@@ -1,4 +1,3 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import { Button, Container, Dropdown, Nav, Navbar } from "react-bootstrap";
 import Switch from "react-switch";
@@ -16,34 +15,21 @@ import { CHAIN_NAMESPACES, IAdapter, IProvider, WEB3AUTH_NETWORK } from "@web3au
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
-// IMP END - Quick Start
-
-// IMP START - Blockchain Calls
 import RPC from "../../lib/ethersRPC";
-// import RPC from "./viemRPC";
-// import RPC from "./web3RPC";
-// IMP END - Blockchain Calls
 
-// IMP START - Dashboard Registration
-const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ"; // get from https://dashboard.web3auth.io
-// IMP END - Dashboard Registration
+const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
 
-// IMP START - Chain Config
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
   chainId: "0xaa36a7",
   rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-  // Avoid using public rpcTarget in production.
-  // Use services like Infura, Quicknode etc
   displayName: "Ethereum Sepolia Testnet",
   blockExplorerUrl: "https://sepolia.etherscan.io",
   ticker: "ETH",
   tickerName: "Ethereum",
   logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
 };
-// IMP END - Chain Config
 
-// IMP START - SDK Initialization
 const privateKeyProvider = new EthereumPrivateKeyProvider({
   config: { chainConfig },
 });
@@ -52,34 +38,35 @@ const web3AuthOptions: Web3AuthOptions = {
   clientId,
   web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
   privateKeyProvider,
-}
+};
 const web3auth = new Web3Auth(web3AuthOptions);
-// IMP END - SDK Initialization
-
-
-
 
 const Header: React.FC = () => {
-
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [safeAddress, setSafeAddress] = useState<string | null>(null);
+  const { theme, toggleTheme } = useTheme();
+  const isChecked: boolean = theme === "light";
 
   useEffect(() => {
     const init = async () => {
       try {
-        // IMP START - Configuring External Wallets
+        const storedAddress = localStorage.getItem(STORAGE_ADDRESS);
+        if (storedAddress) {
+          setSafeAddress(storedAddress);
+          setLoggedIn(true); // User is already logged in
+        }
+
         const adapters = await getDefaultExternalAdapters({ options: web3AuthOptions });
         adapters.forEach((adapter: IAdapter<unknown>) => {
           web3auth.configureAdapter(adapter);
         });
-        // IMP END - Configuring External Wallets
-        // IMP START - SDK Initialization
         await web3auth.initModal();
-        // IMP END - SDK Initialization
         setProvider(web3auth.provider);
 
-        if (web3auth.connected) {
-          setLoggedIn(true);
+        if (web3auth.connected && !storedAddress) {
+          // If the user is connected but no address is in localStorage, fetch user details
+          await fetchUserDetails();
         }
       } catch (error) {
         console.error(error);
@@ -89,55 +76,60 @@ const Header: React.FC = () => {
     init();
   }, []);
 
-
   const loginTry = async () => {
-    // IMP START - Login
-    const web3authProvider = await web3auth.connect();
-    // IMP END - Login
-    setProvider(web3authProvider);
-    if (web3auth.connected) {
-      setLoggedIn(true);
+    try {
+      const web3authProvider = await web3auth.connect();
+      setProvider(web3authProvider);
+      if (web3auth.connected) {
+        setLoggedIn(true);
+        await fetchUserDetails(); // Fetch and display user details on login
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
     }
   };
-  const authenticate = false;
-  const { theme, toggleTheme } = useTheme();
-  const [confirmation, setConfirmation] = useState<boolean>(false);
-  const router = useRouter();
-  const [login, setLogin] = useState<boolean>(false); // Explicitly define the type as boolean
-  const [checkLogin, setCheckLogin] = useState<boolean>(false); // Explicitly define the type as boolean
-  const handleLogin = () => setLogin(!login);
-  const DEFAULT_CHAR_DISPLAYED = 6;
-  function splitAddress(
-    address: string,
-    charDisplayed: number = DEFAULT_CHAR_DISPLAYED
-  ): string {
-    const firstPart = address.slice(0, charDisplayed);
-    const lastPart = address.slice(address.length - charDisplayed);
 
-    return `${firstPart}...${lastPart}`;
-  }
-  function logout() {
+  const logout = async () => {
+    await web3auth.logout();
     localStorage.removeItem(STORAGE_ADDRESS);
-    setCheckLogin(false);
-  }
+    localStorage.removeItem("user_balance");
+    localStorage.removeItem("user_info");
+    setSafeAddress(null);
+    setLoggedIn(false);
+  };
 
-  // Get the current page name from the router's pathname
+  const fetchUserDetails = async () => {
+    try {
+      if (!provider) {
+        console.error("Provider not initialized yet");
+        return;
+      }
 
-  const handleConfirmation = () => setConfirmation(!confirmation);
+      // Fetch account details
+      const address = await RPC.getAccounts(provider);
+      const balance = await RPC.getBalance(provider);
+      const userInfo = await web3auth.getUserInfo();
 
-  const isChecked: boolean = theme === "light";
-  useEffect(() => {
-    setCheckLogin(localStorage.getItem(STORAGE_ADDRESS) ? true : false);
-  }, []);
-  // console.log("checkLogin-->", checkLogin); 
+      // Save details to local storage
+      localStorage.setItem(STORAGE_ADDRESS, address);
+      localStorage.setItem("user_balance", balance);
+      localStorage.setItem("user_info", JSON.stringify(userInfo));
+
+      // Update the safe address display
+      setSafeAddress(address);
+    } catch (error) {
+      console.error("Failed to fetch user details:", error);
+    }
+  };
+
+  const splitAddress = (address: string, charDisplayed: number = 6): string => {
+    const firstPart = address.slice(0, charDisplayed);
+    const lastPart = address.slice(-charDisplayed);
+    return `${firstPart}...${lastPart}`;
+  };
+
   return (
     <>
-      <LoginPop
-        login={login}
-        setLogin={setLogin}
-        setCheckLogin={setCheckLogin}
-        checkLogin={checkLogin}
-      />
       <header
         className="siteHeader sticky-top py-1 w-100 shadow"
         style={{ zIndex: 99, background: "var(--backgroundColor)" }}
@@ -186,13 +178,17 @@ const Header: React.FC = () => {
                       activeBoxShadow="0px 0px 0px 0px"
                     />
                   </div>
-                  {!checkLogin ? (
+                  {!loggedIn ? (
+                    <Button
+                      onClick={loginTry}
+                      className="d-flex align-items-center justify-content-center commonBtn"
+                    >
+                      Login
+                    </Button>
+                  ) : (
                     <>
                       <Button className="d-flex align-items-center justify-content-center commonBtn">
-                        Safe Address:{" "}
-                        {splitAddress(
-                          localStorage.getItem(STORAGE_ADDRESS) || ""
-                        )}
+                        Safe Address: {safeAddress ? splitAddress(safeAddress) : "Loading..."}
                       </Button>
                       <Dropdown>
                         <Dropdown.Toggle
@@ -210,7 +206,7 @@ const Header: React.FC = () => {
 
                         <Dropdown.Menu style={{ right: 0, left: "unset" }}>
                           <LinkList className="list-unstyled ps-0 mb-0">
-                            <li className="">
+                            <li>
                               <Link
                                 href="/setting"
                                 className="px-3 py-1 d-flex align-items-center gap-10 text-dark fw-sbold"
@@ -218,7 +214,7 @@ const Header: React.FC = () => {
                                 Setting
                               </Link>
                             </li>
-                            <li className="">
+                            <li>
                               <div
                                 onClick={logout}
                                 className="px-3 py-1 d-flex align-items-center gap-10 text-dark fw-sbold"
@@ -226,26 +222,9 @@ const Header: React.FC = () => {
                                 Logout
                               </div>
                             </li>
-                            <li className="">
-                              <div
-                                onClick={loginTry}
-                                className="px-3 py-1 d-flex align-items-center gap-10 text-dark fw-sbold"
-                              >
-                                Connect
-                              </div>
-                            </li>
                           </LinkList>
                         </Dropdown.Menu>
                       </Dropdown>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        onClick={handleLogin}
-                        className="d-flex align-items-center justify-content-center commonBtn"
-                      >
-                        Login
-                      </Button>
                     </>
                   )}
                 </div>
