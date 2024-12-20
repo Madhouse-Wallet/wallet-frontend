@@ -1,12 +1,29 @@
 import React, { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
+import 'react-tooltip/dist/react-tooltip.css'
+import { Tooltip } from 'react-tooltip'
 
 // css
 
 // img
 
-const BtcExchangePop = ({ btcExchange, setBtcExchange }) => {
+const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, qrCode, loading, mint }) => {
+
+  const [textToCopy, setTextToCopy] = useState(walletAddress);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset the copied state after 2 seconds
+    } catch (error) {
+      console.error('Failed to copy text:', error);
+    }
+  };
+
+
   const handleBTCExchange = () => setBtcExchange(!btcExchange);
 
   return (
@@ -57,19 +74,32 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange }) => {
           </Button>
           <div className="top pb-3">
             <h5 className="m-0 fw-bold">Receive Bitcoin</h5>
-            <p className="m-0" style={{ fontSize: 12 }}>
+            {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
-            </p>
+            </p> */}
           </div>
           <div className="content p-3">
             <div className="cardCstm p-3 text-center">
-              {qrCode}
-              <div className="content mt-2" style={{ fontSize: 12 }}>
+              {loading ? <>
+                <img src={"./loading.gif"} alt="" className="img-fluid object-fit-contain" style={{height: 100}}/>
+              
+              </> : <>
+              
+              <img src={qrCode} alt="" className="img-fluid" />
+              </>}
+              {!loading && <> <div className="content mt-2" style={{ fontSize: 12 }}>
                 <h6 className="m-0 themeClr">Your Wallet Address</h6>
-                <p className="m-0">bceadf23423423sdfsdfsdf32434</p>
-              </div>
+                <div className="d-flex align-items-center flex-wrap justify-content-center">
+                <Tooltip id="my-tooltip" />
+                <p className="m-0 text-truncate" data-tooltip-id="my-tooltip" data-tooltip-content={walletAddress} style={{maxWidth: 200}}>{walletAddress}</p>
+               
+                <button onClick={handleCopy} className="border-0 p-0 bg-transparent themeClr">{copyIcn}</button>
+      {isCopied && <span style={{ marginLeft: '10px', color: 'green' }}>Copied!</span>}
+       </div>
+              </div></> }
+             
             </div>
-            <div className="btnWrpper mt-3">
+            {/* <div className="btnWrpper mt-3">
               <RadioList className="list-unstyled ps-0 mb-0 d-flex align-items-center justify-content-center gap-10">
                 <li className="position-relative">
                   <input
@@ -102,13 +132,15 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange }) => {
                   </Button>
                 </li>
               </RadioList>
-            </div>
+            </div> */}
           </div>
+          {!loading && 
           <div className="btnWRpper mt-4">
-            <Button className="d-flex align-items-center justify-content-center commonBtn w-100">
-              Generate QR Codes and Address
+            <Button   onClick={()=>mint()} className="d-flex align-items-center justify-content-center commonBtn w-100">
+             Mint
             </Button>
           </div>
+          }
         </Modal.Body>
       </Modal>
     </>
@@ -152,3 +184,9 @@ const qrCode = (
     />
   </svg>
 );
+
+
+const copyIcn = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z" fill="currentColor"/>
+<path opacity="0.5" d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z" fill="currentColor"/>
+</svg>
