@@ -16,6 +16,10 @@ import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import RPC from "../../lib/ethersRPC";
+import { userDetails } from "@/lib/redux/slices/auth";
+import { useDispatch,useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../lib/redux/store";
+import { setSafeAddress } from "@/lib/redux/slices/auth/authSlice";
 
 const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
 
@@ -42,11 +46,15 @@ const web3AuthOptions: Web3AuthOptions = {
 const web3auth = new Web3Auth(web3AuthOptions);
 
 const Header: React.FC = () => {
+  const { userInfo, safeAddress, userBalance } = useSelector((state: RootState) => state.auth);
+  console.log("line-55",userInfo, safeAddress, userBalance )
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [safeAddress, setSafeAddress] = useState<string | null>(null);
+  // const [safeAddress, setSafeAddress] = useState<string | null>(null);
   const { theme, toggleTheme } = useTheme();
   const isChecked: boolean = theme === "light";
+  const dispatch = useDispatch<AppDispatch>();
+  
 
   useEffect(() => {
     const init = async () => {
@@ -94,32 +102,36 @@ const Header: React.FC = () => {
     localStorage.removeItem(STORAGE_ADDRESS);
     localStorage.removeItem("user_balance");
     localStorage.removeItem("user_info");
-    setSafeAddress(null);
+    setSafeAddress('');
     setLoggedIn(false);
   };
 
-  const fetchUserDetails = async () => {
-    try {
-      if (!provider) {
-        console.error("Provider not initialized yet");
-        return;
-      }
+  // const fetchUserDetails = async () => {
+  //   try {
+  //     if (!provider) {
+  //       console.error("Provider not initialized yet");
+  //       return;
+  //     }
 
-      // Fetch account details
-      const address = await RPC.getAccounts(provider);
-      const balance = await RPC.getBalance(provider);
-      const userInfo = await web3auth.getUserInfo();
+  //     // Fetch account details
+  //     const address = await RPC.getAccounts(provider);
+  //     const balance = await RPC.getBalance(provider);
+  //     const userInfo = await web3auth.getUserInfo();
 
-      // Save details to local storage
-      localStorage.setItem(STORAGE_ADDRESS, address);
-      localStorage.setItem("user_balance", balance);
-      localStorage.setItem("user_info", JSON.stringify(userInfo));
+  //     // Save details to local storage
+  //     localStorage.setItem(STORAGE_ADDRESS, address);
+  //     localStorage.setItem("user_balance", balance);
+  //     localStorage.setItem("user_info", JSON.stringify(userInfo));
 
-      // Update the safe address display
-      setSafeAddress(address);
-    } catch (error) {
-      console.error("Failed to fetch user details:", error);
-    }
+  //     // Update the safe address display
+  //     setSafeAddress(address);
+  //   } catch (error) {
+  //     console.error("Failed to fetch user details:", error);
+  //   }
+  // };
+
+  const fetchUserDetails = () => {
+    dispatch(userDetails(provider, RPC, web3auth));
   };
 
   const splitAddress = (address: string, charDisplayed: number = 6): string => {
@@ -188,7 +200,7 @@ const Header: React.FC = () => {
                   ) : (
                     <>
                       <Button className="d-flex align-items-center justify-content-center commonBtn">
-                        Safe Address: {safeAddress ? splitAddress(safeAddress) : "Loading..."}
+                        {safeAddress ? splitAddress(safeAddress) : "Loading..."}
                       </Button>
                       <Dropdown>
                         <Dropdown.Toggle

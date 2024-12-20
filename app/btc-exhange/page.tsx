@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Nav, Row, Tab } from "react-bootstrap";
 import RecentTransaction from "./RecentTransaction";
 import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
-import { initializeTBTC } from "../../tbtc/src/tbtcSdkInitializer";
+// import { initializeTBTC } from "../../tbtc/src/tbtcSdkInitializer";
 import ether4 from "../../ethers/index.js"
 import QRCode from 'qrcode';
 const BTCEchange: React.FC = () => {
@@ -35,31 +35,31 @@ const BTCEchange: React.FC = () => {
     }
   };
 
-  const startReceive = async () => {
-    try { 
-      setLoading(true)
-      console.log("initializeTBTC00>",initializeTBTC)
-      // Replace with your Ethereum provider
-      const provider = new ether4.providers.Web3Provider((window as any).ethereum);
-      // const provider = new  ethers.providers.JsonRpcProvider("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d")
-      // console.log("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d--?",provider)
-      // Get write access as an account by getting the signer
-      await provider.send("eth_requestAccounts", []); // Request wallet access
-      const signer = provider.getSigner();
-      // Get the current chain ID
-      console.log("signer-->", signer)
-      const network = await provider.getNetwork();
-      console.log("network--", network)
-      // Initialize tBTC SDK
-      const sdk = await initializeTBTC(signer);
-      console.log("sdk-->",sdk)
+  // const startReceive = async () => {
+  //   try { 
+  //     setLoading(true)
+  //     console.log("initializeTBTC00>",initializeTBTC)
+  //     // Replace with your Ethereum provider
+  //     const provider = new ether4.providers.Web3Provider((window as any).ethereum);
+  //     // const provider = new  ethers.providers.JsonRpcProvider("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d")
+  //     // console.log("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d--?",provider)
+  //     // Get write access as an account by getting the signer
+  //     await provider.send("eth_requestAccounts", []); // Request wallet access
+  //     const signer = provider.getSigner();
+  //     // Get the current chain ID
+  //     console.log("signer-->", signer)
+  //     const network = await provider.getNetwork();
+  //     console.log("network--", network)
+  //     // Initialize tBTC SDK
+  //     const sdk = await initializeTBTC(signer);
+  //     console.log("sdk-->",sdk)
        
-      depo(sdk)
-      setBtcExchange(!btcExchange)
-    } catch (error) {
-      console.log("error rec-->", error)
-    }
-  }
+  //     depo(sdk)
+  //     setBtcExchange(!btcExchange)
+  //   } catch (error) {
+  //     console.log("error rec-->", error)
+  //   }
+  // }
 
   const generateQRCode = async (text:any) => {
     try {
@@ -162,7 +162,7 @@ const BTCEchange: React.FC = () => {
                             Send
                           </Button>
                           <Button
-                            onClick={() => startReceive()}
+                            // onClick={() => startReceive()}
                             className="d-flex align-items-center justify-content-center commonBtn"
                           >
                             Receive

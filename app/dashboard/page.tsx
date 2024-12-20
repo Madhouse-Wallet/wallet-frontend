@@ -22,6 +22,8 @@ import MyActivity from "./myActivity";
 import Header from "@/components/Header";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { Provider } from "react-redux";
+import {store} from '../../lib/redux/store'
 
 const AreaChart = dynamic(() => import("@/components/graph/AreaChart/index"), {
   ssr: false,
@@ -159,6 +161,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         <BTCAddressPop btcAddress={btcAddress} setBtcAddress={setBtcAddress} />
         {true ? <Header /> : ""}
@@ -308,6 +311,7 @@ const Dashboard: React.FC = () => {
           </section>
         )}
       </ThemeProvider>
+      </Provider>
     </>
   );
 };
