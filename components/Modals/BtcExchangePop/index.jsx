@@ -3,147 +3,216 @@ import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
 import 'react-tooltip/dist/react-tooltip.css'
 import { Tooltip } from 'react-tooltip'
+import QRCode from 'qrcode';
+import { useDispatch, useSelector } from "react-redux";
+import { depositFunds, mintToken } from "@/lib/redux/slices/deposit";
 
 // css
 
 // img
 
-const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, qrCode, loading, mint }) => {
-
-  const [textToCopy, setTextToCopy] = useState(walletAddress);
+const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) => {
+  const {  safeAddress } = useSelector((state) => state.auth);
+  console.log("line-16",safeAddress)
+  const dispatch = useDispatch();
+  const [textToCopy, setTextToCopy] = useState('');
+  const [depositedId, setDepositedId] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [recoveryAddress, setRecoveryAddress] = useState("");
+  const [showQR, setShowQR] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState("");
+  const [qrCode, setQRCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset the copied state after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy text:', error);
     }
   };
 
+  const handleBTCExchange = () => {
+    setBtcExchange(!btcExchange);
+    setShowQR(false);
+    setRecoveryAddress("");
+    setError("");
+  };
 
-  const handleBTCExchange = () => setBtcExchange(!btcExchange);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsValidating(true);
+    setError("");
+
+    try {
+      if(safeAddress === null){
+        console.log("Wallet is Not Connected")
+        setError("Please connect your wallet.");
+        return
+      }
+      const result = await dispatch(depositFunds({
+        recovery: recoveryAddress,
+        userWallet: safeAddress,
+        callBack: (err, res) => {
+          if (err) {
+            setError("Failed to validate address. Please try again.");
+            setShowQR(false);
+            // generateQRCode("hjshdjsdj")
+          } else {
+            console.log("line-58",res)
+            setShowQR(true);
+            generateQRCode(res?.data?.depositAddress)
+            setDepositedId(res?.data?.id)
+          }
+        }
+      })).unwrap();
+
+      if (result) {
+        setShowQR(true);
+        // generateQRCode(res?.data?.depositAddress)
+        // setDepositedId(res?.data?.id)
+      }
+    } catch (error) {
+      setError("Failed to process request. Please try again.");
+      console.error('Address validation failed:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleMintSubmit = async (e) => {
+    e.preventDefault();
+    setIsValidating(true);
+    setError("");
+
+    try {
+      const result = await dispatch(mintToken({
+        id:depositedId,
+        callBack: (err, res) => {
+          if (err) {
+            setError("Failed to validate address. Please try again.");
+            // setShowQR(false);
+            // generateQRCode("hjshdjsdj")
+          } else {
+            console.log("line-58",res)
+            // setShowQR(true);
+            // generateQRCode(res?.data?.depositAddress)
+            // setDepositedId(res?.data?.id)
+          }
+        }
+      })).unwrap();
+
+      // if (result) {
+      //   setShowQR(true);
+      //   generateQRCode(res?.data?.depositAddress)
+      //   setDepositedId(res?.data?.id)
+      // }
+    } catch (error) {
+      setError("Failed to process request. Please try again.");
+      console.error('Address validation failed:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const generateQRCode = async (text) => {
+    try {
+      setTextToCopy(text)
+      const qr = await QRCode.toDataURL(text);
+      setQRCode(qr);
+      setLoading(false)
+    } catch (err) {
+      setLoading(false)
+      console.error(err);
+    }
+  };
 
   return (
-    <>
-      <Modal
-        show={btcExchange}
-        className={`  BtcExchangePop`}
-        onHide={handleBTCExchange}
-        backdrop="static"
-        keyboard={false}
-        centered
+    <Modal
+    show={btcExchange}
+    className="BtcExchangePop"
+    onHide={handleBTCExchange}
+    backdrop="static"
+    keyboard={false}
+    centered
+  >
+    <Modal.Body className="position-relative rounded">
+      <Button
+        onClick={handleBTCExchange}
+        className="border-0 p-0 position-absolute"
+        variant="transparent"
+        style={{ right: 10, top: 0 }}
       >
-        <Modal.Body className={`position-relative rounded`}>
-          <Button
-            onClick={handleBTCExchange}
-            className="border-0 p-0 position-absolute"
-            variant="transparent"
-            style={{ right: 10, top: 0 }}
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 15" fill="none">
+          <g clipPath="url(#clip0_0_6282)">
+            <path d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z" fill="var(--textColor)"/>
+            <path d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z" fill="var(--textColor)"/>
+          </g>
+        </svg>
+      </Button>
+      
+      <div className="top pb-3">
+        <h5 className="m-0 fw-bold">Receive Bitcoin</h5>
+      </div>
+
+      {!showQR ? (
+        <Form onSubmit={handleSubmit} className="p-3">
+          <Form.Group className="mb-3">
+            <Form.Label>Enter Recovery Address</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter your recovery address"
+              value={recoveryAddress}
+              onChange={(e) => setRecoveryAddress(e.target.value)}
+              required
+            />
+          </Form.Group>
+          {error && <div className="text-danger mb-3">{error}</div>}
+          <Button 
+            type="submit" 
+            className="w-100 commonBtn"
+            disabled={isValidating || recoveryAddress === '' ? true : false}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 16 15"
-              fill="none"
-            >
-              <g clip-path="url(#clip0_0_6282)">
-                <path
-                  d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
-                  fill="var(--textColor)"
-                />
-                <path
-                  d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
-                  fill="var(--textColor)"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_0_6282">
-                  <rect
-                    width="15"
-                    height="15"
-                    fill="var(--textColor)"
-                    transform="translate(0.564453)"
-                  />
-                </clipPath>
-              </defs>
-            </svg>
+            {isValidating ? 'Validating...' : 'Submit'}
           </Button>
-          <div className="top pb-3">
-            <h5 className="m-0 fw-bold">Receive Bitcoin</h5>
-            {/* <p className="m-0" style={{ fontSize: 12 }}>
-              Generate a QR code or wallet address to receive Bitcoin Securely
-            </p> */}
-          </div>
+        </Form>
+      ) : (
+        <>
           <div className="content p-3">
             <div className="cardCstm p-3 text-center">
-              {loading ? <>
-                <img src={"./loading.gif"} alt="" className="img-fluid object-fit-contain" style={{height: 100}}/>
-              
-              </> : <>
-              
-              <img src={qrCode} alt="" className="img-fluid" />
-              </>}
-              {!loading && <> <div className="content mt-2" style={{ fontSize: 12 }}>
-                <h6 className="m-0 themeClr">Your Wallet Address</h6>
-                <div className="d-flex align-items-center flex-wrap justify-content-center">
-                <Tooltip id="my-tooltip" />
-                <p className="m-0 text-truncate" data-tooltip-id="my-tooltip" data-tooltip-content={walletAddress} style={{maxWidth: 200}}>{walletAddress}</p>
-               
-                <button onClick={handleCopy} className="border-0 p-0 bg-transparent themeClr">{copyIcn}</button>
-      {isCopied && <span style={{ marginLeft: '10px', color: 'green' }}>Copied!</span>}
-       </div>
-              </div></> }
-             
+              {loading ? (
+                <img src="./loading.gif" alt="" className="img-fluid object-fit-contain" style={{height: 100}}/>
+              ) : (
+                <>
+                  <img src={qrCode} alt="" className="img-fluid" />
+                  <div className="content mt-2" style={{ fontSize: 12 }}>
+                    <h6 className="m-0 themeClr">Your Wallet Address</h6>
+                    <div className="d-flex align-items-center flex-wrap justify-content-center">
+                      <Tooltip id="my-tooltip" />
+                      <p className="m-0 text-truncate" data-tooltip-id="my-tooltip" data-tooltip-content={textToCopy} style={{maxWidth: 200}}>{textToCopy}</p>
+                      <button onClick={handleCopy} className="border-0 p-0 bg-transparent themeClr">{copyIcn}</button>
+                      {isCopied && <span style={{ marginLeft: '10px', color: 'green' }}>Copied!</span>}
+                    </div>
+                    <diuv>{error && <div className="text-danger mb-3">{error}</div>}</diuv>
+                  </div>
+                </>
+              )}
             </div>
-            {/* <div className="btnWrpper mt-3">
-              <RadioList className="list-unstyled ps-0 mb-0 d-flex align-items-center justify-content-center gap-10">
-                <li className="position-relative">
-                  <input
-                    type="radio"
-                    name="wallet"
-                    className="position-absolute h-100 cursor-pointer w-100 opacity-0"
-                  />
-                  <Button className="d-flex align-items-center justify-content-center fw-sbold">
-                    Native Segwit
-                  </Button>
-                </li>
-                <li className="position-relative">
-                  <input
-                    type="radio"
-                    name="wallet"
-                    className="position-absolute h-100 cursor-pointer w-100 opacity-0"
-                  />
-                  <Button className="d-flex align-items-center justify-content-center fw-sbold">
-                    Lightning Network
-                  </Button>
-                </li>
-                <li className="position-relative">
-                  <input
-                    type="radio"
-                    name="wallet"
-                    className="position-absolute h-100 cursor-pointer w-100 opacity-0"
-                  />
-                  <Button className="d-flex align-items-center justify-content-center fw-sbold">
-                    Liquid Network
-                  </Button>
-                </li>
-              </RadioList>
-            </div> */}
           </div>
           {!loading && 
-          <div className="btnWRpper mt-4">
-            <Button   onClick={()=>mint()} className="d-flex align-items-center justify-content-center commonBtn w-100">
-             Mint
-            </Button>
-          </div>
+            <div className="btnWRpper mt-4">
+              <Button onClick={handleMintSubmit} className="d-flex align-items-center justify-content-center commonBtn w-100">
+              {isValidating ? 'Minting...' : 'Mint'}
+              </Button>
+            </div>
           }
-        </Modal.Body>
-      </Modal>
-    </>
+        </>
+      )}
+    </Modal.Body>
+  </Modal>
   );
 };
 

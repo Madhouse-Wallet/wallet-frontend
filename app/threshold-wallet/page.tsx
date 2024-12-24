@@ -8,6 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { CardCstm } from "../dashboard/DashboardStyled";
 import { useRouter } from "next/navigation";
+import { Provider } from "react-redux";
+import { store } from "@/lib/redux";
 
 interface CardData {
   head: string;
@@ -104,6 +106,7 @@ const ThresholdWallet: React.FC = () => {
 
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -159,6 +162,7 @@ const ThresholdWallet: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider>
     </>
   );
 };

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Nav, Row, Tab } from "react-bootstrap";
 import RecentApprovals from "./RecentApprovals";
+import { Provider } from "react-redux";
+import { store } from "@/lib/redux";
 
 const Approvals: React.FC = () => {
   const router = useRouter();
@@ -27,6 +29,7 @@ const Approvals: React.FC = () => {
   };
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -75,6 +78,7 @@ const Approvals: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider> 
     </>
   );
 };

@@ -8,6 +8,8 @@ import { Button, Col, Container, Nav, Row, Tab } from "react-bootstrap";
 import p1 from "@/public/user.png";
 import Image from "next/image";
 import styled from "styled-components";
+import { Provider } from "react-redux";
+import { store } from "@/lib/redux";
 
 const BuyCoin: React.FC = () => {
   const router = useRouter();
@@ -29,6 +31,7 @@ const BuyCoin: React.FC = () => {
   };
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -201,6 +204,7 @@ const BuyCoin: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider>
     </>
   );
 };

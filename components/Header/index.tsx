@@ -17,8 +17,8 @@ import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
 import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import RPC from "../../lib/ethersRPC";
 import { userDetails } from "@/lib/redux/slices/auth";
-import { useDispatch,useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../lib/redux/store";
+import { Provider, useDispatch,useSelector } from "react-redux";
+import { AppDispatch, RootState, store } from "../../lib/redux/store";
 import { setSafeAddress } from "@/lib/redux/slices/auth/authSlice";
 
 const clientId = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
@@ -142,6 +142,7 @@ const Header: React.FC = () => {
 
   return (
     <>
+    <Provider store={store}>
       <header
         className="siteHeader sticky-top py-1 w-100 shadow"
         style={{ zIndex: 99, background: "var(--backgroundColor)" }}
@@ -245,6 +246,7 @@ const Header: React.FC = () => {
           </Navbar>
         </Container>
       </header>
+    </Provider>
     </>
   );
 };

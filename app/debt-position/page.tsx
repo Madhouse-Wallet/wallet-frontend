@@ -10,6 +10,8 @@ import p1 from "@/public/user.png";
 import Image from "next/image";
 import styled from "styled-components";
 import { MinimizeTwoTone } from "@mui/icons-material";
+import { Provider } from "react-redux";
+import { store } from "@/lib/redux";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
@@ -32,6 +34,7 @@ const DebtPosition: React.FC = () => {
   };
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -255,6 +258,7 @@ const DebtPosition: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider>
     </>
   );
 };

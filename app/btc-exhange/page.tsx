@@ -11,11 +11,14 @@ import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 // import { initializeTBTC } from "../../tbtc/src/tbtcSdkInitializer";
 import ether4 from "../../ethers/index.js"
 import QRCode from 'qrcode';
+import { Provider, useSelector } from "react-redux";
+import { store } from "@/lib/redux/store";
+import { RootState } from "@/lib/redux";
 const BTCEchange: React.FC = () => {
+  // const {  safeAddress } = useSelector((state:RootState) => state.auth);
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
-  const [qrCode, setQRCode] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [depositSetup, setDepositSetup] = useState<any>("");
@@ -35,74 +38,6 @@ const BTCEchange: React.FC = () => {
     }
   };
 
-  // const startReceive = async () => {
-  //   try { 
-  //     setLoading(true)
-  //     console.log("initializeTBTC00>",initializeTBTC)
-  //     // Replace with your Ethereum provider
-  //     const provider = new ether4.providers.Web3Provider((window as any).ethereum);
-  //     // const provider = new  ethers.providers.JsonRpcProvider("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d")
-  //     // console.log("https://sepolia.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d--?",provider)
-  //     // Get write access as an account by getting the signer
-  //     await provider.send("eth_requestAccounts", []); // Request wallet access
-  //     const signer = provider.getSigner();
-  //     // Get the current chain ID
-  //     console.log("signer-->", signer)
-  //     const network = await provider.getNetwork();
-  //     console.log("network--", network)
-  //     // Initialize tBTC SDK
-  //     const sdk = await initializeTBTC(signer);
-  //     console.log("sdk-->",sdk)
-       
-  //     depo(sdk)
-  //     setBtcExchange(!btcExchange)
-  //   } catch (error) {
-  //     console.log("error rec-->", error)
-  //   }
-  // }
-
-  const generateQRCode = async (text:any) => {
-    try {
-      const qr = await QRCode.toDataURL(text);
-      setQRCode(qr);
-      setLoading(false)
-    } catch (err) {
-      setLoading(false)
-      console.error(err);
-    }
-  };
- 
-  const depo = async(tbtcSdk:any)=>{
-    const bitcoinRecoveryAddress = "tb1q29jj6w0ggjr0ukdzjmw54huev9gwrptaj04n8d"; // Replace with a valid BTC address
-  
-    try {
-      // Step 4: Initiate the deposit
-      console.log(tbtcSdk.deposits.initiateDeposit)
-      const deposit = await tbtcSdk.deposits.initiateDeposit(bitcoinRecoveryAddress);
-      console.log("Deposit initiated:", deposit);
-      setDepositSetup(deposit)
-      // Step 5: Get the Bitcoin deposit address
-      const bitcoinDepositAddress = await deposit.getBitcoinAddress();
-      console.log("Bitcoin deposit address:", bitcoinDepositAddress);
-      setWalletAddress(bitcoinDepositAddress)
-      await generateQRCode(bitcoinDepositAddress);
-      // Inform the user to send BTC to the deposit address
-      // alert(`Send BTC to the deposit address: ${bitcoinDepositAddress}`);
-  
-      // Step 6: Monitor the Bitcoin funding and initiate minting
-      // Wait for the user to complete the deposit (manual step required)
-      // console.log("Waiting for Bitcoin funding to complete...");
-  
-      // // Initiate minting using the latest funding UTXO
-      // const txHash = await deposit.initiateMinting();
-      // console.log("Minting initiated, transaction hash:", txHash);
-  
-      // alert(`Minting initiated successfully! Transaction hash: ${txHash}`);
-    } catch (error) {
-      console.error("Error during deposit process:", error);
-    }
-  }
-
 
   const mint = async()=>{
     try {
@@ -112,8 +47,22 @@ const BTCEchange: React.FC = () => {
       console.log("setSdkTbtc-->",error)
     }
   }
+
+  const handleReceiveClick = () => {
+    try {
+      setLoading(true);
+      setBtcExchange(true);
+    } catch (error) {
+      console.error("Error in receive process:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -124,8 +73,7 @@ const BTCEchange: React.FC = () => {
               btcExchange={btcExchange}
               setBtcExchange={setBtcExchange}
               walletAddress={walletAddress}
-              qrCode={qrCode}
-              loading={loading}
+              // loading={loading}
               mint={mint}
             />
             <section className="position-relative dashboard py-3">
@@ -156,13 +104,13 @@ const BTCEchange: React.FC = () => {
                       <div className="right">
                         <div className="d-flex align-items-center gap-10">
                           <Button
-                            onClick={() => setBtcExchange(!btcExchange)}
+                            // onClick={() => setBtcExchange(!btcExchange)}
                             className="d-flex align-items-center justify-content-center commonBtn"
                           >
                             Send
                           </Button>
                           <Button
-                            // onClick={() => startReceive()}
+                            onClick={() => handleReceiveClick()}
                             className="d-flex align-items-center justify-content-center commonBtn"
                           >
                             Receive
@@ -185,6 +133,7 @@ const BTCEchange: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+      </Provider>
     </>
   );
 };

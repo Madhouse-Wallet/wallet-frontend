@@ -2,9 +2,11 @@
 import { ThemeProvider } from "@/components/ContextApi/ThemeContext";
 import Header from "@/components/Header";
 import Loader from "@/components/loader";
+import { store } from "@/lib/redux";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Nav, Row, Tab } from "react-bootstrap";
+import { Provider } from "react-redux";
 import styled from "styled-components";
 
 const BTCDebitCard: React.FC = () => {
@@ -27,6 +29,7 @@ const BTCDebitCard: React.FC = () => {
   };
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -199,6 +202,7 @@ const BTCDebitCard: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider>
     </>
   );
 };

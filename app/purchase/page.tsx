@@ -8,6 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Nav, Row, Tab } from "react-bootstrap";
 import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import styled from "styled-components";
+import { Provider } from "react-redux";
+import { store } from "@/lib/redux";
 
 const PurchasePage: React.FC = () => {
   const router = useRouter();
@@ -29,6 +31,7 @@ const PurchasePage: React.FC = () => {
   };
   return (
     <>
+    <Provider store={store}>
       <ThemeProvider>
         {true ? <Header /> : ""}
         {showFirstComponent ? (
@@ -122,6 +125,7 @@ const PurchasePage: React.FC = () => {
           </>
         )}
       </ThemeProvider>
+    </Provider>
     </>
   );
 };
