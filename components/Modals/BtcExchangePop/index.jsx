@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
-import 'react-tooltip/dist/react-tooltip.css'
-import { Tooltip } from 'react-tooltip'
-import QRCode from 'qrcode';
+import "react-tooltip/dist/react-tooltip.css";
+import { Tooltip } from "react-tooltip";
+import QRCode from "qrcode";
 import { useDispatch, useSelector } from "react-redux";
 import { depositFunds, mintToken } from "@/lib/redux/slices/deposit";
 
@@ -11,19 +11,32 @@ import { depositFunds, mintToken } from "@/lib/redux/slices/deposit";
 
 // img
 
-const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) => {
-  const {  safeAddress } = useSelector((state) => state.auth);
-  console.log("line-16",safeAddress)
+const BtcExchangePop = ({
+  btcExchange,
+  setBtcExchange,
+  walletAddress,
+  mint,
+}) => {
+  const { safeAddress } = useSelector((state) => state.auth);
+  console.log("line-16", safeAddress);
   const dispatch = useDispatch();
-  const [textToCopy, setTextToCopy] = useState('');
-  const [depositedId, setDepositedId] = useState('');
+  const [textToCopy, setTextToCopy] = useState("");
+  const [depositedId, setDepositedId] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState("");
   const [showQR, setShowQR] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState("");
-  const [qrCode, setQRCode] = useState('');
+  const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(300);
+
+  useEffect(() => {
+    if (showQR && timer > 0) {
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showQR, timer]);
 
   const handleCopy = async () => {
     try {
@@ -31,7 +44,7 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy text:', error);
+      console.error("Failed to copy text:", error);
     }
   };
 
@@ -40,6 +53,7 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
     setShowQR(false);
     setRecoveryAddress("");
     setError("");
+    setTimer(300);
   };
 
   const handleSubmit = async (e) => {
@@ -48,27 +62,29 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
     setError("");
 
     try {
-      if(safeAddress === null){
-        console.log("Wallet is Not Connected")
+      if (safeAddress === null) {
+        console.log("Wallet is Not Connected");
         setError("Please connect your wallet.");
-        return
+        return;
       }
-      const result = await dispatch(depositFunds({
-        recovery: recoveryAddress,
-        userWallet: safeAddress,
-        callBack: (err, res) => {
-          if (err) {
-            setError("Failed to validate address. Please try again.");
-            setShowQR(false);
-            // generateQRCode("hjshdjsdj")
-          } else {
-            console.log("line-58",res)
-            setShowQR(true);
-            generateQRCode(res?.data?.depositAddress)
-            setDepositedId(res?.data?.id)
-          }
-        }
-      })).unwrap();
+      const result = await dispatch(
+        depositFunds({
+          recovery: recoveryAddress,
+          userWallet: safeAddress,
+          callBack: (err, res) => {
+            if (err) {
+              setError("Failed to validate address. Please try again.");
+              setShowQR(false);
+              // generateQRCode("hjshdjsdj")
+            } else {
+              console.log("line-58", res);
+              setShowQR(true);
+              generateQRCode(res?.data?.depositAddress);
+              setDepositedId(res?.data?.id);
+            }
+          },
+        })
+      ).unwrap();
 
       if (result) {
         setShowQR(true);
@@ -76,8 +92,8 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
         // setDepositedId(res?.data?.id)
       }
     } catch (error) {
-      setError("Failed to process request. Please try again.");
-      console.error('Address validation failed:', error);
+      // setError("Failed to process request. Please try again.");
+      console.error("Address validation failed:", error);
     } finally {
       setIsValidating(false);
     }
@@ -89,21 +105,23 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
     setError("");
 
     try {
-      const result = await dispatch(mintToken({
-        id:depositedId,
-        callBack: (err, res) => {
-          if (err) {
-            setError("Failed to validate address. Please try again.");
-            // setShowQR(false);
-            // generateQRCode("hjshdjsdj")
-          } else {
-            console.log("line-58",res)
-            // setShowQR(true);
-            // generateQRCode(res?.data?.depositAddress)
-            // setDepositedId(res?.data?.id)
-          }
-        }
-      })).unwrap();
+      const result = await dispatch(
+        mintToken({
+          id: depositedId,
+          callBack: (err, res) => {
+            if (err) {
+              setError("Failed to validate address. Please try again.");
+              // setShowQR(false);
+              // generateQRCode("hjshdjsdj")
+            } else {
+              console.log("line-58", res);
+              // setShowQR(true);
+              // generateQRCode(res?.data?.depositAddress)
+              // setDepositedId(res?.data?.id)
+            }
+          },
+        })
+      ).unwrap();
 
       // if (result) {
       //   setShowQR(true);
@@ -112,7 +130,7 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
       // }
     } catch (error) {
       setError("Failed to process request. Please try again.");
-      console.error('Address validation failed:', error);
+      console.error("Address validation failed:", error);
     } finally {
       setIsValidating(false);
     }
@@ -120,99 +138,155 @@ const BtcExchangePop = ({ btcExchange, setBtcExchange,   walletAddress, mint }) 
 
   const generateQRCode = async (text) => {
     try {
-      setTextToCopy(text)
+      setTextToCopy(text);
       const qr = await QRCode.toDataURL(text);
       setQRCode(qr);
-      setLoading(false)
+      setLoading(false);
     } catch (err) {
-      setLoading(false)
+      setLoading(false);
       console.error(err);
     }
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
   return (
     <Modal
-    show={btcExchange}
-    className="BtcExchangePop"
-    onHide={handleBTCExchange}
-    backdrop="static"
-    keyboard={false}
-    centered
-  >
-    <Modal.Body className="position-relative rounded">
-      <Button
-        onClick={handleBTCExchange}
-        className="border-0 p-0 position-absolute"
-        variant="transparent"
-        style={{ right: 10, top: 0 }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 15" fill="none">
-          <g clipPath="url(#clip0_0_6282)">
-            <path d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z" fill="var(--textColor)"/>
-            <path d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z" fill="var(--textColor)"/>
-          </g>
-        </svg>
-      </Button>
-      
-      <div className="top pb-3">
-        <h5 className="m-0 fw-bold">Receive Bitcoin</h5>
-      </div>
-
-      {!showQR ? (
-        <Form onSubmit={handleSubmit} className="p-3">
-          <Form.Group className="mb-3">
-            <Form.Label>Enter Recovery Address</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter your recovery address"
-              value={recoveryAddress}
-              onChange={(e) => setRecoveryAddress(e.target.value)}
-              required
-            />
-          </Form.Group>
-          {error && <div className="text-danger mb-3">{error}</div>}
-          <Button 
-            type="submit" 
-            className="w-100 commonBtn"
-            disabled={isValidating || recoveryAddress === '' ? true : false}
+      show={btcExchange}
+      className="BtcExchangePop"
+      onHide={handleBTCExchange}
+      backdrop="static"
+      keyboard={false}
+      centered
+    >
+      <Modal.Body className="position-relative rounded">
+        <Button
+          onClick={handleBTCExchange}
+          className="border-0 p-0 position-absolute"
+          variant="transparent"
+          style={{ right: 10, top: 0 }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 16 15"
+            fill="none"
           >
-            {isValidating ? 'Validating...' : 'Submit'}
-          </Button>
-        </Form>
-      ) : (
-        <>
-          <div className="content p-3">
-            <div className="cardCstm p-3 text-center">
-              {loading ? (
-                <img src="./loading.gif" alt="" className="img-fluid object-fit-contain" style={{height: 100}}/>
-              ) : (
-                <>
-                  <img src={qrCode} alt="" className="img-fluid" />
-                  <div className="content mt-2" style={{ fontSize: 12 }}>
-                    <h6 className="m-0 themeClr">Your Wallet Address</h6>
-                    <div className="d-flex align-items-center flex-wrap justify-content-center">
-                      <Tooltip id="my-tooltip" />
-                      <p className="m-0 text-truncate" data-tooltip-id="my-tooltip" data-tooltip-content={textToCopy} style={{maxWidth: 200}}>{textToCopy}</p>
-                      <button onClick={handleCopy} className="border-0 p-0 bg-transparent themeClr">{copyIcn}</button>
-                      {isCopied && <span style={{ marginLeft: '10px', color: 'green' }}>Copied!</span>}
+            <g clipPath="url(#clip0_0_6282)">
+              <path
+                d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
+                fill="var(--textColor)"
+              />
+              <path
+                d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
+                fill="var(--textColor)"
+              />
+            </g>
+          </svg>
+        </Button>
+
+        <div className="top pb-3">
+          <h5 className="m-0 fw-bold">Receive Bitcoin</h5>
+        </div>
+
+        {!showQR ? (
+          <Form onSubmit={handleSubmit} className="p-3">
+            <Form.Group className="mb-3">
+              <Form.Label>Enter Recovery Address</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter your recovery address"
+                value={recoveryAddress}
+                onChange={(e) => setRecoveryAddress(e.target.value)}
+                required
+              />
+            </Form.Group>
+            {error && <div className="text-danger mb-3">{error}</div>}
+            <Button
+              type="submit"
+              className="w-100 commonBtn"
+              disabled={isValidating || recoveryAddress === "" ? true : false}
+            >
+              {isValidating ? "Validating..." : "Submit"}
+            </Button>
+          </Form>
+        ) : (
+          <>
+            <div className="content p-3">
+              <div className="cardCstm p-3 text-center">
+                {loading ? (
+                  <img
+                    src="./loading.gif"
+                    alt=""
+                    className="img-fluid object-fit-contain"
+                    style={{ height: 100 }}
+                  />
+                ) : (
+                  <>
+                    <img src={qrCode} alt="" className="img-fluid" />
+                    <div className="content mt-2" style={{ fontSize: 12 }}>
+                      <h6 className="m-0 themeClr">Your Wallet Address</h6>
+                      <div className="d-flex align-items-center flex-wrap justify-content-center">
+                        <Tooltip id="my-tooltip" />
+                        <p
+                          className="m-0 text-truncate"
+                          data-tooltip-id="my-tooltip"
+                          data-tooltip-content={textToCopy}
+                          style={{ maxWidth: 200 }}
+                        >
+                          {textToCopy}
+                        </p>
+                        <button
+                          onClick={handleCopy}
+                          className="border-0 p-0 bg-transparent themeClr"
+                        >
+                          {copyIcn}
+                        </button>
+                        {isCopied && (
+                          <span style={{ marginLeft: "10px", color: "green" }}>
+                            Copied!
+                          </span>
+                        )}
+                      </div>
+                      <diuv>
+                        {error && (
+                          <div className="text-danger mb-3">{error}</div>
+                        )}
+                      </diuv>
                     </div>
-                    <diuv>{error && <div className="text-danger mb-3">{error}</div>}</diuv>
-                  </div>
-                </>
+                  </>
+                )}
+              </div>
+            </div>
+            {/* {!loading && (
+              <div className="btnWRpper mt-4">
+                <Button
+                  onClick={handleMintSubmit}
+                  className="d-flex align-items-center justify-content-center commonBtn w-100"
+                >
+                  {isValidating ? "Minting..." : "Mint"}
+                </Button>
+              </div>
+            )} */}
+             {!loading && (
+                <div className="timer text-center" style={{ fontSize: 14, fontWeight: 'bold', color: timer <= 60 ? 'red' : 'white' }}>
+                  {formatTime(timer)}
+                </div>
               )}
-            </div>
-          </div>
-          {!loading && 
-            <div className="btnWRpper mt-4">
-              <Button onClick={handleMintSubmit} className="d-flex align-items-center justify-content-center commonBtn w-100">
-              {isValidating ? 'Minting...' : 'Mint'}
-              </Button>
-            </div>
-          }
-        </>
-      )}
-    </Modal.Body>
-  </Modal>
+            {!loading &&
+              <div className="note text-center mt-3" style={{ fontSize: 12, color: 'red' }}>
+                Note: Deposit address is valid for 5 minutes only.
+              </div>
+            }
+          </>
+        )}
+      </Modal.Body>
+    </Modal>
   );
 };
 
@@ -254,8 +328,22 @@ const qrCode = (
   </svg>
 );
 
-
-const copyIcn = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z" fill="currentColor"/>
-<path opacity="0.5" d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z" fill="currentColor"/>
-</svg>
+const copyIcn = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
+      fill="currentColor"
+    />
+    <path
+      opacity="0.5"
+      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
+      fill="currentColor"
+    />
+  </svg>
+);
