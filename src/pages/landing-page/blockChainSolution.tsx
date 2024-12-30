@@ -7,11 +7,11 @@ import img from "@/Assets/Images/blockchainSol.png";
 const BlockChainSolution: React.FC = () => {
   return (
     <>
-      <BlockChainSol className=" relative pb-5 pt-14 z-10 bg-[#131313]">
+      <BlockChainSol className=" relative pb-5 pt-14 z-10 bg-[#fff]">
         <div className="container pt-14">
           <div className="grid gap-3 grid-cols-12 itmes-center">
             <div className="md:col-span-6 col-span-12">
-              <h2 className="m-0 font-medium text-5xl text-white py-2">
+              <h2 className="m-0 font-medium text-5xl text-dark py-2">
                 Blockchain solutions built around you
               </h2>
               <p className="m-0 py-2 text-gray-400">

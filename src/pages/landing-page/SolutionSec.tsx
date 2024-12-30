@@ -30,7 +30,7 @@ const SolutionSec: React.FC = () => {
   };
   return (
     <>
-      <SolutionSection className=" relative pb-5 pt-14 z-10 bg-[#131313]">
+      <SolutionSection className=" relative pb-5 pt-14 z-10 bg-[#fff]">
         <div className="container">
           <div className="grid gap-3 grid-cols-12 itmes-center">
             <div className="lg:col-span-5 col-span-12 imgWrpper">
@@ -46,7 +46,7 @@ const SolutionSec: React.FC = () => {
             </div>
             <div className="lg:col-span-7 col-span-12">
               <div className="p-lg-3">
-                <h2 className="m-0 font-medium text-5xl text-white py-2">
+                <h2 className="m-0 font-medium text-5xl text-dark py-2">
                   <span className="text-gradient block">Key solutions </span>
                   we provide The{" "}
                 </h2>
@@ -66,7 +66,7 @@ const SolutionSec: React.FC = () => {
                         }
                         onClick={() => handleAccordionClick(key)}
                         isOpen={openIndex === key}
-                        btnClass={`  font-semibold flex items-center justify-start gap-2 text-xl px-0 py-2 relative`}
+                        btnClass={`  font-semibold flex items-center justify-start gap-2 text-xl text-dark px-0 py-2 relative`}
                         btnIcnClass={` icn`}
                         svg={""}
                         title={item.title}
