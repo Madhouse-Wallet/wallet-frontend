@@ -77,7 +77,7 @@ const Header: React.FC = () => {
     init();
   }, []);
   
-
+  
   const loginTry = async () => {
     try {
       if (!web3auth) return;
