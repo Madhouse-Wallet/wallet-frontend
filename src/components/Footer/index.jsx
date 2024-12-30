@@ -7,17 +7,17 @@ import styled from "styled-components";
 const Footer = () => {
   return (
     <>
-      <FooterDiv className="siteFooter py-5 z-10 relative bg-[#131313]">
-        <Image
+      <FooterDiv className="siteFooter py-2 z-10 relative bg-[#fff]">
+        {/* <Image
           src={bg}
           alt="graphic"
           height={1000}
           width={1000}
           className="max-w-full max-h-full absolute w-100  bottom-0 left-0 h-auto  opacity-30 object-cover right-0 z-[-1]"
-        />
+        /> */}
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
+            <div className="col-span-12 hidden">
               <div className="border border-secondary p-lg-5 p-3 rounded-4 grid gap-3 grid-cols-12">
                 <div className="lg:col-span-3 md:col-span-4 sm:col-span-6 col-span-12">
                   <h6 className="m-0 font-bold text-white text-xl">Pages</h6>
@@ -160,6 +160,61 @@ const Footer = () => {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div className="col-span-12">
+              <div className="flex items-center justify-center justify-between gap-2 flex-wrap">
+                <p className="m-0 text-gray-500 text-xs">Copyright @MadHouse</p>
+                <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                  <li className="py-1">
+                    <Link
+                      href={"https://www.linkedin.com/in/quincyryanwalker/"}
+                      target="_blank"
+                      style={{ height: 30, width: 30 }}
+                      className=" text-xs hover:bg-[#ff8735] bg-[#262626] rounded-circle flex items-center justify-center "
+                    >
+                      {linkedIn}
+                    </Link>
+                  </li>
+                  <li className="py-1">
+                    <Link
+                      target="_blank"
+                      href={"https://x.com/rogeroger120 "}
+                      style={{ height: 30, width: 30 }}
+                      className=" text-xs hover:bg-[#ff8735] bg-[#262626] rounded-circle flex items-center justify-center "
+                    >
+                      {twitter}
+                    </Link>
+                  </li>
+                  <li className="py-1">
+                    <Link
+                      href={"https://discord.gg/SUWXaqP5yq"}
+                      target="_blank"
+                      style={{ height: 30, width: 30 }}
+                      className=" text-xs hover:bg-[#ff8735] bg-[#262626] rounded-circle flex items-center justify-center "
+                    >
+                      {discord}
+                    </Link>
+                  </li>
+                </ul>
+                <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                  <li className="">
+                    <Link
+                      href={""}
+                      className="text-gray-500 text-xs hover:text-[#ff8029]"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </li>
+                  <li className="">
+                    <Link
+                      href={""}
+                      className="text-gray-500 text-xs hover:text-[#ff8029]"
+                    >
+                      Terms & Condition{" "}
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

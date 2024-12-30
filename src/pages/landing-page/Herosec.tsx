@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 import styled from "styled-components";
 import wave from "@/Assets/Images/waveline.png";
+import bg from "@/Assets/Images/bg.png";
 import hero from "@/Assets/Images/hero.png";
 
 const Herosec: React.FC = () => {
@@ -14,6 +15,13 @@ const Herosec: React.FC = () => {
           height={1000}
           width={1000}
           className="max-w-full absolute w-auto  top-0 left-0 h-full ml-auto right-0 z-[-1]"
+        />
+        <Image
+          src={bg}
+          alt="graphic"
+          height={1000}
+          width={1000}
+          className="max-w-full absolute w-full top-0 left-0 h-full ml-auto right-0 z-[-1]"
         />
         <div className="container pt-14">
           <div className="grid gap-3 grid-cols-12">
@@ -53,7 +61,7 @@ const Herosec: React.FC = () => {
                     <span className="icn ms-2">{right}</span>
                   </button>
                 </div>
-                <div className="flex items-start gap-4 pt-3">
+                {/* <div className="flex items-start gap-4 pt-3">
                   <h3 className="text-xl text-white font-semibold">
                     Current Bid
                   </h3>
@@ -63,7 +71,7 @@ const Herosec: React.FC = () => {
                       $4,560.60
                     </span>
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
