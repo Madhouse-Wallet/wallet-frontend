@@ -135,9 +135,8 @@ const ThresholdWallet: React.FC = () => {
             <div className="col-span-12 my-2">
               <div className="grid gap-3 grid-cols-12">
                 {cardData.map((item, key) => (
-                  <div className=" md:col-span-4 col-span-6">
+                  <div key={key} className=" md:col-span-4 col-span-6">
                     <CardCstm
-                      key={key}
                       onClick={item.onClick}
                       className="p-3 rounded-3 h-100 position-relative cursor-pointer"
                     >
