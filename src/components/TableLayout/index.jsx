@@ -28,7 +28,7 @@ const TableLayout = ({ column, data }) => {
               data?.length > 0 &&
               data.map((data, columnkey) => {
                 return (
-                  <tr>
+                  <tr key={columnkey}>
                     {column &&
                       column.length > 0 &&
                       column.map((item, key) => {

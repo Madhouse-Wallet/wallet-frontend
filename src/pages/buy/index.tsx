@@ -17,12 +17,8 @@ const stripePromise = loadStripe(
 const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [isStripeModalVisible, setIsStripeModalVisible] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
-  const [isModalVisible, setIsModalVisible] = useState(false); // For the modal visibility
-  const [confirmed, setConfirmed] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -31,24 +27,17 @@ const BuyCoin: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
-  useEffect(() => {
-    if (selectedPaymentMethod === "Card") {
-      fetch("http://localhost:5000/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
-      })
-        .then((res) => res.json())
-        .then((data) => setClientSecret(data.clientSecret));
-    }
-  }, [selectedPaymentMethod]);
-
-  useEffect(() => {
-    const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
-    
-    // Set confirmed to true if the client secret exists, otherwise false
-    setConfirmed(!!clientSecret); // Using double negation to convert the value to boolean
-  }, []);
+  // useEffect(() => {
+  //   if (selectedPaymentMethod === "Card") {
+  //     fetch("http://localhost:5000/create-payment-intent", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => setClientSecret(data.clientSecret));
+  //   }
+  // }, [selectedPaymentMethod]);
 
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -57,18 +46,6 @@ const BuyCoin: React.FC = () => {
       router.push("/");
     }
   };
-
-  // const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   const selectedMethod = (e.target as HTMLButtonElement).id;  // Cast the target to the correct type
-  //   setSelectedPaymentMethod(selectedMethod);
-  //   if (selectedMethod !== "Card") {
-  //     setIsStripeModalVisible(false);
-  //     setClientSecret(null);
-  //   } else {
-  //     setIsStripeModalVisible(true);
-  //     setIsModalVisible(true);  // Show the modal when 'Credit/Debit Card' is selected
-  //   }
-  // };
   
   const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
     const selectedMethod = (e.target as HTMLButtonElement).id;  
@@ -76,22 +53,6 @@ const BuyCoin: React.FC = () => {
     if (selectedMethod === "Card") {
       router.push("/stripePaymentPage"); // Navigate to Stripe payment page
     }
-  };
-
-  const handleOpenModal = () => {
-    setIsModalVisible(true); // Open the modal
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false); // Close the modal
-    setSelectedPaymentMethod(""); // Reset the selected payment method
-  };
-
-  const appearance = {
-    theme: "stripe",
-  };
-  const options: StripeElementsOptions = {
-    clientSecret: clientSecret || "",
   };
 
   return (
@@ -191,7 +152,7 @@ const BuyCoin: React.FC = () => {
                 className="list-unstyled ps-0 mb-0"
                 style={{ fontSize: 12 }}
               >
-                <li className="my-3 position-relative">
+                 <li className="my-3 position-relative">
                   <button
                     className={`payment-btn ${
                       selectedPaymentMethod === "Card" ? "selected" : ""
@@ -234,45 +195,15 @@ const BuyCoin: React.FC = () => {
               </RadioList>
             </div>
           </div>
-          <div className="pt-3">
+          <div className="pt-3 grid gap-3 grid-cols-12">
             <div className="sm:col-span-4 col-span-12 my-2">
-              <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold w-100">
+              <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold ">
                 Buy Coin
               </button>
             </div>
           </div>
         </div>
       </section>
-
-      {/* {isModalVisible && (
-        <ModalContainer>
-          <ModalContent>
-          <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
-            <h4>Complete Your Payment</h4>
-            {clientSecret && (
-              <Elements stripe={stripePromise} options={options}>
-                <CheckoutForm />
-              </Elements>
-            )}
-          </ModalContent>
-        </ModalContainer>
-      )} */}
-
-{isModalVisible && (
-        <ModalContainer>
-          <ModalContent>
-            <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
-            <h4>Complete Your Payment</h4>
-            {clientSecret ? (
-              <Elements stripe={stripePromise} options={options}>
-                {confirmed ? <CompletePage /> : <CheckoutForm />}
-              </Elements>
-            ) : (
-              <p>Loading payment...</p>
-            )}
-          </ModalContent>
-        </ModalContainer>
-      )}
     </>
   );
 };

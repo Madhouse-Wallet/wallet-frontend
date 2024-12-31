@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import styled from "styled-components";
 
 // css
 
@@ -9,8 +10,8 @@ const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
 
   return (
     <>
-      <div
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99]`}
+      <Modal
+        className={` fixed inset-0 flex items-center justify-center cstmModal z-[999]`}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div
@@ -106,9 +107,15 @@ const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
             </form>
           </div>
         </div>
-      </div>
+      </Modal>
     </>
   );
 };
+
+const Modal = styled.div`
+  .modalDialog {
+    max-width: 500px;
+  }
+`;
 
 export default BTCAddressPop;
