@@ -103,40 +103,40 @@ const Header: React.FC = () => {
     init();
   }, []);
 
-  useEffect(() => {
-    const openTrove = async () => {
-      // setLoading(true);
-      // setError(null);
+  // useEffect(() => {
+  //   const openTrove = async () => {
+  //     // setLoading(true);
+  //     // setError(null);
 
-      const provider = (window as any).ethereum; // Ensure user has a wallet extension
-      if (!provider) {
-        console.log("No wallet detected. Please install Metamask.")
-        // setError("No wallet detected. Please install Metamask.");
-        // setLoading(false);
-        return;
-      }
+  //     const provider = (window as any).ethereum; // Ensure user has a wallet extension
+  //     if (!provider) {
+  //       console.log("No wallet detected. Please install Metamask.")
+  //       // setError("No wallet detected. Please install Metamask.");
+  //       // setLoading(false);
+  //       return;
+  //     }
 
-      const web3 = new Web3Interaction("sepolia", provider);
-      console.log("line-57",provider)
-      const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167"; // Replace with actual contract address
+  //     const web3 = new Web3Interaction("sepolia", provider);
+  //     console.log("line-57",provider)
+  //     const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167"; // Replace with actual contract address
 
-      try {
-        const receipt = await web3.openTrove(
-          contractAddress,
-          "1000000000000000000000", 
-          "0",
-          "10000016139672853",
-          "0x4Cf100cce352029e726185980E4611de835D6C7B", // Replace with actual upper hint
-          "0xd0236C05d6FcA23fbA40AFeC83DF7cE4188D48E3"  // Replace with actual lower hint
-        );
-        console.log("Transaction Receipt:", receipt);
-      } catch (error) {
-        console.error("Error calling openTrove:", error);
-      }
-    };
+  //     try {
+  //       const receipt = await web3.openTrove(
+  //         contractAddress,
+  //         "1000000000000000000000", 
+  //         "0",
+  //         "10000016139672853",
+  //         "0x4Cf100cce352029e726185980E4611de835D6C7B", // Replace with actual upper hint
+  //         "0xd0236C05d6FcA23fbA40AFeC83DF7cE4188D48E3"  // Replace with actual lower hint
+  //       );
+  //       console.log("Transaction Receipt:", receipt);
+  //     } catch (error) {
+  //       console.error("Error calling openTrove:", error);
+  //     }
+  //   };
 
-    openTrove();
-  }, []);
+  //   openTrove();
+  // }, []);
 
 
   const loginTry = async () => {

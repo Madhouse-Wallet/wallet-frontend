@@ -4,10 +4,25 @@ import React, { useEffect, useRef, useState } from "react";
 import p1 from "../../Assets/Images/user.png";
 import Image from "next/image";
 import styled from "styled-components";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import CheckoutForm from "@/components/stripe/CheckoutForm";
+import { StripeElementsOptions } from "@stripe/stripe-js";
+import CompletePage from "@/components/stripe/CompleteForm";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+);
 
 const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isStripeModalVisible, setIsStripeModalVisible] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("");
+  const [isModalVisible, setIsModalVisible] = useState(false); // For the modal visibility
+  const [confirmed, setConfirmed] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -16,187 +31,260 @@ const BuyCoin: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+  useEffect(() => {
+    if (selectedPaymentMethod === "Card") {
+      fetch("http://localhost:5000/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
+      })
+        .then((res) => res.json())
+        .then((data) => setClientSecret(data.clientSecret));
+    }
+  }, [selectedPaymentMethod]);
+
+  useEffect(() => {
+    const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
+    
+    // Set confirmed to true if the client secret exists, otherwise false
+    setConfirmed(!!clientSecret); // Using double negation to convert the value to boolean
+  }, []);
+
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back(); // Navigates to the previous page
+      router.back();
     } else {
-      router.push("/"); // Fallback: Redirects to the homepage
+      router.push("/");
     }
   };
+
+  // const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   const selectedMethod = (e.target as HTMLButtonElement).id;  // Cast the target to the correct type
+  //   setSelectedPaymentMethod(selectedMethod);
+  //   if (selectedMethod !== "Card") {
+  //     setIsStripeModalVisible(false);
+  //     setClientSecret(null);
+  //   } else {
+  //     setIsStripeModalVisible(true);
+  //     setIsModalVisible(true);  // Show the modal when 'Credit/Debit Card' is selected
+  //   }
+  // };
+  
+  const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const selectedMethod = (e.target as HTMLButtonElement).id;  
+    setSelectedPaymentMethod(selectedMethod);
+    if (selectedMethod === "Card") {
+      router.push("/stripePaymentPage"); // Navigate to Stripe payment page
+    }
+  };
+
+  const handleOpenModal = () => {
+    setIsModalVisible(true); // Open the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false); // Close the modal
+    setSelectedPaymentMethod(""); // Reset the selected payment method
+  };
+
+  const appearance = {
+    theme: "stripe",
+  };
+  const options: StripeElementsOptions = {
+    clientSecret: clientSecret || "",
+  };
+
   return (
     <>
-            <section className="position-relative dashboard py-3">
-              <div className="container">
-              <div className="grid gap-3 grid-cols-12">
-              <div className="my-2 col-span-12">
-                    <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                      <div className="d-flex align-items-center gap-10">
-                        <button
-                          onClick={handleGoBack}
-                          className="border-0 themeClr p-0"
-                        >
-                          {backIcn}
-                        </button>
-                        <h4 className="m-0">Buy Coin</h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="my-2 col-span-12">
-                    <div
-                      className="d-flex gap-10 flex-wrap align-items-center justify-content-between mb-5"
-                      style={{ fontSize: 12 }}
-                    >
-                      <div className="d-flex align-items-start gap-10">
-                        <div className="flex-shrink-0 rounded-circle">
-                          <Image
-                            src={p1}
-                            alt=""
-                            style={{ height: 40, width: 40 }}
-                            className="img-fluid object-fit-cover rounded-circle"
-                          />
-                        </div>
-                        <div className="content">
-                          <p className="m-0 fw-normal fw-sbold themeClr">
-                            Wallet Address:
-                          </p>
-                          <p className="m-0 fw-normal">324rqwerqwer323423</p>
-                          <div className="d-flex align-items-center gap-10">
-                            <button
-                              className="border-0 p-0"
-                            >
-                              {shareIcn}
-                            </button>
-                            <button
-                              className="border-0 p-0"
-                            >
-                              {redirectIcn}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="right">
-                        <h6 className="m-0 fw-bold">
-                          Real-Time Exchange Rates
-                        </h6>
-                        <p className="m-0">1 Bitcoin = $54,000 USD</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="my-2 md:col-span-6 col-span-12">
-                    <CardCstm className="p-3 rounded position-relative">
-                      <div className="top d-flex align-items-center justify-content-between pb-3">
-                        <h6 className="m-0 fw-bold">Purchase History</h6>
-                      </div>
-                      <div className="contentBody">
-                        <ul
-                          className="list-unstyled ps-0 mb-0"
-                          style={{ fontSize: 12 }}
-                        >
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                        </ul>
-                      </div>
-                    </CardCstm>
-                  </div>
-                  <div className="my-2 md:col-span-6 col-span-12">
-                    <div className="top d-flex align-items-center justify-content-between">
-                      <h6 className="m-0 fw-bold">Select Payment Method</h6>
-                      <span className="icn">{stripe}</span>
-                    </div>
-                    <RadioList
-                      className="list-unstyled ps-0 mb-0"
-                      style={{ fontSize: 12 }}
-                    >
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="Card"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="Card"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          Credit/Debit Card
-                        </label>
-                      </li>
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="Bank"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="Bank"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          Bank Transfer
-                        </label>
-                      </li>
-
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="wallet"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="wallet"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          E-Wallet
-                        </label>
-                      </li>
-                    </RadioList>
-                  </div>
-                </div>
-                <div className="pt-3">
-                  <div  className="sm:col-span-4 col-span-12 my-2">
-                    <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold w-100">
-                      Buy Coin
-                    </button>
-                  </div>
+      <section className="position-relative dashboard py-3">
+        <div className="container">
+          <div className="grid gap-3 grid-cols-12">
+            <div className="my-2 col-span-12">
+              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
+                <div className="d-flex align-items-center gap-10">
+                  <button
+                    onClick={handleGoBack}
+                    className="border-0 themeClr p-0"
+                  >
+                    {backIcn}
+                  </button>
+                  <h4 className="m-0">Buy Coin</h4>
                 </div>
               </div>
-            </section>
+            </div>
+            <div className="my-2 col-span-12">
+              <div
+                className="d-flex gap-10 flex-wrap align-items-center justify-content-between mb-5"
+                style={{ fontSize: 12 }}
+              >
+                <div className="d-flex align-items-start gap-10">
+                  <div className="flex-shrink-0 rounded-circle">
+                    <Image
+                      src={p1}
+                      alt=""
+                      style={{ height: 40, width: 40 }}
+                      className="img-fluid object-fit-cover rounded-circle"
+                    />
+                  </div>
+                  <div className="content">
+                    <p className="m-0 fw-normal fw-sbold themeClr">
+                      Wallet Address:
+                    </p>
+                    <p className="m-0 fw-normal">324rqwerqwer323423</p>
+                    <div className="d-flex align-items-center gap-10">
+                      <button className="border-0 p-0">{shareIcn}</button>
+                      <button className="border-0 p-0">{redirectIcn}</button>
+                    </div>
+                  </div>
+                </div>
+                <div className="right">
+                  <h6 className="m-0 fw-bold">Real-Time Exchange Rates</h6>
+                  <p className="m-0">1 Bitcoin = $54,000 USD</p>
+                </div>
+              </div>
+            </div>
+            <div className="my-2 md:col-span-6 col-span-12">
+              <CardCstm className="p-3 rounded position-relative">
+                <div className="top d-flex align-items-center justify-content-between pb-3">
+                  <h6 className="m-0 fw-bold">Purchase History</h6>
+                </div>
+                <div className="contentBody">
+                  <ul
+                    className="list-unstyled ps-0 mb-0"
+                    style={{ fontSize: 12 }}
+                  >
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                  </ul>
+                </div>
+              </CardCstm>
+            </div>
+            <div className="my-2 md:col-span-6 col-span-12">
+              <div className="top d-flex align-items-center justify-content-between">
+                <h6 className="m-0 fw-bold">Select Payment Method</h6>
+                <span className="icn">{stripe}</span>
+              </div>
+              <RadioList
+                className="list-unstyled ps-0 mb-0"
+                style={{ fontSize: 12 }}
+              >
+                <li className="my-3 position-relative">
+                  <button
+                    className={`payment-btn ${
+                      selectedPaymentMethod === "Card" ? "selected" : ""
+                    }`}
+                    id="Card"
+                    onClick={handlePaymentMethodChange}
+                  >
+                    Credit/Debit Card
+                  </button>
+                </li>
+                <li className="my-3 position-relative">
+                  <input
+                    type="radio"
+                    name="payment"
+                    id="Bank"
+                    className="position-absolute h-100 w-100 file"
+                  />
+                  <label
+                    htmlFor="Bank"
+                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  >
+                    Bank Transfer
+                  </label>
+                </li>
+
+                <li className="my-3 position-relative">
+                  <input
+                    type="radio"
+                    name="payment"
+                    id="wallet"
+                    className="position-absolute h-100 w-100 file"
+                  />
+                  <label
+                    htmlFor="wallet"
+                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  >
+                    E-Wallet
+                  </label>
+                </li>
+              </RadioList>
+            </div>
+          </div>
+          <div className="pt-3">
+            <div className="sm:col-span-4 col-span-12 my-2">
+              <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold w-100">
+                Buy Coin
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* {isModalVisible && (
+        <ModalContainer>
+          <ModalContent>
+          <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
+            <h4>Complete Your Payment</h4>
+            {clientSecret && (
+              <Elements stripe={stripePromise} options={options}>
+                <CheckoutForm />
+              </Elements>
+            )}
+          </ModalContent>
+        </ModalContainer>
+      )} */}
+
+{isModalVisible && (
+        <ModalContainer>
+          <ModalContent>
+            <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
+            <h4>Complete Your Payment</h4>
+            {clientSecret ? (
+              <Elements stripe={stripePromise} options={options}>
+                {confirmed ? <CompletePage /> : <CheckoutForm />}
+              </Elements>
+            ) : (
+              <p>Loading payment...</p>
+            )}
+          </ModalContent>
+        </ModalContainer>
+      )}
     </>
   );
 };
 
- const CardCstm = styled.div`
+const CardCstm = styled.div`
   background-color: var(--cardBg);
   border: 1px solid #7aff9b;
   font-size: 14px;
   line-height: 20px;
 `;
 
- const RadioList = styled.div`
+const RadioList = styled.div`
   label {
     height: 50px;
     background-color: var(--cardBg2);
@@ -207,6 +295,39 @@ const BuyCoin: React.FC = () => {
     border: 1px solid #7aff9b;
   }
 `;
+
+const ModalContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+`;
+
+const CloseButton = styled.span`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+`;
+
 
 export default BuyCoin;
 

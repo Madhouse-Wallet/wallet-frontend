@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cowprotocol/widget-react": "^0.13.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^5.16.13",
@@ -16,6 +17,8 @@
     "@reduxjs/toolkit": "^2.5.0",
     "@safe-global/protocol-kit": "^4.1.0",
     "@safe-global/relay-kit": "^3.1.0",
+    "@stripe/react-stripe-js": "^3.1.1",
+    "@stripe/stripe-js": "^5.4.0",
     "@svgr/webpack": "^8.1.0",
     "@walletconnect/sign-client": "^2.17.3",
     "@walletconnect/utils": "^2.17.3",
@@ -33,6 +36,8 @@
     "daisyui": "^4.12.23",
     "dayjs": "^1.11.13",
     "ethers": "^5.7.2",
+    "micro": "^10.0.1",
+    "micro-cors": "^0.1.1",
     "moment": "^2.30.1",
     "next": "14.2.3",
     "qrcode": "^1.5.4",
@@ -49,10 +54,12 @@
     "redux-logger": "^3.0.6",
     "sass": "^1.83.0",
     "slick-carousel": "^1.8.1",
+    "stripe": "^17.5.0",
     "styled-components": "^6.1.13",
     "viem": "^2.21.57"
   },
   "devDependencies": {
+    "@types/micro-cors": "^0.1.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
