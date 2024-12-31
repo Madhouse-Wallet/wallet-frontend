@@ -8,11 +8,12 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import { initializeTBTC } from "../../../tbtc/src/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { ethers } from "ethers";
+// @ts-ignore
 import QRCode from "qrcode";
 const BTCEchange = () => {
   const router = useRouter();
   const { walletAddress, provider, signer, login } = useSelector(
-    (state) => state.Auth
+    (state:any) => state.Auth
   );
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
@@ -143,7 +144,6 @@ const BTCEchange = () => {
                 <div className="d-flex align-items-center gap-3">
                   <button
                     onClick={handleGoBack}
-                    variant="transparent"
                     className="border-0 themeClr p-0"
                   >
                     {backIcn}

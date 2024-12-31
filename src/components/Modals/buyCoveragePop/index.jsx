@@ -3,7 +3,6 @@ import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import p1 from "@/public/user.png";
 
 // css
 
