@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
-import webpack from "webpack";
 const nextConfig = {
-  reactStrictMode: true,
   webpack(config, { isServer }) {
     // Configures webpack to handle SVG files with SVGR. SVGR optimizes and transforms SVG files
     // into React components. See https://react-svgr.com/docs/next/
@@ -28,36 +26,8 @@ const nextConfig = {
       }
     );
 
-
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
-    // Add fallback for browser polyfills
-   
-
-     // Add fallback for browser polyfills
-     config.resolve.fallback = {
-      ...config.resolve.fallback,
-      crypto: "crypto-browserify",
-      stream: "stream-browserify",
-      buffer: "buffer",
-      process: "process/browser",
-      path: "path-browserify",
-      zlib: "browserify-zlib",
-      util: "util",
-      assert: "assert",
-      http: "stream-http",
-      net: false, // Node.js-only module
-      tls: false, // Node.js-only module
-      fs: false,  // Node.js-only module
-    };
-
-    // Add plugins
-    config.plugins.push(
-      new webpack.ProvidePlugin({
-        process: "process/browser",
-        Buffer: ["buffer", "Buffer"],
-      })
-    );
 
     return config;
   },

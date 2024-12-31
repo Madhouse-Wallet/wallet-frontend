@@ -1,0 +1,15 @@
+.mainLayout {
+  main.MainBody {
+    height: calc(100vh - 0px);
+    overflow: auto;
+    scrollbar-width: none;
+    // width: calc(100% - 256px);
+  }
+}
+@media (max-width: 992px) {
+  .mainLayout {
+    main.MainBody {
+      width: calc(100%);
+    }
+  }
+}

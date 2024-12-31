@@ -1,0 +1,26 @@
+table.table {
+  background-color: var(--cardBg2);
+  th,
+  td {
+    padding: 10px 15px;
+    font-size: 10px;
+    line-height: 20px;
+    max-width: 200px;
+    min-width: 120px;
+    vertical-align: middle;
+  }
+  thead {
+    th {
+      font-weight: 400;
+      background-color: #76fc93;
+      white-space: nowrap;
+    }
+  }
+  tbody {
+    td {
+      padding: 20px 15px;
+      font-weight: 400;
+      border: 0;
+    }
+  }
+}
