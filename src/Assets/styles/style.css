@@ -136,9 +136,8 @@ button:disabled {
   background: #ccc;
   color: #666;
 }
-
-/* css */
-
 .modal-body {
   background-color: var(--backgroundColor);
 }
+
+/* css */
