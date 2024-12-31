@@ -13,7 +13,7 @@ const BuyBitcoin = ({ buy, setBuy }) => {
 
   return (
     <>
-      <div
+      <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99]`}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
@@ -100,10 +100,15 @@ const BuyBitcoin = ({ buy, setBuy }) => {
             </div>
           </div>
         </div>
-      </div>
+      </Modal>
     </>
   );
 };
+const Modal = styled.div`
+  .modalDialog {
+    max-width: 500px;
+  }
+`;
 
 export default BuyBitcoin;
 

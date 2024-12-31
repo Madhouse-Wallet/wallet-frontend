@@ -25,178 +25,168 @@ const BuyCoin: React.FC = () => {
   };
   return (
     <>
-            <section className="position-relative dashboard py-3">
-              <div className="container">
-              <div className="grid gap-3 grid-cols-12">
-              <div className="my-2 col-span-12">
-                    <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                      <div className="d-flex align-items-center gap-10">
-                        <button
-                          onClick={handleGoBack}
-                          className="border-0 themeClr p-0"
-                        >
-                          {backIcn}
-                        </button>
-                        <h4 className="m-0">Buy Coin</h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="my-2 col-span-12">
-                    <div
-                      className="d-flex gap-10 flex-wrap align-items-center justify-content-between mb-5"
-                      style={{ fontSize: 12 }}
-                    >
-                      <div className="d-flex align-items-start gap-10">
-                        <div className="flex-shrink-0 rounded-circle">
-                          <Image
-                            src={p1}
-                            alt=""
-                            style={{ height: 40, width: 40 }}
-                            className="img-fluid object-fit-cover rounded-circle"
-                          />
-                        </div>
-                        <div className="content">
-                          <p className="m-0 fw-normal fw-sbold themeClr">
-                            Wallet Address:
-                          </p>
-                          <p className="m-0 fw-normal">324rqwerqwer323423</p>
-                          <div className="d-flex align-items-center gap-10">
-                            <button
-                              className="border-0 p-0"
-                            >
-                              {shareIcn}
-                            </button>
-                            <button
-                              className="border-0 p-0"
-                            >
-                              {redirectIcn}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="right">
-                        <h6 className="m-0 fw-bold">
-                          Real-Time Exchange Rates
-                        </h6>
-                        <p className="m-0">1 Bitcoin = $54,000 USD</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="my-2 md:col-span-6 col-span-12">
-                    <CardCstm className="p-3 rounded position-relative">
-                      <div className="top d-flex align-items-center justify-content-between pb-3">
-                        <h6 className="m-0 fw-bold">Purchase History</h6>
-                      </div>
-                      <div className="contentBody">
-                        <ul
-                          className="list-unstyled ps-0 mb-0"
-                          style={{ fontSize: 12 }}
-                        >
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-
-                          <li
-                            className="py-3"
-                            style={{ borderBottom: "1px dashed #ddd" }}
-                          >
-                            Bought 0.1 BTC on 01/10/2023 - $5,400
-                          </li>
-                        </ul>
-                      </div>
-                    </CardCstm>
-                  </div>
-                  <div className="my-2 md:col-span-6 col-span-12">
-                    <div className="top d-flex align-items-center justify-content-between">
-                      <h6 className="m-0 fw-bold">Select Payment Method</h6>
-                      <span className="icn">{stripe}</span>
-                    </div>
-                    <RadioList
-                      className="list-unstyled ps-0 mb-0"
-                      style={{ fontSize: 12 }}
-                    >
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="Card"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="Card"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          Credit/Debit Card
-                        </label>
-                      </li>
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="Bank"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="Bank"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          Bank Transfer
-                        </label>
-                      </li>
-
-                      <li className="my-3 position-relative">
-                        <input
-                          type="radio"
-                          name="payment"
-                          id="wallet"
-                          className="position-absolute h-100 w-100 file"
-                        />
-                        <label
-                          htmlFor="wallet"
-                          className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
-                        >
-                          E-Wallet
-                        </label>
-                      </li>
-                    </RadioList>
-                  </div>
-                </div>
-                <div className="pt-3">
-                  <div  className="sm:col-span-4 col-span-12 my-2">
-                    <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold w-100">
-                      Buy Coin
-                    </button>
-                  </div>
+      <section className="position-relative dashboard py-3">
+        <div className="container">
+          <div className="grid gap-3 grid-cols-12">
+            <div className="my-2 col-span-12">
+              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
+                <div className="d-flex align-items-center gap-10">
+                  <button
+                    onClick={handleGoBack}
+                    className="border-0 themeClr p-0"
+                  >
+                    {backIcn}
+                  </button>
+                  <h4 className="m-0">Buy Coin</h4>
                 </div>
               </div>
-            </section>
+            </div>
+            <div className="my-2 col-span-12">
+              <div
+                className="d-flex gap-10 flex-wrap align-items-center justify-content-between mb-5"
+                style={{ fontSize: 12 }}
+              >
+                <div className="d-flex align-items-start gap-10">
+                  <div className="flex-shrink-0 rounded-circle">
+                    <Image
+                      src={p1}
+                      alt=""
+                      style={{ height: 40, width: 40 }}
+                      className="img-fluid object-fit-cover rounded-circle"
+                    />
+                  </div>
+                  <div className="content">
+                    <p className="m-0 fw-normal fw-sbold themeClr">
+                      Wallet Address:
+                    </p>
+                    <p className="m-0 fw-normal">324rqwerqwer323423</p>
+                    <div className="d-flex align-items-center gap-10">
+                      <button className="border-0 p-0">{shareIcn}</button>
+                      <button className="border-0 p-0">{redirectIcn}</button>
+                    </div>
+                  </div>
+                </div>
+                <div className="right">
+                  <h6 className="m-0 fw-bold">Real-Time Exchange Rates</h6>
+                  <p className="m-0">1 Bitcoin = $54,000 USD</p>
+                </div>
+              </div>
+            </div>
+            <div className="my-2 md:col-span-6 col-span-12">
+              <CardCstm className="p-3 rounded position-relative">
+                <div className="top d-flex align-items-center justify-content-between pb-3">
+                  <h6 className="m-0 fw-bold">Purchase History</h6>
+                </div>
+                <div className="contentBody">
+                  <ul
+                    className="list-unstyled ps-0 mb-0"
+                    style={{ fontSize: 12 }}
+                  >
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+
+                    <li
+                      className="py-3"
+                      style={{ borderBottom: "1px dashed #ddd" }}
+                    >
+                      Bought 0.1 BTC on 01/10/2023 - $5,400
+                    </li>
+                  </ul>
+                </div>
+              </CardCstm>
+            </div>
+            <div className="my-2 md:col-span-6 col-span-12">
+              <div className="top d-flex align-items-center justify-content-between">
+                <h6 className="m-0 fw-bold">Select Payment Method</h6>
+                <span className="icn">{stripe}</span>
+              </div>
+              <RadioList
+                className="list-unstyled ps-0 mb-0"
+                style={{ fontSize: 12 }}
+              >
+                <li className="my-3 position-relative">
+                  <input
+                    type="radio"
+                    name="payment"
+                    id="Card"
+                    className="position-absolute h-100 w-100 file"
+                  />
+                  <label
+                    htmlFor="Card"
+                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  >
+                    Credit/Debit Card
+                  </label>
+                </li>
+                <li className="my-3 position-relative">
+                  <input
+                    type="radio"
+                    name="payment"
+                    id="Bank"
+                    className="position-absolute h-100 w-100 file"
+                  />
+                  <label
+                    htmlFor="Bank"
+                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  >
+                    Bank Transfer
+                  </label>
+                </li>
+
+                <li className="my-3 position-relative">
+                  <input
+                    type="radio"
+                    name="payment"
+                    id="wallet"
+                    className="position-absolute h-100 w-100 file"
+                  />
+                  <label
+                    htmlFor="wallet"
+                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  >
+                    E-Wallet
+                  </label>
+                </li>
+              </RadioList>
+            </div>
+          </div>
+          <div className="pt-3 grid gap-3 grid-cols-12">
+            <div className="sm:col-span-4 col-span-12 my-2">
+              <button className="inline-flex align-items-center justify-content-center commonBtn fw-sbold ">
+                Buy Coin
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 };
 
- const CardCstm = styled.div`
+const CardCstm = styled.div`
   background-color: var(--cardBg);
   border: 1px solid #7aff9b;
   font-size: 14px;
   line-height: 20px;
 `;
 
- const RadioList = styled.div`
+const RadioList = styled.div`
   label {
     height: 50px;
     background-color: var(--cardBg2);

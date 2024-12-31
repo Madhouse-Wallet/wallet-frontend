@@ -16,22 +16,22 @@ const Herosec: React.FC = () => {
           width={1000}
           className="max-w-full absolute w-auto  top-0 left-0 h-full ml-auto right-0 z-[-1]"
         />
-        <Image
+        {/* <Image
           src={bg}
           alt="graphic"
           height={1000}
           width={1000}
           className="max-w-full absolute w-full top-0 left-0 h-full ml-auto right-0 z-[-1]"
-        />
+        /> */}
         <div className="container pt-14">
           <div className="grid gap-3 grid-cols-12">
-            <div className=" col-span-12">
+            <div className="md:col-span-6 col-span-12">
               <h2
-                className="m-0 font-medium text-7xl text-white"
-                style={{ lineHeight: "100px" }}
+                className="m-0 font-medium text-4xl text-white"
+                style={{ lineHeight: "50px" }}
               >
                 Borrow Dollars Using Your{" "}
-                <span className="text-gradient">Bitcoin </span> at 0% interest.
+                <span className="text-gradient">Bitcoin at 0%</span> interest.
                 Pay back when you want{" "}
               </h2>
             </div>
