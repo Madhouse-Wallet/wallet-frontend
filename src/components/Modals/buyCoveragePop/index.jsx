@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-// import p1 from "../@/Assets/Images/user.png";
+import p1 from "@/public/user.png";
 
 // css
 
@@ -15,168 +16,160 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
   return (
     <>
       <Modal
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99]`}
+        show={buycoverage}
+        className={`BuyCoveragePop`}
+        onHide={handleBuyCoverage}
+        backdrop="static"
+        keyboard={false}
+        centered
+        scrollable="true"
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <div
-          className={`modalDialog relative p-2 mx-auto rounded-lg z-10 bg-[var(--backgroundColor)]`}
-        >
-          <div className={`position-relative rounded`}>
-            <button
-              onClick={handleBuyCoverage}
-              className="border-0 p-0 position-absolute"
-              variant="transparent"
-              style={{ right: 10, top: 0 }}
+        <Modal.Body className={`position-relative rounded`}>
+          <Button
+            onClick={handleBuyCoverage}
+            className="border-0 p-0 position-absolute"
+            variant="transparent"
+            style={{ right: 10, top: 0 }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 16 15"
+              fill="none"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 16 15"
-                fill="none"
-              >
-                <g clip-path="url(#clip0_0_6282)">
-                  <path
-                    d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
+              <g clip-path="url(#clip0_0_6282)">
+                <path
+                  d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
+                  fill="var(--textColor)"
+                />
+                <path
+                  d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
+                  fill="var(--textColor)"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0_0_6282">
+                  <rect
+                    width="15"
+                    height="15"
                     fill="var(--textColor)"
+                    transform="translate(0.564453)"
                   />
-                  <path
-                    d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
-                    fill="var(--textColor)"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_0_6282">
-                    <rect
-                      width="15"
-                      height="15"
-                      fill="var(--textColor)"
-                      transform="translate(0.564453)"
-                    />
-                  </clipPath>
-                </defs>
-              </svg>
-            </button>
-            <div className="top pb-3">
-              <h5 className="m-0 fw-bold">Coverage Purchased</h5>
-            </div>
-            <div className="content p-3">
-              <div className="py-2">
-                <ul className="list-unstyled ps-0 mb-0">
-                  <li
-                    className="py-2"
-                    style={{ borderBottom: "1px dashed #ddd" }}
-                  >
-                    <div
-                      className="d-flex align-items-center justify-content-between flex-wrap gap-3"
-                      style={{ fontSize: 12 }}
-                    >
-                      <div className="left d-flex align-items-center gap-3">
-                        <div className="imgWrp flex-shrink-0">
-                          <Image
-                            src=""
-                            height={10000}
-                            width={10000}
-                            alt=""
-                            style={{ height: 70, width: 100 }}
-                            className="img-fluid object-fit-cover rounded"
-                          />
-                        </div>
-                        <div className="content">
-                          <p className="m-0 fw-sbold">Expiry Date</p>
-                          <p className="m-0 fw-sbold">Jun 22 2025</p>
-                        </div>
-                      </div>
-                      <div className="right">
-                        <p
-                          className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
-                        >
-                          ID: 232
-                        </p>
-                        <p className="m-0 mt-2 ">
-                          Amount: <span className="themeClr">$100</span>{" "}
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                  <li
-                    className="py-2"
-                    style={{ borderBottom: "1px dashed #ddd" }}
-                  >
-                    <div
-                      className="d-flex align-items-center justify-content-between flex-wrap gap-3"
-                      style={{ fontSize: 12 }}
-                    >
-                      <div className="left d-flex align-items-center gap-3">
-                        <div className="imgWrp flex-shrink-0">
-                          <Image
-                            src=""
-                            height={10000}
-                            width={10000}
-                            alt=""
-                            style={{ height: 70, width: 100 }}
-                            className="img-fluid object-fit-cover rounded"
-                          />
-                        </div>
-                        <div className="content">
-                          <p className="m-0 fw-sbold">Expiry Date</p>
-                          <p className="m-0 fw-sbold">Jun 22 2025</p>
-                        </div>
-                      </div>
-                      <div className="right">
-                        <p
-                          className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
-                        >
-                          ID: 232
-                        </p>
-                        <p className="m-0 mt-2 ">
-                          Amount: <span className="themeClr">$100</span>{" "}
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div className="py-2">
-                <ul
-                  className="list-unstyled ps-0 mb-0"
-                  style={{ fontSize: 12 }}
+                </clipPath>
+              </defs>
+            </svg>
+          </Button>
+          <div className="top pb-3">
+            <h5 className="m-0 fw-bold">Coverage Purchased</h5>
+          </div>
+          <div className="content p-3">
+            <div className="py-2">
+              <ul className="list-unstyled ps-0 mb-0">
+                <li
+                  className="py-2"
+                  style={{ borderBottom: "1px dashed #ddd" }}
                 >
-                  <li className="py-1 d-flex align-items-center justify-content-between">
-                    <span className="">Principal to Cover</span>
-                    <span className="themeClr">$20000</span>
-                  </li>
-                  <li className="py-1 d-flex align-items-center justify-content-between">
-                    <span className="">Expiry Date</span>
-                    <span className="themeClr">Aug 14 2025</span>
-                  </li>
-                  <li
-                    className="py-1 mt-2 d-flex align-items-center justify-content-between"
-                    style={{ borderTop: "1px dashed #ddd" }}
+                  <div
+                    className="d-flex align-items-center justify-content-between flex-wrap gap-10"
+                    style={{ fontSize: 12 }}
                   >
-                    <span className="fw-bold">Total</span>
-                    <span className="themeClr fw-bold">$50.41</span>
-                  </li>
-                </ul>
-              </div>
+                    <div className="left d-flex align-items-center gap-10">
+                      <div className="imgWrp flex-shrink-0">
+                        <Image
+                          src="https://www.shutterstock.com/image-photo/banner-gold-bitcoin-on-isolated-260nw-770056429.jpg"
+                          height={10000}
+                          width={10000}
+                          alt=""
+                          style={{ height: 70, width: 100 }}
+                          className="img-fluid object-fit-cover rounded"
+                        />
+                      </div>
+                      <div className="content">
+                        <p className="m-0 fw-sbold">Expiry Date</p>
+                        <p className="m-0 fw-sbold">Jun 22 2025</p>
+                      </div>
+                    </div>
+                    <div className="right">
+                      <p
+                        className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
+                      >
+                        ID: 232
+                      </p>
+                      <p className="m-0 mt-2 ">
+                        Amount: <span className="themeClr">$100</span>{" "}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+                <li
+                  className="py-2"
+                  style={{ borderBottom: "1px dashed #ddd" }}
+                >
+                  <div
+                    className="d-flex align-items-center justify-content-between flex-wrap gap-10"
+                    style={{ fontSize: 12 }}
+                  >
+                    <div className="left d-flex align-items-center gap-10">
+                      <div className="imgWrp flex-shrink-0">
+                        <Image
+                          src="https://www.shutterstock.com/image-photo/banner-gold-bitcoin-on-isolated-260nw-770056429.jpg"
+                          height={10000}
+                          width={10000}
+                          alt=""
+                          style={{ height: 70, width: 100 }}
+                          className="img-fluid object-fit-cover rounded"
+                        />
+                      </div>
+                      <div className="content">
+                        <p className="m-0 fw-sbold">Expiry Date</p>
+                        <p className="m-0 fw-sbold">Jun 22 2025</p>
+                      </div>
+                    </div>
+                    <div className="right">
+                      <p
+                        className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
+                      >
+                        ID: 232
+                      </p>
+                      <p className="m-0 mt-2 ">
+                        Amount: <span className="themeClr">$100</span>{" "}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <div className="btnWRpper mt-4">
-              <button className="d-flex align-items-center justify-content-center commonBtn w-100 fw-sbold">
-                Buy Coverage
-              </button>
+            <div className="py-2">
+              <ul className="list-unstyled ps-0 mb-0" style={{ fontSize: 12 }}>
+                <li className="py-1 d-flex align-items-center justify-content-between">
+                  <span className="">Principal to Cover</span>
+                  <span className="themeClr">$20000</span>
+                </li>
+                <li className="py-1 d-flex align-items-center justify-content-between">
+                  <span className="">Expiry Date</span>
+                  <span className="themeClr">Aug 14 2025</span>
+                </li>
+                <li
+                  className="py-1 mt-2 d-flex align-items-center justify-content-between"
+                  style={{ borderTop: "1px dashed #ddd" }}
+                >
+                  <span className="fw-bold">Total</span>
+                  <span className="themeClr fw-bold">$50.41</span>
+                </li>
+              </ul>
             </div>
           </div>
-        </div>
+          <div className="btnWRpper mt-4">
+            <Button className="d-flex align-items-center justify-content-center commonBtn w-100 fw-sbold">
+              Buy Coverage
+            </Button>
+          </div>
+        </Modal.Body>
       </Modal>
     </>
   );
 };
-
-const Modal = styled.div`
-  .modalDialog {
-    max-width: 500px;
-  }
-`;
 
 export default BuyCoveragePop;
 

@@ -8,17 +8,25 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import { initializeTBTC } from "../../../tbtc/src/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { ethers } from "ethers";
-import QRCode from 'qrcode';
+import QRCode from "qrcode";
 const BTCEchange = () => {
   const router = useRouter();
-  const { walletAddress, provider, signer, login } = useSelector((state) => state.Auth);
+  const { walletAddress, provider, signer, login } = useSelector(
+    (state) => state.Auth
+  );
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
-  const [qrCode, setQRCode] = useState('');
+  const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [walletAddressDepo, setWalletAddressDepo] = useState('');
+  const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
-  console.log("walletAddress, provider, signer, login-->",walletAddress, provider, signer, login)
+  console.log(
+    "walletAddress, provider, signer, login-->",
+    walletAddress,
+    provider,
+    signer,
+    login
+  );
   // useEffect(() => {
   //   const timer = setTimeout(() => {
   //     setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -36,43 +44,42 @@ const BTCEchange = () => {
   };
   const startReceive = async (address: any) => {
     try {
-      setLoading(true)
-      console.log("initializeTBTC00>", initializeTBTC)
+      setLoading(true);
+      console.log("initializeTBTC00>", initializeTBTC);
       // Initialize tBTC SDK
       const sdk = await initializeTBTC(signer);
-      console.log("sdk-->", sdk)
-      depo(sdk,address)
+      console.log("sdk-->", sdk);
+      depo(sdk, address);
       // setBtcExchange(!btcExchange)
     } catch (error) {
-      console.log("error rec-->", error)
+      console.log("error rec-->", error);
     }
-  }
-
+  };
 
   const generateQRCode = async (text: any) => {
     try {
       const qr = await QRCode.toDataURL(text);
       setQRCode(qr);
-      setLoading(false)
+      setLoading(false);
     } catch (err) {
-      setLoading(false)
+      setLoading(false);
       console.error(err);
     }
   };
 
   const depo = async (tbtcSdk: any, address: any) => {
     const bitcoinRecoveryAddress = "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"; // Replace with a valid BTC address
-    console.log("bitcoinRecoveryAddress-->", bitcoinRecoveryAddress, address)
+    console.log("bitcoinRecoveryAddress-->", bitcoinRecoveryAddress, address);
     try {
       // Step 4: Initiate the deposit
-      console.log(tbtcSdk.deposits.initiateDeposit)
+      console.log(tbtcSdk.deposits.initiateDeposit);
       const deposit = await tbtcSdk.deposits.initiateDeposit(address);
       console.log("Deposit initiated:", deposit);
-      setDepositSetup(deposit)
+      setDepositSetup(deposit);
       // Step 5: Get the Bitcoin deposit address
       const bitcoinDepositAddress = await deposit.getBitcoinAddress();
       console.log("Bitcoin deposit address:", bitcoinDepositAddress);
-      setWalletAddressDepo(bitcoinDepositAddress)
+      setWalletAddressDepo(bitcoinDepositAddress);
       await generateQRCode(bitcoinDepositAddress);
       // Inform the user to send BTC to the deposit address
       // alert(`Send BTC to the deposit address: ${bitcoinDepositAddress}`);
@@ -89,29 +96,28 @@ const BTCEchange = () => {
     } catch (error) {
       console.error("Error during deposit process:", error);
     }
-  }
-
+  };
 
   const mint = async () => {
     try {
       // const txHash = await depositSetup.initiateMinting();
       // console.log("Minting initiated, transaction hash:", txHash);
       // Detect funding UTXOs manually. There can be more than one.
-      const fundingUTXOs = await depositSetup.detectFunding()
-      console.log("fundingUTXOs---->", fundingUTXOs)
+      const fundingUTXOs = await depositSetup.detectFunding();
+      console.log("fundingUTXOs---->", fundingUTXOs);
       // Initiate minting using one of the funding UTXOs. Returns hash of the
       // initiate minting transaction.
-      if(fundingUTXOs.length > 0){
-        const txHash = await depositSetup.initiateMinting(fundingUTXOs[0])
-        console.log("txHash---->", txHash)
-      }else{
-        mint()
+      if (fundingUTXOs.length > 0) {
+        const txHash = await depositSetup.initiateMinting(fundingUTXOs[0]);
+        console.log("txHash---->", txHash);
+      } else {
+        mint();
       }
     } catch (error) {
-      console.log("setSdkTbtc-->", error)
-      mint()
+      console.log("setSdkTbtc-->", error);
+      mint();
     }
-  }
+  };
 
   return (
     <>
@@ -119,13 +125,13 @@ const BTCEchange = () => {
         createPortal(
           <BtcExchangePop
             btcExchange={btcExchange}
-              setBtcExchange={setBtcExchange}
-              walletAddress={walletAddressDepo}
-              qrCode={qrCode}
-              loading={loading}
-              setLoading={setLoading}
-              mint={mint}
-              startReceive={startReceive}
+            setBtcExchange={setBtcExchange}
+            walletAddress={walletAddressDepo}
+            qrCode={qrCode}
+            loading={loading}
+            setLoading={setLoading}
+            mint={mint}
+            startReceive={startReceive}
           />,
           document.body
         )}
@@ -163,7 +169,7 @@ const BTCEchange = () => {
                       Send
                     </button>
                     <button
-                        onClick={() => setBtcExchange(!btcExchange)}
+                      onClick={() => setBtcExchange(!btcExchange)}
                       className="d-flex align-items-center justify-content-center commonBtn"
                     >
                       Receive
@@ -177,7 +183,7 @@ const BTCEchange = () => {
                 <div className="d-flex align-items-center gap-3 mb-3">
                   <h4 className="m-0 text-xl">Recent Transaction</h4>
                 </div>
-                <RecentTransaction />
+                {/* <RecentTransaction /> */}
               </div>
             </div>
           </div>

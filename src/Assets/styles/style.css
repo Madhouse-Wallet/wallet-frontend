@@ -33,6 +33,9 @@ a {
 .cursor-pointer {
   cursor: pointer;
 }
+.cursor-pointer {
+  cursor: pointer;
+}
 .dropdown .dropdown-toggle:after {
   display: none;
 }
@@ -141,3 +144,7 @@ button:disabled {
 }
 
 /* css */
+
+.modal-body {
+  background-color: var(--backgroundColor);
+}

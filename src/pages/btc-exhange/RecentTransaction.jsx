@@ -1,6 +1,6 @@
 import React from "react";
+import TableLayout from "@/components/TableLayout/index";
 import styled from "styled-components";
-import TableLayout from "../../components/TableLayout";
 
 const RecentTransaction = () => {
   const column = [
@@ -45,7 +45,7 @@ const RecentTransaction = () => {
   ];
   return (
     <>
-      {/* <TableLayout data={data} column={column} /> */}
+      <TableLayout data={data} column={column} />
     </>
   );
 };
