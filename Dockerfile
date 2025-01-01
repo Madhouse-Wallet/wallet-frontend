@@ -1,6 +1,9 @@
 # Stage 1: Build the Next.js application
 FROM node:18-alpine AS builder
 
+# Install necessary tools for Alpine-based images
+RUN apk add --no-cache bash git python3 make g++
+
 # Set working directory for the main project
 WORKDIR /app
 
@@ -34,6 +37,9 @@ RUN npm run build
 # Stage 2: Create a lightweight image to serve the built application
 FROM node:18-alpine
 
+# Install necessary tools for Alpine-based images
+RUN apk add --no-cache bash
+
 # Set working directory
 WORKDIR /app
 
@@ -46,8 +52,8 @@ COPY --from=builder /app/tbtc /app/tbtc
 # Install only production dependencies for the main project
 RUN npm install --legacy-peer-deps --production
 
-# Expose port 3000 for the Next.js application
-EXPOSE 3000
+# Expose port 80 for the Next.js application
+EXPOSE 80
 
 # Start the Next.js application
 CMD ["npm", "start"]
