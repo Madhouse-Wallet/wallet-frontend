@@ -21,6 +21,7 @@ import { sepolia, baseSepolia } from "viem/chains"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { createBundlerClient, entryPoint07Address } from "viem/account-abstraction"
 import { createSmartAccountClient } from "permissionless"
+import { erc7579Actions } from "permissionless/actions/erc7579";
 
 import {
   getAddress,
@@ -34,6 +35,24 @@ import {
 import { encodeFunctionData, parseAbiItem } from "viem"
 
 
+import {
+  create,
+  get,
+  PublicKeyCredentialWithAttestationJSON,
+} from "@github/webauthn-json";
+import crypto from "crypto";
+import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
+import { saveRegistration } from "../../lib/state";
+
+
+import {
+  getWebAuthnValidator,
+  getSmartSessionsValidator,
+  getWebauthnValidatorSignature,
+  getTrustAttestersAction,
+  RHINESTONE_ATTESTER_ADDRESS,
+  MOCK_ATTESTER_ADDRESS,
+} from "@rhinestone/module-sdk";
 
 const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -47,7 +66,9 @@ const Header: React.FC = () => {
   const [provider, setProvider] = useState<null>(null);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
-
+  function clean(str: string) {
+    return str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  }
 
   const loginTry = async () => {
     try {
@@ -97,8 +118,9 @@ const Header: React.FC = () => {
             return (await pimlicoClient.getUserOperationGasPrice()).fast
           },
         },
-      })
+      }).extend(erc7579Actions())
 
+      console.log("smartAccountClient-->",smartAccountClient)
       console.log(`Smart account address: https://sepolia.basescan.org/address/${account.address}`, account)
       setSafeAddress(account.address)
       setLoggedIn(true)
@@ -110,6 +132,112 @@ const Header: React.FC = () => {
           signer: "signerT",
         })
       );
+
+
+
+      //generate passkey
+      const saltUUID = crypto.createHash("sha256").update("salt").digest("hex");
+
+      // const _credential = await create({
+      //   publicKey: {
+      //     challenge: clean(crypto.randomBytes(32).toString("base64")),
+      //     rp: {
+      //       name: "Rhinestone",
+      //       id: "localhost",
+      //     },
+      //     user: {
+      //       id: saltUUID,
+      //       name: "rhinestone wallet",
+      //       displayName: "rhinestone wallet",
+      //     },
+      //     pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+      //     timeout: 60000,
+      //     authenticatorSelection: {
+      //       residentKey: "required",
+      //       userVerification: "required",
+      //       authenticatorAttachment: "platform",
+      //     },
+      //   },
+      // });
+
+      // console.log("_credential--->", _credential)
+
+      // // Extract public key data using webauthn-json
+      // const { attestationObject, clientDataJSON } = _credential.response;
+      // // saveRegistration(_credential)
+      // const passkey = await extractPasskeyData(_credential)
+      // console.log("passkey--->",  passkey)
+
+
+
+
+
+      const displayName = 'Safe Owner' // This can be customized to match, for example, a user name.
+      // Generate a passkey credential using WebAuthn API
+      const passkeyCredential = await navigator.credentials.create({
+        publicKey: {
+          pubKeyCredParams: [
+            {
+              alg: -7,
+              type: 'public-key'
+            }
+          ],
+          challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+          rp: {
+            name: "Rhinestone",
+            id: "localhost",
+          },
+          user: {
+            id: window.crypto.getRandomValues(new Uint8Array(32)),
+            name: "rhinestone wallet",
+            displayName: "rhinestone wallet",
+          },
+          timeout: 60_000,
+          attestation: 'none',
+          authenticatorSelection: {
+            residentKey: "required",
+            userVerification: "required",
+            authenticatorAttachment: "platform",
+          },
+          extensions: {
+            credProps: true,
+          },
+        }
+      })
+
+      if (!passkeyCredential) {
+        throw Error('Passkey creation failed: No credential was returned.')
+      }
+      console.log("passkeyCredential-->", passkeyCredential, passkeyCredential.id)
+      const passkey = await extractPasskeyData(passkeyCredential)
+      console.log('Created Passkey:', passkey.coordinates.x)
+      let xr = passkey.coordinates.x
+      let yr = passkey.coordinates.y
+      let id = passkeyCredential.id;
+      const webAuthnCredential = {
+        pubKey: {
+          x: xr,
+          y: yr,
+        },
+        authenticatorId: id,
+      };
+      const smartSessions = getSmartSessionsValidator({})
+      const webauthn = getWebAuthnValidator(webAuthnCredential);
+      console.log("module-->", webauthn)
+
+
+
+
+      const opHash = await smartAccountClient.installModule({
+        type: webauthn.type,
+        address: webauthn.module,
+        context: webauthn.initData!,
+      });
+    console.log("opHash-->",opHash)
+      await pimlicoClient.waitForUserOperationReceipt({
+        hash: opHash,
+      });
+
 
 
     } catch (error) {

@@ -11,9 +11,11 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@github/webauthn-json": "^2.1.1",
     "@mui/icons-material": "^5.16.13",
     "@mui/material": "^5.16.13",
     "@reduxjs/toolkit": "^2.5.0",
+    "@rhinestone/module-sdk": "^0.2.0",
     "@safe-global/protocol-kit": "^4.1.0",
     "@safe-global/relay-kit": "^3.1.0",
     "@svgr/webpack": "^8.1.0",
@@ -29,11 +31,13 @@
     "@web3auth/wallet-services-plugin-react-hooks": "^9.5.1",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "crypto": "^1.0.1",
     "daisyui": "^4.12.23",
     "dayjs": "^1.11.13",
     "ethers": "^5.7.2",
     "moment": "^2.30.1",
     "next": "14.2.3",
+    "permissionless": "^0.2.24",
     "qrcode": "^1.5.4",
     "react": "^18",
     "react-apexcharts": "^1.7.0",
@@ -49,8 +53,7 @@
     "sass": "^1.83.0",
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.13",
-    "permissionless": "^0.2.0",
-    "viem": "^2.20.0"
+    "viem": "^2.22.1"
   },
   "devDependencies": {
     "@types/node": "^20",
