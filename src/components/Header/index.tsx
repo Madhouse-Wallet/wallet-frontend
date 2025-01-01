@@ -12,41 +12,28 @@ import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
+
+import { writeFileSync } from "fs"
+import { toSafeSmartAccount } from "permissionless/accounts"
+import { Hex, createPublicClient, getContract, http } from "viem"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { sepolia, baseSepolia } from "viem/chains"
+import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { createBundlerClient, entryPoint07Address } from "viem/account-abstraction"
+import { createSmartAccountClient } from "permissionless"
+
 import {
-  CHAIN_NAMESPACES,
-  IAdapter,
-  IProvider,
-  WEB3AUTH_NETWORK,
-} from "@web3auth/base";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
-import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
-import RPC from "../../lib/ethersRPC";
+  getAddress,
+  maxUint256,
+  parseAbi,
+} from "viem";
+import {
+  EntryPointVersion,
+} from "viem/account-abstraction";
 
-const clientId =
-  "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ";
+import { encodeFunctionData, parseAbiItem } from "viem"
 
-const chainConfig = {
-  chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: "0xaa36a7",
-  rpcTarget: "https://rpc.ankr.com/eth_sepolia",
-  displayName: "Ethereum Sepolia Testnet",
-  blockExplorerUrl: "https://sepolia.etherscan.io",
-  ticker: "ETH",
-  tickerName: "Ethereum",
-  logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-};
 
-const privateKeyProvider = new EthereumPrivateKeyProvider({
-  config: { chainConfig },
-});
-
-const web3AuthOptions: Web3AuthOptions = {
-  clientId,
-  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-  privateKeyProvider,
-};
-const web3auth = new Web3Auth(web3AuthOptions);
 
 const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -57,111 +44,86 @@ const Header: React.FC = () => {
   const [checkLogin, setCheckLogin] = useState<boolean>(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const dispatch = useDispatch();
-  const [provider, setProvider] = useState<IProvider | null>(null);
+  const [provider, setProvider] = useState<null>(null);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const storedAddress = localStorage.getItem("wallet_address");
-        // const storedProvider = localStorage.getItem("provider");
-        if (storedAddress) {
-          // setSafeAddress(storedAddress);
-          // const providerData1 = JSON.parse(storedProvider);
-          // const providerData = new ethers.providers.Web3Provider(providerData1);
-          // const signer = await providerData.getSigner();
-          // console.log("signer-->",signer)
-          // console.log("providerData-->",providerData)
-          // setLoggedIn(true); // User is already logged in
-          // dispatch(loginSet({
-          // login : true,
-          // walletAddress : storedAddress,
-          // provider : providerData,
-          // signer : signer
-          // }));
-        }
-        const adapters = await getDefaultExternalAdapters({
-          options: web3AuthOptions,
-        });
-        adapters.forEach((adapter: IAdapter<unknown>) => {
-          web3auth.configureAdapter(adapter);
-        });
-        await web3auth.initModal();
-        setProvider(web3auth.provider);
-
-        if (web3auth.connected) {
-          // If the user is connected but no address is in localStorage, fetch user details
-          await fetchUserDetails();
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    init();
-  }, []);
 
   const loginTry = async () => {
     try {
-      const web3authProvider = await web3auth.connect();
-      if(web3authProvider){
-        console.log("web3authProvider-->", web3authProvider);
-        setProvider(web3authProvider);
-        // provider is
-        const providerN = new ethers.providers.Web3Provider(web3authProvider);
-        localStorage.setItem("provider", JSON.stringify(web3authProvider));
-  
-        if (web3auth.connected) {
-          setLoggedIn(true);
-          await fetchUserDetails();
-        }
-      }
-    
+
+      const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+      const paymaster = "0x0000000000000039cd5e8ae05257ce51c473ddd1"
+
+      const privateKey =
+        (process.env.PRIVATE_KEY as Hex) ??
+        (() => {
+          const pk = generatePrivateKey()
+          // writeFileSync(".env", `PRIVATE_KEY=${pk}`)
+          return pk
+        })()
+
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http("https://sepolia.base.org"),
+      })
+
+      const apiKey = "pim_C2hN8VhSZsDJE3uAY4WFcU"
+      const pimlicoUrl = `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${apiKey}`
+
+      const pimlicoClient = createPimlicoClient({
+        chain: baseSepolia,
+        transport: http(pimlicoUrl),
+        entryPoint: {
+          address: entryPoint07Address,
+          version: "0.7" as EntryPointVersion,
+        },
+      })
+
+
+      const account = await toSafeSmartAccount({
+        client: publicClient,
+        owners: [privateKeyToAccount(privateKey)],
+        version: "1.4.1",
+      })
+
+      const smartAccountClient = createSmartAccountClient({
+        account,
+        chain: baseSepolia,
+        bundlerTransport: http(pimlicoUrl),
+        paymaster: pimlicoClient,
+        userOperation: {
+          estimateFeesPerGas: async () => {
+            return (await pimlicoClient.getUserOperationGasPrice()).fast
+          },
+        },
+      })
+
+      console.log(`Smart account address: https://sepolia.basescan.org/address/${account.address}`, account)
+      setSafeAddress(account.address)
+      setLoggedIn(true)
+      dispatch(
+        loginSet({
+          login: true,
+          walletAddress: account.address,
+          provider: "providerN",
+          signer: "signerT",
+        })
+      );
+
+
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
 
   const logout = async () => {
-    await web3auth.logout();
     localStorage.removeItem("user_balance");
     localStorage.removeItem("user_info");
     localStorage.removeItem("wallet_address");
     localStorage.removeItem("provider");
     setSafeAddress(null);
     setLoggedIn(false);
-  };
-
-  const fetchUserDetails = async () => {
-    try {
-      if (!provider) {
-        console.error("Provider not initialized yet");
-        return;
-      }
-
-      const address = await RPC.getAccounts(provider);
-      const balance = await RPC.getBalance(provider);
-      const userInfo = await web3auth.getUserInfo();
-      console.log(address, balance, userInfo);
-      const providerN = new ethers.providers.Web3Provider(provider);
-      const signerT = await providerN.getSigner();
-      dispatch(
-        loginSet({
-          login: true,
-          walletAddress: address,
-          provider: providerN,
-          signer: signerT,
-        })
-      );
-      localStorage.setItem("user_balance", balance);
-      localStorage.setItem("wallet_address", address);
-      localStorage.setItem("user_info", JSON.stringify(userInfo));
-
-      setSafeAddress(address);
-    } catch (error) {
-      console.error("Failed to fetch user details:", error);
-    }
   };
 
   const splitAddress = (address: string, charDisplayed: number = 6): string => {
@@ -204,9 +166,8 @@ const Header: React.FC = () => {
               </button>
             </div>
             <div
-              className={`${
-                !menu && "hidden"
-              } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
+              className={`${!menu && "hidden"
+                } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap">
