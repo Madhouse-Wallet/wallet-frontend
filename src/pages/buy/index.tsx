@@ -30,23 +30,23 @@ const BuyCoin: React.FC = () => {
           <div className="grid gap-3 grid-cols-12">
             <div className="my-2 col-span-12">
               <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-10">
+                <div className="d-flex align-items-center gap-3">
                   <button
                     onClick={handleGoBack}
                     className="border-0 themeClr p-0"
                   >
                     {backIcn}
                   </button>
-                  <h4 className="m-0">Buy Coin</h4>
+                  <h4 className="m-0 text-2xl font-bold">Buy Coin</h4>
                 </div>
               </div>
             </div>
             <div className="my-2 col-span-12">
               <div
-                className="d-flex gap-10 flex-wrap align-items-center justify-content-between mb-5"
+                className="d-flex gap-3 flex-wrap align-items-center justify-content-between mb-5"
                 style={{ fontSize: 12 }}
               >
-                <div className="d-flex align-items-start gap-10">
+                <div className="d-flex align-items-start gap-3">
                   <div className="flex-shrink-0 rounded-circle">
                     <Image
                       src={p1}
@@ -60,7 +60,7 @@ const BuyCoin: React.FC = () => {
                       Wallet Address:
                     </p>
                     <p className="m-0 fw-normal">324rqwerqwer323423</p>
-                    <div className="d-flex align-items-center gap-10">
+                    <div className="d-flex align-items-center gap-3">
                       <button className="border-0 p-0">{shareIcn}</button>
                       <button className="border-0 p-0">{redirectIcn}</button>
                     </div>
@@ -181,7 +181,7 @@ const BuyCoin: React.FC = () => {
 
 const CardCstm = styled.div`
   background-color: var(--cardBg);
-  border: 1px solid #7aff9b;
+  border: 1px solid #ff8735;
   font-size: 14px;
   line-height: 20px;
 `;
@@ -194,7 +194,7 @@ const RadioList = styled.div`
   }
   input:checked + label {
     background-color: var(--cardBg);
-    border: 1px solid #7aff9b;
+    border: 1px solid #ff8735;
   }
 `;
 
@@ -230,7 +230,7 @@ const shareIcn = (
   >
     <path
       d="M21 12L14 5V9C7 10 4 15 3 20C5.5 16.5 9 14.9 14 14.9V19L21 12Z"
-      fill="#7aff9b"
+      fill="#ff8735"
     />
   </svg>
 );
@@ -245,11 +245,11 @@ const redirectIcn = (
   >
     <path
       d="M14.828 12L16.243 13.414L19.071 10.586C19.8212 9.83584 20.2426 8.81839 20.2426 7.7575C20.2426 6.69661 19.8212 5.67916 19.071 4.929C18.6996 4.55756 18.2586 4.26291 17.7733 4.06189C17.288 3.86086 16.7678 3.7574 16.2425 3.7574C15.1816 3.7574 14.1642 4.17883 13.414 4.929L10.586 7.757L12 9.172L14.828 6.343C15.2032 5.96785 15.712 5.75709 16.2425 5.75709C16.773 5.75709 17.2819 5.96785 17.657 6.343C18.0322 6.71815 18.2429 7.22696 18.2429 7.7575C18.2429 8.28804 18.0322 8.79685 17.657 9.172L14.828 12ZM12 14.829L13.414 16.243L10.586 19.071C9.83584 19.8212 8.8184 20.2426 7.7575 20.2426C6.69661 20.2426 5.67917 19.8212 4.929 19.071C4.17884 18.3208 3.7574 17.3034 3.7574 16.2425C3.7574 15.1816 4.17884 14.1642 4.929 13.414L7.757 10.586L9.172 12L6.343 14.829C5.96799 15.2041 5.75736 15.7129 5.75745 16.2434C5.75755 16.7738 5.96836 17.2825 6.3435 17.6575C6.71865 18.0325 7.22741 18.2431 7.75786 18.2431C8.2883 18.243 8.79699 18.0321 9.172 17.657L12 14.829Z"
-      fill="#7aff9b"
+      fill="#ff8735"
     />
     <path
       d="M14.829 10.586C15.0166 10.3984 15.1221 10.1439 15.1221 9.8785C15.1221 9.61314 15.0166 9.35864 14.829 9.171C14.6414 8.98336 14.3869 8.87794 14.1215 8.87794C13.8561 8.87794 13.6016 8.98336 13.414 9.171L9.172 13.414C9.07649 13.5062 9.00031 13.6166 8.9479 13.7386C8.89549 13.8606 8.86791 13.9918 8.86675 14.1246C8.8656 14.2574 8.8909 14.3891 8.94118 14.512C8.99146 14.6349 9.06571 14.7465 9.15961 14.8404C9.2535 14.9343 9.36515 15.0085 9.48805 15.0588C9.61094 15.1091 9.74262 15.1344 9.8754 15.1333C10.0082 15.1321 10.1394 15.1045 10.2614 15.0521C10.3834 14.9997 10.4938 14.9235 10.586 14.828L14.829 10.586Z"
-      fill="#7aff9b"
+      fill="#ff8735"
     />
   </svg>
 );

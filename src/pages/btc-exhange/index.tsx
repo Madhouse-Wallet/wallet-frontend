@@ -13,7 +13,7 @@ import QRCode from "qrcode";
 const BTCEchange = () => {
   const router = useRouter();
   const { walletAddress, provider, signer, login } = useSelector(
-    (state:any) => state.Auth
+    (state: any) => state.Auth
   );
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
@@ -183,7 +183,7 @@ const BTCEchange = () => {
                 <div className="d-flex align-items-center gap-3 mb-3">
                   <h4 className="m-0 text-xl">Recent Transaction</h4>
                 </div>
-                {/* <RecentTransaction /> */}
+                <RecentTransaction />
               </div>
             </div>
           </div>

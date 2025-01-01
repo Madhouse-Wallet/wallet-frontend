@@ -6,8 +6,8 @@ const themeVariables = {
     backgroundColor: "#fff",
     textColor: "#000000",
     textColor2: "#383838",
-    cardBg: "#e3ffe9",
-    cardBg2: "#e3ffe9",
+    cardBg: "#fff5f1",
+    cardBg2: "#fff5f1",
     lightBtn: "#b8b8b8",
   },
   dark: {

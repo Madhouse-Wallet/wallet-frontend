@@ -1,6 +1,6 @@
-import React from 'react'
-import styled from 'styled-components'
-import Slider from 'react-slick'
+import React from "react";
+import styled from "styled-components";
+import Slider from "react-slick";
 
 const NFTSlider = () => {
   var settings = {
@@ -13,23 +13,23 @@ const NFTSlider = () => {
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 3
-        }
+          slidesToShow: 3,
+        },
       },
       {
         breakpoint: 767,
         settings: {
-          slidesToShow: 2
-        }
+          slidesToShow: 2,
+        },
       },
       {
         breakpoint: 575,
         settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
-  }
+          slidesToShow: 1,
+        },
+      },
+    ],
+  };
   return (
     <>
       <Slider {...settings}>
@@ -65,20 +65,20 @@ const NFTSlider = () => {
         ))}
       </Slider>
     </>
-  )
-}
+  );
+};
 
 const NFTCard = styled.div`
   background-color: var(--cardBg2);
-  border: 1px solid #7aff9b;
+  border: 1px solid #ff8735;
   font-size: 14px;
   line-height: 20px;
   li {
     font-size: 12px;
   }
-`
+`;
 
-export default NFTSlider
+export default NFTSlider;
 
 const icn1 = (
   <svg
@@ -94,4 +94,4 @@ const icn1 = (
       fill="#0d1017"
     />
   </svg>
-)
+);

@@ -12,7 +12,7 @@ const LandingPage: React.FC = () => {
   return (
     <>
       <Herosec />
-      <BlockChainSolution />
+      {/* <BlockChainSolution /> */}
       <SolutionSec />
       {/* <WhyChoose /> */}
       {/* <FeatureSec />

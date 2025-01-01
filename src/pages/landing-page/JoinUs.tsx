@@ -14,7 +14,7 @@ const JoinUsSec: React.FC = () => {
           alt="graphic"
           height={1000}
           width={1000}
-          className="max-w-full absolute w-auto  bottom-5 left-0 opacity-50  right-0 z-[-1]"
+          className="max-w-full absolute w-auto  bottom-5 left-0 opacity-70  right-0 z-[-1]"
           style={{ height: 200 }}
         />
         <Image
@@ -23,7 +23,7 @@ const JoinUsSec: React.FC = () => {
           style={{ height: 200 }}
           height={1000}
           width={1000}
-          className="max-w-full absolute w-auto  top-5 right-0 opacity-50 right-0 z-[-1]"
+          className="max-w-full absolute w-auto  top-5 right-0 opacity-70 right-0 z-[-1]"
         />
         <div className="container py-5">
           <div className="grid gap-3 grid-cols-12 itmes-center">

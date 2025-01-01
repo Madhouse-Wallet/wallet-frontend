@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import styled from "styled-components";
 
 const LoginPop = ({ login, setLogin }) => {
   const router = useRouter();
@@ -12,12 +13,12 @@ const LoginPop = ({ login, setLogin }) => {
   };
   return (
     <>
-      <div
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99]`}
+      <Modal
+        className={` fixed inset-0 flex items-center justify-center cstmModal z-[999]`}
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
-          className={`modalDialog relative p-2 mx-auto rounded-lg z-10 bg-[var(--backgroundColor)]`}
+          className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >
           <div className="modalBody py-2 px-2">
             <div className="formInner position-relative px-lg-3">
@@ -55,10 +56,16 @@ const LoginPop = ({ login, setLogin }) => {
             </div>
           </div>
         </div>
-      </div>
+      </Modal>
     </>
   );
 };
+
+const Modal = styled.div`
+  .modalDialog {
+    max-width: 500px;
+  }
+`;
 
 export default LoginPop;
 

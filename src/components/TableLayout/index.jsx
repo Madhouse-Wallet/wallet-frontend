@@ -16,7 +16,7 @@ const TableLayout = ({ column, data }) => {
                 column.length > 0 &&
                 column.map((item, key) => (
                   <>
-                    <th key={key} className=" fw-bold border-0 text-dark">
+                    <th key={key} className=" font-medium border-0">
                       {item.head}
                     </th>
                   </>
@@ -76,8 +76,9 @@ const Table = styled.div`
   thead {
     th {
       font-weight: 400;
-      background-color: #76fc93;
+      background-color: var(--cardBg);
       white-space: nowrap;
+      color: var(--textColor);
     }
   }
   tbody {

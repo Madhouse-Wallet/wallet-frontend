@@ -53,7 +53,7 @@ const CounterList = ({ data }) => {
 
 const CounterCard = styled.div`
   background-color: var(--cardBg);
-  border: 1px solid #7aff9b;
+  border: 1px solid #ff8735;
 `;
 
 export default CounterList;

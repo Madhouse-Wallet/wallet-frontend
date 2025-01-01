@@ -1,49 +1,49 @@
-import React from 'react'
-import { CardCstm } from '../../Assets/styles/DashboardStyled'
-import TableLayout from '../../components/TableLayout/index'
+import React from "react";
+import { CardCstm } from "../../Assets/styles/DashboardStyled";
+import TableLayout from "../../components/TableLayout/index";
 
 const TransactionTable = () => {
   const column = [
     {
-      head: 'Asset',
-      accessor: 'coin',
+      head: "Asset",
+      accessor: "coin",
       component: (item, key) => {
         return (
           <>
-            <div className="d-flex align-items-center gap-10">
+            <div className="d-flex align-items-center gap-3">
               <div className="imgWrp flex-shrink-0">{item.coin}</div>
               <div className="content">
                 <p className="m-0 themeClr">{item.CoinName}</p>
               </div>
             </div>
           </>
-        )
-      }
+        );
+      },
     },
-    { head: 'Balance', accessor: 'Balance' },
+    { head: "Balance", accessor: "Balance" },
     {
-      head: 'APY',
-      accessor: 'APY',
-      isComponent: false
-    }
-  ]
+      head: "APY",
+      accessor: "APY",
+      isComponent: false,
+    },
+  ];
   const data = [
     {
-      CoinName: 'BTC',
+      CoinName: "BTC",
       coin: btc,
-      Balance: '0.00100',
-      APY: '0.14%'
-    }
-  ]
+      Balance: "0.00100",
+      APY: "0.14%",
+    },
+  ];
   return (
     <>
-      <div className='grid gap-3 grid-cols-12'>
+      <div className="grid gap-3 grid-cols-12">
         <div className="my-2 col-span-12">
           <div
             className="top d-flex align-items-center justify-content-between flex-wrap pb-3"
             style={{ fontSize: 12 }}
           >
-            <div className="left d-flex align-items-center gap-10">
+            <div className="left d-flex align-items-center gap-3">
               <div className="px-2">
                 <p className="m-0">Net Worth</p>
                 <h4 className="m-0 fw-bold" style={{ fontSize: 18 }}>
@@ -64,10 +64,7 @@ const TransactionTable = () => {
               </div>
             </div>
             <div className="right">
-              <button
-                
-                className="border-0 btn fw-bold p-0 themeClr"
-              >
+              <button className="border-0 btn fw-bold p-0 themeClr">
                 View Transaction
               </button>
             </div>
@@ -79,7 +76,7 @@ const TransactionTable = () => {
               <div className="left">
                 <h4 className="m-0 font-semibold text-xl">Your supplies</h4>
                 <ul
-                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-10"
+                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3"
                   style={{ fontSize: 10 }}
                 >
                   <li className="">
@@ -89,7 +86,7 @@ const TransactionTable = () => {
                     APY <span className="fw-sbold themeClr">0.14</span>
                   </li>
                   <li className="">
-                    Collateral{' '}
+                    Collateral{" "}
                     <span className="fw-sbold themeClr">$911.94</span>
                   </li>
                 </ul>
@@ -106,7 +103,7 @@ const TransactionTable = () => {
               <div className="left">
                 <h4 className="m-0 font-semibold text-xl">Your Borrows</h4>
                 <ul
-                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-10"
+                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3"
                   style={{ fontSize: 10 }}
                 >
                   <li className="">
@@ -116,7 +113,7 @@ const TransactionTable = () => {
                     APY <span className="fw-sbold themeClr">0.14</span>
                   </li>
                   <li className="">
-                    Borrow power used{' '}
+                    Borrow power used{" "}
                     <span className="fw-sbold themeClr">$911.94</span>
                   </li>
                 </ul>
@@ -129,10 +126,10 @@ const TransactionTable = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default TransactionTable
+export default TransactionTable;
 
 const btc = (
   <svg
@@ -169,4 +166,4 @@ const btc = (
       </clipPath>
     </defs>
   </svg>
-)
+);

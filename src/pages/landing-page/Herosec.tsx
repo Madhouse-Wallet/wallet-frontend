@@ -23,8 +23,8 @@ const Herosec: React.FC = () => {
           width={1000}
           className="max-w-full absolute w-full top-0 left-0 h-full ml-auto right-0 z-[-1]"
         /> */}
-        <div className="container pt-14">
-          <div className="grid gap-3 grid-cols-12">
+        <div className="container py-10">
+          {/* <div className="grid gap-3 grid-cols-12">
             <div className="md:col-span-6 col-span-12">
               <h2
                 className="m-0 font-medium text-4xl text-white"
@@ -35,9 +35,19 @@ const Herosec: React.FC = () => {
                 Pay back when you want{" "}
               </h2>
             </div>
-          </div>
+          </div> */}
           <div className="grid pt-5 gap-3 grid-cols-12 items-center">
-            <div className="col-span-12 md:col-span-6 p-lg-4">
+            <div className="md:col-span-6 col-span-12">
+              <h2
+                className="m-0 font-medium text-4xl text-white"
+                style={{ lineHeight: "50px" }}
+              >
+                Borrow Dollars Using Your{" "}
+                <span className="themeClr">Bitcoin at 0%</span> interest. Pay
+                back when you want{" "}
+              </h2>
+            </div>
+            {/* <div className="col-span-12 md:col-span-6 p-lg-4">
               <Image
                 src={hero}
                 alt="graphic"
@@ -45,7 +55,7 @@ const Herosec: React.FC = () => {
                 width={1000}
                 className="max-w-full w-100 h-full"
               />
-            </div>
+            </div> */}
             <div className="col-span-12 md:col-span-6">
               <div className="p-lg-4">
                 <p className="m-0 py-2 text-gray-400">

@@ -13,7 +13,7 @@ const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[999]`}
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
           className={`modalDialog relative p-2 mx-auto rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >

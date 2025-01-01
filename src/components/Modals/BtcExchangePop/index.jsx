@@ -52,7 +52,7 @@ const BtcExchangePop = ({
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[999]`}
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
           className={`modalDialog relative p-2 mx-auto rounded-lg z-10 bg-[var(--backgroundColor)] w-full`}
         >
@@ -183,7 +183,7 @@ const BtcExchangePop = ({
                 )}
               </div>
               {/* <div className="btnWrpper mt-3">
-              <RadioList className="list-unstyled ps-0 mb-0 d-flex align-items-center justify-content-center gap-10">
+              <RadioList className="list-unstyled ps-0 mb-0 d-flex align-items-center justify-content-center gap-3">
                 <li className="position-relative">
                   <input
                     type="radio"
