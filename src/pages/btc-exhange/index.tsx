@@ -5,7 +5,7 @@ import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
 import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
-import { initializeTBTC } from "../../../tbtc/src/tbtcSdkInitializer";
+import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { ethers } from "ethers";
 // @ts-ignore
