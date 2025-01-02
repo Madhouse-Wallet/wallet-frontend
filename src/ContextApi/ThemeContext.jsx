@@ -4,6 +4,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 const themeVariables = {
   light: {
     backgroundColor: "#fff",
+    backgroundColor2: "#ff1f1",
     textColor: "#000000",
     textColor2: "#383838",
     cardBg: "#fff5f1",
@@ -12,6 +13,7 @@ const themeVariables = {
   },
   dark: {
     backgroundColor: "#0d1017",
+    backgroundColor2: "#2c2c2c",
     textColor: "#fff",
     textColor2: "#fff",
     cardBg: "#1e1e1e",

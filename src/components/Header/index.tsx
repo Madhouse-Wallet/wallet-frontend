@@ -48,7 +48,12 @@ const web3AuthOptions: Web3AuthOptions = {
 };
 const web3auth = new Web3Auth(web3AuthOptions);
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  sidebar: boolean;
+  setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const { theme, toggleTheme } = useTheme();
   const [menu, setMenu] = useState<boolean>(false);
   const [confirmation, setConfirmation] = useState<boolean>(false);
@@ -185,15 +190,26 @@ const Header: React.FC = () => {
       <header className="siteHeader sticky top-0 py-2 w-full shadow z-[999] bg-[var(--backgroundColor)]">
         <div className="container mx-auto">
           <Nav className="flex items-center justify-between ">
+            <div className="">
+              <button
+                onClick={() => setMenu(!menu)}
+                aria-controls="navbarScroll"
+                className="border-0 p-0"
+              >
+                <span className="block w-6 h-0.5 bg-[var(--textColor)] mb-1"></span>
+                <span className="block w-6 h-0.5 bg-[var(--textColor)] mb-1"></span>
+                <span className="block w-6 h-0.5 bg-[var(--textColor)]"></span>
+              </button>
+            </div>
             <a
               href="#"
-              className="text-[var(--textColor)] font-bold text-lg whitespace-nowrap"
+              className="text-[var(--textColor)] font-bold text-lg whitespace-nowrap lg:hidden"
             >
               {logo}
             </a>
             <div className="lg:hidden">
               <button
-                onClick={() => setMenu(!menu)}
+                onClick={() => setSidebar(!sidebar)}
                 aria-controls="navbarScroll"
                 className="border-0 p-0"
               >

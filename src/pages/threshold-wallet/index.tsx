@@ -138,10 +138,10 @@ const ThresholdWallet: React.FC = () => {
                   <div key={key} className=" md:col-span-4 col-span-6">
                     <CardCstm
                       onClick={item.onClick}
-                      className="p-3 rounded-3 h-100 position-relative cursor-pointer"
+                      className="p-3 rounded-3 h-100 position-relative cursor-pointer flex items-center justify-start gap-2"
                     >
-                      <h6 className="m-0 fw-sbold">{item.head}</h6>
                       <div className="text-end">{item.icn}</div>
+                      <h6 className="m-0 fw-sbold">{item.head}</h6>
                     </CardCstm>
                   </div>
                 ))}
@@ -159,6 +159,13 @@ const CardCstm = styled.div`
   border: 1px solid #737373;
   font-size: 14px;
   line-height: 20px;
+  svg {
+    height: 40px;
+    width: 40px;
+    path {
+      fill: #ff8029;
+    }
+  }
 `;
 
 export default ThresholdWallet;

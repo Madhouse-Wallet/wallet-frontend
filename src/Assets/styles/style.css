@@ -5,7 +5,7 @@ body {
   font-size: 14px;
   line-height: 26px;
   font-weight: 400;
-  background-color: var(--backgroundColor) !important;
+  background-color: var(--backgroundColor2) !important;
   color: var(--textColor) !important;
   min-height: 100vh !important;
 }
