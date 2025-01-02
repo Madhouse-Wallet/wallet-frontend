@@ -7,13 +7,14 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
 const BTCEchange = () => {
   const router = useRouter();
   const { walletAddress, provider, signer, login } = useSelector(
-    (state:any) => state.Auth
+    (state: any) => state.Auth
   );
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
@@ -21,6 +22,8 @@ const BTCEchange = () => {
   const [loading, setLoading] = useState(false);
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
+  const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
+  const [depositFound, setDepositFound] = useState<any>("");
   console.log(
     "walletAddress, provider, signer, login-->",
     walletAddress,
@@ -28,14 +31,7 @@ const BTCEchange = () => {
     signer,
     login
   );
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setShowFirstComponent(false); // Hide the first component after 4-5 seconds
-  //   }, 3000); // 5000ms = 5 seconds
 
-  //   // Cleanup timer when the component unmounts
-  //   return () => clearTimeout(timer);
-  // }, []);
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back(); // Navigates to the previous page
@@ -43,15 +39,20 @@ const BTCEchange = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
-  const startReceive = async (address: any) => {
+  const startReceive = async () => {
     try {
       setLoading(true);
-      console.log("initializeTBTC00>", initializeTBTC);
-      // Initialize tBTC SDK
-      const sdk = await initializeTBTC(signer);
-      console.log("sdk-->", sdk);
-      depo(sdk, address);
-      // setBtcExchange(!btcExchange)
+      setDepositSetup("");
+      setDepositFound("")
+      if (signer) {
+        const sdk = await initializeTBTC(signer);
+        if (sdk) {
+          depo(sdk);
+          setBtcExchange(!btcExchange)
+        }
+      } else {
+        toast.error("Please Login First");
+      }
     } catch (error) {
       console.log("error rec-->", error);
     }
@@ -62,19 +63,24 @@ const BTCEchange = () => {
       const qr = await QRCode.toDataURL(text);
       setQRCode(qr);
       setLoading(false);
+
     } catch (err) {
       setLoading(false);
       console.error(err);
     }
   };
-
-  const depo = async (tbtcSdk: any, address: any) => {
+  useEffect(() => {
+    console.log("depositSetup test",depositSetup)
+    if (depositSetup) {
+      mint(depositSetup)
+    }
+  }, [depositSetup, depositSetupCheck])
+  console.log("setDepositSetup-->", depositSetup)
+  const depo = async (tbtcSdk: any) => {
     const bitcoinRecoveryAddress = "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"; // Replace with a valid BTC address
-    console.log("bitcoinRecoveryAddress-->", bitcoinRecoveryAddress, address);
     try {
-      // Step 4: Initiate the deposit
       console.log(tbtcSdk.deposits.initiateDeposit);
-      const deposit = await tbtcSdk.deposits.initiateDeposit(address);
+      const deposit = await tbtcSdk.deposits.initiateDeposit(bitcoinRecoveryAddress);
       console.log("Deposit initiated:", deposit);
       setDepositSetup(deposit);
       // Step 5: Get the Bitcoin deposit address
@@ -82,41 +88,34 @@ const BTCEchange = () => {
       console.log("Bitcoin deposit address:", bitcoinDepositAddress);
       setWalletAddressDepo(bitcoinDepositAddress);
       await generateQRCode(bitcoinDepositAddress);
-      // Inform the user to send BTC to the deposit address
-      // alert(`Send BTC to the deposit address: ${bitcoinDepositAddress}`);
 
-      // Step 6: Monitor the Bitcoin funding and initiate minting
-      // Wait for the user to complete the deposit (manual step required)
-      // console.log("Waiting for Bitcoin funding to complete...");
-
-      // // Initiate minting using the latest funding UTXO
-      // const txHash = await deposit.initiateMinting();
-      // console.log("Minting initiated, transaction hash:", txHash);
-
-      // alert(`Minting initiated successfully! Transaction hash: ${txHash}`);
     } catch (error) {
       console.error("Error during deposit process:", error);
     }
   };
 
-  const mint = async () => {
+ 
+
+  const mint = async (depo: any) => {
     try {
-      // const txHash = await depositSetup.initiateMinting();
-      // console.log("Minting initiated, transaction hash:", txHash);
-      // Detect funding UTXOs manually. There can be more than one.
-      const fundingUTXOs = await depositSetup.detectFunding();
-      console.log("fundingUTXOs---->", fundingUTXOs);
-      // Initiate minting using one of the funding UTXOs. Returns hash of the
-      // initiate minting transaction.
-      if (fundingUTXOs.length > 0) {
-        const txHash = await depositSetup.initiateMinting(fundingUTXOs[0]);
-        console.log("txHash---->", txHash);
-      } else {
-        mint();
+      console.log("mint-->", depo)
+      if (depo) {
+        const fundingUTXOs = await depo.detectFunding();
+        console.log("fundingUTXOs---->", fundingUTXOs);
+        if (fundingUTXOs.length > 0) {
+          const txHash = await depo.initiateMinting(fundingUTXOs[0]);
+          console.log("txHash---->", txHash);
+          setDepositFound(txHash)
+        } else {
+          console.log("depo-->",depo)
+          if(depo){
+            setDepositSetupCheck(!depositSetupCheck)
+          }
+        }
       }
     } catch (error) {
       console.log("setSdkTbtc-->", error);
-      mint();
+      setDepositSetupCheck(!depositSetupCheck)
     }
   };
 
@@ -133,6 +132,10 @@ const BTCEchange = () => {
             setLoading={setLoading}
             mint={mint}
             startReceive={startReceive}
+            setDepositSetup={setDepositSetup}
+            depositFound={depositFound}
+            setDepositFound={setDepositFound}
+            userAddress={walletAddress}
           />,
           document.body
         )}
@@ -169,7 +172,7 @@ const BTCEchange = () => {
                       Send
                     </button>
                     <button
-                      onClick={() => setBtcExchange(!btcExchange)}
+                      onClick={() => startReceive()}
                       className="d-flex align-items-center justify-content-center commonBtn"
                     >
                       Receive
