@@ -105,19 +105,18 @@ const Header: React.FC = () => {
   const loginTry = async () => {
     try {
       const web3authProvider = await web3auth.connect();
-      if(web3authProvider){
+      if (web3authProvider) {
         console.log("web3authProvider-->", web3authProvider);
         setProvider(web3authProvider);
         // provider is
         const providerN = new ethers.providers.Web3Provider(web3authProvider);
         localStorage.setItem("provider", JSON.stringify(web3authProvider));
-  
+
         if (web3auth.connected) {
           setLoggedIn(true);
           await fetchUserDetails();
         }
       }
-    
     } catch (error) {
       console.error("Login failed:", error);
     }

@@ -4,6 +4,7 @@ import styled from "styled-components";
 // css
 import { useRouter } from "next/router";
 import Header from "../../components/Header";
+import Sidebar from "../../components/Header/sidebar";
 
 const MainLayout = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -12,10 +13,17 @@ const MainLayout = ({ Component, pageProps }) => {
 
   return (
     <>
-      <Header />
-      <Component {...pageProps} />
+      <div className="flex items-start">
+        <Sidebar />
+        <Main className="w-full">
+          <Header />
+          <Component {...pageProps} />
+        </Main>
+      </div>
     </>
   );
 };
+
+const Main = styled.main``;
 
 export default MainLayout;
