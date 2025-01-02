@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 
 // img
 import { CardCstm, GreyBtn } from "../../Assets/styles/DashboardStyled";
+// @ts-ignore
 import Slider from "react-slick";
+
 import NFTSlider from "./NFTSlider";
 import TransactionTable from "./TransactionTable";
 import MyActivity from "./myActivity";
@@ -14,12 +16,12 @@ import CounterList from "../../components/CounterList";
 import BTCAddressPop from "../../components/Modals/BtcAddressPop";
 import { createPortal } from "react-dom";
 
-const AreaChart = dynamic(
-  () => import("../../components/graph/AreaChart/index"),
-  {
-    ssr: false,
-  }
-);
+// const AreaChart = dynamic(
+//   () => import("../../components/graph/AreaChart/index"),
+//   {
+//     ssr: false,
+//   }
+// );
 
 interface CardData {
   head: string;
@@ -208,7 +210,7 @@ const Dashboard: React.FC = () => {
                   <p className="m-0">14 Nov, 12:47 pm IST • Disclaimer</p>
                 </div>
                 <div className="graphBody">
-                  <AreaChart />
+                  {/* <AreaChart /> */}
                 </div>
               </CardCstm>
             </div>

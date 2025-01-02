@@ -152,7 +152,7 @@ const BuyCoin: React.FC = () => {
                 className="list-unstyled ps-0 mb-0"
                 style={{ fontSize: 12 }}
               >
-                 <li className="my-3 position-relative">
+                 {/* <li className="my-3 position-relative">
                   <button
                     className={`payment-btn ${
                       selectedPaymentMethod === "Card" ? "selected" : ""
@@ -162,23 +162,24 @@ const BuyCoin: React.FC = () => {
                   >
                     Credit/Debit Card
                   </button>
-                </li>
+                </li> */}
                 <li className="my-3 position-relative">
-                  <input
+                  {/* <input
                     type="radio"
                     name="payment"
                     id="Bank"
                     className="position-absolute h-100 w-100 file"
-                  />
-                  <label
-                    htmlFor="Bank"
-                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  /> */}
+                  <button
+                   onClick={handlePaymentMethodChange}
+                    id="Card"
+                    className="form-label btn m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
                   >
-                    Bank Transfer
-                  </label>
+                   Credit/Debit Card
+                  </button>
                 </li>
 
-                <li className="my-3 position-relative">
+                {/* <li className="my-3 position-relative">
                   <input
                     type="radio"
                     name="payment"
@@ -191,7 +192,7 @@ const BuyCoin: React.FC = () => {
                   >
                     E-Wallet
                   </label>
-                </li>
+                </li> */}
               </RadioList>
             </div>
           </div>

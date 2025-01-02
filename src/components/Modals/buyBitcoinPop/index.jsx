@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import styled from "styled-components";
-import StockGraph from "./StockGraph";
+// import StockGraph from "./StockGraph";
 import { useRouter } from "next/navigation";
 
 // css
@@ -64,7 +64,7 @@ const BuyBitcoin = ({ buy, setBuy }) => {
           </div>
           <div className="content p-3">
             <div className="py-2">
-              <StockGraph />
+              {/* <StockGraph /> */}
             </div>
             <div className="py-2">
               <Form>

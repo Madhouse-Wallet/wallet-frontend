@@ -47,32 +47,32 @@ const getBalance = async (provider: IProvider): Promise<string> => {
   }
 }
 
-const sendTransaction = async (provider: IProvider): Promise<any> => {
-  try {
-    const ethersProvider = new ethers.providers.Web3Provider(provider);
-    const signer = await ethersProvider.getSigner();
+// const sendTransaction = async (provider: IProvider): Promise<any> => {
+//   try {
+//     const ethersProvider = new ethers.providers.Web3Provider(provider);
+//     const signer = await ethersProvider.getSigner();
 
-    const destination = "0x40e1c367Eca34250cAF1bc8330E9EddfD403fC56";
+//     const destination = "0x40e1c367Eca34250cAF1bc8330E9EddfD403fC56";
 
-    const amount = ethers.utils.parseEther("0.001");
-    const fees = await ethersProvider.getFeeData()
+//     const amount = ethers.utils.parseEther("0.001");
+//     const fees = await ethersProvider.getFeeData()
 
-    // Submit transaction to the blockchain
-    const tx = await signer.sendTransaction({
-      to: destination,
-      value: amount,
-      maxPriorityFeePerGas: fees.maxPriorityFeePerGas, // Max priority fee per gas
-      maxFeePerGas: fees.maxFeePerGas, // Max fee per gas
-    });
+//     // Submit transaction to the blockchain
+//     const tx = await signer.sendTransaction({
+//       to: destination,
+//       value: amount,
+//       maxPriorityFeePerGas: fees?.maxPriorityFeePerGas, // Max priority fee per gas
+//       maxFeePerGas: fees?.maxFeePerGas, // Max fee per gas
+//     });
 
-    // Wait for transaction to be mined
-    const receipt = await tx.wait();
+//     // Wait for transaction to be mined
+//     const receipt = await tx.wait();
 
-    return receipt;
-  } catch (error) {
-    return error as string;
-  }
-}
+//     return receipt;
+//   } catch (error) {
+//     return error as string;
+//   }
+// }
 
 const signMessage = async (provider: IProvider): Promise<any> => {
   try {
@@ -94,4 +94,4 @@ const signMessage = async (provider: IProvider): Promise<any> => {
   }
 }
 
-export default { getChainId, getAccounts, getBalance, sendTransaction, signMessage };
+export default { getChainId, getAccounts, getBalance,  signMessage };
