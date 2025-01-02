@@ -66,7 +66,22 @@ const ThresholdWallet: React.FC = () => {
       head: "Buy Bitcoin",
       icn: icn6,
       onClick: () => {
-        setBuy(!buy);
+        // setBuy(!buy);
+        router.push("/stripePaymentPage"); 
+      },
+    },
+    {
+      head: "Swap",
+      icn: icn1,
+      onClick: () => {
+        router.push("/swap");
+      },
+    },
+    {
+      head: "Identity",
+      icn: icn1,
+      onClick: () => {
+        router.push("/identity");
       },
     },
     {
