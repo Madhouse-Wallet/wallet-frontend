@@ -12,8 +12,8 @@ import DebtPositionPop from "@/components/Modals/debtPositionPop";
 const DebtPosition: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [ischecked, setIschecked] = useState();
-  const [debtPosition, setDebtPosition] = useState();
+  const [ischecked, setIschecked] =  useState<boolean>(false);
+  const [debtPosition, setDebtPosition] = useState<boolean>(false);
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
