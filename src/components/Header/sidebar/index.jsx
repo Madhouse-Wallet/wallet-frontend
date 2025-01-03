@@ -184,6 +184,9 @@ const SidebarDiv = styled.div`
   flex-shrink: 0;
   background: var(--cardBg2);
   .sidebarWrpper {
+    max-height: calc(100vh - 86px);
+    overflow: scroll;
+    scrollbar-width: none;
     a {
       svg {
         path {
