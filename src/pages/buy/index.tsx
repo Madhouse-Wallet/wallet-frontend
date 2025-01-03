@@ -4,10 +4,19 @@ import React, { useEffect, useRef, useState } from "react";
 import p1 from "../../Assets/Images/user.png";
 import Image from "next/image";
 import styled from "styled-components";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { StripeElementsOptions } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+);
 
 const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("");
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -16,13 +25,34 @@ const BuyCoin: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+  // useEffect(() => {
+  //   if (selectedPaymentMethod === "Card") {
+  //     fetch("http://localhost:5000/create-payment-intent", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ items: [{ id: "xl-tshirt" }] }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => setClientSecret(data.clientSecret));
+  //   }
+  // }, [selectedPaymentMethod]);
+
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back(); // Navigates to the previous page
+      router.back();
     } else {
-      router.push("/"); // Fallback: Redirects to the homepage
+      router.push("/");
     }
   };
+  
+  const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const selectedMethod = (e.target as HTMLButtonElement).id;  
+    setSelectedPaymentMethod(selectedMethod);
+    if (selectedMethod === "Card") {
+      router.push("/stripePaymentPage"); // Navigate to Stripe payment page
+    }
+  };
+
   return (
     <>
       <section className="position-relative dashboard py-3">
@@ -120,36 +150,34 @@ const BuyCoin: React.FC = () => {
                 className="list-unstyled ps-0 mb-0"
                 style={{ fontSize: 12 }}
               >
-                <li className="my-3 position-relative">
-                  <input
-                    type="radio"
-                    name="payment"
+                 {/* <li className="my-3 position-relative">
+                  <button
+                    className={`payment-btn ${
+                      selectedPaymentMethod === "Card" ? "selected" : ""
+                    }`}
                     id="Card"
-                    className="position-absolute h-100 w-100 file"
-                  />
-                  <label
-                    htmlFor="Card"
-                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                    onClick={handlePaymentMethodChange}
                   >
                     Credit/Debit Card
-                  </label>
-                </li>
+                  </button>
+                </li> */}
                 <li className="my-3 position-relative">
-                  <input
+                  {/* <input
                     type="radio"
                     name="payment"
                     id="Bank"
                     className="position-absolute h-100 w-100 file"
-                  />
-                  <label
-                    htmlFor="Bank"
-                    className="form-label m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                  /> */}
+                  <button
+                   onClick={handlePaymentMethodChange}
+                    id="Card"
+                    className="form-label btn m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
                   >
-                    Bank Transfer
-                  </label>
+                   Credit/Debit Card
+                  </button>
                 </li>
 
-                <li className="my-3 position-relative">
+                {/* <li className="my-3 position-relative">
                   <input
                     type="radio"
                     name="payment"
@@ -162,7 +190,7 @@ const BuyCoin: React.FC = () => {
                   >
                     E-Wallet
                   </label>
-                </li>
+                </li> */}
               </RadioList>
             </div>
           </div>
@@ -197,6 +225,39 @@ const RadioList = styled.div`
     border: 1px solid #ff8735;
   }
 `;
+
+const ModalContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+`;
+
+const CloseButton = styled.span`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+`;
+
 
 export default BuyCoin;
 

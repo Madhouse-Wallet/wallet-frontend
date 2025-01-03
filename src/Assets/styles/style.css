@@ -148,3 +148,11 @@ button:disabled {
 .modal-body {
   background-color: var(--backgroundColor);
 }
+.cstmModal .modalDialog {
+  max-height: calc(100% - 60px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+.cstmModal .modalDialog::-webkit-scrollbar {
+  display: none
+}
