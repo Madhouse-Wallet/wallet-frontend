@@ -12,10 +12,12 @@
 name: "CodeQL Advanced"
 
 on:
-  workflow_dispatch:
-    inputs:
-        branch: 
-          required: true
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '41 0 * * 4'
 
 jobs:
   analyze:
@@ -55,7 +57,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.inputs.branch }}
+        ref: main
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
