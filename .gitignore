@@ -11,6 +11,7 @@ node_modules
 
 # next.js
 /.next/
+/external/
 /out/
 
 # production
@@ -26,7 +27,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
 
 # vercel
 .vercel
