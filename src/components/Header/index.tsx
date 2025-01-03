@@ -188,6 +188,7 @@ const Header: React.FC = () => {
           <Nav className="flex items-center justify-between ">
             <a
               href="#"
+              onClick={() => router.push("/")}
               className="text-[var(--textColor)] font-bold text-lg whitespace-nowrap"
             >
               {logo}

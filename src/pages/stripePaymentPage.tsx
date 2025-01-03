@@ -15,7 +15,7 @@ const StripePaymentPage: React.FC = () => {
   useEffect(() => {
     // Fetch the onramp session and set the client secret
     try {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}create-onramp-session`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}user/create-onramp-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -27,7 +27,10 @@ const StripePaymentPage: React.FC = () => {
         }),
       })
         .then((res) => res.json())
-        .then((data) => setClientSecret(data.clientSecret));
+        .then((data) =>{
+          console.log("data-->",data);
+          setClientSecret(data.data.clientSecret)
+        });
     } catch (error) {
       console.log(error)
     }
