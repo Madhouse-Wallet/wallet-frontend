@@ -1,9 +1,9 @@
 /* @import statements should be the first lines in the file */
-@import "./style.css"; /* custom styles */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@import "./style.css"; /* custom styles */
 
 /* Media query for dark mode */
 @media (prefers-color-scheme: dark) {

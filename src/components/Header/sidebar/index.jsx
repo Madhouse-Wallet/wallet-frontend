@@ -97,7 +97,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{icn4}</span>
-                Bitcoin Debit Positions
+                Debit Positions
               </Link>
             </li>
             <li className="py-1">

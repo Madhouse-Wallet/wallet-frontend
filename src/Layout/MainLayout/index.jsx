@@ -15,7 +15,7 @@ const MainLayout = ({ Component, pageProps }) => {
     <>
       <div className="flex items-start justify-end relative">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
-        <Main className="ml-auto">
+        <Main className="ml-auto ms-auto">
           <Header sidebar={sidebar} setSidebar={setSidebar} />
           <Component {...pageProps} />
         </Main>
