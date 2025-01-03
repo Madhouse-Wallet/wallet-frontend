@@ -12,13 +12,13 @@ export default function Identity() {
   useEffect(() => {
 const initializeStripe = async () => {
       try {
-        const response = await fetch('http://localhost:4242/config');
+        const response = await fetch('/api/config');
         const { publishableKey } = await response.json();
         const stripeInstance = await loadStripe(publishableKey);
         setStripe(stripeInstance);
       } catch (error) {
         console.error('Failed to initialize Stripe:', error);
-        alert('Failed to initialize verification system');
+        // alert('Failed to initialize verification system');
       }
     };
     
@@ -29,7 +29,7 @@ const initializeStripe = async () => {
     setIsLoading(true);
     try {
       // Create the VerificationSession on the server
-      const response = await fetch('http://localhost:4242/create-verification-session', {
+      const response = await fetch('/api/create-verification-session', {
         method: 'POST',
       });
       const { client_secret } = await response.json();
@@ -40,12 +40,13 @@ const initializeStripe = async () => {
         if (!error) {
           router.push('identity/submitted');
         } else {
-          alert(error.message);
+          // alert(error.message);
+          console.log(error.message)
         }
       }
     } catch (error) {
       console.error('Verification failed:', error);
-      alert('Verification process failed. Please try again.');
+      // alert('Verification process failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

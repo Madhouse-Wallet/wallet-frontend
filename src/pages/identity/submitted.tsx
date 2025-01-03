@@ -19,9 +19,9 @@ export default function Submitted() {
               Thanks for submitting your identity document.
             </h1>
             <p className={styles.message}>We are processing your verification.</p>
-            <Link href="/" className={styles.link}>
+            {/* <Link href="/" className={styles.link}>
               Restart demo
-            </Link>
+            </Link> */}
           </div>
         </section>
       </main>
