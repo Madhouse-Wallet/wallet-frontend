@@ -18,7 +18,9 @@
     "@reduxjs/toolkit": "^2.5.0",
     "@safe-global/protocol-kit": "^4.1.0",
     "@safe-global/relay-kit": "^3.1.0",
-    "@stripe/stripe-js": "^5.4.0",
+    "@stripe/crypto": "^0.0.4",
+    "@stripe/react-stripe-js": "^3.1.1",
+    "@stripe/stripe-js": "^1.54.2",
     "@svgr/webpack": "^8.1.0",
     "@walletconnect/sign-client": "^2.17.3",
     "@walletconnect/utils": "^2.17.3",
@@ -53,8 +55,6 @@
     "slick-carousel": "^1.8.1",
     "stripe": "^17.5.0",
     "styled-components": "^6.1.13",
-    "@stripe/crypto": "^0.0.4",
-    "@stripe/react-stripe-js": "^3.1.1",
     "viem": "^2.21.57"
   },
   "devDependencies": {
