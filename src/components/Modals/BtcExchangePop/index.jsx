@@ -22,13 +22,13 @@ const BtcExchangePop = ({
   setDepositSetup,
   depositFound,
   setDepositFound,
-  userAddress
+  userAddress,
 }) => {
   const [textToCopy, setTextToCopy] = useState(walletAddress);
   const [isCopied, setIsCopied] = useState({
-    "one": false,
-    "two": false,
-    "three": false
+    one: false,
+    two: false,
+    three: false,
   });
   const [step, setStep] = useState(2);
   const [recoveryAddress, setRecoveryAddress] = useState();
@@ -39,16 +39,20 @@ const BtcExchangePop = ({
     try {
       await navigator.clipboard.writeText(address);
       setIsCopied((prev) => ({ ...prev, [type]: true }));
-      setTimeout(() => setIsCopied({
-        "one": false,
-        "two": false,
-        "three": false
-      }), 2000); // Reset the copied state after 2 seconds
+      setTimeout(
+        () =>
+          setIsCopied({
+            one: false,
+            two: false,
+            three: false,
+          }),
+        2000
+      ); // Reset the copied state after 2 seconds
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
   };
-  console.log("isCopied-->", isCopied)
+  console.log("isCopied-->", isCopied);
   const splitAddress = (address, charDisplayed = 6) => {
     const firstPart = address.slice(0, charDisplayed);
     const lastPart = address.slice(-charDisplayed);
@@ -63,27 +67,25 @@ const BtcExchangePop = ({
         setStep(2);
         setLoading(true);
       } else toast.error("Wow so easy!");
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleBTCExchange = () => {
     try {
       setDepositSetup("");
-      setDepositFound("")
+      setDepositFound("");
       setBtcExchange(!btcExchange);
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
 
   return (
     <>
       <Modal
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[999]`}
+        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
-          className={`modalDialog relative p-2 mx-auto rounded-lg z-10 bg-[var(--backgroundColor)] w-full`}
+          className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)] w-full`}
         >
           <div className={`position-relative rounded`}>
             <button
@@ -153,9 +155,8 @@ const BtcExchangePop = ({
                       </div>
                     </form>
                   </>
-                ) : (step == 2 && (!depositFound))? (
+                ) : step == 2 && !depositFound ? (
                   <>
-
                     {loading ? (
                       <>
                         <Image
@@ -168,7 +169,10 @@ const BtcExchangePop = ({
                       </>
                     ) : (
                       <>
-                        <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">Use this generated address to send minimum 0.01 BTC, to mint as tBTC.</p>
+                        <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
+                          Use this generated address to send minimum 0.01 BTC,
+                          to mint as tBTC.
+                        </p>
                         <Image
                           src={qrCode}
                           height={10000}
@@ -211,57 +215,69 @@ const BtcExchangePop = ({
                             <div className="sm:col-span-4 col-span-12">
                               <div className="cardCstm text-center bg-[var(--cardBg)]">
                                 <div className="top p-2 bg-gray-600 ">
-                                  <span className="font-bold text-xl block themeClr">1 hour
+                                  <span className="font-bold text-xl block themeClr">
+                                    1 hour
                                   </span>
-                                  <span className="text-xs font-light">+ 1 confirmation
+                                  <span className="text-xs font-light">
+                                    + 1 confirmation
                                   </span>
                                 </div>
                                 <div className="bottom px-2 py-3">
-                                  <p className="m-0 text-2xl text-gray-500 font-medium">{`<`} 0.10 <sub className="text-xs">BTC</sub></p>
+                                  <p className="m-0 text-2xl text-gray-500 font-medium">
+                                    {`<`} 0.10{" "}
+                                    <sub className="text-xs">BTC</sub>
+                                  </p>
                                 </div>
                               </div>
                             </div>
                             <div className="sm:col-span-4 col-span-12">
                               <div className="cardCstm text-center bg-[var(--cardBg)]">
                                 <div className="top p-2 bg-gray-600 ">
-                                  <span className="font-bold text-xl block themeClr">1.5 hours
-
+                                  <span className="font-bold text-xl block themeClr">
+                                    1.5 hours
                                   </span>
-                                  <span className="text-xs font-light">+ 3 confirmations
-
-
+                                  <span className="text-xs font-light">
+                                    + 3 confirmations
                                   </span>
                                 </div>
                                 <div className="bottom px-2 py-3">
-                                  <p className="m-0 text-2xl text-gray-500 font-medium">{`<`} 1.00 <sub className="text-xs">BTC</sub></p>
+                                  <p className="m-0 text-2xl text-gray-500 font-medium">
+                                    {`<`} 1.00{" "}
+                                    <sub className="text-xs">BTC</sub>
+                                  </p>
                                 </div>
                               </div>
                             </div>
                             <div className="sm:col-span-4 col-span-12">
                               <div className="cardCstm text-center bg-[var(--cardBg)]">
                                 <div className="top p-2 bg-gray-600 ">
-                                  <span className="font-bold text-xl block themeClr">2 hours
-
+                                  <span className="font-bold text-xl block themeClr">
+                                    2 hours
                                   </span>
-                                  <span className="text-xs font-light">+ 6 confirmations
-
-
+                                  <span className="text-xs font-light">
+                                    + 6 confirmations
                                   </span>
                                 </div>
                                 <div className="bottom px-2 py-3">
-                                  <p className="m-0 text-2xl text-gray-500 font-medium">{`≥`}  1.00 <sub className="text-xs">BTC</sub></p>
+                                  <p className="m-0 text-2xl text-gray-500 font-medium">
+                                    {`≥`} 1.00{" "}
+                                    <sub className="text-xs">BTC</sub>
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div className="bottom pt-3">
-                            <h6 className="m-0 font-bold text-xl">Provided Addresses Recap</h6>
+                            <h6 className="m-0 font-bold text-xl">
+                              Provided Addresses Recap
+                            </h6>
                             <ul className="list-none pl-0 mb-0">
                               <li className="py-1 flex items-center justify-between">
-                                <span className="themeClr font-medium">ETH Address</span>
+                                <span className="themeClr font-medium">
+                                  ETH Address
+                                </span>
                                 <Tooltip id="my-tooltip1" />
                                 <div className="flex items-center gap-1">
-
                                   <p
                                     className="m-0 text-truncate text-right"
                                     data-tooltip-id="my-tooltip1"
@@ -272,14 +288,19 @@ const BtcExchangePop = ({
                                   </p>
 
                                   <button
-                                    onClick={() => (handleCopy(userAddress, "two"))}
+                                    onClick={() =>
+                                      handleCopy(userAddress, "two")
+                                    }
                                     className="border-0 p-0 bg-transparent themeClr"
                                   >
                                     {copyIcn}
                                   </button>
                                   {isCopied?.two && (
                                     <span
-                                      style={{ marginLeft: "10px", color: "green" }}
+                                      style={{
+                                        marginLeft: "10px",
+                                        color: "green",
+                                      }}
                                     >
                                       Copied!
                                     </span>
@@ -287,28 +308,41 @@ const BtcExchangePop = ({
                                 </div>
                               </li>
                               <li className="py-1 flex items-center justify-between">
-                                <span className="themeClr  font-medium">BTC Recovery Address</span>
+                                <span className="themeClr  font-medium">
+                                  BTC Recovery Address
+                                </span>
                                 <Tooltip id="my-tooltip1" />
                                 <div className="flex items-center gap-1">
-
                                   <p
                                     className="m-0 text-right text-truncate"
                                     data-tooltip-id="my-tooltip1"
-                                    data-tooltip-content={"tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"}
+                                    data-tooltip-content={
+                                      "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"
+                                    }
                                     style={{ maxWidth: 200 }}
                                   >
-                                    {splitAddress("tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf")}
+                                    {splitAddress(
+                                      "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"
+                                    )}
                                   </p>
 
                                   <button
-                                    onClick={() => (handleCopy("tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf", "three"))}
+                                    onClick={() =>
+                                      handleCopy(
+                                        "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf",
+                                        "three"
+                                      )
+                                    }
                                     className="border-0 p-0 bg-transparent themeClr"
                                   >
                                     {copyIcn}
                                   </button>
                                   {isCopied?.three && (
                                     <span
-                                      style={{ marginLeft: "10px", color: "green" }}
+                                      style={{
+                                        marginLeft: "10px",
+                                        color: "green",
+                                      }}
                                     >
                                       Copied!
                                     </span>
@@ -321,15 +355,23 @@ const BtcExchangePop = ({
                       </>
                     )}
                   </>
-                ) : depositFound ? <>
-                  <div className="text-center p-3">
-                    <div className="py-2 flex items-center justify-center">
-                      {checkIcn}
+                ) : depositFound ? (
+                  <>
+                    <div className="text-center p-3">
+                      <div className="py-2 flex items-center justify-center">
+                        {checkIcn}
+                      </div>
+                      <h2 className="m-0 text-green-500 text-2xl font-semibold">
+                        Successfully
+                      </h2>
+                      <p className="m-0 py-1">
+                        We have found deposit in generated address.
+                      </p>
                     </div>
-                    <h2 className="m-0 text-green-500 text-2xl font-semibold">Successfully</h2>
-                    <p className="m-0 py-1">We have found deposit in generated address.</p>
-                  </div>
-                </> : <></>}
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
               {/* <div className="btnWrpper mt-3">
               <RadioList className="list-unstyled ps-0 mb-0 d-flex align-items-center justify-content-center gap-3">
@@ -447,14 +489,24 @@ const copyIcn = (
   </svg>
 );
 
-
-const checkIcn = <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g clip-path="url(#clip0_1_2)">
-    <path d="M40 80C29.3913 80 19.2172 75.7857 11.7157 68.2843C4.21427 60.7828 0 50.6087 0 40C0 29.3913 4.21427 19.2172 11.7157 11.7157C19.2172 4.21427 29.3913 0 40 0C50.6087 0 60.7828 4.21427 68.2843 11.7157C75.7857 19.2172 80 29.3913 80 40C80 50.6087 75.7857 60.7828 68.2843 68.2843C60.7828 75.7857 50.6087 80 40 80ZM32 60L68 26L62 20L32 48L18 34L12 40L32 60Z" fill="#22C55E" />
-  </g>
-  <defs>
-    <clipPath id="clip0_1_2">
-      <rect width="80" height="80" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
+const checkIcn = (
+  <svg
+    width="80"
+    height="80"
+    viewBox="0 0 80 80"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clip-path="url(#clip0_1_2)">
+      <path
+        d="M40 80C29.3913 80 19.2172 75.7857 11.7157 68.2843C4.21427 60.7828 0 50.6087 0 40C0 29.3913 4.21427 19.2172 11.7157 11.7157C19.2172 4.21427 29.3913 0 40 0C50.6087 0 60.7828 4.21427 68.2843 11.7157C75.7857 19.2172 80 29.3913 80 40C80 50.6087 75.7857 60.7828 68.2843 68.2843C60.7828 75.7857 50.6087 80 40 80ZM32 60L68 26L62 20L32 48L18 34L12 40L32 60Z"
+        fill="#22C55E"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_1_2">
+        <rect width="80" height="80" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);

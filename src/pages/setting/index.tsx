@@ -5,6 +5,34 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 const Setting: React.FC = () => {
+  const tabs = [
+    {
+      title: "Help & Support",
+      content: <>asdfasdf</>,
+    },
+    {
+      title: "Settings",
+      content: <>asdfasdf as2213123</>,
+    },
+    {
+      title: "Alert Preferences",
+      content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Wallet Owner",
+      content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Whitelist Address",
+      content: <>asdfasf 4234234234243234</>,
+    },
+  ];
+  const [activeTab, setActiveTab] = useState(1);
+  const showTab = (tab: number) => {
+    console.log(tab, "tab");
+
+    setActiveTab(tab);
+  };
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   useEffect(() => {
@@ -41,6 +69,48 @@ const Setting: React.FC = () => {
               </div>
             </div>
             <div className="col-span-12 my-2">
+              <div className="grid gap-3 grid-cols-12">
+                <div className=" col-span-12">
+                  <div
+                    className="flex nav navpillsTab  flex-nowrap border-b gap-2  overflow-x-auto"
+                    style={{ borderColor: "#424242" }}
+                  >
+                    {tabs &&
+                      tabs.length > 0 &&
+                      tabs.map((item, key) => (
+                        <button
+                          key={key}
+                          onClick={() => showTab(key)}
+                          className={`${
+                            activeTab === key && "active"
+                          } tab-button font-medium relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                        >
+                          {item.title}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+                <div className=" col-span-12">
+                  <div className={` tabContent pt-3`}>
+                    {tabs &&
+                      tabs.length > 0 &&
+                      tabs.map((item, key) => {
+                        if (activeTab !== key) return;
+                        return (
+                          <div
+                            key={key}
+                            id="tabContent1"
+                            className={`${
+                              activeTab === key && "block"
+                            } tab-content border-0`}
+                          >
+                            {item.content}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
               {/* <Tab.Container id="left-tabs-example" defaultActiveKey="Help">
                 <div className="grid gap-3 grid-cols-12">
                   <div className="sm:col-span-3 col-span-12">

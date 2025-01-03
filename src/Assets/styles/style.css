@@ -49,7 +49,12 @@ input.form-check {
 textarea {
   resize: none;
 }
-
+input.form-control {
+  height: 45px;
+}
+input.form-control:focus {
+  box-shadow: unset !important;
+}
 input.file {
   top: 0;
   left: 0;
@@ -154,5 +159,16 @@ button:disabled {
   scrollbar-width: none;
 }
 .cstmModal .modalDialog::-webkit-scrollbar {
-  display: none
+  display: none;
+}
+
+.nav.navpillsTab .tab-button {
+  background: var(--cardBg2);
+  border-color: var(--cardBg2);
+  color: var(--textColor);
+}
+
+.nav.navpillsTab .tab-button.active {
+  background: #fc8148;
+  border-color: #fc8148;
 }

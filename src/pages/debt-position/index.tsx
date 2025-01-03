@@ -6,11 +6,14 @@ import p1 from "@/public/user.png";
 import Image from "next/image";
 import styled from "styled-components";
 import { MinimizeTwoTone } from "@mui/icons-material";
+import { createPortal } from "react-dom";
+import DebtPositionPop from "@/components/Modals/debtPositionPop";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [ischecked, setIschecked] = useState();
+  const [debtPosition, setDebtPosition] = useState();
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -28,6 +31,14 @@ const DebtPosition: React.FC = () => {
   };
   return (
     <>
+      {debtPosition &&
+        createPortal(
+          <DebtPositionPop
+            debtPosition={debtPosition}
+            setDebtPosition={setDebtPosition}
+          />,
+          document.body
+        )}
       <section className="position-relative dashboard py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -176,6 +187,7 @@ const DebtPosition: React.FC = () => {
                         <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
                           <li className="">
                             <button
+                              onClick={() => setDebtPosition(!debtPosition)}
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
