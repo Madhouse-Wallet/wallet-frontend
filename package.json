@@ -34,6 +34,7 @@
     "@web3auth/wallet-services-plugin-react-hooks": "^9.5.1",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
     "daisyui": "^4.12.23",
     "dayjs": "^1.11.13",
     "ethers": "^5.7.2",
@@ -58,6 +59,7 @@
     "viem": "^2.21.57"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
