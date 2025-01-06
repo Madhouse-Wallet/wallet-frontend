@@ -3,28 +3,286 @@ import BTCAddressPop from "@/components/Modals/BtcAddressPop";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { AccordionItem } from "@/components/common/index";
 
 const Setting: React.FC = () => {
   const tabs = [
     {
-      title: "Help & Support",
+      title: "Export Private Key",
       content: <>asdfasdf</>,
     },
     {
-      title: "Settings",
+      title: "Set Up Email Recovery",
       content: <>asdfasdf as2213123</>,
     },
     {
-      title: "Alert Preferences",
+      title: "Set Up MFA",
       content: <>asdfasf 4234234234243234</>,
     },
     {
-      title: "Wallet Owner",
+      title: "Whitelisted Address Book",
       content: <>asdfasf 4234234234243234</>,
     },
     {
-      title: "Whitelist Address",
+      title: "ENS username",
       content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Set Login Email/Phone",
+      content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Update Owners",
+      content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Autopay loan",
+      content: <>asdfasf 4234234234243234</>,
+    },
+    {
+      title: "Scheduled Transfer ",
+      content: <>asdfasf 4234234234243234</>,
+    },
+  ];
+  const accordionTabs = [
+    {
+      title: "Export Private Key",
+      content: (
+        <>
+          <div className="pb-3">
+            <button className="inline-flex items-center justify-center btn commonBtn">
+              Export Key
+            </button>
+          </div>
+        </>
+      ),
+    },
+    {
+      title: "Set Up Email Recovery",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Email Address
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Set Up MFA",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Set Up MFA
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Whitelisted Address Book",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Whitelisted Address
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "ENS username",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  ENS username
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Set Login Email/Phone",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Login Email/Phone
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Update Owners",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Update Owners
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Autopay loan",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Autopay loan
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
+    },
+    {
+      title: "Scheduled Transfer ",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Transfer
+                </label>
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
   ];
   const [activeTab, setActiveTab] = useState(1);
@@ -50,6 +308,11 @@ const Setting: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const handleAccordionClick = (index: number) => {
+    setOpenIndex(index === openIndex ? null : index);
+  };
   return (
     <>
       <section className="position-relative dashboard py-3">
@@ -68,11 +331,11 @@ const Setting: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-12 my-2">
+            <div className="col-span-12 my-2 hidden">
               <div className="grid gap-3 grid-cols-12">
                 <div className=" col-span-12">
                   <div
-                    className="flex nav navpillsTab  flex-nowrap border-b gap-2  overflow-x-auto"
+                    className="flex nav navpillsTab  flex-nowrap border-b gap-2  overflow-x-auto pb-3"
                     style={{ borderColor: "#424242" }}
                   >
                     {tabs &&
@@ -111,78 +374,28 @@ const Setting: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {/* <Tab.Container id="left-tabs-example" defaultActiveKey="Help">
-                <div className="grid gap-3 grid-cols-12">
-                  <div className="sm:col-span-3 col-span-12">
-                    <NavList
-                      variant="pills"
-                      className="flex-column p-3 rounded-3 shadow"
-                      style={{ backgroundColor: "var(--cardBg2)" }}
-                    >
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="Help"
-                        >
-                          <span className="icn ">{helpIcn}</span>
-                          Help & Support
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="CardSettings"
-                        >
-                          <span className="icn">{settingIcn}</span> Card
-                          Settings
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="Alert"
-                        >
-                          <span className="icn">{alertIcn}</span>
-                          Alert Preferences
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="WalletOwner"
-                        >
-                          <span className="icn">{walletIcn}</span>
-                          Wallet Owner
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="WhitelistAddress"
-                        >
-                          <span className="icn">{whitelistIcn}</span>
-                          Whitelist Address
-                        </Nav.Link>
-                      </Nav.Item>
-                    </NavList>
-                  </div>
-                  <div className="sm:col-span-3 col-span-12">
-                    <Tab.Content>
-                      <Tab.Pane eventKey="Help">First tab content</Tab.Pane>
-                      <Tab.Pane eventKey="CardSettings">
-                        Second tab content
-                      </Tab.Pane>
-                      <Tab.Pane eventKey="Alert">Second tab content</Tab.Pane>
-                      <Tab.Pane eventKey="WalletOwner">
-                        Second tab content
-                      </Tab.Pane>
-                      <Tab.Pane eventKey="WhitelistAddress">
-                        Second tab content
-                      </Tab.Pane>
-                    </Tab.Content>
-                  </div>
+            </div>
+            <div className="col-span-12">
+              <AccordionWrpper className="grid gap-3 grid-cols-12 pb-4">
+                <div className="col-span-12">
+                  {accordionTabs &&
+                    accordionTabs.length > 0 &&
+                    accordionTabs.map((item, key) => (
+                      <AccordionItem
+                        svg={false}
+                        key={key}
+                        wrpperClass={"my-3 AccordionItem"}
+                        onClick={() => handleAccordionClick(key)}
+                        isOpen={openIndex === key}
+                        btnClass={`accordionBtn flex items-center text-left gap-2 px-3 py-2 relative text-white font-medium`}
+                        btnIcnClass={``}
+                        title={item.title}
+                      >
+                        <div className="px-3">{item.content}</div>
+                      </AccordionItem>
+                    ))}
                 </div>
-              </Tab.Container> */}
+              </AccordionWrpper>
             </div>
           </div>
         </div>
@@ -191,6 +404,21 @@ const Setting: React.FC = () => {
   );
 };
 
+const AccordionWrpper = styled.div`
+  .AccordionItem {
+    background: var(--cardBg);
+    backdrop-filter: blur(21.5px);
+    border-radius: 10px;
+    .accordionBtn {
+      height: 70px;
+      justify-content: start;
+      color: var(--textColor) !important;
+    }
+    input {
+      color: var(--textColor);
+    }
+  }
+`;
 // const NavList = styled(Nav)`
 //   font-size: 12px;
 //   a {
