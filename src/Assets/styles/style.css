@@ -174,3 +174,10 @@ button:disabled {
 }
 
 /* end */
+input {
+  color: var(--textColor)
+}
+
+.Toastify__toast-container {
+  z-index: 999999 !important;
+}

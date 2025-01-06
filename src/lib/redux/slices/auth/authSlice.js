@@ -28,6 +28,7 @@ export const authSlice = createSlice({
   reducers: {
     loginSet: (state, action) => {
       state.login = action.payload.login;
+      state.username = action.payload.username;
       state.walletAddress = action.payload.walletAddress;
       state.provider = action.payload.provider;
       state.signer = action.payload.signer;
