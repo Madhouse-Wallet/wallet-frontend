@@ -12,30 +12,93 @@ const StripePaymentPage: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
 
-  useEffect(() => {
-    // Fetch the onramp session and set the client secret
-    try {
-      fetch(`/api/create-onramp-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          transaction_details: {
-            destination_currency: "btc",
-            destination_exchange_amount: "10000000",
-            destination_network: "ethereum"
-          },
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) =>{
-          console.log("data-->",data);
-          setClientSecret(data.clientSecret)
-        });
-    } catch (error) {
-      console.log(error)
-    }
+  // useEffect(() => {
+  //   // Fetch the onramp session and set the client secret
+  //   try {
+  //     fetch(`/api/create-onramp-session`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         transaction_details: {
+  //           destination_currency: "usdc",
+  //           destination_exchange_amount: "100000000",
+  //           destination_network: "ethereum",
+          
+  //         },
+  //         wallet_address:"0x9A872029Ee44858EA17B79E30198947907a3a67A",
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) =>{
+  //         console.log("data-->",data);
+  //         setClientSecret(data.clientSecret)
+  //       });
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
    
+  // }, []);
+
+  useEffect(() => {
+    let isMounted = true; // Tracks if the component is still mounted
+    const fetchAccountAndCreateOnrampSession = async () => {
+      try {
+        console.log("Fetching account address");
+        const accountResponse = await fetch(`/api/getAccount`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+  
+        if (!accountResponse.ok) {
+          throw new Error("Failed to fetch account address");
+        }
+  
+        const accountData = await accountResponse.json();
+        console.log("Account data:", accountData);
+  
+        const walletAddress = accountData?.address;
+        console.log("Wallet address:", walletAddress);
+  
+        if (walletAddress && isMounted) {
+          console.log("Creating onramp session");
+          const onrampResponse = await fetch(`/api/create-onramp-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              transaction_details: {
+                destination_currency: "usdc",
+                destination_exchange_amount: "100000000",
+                destination_network: "ethereum",
+              },
+              wallet_address: walletAddress,
+            }),
+          });
+  
+          if (!onrampResponse.ok) {
+            throw new Error("Failed to create onramp session");
+          }
+  
+          const onrampData = await onrampResponse.json();
+          console.log("Onramp data:", onrampData);
+  
+          if (isMounted) {
+            setClientSecret(onrampData.clientSecret);
+          }
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+  
+    fetchAccountAndCreateOnrampSession();
+  
+    return () => {
+      // Cleanup function to avoid setting state if the component unmounts
+      isMounted = false;
+    };
   }, []);
+  
+  
 
   const onChange = useCallback(({ session }: { session: any }) => {
     setMessage(`OnrampSession is now in ${session.status} state.`);

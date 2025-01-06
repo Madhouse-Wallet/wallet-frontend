@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 import webpack from "webpack";
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
   webpack(config, { isServer }) {
     // Configures webpack to handle SVG files with SVGR. SVGR optimizes and transforms SVG files
     // into React components. See https://react-svgr.com/docs/next/
