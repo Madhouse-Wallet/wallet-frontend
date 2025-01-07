@@ -1,6 +1,8 @@
 import React, { useState, useEffect, use } from "react";
 import styled from "styled-components";
 import Switch from "react-switch";
+import Script from 'next/script'
+
 import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "react-tooltip";
 import { useTheme } from "../../ContextApi/ThemeContext";
@@ -42,7 +44,9 @@ const chainConfig = {
 const privateKeyProvider = new EthereumPrivateKeyProvider({
   config: { chainConfig },
 });
-
+<Script
+src="https://www.phone.email/verify_email_v1.js"
+/>
 const web3AuthOptions: Web3AuthOptions = {
   clientId,
   web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,

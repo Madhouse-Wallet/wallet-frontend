@@ -1,12 +1,14 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
+import Script from "next/script";
 import { toast } from "react-toastify";
 import { ErrorRounded } from "@mui/icons-material";
 import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
 import { create, get } from "../../../lib/passkey";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
+import loginVerify from "./loginVerify";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -201,6 +203,7 @@ const LoginPop = ({ login, setLogin }) => {
             <label htmlFor="" className="form-label m-0 font-medium text-xs">Email Address</label>
             <input type="email" value={registerEmail} onChange={(e) => (setRegisterEmail(e.target.value))} required className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
           </div>
+          <div class="pe_verify_email" data-client-id="17834183298366261179"><Script src="https://www.phone.email/verify_email_v1.js" /></div>
           <div className="col-span-12">
             <button disabled={registerLoading} onClick={registerFn} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
               {(registerLoading) ? "Loading" : "Submit"}
