@@ -411,6 +411,7 @@ function bufferToBase64URLString(buffer: ArrayBuffer): string {
       //   passkeyName: keyName,
       // });
       // get authenticator data
+<<<<<<< HEAD
       // const { authenticatorData } = cred.response;
       // const authenticatorDataHex = uint8ArrayToHexString(
       //   b64ToBytes(authenticatorData),
@@ -444,6 +445,48 @@ function bufferToBase64URLString(buffer: ArrayBuffer): string {
       // const receipt = await pimlicoClient.waitForUserOperationReceipt({
       //   hash: userOpHash,
       // });
+=======
+      const bufferToBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      const { authenticatorData } = cred.response;
+      const authenticatorDataBase64 = bufferToBase64(authenticatorData)
+      const authenticatorDataBytes = b64ToBytes(authenticatorDataBase64);
+      const authenticatorDataHex = uint8ArrayToHexString(authenticatorDataBytes);
+      // const authenticatorDataHex = bufferToBase64(authenticatorData)
+console.log("authenticatorDataHex-->",authenticatorDataHex)
+      // get client data JSON
+      const clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
+
+      // get challenge and response type location
+      const { beforeType } = findQuoteIndices(clientDataJSON);
+
+      // get signature r,s
+      const { signature } = cred.response;
+      const signatureBase64 = bufferToBase64(signature)
+      const signatureBytes = b64ToBytes(signatureBase64);
+      const signatureHex = uint8ArrayToHexString(signatureBytes);
+      console.log("signatureHex-->,",signatureHex)
+      const { r, s } = parseAndNormalizeSig(signatureHex);
+      console.log("r, s-->,",r, s)
+      const userOpHash = await smartAccountClient.sendUserOperation({
+        account: account,
+        calls: calls,
+        nonce,
+        signature: getWebauthnValidatorSignature({
+          authenticatorData: authenticatorDataHex,
+          clientDataJSON,
+          responseTypeLocation: BigInt(beforeType),
+          r: BigInt(r),
+          s: BigInt(s),
+          usePrecompiled: false,
+        }),
+      });
+      console.log("line-366", userOpHash);
+      const receipt = await pimlicoClient.waitForUserOperationReceipt({
+        hash: userOpHash,
+      });
+      console.log("line-361", receipt);
+>>>>>>> 859f46d83d19286ad8871f5db221f78a1cc4319a
     } catch (error) {
       console.error("Login failed:", error);
     }
