@@ -352,7 +352,10 @@ const Header: React.FC = () => {
       const bufferToBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
   const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
       const { authenticatorData } = cred.response;
-      const authenticatorDataHex = bufferToBase64(authenticatorData)
+      const authenticatorDataBase64 = bufferToBase64(authenticatorData)
+      const authenticatorDataBytes = b64ToBytes(authenticatorDataBase64);
+      const authenticatorDataHex = uint8ArrayToHexString(authenticatorDataBytes);
+      // const authenticatorDataHex = bufferToBase64(authenticatorData)
 console.log("authenticatorDataHex-->",authenticatorDataHex)
       // get client data JSON
       const clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
@@ -362,7 +365,9 @@ console.log("authenticatorDataHex-->",authenticatorDataHex)
 
       // get signature r,s
       const { signature } = cred.response;
-      const signatureHex = uint8ArrayToHexString(b64ToBytes(signature));
+      const signatureBase64 = bufferToBase64(signature)
+      const signatureBytes = b64ToBytes(signatureBase64);
+      const signatureHex = uint8ArrayToHexString(signatureBytes);
       console.log("signatureHex-->,",signatureHex)
       const { r, s } = parseAndNormalizeSig(signatureHex);
       console.log("r, s-->,",r, s)
