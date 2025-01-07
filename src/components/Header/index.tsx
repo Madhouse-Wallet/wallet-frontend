@@ -13,25 +13,28 @@ import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 
-import { writeFileSync } from "fs";
-import { toSafeSmartAccount } from "permissionless/accounts";
+import { writeFileSync } from "fs"
+import { toKernelSmartAccount, ToKernelSmartAccountReturnType, toSafeSmartAccount } from "permissionless/accounts"
 import { getAccountNonce } from "permissionless/actions";
-import { Hex, createPublicClient, getContract, http, pad } from "viem";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { sepolia, baseSepolia } from "viem/chains";
-import { createPimlicoClient } from "permissionless/clients/pimlico";
-import {
-  createBundlerClient,
-  entryPoint07Address,
-  getUserOperationHash,
-} from "viem/account-abstraction";
-import { createSmartAccountClient } from "permissionless";
+import { Hex, createPublicClient, getContract, http, pad } from "viem"
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { sepolia, baseSepolia } from "viem/chains"
+import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { createBundlerClient, createWebAuthnCredential, entryPoint07Address,getUserOperationHash, toWebAuthnAccount } from "viem/account-abstraction"
+import { createSmartAccountClient } from "permissionless"
 import { erc7579Actions } from "permissionless/actions/erc7579";
 
-import { getAddress, maxUint256, parseAbi } from "viem";
-import { EntryPointVersion } from "viem/account-abstraction";
+import {
+  getAddress,
+  maxUint256,
+  parseAbi,
+} from "viem";
+import {
+  EntryPointVersion,
+} from "viem/account-abstraction";
 
-import { encodeFunctionData, parseAbiItem } from "viem";
+import { encodeFunctionData, parseAbiItem } from "viem"
+
 
 import {
   create,
@@ -39,8 +42,9 @@ import {
   PublicKeyCredentialWithAttestationJSON,
 } from "@github/webauthn-json";
 import crypto from "crypto";
-import { PasskeyArgType, extractPasskeyData } from "@safe-global/protocol-kit";
+import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
 import { saveRegistration } from "../../lib/state";
+
 
 import {
   getWebAuthnValidator,
@@ -50,12 +54,7 @@ import {
   RHINESTONE_ATTESTER_ADDRESS,
   MOCK_ATTESTER_ADDRESS,
 } from "@rhinestone/module-sdk";
-import {
-  b64ToBytes,
-  findQuoteIndices,
-  parseAndNormalizeSig,
-  uint8ArrayToHexString,
-} from "./utils";
+import { b64ToBytes, findQuoteIndices, parseAndNormalizeSig, uint8ArrayToHexString } from "./utils";
 
 const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -73,26 +72,39 @@ const Header: React.FC = () => {
     return str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
 
+  // Convert buffer to base64URL string
+function bufferToBase64URLString(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const base64 = btoa(binary);
+  // Convert to base64URL
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
   const loginTry = async () => {
     try {
-      const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-      const paymaster = "0x0000000000000039cd5e8ae05257ce51c473ddd1";
+
+      const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+      const paymaster = "0x0000000000000039cd5e8ae05257ce51c473ddd1"
 
       const privateKey =
         (process.env.PRIVATE_KEY as Hex) ??
         (() => {
-          const pk = generatePrivateKey();
+          const pk = generatePrivateKey()
           // writeFileSync(".env", `PRIVATE_KEY=${pk}`)
-          return pk;
-        })();
+          return pk
+        })()
 
       const publicClient = createPublicClient({
         chain: baseSepolia,
         transport: http("https://sepolia.base.org"),
-      });
+      })
 
-      const apiKey = "pim_C2hN8VhSZsDJE3uAY4WFcU";
-      const pimlicoUrl = `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${apiKey}`;
+      const apiKey = "pim_C2hN8VhSZsDJE3uAY4WFcU"
+      const pimlicoUrl = `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${apiKey}`
 
       const pimlicoClient = createPimlicoClient({
         chain: baseSepolia,
@@ -101,9 +113,9 @@ const Header: React.FC = () => {
           address: entryPoint07Address,
           version: "0.7" as EntryPointVersion,
         },
-      });
+      })
 
-      console.log("line-104", privateKey);
+      console.log("line-104",privateKey)
       const account = await toSafeSmartAccount({
         client: publicClient,
         owners: [privateKeyToAccount(privateKey)],
@@ -119,7 +131,8 @@ const Header: React.FC = () => {
           MOCK_ATTESTER_ADDRESS, // Mock Attester - do not use in production
         ],
         attestersThreshold: 1,
-      });
+      })
+
 
       const smartAccountClient = createSmartAccountClient({
         account,
@@ -128,18 +141,15 @@ const Header: React.FC = () => {
         paymaster: pimlicoClient,
         userOperation: {
           estimateFeesPerGas: async () => {
-            return (await pimlicoClient.getUserOperationGasPrice()).fast;
+            return (await pimlicoClient.getUserOperationGasPrice()).fast
           },
         },
-      }).extend(erc7579Actions());
+      }).extend(erc7579Actions())
 
-      console.log("smartAccountClient-->", smartAccountClient);
-      console.log(
-        `Smart account address: https://sepolia.basescan.org/address/${account.address}`,
-        account
-      );
-      setSafeAddress(account.address);
-      setLoggedIn(true);
+      console.log("smartAccountClient-->",smartAccountClient)
+      console.log(`Smart account address: https://sepolia.basescan.org/address/${account.address}`, account)
+      setSafeAddress(account.address)
+      setLoggedIn(true)
       dispatch(
         loginSet({
           login: true,
@@ -148,6 +158,8 @@ const Header: React.FC = () => {
           signer: "signerT",
         })
       );
+
+
 
       //generate passkey
       const saltUUID = crypto.createHash("sha256").update("salt").digest("hex");
@@ -182,15 +194,19 @@ const Header: React.FC = () => {
       // const passkey = await extractPasskeyData(_credential)
       // console.log("passkey--->",  passkey)
 
-      const displayName = "Safe Owner"; // This can be customized to match, for example, a user name.
+
+
+
+
+      const displayName = 'Safe Owner' // This can be customized to match, for example, a user name.
       // Generate a passkey credential using WebAuthn API
       const passkeyCredential = await navigator.credentials.create({
         publicKey: {
           pubKeyCredParams: [
             {
               alg: -7,
-              type: "public-key",
-            },
+              type: 'public-key'
+            }
           ],
           challenge: window.crypto.getRandomValues(new Uint8Array(32)),
           rp: {
@@ -203,7 +219,7 @@ const Header: React.FC = () => {
             displayName: "rhinestone wallet",
           },
           timeout: 60_000,
-          attestation: "none",
+          attestation: 'none',
           authenticatorSelection: {
             residentKey: "required",
             userVerification: "required",
@@ -212,21 +228,18 @@ const Header: React.FC = () => {
           extensions: {
             credProps: true,
           },
-        },
-      });
+        }
+      })
+      
 
       if (!passkeyCredential) {
-        throw Error("Passkey creation failed: No credential was returned.");
+        throw Error('Passkey creation failed: No credential was returned.')
       }
-      console.log(
-        "passkeyCredential-->",
-        passkeyCredential,
-        passkeyCredential.id
-      );
-      const passkey = await extractPasskeyData(passkeyCredential);
-      console.log("Created Passkey:", passkey);
-      let xr = passkey.coordinates.x;
-      let yr = passkey.coordinates.y;
+      console.log("passkeyCredential-->", passkeyCredential, passkeyCredential.id)
+      const passkey = await extractPasskeyData(passkeyCredential)
+      console.log('Created Passkey:', passkey)
+      let xr = passkey.coordinates.x
+      let yr = passkey.coordinates.y
       let id = passkeyCredential.id;
       const webAuthnCredential = {
         pubKey: {
@@ -235,15 +248,12 @@ const Header: React.FC = () => {
         },
         authenticatorId: id,
       };
-      const smartSessions = getSmartSessionsValidator({});
+      const smartSessions = getSmartSessionsValidator({})
       const webauthn = getWebAuthnValidator(webAuthnCredential);
-      console.log(
-        "module-->",
-        webauthn,
-        webauthn.type,
-        webauthn.module,
-        webauthn.initData
-      );
+      console.log("module-->", webauthn,webauthn.type,webauthn.module,webauthn.initData)
+
+
+
 
       const opHash = await smartAccountClient.installModule({
         type: webauthn.type,
@@ -252,7 +262,7 @@ const Header: React.FC = () => {
       });
 
       // (await pimlicoClient.getUserOperationGasPrice()).fast
-      console.log("opHash-->", opHash);
+    console.log("opHash-->",opHash)
       await pimlicoClient.waitForUserOperationReceipt({
         hash: opHash,
       });
@@ -262,21 +272,21 @@ const Header: React.FC = () => {
         entryPointAddress: entryPoint07Address,
         key: BigInt(pad(webauthn.module, { dir: "right", size: 24 })),
       });
-
-      console.log("line-260", nonce);
+    
+      console.log("line-260",nonce)
       const action = getTrustAttestersAction({
         threshold: 1,
         attesters: [RHINESTONE_ATTESTER_ADDRESS],
       });
-      console.log("line-268", action);
+      console.log("line-268",action)
       const calls = [
         {
           to: action.target,
           data: action.callData,
         },
       ];
-
-      console.log("line-276", calls);
+    
+      console.log("line-276",calls)
       //Batch Multiple Transactions: https://docs.pimlico.io/permissionless/how-to/parallel-transactions
       //
       const userOperation = await smartAccountClient.prepareUserOperation({
@@ -287,8 +297,8 @@ const Header: React.FC = () => {
         signature:
           "0x00000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000001635bc6d0f68ff895cae8a288ecf7542a6a9cd555df784b73e1e2ea7e9104b1db15e9015d280cb19527881c625fee43fd3a405d5b0d199a8c8e6589a7381209e40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002549960de5880e8c687434170f6476605b8fe4aeb9a28632c7995cf3ba831d97631d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f47b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a22746278584e465339585f3442797231634d77714b724947422d5f3330613051685a36793775634d30424f45222c226f726967696e223a22687474703a2f2f6c6f63616c686f73743a33303030222c2263726f73734f726967696e223a66616c73652c20226f746865725f6b6579735f63616e5f62655f61646465645f68657265223a22646f206e6f7420636f6d7061726520636c69656e74446174614a534f4e20616761696e737420612074656d706c6174652e205365652068747470733a2f2f676f6f2e676c2f796162506578227d000000000000000000000000",
       });
-
-      console.log("line-288", userOperation);
+    
+      console.log("line-288",userOperation)
 
       const userOpHashToSign = getUserOperationHash({
         chainId: baseSepolia.id,
@@ -296,37 +306,38 @@ const Header: React.FC = () => {
         entryPointVersion: "0.7",
         userOperation,
       });
-
-      console.log("line-297", userOpHashToSign);
+    
+      console.log("line-297",userOpHashToSign)
 
       // const formattedMessage = userOpHashToSign.startsWith("0x")
       //   ? userOpHashToSign.slice(2)
       //   : userOpHashToSign;
-
+    
       // const challenge = base64FromUint8Array(
       //   hexStringToUint8Array(formattedMessage),
       //   true
       // );
-
+    
       // // prepare assertion options
       // const assertionOptions: PublicKeyCredentialWithAttestationJSON = {
       //   challenge,
       //   // allowCredentials,
       //   userVerification: "required",
       // };
-      const cred = await navigator.credentials.get({
-        publicKey: {
-          challenge: window.crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [
-            {
-              id: passkeyCredential.rawId, // Retrieve from backend
-              type: "public-key",
-              // transports: ['usb', 'ble', 'nfc'],
-            },
-          ],
-          timeout: 60_000,
-        },
-      });
+    //   const cred = await navigator.credentials.get({
+    //     publicKey: {
+    //         challenge: window.crypto.getRandomValues(new Uint8Array(32)),
+    //         allowCredentials: [
+    //             {
+    //                 id: passkeyCredential.rawId, // Retrieve from backend
+    //                 type: 'public-key',
+    //                 // transports: ['usb', 'ble', 'nfc'],
+    //             },
+    //         ],
+    //         timeout: 60_000,
+    //     }
+    // })
+    // console.log("cred--->",cred)
       // const cred = await get({
       //   publicKey: {
       //     challenge: Buffer.from(userOpHashToSign, "hex").toString("base64"),
@@ -341,7 +352,58 @@ const Header: React.FC = () => {
       //     ],
       //   },
       // });
-      console.log("line-329", cred);
+      const cred = await get({
+        publicKey: {
+          challenge: clean(Buffer.from(userOpHashToSign.slice(2), 'hex').toString('base64')),
+          timeout: 60000,
+          userVerification: "required",
+          rpId: "localhost",
+          allowCredentials: [
+            {
+              id: passkeyCredential.id, // If the ID is already in the correct format
+              type: "public-key",
+            },
+          ],
+        },
+      });
+      console.log("line-329",cred)
+
+    //   const credential = await createWebAuthnCredential({
+    //     name: "Wallet"
+    // })
+    // console.log("credential",credential)
+    //   if (!credential) return
+      try {
+        toKernelSmartAccount({ 
+          client: publicClient, 
+          version: "0.3.1", 
+          owners: [toWebAuthnAccount({ cred })], 
+          entryPoint: { 
+              address: entryPoint07Address, 
+              version: "0.7"
+          } 
+      }).then((account: ToKernelSmartAccountReturnType<"0.7">) => { 
+          // setSmartAccountClient( 
+            const smartAccountClient = createSmartAccountClient({ 
+                  account, 
+                  paymaster: pimlicoClient, 
+                  chain: baseSepolia,
+                  userOperation: { 
+                      estimateFeesPerGas: async () =>
+                          (await pimlicoClient.getUserOperationGasPrice()) 
+                              .fast 
+                  }, 
+                  bundlerTransport: http(pimlicoUrl) 
+              }) 
+          // ) 
+          console.log("acoun---->",account)
+      }) 
+      } catch (error) {
+        console.log("liene-371",error)
+      }
+        
+
+
       // return parseSignatureResponse({
       //   signatureB64: sigCredential.response.signature,
       //   rawAuthenticatorDataB64: sigCredential.response.authenticatorData,
@@ -349,41 +411,39 @@ const Header: React.FC = () => {
       //   passkeyName: keyName,
       // });
       // get authenticator data
-      const bufferToBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-  const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-      const { authenticatorData } = cred.response;
-      const authenticatorDataHex = bufferToBase64(authenticatorData)
-console.log("authenticatorDataHex-->",authenticatorDataHex)
-      // get client data JSON
-      const clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
-
-      // get challenge and response type location
-      const { beforeType } = findQuoteIndices(clientDataJSON);
-
-      // get signature r,s
-      const { signature } = cred.response;
-      const signatureHex = uint8ArrayToHexString(b64ToBytes(signature));
-      console.log("signatureHex-->,",signatureHex)
-      const { r, s } = parseAndNormalizeSig(signatureHex);
-      console.log("r, s-->,",r, s)
-      const userOpHash = await smartAccountClient.sendUserOperation({
-        account: account,
-        calls: calls,
-        nonce,
-        signature: getWebauthnValidatorSignature({
-          authenticatorData: authenticatorDataHex,
-          clientDataJSON,
-          responseTypeLocation: BigInt(beforeType),
-          r: BigInt(r),
-          s: BigInt(s),
-          usePrecompiled: false,
-        }),
-      });
-      console.log("line-366", userOpHash);
-      const receipt = await pimlicoClient.waitForUserOperationReceipt({
-        hash: userOpHash,
-      });
-      console.log("line-361", receipt);
+      // const { authenticatorData } = cred.response;
+      // const authenticatorDataHex = uint8ArrayToHexString(
+      //   b64ToBytes(authenticatorData),
+      // );
+    
+      // // get client data JSON
+      // const clientDataJSON = atob(cred.response.clientDataJSON);
+    
+      // // get challenge and response type location
+      // const { beforeType } = findQuoteIndices(clientDataJSON);
+    
+      // // get signature r,s
+      // const { signature } = cred.response;
+      // const signatureHex = uint8ArrayToHexString(b64ToBytes(signature));
+      // const { r, s } = parseAndNormalizeSig(signatureHex);
+    
+      // const userOpHash = await smartAccountClient.sendUserOperation({
+      //   account: account,
+      //   calls: calls,
+      //   nonce,
+      //   signature: getWebauthnValidatorSignature({
+      //     authenticatorData: authenticatorDataHex,
+      //     clientDataJSON,
+      //     responseTypeLocation: BigInt(beforeType),
+      //     r: BigInt(r),
+      //     s: BigInt(s),
+      //     usePrecompiled: false,
+      //   }),
+      // });
+      // console.log("line-366",userOpHash)
+      // const receipt = await pimlicoClient.waitForUserOperationReceipt({
+      //   hash: userOpHash,
+      // });
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -438,9 +498,8 @@ console.log("authenticatorDataHex-->",authenticatorDataHex)
               </button>
             </div>
             <div
-              className={`${
-                !menu && "hidden"
-              } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
+              className={`${!menu && "hidden"
+                } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap">
