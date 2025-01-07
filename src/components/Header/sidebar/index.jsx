@@ -43,6 +43,18 @@ const Sidebar = ({ sidebar, setSidebar }) => {
             <li className="py-1">
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
+                href={"/"}
+                className={`${
+                  router.pathname === "/" && "active"
+                } flex p-2 items-start justify-start gap-2 rounded`}
+              >
+                <span className="icn">{Dashboard}</span>
+                Dashboard
+              </Link>
+            </li>
+            <li className="py-1">
+              <Link
+                // isActive={router.pathname == "/btc-exhange"}
                 href={"/approval"}
                 className={`${
                   router.pathname === "/approval" && "active"

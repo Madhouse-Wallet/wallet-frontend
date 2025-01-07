@@ -6,7 +6,13 @@ import BuyBitcoin from "../../components/Modals/buyBitcoinPop";
 import BuyCoveragePop from "../../components/Modals/buyCoveragePop";
 import { createPortal } from "react-dom";
 import CounterList from "../../components/CounterList";
-
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 interface CardData {
   head: string;
   icn: React.ReactNode;
@@ -169,10 +175,7 @@ const ThresholdWallet: React.FC = () => {
                 <h4 className="m-0 text-2xl font-bold">Threshold Wallet</h4>
               </div>
             </div>
-            <div className="col-span-12 my-2">
-              <CounterList data={cardMetrics} />
-            </div>
-            <div className="col-span-12 my-2">
+            {/* <div className="col-span-12 my-2">
               <div className="d-flex align-items-start justify-content-between flex-wrap pt-4">
                 <div className="left ">
                   <h4 className="m-0 text-xl fw-bold">
@@ -182,6 +185,33 @@ const ThresholdWallet: React.FC = () => {
                   <p className="m-0" style={{ fontSize: 12 }}>
                     Loan Health 1.77 Borrow APY 5% Debit Card Balance $2000
                   </p>
+                </div>
+              </div>
+            </div> */}
+            <div className="col-span-12 my-2">
+              <CounterList data={cardMetrics} />
+            </div>
+
+            <div className="col-span-12 my-2">
+              <h4 className="m-0 text-xl fw-bold">
+                Loan Health Categories:{" "}
+                <span className="text-red-500 font-medium ms-2">Unhealthy</span>
+              </h4>
+              <div className="mt-3">
+                <div className="flex text-center">
+                  <div className="p-3 bg-green-500 w-100 opacity-40">
+                    <p className="m-0 font-medium text-white">Healthy</p>
+                  </div>
+
+                  <div className="p-3 bg-orange-500 w-100 opacity-40">
+                    <p className="m-0 font-medium text-white">Caution</p>
+                  </div>
+                  <div className="p-3 bg-red-500 w-100 ">
+                    <p className="m-0 font-medium text-white">Unhealthy</p>
+                  </div>
+                  <div className="p-3 bg-purple-500 w-100 opacity-40">
+                    <p className="m-0 font-medium text-white">Liquidated</p>
+                  </div>
                 </div>
               </div>
             </div>
