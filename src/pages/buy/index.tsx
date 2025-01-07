@@ -44,9 +44,11 @@ const BuyCoin: React.FC = () => {
       router.push("/");
     }
   };
-  
-  const handlePaymentMethodChange = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const selectedMethod = (e.target as HTMLButtonElement).id;  
+
+  const handlePaymentMethodChange = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    const selectedMethod = (e.target as HTMLButtonElement).id;
     setSelectedPaymentMethod(selectedMethod);
     if (selectedMethod === "Card") {
       router.push("/stripePaymentPage"); // Navigate to Stripe payment page
@@ -150,7 +152,7 @@ const BuyCoin: React.FC = () => {
                 className="list-unstyled ps-0 mb-0"
                 style={{ fontSize: 12 }}
               >
-                 {/* <li className="my-3 position-relative">
+                {/* <li className="my-3 position-relative">
                   <button
                     className={`payment-btn ${
                       selectedPaymentMethod === "Card" ? "selected" : ""
@@ -169,11 +171,11 @@ const BuyCoin: React.FC = () => {
                     className="position-absolute h-100 w-100 file"
                   /> */}
                   <button
-                   onClick={handlePaymentMethodChange}
+                    onClick={handlePaymentMethodChange}
                     id="Card"
                     className="form-label btn m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
                   >
-                   Credit/Debit Card
+                    Credit/Debit Card
                   </button>
                 </li>
 
@@ -257,7 +259,6 @@ const CloseButton = styled.span`
   cursor: pointer;
   color: #333;
 `;
-
 
 export default BuyCoin;
 
