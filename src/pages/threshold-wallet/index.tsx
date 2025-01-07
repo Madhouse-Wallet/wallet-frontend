@@ -57,7 +57,9 @@ const ThresholdWallet: React.FC = () => {
     {
       head: "Bitcoin Loan",
       icn: bitcoin,
-      onClick: () => {},
+      onClick: () => {
+        router.push("/debt-position");
+      },
     },
     {
       head: "Buy Bitcoin",
@@ -71,7 +73,7 @@ const ThresholdWallet: React.FC = () => {
       head: "Withdraw/Deposit Dollars",
       icn: dollarIcn,
       onClick: () => {
-        // setBuyCoverage(!buycoverage);
+        router.push("/identity");
       },
     },
     {
@@ -79,7 +81,7 @@ const ThresholdWallet: React.FC = () => {
       icn: sellIcn,
       onClick: () => {
         // setBuy(!buy);
-        // router.push("/stripePaymentPage");
+        router.push("/swap");
       },
     },
     {
@@ -197,7 +199,7 @@ const ThresholdWallet: React.FC = () => {
                 Loan Health Categories:{" "}
                 <span className="text-red-500 font-medium ms-2">Unhealthy</span>
               </h4>
-              <div className="mt-3">
+              {/* <div className="mt-3">
                 <div className="flex text-center">
                   <div className="p-3 bg-green-500 w-100 opacity-40">
                     <p className="m-0 font-medium text-white">Healthy</p>
@@ -213,7 +215,7 @@ const ThresholdWallet: React.FC = () => {
                     <p className="m-0 font-medium text-white">Liquidated</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="col-span-12 my-2">
               <div className="grid gap-3 grid-cols-12">

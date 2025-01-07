@@ -1,5 +1,4 @@
 import React from "react";
-import { Col, Row } from "react-bootstrap";
 import TableLayout from "@/components/TableLayout/index";
 import styled from "styled-components";
 
@@ -31,8 +30,8 @@ const RecentApprovals = () => {
             item.Status?.includes("Pending")
               ? "redStatus"
               : item.Status?.includes("Success")
-                ? "greenStatus"
-                : ""
+              ? "greenStatus"
+              : ""
           } status d-inline-flex m-0 rounded-pill px-3 text-capitalize py-1 fw-sbold`}
         >
           {item.Status}

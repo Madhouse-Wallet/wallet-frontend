@@ -62,7 +62,7 @@ const TableLayout = ({ column, data }) => {
   );
 };
 
-const Table = styled.div`
+const Table = styled.table`
   background-color: var(--cardBg2);
   th,
   td {
