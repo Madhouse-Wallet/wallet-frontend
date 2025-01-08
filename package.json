@@ -12,10 +12,12 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@github/webauthn-json": "^2.1.1",
+    "@keep-network/tbtc-v2.ts": "~2.4.1",
     "@mui/icons-material": "^5.16.13",
     "@mui/material": "^5.16.13",
     "@reduxjs/toolkit": "^2.5.0",
-    "@rhinestone/module-sdk": "^0.2.0",
+    "@rhinestone/automations-sdk": "^0.0.3",
+    "@rhinestone/module-sdk": "^0.2.1",
     "@safe-global/protocol-kit": "^4.1.0",
     "@safe-global/relay-kit": "^3.1.0",
     "@svgr/webpack": "^8.1.0",
@@ -53,8 +55,7 @@
     "sass": "^1.83.0",
     "slick-carousel": "^1.8.1",
     "styled-components": "^6.1.13",
-    "viem": "^2.22.1",
-    "@keep-network/tbtc-v2.ts": "~2.4.1"
+    "viem": "^2.22.1"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -56,6 +56,7 @@ import {
   parseAndNormalizeSig,
   uint8ArrayToHexString,
 } from "./utils";
+import { constrainedMemory } from "process";
 
 const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -350,37 +351,82 @@ const Header: React.FC = () => {
       // });
       // get authenticator data
       const bufferToBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-  const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
       const { authenticatorData } = cred.response;
       const authenticatorDataBase64 = bufferToBase64(authenticatorData)
       const authenticatorDataBytes = b64ToBytes(authenticatorDataBase64);
       const authenticatorDataHex = uint8ArrayToHexString(authenticatorDataBytes);
-      // const authenticatorDataHex = bufferToBase64(authenticatorData)
-console.log("authenticatorDataHex-->",authenticatorDataHex)
-      // get client data JSON
-      const clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
 
+
+
+      // get client data JSON
+      let clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
+      console.log("clientDataJSON1-->", clientDataJSON)
+      clientDataJSON = atob(clientDataJSON);
+      console.log("clientDataJSON-->", clientDataJSON)
       // get challenge and response type location
       const { beforeType } = findQuoteIndices(clientDataJSON);
 
+      console.log("beforeType-->",beforeType)
+
+      // const authenticatorDataHex = bufferToBase64(authenticatorData)
+      console.log("authenticatorDataHex-->", authenticatorDataHex)
+      // get client data JSON
+      // const clientDataJSON = bufferToBase64(cred.response.clientDataJSON);
+
+      // get challenge and response type location
+      // const { beforeType } = findQuoteIndices(clientDataJSON);
+
       // get signature r,s
       const { signature } = cred.response;
+
+
+
+      const signatureHex1 = uint8ArrayToHexString(new Uint8Array(signature));
+console.log("signatureHex-->",signatureHex1)
+
+
+
       const signatureBase64 = bufferToBase64(signature)
       const signatureBytes = b64ToBytes(signatureBase64);
       const signatureHex = uint8ArrayToHexString(signatureBytes);
-      console.log("signatureHex-->,",signatureHex)
+      console.log("signatureHex-->,", signatureHex)
       const { r, s } = parseAndNormalizeSig(signatureHex);
-      console.log("r, s-->,",r, s)
+      console.log("r, s-->,", r, s)
+      // console.log('Webauthn object:', webauthn);
+      // const userOpHash = await smartAccountClient.sendUserOperation({
+      //   account: account,
+      //   calls: calls,
+      //   nonce,
+      //   signature: getWebauthnValidatorSignature({
+      //     webauthn: {
+      //       authenticatorData: authenticatorDataHex,
+      //       clientDataJSON,
+      //       typeIndex: BigInt(beforeType),
+      //     },
+      //     signature: { r: BigInt(r), s: BigInt(s) },
+      //     usePrecompiled: false,
+      //   }),
+      // });
+      // console.log("beforeType-->", beforeType, BigInt(beforeType))
+      // let validatedTypeIndex: bigint;
+      // if (beforeType === -1) {
+      //   // Handle this case, set to a default value or throw an error
+      //   validatedTypeIndex = 0n; // Set to a default valid value, or
+      //   // throw new Error('Invalid beforeType value: -1');
+      // } else {
+      //   validatedTypeIndex = BigInt(beforeType);
+      // }
       const userOpHash = await smartAccountClient.sendUserOperation({
         account: account,
         calls: calls,
-        nonce,
         signature: getWebauthnValidatorSignature({
-          authenticatorData: authenticatorDataHex,
-          clientDataJSON,
-          responseTypeLocation: BigInt(beforeType),
-          r: BigInt(r),
-          s: BigInt(s),
+          webauthn: {
+            authenticatorData: authenticatorDataHex,
+            clientDataJSON,
+            typeIndex: BigInt(beforeType)
+          },
+          signature: { r: BigInt(r), s: BigInt(s) },
           usePrecompiled: false,
         }),
       });
@@ -443,9 +489,8 @@ console.log("authenticatorDataHex-->",authenticatorDataHex)
               </button>
             </div>
             <div
-              className={`${
-                !menu && "hidden"
-              } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
+              className={`${!menu && "hidden"
+                } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap">
