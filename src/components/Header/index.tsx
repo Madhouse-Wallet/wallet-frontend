@@ -4,11 +4,13 @@ import Switch from "react-switch";
 import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "react-tooltip";
 import { useTheme } from "../../ContextApi/ThemeContext";
+import { create, get } from "../../lib/passkey";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import user from "@/Assets/Images/user.png";
 import { createPortal } from "react-dom";
+import { PasskeyArgType, extractPasskeyData } from "@safe-global/protocol-kit";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
@@ -54,6 +56,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
+  const userAuth = useSelector((state: any) => state.Auth);
   const { theme, toggleTheme } = useTheme();
   const [menu, setMenu] = useState<boolean>(false);
   const [confirmation, setConfirmation] = useState<boolean>(false);
@@ -109,18 +112,16 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
 
   const loginTry = async () => {
     try {
-      const web3authProvider = await web3auth.connect();
-      if (web3authProvider) {
-        console.log("web3authProvider-->", web3authProvider);
-        setProvider(web3authProvider);
-        // provider is
-        const providerN = new ethers.providers.Web3Provider(web3authProvider);
-        localStorage.setItem("provider", JSON.stringify(web3authProvider));
-
-        if (web3auth.connected) {
-          setLoggedIn(true);
-          await fetchUserDetails();
-        }
+      const createdCredential = await create("test");
+      if (createdCredential) {
+        //   console.log("passkeyCredential-->", createdCredential, createdCredential.id, bufferToBase64(createdCredential.rawId))
+        //   const passkey = await extractPasskeyData(createdCredential)
+        //   console.log('Created Passkey:', passkey.coordinates.x, passkey.coordinates.y, passkey)
+        //  const authenticated = await get(createdCredential.rawId)
+        //   // let xr = passkey.coordinates.x
+        //   // let yr = passkey.coordinates.y
+        //   // let id = createdCredential.id;
+        //   console.log("authenticated--->", authenticated)
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -128,13 +129,22 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   };
 
   const logout = async () => {
-    await web3auth.logout();
-    localStorage.removeItem("user_balance");
-    localStorage.removeItem("user_info");
-    localStorage.removeItem("wallet_address");
-    localStorage.removeItem("provider");
-    setSafeAddress(null);
-    setLoggedIn(false);
+    // await web3auth.logout();
+    // localStorage.removeItem("user_balance");
+    // localStorage.removeItem("user_info");
+    // localStorage.removeItem("wallet_address");
+    // localStorage.removeItem("provider");
+    // setSafeAddress(null);
+    // setLoggedIn(false);
+    dispatch(
+      loginSet({
+        login: false,
+        walletAddress: "",
+        provider: "",
+        signer: "",
+        username: "",
+      })
+    );
   };
 
   const fetchUserDetails = async () => {
@@ -249,11 +259,12 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                     activeBoxShadow="0px 0px 0px 0px"
                   />
                 </div>
-                {loggedIn ? (
+                {userAuth.login ? (
                   <>
                     <button className="btn flex items-center justify-center commonBtn font-normal rounded">
-                      Safe Address:{" "}
-                      {safeAddress ? splitAddress(safeAddress) : "Loading..."}
+                      {userAuth?.username}
+                      {/* Safe Address:{" "} */}
+                      {/* {safeAddress ? splitAddress(safeAddress) : "Loading..."} */}
                     </button>
                     <div className="dropdown dropdown-end">
                       <div
@@ -294,7 +305,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   </>
                 ) : (
                   <button
-                    onClick={loginTry}
+                    // onClick={loginTry}
+                    onClick={() => setLogin(!login)}
                     className="btn flex items-center justify-center commonBtn"
                   >
                     Login

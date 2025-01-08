@@ -195,9 +195,11 @@ const ThresholdWallet: React.FC = () => {
             </div>
 
             <div className="col-span-12 my-2">
-              <h4 className="m-0 text-xl fw-bold">
-                Loan Health Categories:{" "}
-                <span className="text-red-500 font-medium ms-2">Unhealthy</span>
+              <h4 className="m-0 text-base fw-medium">
+                Health Factor:{" "}
+                <span className="text-green-500 text-xl font-bold ms-2">
+                  1.27
+                </span>
               </h4>
               {/* <div className="mt-3">
                 <div className="flex text-center">
@@ -257,8 +259,8 @@ export default ThresholdWallet;
 
 const icn1 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -272,8 +274,8 @@ const icn1 = (
 
 const icn2 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -294,8 +296,8 @@ const icn2 = (
 
 const icn3 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 18 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -309,8 +311,8 @@ const icn3 = (
 
 const icn4 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -324,8 +326,8 @@ const icn4 = (
 
 const icn5 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 14 14"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -348,8 +350,8 @@ const icn5 = (
 
 const icn6 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -363,8 +365,8 @@ const icn6 = (
 
 const icn7 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -378,8 +380,8 @@ const icn7 = (
 
 const icn8 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -393,8 +395,8 @@ const icn8 = (
 
 const icn9 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -410,8 +412,8 @@ const icn9 = (
 
 const icn10 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -425,8 +427,8 @@ const icn10 = (
 
 const bitcoin = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -440,8 +442,8 @@ const bitcoin = (
 
 const buyIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -455,8 +457,8 @@ const buyIcn = (
 
 const dollarIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -476,8 +478,8 @@ const dollarIcn = (
 
 const sellIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -491,8 +493,8 @@ const sellIcn = (
 
 const icn11 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -519,8 +521,8 @@ const icn11 = (
 
 const icn22 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -535,8 +537,8 @@ const icn22 = (
 
 const icn33 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

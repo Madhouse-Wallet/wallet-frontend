@@ -20,7 +20,7 @@ const RecentTransaction = () => {
               : item.Transaction?.includes("Sent")
               ? "text-danger"
               : ""
-          } status d-inline-flex m-0 rounded-pill px-3 text-capitalize py-1 fw-sbold`}
+          }  d-inline-flex m-0 rounded-pill text-capitalize fw-sbold`}
         >
           {item.Transaction}
         </p>

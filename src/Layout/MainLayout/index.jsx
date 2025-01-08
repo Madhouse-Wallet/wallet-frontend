@@ -13,6 +13,7 @@ const MainLayout = ({ Component, pageProps }) => {
 
   return (
     <>
+    
       <div className="flex items-start justify-end relative">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <Main className="ml-auto ms-auto">
