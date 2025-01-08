@@ -6,13 +6,6 @@ import BuyBitcoin from "../../components/Modals/buyBitcoinPop";
 import BuyCoveragePop from "../../components/Modals/buyCoveragePop";
 import { createPortal } from "react-dom";
 import CounterList from "../../components/CounterList";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 interface CardData {
   head: string;
   icn: React.ReactNode;
@@ -57,7 +50,9 @@ const ThresholdWallet: React.FC = () => {
     {
       head: "Bitcoin Loan",
       icn: bitcoin,
-      onClick: () => {},
+      onClick: () => {
+        router.push("/debt-position");
+      },
     },
     {
       head: "Buy Bitcoin",
@@ -71,7 +66,7 @@ const ThresholdWallet: React.FC = () => {
       head: "Withdraw/Deposit Dollars",
       icn: dollarIcn,
       onClick: () => {
-        // setBuyCoverage(!buycoverage);
+        router.push("/identity");
       },
     },
     {
@@ -79,7 +74,7 @@ const ThresholdWallet: React.FC = () => {
       icn: sellIcn,
       onClick: () => {
         // setBuy(!buy);
-        // router.push("/stripePaymentPage");
+        router.push("/swap");
       },
     },
     {
@@ -193,11 +188,17 @@ const ThresholdWallet: React.FC = () => {
             </div>
 
             <div className="col-span-12 my-2">
-              <h4 className="m-0 text-xl fw-bold">
-                Loan Health Categories:{" "}
-                <span className="text-red-500 font-medium ms-2">Unhealthy</span>
+              <h4 className="m-0 text-base fw-medium flex items-center gap-2">
+                Health Factor:{" "}
+                <span className="text-green-500 text-xl font-bold ms-2">
+                  1.27
+                </span>
+                <div className="rounded border text-xs border-secondary bg-[var(--backgroundColor)]"
+                style={{fontSize: 10, padding: "2px 5px"}}>
+                  Risk Factor
+                </div>
               </h4>
-              <div className="mt-3">
+              {/* <div className="mt-3">
                 <div className="flex text-center">
                   <div className="p-3 bg-green-500 w-100 opacity-40">
                     <p className="m-0 font-medium text-white">Healthy</p>
@@ -213,7 +214,7 @@ const ThresholdWallet: React.FC = () => {
                     <p className="m-0 font-medium text-white">Liquidated</p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="col-span-12 my-2">
               <div className="grid gap-3 grid-cols-12">
@@ -255,8 +256,8 @@ export default ThresholdWallet;
 
 const icn1 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -270,8 +271,8 @@ const icn1 = (
 
 const icn2 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -292,8 +293,8 @@ const icn2 = (
 
 const icn3 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 18 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -307,8 +308,8 @@ const icn3 = (
 
 const icn4 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -322,8 +323,8 @@ const icn4 = (
 
 const icn5 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 14 14"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -346,8 +347,8 @@ const icn5 = (
 
 const icn6 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -361,8 +362,8 @@ const icn6 = (
 
 const icn7 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -376,8 +377,8 @@ const icn7 = (
 
 const icn8 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -391,8 +392,8 @@ const icn8 = (
 
 const icn9 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -408,8 +409,8 @@ const icn9 = (
 
 const icn10 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -423,8 +424,8 @@ const icn10 = (
 
 const bitcoin = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -438,8 +439,8 @@ const bitcoin = (
 
 const buyIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -453,8 +454,8 @@ const buyIcn = (
 
 const dollarIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -474,8 +475,8 @@ const dollarIcn = (
 
 const sellIcn = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -489,8 +490,8 @@ const sellIcn = (
 
 const icn11 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -517,8 +518,8 @@ const icn11 = (
 
 const icn22 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -533,8 +534,8 @@ const icn22 = (
 
 const icn33 = (
   <svg
-    width="54"
-    height="54"
+    width="24"
+    height="24"
     viewBox="0 0 54 54"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

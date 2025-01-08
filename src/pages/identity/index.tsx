@@ -80,7 +80,7 @@ export default function Identity() {
                   >
                     {backIcn}
                   </button>
-                  <h4 className="m-0 text-2xl font-bold">Cowswap</h4>
+                  <h4 className="m-0 text-2xl font-bold">Identity</h4>
                 </div>
               </div>
             </div>

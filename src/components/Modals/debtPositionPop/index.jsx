@@ -1,13 +1,95 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers } from "ethers";
+import { toast } from "react-toastify";
 
 // css
 
 // img
 
 const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
+  const calculateCollateralAmount = (baseAmount) => {
+    if (!baseAmount) return 0;
+    const fixedValue = 200;
+    const percentage = 0.005; // 0.5% in decimal
+
+    const collateralAmount = baseAmount + fixedValue + baseAmount * percentage;
+    return collateralAmount;
+  };
+
   const [step, setStep] = useState(1);
+  const [borrowingAmount, setBorrowingAmount] = useState(0); // State for Borrowing Amount (USD)
+  const [ltv, setLtv] = useState(2); // State for Safe (2), Moderate (1.5), Risky (1.25)
+  const [currentBTCPrice, setCurrentBTCPrice] = useState(0);
+
   const handleDebtPosition = () => setDebtPosition(!debtPosition);
+
+  const calculateRecommendedCollateral = (borrowingAmount, btcPrice, ltv) => {
+    if (!btcPrice || !ltv || !borrowingAmount) return 0;
+    return (borrowingAmount / (btcPrice * (1 / ltv))).toFixed(8); // BTC amount rounded to 8 decimals
+  };
+
+  const recommendedCollateral = calculateRecommendedCollateral(
+    calculateCollateralAmount(borrowingAmount),
+    currentBTCPrice,
+    ltv
+  );
+  const openTrove = async (borrowingAmount) => {
+    const provider = window.ethereum; // Ensure user has a wallet extension
+    if (!provider) {
+      return  toast.error("Please Coonect to wallet");
+    }
+
+    const web3 = new Web3Interaction("sepolia", provider);
+
+    const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
+    const upperHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
+    const lowerHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
+    const collateralAmount = ethers.utils.parseEther("0.01");
+    const maxFeePercentage = ethers.utils.parseEther(
+      borrowingAmount.toString()
+    );
+    const recommendedCollaterall = ethers.utils.parseEther(
+      recommendedCollateral.toString()
+    );
+
+    try {
+      await web3.openTrove(
+        contractAddress,
+        "0",
+        maxFeePercentage,
+        collateralAmount,
+        recommendedCollaterall,
+        upperHint,
+        lowerHint
+      );
+    } catch (error) {
+      console.error("Error calling openTrove:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const provider = window.ethereum; // Ensure user has a wallet extension
+        if (!provider) {
+          console.log("No wallet detected. Please install Metamask.");
+          return;
+        }
+        const contractAddress = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
+        const web3 = new Web3Interaction("sepolia", provider);
+        const receipt = await web3.fetchPrice(contractAddress);
+        const receiptInEther = ethers.utils.formatEther(receipt);
+        const adjustedPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+        setCurrentBTCPrice(adjustedPrice);
+      } catch (error) {
+        console.error("Error calling fetchPrice:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -72,8 +154,15 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                       </label>
                       <input
                         type="text"
-                        placeholder=""
-                        className="form-control bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
+                        value={borrowingAmount}
+                        // onChange={(e) => setBorrowingAmount(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            setBorrowingAmount(Number(value)); // Update the state only if valid
+                          }
+                        }}
+                        className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
                       />
                     </div>
                     <div className="py-2">
@@ -85,8 +174,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                       </label>
                       <input
                         type="number"
-                        placeholder=""
-                        className="form-control bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
+                        value={recommendedCollateral}
+                        readOnly
+                        className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 focus:border-gray-600 text-xs font-medium"
                       />
                     </div>
                     <div className="py-2">
@@ -94,31 +184,37 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         <li className="position-relative">
                           <input
                             type="radio"
+                            checked={ltv === 2 && true}
                             name="wallet"
                             className="absolute h-full cursor-pointer w-full opacity-0"
+                            onChange={() => setLtv(2)}
                           />
                           <button className="flex items-center justify-center px-3 py-2">
-                            Safe (LTV 2.5)
+                            Safe (LTV 2)
+                          </button>
+                        </li>
+                        <li className="position-relative">
+                          <input
+                            type="radio"
+                            checked={ltv === 1.5 && true}
+                            name="wallet"
+                            className="absolute h-full cursor-pointer w-full opacity-0"
+                            onChange={() => setLtv(1.5)}
+                          />
+                          <button className="flex items-center justify-center px-3 py-2">
+                            Moderate (LTV 1.5)
                           </button>
                         </li>
                         <li className="position-relative">
                           <input
                             type="radio"
                             name="wallet"
+                            checked={ltv === 1.25 && true}
                             className="absolute h-full cursor-pointer w-full opacity-0"
+                            onChange={() => setLtv(1.25)}
                           />
                           <button className="flex items-center justify-center px-3 py-2">
-                            Moderate (LTV 2.5)
-                          </button>
-                        </li>
-                        <li className="position-relative">
-                          <input
-                            type="radio"
-                            name="wallet"
-                            className="absolute h-full cursor-pointer w-full opacity-0"
-                          />
-                          <button className="flex items-center justify-center px-3 py-2">
-                            Risky (LTV 2.5)
+                            Risky (LTV 1.25)
                           </button>
                         </li>
                       </RadioList>
@@ -128,6 +224,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         type="button"
                         onClick={() => setStep(2)}
                         className="flex items-center justify-center btn commonBtn w-full"
+                        disabled={borrowingAmount === 0 ? true : false}
                       >
                         Next
                       </button>
@@ -145,7 +242,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         <span className="text-xs text-gray-500">
                           Collateral Needed
                         </span>
-                        <span className="text-xs font-semibold">0.1 BTC</span>
+                        <span className="text-xs font-semibold">
+                          {recommendedCollateral} BTC
+                        </span>
                       </li>
                       <li
                         className="py-2 flex items-center justify-between"
@@ -154,14 +253,18 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         <span className="text-xs text-gray-500">
                           Loan to Value
                         </span>
-                        <span className="text-xs font-semibold">1.77</span>
+                        <span className="text-xs font-semibold">{ltv}</span>
                       </li>
                       <li
                         className="py-2 flex items-center justify-between"
                         style={{ borderBottom: "1px dashed #525252" }}
                       >
                         <span className="text-xs text-gray-500">Fees</span>
-                        <span className="text-xs font-semibold">$15.45</span>
+                        <span className="text-xs font-semibold">
+                          $
+                          {calculateCollateralAmount(borrowingAmount) -
+                            borrowingAmount}
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -169,6 +272,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                     <button
                       type="button"
                       className="flex items-center justify-center btn commonBtn w-full"
+                      onClick={() => openTrove(borrowingAmount)}
                     >
                       Deposit
                     </button>
@@ -186,6 +290,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
 const Modal = styled.div`
   .modalDialog {
     max-width: 500px;
+    input {
+      color: var(--textColor);
+    }
   }
 `;
 

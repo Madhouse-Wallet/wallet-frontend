@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Script from "next/script";
 import { toast } from "react-toastify";
-import { ErrorRounded } from "@mui/icons-material";
-import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
+import { PasskeyArgType, extractPasskeyData } from "@safe-global/protocol-kit";
 import { create, get } from "../../../lib/passkey";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
@@ -19,7 +18,6 @@ const LoginPop = ({ login, setLogin }) => {
   const [registerTab, setRegisterTab] = useState(1);
 
   const [loginEmail, setLoginEmail] = useState();
-
 
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
@@ -39,34 +37,40 @@ const LoginPop = ({ login, setLogin }) => {
   };
 
   // Utility to encode and decode Base64
-  const bufferToBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-  const base64ToBuffer = base64 => Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  const bufferToBase64 = (buffer) =>
+    btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  const base64ToBuffer = (base64) =>
+    Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
   const addUser = async (email, username, passkey, publickeyId, rawId) => {
     try {
       try {
-        console.log(email, username, passkey, publickeyId, rawId)
+        console.log(email, username, passkey, publickeyId, rawId);
         return await fetch(`/api/add-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email, username, passkey, publickeyId, rawId
+            email,
+            username,
+            passkey,
+            publickeyId,
+            rawId,
           }),
         })
           .then((res) => res.json())
           .then((data) => {
             // console.log("data-->", data);
-            return data
+            return data;
           });
       } catch (error) {
-        console.log(error)
-        return false
+        console.log(error);
+        return false;
       }
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
   const getUser = async (email) => {
     try {
       try {
@@ -75,23 +79,23 @@ const LoginPop = ({ login, setLogin }) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email
+            email,
           }),
         })
           .then((res) => res.json())
           .then((data) => {
             // console.log("data-->", data);
-            return data
+            return data;
           });
       } catch (error) {
-        console.log(error)
-        return false
+        console.log(error);
+        return false;
       }
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
 
 
   const sendOTP = async ({email, name, otp, subject, type}) => {
@@ -123,45 +127,47 @@ const LoginPop = ({ login, setLogin }) => {
   }
   const loginFn = async () => {
     try {
-      setLoginLoading(true)
+      setLoginLoading(true);
       if (!loginEmail) {
-        toast.error("Please Enter Email!")
+        toast.error("Please Enter Email!");
       } else {
-        let validEmail = await isValidEmail(loginEmail)
+        let validEmail = await isValidEmail(loginEmail);
         if (!validEmail) {
-          setLoginLoading(false)
-          return toast.error("Please Enter Valid Email!")
+          setLoginLoading(false);
+          return toast.error("Please Enter Valid Email!");
         }
-        let userExist = await getUser(loginEmail)
+        let userExist = await getUser(loginEmail);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("User Not Found!")
+          toast.error("User Not Found!");
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = await get(base64ToBuffer(userExist.userId.rawId))
+          const authenticated = await get(
+            base64ToBuffer(userExist.userId.rawId)
+          );
           if (authenticated) {
-            toast.success("Login Successfully!")
+            toast.success("Login Successfully!");
             dispatch(
               loginSet({
                 login: true,
                 walletAddress: "",
                 provider: "",
                 signer: "",
-                username: userExist.userId.username
-              }))
-            setLoginEmail()
+                username: userExist.userId.username,
+              })
+            );
+            setLoginEmail();
           } else {
-            toast.error("Login Failed!")
+            toast.error("Login Failed!");
           }
         }
       }
-      setLoginLoading(false)
+      setLoginLoading(false);
     } catch (error) {
-      setLoginLoading(false)
-      console.log("error---->", error)
+      setLoginLoading(false);
+      console.log("error---->", error);
     }
-  }
-
+  };
 
   const registerFn = async () => {
     try {
@@ -200,12 +206,12 @@ const LoginPop = ({ login, setLogin }) => {
         }
 
       }
-      setRegisterLoading(false)
+      setRegisterLoading(false);
     } catch (error) {
-      console.log("error---->", error)
-      setRegisterLoading(false)
+      console.log("error---->", error);
+      setRegisterLoading(false);
     }
-  }
+  };
 
   const sendRegisterOtp = async () => {
     try {
@@ -254,21 +260,34 @@ const LoginPop = ({ login, setLogin }) => {
   const tabs = [
     {
       title: "Login",
-      content: <>
-        {/* <form action="" className="px-3"> */}
-        <div className="grid gap-3 grid-cols-12">
-          <div className="col-span-12">
-            <label htmlFor="" className="form-label m-0 font-medium text-xs">Email Address</label>
-            <input type="email" value={loginEmail} onChange={(e) => (setLoginEmail(e.target.value))} className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
+      content: (
+        <>
+          {/* <form action="" className="px-3"> */}
+          <div className="grid gap-3 grid-cols-12">
+            <div className="col-span-12">
+              <label htmlFor="" className="form-label m-0 font-medium text-xs">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+              />
+            </div>
+            <div className="col-span-12">
+              <button
+                disabled={loginLoading}
+                onClick={loginFn}
+                className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+              >
+                {loginLoading ? "Loading" : "Submit"}
+              </button>
+            </div>
           </div>
-          <div className="col-span-12">
-            <button disabled={loginLoading} onClick={loginFn} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
-              {(loginLoading) ? "Loading" : "Submit"}
-            </button>
-          </div>
-        </div>
-        {/* </form> */}
-      </>,
+          {/* </form> */}
+        </>
+      ),
     },
     {
       title: "Sign Up",
@@ -324,14 +343,14 @@ const LoginPop = ({ login, setLogin }) => {
       >
         <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
-          className={`modalDialog relative p-2 mx-auto w-full w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
+          className={`modalDialog relative p-2 mx-auto w-full w-full rounded-2 z-10 bg-[var(--backgroundColor)]`}
         >
           <div className="modalBody py-2 px-2">
             <button
               onClick={handleLogin}
               className="border-0 p-0 position-absolute"
               variant="transparent"
-              style={{ right: 10, top: 0 }}
+              style={{ right: 0, top: 0 }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -372,8 +391,9 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${activeTab === key && "active"
-                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${
+                      activeTab === key && "active"
+                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -388,8 +408,9 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${activeTab === key && "block"
-                        } tab-content border-0`}
+                      className={`${
+                        activeTab === key && "block"
+                      } tab-content border-0`}
                     >
                       {item.content}
                     </div>
@@ -440,7 +461,7 @@ const Modal = styled.div`
   .modalDialog {
     max-width: 500px;
     input {
-     color: var(--textColor)
+      color: var(--textColor);
     }
   }
 `;

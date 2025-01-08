@@ -1,7 +1,7 @@
 import React from "react";
-import { Col, Row } from "react-bootstrap";
 import TableLayout from "@/components/TableLayout/index";
 import styled from "styled-components";
+import img from "@/Assets/Images/user.png";
 
 const RecentApprovals = () => {
   const column = [
@@ -15,7 +15,7 @@ const RecentApprovals = () => {
       isComponent: true,
       component: (item, ind) => (
         <p
-          className={` status d-inline-flex m-0 rounded-pill px-3 text-capitalize py-1 fw-sbold`}
+          className={` d-inline-flex m-0 rounded-pill text-capitalize py-1 fw-sbold`}
         >
           {item.Amount}
         </p>
@@ -31,9 +31,9 @@ const RecentApprovals = () => {
             item.Status?.includes("Pending")
               ? "redStatus"
               : item.Status?.includes("Success")
-                ? "greenStatus"
-                : ""
-          } status d-inline-flex m-0 rounded-pill px-3 text-capitalize py-1 fw-sbold`}
+              ? "greenStatus"
+              : ""
+          } status d-inline-flex m-0 rounded-pill px-3 text-capitalize fw-sbold`}
         >
           {item.Status}
         </p>
@@ -51,10 +51,22 @@ const RecentApprovals = () => {
       Amount: "0.012 BTC",
       Status: "Success",
     },
+    {
+      Type: "Sign to Send",
+      Amount: "0.012 BTC",
+      Status: "Pending",
+    },
+    {
+      Type: "Recieved",
+      Amount: "0.012 BTC",
+      Status: "Success",
+    },
   ];
   return (
     <>
-      <TableLayout data={data} column={column} />
+      <div className="shadow-sm rounded">
+        <TableLayout data={data} column={column} />
+      </div>
     </>
   );
 };

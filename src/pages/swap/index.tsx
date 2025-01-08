@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ethers } from "ethers";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 const Swap = () => {
   const router = useRouter();
   const [account, setAccount] = useState<string | null>(null);
@@ -25,7 +26,6 @@ const Swap = () => {
   useEffect(() => {
     if (typeof window !== "undefined" && (window as any).ethereum) {
       const ethereum = (window as any).ethereum;
-      console.log("ethereum-->", ethereum);
       setProv(ethereum);
       // Request accounts and set the first account
       ethereum
@@ -52,7 +52,7 @@ const Swap = () => {
           console.error("Error fetching accounts or balance:", err)
         );
     } else {
-      console.error("Ethereum provider not found.");
+       toast.error("Please Coonect to wallet");
     }
   }, []);
   console.log("prov-->", prov);
@@ -87,7 +87,7 @@ const Swap = () => {
   };
   console.log("provider-->", provider);
   console.log("provider provider-->", provider?.provider);
-  if (!provider) {
+  if (!prov) {
     return <div>Loading Ethereum provider...</div>;
   }
   return (
@@ -112,7 +112,7 @@ const Swap = () => {
               {/* <h2>Wallet Info</h2>
         <p><strong>Address:</strong> {account || "Not connected"}</p>
         <p><strong>Balance:</strong> {balance ? `${balance} ETH` : "Loading..."}</p> */}
-              {provider && <CowSwapWidget params={params} provider={prov} />}
+              {prov && <CowSwapWidget params={params} provider={prov} />}
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ import Link from "next/link";
 import Image from "next/image";
 import user from "@/Assets/Images/user.png";
 import { createPortal } from "react-dom";
-import { PasskeyArgType, extractPasskeyData } from '@safe-global/protocol-kit'
+import { PasskeyArgType, extractPasskeyData } from "@safe-global/protocol-kit";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
@@ -60,10 +60,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
-
-  const userAuth = useSelector(
-    (state: any) => state.Auth
-  );
+  const userAuth = useSelector((state: any) => state.Auth);
   const { theme, toggleTheme } = useTheme();
   const [menu, setMenu] = useState<boolean>(false);
   const [confirmation, setConfirmation] = useState<boolean>(false);
@@ -75,8 +72,6 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [safeAddress, setSafeAddress] = useState<string | null>(null);
-
-
 
   useEffect(() => {
     const init = async () => {
@@ -121,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
 
   const loginTry = async () => {
     try {
-      const createdCredential = await create("test")
+      const createdCredential = await create("test");
       if (createdCredential) {
         //   console.log("passkeyCredential-->", createdCredential, createdCredential.id, bufferToBase64(createdCredential.rawId))
         //   const passkey = await extractPasskeyData(createdCredential)
@@ -151,8 +146,9 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         walletAddress: "",
         provider: "",
         signer: "",
-        username: ""
-      }))
+        username: "",
+      })
+    );
   };
 
   const fetchUserDetails = async () => {
@@ -237,8 +233,9 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
               </button>
             </div>
             <div
-              className={`${!menu && "hidden"
-                } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
+              className={`${
+                !menu && "hidden"
+              } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap">

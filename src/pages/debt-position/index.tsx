@@ -4,8 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import p1 from "@/public/user.png";
 import Image from "next/image";
-import styled from "styled-components";
-import { MinimizeTwoTone } from "@mui/icons-material";
+import styled from "styled-components"; 
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
 

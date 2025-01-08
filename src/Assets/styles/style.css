@@ -87,14 +87,17 @@ input.file {
   border-color: #000 !important;
   color: #fff !important;
 }
+.status {
+  border: 1px solid #ddd;
+}
 .greenStatus {
   border-color: #00b69b;
-  color: #00b69b;
-  background-color: #d5ffeb;
+  color: #fff;
+  background-color: #00b69b;
 }
 .redStatus {
-  background: #ffd3d3;
-  color: #fd5454;
+  background: #fd5454;
+  color: #fff;
   border-color: #fd5454;
 }
 button.slick-arrow.slick-prev {
@@ -175,7 +178,7 @@ button:disabled {
 
 /* end */
 input {
-  color: var(--textColor)
+  color: var(--textColor);
 }
 
 .Toastify__toast-container {
