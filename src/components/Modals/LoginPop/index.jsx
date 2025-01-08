@@ -157,6 +157,7 @@ const LoginPop = ({ login, setLogin }) => {
               })
             );
             setLoginEmail();
+            handleLogin()
           } else {
             toast.error("Login Failed!");
           }
