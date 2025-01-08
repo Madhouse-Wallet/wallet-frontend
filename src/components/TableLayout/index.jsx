@@ -1,8 +1,7 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import styled from "styled-components";
 
 // css
-import styles from "./Table.module.scss";
 
 // image
 
@@ -10,14 +9,16 @@ const TableLayout = ({ column, data }) => {
   return (
     <>
       <div className="table-responsive">
-        <table className={`${styles.table} table`}>
+        <Table className={` table rounded border-0`}>
           <thead>
             <tr className="">
               {column &&
                 column.length > 0 &&
                 column.map((item, key) => (
                   <>
-                    <th className="text-dark fw-bold border-0">{item.head}</th>
+                    <th key={key} className=" font-medium border-0">
+                      {item.head}
+                    </th>
                   </>
                 ))}
             </tr>
@@ -27,20 +28,26 @@ const TableLayout = ({ column, data }) => {
               data?.length > 0 &&
               data.map((data, columnkey) => {
                 return (
-                  <tr>
+                  <tr key={columnkey}>
                     {column &&
                       column.length > 0 &&
                       column.map((item, key) => {
                         if (item.component) {
                           return (
-                            <td className="border-bottom fw-sbold">
+                            <td
+                              key={key}
+                              className=" fw-sbold bg-transparent border-0 themeClr"
+                            >
                               {item.component(data, columnkey, data)}
                             </td>
                           );
                         }
 
                         return (
-                          <td className="border-bottom fw-sbold">
+                          <td
+                            key={key}
+                            className=" fw-sbold bg-transparent border-0 themeClr"
+                          >
                             {data[item?.accessor]}
                           </td>
                         );
@@ -49,10 +56,38 @@ const TableLayout = ({ column, data }) => {
                 );
               })}
           </tbody>
-        </table>
+        </Table>
       </div>
     </>
   );
 };
+
+const Table = styled.div`
+  background-color: var(--cardBg2);
+  th,
+  td {
+    padding: 10px 15px;
+    font-size: 10px;
+    line-height: 20px;
+    max-width: 200px;
+    min-width: 120px;
+    vertical-align: middle;
+  }
+  thead {
+    th {
+      font-weight: 400;
+      background-color: var(--cardBg);
+      white-space: nowrap;
+      color: var(--textColor);
+    }
+  }
+  tbody {
+    td {
+      padding: 20px 15px;
+      font-weight: 400;
+      border: 0;
+    }
+  }
+`;
 
 export default TableLayout;
