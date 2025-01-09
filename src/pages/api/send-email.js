@@ -18,31 +18,31 @@ const replacePlaceholders = (template, placeholders) => {
 export default async function handler(req, res) {
     try {
         if (req.method === 'POST') {
-            const sts = new AWS.STS();
-            const roleToAssume = {
-                RoleArn: "arn:aws:iam::264736150784:role/Ses-Email-Madhouse-Role", // Replace with the role ARN in Account A
-                RoleSessionName: "FargateCrossAccountSESSession",
-            };
+            // const sts = new AWS.STS();
+            // const roleToAssume = {
+            //     RoleArn: "arn:aws:iam::264736150784:role/Ses-Email-Madhouse-Role", // Replace with the role ARN in Account A
+            //     RoleSessionName: "FargateCrossAccountSESSession",
+            // };
 
-            const assumedRole = await sts.assumeRole(roleToAssume).promise();
-            const { AccessKeyId, SecretAccessKey, SessionToken } = assumedRole.Credentials;
-            console.log("AccessKeyId, SecretAccessKey, SessionToken", AccessKeyId, SecretAccessKey, SessionToken)
-            // Step 2: Use temporary credentials to send an email via SES in Account A
-            const ses = new AWS.SES({
-                region: "us-east-1", // Replace with the SES region
-                accessKeyId: AccessKeyId,
-                secretAccessKey: SecretAccessKey,
-                sessionToken: SessionToken,
-            });
+            // const assumedRole = await sts.assumeRole(roleToAssume).promise();
+            // const { AccessKeyId, SecretAccessKey, SessionToken } = assumedRole.Credentials;
+            // console.log("AccessKeyId, SecretAccessKey, SessionToken", AccessKeyId, SecretAccessKey, SessionToken)
+            // // Step 2: Use temporary credentials to send an email via SES in Account A
+            // const ses = new AWS.SES({
+            //     region: "us-east-1", // Replace with the SES region
+            //     accessKeyId: AccessKeyId,
+            //     secretAccessKey: SecretAccessKey,
+            //     sessionToken: SessionToken,
+            // });
            
 
-            // const ses = new AWS.SES({
-            //     region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
-            //     credentials: {
-            //         accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-            //         secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
-            //     }
-            // });
+            const ses = new AWS.SES({
+                region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
+                credentials: {
+                    accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
+                    secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+                }
+            });
           
             console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;
