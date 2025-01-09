@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         if (req.method === 'POST') {
             const sts = new AWS.STS();
             const roleToAssume = {
-                RoleArn: "arn:aws:iam::123456789012:role/CrossAccountSESSendEmail", // Replace with the role ARN in Account A
+                RoleArn: "arn:aws:iam::264736150784:role/Ses-Email-Madhouse-Role", // Replace with the role ARN in Account A
                 RoleSessionName: "FargateCrossAccountSESSession",
             };
 
