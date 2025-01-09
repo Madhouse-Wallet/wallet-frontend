@@ -1,14 +1,15 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
-import Script from "next/script";
 import { toast } from "react-toastify";
-import { PasskeyArgType, extractPasskeyData } from "@safe-global/protocol-kit";
+import { extractPasskeyData } from "@safe-global/protocol-kit";
 import { create, get } from "../../../lib/passkey";
+import { getAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
 import { send } from "process";
+import { generateOTP, bufferToBase64, base64ToBuffer } from "../../../utils/globals"
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -30,19 +31,9 @@ const LoginPop = ({ login, setLogin }) => {
     return emailRegex.test(email);
   }
 
-  const generateOTP = (length) => {
-    const min = Math.pow(10, length - 1);
-    const max = Math.pow(10, length) - 1;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
 
-  // Utility to encode and decode Base64
-  const bufferToBase64 = (buffer) =>
-    btoa(String.fromCharCode(...new Uint8Array(buffer)));
-  const base64ToBuffer = (base64) =>
-    Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 
-  const addUser = async (email, username, passkey, publickeyId, rawId) => {
+  const addUser = async (email, username, passkey, publickeyId, rawId, wallet) => {
     try {
       try {
         console.log(email, username, passkey, publickeyId, rawId);
@@ -55,6 +46,7 @@ const LoginPop = ({ login, setLogin }) => {
             passkey,
             publickeyId,
             rawId,
+            wallet
           }),
         })
           .then((res) => res.json())
@@ -98,28 +90,28 @@ const LoginPop = ({ login, setLogin }) => {
   };
 
 
-  const sendOTP = async ({email, name, otp, subject, type}) => {
+  const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
-        // console.log(email)
-        return await fetch(`/api/send-email`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type,
-            subject,
-            emailData: {
-              name: name,
-              verificationCode: otp
-            },
-            email
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log("data-->", data);
-            return data
-          });
-   
+      // console.log(email)
+      return await fetch(`/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          subject,
+          emailData: {
+            name: name,
+            verificationCode: otp
+          },
+          email
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data
+        });
+
     } catch (error) {
       console.log("error-->", error)
       return false
@@ -150,7 +142,7 @@ const LoginPop = ({ login, setLogin }) => {
             dispatch(
               loginSet({
                 login: true,
-                walletAddress: "",
+                walletAddress: ((userExist.userId.wallet)|| ""),
                 provider: "",
                 signer: "",
                 username: userExist.userId.username,
@@ -183,19 +175,22 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!")
         }
-        const createdCredential = await create(registerUsername)
+        const createdCredential = await create(registerEmail)
         if (createdCredential) {
-
-          // console.log("passkeyCredential-->", createdCredential, createdCredential.id, bufferToBase64(createdCredential.rawId))
-          const passkey = await extractPasskeyData(createdCredential)
-          let data = await addUser(registerEmail, registerUsername, passkey, (createdCredential.id), bufferToBase64(createdCredential.rawId))
+          let account = await getAccount(createdCredential);
+          console.log("account-->",account?.address)
+          if(!account){
+            account = "";
+          }
+          // const passkey = await extractPasskeyData(createdCredential)
+          let data = await addUser(registerEmail, registerUsername, createdCredential, (createdCredential.publicKey), (createdCredential.id), (account.address))
           // console.log("logged user--->", data)
           toast.success("Sign Up Successfully!")
           setRegisterTab(2)
           dispatch(
             loginSet({
               login: true,
-              walletAddress: "",
+              walletAddress: (account?.address || ""),
               provider: "",
               signer: "",
               username: registerUsername
@@ -228,7 +223,6 @@ const LoginPop = ({ login, setLogin }) => {
           return toast.error("Please Enter Valid Email!")
         }
         // console.log("t")
-
         let userExist = await getUser(registerEmail)
         // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
@@ -392,9 +386,8 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${
-                      activeTab === key && "active"
-                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${activeTab === key && "active"
+                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -409,9 +402,8 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${
-                        activeTab === key && "block"
-                      } tab-content border-0`}
+                      className={`${activeTab === key && "block"
+                        } tab-content border-0`}
                     >
                       {item.content}
                     </div>

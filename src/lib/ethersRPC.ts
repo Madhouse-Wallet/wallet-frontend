@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IProvider } from "@web3auth/base";
 import { ethers } from "ethers";
 
-const getChainId = async (provider: IProvider): Promise<any> => {
+const getChainId = async (provider: any): Promise<any> => {
   try {
 
     const ethersProvider = new ethers.providers.Web3Provider(provider);
@@ -14,7 +13,7 @@ const getChainId = async (provider: IProvider): Promise<any> => {
   }
 }
 
-const getAccounts = async (provider: IProvider): Promise<any> => {
+const getAccounts = async (provider: any): Promise<any> => {
   try {
     const ethersProvider = new ethers.providers.Web3Provider(provider);
     const signer = await ethersProvider.getSigner();
@@ -28,7 +27,7 @@ const getAccounts = async (provider: IProvider): Promise<any> => {
   }
 }
 
-const getBalance = async (provider: IProvider): Promise<string> => {
+const getBalance = async (provider: any): Promise<string> => {
   try {
     const ethersProvider = new ethers.providers.Web3Provider(provider);
     const signer = await ethersProvider.getSigner();
@@ -47,7 +46,7 @@ const getBalance = async (provider: IProvider): Promise<string> => {
   }
 }
 
-// const sendTransaction = async (provider: IProvider): Promise<any> => {
+// const sendTransaction = async (provider: any): Promise<any> => {
 //   try {
 //     const ethersProvider = new ethers.providers.Web3Provider(provider);
 //     const signer = await ethersProvider.getSigner();
@@ -74,7 +73,7 @@ const getBalance = async (provider: IProvider): Promise<string> => {
 //   }
 // }
 
-const signMessage = async (provider: IProvider): Promise<any> => {
+const signMessage = async (provider: any): Promise<any> => {
   try {
     // For ethers v5
     // const ethersProvider = new ethers.providers.Web3Provider(provider);

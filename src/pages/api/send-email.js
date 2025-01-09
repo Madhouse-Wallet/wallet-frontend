@@ -34,7 +34,7 @@ export default async function handler(req, res) {
                 secretAccessKey: SecretAccessKey,
                 sessionToken: SessionToken,
             });
-
+           
           
             console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;

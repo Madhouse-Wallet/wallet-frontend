@@ -1,5 +1,4 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import Script from "next/script";
 
 export default function Document() {
   return (
@@ -15,10 +14,7 @@ export default function Document() {
           rel="stylesheet"
           href="https://shadcdn.com/package/@shadcdn/library-name/style.css"
         />
-        <Script
-          src="https://shadcdn.com/package/@shadcdn/library-name/script.js"
-          strategy="beforeInteractive"
-        />
+       
       </Head>
       <body>
         <Main />

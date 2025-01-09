@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { email, username, passkey, publickeyId, rawId } = req.body;
+        const { email, username, passkey, publickeyId, rawId, wallet } = req.body;
 
         // Validate email
         if (!email || typeof email !== 'string') {
@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Insert the new user
-        const result = await usersCollection.insertOne({ email, username, passkey, publickeyId, rawId, createdAt: new Date() });
+        const result = await usersCollection.insertOne({ email, username, passkey, publickeyId, rawId, wallet, createdAt: new Date() });
         console.log("result-->", result)
         return res.status(201).json({ status: "success", message: 'User added successfully', userId: result.insertedId });
     } catch (error) {
