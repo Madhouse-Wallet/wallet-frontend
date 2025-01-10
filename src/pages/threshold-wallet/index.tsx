@@ -56,6 +56,13 @@ const ThresholdWallet: React.FC = () => {
       },
     },
     {
+      head: "Swap",
+      icn: icn1,
+      onClick: () => {
+        router.push("/swap");
+      },
+    },
+    {
       head: "Buy Smart Contract Coverage",
       icn: icn5,
       onClick: () => {

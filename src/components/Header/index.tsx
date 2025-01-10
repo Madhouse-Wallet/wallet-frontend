@@ -511,227 +511,6 @@ const Header: React.FC = () => {
   // };
 
 
-  // const loginTry = async () => {
-  //   try {
-  //     const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-  //     const paymaster = "0x0000000000000039cd5e8ae05257ce51c473ddd1";
-
-  //     const privateKey =
-  //       (process.env.PRIVATE_KEY as Hex) ??
-  //       (() => {
-  //         const pk = generatePrivateKey();
-  //         // writeFileSync(".env", `PRIVATE_KEY=${pk}`)
-  //         return pk;
-  //       })();
-
-  //     const publicClient = createPublicClient({
-  //       chain: baseSepolia,
-  //       transport: http("https://sepolia.base.org"),
-  //     });
-
-  //     const apiKey = "pim_C2hN8VhSZsDJE3uAY4WFcU";
-  //     const pimlicoUrl = `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${apiKey}`;
-
-  //     const pimlicoClient = createPimlicoClient({
-  //       chain: baseSepolia,
-  //       transport: http(pimlicoUrl),
-  //       entryPoint: {
-  //         address: entryPoint07Address,
-  //         version: "0.7" as EntryPointVersion,
-  //       },
-  //     });
-
-  //     console.log("line-104", privateKey);
-  //     const account = await toSafeSmartAccount({
-  //       client: publicClient,
-  //       owners: [
-  //         privateKeyToAccount(
-  //           privateKey
-  //         ),
-  //       ],
-  //       version: "1.4.1",
-  //       entryPoint: {
-  //         address: entryPoint07Address,
-  //         version: "0.7",
-  //       },
-  //       safe4337ModuleAddress: "0x7579EE8307284F293B1927136486880611F20002",
-  //       erc7579LaunchpadAddress: "0x7579011aB74c46090561ea277Ba79D510c6C00ff",
-  //       attesters: [
-  //         RHINESTONE_ATTESTER_ADDRESS, // Rhinestone Attester
-  //         MOCK_ATTESTER_ADDRESS, // Mock Attester - do not use in production
-  //       ],
-  //       attestersThreshold: 1,
-  //     });
-
-  //     const smartAccountClient = createSmartAccountClient({
-  //       account,
-  //       chain: baseSepolia,
-  //       bundlerTransport: http(pimlicoUrl),
-  //       paymaster: pimlicoClient,
-  //       userOperation: {
-  //         estimateFeesPerGas: async () => {
-  //           return (await pimlicoClient.getUserOperationGasPrice()).fast;
-  //         },
-  //       },
-  //     }).extend(erc7579Actions());
-
-  //     console.log("smartAccountClient-->", smartAccountClient);
-  //     console.log(
-  //       `Smart account address: https://sepolia.basescan.org/address/${account.address}`,
-  //       account
-  //     );
-  //     setSafeAddress(account.address);
-  //     setLoggedIn(true);
-  //     dispatch(
-  //       loginSet({
-  //         login: true,
-  //         walletAddress: account.address,
-  //         provider: "providerN",
-  //         signer: "signerT",
-  //       })
-  //     );
-
-
-  //     // const passkeyCredential = {
-  //     //   id: "rZKkbEPqYd8gJFgAE0_ENw",
-  //     //   publicKey:
-  //     //     "0xe6830f3a7f8e89c9563c913e12a6625e6bd53b3c00629b28417febf71ddb295591f723f25de36aa669005c48fd67753ee5df427461a978ba3511e748757d0965",
-  //     //   raw: {
-  //     //     authenticatorAttachment: "platform",
-  //     //     clientExtensionResults: {},
-  //     //     id: "rZKkbEPqYd8gJFgAE0_ENw",
-  //     //     rawId: "rZKkbEPqYd8gJFgAE0_ENw",
-  //     //     response: {
-  //     //       attestationObject:
-  //     //         "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-  //     //       authenticatorData:
-  //     //         "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-  //     //       clientDataJSON:
-  //     //         "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
-  //     //       publicKey:
-  //     //         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVWR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-  //     //       publicKeyAlgorithm: -7,
-  //     //       transports: ["hybrid", "internal"],
-  //     //     },
-  //     //     type: "public-key",
-  //     //   },
-  //     // };
-
-      
-
-  //       const passkeyCredential = await createWebAuthnCredential({
-  //         name: "Wallet"
-  //     })
-
-  //     console.log("passkeyCredential-->", passkeyCredential);
-  //     console.log("line-298", "fu");
-  //     if (!passkeyCredential) {
-  //       throw Error("Passkey creation failed: No credential was returned.");
-  //     }
-  //     console.log(
-  //       "passkeyCredential-->",
-  //       passkeyCredential,
-  //       passkeyCredential.id
-  //     );
-  //     const passkey = await extractPasskeyData(passkeyCredential.raw);
-  //     console.log("Created Passkey:", passkey);
-  //     let xr = passkey.coordinates.x;
-  //     let yr = passkey.coordinates.y;
-  //     let id = passkeyCredential.id;
-  //     const webAuthnCredential = {
-  //       pubKey: {
-  //         x: xr,
-  //         y: yr,
-  //       },
-  //       authenticatorId: id,
-  //     };
-  //     const smartSessions = getSmartSessionsValidator({});
-  //     const webauthn = getWebAuthnValidator(webAuthnCredential);
-  //     console.log(
-  //       "module-->",
-  //       webauthn,
-  //       webauthn.type,
-  //       webauthn.module,
-  //       webauthn.initData
-  //     );
-
-  //     const opHash = await smartAccountClient.installModule({
-  //       type: webauthn.type,
-  //       address: webauthn.module,
-  //       context: webauthn.initData,
-  //     });
-
-  //     (await pimlicoClient.getUserOperationGasPrice()).fast
-  //     console.log("opHash-->", opHash);
-  //     await pimlicoClient.waitForUserOperationReceipt({
-  //       hash: opHash,
-  //     });
-
-  //     try {
-  //       toKernelSmartAccount({
-  //         client: publicClient,
-  //         version: "0.3.1",
-  //         owners: [toWebAuthnAccount({ credential: passkeyCredential })],
-  //         entryPoint: {
-  //           address: entryPoint07Address,
-  //           version: "0.7",
-  //         },
-  //       }).then(async (account: ToKernelSmartAccountReturnType<"0.7">) => {
-  //         // setSmartAccountClient(
-  //         const smartAccountClient = createSmartAccountClient({
-  //           account,
-  //           paymaster: pimlicoClient,
-  //           chain: baseSepolia,
-  //           userOperation: {
-  //             estimateFeesPerGas: async () =>
-  //               (await pimlicoClient.getUserOperationGasPrice()).fast,
-  //           },
-  //           bundlerTransport: http(pimlicoUrl),
-  //         });
-  //         // )
-  //         console.log("acoun---->", account);
-  //         try {
-  //           const txHash = await smartAccountClient.sendTransaction({
-  //             // calls: [
-  //             //   {
-  //             //     to: "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
-  //             //     abi: parseAbi([
-  //             //       "function transfer(address to, uint256 value)",
-  //             //     ]),
-  //             //     functionName: "transfer",
-  //             //     args: [
-  //             //       "0x9A872029Ee44858EA17B79E30198947907a3a67A",
-  //             //       BigInt(1000000000000000000),
-  //             //     ],
-  //             //   },
-  //             // ],
-  //             calls: [ 
-  //               { 
-  //                   to:"0x9A872029Ee44858EA17B79E30198947907a3a67A", 
-  //                   value: BigInt(10000000000000) 
-  //               } 
-  //           ], 
-  //             // paymasterContext: {
-  //             //   token: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-  //             // },
-  //           });
-
-  //           console.log("line-406", txHash);
-  //         } catch (error) {
-  //           console.log("liene-377", error);
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.log("liene-371", error);
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Login failed:", error);
-  //   }
-  // };
-  
-
-
   const loginTry = async () => {
     try {
       const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
@@ -746,15 +525,15 @@ const Header: React.FC = () => {
         })();
 
       const publicClient = createPublicClient({
-        chain: baseSepolia,
-        transport: http("https://sepolia.base.org"),
+        chain: sepolia,
+        transport: http("https://sepolia.drpc.org"),
       });
 
-      const apiKey = "pim_C2hN8VhSZsDJE3uAY4WFcU";
-      const pimlicoUrl = `https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${apiKey}`;
+      const apiKey = "pim_gCvmGFU2NgG2xZcmjKVNsE";
+      const pimlicoUrl = `https://api.pimlico.io/v2/${sepolia.id}/rpc?apikey=${apiKey}`;
 
       const pimlicoClient = createPimlicoClient({
-        chain: baseSepolia,
+        chain: sepolia,
         transport: http(pimlicoUrl),
         entryPoint: {
           address: entryPoint07Address,
@@ -767,7 +546,7 @@ const Header: React.FC = () => {
         client: publicClient,
         owners: [
           privateKeyToAccount(
-            '0xa9ed77daae44bc5f5e5b8e9de8c7a28cd44b45823afb54b3d5f2fac49310b6df'
+            privateKey
           ),
         ],
         version: "1.4.1",
@@ -786,7 +565,7 @@ const Header: React.FC = () => {
 
       const smartAccountClient = createSmartAccountClient({
         account,
-        chain: baseSepolia,
+        chain: sepolia,
         bundlerTransport: http(pimlicoUrl),
         paymaster: pimlicoClient,
         userOperation: {
@@ -813,36 +592,36 @@ const Header: React.FC = () => {
       );
 
 
-      const passkeyCredential = {
-        id: "rZKkbEPqYd8gJFgAE0_ENw",
-        publicKey:
-          "0xe6830f3a7f8e89c9563c913e12a6625e6bd53b3c00629b28417febf71ddb295591f723f25de36aa669005c48fd67753ee5df427461a978ba3511e748757d0965",
-        raw: {
-          authenticatorAttachment: "platform",
-          clientExtensionResults: {},
-          id: "rZKkbEPqYd8gJFgAE0_ENw",
-          rawId: "rZKkbEPqYd8gJFgAE0_ENw",
-          response: {
-            attestationObject:
-              "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-            authenticatorData:
-              "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-            clientDataJSON:
-              "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
-            publicKey:
-              "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVWR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
-            publicKeyAlgorithm: -7,
-            transports: ["hybrid", "internal"],
-          },
-          type: "public-key",
-        },
-      };
+      // const passkeyCredential = {
+      //   id: "rZKkbEPqYd8gJFgAE0_ENw",
+      //   publicKey:
+      //     "0xe6830f3a7f8e89c9563c913e12a6625e6bd53b3c00629b28417febf71ddb295591f723f25de36aa669005c48fd67753ee5df427461a978ba3511e748757d0965",
+      //   raw: {
+      //     authenticatorAttachment: "platform",
+      //     clientExtensionResults: {},
+      //     id: "rZKkbEPqYd8gJFgAE0_ENw",
+      //     rawId: "rZKkbEPqYd8gJFgAE0_ENw",
+      //     response: {
+      //       attestationObject:
+      //         "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
+      //       authenticatorData:
+      //         "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEK2SpGxD6mHfICRYABNPxDelAQIDJiABIVgg5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVUiWCCR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
+      //       clientDataJSON:
+      //         "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+      //       publicKey:
+      //         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE5oMPOn-OiclWPJE-EqZiXmvVOzwAYpsoQX_r9x3bKVWR9yPyXeNqpmkAXEj9Z3U-5d9CdGGpeLo1EedIdX0JZQ",
+      //       publicKeyAlgorithm: -7,
+      //       transports: ["hybrid", "internal"],
+      //     },
+      //     type: "public-key",
+      //   },
+      // };
 
       
 
-      //   const passkeyCredential = await createWebAuthnCredential({
-      //     name: "Wallet"
-      // })
+        const passkeyCredential = await createWebAuthnCredential({
+          name: "Wallettt"
+      })
 
       console.log("passkeyCredential-->", passkeyCredential);
       console.log("line-298", "fu");
@@ -854,39 +633,40 @@ const Header: React.FC = () => {
         passkeyCredential,
         passkeyCredential.id
       );
-      // const passkey = await extractPasskeyData(passkeyCredential.raw);
-      // console.log("Created Passkey:", passkey);
-      // let xr = passkey.coordinates.x;
-      // let yr = passkey.coordinates.y;
-      // let id = passkeyCredential.id;
-      // const webAuthnCredential = {
-      //   pubKey: {
-      //     x: xr,
-      //     y: yr,
-      //   },
-      //   authenticatorId: id,
-      // };
-      // const smartSessions = getSmartSessionsValidator({});
-      // const webauthn = getWebAuthnValidator(webAuthnCredential);
-      // console.log(
-      //   "module-->",
-      //   webauthn,
-      //   webauthn.type,
-      //   webauthn.module,
-      //   webauthn.initData
-      // );
+      const passkey = await extractPasskeyData(passkeyCredential.raw);
+      console.log("Created Passkey:", passkey);
+      let xr = passkey.coordinates.x;
+      let yr = passkey.coordinates.y;
+      let id = passkeyCredential.id;
+      const webAuthnCredential = {
+        pubKey: {
+          x: xr,
+          y: yr,
+        },
+        authenticatorId: id,
+      };
+      const smartSessions = getSmartSessionsValidator({});
+      const webauthn = getWebAuthnValidator(webAuthnCredential);
+      console.log(
+        "module-->",
+        webauthn,
+        webauthn.type,
+        webauthn.module,
+        webauthn.initData
+      );
 
-      // const opHash = await smartAccountClient.installModule({
-      //   type: webauthn.type,
-      //   address: webauthn.module,
-      //   context: webauthn.initData,
-      // });
+      const opHash = await smartAccountClient.installModule({
+        type: webauthn.type,
+        address: webauthn.module,
+        context: webauthn.initData,
+      });
 
-      // (await pimlicoClient.getUserOperationGasPrice()).fast
-      // console.log("opHash-->", opHash);
-      // await pimlicoClient.waitForUserOperationReceipt({
-      //   hash: opHash,
-      // });
+      (await pimlicoClient.getUserOperationGasPrice()).fast
+      console.log("opHash-->", opHash);
+      await pimlicoClient.waitForUserOperationReceipt({
+        hash: opHash,
+      });
+
 
       try {
         toKernelSmartAccount({
@@ -902,7 +682,7 @@ const Header: React.FC = () => {
           const smartAccountClient = createSmartAccountClient({
             account,
             paymaster: pimlicoClient,
-            chain: baseSepolia,
+            chain: sepolia,
             userOperation: {
               estimateFeesPerGas: async () =>
                 (await pimlicoClient.getUserOperationGasPrice()).fast,
@@ -950,6 +730,231 @@ const Header: React.FC = () => {
       console.error("Login failed:", error);
     }
   };
+  
+
+
+  // const loginTry = async () => {
+  //   try {
+  //     // const usdc = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+  //     // const paymaster = "0x0000000000000039cd5e8ae05257ce51c473ddd1";
+
+  //     // const privateKey =
+  //     //   (process.env.PRIVATE_KEY as Hex) ??
+  //     //   (() => {
+  //     //     const pk = generatePrivateKey();
+  //     //     // writeFileSync(".env", `PRIVATE_KEY=${pk}`)
+  //     //     return pk;
+  //     //   })();
+
+  //     const publicClient = createPublicClient({
+  //       chain: sepolia,
+  //       transport: http("https://sepolia.drpc.org"),
+  //     });
+
+  //     const apiKey = "pim_RVmdrqc1CrXLqaKPHVCpDN";
+  //     const pimlicoUrl = `https://api.pimlico.io/v2/${sepolia.id}/rpc?apikey=${apiKey}`;
+
+  //     const pimlicoClient = createPimlicoClient({
+  //       chain: sepolia,
+  //       transport: http(pimlicoUrl),
+  //       entryPoint: {
+  //         address: entryPoint07Address,
+  //         version: "0.7" as EntryPointVersion,
+  //       },
+  //     });
+
+  //     // console.log("line-104", privateKey);
+  //     // const account = await toSafeSmartAccount({
+  //     //   client: publicClient,
+  //     //   owners: [
+  //     //     privateKeyToAccount(
+  //     //       '0x7a4fc6722617ec3525817c916068418bf6606caf34a346b806abd4c79de714e2'
+  //     //     ),
+  //     //   ],
+  //     //   version: "1.4.1",
+  //     //   entryPoint: {
+  //     //     address: entryPoint07Address,
+  //     //     version: "0.7",
+  //     //   },
+  //     //   safe4337ModuleAddress: "0x7579EE8307284F293B1927136486880611F20002",
+  //     //   erc7579LaunchpadAddress: "0x7579011aB74c46090561ea277Ba79D510c6C00ff",
+  //     //   attesters: [
+  //     //     RHINESTONE_ATTESTER_ADDRESS, // Rhinestone Attester
+  //     //     MOCK_ATTESTER_ADDRESS, // Mock Attester - do not use in production
+  //     //   ],
+  //     //   attestersThreshold: 1,
+  //     // });
+
+  //     // const smartAccountClient = createSmartAccountClient({
+  //     //   account,
+  //     //   chain: baseSepolia,
+  //     //   bundlerTransport: http(pimlicoUrl),
+  //     //   paymaster: pimlicoClient,
+  //     //   userOperation: {
+  //     //     estimateFeesPerGas: async () => {
+  //     //       return (await pimlicoClient.getUserOperationGasPrice()).fast;
+  //     //     },
+  //     //   },
+  //     // }).extend(erc7579Actions());
+
+  //     // console.log("smartAccountClient-->", smartAccountClient);
+  //     // console.log(
+  //     //   `Smart account address: https://sepolia.basescan.org/address/${account.address}`,
+  //     //   account
+  //     // );
+  //     // setSafeAddress(account.address);
+  //     // setLoggedIn(true);
+  //     // dispatch(
+  //     //   loginSet({
+  //     //     login: true,
+  //     //     walletAddress: account.address,
+  //     //     provider: "providerN",
+  //     //     signer: "signerT",
+  //     //   })
+  //     // );
+
+
+  //     const passkeyCredential = {
+  //       "id": "EQ_VQPiGOc24nUvCA_cb5A",
+  //       "publicKey": "0x828744e6d504e4a896197cd4873e5cf8d8c5fc0f9020836ead8b91df9c070e5624cce4fba86817e83bb98d12874573d2bd0ccadf8670781383ad857b1314eadc",
+  //       "raw": {
+  //           "authenticatorAttachment": "platform",
+  //           "clientExtensionResults": {},
+  //           "id": "EQ_VQPiGOc24nUvCA_cb5A",
+  //           "rawId": "EQ_VQPiGOc24nUvCA_cb5A",
+  //           "response": {
+  //               "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEBEP1UD4hjnNuJ1LwgP3G-SlAQIDJiABIVgggodE5tUE5KiWGXzUhz5c-NjF_A-QIINurYuR35wHDlYiWCAkzOT7qGgX6Du5jRKHRXPSvQzK34ZweBODrYV7ExTq3A",
+  //               "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEBEP1UD4hjnNuJ1LwgP3G-SlAQIDJiABIVgggodE5tUE5KiWGXzUhz5c-NjF_A-QIINurYuR35wHDlYiWCAkzOT7qGgX6Du5jRKHRXPSvQzK34ZweBODrYV7ExTq3A",
+  //               "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+  //               "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEgodE5tUE5KiWGXzUhz5c-NjF_A-QIINurYuR35wHDlYkzOT7qGgX6Du5jRKHRXPSvQzK34ZweBODrYV7ExTq3A",
+  //               "publicKeyAlgorithm": -7,
+  //               "transports": [
+  //                   "hybrid",
+  //                   "internal"
+  //               ]
+  //           },
+  //           "type": "public-key"
+  //       }
+  //   }
+
+      
+
+  //     //   const passkeyCredential = await createWebAuthnCredential({
+  //     //     name: "Wallet"
+  //     // })
+
+  //     console.log("passkeyCredential-->", passkeyCredential);
+  //     console.log("line-298", "fu");
+  //     if (!passkeyCredential) {
+  //       throw Error("Passkey creation failed: No credential was returned.");
+  //     }
+  //     console.log(
+  //       "passkeyCredential-->",
+  //       passkeyCredential,
+  //       passkeyCredential.id
+  //     );
+  //     // const passkey = await extractPasskeyData(passkeyCredential.raw);
+  //     // console.log("Created Passkey:", passkey);
+  //     // let xr = passkey.coordinates.x;
+  //     // let yr = passkey.coordinates.y;
+  //     // let id = passkeyCredential.id;
+  //     // const webAuthnCredential = {
+  //     //   pubKey: {
+  //     //     x: xr,
+  //     //     y: yr,
+  //     //   },
+  //     //   authenticatorId: id,
+  //     // };
+  //     // const smartSessions = getSmartSessionsValidator({});
+  //     // const webauthn = getWebAuthnValidator(webAuthnCredential);
+  //     // console.log(
+  //     //   "module-->",
+  //     //   webauthn,
+  //     //   webauthn.type,
+  //     //   webauthn.module,
+  //     //   webauthn.initData
+  //     // );
+
+  //     // const opHash = await smartAccountClient.installModule({
+  //     //   type: webauthn.type,
+  //     //   address: webauthn.module,
+  //     //   context: webauthn.initData,
+  //     // });
+
+  //     // (await pimlicoClient.getUserOperationGasPrice()).fast
+  //     // console.log("opHash-->", opHash);
+  //     // await pimlicoClient.waitForUserOperationReceipt({
+  //     //   hash: opHash,
+  //     // });
+
+  //     try {
+  //       toKernelSmartAccount({
+  //         client: publicClient,
+  //         version: "0.3.1",
+  //         owners: [toWebAuthnAccount({ credential: passkeyCredential })],
+  //         entryPoint: {
+  //           address: entryPoint07Address,
+  //           version: "0.7",
+  //         },
+  //       }).then(async (account: ToKernelSmartAccountReturnType<"0.7">) => {
+  //         // setSmartAccountClient(
+  //         const smartAccountClient = createSmartAccountClient({
+  //           account,
+  //           paymaster: pimlicoClient,
+  //           chain: sepolia,
+  //           userOperation: {
+  //             estimateFeesPerGas: async () =>
+  //               (await pimlicoClient.getUserOperationGasPrice()).fast,
+  //           },
+  //           bundlerTransport: http(pimlicoUrl),
+  //         });
+  //         // )
+  //         console.log("acoun---->", account);
+  //         try {
+  //           const txHash = await smartAccountClient.sendTransaction({
+  //             // calls: [
+  //             //   // {
+  //             //   //   to: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+  //             //   //   abi: parseAbi(["function approve(address,uint)"]),
+  //             //   //   functionName: "approve",
+  //             //   //   args: ['0x0000000000000039cd5e8ae05257ce51c473ddd1', BigInt(1000000)],
+  //             //   // },
+  //             //   {
+  //             //     to: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  //             //     abi: parseAbi([
+  //             //       "function transfer(address to, uint256 value)",
+  //             //     ]),
+  //             //     functionName: "transfer",
+  //             //     args: [
+  //             //       "0xAbb188AA605E5A0AF65d4029ACAca04Bf26ECb4d",
+  //             //       BigInt(900000),
+  //             //     ],
+  //             //   },
+  //             // ],
+  //             calls: [ 
+  //               { 
+  //                   to:"0xAbb188AA605E5A0AF65d4029ACAca04Bf26ECb4d", 
+  //                   value: BigInt(2000000000000000) 
+  //               } 
+  //           ], 
+  //             // paymasterContext: {
+  //             //   token: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  //             // },
+  //           });
+
+  //           console.log("line-406", txHash);
+  //         } catch (error) {
+  //           console.log("liene-377", error);
+  //         }
+  //       });
+  //     } catch (error) {
+  //       console.log("liene-371", error);
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //   }
+  // };
 
 
   const logout = async () => {
