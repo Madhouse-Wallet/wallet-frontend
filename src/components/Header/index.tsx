@@ -73,7 +73,6 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
       console.error("Failed to copy text:", error);
     }
   };
-  console.log("isCopied-->", isCopied);
  
  
 
