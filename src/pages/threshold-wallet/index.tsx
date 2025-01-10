@@ -6,6 +6,8 @@ import BuyBitcoin from "../../components/Modals/buyBitcoinPop";
 import BuyCoveragePop from "../../components/Modals/buyCoveragePop";
 import { createPortal } from "react-dom";
 import CounterList from "../../components/CounterList";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 interface CardData {
   head: string;
   icn: React.ReactNode;
@@ -18,6 +20,7 @@ interface CardMetrics {
 }
 
 const ThresholdWallet: React.FC = () => {
+  const userAuth = useSelector((state: any) => state.Auth);
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [buy, setBuy] = useState(false);
@@ -30,6 +33,8 @@ const ThresholdWallet: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
+  console.log(userAuth?.login , "loginLogo")
 
   const cardMetrics: CardMetrics[] = [
     { head: "Total Deposit", value: "$234234", icn: icn11 },
@@ -73,8 +78,12 @@ const ThresholdWallet: React.FC = () => {
       head: "Sell Bitcoin",
       icn: sellIcn,
       onClick: () => {
+        if (userAuth.login){
+          router.push("/swap");
+        } else{
+          toast.error("Please Login!")
+        }
         // setBuy(!buy);
-        router.push("/swap");
       },
     },
     {

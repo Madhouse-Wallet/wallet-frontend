@@ -52,7 +52,6 @@ const BtcExchangePop = ({
       console.error("Failed to copy text:", error);
     }
   };
-  console.log("isCopied-->", isCopied);
   const splitAddress = (address, charDisplayed = 6) => {
     const firstPart = address.slice(0, charDisplayed);
     const lastPart = address.slice(-charDisplayed);
