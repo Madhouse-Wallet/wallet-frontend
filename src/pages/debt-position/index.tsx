@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import p1 from "@/public/user.png";
 import Image from "next/image";
-import styled from "styled-components"; 
+import styled from "styled-components";
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
+import LiquitdityProtectionPop from "@/components/Modals/LiquidityProtectionPop";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [ischecked, setIschecked] =  useState<boolean>(false);
+  const [liquidity, setLiquidity] = useState(false);
   const [debtPosition, setDebtPosition] = useState<boolean>(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -35,6 +36,14 @@ const DebtPosition: React.FC = () => {
           <DebtPositionPop
             debtPosition={debtPosition}
             setDebtPosition={setDebtPosition}
+          />,
+          document.body
+        )}
+      {liquidity &&
+        createPortal(
+          <LiquitdityProtectionPop
+            liquidity={liquidity}
+            setLiquidity={setLiquidity}
           />,
           document.body
         )}
@@ -162,8 +171,8 @@ const DebtPosition: React.FC = () => {
                           handleDiameter={24}
                           offColor="#4C4C57"
                           onColor="#4C4C57"
-                          checked={ischecked}
-                          onChange={() => setIschecked(!ischecked)}
+                          checked={liquidity}
+                          onChange={() => setLiquidity(!liquidity)}
                           boxShadow="0px 0px 0px 0px"
                           activeBoxShadow="0px 0px 0px 0px"
                         />
