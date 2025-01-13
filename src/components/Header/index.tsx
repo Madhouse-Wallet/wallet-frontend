@@ -667,7 +667,6 @@ const Header: React.FC = () => {
         hash: opHash,
       });
 
-
       try {
         toKernelSmartAccount({
           client: publicClient,
@@ -709,7 +708,8 @@ const Header: React.FC = () => {
               calls: [ 
                 { 
                     to:"0x9A872029Ee44858EA17B79E30198947907a3a67A", 
-                    value: BigInt(10000000000000) 
+                    value: BigInt(0),
+                    data: "0x1234",
                 } 
             ], 
               // paymasterContext: {

@@ -53,11 +53,11 @@ const cowSwapParams = {
   ],
   tradeType: "swap",
   sell: {
-    asset: "WBTC",
+    asset: "USDC",
     amount: "100000",
   },
   buy: {
-    asset: "USDC",
+    asset: "COW",
     amount: "0",
   },
   enabledTradeTypes: ["swap", "limit", "advanced", "yield"],
@@ -116,18 +116,18 @@ const Swap = () => {
       },
     });
     const passkeyCredential = {
-      "id": "3EGf7mlW7Oum5JDnVAu76g",
-      "publicKey": "0x0ae94b7d2ea6555297d68b2ae6fd080f304afebac6f08448c9b71184a3747c57141a3c2b10ec32d281ae61b51c5373d2445d6455a2ef2710e6a7c1c4c2a6572d",
+      "id": "ZZmTpe9HNXpwYld8iK4qzg",
+      "publicKey": "0x5dc8ff3545d3a5aa948bd1e607edfe0c91d5780025552750cd6ecb02cb6d4e7a3fd145ec3c8702e945bd8ffcb563950e02a4e71800ea6f8c24e52289c6bb4fbe",
       "raw": {
           "authenticatorAttachment": "platform",
           "clientExtensionResults": {},
-          "id": "3EGf7mlW7Oum5JDnVAu76g",
-          "rawId": "3EGf7mlW7Oum5JDnVAu76g",
+          "id": "ZZmTpe9HNXpwYld8iK4qzg",
+          "rawId": "ZZmTpe9HNXpwYld8iK4qzg",
           "response": {
-              "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAENxBn-5pVuzrpuSQ51QLu-qlAQIDJiABIVggCulLfS6mVVKX1osq5v0IDzBK_rrG8IRIybcRhKN0fFciWCAUGjwrEOwy0oGuYbUcU3PSRF1kVaLvJxDmp8HEwqZXLQ",
-              "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAENxBn-5pVuzrpuSQ51QLu-qlAQIDJiABIVggCulLfS6mVVKX1osq5v0IDzBK_rrG8IRIybcRhKN0fFciWCAUGjwrEOwy0oGuYbUcU3PSRF1kVaLvJxDmp8HEwqZXLQ",
-              "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
-              "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECulLfS6mVVKX1osq5v0IDzBK_rrG8IRIybcRhKN0fFcUGjwrEOwy0oGuYbUcU3PSRF1kVaLvJxDmp8HEwqZXLQ",
+              "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViUSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEGWZk6XvRzV6cGJXfIiuKs6lAQIDJiABIVggXcj_NUXTpaqUi9HmB-3-DJHVeAAlVSdQzW7LAsttTnoiWCA_0UXsPIcC6UW9j_y1Y5UOAqTnGADqb4wk5SKJxrtPvg",
+              "authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NdAAAAAOqbjWZNAR0hPOS2tIy1ddQAEGWZk6XvRzV6cGJXfIiuKs6lAQIDJiABIVggXcj_NUXTpaqUi9HmB-3-DJHVeAAlVSdQzW7LAsttTnoiWCA_0UXsPIcC6UW9j_y1Y5UOAqTnGADqb4wk5SKJxrtPvg",
+              "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiYWF1MHRhRGVTOFlxS2lBZmpTVzY2USIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImNyb3NzT3JpZ2luIjpmYWxzZSwib3RoZXJfa2V5c19jYW5fYmVfYWRkZWRfaGVyZSI6ImRvIG5vdCBjb21wYXJlIGNsaWVudERhdGFKU09OIGFnYWluc3QgYSB0ZW1wbGF0ZS4gU2VlIGh0dHBzOi8vZ29vLmdsL3lhYlBleCJ9",
+              "publicKey": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEXcj_NUXTpaqUi9HmB-3-DJHVeAAlVSdQzW7LAsttTno_0UXsPIcC6UW9j_y1Y5UOAqTnGADqb4wk5SKJxrtPvg",
               "publicKeyAlgorithm": -7,
               "transports": [
                   "hybrid",
@@ -219,9 +219,9 @@ const Swap = () => {
 
                   const txHash = await smartAccountClient.sendTransaction({
                     calls,
-                    paymasterContext: {
-                      token: to // Use the target address as token for paymaster context
-                    }
+                    // paymasterContext: {
+                    //   token: to // Use the target address as token for paymaster context
+                    // }
                   });
                   
                   console.log('Transaction hash:', txHash);
@@ -270,10 +270,6 @@ const Swap = () => {
   }, []);
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      {/* <CowSwapWidget client={queryClient}   params={cowSwapParams}> */}
-      <QueryClientProvider client={queryClient}>
-        <PermissionlessProvider capabilities={capabilities}>
           <>
           <section className="coswap py-3 relative">
             <div className="container">
@@ -302,10 +298,6 @@ const Swap = () => {
             </div>
           </section>
           </>
-        </PermissionlessProvider>
-        {/* </CowSwapWidget> */}
-      </QueryClientProvider>
-    </WagmiProvider>
   );
 };
 
