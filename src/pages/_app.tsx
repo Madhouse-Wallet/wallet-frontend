@@ -13,34 +13,43 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/router";
 console.log("initializeTBTC--->", initializeTBTC);
 export default function App({ Component, pageProps, ...props }: AppProps) {
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Show loading screen when the route changes
-    const handleRouteChange = () => {
-      setLoading(true); // Trigger loader
-      setTimeout(() => {
-        setLoading(false); // Hide loader after 4 seconds
-      }, 2000); // 4 seconds duration for loading screen
-    };
+  // useEffect(() => {
+  //   const handleStart = () => {
+  //     setLoading(true);
+  //     // Delay for 2 seconds before hiding the loader
+  //     setTimeout(() => {
+  //       setLoading(false);
+  //     }, 2000);
+  //   };
 
-    // Listen for route changes
-    router.events.on("routeChangeStart", handleRouteChange);
+  //   const handleComplete = () => {
+  //     setLoading(false);
+  //   };
 
-    // Cleanup listener on component unmount
-    return () => {
-      router.events.off("routeChangeStart", handleRouteChange);
-    };
-  }, [router.events]);
-  console.log(loading, "loadingState");
-  if (loading) {
-    return (
-      <ThemeProvider>
-        <LoadingScreen /> {/* Show loading screen when loading is true */}
-      </ThemeProvider>
-    );
-  }
+  //   router.events.on("routeChangeStart", handleStart);
+  //   router.events.on("routeChangeComplete", handleComplete);
+  //   router.events.on("routeChangeError", handleComplete);
+
+  //   // Show the loader for 2 seconds on page refresh
+  //   handleStart();
+
+  //   return () => {
+  //     router.events.off("routeChangeStart", handleStart);
+  //     router.events.off("routeChangeComplete", handleComplete);
+  //     router.events.off("routeChangeError", handleComplete);
+  //   };
+  // }, [router]);
+
+  // if (loading) {
+  //   return (
+  //     <ThemeProvider>
+  //       <LoadingScreen /> {/* Show loading screen when loading is true */}
+  //     </ThemeProvider>
+  //   );
+  // }
 
   return (
     <>
