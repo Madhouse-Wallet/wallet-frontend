@@ -1006,9 +1006,8 @@ const Header: React.FC = () => {
               </button>
             </div>
             <div
-              className={`${
-                !menu && "hidden"
-              } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
+              className={`${!menu && "hidden"
+                } lg:flex lg:items-center lg:justify-end w-full gap-2 flex-wrap menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap">
