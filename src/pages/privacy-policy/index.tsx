@@ -7,7 +7,7 @@ const PrivacyPolicy = () => {
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <div className="max-w-4xl mx-auto p-6 space-y-6">
+              <div className="max-w-4xl mx-auto space-y-6">
                 <h1 className="text-3xl font-bold ">Privacy Policy v1.0</h1>
                 <p className="text-gray-400">
                   At Madhouse, we respect the privacy of our users and are

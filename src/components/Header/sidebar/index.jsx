@@ -3,15 +3,21 @@ import BuyCoveragePop from "@/components/Modals/buyCoveragePop";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import logomw from "@/Assets/Images/logo.png";
+import Wlogomw from "@/Assets/Images/logow.png";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
+import Image from "next/image";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const Sidebar = ({ sidebar, setSidebar }) => {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [buycoverage, setBuyCoverage] = useState(false);
   const [buy, setBuy] = useState(false);
 
   console.log(router.pathname == "/", "asdfas");
+  const isChecked = theme === "light";
 
   return (
     <>
@@ -37,13 +43,38 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         >
           {close}
         </button>
-        <div className="top pb-2">{logo}</div>
+        <div className="top p-2">
+          {isChecked ? (
+            <>
+              <Image
+                src={logomw}
+                alt="logo"
+                height={10000}
+                width={10000}
+                className="max-w-full object-contain w-auto"
+                style={{ height: 40 }}
+              />
+            </>
+          ) : (
+            <>
+              <Image
+                src={Wlogomw}
+                alt="logo"
+                height={10000}
+                width={10000}
+                className="max-w-full object-contain w-auto"
+                style={{ height: 40 }}
+              />
+            </>
+          )}
+        </div>
         <div className="sidebarWrpper pt-3">
           <ul className="list-none pl-0 mb-0">
             <li className="py-1">
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}
@@ -55,6 +86,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
             <li className="py-1">
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
+                onClick={() => setSidebar(!sidebar)}
                 href={"/approval"}
                 className={`${
                   router.pathname === "/approval" && "active"
@@ -68,6 +100,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/setting"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/setting" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}
@@ -80,6 +113,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/help"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/help" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}
@@ -92,6 +126,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/documentation"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/documentation" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}
@@ -104,6 +139,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/legal-notice"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/legal-notice" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}
@@ -116,6 +152,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/privacy-policy"}
+                onClick={() => setSidebar(!sidebar)}
                 className={`${
                   router.pathname === "/privacy-policy" && "active"
                 } flex p-2 items-start justify-start gap-2 rounded`}

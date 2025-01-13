@@ -243,14 +243,14 @@ const DebtPosition: React.FC = () => {
                               Repay
                             </button>
                           </li>
-                          <li className="">
+                          {/* <li className="">
                             <button
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
                               Switch
                             </button>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </CardCstm>

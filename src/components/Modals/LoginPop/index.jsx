@@ -9,7 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
 import { send } from "process";
-import { generateOTP, bufferToBase64, base64ToBuffer } from "../../../utils/globals"
+import {
+  generateOTP,
+  bufferToBase64,
+  base64ToBuffer,
+} from "../../../utils/globals";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -31,9 +35,14 @@ const LoginPop = ({ login, setLogin }) => {
     return emailRegex.test(email);
   }
 
-
-
-  const addUser = async (email, username, passkey, publickeyId, rawId, wallet) => {
+  const addUser = async (
+    email,
+    username,
+    passkey,
+    publickeyId,
+    rawId,
+    wallet
+  ) => {
     try {
       try {
         console.log(email, username, passkey, publickeyId, rawId);
@@ -46,7 +55,7 @@ const LoginPop = ({ login, setLogin }) => {
             passkey,
             publickeyId,
             rawId,
-            wallet
+            wallet,
           }),
         })
           .then((res) => res.json())
@@ -89,7 +98,6 @@ const LoginPop = ({ login, setLogin }) => {
     }
   };
 
-
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
       // console.log(email)
@@ -101,22 +109,21 @@ const LoginPop = ({ login, setLogin }) => {
           subject,
           emailData: {
             name: name,
-            verificationCode: otp
+            verificationCode: otp,
           },
-          email
+          email,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
           console.log("data-->", data);
-          return data
+          return data;
         });
-
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
   const loginFn = async () => {
     try {
       setLoginLoading(true);
@@ -138,26 +145,25 @@ const LoginPop = ({ login, setLogin }) => {
             base64ToBuffer(userExist.userId.rawId)
           );
           if (authenticated) {
-            let account = await getAccount(userExist.userId.passkey)
-            console.log("account-->", account)
+            let account = await getAccount(userExist.userId.passkey);
+            console.log("account-->", account);
             if (account) {
               toast.success("Login Successfully!");
               dispatch(
                 loginSet({
                   login: true,
-                  walletAddress: ((account?.account?.address) || ""),
+                  walletAddress: account?.account?.address || "",
                   signer: "",
                   username: userExist.userId.username,
                   email: userExist.userId.email,
-                  passkeyCred: ((userExist.userId.passkey || "")),
+                  passkeyCred: userExist.userId.passkey || "",
                 })
               );
               setLoginEmail();
-              handleLogin()
+              handleLogin();
             } else {
               toast.error("Login Failed!");
             }
-
           } else {
             toast.error("Login Failed!");
           }
@@ -172,42 +178,48 @@ const LoginPop = ({ login, setLogin }) => {
 
   const registerFn = async () => {
     try {
-      setRegisterLoading(true)
+      setRegisterLoading(true);
       if (!registerOTP) {
-        toast.error("Please Enter OTP!")
+        toast.error("Please Enter OTP!");
       } else if (registerOTP != checkOTP) {
-        toast.error("Invalid OTP!")
+        toast.error("Invalid OTP!");
       } else {
-        let userExist = await getUser(registerEmail)
+        let userExist = await getUser(registerEmail);
         // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
-          return toast.error("User Already Exist!")
+          return toast.error("User Already Exist!");
         }
-        const createdCredential = await create(registerEmail)
+        const createdCredential = await create(registerEmail);
         if (createdCredential) {
           let account = await createAccount(createdCredential);
           // account, smartAccountClient
-          console.log("account-->", account?.account?.address)
+          console.log("account-->", account?.account?.address);
           // const passkey = await extractPasskeyData(createdCredential)
-          let data = await addUser(registerEmail, registerUsername, createdCredential, (createdCredential.publicKey), (createdCredential.id), (account?.account?.address))
+          let data = await addUser(
+            registerEmail,
+            registerUsername,
+            createdCredential,
+            createdCredential.publicKey,
+            createdCredential.id,
+            account?.account?.address
+          );
           // console.log("logged user--->", data)
-          toast.success("Sign Up Successfully!")
-          setRegisterTab(2)
+          toast.success("Sign Up Successfully!");
+          setRegisterTab(2);
           dispatch(
             loginSet({
               login: true,
-              walletAddress: (account?.account?.address || ""),
+              walletAddress: account?.account?.address || "",
               signer: "",
               username: registerUsername,
               email: registerEmail,
-              passkeyCred: ((createdCredential || "")),
+              passkeyCred: createdCredential || "",
             })
           );
-          setRegisterEmail()
-          setRegisterUsername()
-          handleLogin()
+          setRegisterEmail();
+          setRegisterUsername();
+          handleLogin();
         }
-
       }
       setRegisterLoading(false);
     } catch (error) {
@@ -218,47 +230,47 @@ const LoginPop = ({ login, setLogin }) => {
 
   const sendRegisterOtp = async () => {
     try {
-      setRegisterOtpLoading(true)
+      setRegisterOtpLoading(true);
       if (!registerEmail) {
-        toast.error("Please Enter Email!")
+        toast.error("Please Enter Email!");
       } else if (!registerUsername) {
-        toast.error("Please Enter Username!")
+        toast.error("Please Enter Username!");
       } else {
-        let validEmail = await isValidEmail(registerEmail)
+        let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
-          setRegisterOtpLoading(false)
-          return toast.error("Please Enter Valid Email!")
+          setRegisterOtpLoading(false);
+          return toast.error("Please Enter Valid Email!");
         }
         // console.log("t")
-        let userExist = await getUser(registerEmail)
+        let userExist = await getUser(registerEmail);
         // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
-          toast.error("User Already Exist!")
+          toast.error("User Already Exist!");
         } else {
           let OTP = generateOTP(4);
-          setCheckOTP(OTP)
+          setCheckOTP(OTP);
           let obj = {
             email: registerEmail,
             name: registerUsername,
-            "otp": OTP,
+            otp: OTP,
             subject: "Madhouse Account Verification OTP",
-            type: "registerOtp"
-          }
-          let sendEmailData = await sendOTP(obj)
+            type: "registerOtp",
+          };
+          let sendEmailData = await sendOTP(obj);
           if (sendEmailData.status && sendEmailData.status == "success") {
-            setRegisterTab(2)
-            toast.success(sendEmailData?.message)
+            setRegisterTab(2);
+            toast.success(sendEmailData?.message);
           } else {
-            toast.error(sendEmailData?.message || sendEmailData?.error)
+            toast.error(sendEmailData?.message || sendEmailData?.error);
           }
         }
       }
-      setRegisterOtpLoading(false)
+      setRegisterOtpLoading(false);
     } catch (error) {
-      console.log("error---->", error)
-      setRegisterOtpLoading(false)
+      console.log("error---->", error);
+      setRegisterOtpLoading(false);
     }
-  }
+  };
   const tabs = [
     {
       title: "Login",
@@ -293,36 +305,86 @@ const LoginPop = ({ login, setLogin }) => {
     },
     {
       title: "Sign Up",
-      content: <>
-        {/* <form  className="px-3"> */}
-        <div className="grid gap-3 grid-cols-12">
-          {registerTab == 1 && (<><div className="col-span-12">
-            <label htmlFor="" className="form-label m-0 font-medium text-xs">Username</label>
-            <input type="text" value={registerUsername} onChange={(e) => (setRegisterUsername(e.target.value))} required className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
-          </div>
-            <div className="col-span-12">
-              <label htmlFor="" className="form-label m-0 font-medium text-xs">Email Address</label>
-              <input type="email" value={registerEmail} onChange={(e) => (setRegisterEmail(e.target.value))} required className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
-            </div>
-            <div className="col-span-12">
-              <button disabled={registerOtpLoading} onClick={sendRegisterOtp} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
-                {(registerOtpLoading) ? "Loading" : "Submit"}
-              </button>
-            </div></>)}
+      content: (
+        <>
+          {/* <form  className="px-3"> */}
+          <div className="grid gap-3 grid-cols-12">
+            {registerTab == 1 && (
+              <>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={registerUsername}
+                    onChange={(e) => setRegisterUsername(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <button
+                    disabled={registerOtpLoading}
+                    onClick={sendRegisterOtp}
+                    className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+                  >
+                    {registerOtpLoading ? "Loading" : "Submit"}
+                  </button>
+                </div>
+              </>
+            )}
 
-          {registerTab == 2 && (<><div className="col-span-12">
-            <label htmlFor="" className="form-label m-0 font-medium text-xs">OTP</label>
-            <input type="text" value={registerOTP} onChange={(e) => (setRegisterOTP(e.target.value))} required className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
+            {registerTab == 2 && (
+              <>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={registerOTP}
+                    onChange={(e) => setRegisterOTP(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <button
+                    disabled={registerLoading}
+                    onClick={registerFn}
+                    className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+                  >
+                    {registerLoading ? "Loading" : "Submit"}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-            <div className="col-span-12">
-              <button disabled={registerLoading} onClick={registerFn} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
-                {(registerLoading) ? "Loading" : "Submit"}
-              </button>
-            </div></>)}
-
-        </div>
-        {/* </form> */}
-      </>,
+          {/* </form> */}
+        </>
+      ),
     },
   ];
   const router = useRouter();
@@ -393,8 +455,9 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${activeTab === key && "active"
-                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${
+                      activeTab === key && "active"
+                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -409,8 +472,9 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${activeTab === key && "block"
-                        } tab-content border-0`}
+                      className={`${
+                        activeTab === key && "block"
+                      } tab-content border-0`}
                     >
                       {item.content}
                     </div>
