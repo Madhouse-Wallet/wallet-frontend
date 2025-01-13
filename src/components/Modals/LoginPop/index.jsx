@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toast } from "react-toastify";
 import { extractPasskeyData } from "@safe-global/protocol-kit";
 import { create, get } from "../../../lib/passkey";
-import { getAccount } from "../../../lib/pimlicoWallet";
+import { getAccount, createAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
@@ -138,18 +138,26 @@ const LoginPop = ({ login, setLogin }) => {
             base64ToBuffer(userExist.userId.rawId)
           );
           if (authenticated) {
-            toast.success("Login Successfully!");
-            dispatch(
-              loginSet({
-                login: true,
-                walletAddress: ((userExist.userId.wallet)|| ""),
-                provider: "",
-                signer: "",
-                username: userExist.userId.username,
-              })
-            );
-            setLoginEmail();
-            handleLogin()
+            let account = await getAccount(userExist.userId.passkey)
+            console.log("account-->", account)
+            if (account) {
+              toast.success("Login Successfully!");
+              dispatch(
+                loginSet({
+                  login: true,
+                  walletAddress: ((account?.account?.address) || ""),
+                  signer: "",
+                  username: userExist.userId.username,
+                  email: userExist.userId.email,
+                  passkeyCred: ((userExist.userId.passkey || "")),
+                })
+              );
+              setLoginEmail();
+              handleLogin()
+            } else {
+              toast.error("Login Failed!");
+            }
+
           } else {
             toast.error("Login Failed!");
           }
@@ -177,23 +185,22 @@ const LoginPop = ({ login, setLogin }) => {
         }
         const createdCredential = await create(registerEmail)
         if (createdCredential) {
-          let account = await getAccount(createdCredential);
-          console.log("account-->",account?.address)
-          if(!account){
-            account = "";
-          }
+          let account = await createAccount(createdCredential);
+          // account, smartAccountClient
+          console.log("account-->", account?.account?.address)
           // const passkey = await extractPasskeyData(createdCredential)
-          let data = await addUser(registerEmail, registerUsername, createdCredential, (createdCredential.publicKey), (createdCredential.id), (account.address))
+          let data = await addUser(registerEmail, registerUsername, createdCredential, (createdCredential.publicKey), (createdCredential.id), (account?.account?.address))
           // console.log("logged user--->", data)
           toast.success("Sign Up Successfully!")
           setRegisterTab(2)
           dispatch(
             loginSet({
               login: true,
-              walletAddress: (account?.address || ""),
-              provider: "",
+              walletAddress: (account?.account?.address || ""),
               signer: "",
-              username: registerUsername
+              username: registerUsername,
+              email: registerEmail,
+              passkeyCred: ((createdCredential || "")),
             })
           );
           setRegisterEmail()
@@ -308,8 +315,8 @@ const LoginPop = ({ login, setLogin }) => {
             <input type="text" value={registerOTP} onChange={(e) => (setRegisterOTP(e.target.value))} required className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs" />
           </div>
             <div className="col-span-12">
-              <button disabled={registerOtpLoading} onClick={registerFn} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
-                {(registerOtpLoading) ? "Loading" : "Submit"}
+              <button disabled={registerLoading} onClick={registerFn} className="btn text-xs commonBtn flex items-center justify-center btn w-full">
+                {(registerLoading) ? "Loading" : "Submit"}
               </button>
             </div></>)}
 

@@ -16,7 +16,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   walletAddress: "",
-  provider:"",
+  passkeyCred:  "",
+  username: "",
   signer:"",
   login: false
 };
@@ -29,8 +30,9 @@ export const authSlice = createSlice({
     loginSet: (state, action) => {
       state.login = action.payload.login;
       state.username = action.payload.username;
+      state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
-      state.provider = action.payload.provider;
+      state.passkeyCred = action.payload.passkeyCred;
       state.signer = action.payload.signer;
     },
   },
