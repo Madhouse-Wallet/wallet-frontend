@@ -4,23 +4,155 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import p1 from "@/public/user.png";
 import Image from "next/image";
-import styled from "styled-components"; 
+import styled from "styled-components";
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
+import SupplyPopUp from "@/components/Modals/SupplyPop";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers, providers } from "ethers";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [ischecked, setIschecked] =  useState<boolean>(false);
+  const [ischecked, setIschecked] = useState<boolean>(false);
   const [debtPosition, setDebtPosition] = useState<boolean>(false);
+  const [supplyPop, setSupplyPop] = useState<boolean>(false);
+  const [supply, setSupply] = useState<string>("");
+  const [debtvalue, setDebtvalue] = useState<string>("");
+  const [healthValue, setHealthtvalue] = useState<string>("");
+  const [walletBalance, setWalletBalance] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+    const calculateCollateralAndHealthFactor = async (
+      collateralAmount: string, // in ETH
+      debt: string // in USD
+    ) => {
+      try {
+        console.log(collateralAmount,debt)
+        const provider = (window as any).ethereum; // Ensure user has a wallet extension
+        if (!provider) {
+          console.error("No wallet detected. Please install Metamask.");
+          return { collateralValue: "0.00", healthFactor: "0.00" };
+        }
+    
+        // Fetch ETH price
+        const contractAddress = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
+        const web3 = new Web3Interaction("sepolia", provider);
+        const receipt = await web3.fetchPrice(contractAddress);
+        const receiptInEther = ethers.utils.formatEther(receipt);
+        const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10); // ETH price in USD
+    
+        // Convert collateralAmount and debt from string to number
+        const collateral = parseFloat(collateralAmount);
+        const debtAmount = parseFloat(debt);
+    
+        if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
+          throw new Error("Invalid collateral amount or debt provided.");
+        }
+    
+        // Calculate collateral value and health factor
+        const collateralValue = ethPrice * collateral; // Collateral value in USD
+        const healthFactor = (collateralValue * 1.1) / debtAmount; // Health factor calculation
+    
+        // Log or return results
+        console.log("Collateral Value:", collateralValue.toFixed(2));
+        console.log("Health Factor:", healthFactor.toFixed(2));
+    
+      //   return {
+      //     collateralValue: collateralValue.toFixed(2),
+      //     healthFactor: healthFactor.toFixed(2),
+      // };
+      console.log(healthFactor.toFixed(2))
+      setHealthtvalue(healthFactor.toFixed(2))
+      // return 
+    } catch (error) {
+      console.error("Error calculating values:", error);
+      return { collateralValue: "0.00", healthFactor: "0.00" };
+    }
+  };
+  
+
+  
+  
+  const fetchTroveData = async (provider: any) => {
+    try {
+      // Get wallet address
+      const accounts = await provider.request({
+        method: "eth_requestAccounts",
+      });
+      const walletAddress = accounts[0];
+
+      // Create web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Contract address
+      const contractAddress = "0x4D74b0eFfa314a79dFd324C129D5b29c11ADbb04";
+      const TUSDAddress = "0xF3e72cc2e04BB24999718e9b2Ca55fA764c5f9ea"; 
+
+      // Fetch data from the contract
+      const troveResponse = await web3.Troves(contractAddress, walletAddress);
+      const balanceResponse = await web3.balanceOf(TUSDAddress, walletAddress);
+      console.log("balanceResponse",balanceResponse)
+      console.log("Trove Response:", troveResponse);
+     
+      const coll = troveResponse?.coll;
+      const debt = troveResponse?.debt;
+
+      const collInEther = ethers.utils.formatEther(coll);
+      const debtInEther = ethers.utils.formatEther(debt);
+      const balance = ethers.utils.formatEther(balanceResponse);
+      console.log(balance)
+      calculateCollateralAndHealthFactor(collInEther,debtInEther)
+      setSupply(collInEther);  // This will set 'supply' as the value in Ether
+      setDebtvalue(debtInEther);
+      setWalletBalance(balance)
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error fetching trove data:", err);
+      setError(err.message || "Failed to fetch trove data");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      const provider = (window as any).ethereum;
+
+      if (!provider) {
+        setError("MetaMask not detected. Please install MetaMask to proceed.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Request account connection from MetaMask
+        const accounts = await provider.request({
+          method: "eth_requestAccounts",
+        });
+        console.log("Connected Account:", accounts[0]);
+
+        // Fetch trove data once connected
+        fetchTroveData(provider);
+       
+      } catch (err: any) {
+        console.error("Error connecting wallet:", err);
+        setError(err.message || "Failed to connect wallet");
+        setLoading(false);
+      }
+    };
+
+    connectWallet();
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
-    }, 3000); // 5000ms = 5 seconds
+    }, 3000); // 3000ms = 3 seconds
 
-    // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back(); // Navigates to the previous page
@@ -28,6 +160,65 @@ const DebtPosition: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
+
+  const Withdraw = async () => {
+    const provider = (window as any).ethereum;
+  
+    if (!provider) {
+      setError("MetaMask not detected. Please install MetaMask to proceed.");
+      setLoading(false);
+      return;
+    }
+    try {
+      // Create web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+  
+      // Contract address and spender address
+      const tokenContractAddress = "0xF3e72cc2e04BB24999718e9b2Ca55fA764c5f9ea";
+      const spenderAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";  // Replace with actual spender address
+  
+      // Infinite allowance value for uint256 (2^256 - 1)
+      const infiniteAllowance = ethers.BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+  
+      // Call approve function with infinite allowance
+      const approveResponse = await web3.approve(tokenContractAddress, spenderAddress, infiniteAllowance);
+      console.log("Approve Response:", approveResponse);
+  
+      // Now that approval is done, proceed with the withdraw function
+      const troveResponse = await web3.closeTrove(spenderAddress);
+      console.log("Trove Response:", troveResponse);
+  
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error fetching trove data:", err);
+      setError(err.message || "Caller doesnt have enough THUSD to make repayment");
+      setLoading(false);
+    }
+  };
+  
+
+  if (loading) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <h4>Loading trove data...</h4>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <h4>Error: {error}</h4>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("line-118",supply,debtvalue)
+
   return (
     <>
       {debtPosition &&
@@ -35,6 +226,14 @@ const DebtPosition: React.FC = () => {
           <DebtPositionPop
             debtPosition={debtPosition}
             setDebtPosition={setDebtPosition}
+          />,
+          document.body
+        )}
+        {supplyPop &&
+        createPortal(
+          <SupplyPopUp
+          supplyPop={supplyPop}
+          setSupplyPop={setSupplyPop}
           />,
           document.body
         )}
@@ -66,12 +265,12 @@ const DebtPosition: React.FC = () => {
                     <p className="m-0">Assets</p>
                   </div>
                   <span className="icn">
-                    <button
+                    {/* <button
                       className="d-flex align-items-center justify-content-center commonBtn fw-sbold"
                       style={{ minWidth: "unset" }}
-                    >
-                      APY 4%
-                    </button>
+                    > */}
+                      THUSD
+                    {/* </button> */}
                   </span>
                 </div>
                 <div
@@ -84,14 +283,14 @@ const DebtPosition: React.FC = () => {
                   >
                     <li className=" d-flex align-items-center justify-content-between">
                       <p className="m-0 fw-sbold">Net Balance</p>
-                      <p className="m-0 fw-sbold">$ 1,234,34</p>
+                      <p className="m-0 fw-sbold">{Number(walletBalance).toFixed(4)}</p>
                     </li>
                     <li
                       className=" d-flex align-items-center justify-content-between"
                       style={{ fontSize: 10 }}
                     >
                       <p className="m-0 fw-sbold">Health Factor</p>
-                      <p className="m-0 fw-sbold"> 1.2</p>
+                      <p className="m-0 fw-sbold">{healthValue}</p>
                     </li>
                   </ul>
                 </div>
@@ -113,10 +312,10 @@ const DebtPosition: React.FC = () => {
                     >
                       <div className="left">
                         <p className="m-0 fw-sbold">Supply</p>
-                        <p className="m-0">APY 1%</p>
+                        {/* <p className="m-0">APY 1%</p> */}
                       </div>
                       <div className="right">
-                        <p className="m-0 fw-sbold">$10000</p>
+                        <p className="m-0 fw-sbold">{supply}</p>
                       </div>
                     </CardCstm>
                   </div>
@@ -129,11 +328,11 @@ const DebtPosition: React.FC = () => {
                       }}
                     >
                       <div className="left">
-                        <p className="m-0 fw-sbold">Borrow</p>
-                        <p className="m-0">APY 1%</p>
+                        <p className="m-0 fw-sbold">Debt</p>
+                        {/* <p className="m-0">APY 1%</p> */}
                       </div>
                       <div className="right">
-                        <p className="m-0 fw-sbold">-$40000</p>
+                        <p className="m-0 fw-sbold">{Number(debtvalue).toFixed(4)}</p>
                       </div>
                     </CardCstm>
                   </div>
@@ -197,6 +396,7 @@ const DebtPosition: React.FC = () => {
                             <button
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
+                              onClick={Withdraw}
                             >
                               Withdraw
                             </button>
@@ -220,6 +420,7 @@ const DebtPosition: React.FC = () => {
                         <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
                           <li className="">
                             <button
+                            onClick={()=> setSupplyPop(!supplyPop)}
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
@@ -231,17 +432,17 @@ const DebtPosition: React.FC = () => {
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
-                              Repay
+                              Adjust
                             </button>
                           </li>
-                          <li className="">
+                          {/* <li className="">
                             <button
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
                               Switch
                             </button>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </CardCstm>

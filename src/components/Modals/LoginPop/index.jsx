@@ -236,6 +236,7 @@ const LoginPop = ({ login, setLogin }) => {
           toast.error("User Already Exist!")
         } else {
           let OTP = generateOTP(4);
+          console.log(OTP)
           setCheckOTP(OTP)
           let obj = {
             email: registerEmail,
@@ -244,9 +245,11 @@ const LoginPop = ({ login, setLogin }) => {
             subject: "Madhouse Account Verification OTP",
             type: "registerOtp"
           }
+          setRegisterTab(2)
           let sendEmailData = await sendOTP(obj)
+          
           if (sendEmailData.status && sendEmailData.status == "success") {
-            setRegisterTab(2)
+            // setRegisterTab(2)
             toast.success(sendEmailData?.message)
           } else {
             toast.error(sendEmailData?.message || sendEmailData?.error)

@@ -199,7 +199,8 @@ class Web3Interaction {
     address: string,
     _assetAmount: number | string,
     _upperHint: string,
-    _lowerHint: string
+    _lowerHint: string,
+    _supplyAmount: number | string,
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -209,7 +210,8 @@ class Web3Interaction {
         const tx = await contract.addColl(
           ethers.BigNumber.from(_assetAmount.toString()),
           _upperHint,
-          _lowerHint
+          _lowerHint,
+          { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(_supplyAmount.toString())}
         );
         const receipt = await tx.wait();
         resolve(receipt);
@@ -254,6 +256,96 @@ class Web3Interaction {
         const receipt = await tx.wait();
         resolve(receipt);
       } catch (error: any) {
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
+  
+  Troves = async (address: string, walletAddress: string): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      console.log("line-267", address, walletAddress);
+      try {
+        const contract = this.getContract(address);
+        if (!contract) throw new Error("Contract initialization failed");
+  
+        console.log("line-271", contract);
+        
+        // Call the Troves function (view function, no need to wait for receipt)
+        const data = await contract.Troves(walletAddress);
+        
+        // Log the raw data returned from the contract
+        console.log("Troves data:", data);
+  
+        resolve(data);  // Resolve with the data
+      } catch (error: any) {
+        console.log("line-279",error)
+        reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
+      }
+    });
+  };
+  
+
+  balanceOf = async (address: string, walletAddress: string): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      console.log("line-267", address, walletAddress);
+      try {
+        const contract = this.getContract(address);
+        if (!contract) throw new Error("Contract initialization failed");
+  
+        console.log("line-271", contract);
+        
+        // Call the Troves function (view function, no need to wait for receipt)
+        const data = await contract.balanceOf(walletAddress);
+        
+        // Log the raw data returned from the contract
+        console.log("Troves data:", data);
+  
+        resolve(data);  // Resolve with the data
+      } catch (error: any) {
+        console.log("line-279",error)
+        reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
+      }
+    });
+  };
+
+  closeTrove = async (address: string): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      console.log("line-267", address);
+      try {
+        const contract = this.getContract(address);
+        if (!contract) throw new Error("Contract initialization failed");
+  
+        console.log("line-271", contract);
+        
+        // Call the Troves function (view function, no need to wait for receipt)
+        const data = await contract.closeTrove();
+        
+        // Log the raw data returned from the contract
+        console.log("Troves data:", data);
+  
+        resolve(data);  // Resolve with the data
+      } catch (error: any) {
+        console.log("line-279",error)
+        reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
+      }
+    });
+  };
+
+  approve = async (
+    address: string,
+    spender: string,
+    amount: ethers.BigNumber | string | number
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const contract = this.getContract(address);
+        if (!contract) throw new Error("Contract initialization failed");
+  
+        const tx = await contract.approve(spender, ethers.BigNumber.from(amount));
+        const receipt = await tx.wait();
+        resolve(receipt);
+      } catch (error: any) {
+        console.log(error)
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
