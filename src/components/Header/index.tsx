@@ -13,9 +13,8 @@ import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
-import {splitAddress} from "../../utils/globals";
- 
- 
+import { splitAddress } from "../../utils/globals";
+
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,7 +29,6 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const [login, setLogin] = useState<boolean>(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const dispatch = useDispatch();
- 
 
   const logout = async () => {
     // await web3auth.logout();
@@ -74,8 +72,6 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
     }
   };
   console.log("isCopied-->", isCopied);
- 
- 
 
   const handleDropdownClick = (index: number, isOpen: boolean) => {
     setOpenDropdown(isOpen ? index : null);
@@ -155,10 +151,17 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                 {userAuth.login ? (
                   <>
                     <button
-                              onClick={() => handleCopy(userAuth?.walletAddress, "one")}
-                              className="btn flex items-center justify-center commonBtn font-normal rounded">
+                      onClick={() => handleCopy(userAuth?.walletAddress, "one")}
+                      className="btn flex items-center justify-center commonBtn font-normal rounded"
+                    >
                       {/* {userAuth?.username} */}
-                      {userAuth?.walletAddress ? <>{splitAddress(userAuth?.walletAddress)} {copyIcn}</>  : "Loading..."}
+                      {userAuth?.walletAddress ? (
+                        <>
+                          {splitAddress(userAuth?.walletAddress)} {copyIcn}
+                        </>
+                      ) : (
+                        "Loading..."
+                      )}
                     </button>
                     <div className="dropdown dropdown-end">
                       <div
@@ -254,7 +257,6 @@ const logo = (
     />
   </svg>
 );
-
 
 const copyIcn = (
   <svg
