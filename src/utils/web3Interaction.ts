@@ -350,6 +350,66 @@ class Web3Interaction {
       }
     });
   };
+
+  allowance = async (
+    address: string,
+    owner: string,
+    spender: string
+  ): Promise<ethers.BigNumber> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Get contract instance
+        const contract = this.getContract(address);
+        if (!contract) throw new Error("Contract initialization failed");
+  
+        // Call allowance method
+        const currentAllowance = await contract.allowance(owner, spender);
+        resolve(ethers.BigNumber.from(currentAllowance));
+      } catch (error: any) {
+        console.log(error);
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
+
+
+  adjustTrove = async (
+    address: string,
+    _maxFeePercentage: number | string,
+    _collWithdrawal: number | string,
+    _THUSDChange: number | string,
+    _isDebtIncrease:boolean,
+    _assetAmount: number | string,
+    _upperHint: string,
+    _lowerHint: string
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const contract = this.getContract(address);
+        console.log("line-41", contract);
+        if (!contract) throw new Error("Contract initialization failed");
+        console.log("line-43", contract);
+
+        const tx = await contract?.adjustTrove(
+          ethers.BigNumber.from(_maxFeePercentage.toString()),
+          ethers.BigNumber.from(_collWithdrawal.toString()),
+          ethers.BigNumber.from(_THUSDChange.toString()),
+          _isDebtIncrease,
+          ethers.BigNumber.from(_assetAmount.toString()),
+          _upperHint,
+          _lowerHint,
+          // { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(recommendedFee.toString())}
+        );
+        console.log("line-53", tx);
+        const receipt = await tx.wait();
+
+        resolve(receipt);
+      } catch (error: any) {
+        console.log("errrrrrrr", error);
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
 }
 
 export default Web3Interaction;

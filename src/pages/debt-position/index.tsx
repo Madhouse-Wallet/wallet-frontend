@@ -8,8 +8,10 @@ import styled from "styled-components";
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
 import SupplyPopUp from "@/components/Modals/SupplyPop";
+import AdjustPopup from "@/components/Modals/AdjustPopup";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers, providers } from "ethers";
+import { toast } from "react-toastify";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
@@ -17,22 +19,20 @@ const DebtPosition: React.FC = () => {
   const [ischecked, setIschecked] = useState<boolean>(false);
   const [debtPosition, setDebtPosition] = useState<boolean>(false);
   const [supplyPop, setSupplyPop] = useState<boolean>(false);
-  const [supply, setSupply] = useState<string>("");
-  const [debtvalue, setDebtvalue] = useState<string>("");
-  const [healthValue, setHealthtvalue] = useState<string>("");
-  const [walletBalance, setWalletBalance] = useState<string>("");
+  const [adjustPop, setAdjustPop] = useState<boolean>(false);
+  const [supply, setSupply] = useState<string>("0");
+  const [debtvalue, setDebtvalue] = useState<string>("0");
+  const [healthValue, setHealthtvalue] = useState<string>("0");
+  const [walletBalance, setWalletBalance] = useState<string>("0");
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
     const calculateCollateralAndHealthFactor = async (
       collateralAmount: string, // in ETH
       debt: string // in USD
     ) => {
       try {
-        console.log(collateralAmount,debt)
         const provider = (window as any).ethereum; // Ensure user has a wallet extension
         if (!provider) {
-          console.error("No wallet detected. Please install Metamask.");
           return { collateralValue: "0.00", healthFactor: "0.00" };
         }
     
@@ -55,19 +55,14 @@ const DebtPosition: React.FC = () => {
         const collateralValue = ethPrice * collateral; // Collateral value in USD
         const healthFactor = (collateralValue * 1.1) / debtAmount; // Health factor calculation
     
-        // Log or return results
-        console.log("Collateral Value:", collateralValue.toFixed(2));
-        console.log("Health Factor:", healthFactor.toFixed(2));
     
       //   return {
       //     collateralValue: collateralValue.toFixed(2),
       //     healthFactor: healthFactor.toFixed(2),
       // };
-      console.log(healthFactor.toFixed(2))
       setHealthtvalue(healthFactor.toFixed(2))
       // return 
     } catch (error) {
-      console.error("Error calculating values:", error);
       return { collateralValue: "0.00", healthFactor: "0.00" };
     }
   };
@@ -93,8 +88,6 @@ const DebtPosition: React.FC = () => {
       // Fetch data from the contract
       const troveResponse = await web3.Troves(contractAddress, walletAddress);
       const balanceResponse = await web3.balanceOf(TUSDAddress, walletAddress);
-      console.log("balanceResponse",balanceResponse)
-      console.log("Trove Response:", troveResponse);
      
       const coll = troveResponse?.coll;
       const debt = troveResponse?.debt;
@@ -102,15 +95,13 @@ const DebtPosition: React.FC = () => {
       const collInEther = ethers.utils.formatEther(coll);
       const debtInEther = ethers.utils.formatEther(debt);
       const balance = ethers.utils.formatEther(balanceResponse);
-      console.log(balance)
       calculateCollateralAndHealthFactor(collInEther,debtInEther)
       setSupply(collInEther);  // This will set 'supply' as the value in Ether
       setDebtvalue(debtInEther);
       setWalletBalance(balance)
       setLoading(false);
     } catch (err: any) {
-      console.error("Error fetching trove data:", err);
-      setError(err.message || "Failed to fetch trove data");
+      toast.error('Failed to fetch trove data')
       setLoading(false);
     }
   };
@@ -120,7 +111,7 @@ const DebtPosition: React.FC = () => {
       const provider = (window as any).ethereum;
 
       if (!provider) {
-        setError("MetaMask not detected. Please install MetaMask to proceed.");
+        toast.error('MetaMask not detected. Please install MetaMask to proceed.')
         setLoading(false);
         return;
       }
@@ -130,14 +121,12 @@ const DebtPosition: React.FC = () => {
         const accounts = await provider.request({
           method: "eth_requestAccounts",
         });
-        console.log("Connected Account:", accounts[0]);
 
         // Fetch trove data once connected
         fetchTroveData(provider);
        
       } catch (err: any) {
-        console.error("Error connecting wallet:", err);
-        setError(err.message || "Failed to connect wallet");
+        toast.error('Failed to connect wallet')
         setLoading(false);
       }
     };
@@ -165,35 +154,72 @@ const DebtPosition: React.FC = () => {
     const provider = (window as any).ethereum;
   
     if (!provider) {
-      setError("MetaMask not detected. Please install MetaMask to proceed.");
+      toast.error('MetaMask not detected. Please install MetaMask to proceed.')
       setLoading(false);
       return;
     }
+    // try {
+    //   // Create web3 instance
+    //   const web3 = new Web3Interaction("sepolia", provider);
+  
+    //   // Contract address and spender address
+    //   const tokenContractAddress = "0xF3e72cc2e04BB24999718e9b2Ca55fA764c5f9ea";
+    //   const spenderAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";  // Replace with actual spender address
+  
+    //   // Infinite allowance value for uint256 (2^256 - 1)
+    //   const infiniteAllowance = ethers.BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+  
+    //   // Call approve function with infinite allowance
+    //   const approveResponse = await web3.approve(tokenContractAddress, spenderAddress, infiniteAllowance);
+  
+    //   // Now that approval is done, proceed with the withdraw function
+    //   const troveResponse = await web3.closeTrove(spenderAddress);
+    //   setLoading(false);
+    // } catch (err: any) {
+    //   toast.error(err.message ||  'Caller doesnt have enough THUSD to make repayment')
+    //   setLoading(false);
+    // }
+
     try {
       // Create web3 instance
       const web3 = new Web3Interaction("sepolia", provider);
-  
+    
       // Contract address and spender address
       const tokenContractAddress = "0xF3e72cc2e04BB24999718e9b2Ca55fA764c5f9ea";
-      const spenderAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";  // Replace with actual spender address
-  
+      const spenderAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167"; // Replace with actual spender address
+    
       // Infinite allowance value for uint256 (2^256 - 1)
       const infiniteAllowance = ethers.BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-  
-      // Call approve function with infinite allowance
-      const approveResponse = await web3.approve(tokenContractAddress, spenderAddress, infiniteAllowance);
-      console.log("Approve Response:", approveResponse);
-  
-      // Now that approval is done, proceed with the withdraw function
+    
+      // Get the account address
+
+      const accounts = await provider.request({
+        method: "eth_requestAccounts",
+      });
+      const walletAddress = accounts[0];
+    
+      // Check current allowance
+      const currentAllowance = await web3.allowance(tokenContractAddress, walletAddress, spenderAddress);
+    
+      // If allowance is insufficient, call approve
+      if (currentAllowance.lt(infiniteAllowance)) {
+        console.log("Insufficient allowance, approving...");
+        const approveResponse = await web3.approve(tokenContractAddress, spenderAddress, infiniteAllowance);
+        console.log("Approval transaction: ", approveResponse);
+      } else {
+        console.log("Sufficient allowance already exists.");
+      }
+    
+      // Now that approval is done or already exists, proceed with the withdraw function
       const troveResponse = await web3.closeTrove(spenderAddress);
-      console.log("Trove Response:", troveResponse);
-  
+      console.log("Trove closed successfully: ", troveResponse);
+    
       setLoading(false);
     } catch (err: any) {
-      console.error("Error fetching trove data:", err);
-      setError(err.message || "Caller doesnt have enough THUSD to make repayment");
+      toast.error(err.message || "Caller doesn't have enough THUSD to make repayment");
       setLoading(false);
     }
+    
   };
   
 
@@ -206,18 +232,6 @@ const DebtPosition: React.FC = () => {
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <h4>Error: {error}</h4>
-        </div>
-      </div>
-    );
-  }
-
-  console.log("line-118",supply,debtvalue)
 
   return (
     <>
@@ -234,6 +248,16 @@ const DebtPosition: React.FC = () => {
           <SupplyPopUp
           supplyPop={supplyPop}
           setSupplyPop={setSupplyPop}
+          />,
+          document.body
+        )}
+        {adjustPop &&
+        createPortal(
+          <AdjustPopup
+          adjustPop={adjustPop}
+          setAdjustPop={setAdjustPop}
+          supply={supply}
+          debtvalue={debtvalue}
           />,
           document.body
         )}
@@ -429,6 +453,7 @@ const DebtPosition: React.FC = () => {
                           </li>
                           <li className="">
                             <button
+                             onClick={()=> setAdjustPop(!adjustPop)}
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
