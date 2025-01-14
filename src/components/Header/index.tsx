@@ -88,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
           document.body
         )}
       <header className="siteHeader sticky top-0 py-2 w-full shadow z-[999] bg-[var(--backgroundColor)]">
-        <div className="container mx-auto">
+        <div className="container-fluid mx-auto">
           <Nav className="flex items-center justify-between ">
             {/* <div className="">
               <button

@@ -11,8 +11,11 @@ import { ThemeProvider } from "@/ContextApi/ThemeContext";
 import { useEffect, useState } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/router";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+
 console.log("initializeTBTC--->", initializeTBTC);
 export default function App({ Component, pageProps, ...props }: AppProps) {
+  useScrollRestoration();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
