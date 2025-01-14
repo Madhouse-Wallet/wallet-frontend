@@ -146,6 +146,39 @@ const DebtPosition: React.FC = () => {
                       </div>
                     </CardCstm>
                   </div>
+                  <div className="py-2">
+                    <CardCstm
+                      className="position-relative p-3 rounded "
+                      style={{
+                        fontSize: 12,
+                        background: "var(--cardBg2)",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                      <div className="left">
+                        <p className="m-0 fw-sbold">Auto Pay Loan</p>
+                      </div>
+                      </div>
+                      <div className="content pt-3">
+                      <form action="" className="">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+         
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+                      </div>
+                    </CardCstm>
+                  </div>
                 </div>
                 <div className="md:col-span-6 col-span-12 my-2">
                   <div className="sectionHeader pb-3">

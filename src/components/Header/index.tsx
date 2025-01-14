@@ -142,18 +142,16 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   style={{ backgroundColor: "#000", color: "#fff" }}
                 />
 
-                {!userAuth.login ? (
+                {userAuth.login ? (
                   <>
                     <button
                       onClick={() => handleCopy(userAuth?.walletAddress, "one")}
                       className="btn flex items-center justify-center commonBtn font-normal rounded"
                     >
                       {/* {userAuth?.username} */}
-                      {!userAuth?.walletAddress ? (
+                      {userAuth?.walletAddress ? (
                         <>
-                          {splitAddress(
-                            "0xEEc675495917DF84C905E31D7E330E22138E951D"
-                          )}{" "}
+                          {splitAddress(userAuth?.walletAddress)}{" "}
                           {copyIcn}
                         </>
                       ) : (

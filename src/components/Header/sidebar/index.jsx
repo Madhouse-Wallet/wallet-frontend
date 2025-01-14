@@ -9,16 +9,32 @@ import { createPortal } from "react-dom";
 import styled from "styled-components";
 import Image from "next/image";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
+import { toast } from "react-toastify";
 const Sidebar = ({ sidebar, setSidebar }) => {
   const router = useRouter();
+  const userAuth = useSelector((state) => state.Auth);
   const { theme, toggleTheme } = useTheme();
   const [buycoverage, setBuyCoverage] = useState(false);
   const [buy, setBuy] = useState(false);
+  const dispatch = useDispatch();
 
   console.log(router.pathname == "/", "asdfas");
   const isChecked = theme === "light";
-
+  const logoutFn = async () => {
+    setSidebar(!sidebar)
+    dispatch(
+      loginSet({
+        login: false,
+        walletAddress: "",
+        provider: "",
+        signer: "",
+        username: "",
+      })
+    );
+    toast.success("Logout Successfully!");
+  };
   return (
     <>
       {buycoverage &&
@@ -33,9 +49,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
       <SidebarDiv
         sidebar={sidebar}
-        className={`${
-          sidebar && "active"
-        } px-3 py-2 fixed top-0 left-0 z-[99999]`}
+        className={`${sidebar && "active"
+          } px-3 py-2 fixed top-0 left-0 z-[99999]`}
       >
         <button
           onClick={() => setSidebar(!sidebar)}
@@ -75,9 +90,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{Dashboard}</span>
                 Dashboard
@@ -88,9 +102,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 onClick={() => setSidebar(!sidebar)}
                 href={"/approval"}
-                className={`${
-                  router.pathname === "/approval" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/approval" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{icn7}</span>
                 Approvals
@@ -101,9 +114,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/setting"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/setting" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/setting" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{setting}</span>
                 Setting & Support
@@ -114,9 +126,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/help"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/help" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/help" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{icn10}</span>
                 Help and Support
@@ -127,9 +138,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/documentation"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/documentation" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/documentation" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{documentation}</span>
                 Documentation
@@ -140,9 +150,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/legal-notice"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/legal-notice" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/legal-notice" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{legal}</span>
                 Legal Notice
@@ -153,24 +162,27 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/privacy-policy"}
                 onClick={() => setSidebar(!sidebar)}
-                className={`${
-                  router.pathname === "/privacy-policy" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/privacy-policy" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{privacy}</span>
                 Privacy
               </Link>
             </li>
-            <li className="py-1">
-              <button
-                // isActive={router.pathname == "/btc-exhange"}
-                // href={"/"}
-                className={`flex p-2 items-start justify-start gap-2 rounded`}
-              >
-                <span className="icn">{logout}</span>
-                Log Out
-              </button>
-            </li>
+            {
+              userAuth.login && (<li className="py-1">
+                <button
+                onClick={logoutFn}
+                  // isActive={router.pathname == "/btc-exhange"}
+                  // href={"/"}
+                  className={`flex p-2 items-start justify-start gap-2 rounded`}
+                >
+                  <span className="icn">{logout}</span>
+                  Log Out
+                </button>
+              </li>)
+            }
+            
           </ul>
         </div>
       </SidebarDiv>
