@@ -5,6 +5,7 @@ import MainLayout from "./MainLayout";
 
 import { useRouter } from "next/router";
 import AuthLayout from "./AuthLayout";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -12,9 +13,9 @@ const outfit = Outfit({
 });
 
 const Layout = ({ Component, pageProps }) => {
+  const router = useRouter();
   const [isAuth, setIsAuth] = useState(false);
 
-  const router = useRouter();
   useEffect(() => {
     if (Component.isProtected) {
       if (!auth.authToken) {

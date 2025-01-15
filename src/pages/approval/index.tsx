@@ -46,13 +46,13 @@ const Approvals: React.FC = () => {
                     Recent <span className="themeClr">Approvals</span>
                   </h4>
                 </div>
-                <div className="right">
+                {/* <div className="right">
                   <div className="d-flex align-items-center gap-3">
                     <button className="d-flex align-items-center justify-content-center commonBtn">
                       Approval History
                     </button>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="col-span-12 my-2">

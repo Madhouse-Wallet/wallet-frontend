@@ -227,34 +227,34 @@ const Setting: React.FC = () => {
         </>
       ),
     },
-    {
-      title: "Autopay loan",
-      content: (
-        <>
-          <form action="" className="pb-3">
-            <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
-                <label
-                  htmlFor=""
-                  className="form-label m-0 text-xs font-medium"
-                >
-                  Autopay loan
-                </label>
-                <input
-                  type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
-                />
-              </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </form>
-        </>
-      ),
-    },
+    // {
+    //   title: "Autopay loan",
+    //   content: (
+    //     <>
+    //       <form action="" className="pb-3">
+    //         <div className="grid gap-3 grid-cols-12">
+    //           <div className="md:col-span-4 sm:col-span-6 col-span-12">
+    //             <label
+    //               htmlFor=""
+    //               className="form-label m-0 text-xs font-medium"
+    //             >
+    //               Autopay loan
+    //             </label>
+    //             <input
+    //               type="text"
+    //               className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+    //             />
+    //           </div>
+    //           <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+    //             <button className="btn flex items-center justify-center commonBtn">
+    //               Submit
+    //             </button>
+    //           </div>
+    //         </div>
+    //       </form>
+    //     </>
+    //   ),
+    // },
     {
       title: "Scheduled Transfer ",
       content: (

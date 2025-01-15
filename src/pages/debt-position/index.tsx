@@ -4,23 +4,136 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import p1 from "@/public/user.png";
 import Image from "next/image";
-import styled from "styled-components"; 
+import styled from "styled-components";
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
+import LiquitdityProtectionPop from "@/components/Modals/LiquidityProtectionPop";
+import SupplyPopUp from "@/components/Modals/SupplyPop";
+import AdjustPopup from "@/components/Modals/AdjustPopup";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers, providers } from "ethers";
+import { toast } from "react-toastify";
 
 const DebtPosition: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [ischecked, setIschecked] =  useState<boolean>(false);
+  const [liquidity, setLiquidity] = useState(false);
+  const [ischecked, setIschecked] = useState<boolean>(false);
+  const [withdrawButton, setWithdrawButton] = useState<boolean>(false);
   const [debtPosition, setDebtPosition] = useState<boolean>(false);
+  const [supplyPop, setSupplyPop] = useState<boolean>(false);
+  const [adjustPop, setAdjustPop] = useState<boolean>(false);
+  const [supply, setSupply] = useState<string>("0");
+  const [debtvalue, setDebtvalue] = useState<string>("0");
+  const [healthValue, setHealthtvalue] = useState<string>("0");
+  const [walletBalance, setWalletBalance] = useState<string>("0");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const calculateCollateralAndHealthFactor = async (
+    collateralAmount: string, // in ETH
+    debt: string // in USD
+  ) => {
+    try {
+      const provider = (window as any).ethereum;
+      if (!provider) {
+        return { collateralValue: "0.00", healthFactor: "0.00" };
+      }
+
+      // Fetch ETH price
+      const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+      const web3 = new Web3Interaction("sepolia", provider);
+      const receipt = await web3.fetchPrice(contractAddress!);
+      const receiptInEther = ethers.utils.formatEther(receipt);
+      const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+
+      const collateral = parseFloat(collateralAmount);
+      const debtAmount = parseFloat(debt);
+
+      if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
+        throw new Error("Invalid collateral amount or debt provided.");
+      }
+
+      const collateralValue = ethPrice * collateral;
+      const healthFactor = (collateralValue * 1.1) / debtAmount;
+      setHealthtvalue(healthFactor.toFixed(2));
+    } catch (error) {
+      return { collateralValue: "0.00", healthFactor: "0.00" };
+    }
+  };
+
+  const fetchTroveData = async (provider: any) => {
+    try {
+      // Get wallet address
+      const accounts = await provider.request({
+        method: "eth_requestAccounts",
+      });
+      const walletAddress = accounts[0];
+
+      // Create web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Contract address
+      const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_CONTRACT_ADDRESS;
+      const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
+
+      // Fetch data from the contract
+      const troveResponse = await web3.Troves(contractAddress!, walletAddress);
+      const balanceResponse = await web3.balanceOf(TUSDAddress!, walletAddress);
+
+      const coll = troveResponse?.coll;
+      const debt = troveResponse?.debt;
+
+      const collInEther = ethers.utils.formatEther(coll);
+      const debtInEther = ethers.utils.formatEther(debt);
+      const balance = ethers.utils.formatEther(balanceResponse);
+      calculateCollateralAndHealthFactor(collInEther, debtInEther);
+      setSupply(collInEther); 
+      setDebtvalue(debtInEther);
+      setWalletBalance(balance);
+      setLoading(false);
+    } catch (err: any) {
+      toast.error("Failed to fetch trove data");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      const provider = (window as any).ethereum;
+
+      if (!provider) {
+        toast.error(
+          "MetaMask not detected. Please install MetaMask to proceed."
+        );
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Request account connection from MetaMask
+        const accounts = await provider.request({
+          method: "eth_requestAccounts",
+        });
+
+        // Fetch trove data once connected
+        fetchTroveData(provider);
+      } catch (err: any) {
+        toast.error("Failed to connect wallet");
+        setLoading(false);
+      }
+    };
+
+    connectWallet();
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
-    }, 3000); // 5000ms = 5 seconds
+    }, 3000); // 3000ms = 3 seconds
 
-    // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back(); // Navigates to the previous page
@@ -28,6 +141,42 @@ const DebtPosition: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
+
+  const Withdraw = async () => {
+    const provider = (window as any).ethereum;
+
+    if (!provider) {
+      toast.error("MetaMask not detected. Please install MetaMask to proceed.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setWithdrawButton(true);
+      const web3 = new Web3Interaction("sepolia", provider);
+      const spenderAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS; // Replace with actual spender address
+      const troveResponse = await web3.closeTrove(spenderAddress!);
+      setLoading(false);
+      setWithdrawButton(false);
+      toast.success("Transaction Completed");
+      fetchTroveData(provider);
+    } catch (err: any) {
+      toast.error(err || "Caller doesn't have enough THUSD to make repayment");
+      setLoading(false);
+      setWithdrawButton(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-5">
+        <div className="text-center">
+          <h4>Loading trove data...</h4>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {debtPosition &&
@@ -35,6 +184,27 @@ const DebtPosition: React.FC = () => {
           <DebtPositionPop
             debtPosition={debtPosition}
             setDebtPosition={setDebtPosition}
+            fetchTroveData={fetchTroveData}
+          />,
+          document.body
+        )}
+      {supplyPop &&
+        createPortal(
+          <SupplyPopUp
+            supplyPop={supplyPop}
+            setSupplyPop={setSupplyPop}
+            fetchTroveData={fetchTroveData}
+          />,
+          document.body
+        )}
+      {adjustPop &&
+        createPortal(
+          <AdjustPopup
+            adjustPop={adjustPop}
+            setAdjustPop={setAdjustPop}
+            supply={supply}
+            debtvalue={debtvalue}
+            fetchTroveData={fetchTroveData}
           />,
           document.body
         )}
@@ -66,12 +236,12 @@ const DebtPosition: React.FC = () => {
                     <p className="m-0">Assets</p>
                   </div>
                   <span className="icn">
-                    <button
+                    {/* <button
                       className="d-flex align-items-center justify-content-center commonBtn fw-sbold"
                       style={{ minWidth: "unset" }}
-                    >
-                      APY 4%
-                    </button>
+                    > */}
+                    THUSD
+                    {/* </button> */}
                   </span>
                 </div>
                 <div
@@ -84,14 +254,16 @@ const DebtPosition: React.FC = () => {
                   >
                     <li className=" d-flex align-items-center justify-content-between">
                       <p className="m-0 fw-sbold">Net Balance</p>
-                      <p className="m-0 fw-sbold">$ 1,234,34</p>
+                      <p className="m-0 fw-sbold">
+                        {Number(walletBalance).toFixed(4)}
+                      </p>
                     </li>
                     <li
                       className=" d-flex align-items-center justify-content-between"
                       style={{ fontSize: 10 }}
                     >
                       <p className="m-0 fw-sbold">Health Factor</p>
-                      <p className="m-0 fw-sbold"> 1.2</p>
+                      <p className="m-0 fw-sbold">{healthValue}</p>
                     </li>
                   </ul>
                 </div>
@@ -113,10 +285,10 @@ const DebtPosition: React.FC = () => {
                     >
                       <div className="left">
                         <p className="m-0 fw-sbold">Supply</p>
-                        <p className="m-0">APY 1%</p>
+                        {/* <p className="m-0">APY 1%</p> */}
                       </div>
                       <div className="right">
-                        <p className="m-0 fw-sbold">$10000</p>
+                        <p className="m-0 fw-sbold">{supply}</p>
                       </div>
                     </CardCstm>
                   </div>
@@ -129,11 +301,46 @@ const DebtPosition: React.FC = () => {
                       }}
                     >
                       <div className="left">
-                        <p className="m-0 fw-sbold">Borrow</p>
-                        <p className="m-0">APY 1%</p>
+                        <p className="m-0 fw-sbold">Debt</p>
+                        {/* <p className="m-0">APY 1%</p> */}
                       </div>
                       <div className="right">
-                        <p className="m-0 fw-sbold">-$40000</p>
+                        <p className="m-0 fw-sbold">
+                          {Number(debtvalue).toFixed(4)}
+                        </p>
+                      </div>
+                    </CardCstm>
+                  </div>
+                  <div className="py-2">
+                    <CardCstm
+                      className="position-relative p-3 rounded "
+                      style={{
+                        fontSize: 12,
+                        background: "var(--cardBg2)",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-between">
+                      <div className="left">
+                        <p className="m-0 fw-sbold">Auto Pay Loan</p>
+                      </div>
+                      </div>
+                      <div className="content pt-3">
+                      <form action="" className="">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+         
+                <input
+                  type="text"
+                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="btn flex items-center justify-center commonBtn">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
                       </div>
                     </CardCstm>
                   </div>
@@ -162,8 +369,8 @@ const DebtPosition: React.FC = () => {
                           handleDiameter={24}
                           offColor="#4C4C57"
                           onColor="#4C4C57"
-                          checked={ischecked}
-                          onChange={() => setIschecked(!ischecked)}
+                          checked={liquidity}
+                          onChange={() => setLiquidity(!liquidity)}
                           boxShadow="0px 0px 0px 0px"
                           activeBoxShadow="0px 0px 0px 0px"
                         />
@@ -197,8 +404,10 @@ const DebtPosition: React.FC = () => {
                             <button
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
+                              onClick={Withdraw}
+                              disabled={withdrawButton}
                             >
-                              Withdraw
+                              {withdrawButton ? "Withdrawing.." : "Withdraw"}
                             </button>
                           </li>
                         </ul>
@@ -220,6 +429,7 @@ const DebtPosition: React.FC = () => {
                         <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
                           <li className="">
                             <button
+                              onClick={() => setSupplyPop(!supplyPop)}
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
@@ -228,20 +438,21 @@ const DebtPosition: React.FC = () => {
                           </li>
                           <li className="">
                             <button
+                              onClick={() => setAdjustPop(!adjustPop)}
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
-                              Repay
+                              Adjust
                             </button>
                           </li>
-                          <li className="">
+                          {/* <li className="">
                             <button
                               className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
                               Switch
                             </button>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                     </CardCstm>
