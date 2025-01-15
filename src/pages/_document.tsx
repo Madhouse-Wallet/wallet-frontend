@@ -4,6 +4,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
+        <link rel="icon" href="/favicn.png" />
         <link
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
           rel="stylesheet"
@@ -14,7 +15,7 @@ export default function Document() {
           rel="stylesheet"
           href="https://shadcdn.com/package/@shadcdn/library-name/style.css"
         />
-       
+        <title>Madhouse Wallet</title>
       </Head>
       <body>
         <Main />

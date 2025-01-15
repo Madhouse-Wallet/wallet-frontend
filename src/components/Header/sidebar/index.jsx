@@ -3,16 +3,38 @@ import BuyCoveragePop from "@/components/Modals/buyCoveragePop";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import logomw from "@/Assets/Images/logo.png";
+import Wlogomw from "@/Assets/Images/logow.png";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
-
+import Image from "next/image";
+import { useTheme } from "@/ContextApi/ThemeContext";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
+import { toast } from "react-toastify";
 const Sidebar = ({ sidebar, setSidebar }) => {
   const router = useRouter();
+  const userAuth = useSelector((state) => state.Auth);
+  const { theme, toggleTheme } = useTheme();
   const [buycoverage, setBuyCoverage] = useState(false);
   const [buy, setBuy] = useState(false);
+  const dispatch = useDispatch();
 
   console.log(router.pathname == "/", "asdfas");
-
+  const isChecked = theme === "light";
+  const logoutFn = async () => {
+    setSidebar(!sidebar)
+    dispatch(
+      loginSet({
+        login: false,
+        walletAddress: "",
+        provider: "",
+        signer: "",
+        username: "",
+      })
+    );
+    toast.success("Logout Successfully!");
+  };
   return (
     <>
       {buycoverage &&
@@ -27,9 +49,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
       <SidebarDiv
         sidebar={sidebar}
-        className={`${
-          sidebar && "active"
-        } px-3 py-2 fixed top-0 left-0 z-[99999]`}
+        className={`${sidebar && "active"
+          } px-3 py-2 fixed top-0 left-0 z-[99999]`}
       >
         <button
           onClick={() => setSidebar(!sidebar)}
@@ -37,16 +58,40 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         >
           {close}
         </button>
-        <div className="top pb-2">{logo}</div>
+        <div className="top p-2">
+          {isChecked ? (
+            <>
+              <Image
+                src={logomw}
+                alt="logo"
+                height={10000}
+                width={10000}
+                className="max-w-full object-contain w-auto"
+                style={{ height: 40 }}
+              />
+            </>
+          ) : (
+            <>
+              <Image
+                src={Wlogomw}
+                alt="logo"
+                height={10000}
+                width={10000}
+                className="max-w-full object-contain w-auto"
+                style={{ height: 40 }}
+              />
+            </>
+          )}
+        </div>
         <div className="sidebarWrpper pt-3">
           <ul className="list-none pl-0 mb-0">
             <li className="py-1">
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/"}
-                className={`${
-                  router.pathname === "/" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{Dashboard}</span>
                 Dashboard
@@ -55,10 +100,10 @@ const Sidebar = ({ sidebar, setSidebar }) => {
             <li className="py-1">
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
+                onClick={() => setSidebar(!sidebar)}
                 href={"/approval"}
-                className={`${
-                  router.pathname === "/approval" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                className={`${router.pathname === "/approval" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{icn7}</span>
                 Approvals
@@ -68,9 +113,9 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/setting"}
-                className={`${
-                  router.pathname === "/setting" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/setting" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{setting}</span>
                 Setting & Support
@@ -80,9 +125,9 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/help"}
-                className={`${
-                  router.pathname === "/help" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/help" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{icn10}</span>
                 Help and Support
@@ -92,9 +137,9 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/documentation"}
-                className={`${
-                  router.pathname === "/documentation" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/documentation" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{documentation}</span>
                 Documentation
@@ -104,9 +149,9 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/legal-notice"}
-                className={`${
-                  router.pathname === "/legal-notice" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/legal-notice" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{legal}</span>
                 Legal Notice
@@ -116,24 +161,28 @@ const Sidebar = ({ sidebar, setSidebar }) => {
               <Link
                 // isActive={router.pathname == "/btc-exhange"}
                 href={"/privacy-policy"}
-                className={`${
-                  router.pathname === "/privacy-policy" && "active"
-                } flex p-2 items-start justify-start gap-2 rounded`}
+                onClick={() => setSidebar(!sidebar)}
+                className={`${router.pathname === "/privacy-policy" && "active"
+                  } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{privacy}</span>
                 Privacy
               </Link>
             </li>
-            <li className="py-1">
-              <button
-                // isActive={router.pathname == "/btc-exhange"}
-                // href={"/"}
-                className={`flex p-2 items-start justify-start gap-2 rounded`}
-              >
-                <span className="icn">{logout}</span>
-                Log Out
-              </button>
-            </li>
+            {
+              userAuth.login && (<li className="py-1">
+                <button
+                onClick={logoutFn}
+                  // isActive={router.pathname == "/btc-exhange"}
+                  // href={"/"}
+                  className={`flex p-2 items-start justify-start gap-2 rounded`}
+                >
+                  <span className="icn">{logout}</span>
+                  Log Out
+                </button>
+              </li>)
+            }
+            
           </ul>
         </div>
       </SidebarDiv>

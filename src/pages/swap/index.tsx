@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { getAccount } from "../../lib/pimlicoWallet";
 import { useEffect, useState } from "react";
+import styled from "styled-components";
 // Parameters for CowSwapWidget
 const cowSwapParams = {
   appCode: "My Cool App",
@@ -80,10 +81,12 @@ const Swap = () => {
               </div>
             </div>
             <div className="col-span-12">
+              <CowSwapCard>
               <CowSwapWidget
                 params={cowSwapParams}
                 provider={provider} // Use the adapted provider
               />
+              </CowSwapCard>
             </div>
           </div>
         </div>
@@ -91,7 +94,16 @@ const Swap = () => {
     </>
   );
 };
-
+const CowSwapCard = styled.div`
+ > div {
+  display: flex;
+  justify-content: center; 
+ }
+  iframe {
+    max-width: 450px;
+    border-radius: 25px;
+  }
+`
 export default Swap;
 
 // Back button icon

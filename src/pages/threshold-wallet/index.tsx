@@ -34,14 +34,13 @@ const ThresholdWallet: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  console.log(userAuth?.login , "loginLogo")
+  console.log(userAuth?.login, "loginLogo");
 
   const cardMetrics: CardMetrics[] = [
     { head: "Total Deposit", value: "$234234", icn: icn11 },
     { head: "BTC Balance", value: "$234234", icn: icn22 },
     { head: "USD Balance", value: "$234234", icn: icn33 },
     { head: "Loan Health", value: "$234234", icn: icn11 },
-    { head: "LTV", value: "$234234", icn: icn22 },
   ];
 
   const cardData: CardData[] = [
@@ -78,10 +77,10 @@ const ThresholdWallet: React.FC = () => {
       head: "Sell Bitcoin",
       icn: sellIcn,
       onClick: () => {
-        if (userAuth.login){
+        if (userAuth.login) {
           router.push("/swap");
-        } else{
-          toast.error("Please Login!")
+        } else {
+          toast.error("Please Login!");
         }
         // setBuy(!buy);
       },
@@ -202,8 +201,10 @@ const ThresholdWallet: React.FC = () => {
                 <span className="text-green-500 text-xl font-bold ms-2">
                   1.27
                 </span>
-                <div className="rounded border text-xs border-secondary bg-[var(--backgroundColor)]"
-                style={{fontSize: 10, padding: "2px 5px"}}>
+                <div
+                  className="rounded border text-xs border-secondary bg-[var(--backgroundColor)]"
+                  style={{ fontSize: 10, padding: "2px 5px" }}
+                >
                   Risk Factor
                 </div>
               </h4>
@@ -226,19 +227,19 @@ const ThresholdWallet: React.FC = () => {
               </div> */}
             </div>
             <div className="col-span-12 my-2">
-              <div className="grid gap-3 grid-cols-12">
+              <DashboardLinks className="grid gap-3 grid-cols-12">
                 {cardData.map((item, key) => (
                   <div key={key} className=" md:col-span-4 col-span-6">
                     <CardCstm
                       onClick={item.onClick}
-                      className="p-3 rounded-3 h-100 position-relative cursor-pointer flex items-center justify-start gap-2"
+                      className="cardcstm p-3 rounded-3 h-100 position-relative cursor-pointer flex items-center justify-start gap-2"
                     >
                       <div className="text-end">{item.icn}</div>
                       <h6 className="m-0 fw-sbold">{item.head}</h6>
                     </CardCstm>
                   </div>
                 ))}
-              </div>
+              </DashboardLinks>
             </div>
           </div>
         </div>
@@ -246,6 +247,14 @@ const ThresholdWallet: React.FC = () => {
     </>
   );
 };
+
+const DashboardLinks = styled.div`
+  @media (max-width: 420px) {
+    .cardcstm {
+      flex-wrap: wrap;
+    }
+  }
+`;
 
 const CardCstm = styled.div`
   background-color: var(--cardBg);
