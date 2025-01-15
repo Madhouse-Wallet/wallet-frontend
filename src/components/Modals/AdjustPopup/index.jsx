@@ -8,12 +8,13 @@ import { toast } from "react-toastify";
 
 // img
 
-const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
+const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue,fetchTroveData }) => {
   const [supplyAmount, setSupplyAmount] = useState(supply);
   const [totalDebtAmount, settotalDebtAmount] = useState();
   const [changeInput, setChangeInput] = useState(false);
+  const [nextButton, setNextButton] = useState(false);
   const [borrowingFeee, setBorrowingFeee] = useState();
-  const [debtAmount, setDebtAmount] = useState(debtvalue - 200);
+  const [debtAmount, setDebtAmount] = useState(debtvalue === '0' ? 0 : debtvalue - 200 );
   const [error, setError] = useState("");
   const [debtError, setDebtError] = useState("");
   const [collRatio, setCollRatio] = useState();
@@ -36,101 +37,26 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
     let borrowingAmount = differenceAmount * borrowingFeePercentage;
 
     // Limit to 2 decimal places
-    console.log("line-39", borrowingAmount);
     borrowingAmount = parseFloat(borrowingAmount);
-
-    console.log("Debt Amount:", debtAmountNum);
-    console.log("Net Debt:", netDebt);
-    console.log("Difference Amount:", differenceAmount);
-    console.log("Borrowing Amount:", borrowingAmount);
 
     // Update states
     setBorrowingFeee(borrowingAmount);
     const totalDebt = debtAmountNum + 200 + borrowingAmount;
     settotalDebtAmount(parseFloat(totalDebt));
 
-    console.log("Total Debt Amount:", totalDebt);
-
     calculateCollateralAndHealthFactor(supplyAmount, totalDebt);
   };
-
-  // const addSupply = async () => {
-  //   const provider = window.ethereum; // Ensure user has a wallet extension
-  //   if (!provider) {
-  //     return toast.error("Please Connect to wallet");
-  //   }
-
-  //   const web3 = new Web3Interaction("sepolia", provider);
-
-  //   const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
-  //   const lowerHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
-  //   const maxFeePercentage = ethers.utils.parseEther("0.01");
-
-  //   let updatedSupplyAmount = supplyAmount;
-  //   let updatedDebtAmount = debtAmount;
-  //   // updatedSupplyAmount = supplyAmount - supply;
-  //   // updatedDebtAmount = debtAmount - (debtvalue - 200);
-  //   updatedSupplyAmount = Math.abs(supplyAmount - supply);
-  //   updatedDebtAmount = Math.abs(debtAmount - (debtvalue - 200));
-  //   const callWithFalse = debtAmount > debtvalue - 200 ? true : false;
-
-  //   let upperHint =
-  //     callWithFalse === true
-  //       ? "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e"
-  //       : "0x9A872029Ee44858EA17B79E30198947907a3a67A";
-
-  //   // Determine the condition and adjust amounts
-  //   // const callWithFalse = supplyAmount > supply && debtAmount === debtvalue;
-  //   console.log("line-43", callWithFalse);
-
-  //   // if (callWithFalse) {
-  //   //   console.log("inside if", supplyAmount, supply);
-  //   //   updatedSupplyAmount = supplyAmount - supply;
-  //   //   updatedDebtAmount = 0;
-  //   //   upperHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
-  //   // } else {
-  //   //   console.log("inside else", debtAmount, debtvalue);
-  //   //   updatedSupplyAmount = 0;
-  //   //   updatedDebtAmount = debtAmount - debtvalue;
-  //   //   upperHint = "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e";
-  //   // }
-
-  //   const supplyAmountInWei = ethers.utils.parseEther(
-  //     updatedSupplyAmount.toString()
-  //   );
-  //   const debtAmountInWei = ethers.utils.parseEther(
-  //     updatedDebtAmount.toString()
-  //   );
-  //   console.log("line-55", updatedSupplyAmount, updatedDebtAmount);
-  //   try {
-  //     await web3.adjustTrove(
-  //       contractAddress,
-  //       maxFeePercentage,
-  //       supplyAmountInWei,
-  //       debtAmountInWei,
-  //       callWithFalse,
-  //       "0",
-  //       upperHint,
-  //       lowerHint,
-  //       supplyValue
-  //     );
-  //     toast.success(`Contract called successfully`);
-  //   } catch (error) {
-  //     console.error("Error calling adjustTrove:", error);
-  //     toast.error("Error calling contract");
-  //   }
-  // };
 
   const addSupply = async () => {
     const provider = window.ethereum; // Ensure user has a wallet extension
     if (!provider) {
       return toast.error("Please Connect to wallet");
     }
-
+    setNextButton(true)
     const web3 = new Web3Interaction("sepolia", provider);
 
-    const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
-    const lowerHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
+    const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+    const lowerHint = process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
     const maxFeePercentage = ethers.utils.parseEther("0.01");
 
     let updatedSupplyAmount = supplyAmount;
@@ -147,10 +73,8 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
     let upperHint =
       callWithFalse === true
-        ? "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e"
-        : "0x9A872029Ee44858EA17B79E30198947907a3a67A";
-
-    console.log("line-43", callWithFalse);
+        ? process.env.NEXT_PUBLIC_THRESHOLD_UPPERHINT_CONTRACT_ADDRESS
+        : process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
 
     // Set supplyValue and supplyAmountInWei based on the sign of supplyDifference
     let supplyValue;
@@ -170,13 +94,6 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
       updatedDebtAmount.toString()
     );
 
-    console.log("line-55", {
-      updatedSupplyAmount,
-      updatedDebtAmount,
-      supplyValue,
-      supplyAmountInWei,
-      debtAmountInWei,
-    });
 
     try {
       await web3.adjustTrove(
@@ -190,10 +107,12 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
         lowerHint,
         supplyValue
       );
-      toast.success(`Contract called successfully`);
+      toast.success(`Transaction Successfull`);
+      setAdjustPop(false)
+      fetchTroveData(provider)
     } catch (error) {
-      console.error("Error calling adjustTrove:", error);
-      toast.error("Error calling contract");
+      toast.error(error);
+      setNextButton(false)
     }
   };
 
@@ -201,24 +120,9 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
   const handleSupplyAmountChange = (e) => {
     const value = e.target.value;
-    console.log("line-86", value);
-
-    // Regex to match positive numbers and decimals
-    const regex = /^\d*\.?\d*$/; // Allows decimals and empty values
-
-    // Allow the input to be empty or a valid positive number (decimal or integer)
+    const regex = /^\d*\.?\d*$/;
     if (regex.test(value)) {
-      console.log("line-92", value);
-
-      // Only update supplyAmount if value is valid (or empty for resetting)
       setSupplyAmount(value);
-
-      // Check if supplyAmount is greater than the props supply
-      // if (value !== "" && parseFloat(value) <= supply) {
-      //   setError("Supply amount must be greater than the actual supply.");
-      // } else {
-      //   setError(""); // Clear error if supplyAmount is valid
-      // }
     } else {
       setError("Please enter a valid positive number (including decimals).");
     }
@@ -226,23 +130,13 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
   const handleDebtAmountChange = (e) => {
     const value = e.target.value;
-    console.log("line-86", value);
-
-    // Regex to match positive numbers and decimals
-    const regex = /^\d*\.?\d*$/; // Allows decimals and empty values
-
-    // Allow the input to be empty or a valid positive number (decimal or integer)
+    const regex = /^\d*\.?\d*$/;
     if (regex.test(value)) {
-      console.log("line-92", value);
-
-      // Only update supplyAmount if value is valid (or empty for resetting)
       setDebtAmount(value);
-
-      // Check if supplyAmount is greater than the props supply
       if (value !== "" && parseFloat(value) <= debtvalue) {
         setDebtError("Debt amount must be greater than the actual debt.");
       } else {
-        setError(""); // Clear error if supplyAmount is valid
+        setError("");
       }
     } else {
       setDebtError(
@@ -254,13 +148,14 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
   const calculateCollateralAndHealthFactor = async (collateralAmount, debt) => {
     try {
       setError("");
-      const provider = window.ethereum; // Ensure user has a wallet extension
+      const provider = window.ethereum;
       if (!provider) {
-        return { collateralValue: "0.00", healthFactor: "0.00" };
+        setCollRatio(0)
+        return;
       }
 
       // Fetch ETH price
-      const contractAddress = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
+      const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
       const web3 = new Web3Interaction("sepolia", provider);
       const receipt = await web3.fetchPrice(contractAddress);
       const receiptInEther = ethers.utils.formatEther(receipt);
@@ -269,7 +164,6 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
       // Convert collateralAmount and debt from string to number
       const collateral = parseFloat(collateralAmount);
       const debtAmount = parseFloat(debt);
-      console.log(collateral, debtAmount);
       if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
         setError("Invalid collateral amount or debt provided.");
         return;
@@ -277,15 +171,7 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
       // Calculate collateral value and health factor
       const collateralValue = ethPrice * collateral; // Collateral value in USD
-      console.log(
-        "line-204",
-        ethPrice,
-        collateral,
-        collateralValue,
-        debtAmount
-      );
       const collateralRatio = (collateralValue * 100) / debtAmount; // Health factor calculation
-      console.log("line-169", collateralRatio, debt);
       setCollRatio(collateralRatio);
       if (collateralRatio < 110) {
         setError("Collateral ratio must be at least 110%.");
@@ -361,48 +247,6 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
             </div>
             <div className="modalBody">
               <form action="">
-                {/* <div className="py-2">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
-                  >
-                    Supply
-                  </label>
-                  <input
-                    type="text"
-                    value={supplyAmount}
-                    // onChange={(e) => setBorrowingAmount(Number(e.target.value))}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      console.log("Updated Supply Amount:", value);
-                      // if (/^\d*$/.test(value)) {
-                        setSupplyAmount(Number(value)); // Update the state only if valid
-                      // }
-                    }}
-                    className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
-                  />
-                </div> */}
-
-                {/* <div className="py-2">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
-                  >
-                    Debt
-                  </label>
-                  <input
-                    type="text"
-                    value={debtAmount}
-                    // onChange={(e) => setBorrowingAmount(Number(e.target.value))}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // if (/^\d*$/.test(value)) {
-                      setDebtAmount(Number(value)); // Update the state only if valid
-                      // }
-                    }}
-                    className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
-                  /> */}
-
                 <div className="py-2">
                   <label
                     htmlFor=""
@@ -462,7 +306,7 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
                         Collateral Ratio
                       </p>
                       <p className="m-0 font-medium text-xl">
-                        {Number(collRatio).toFixed(2)}
+                        {collRatio ? Number(collRatio).toFixed(2) : 0}
                       </p>
                     </li>
                     <li className="py-2 my-1 col-span-6">
@@ -485,14 +329,14 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
                     className="flex items-center justify-center btn commonBtn w-full"
                     // disabled={supplyAmount === 0 ? true : false}
                     disabled={
-                      collRatio > 110 && error === "" && changeInput === true
+                      collRatio > 110 && error === "" && changeInput === true && nextButton === false
                         ? false
                         : true
                     }
                     // disabled={supplyAmount !== supply && debtAmount !== debtvalue && collRatio > 110 && error === ''  ? false : true}
                     onClick={() => addSupply()}
                   >
-                    Next
+                    {nextButton ? "Adjusting Trove ...":"Next"}
                   </button>
                 </div>
               </form>

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 // img
 
-const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
+const DebtPositionPop = ({ debtPosition, setDebtPosition,fetchTroveData }) => {
   const calculateCollateralAmount = (baseAmount) => {
     if (!baseAmount) return 0;
     const fixedValue = 200;
@@ -22,6 +22,8 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
   const [borrowingAmount, setBorrowingAmount] = useState(0); // State for Borrowing Amount (USD)
   const [ltv, setLtv] = useState(2); // State for Safe (2), Moderate (1.5), Risky (1.25)
   const [currentBTCPrice, setCurrentBTCPrice] = useState(0);
+  const [error, setError] = useState("");
+  const [depositButton, setDepositButton] = useState(false);
 
   const handleDebtPosition = () => setDebtPosition(!debtPosition);
 
@@ -40,12 +42,12 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
     if (!provider) {
       return  toast.error("Please Coonect to wallet");
     }
-
+    setDepositButton(true)
     const web3 = new Web3Interaction("sepolia", provider);
 
-    const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
-    const upperHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
-    const lowerHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
+    const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+    const upperHint = process.env.NEXT_PUBLIC_THRESHOLD_UPPERHINT_CONTRACT_ADDRESS;
+    const lowerHint = process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
     const collateralAmount = ethers.utils.parseEther("0.01");
     const maxFeePercentage = ethers.utils.parseEther(
       borrowingAmount.toString()
@@ -55,7 +57,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
     );
 
     try {
-      await web3.openTrove(
+     const result =  await web3.openTrove(
         contractAddress,
         "0",
         maxFeePercentage,
@@ -64,8 +66,12 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
         upperHint,
         lowerHint
       );
+      fetchTroveData(provider)
+      setDebtPosition(false)
+      toast.success("Transaction Completed")
     } catch (error) {
-      console.error("Error calling openTrove:", error);
+      toast.error(error)
+      setDepositButton(false)
     }
   };
 
@@ -77,14 +83,13 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
           console.log("No wallet detected. Please install Metamask.");
           return;
         }
-        const contractAddress = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
+        const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
         const web3 = new Web3Interaction("sepolia", provider);
         const receipt = await web3.fetchPrice(contractAddress);
         const receiptInEther = ethers.utils.formatEther(receipt);
         const adjustedPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
         setCurrentBTCPrice(adjustedPrice);
       } catch (error) {
-        console.error("Error calling fetchPrice:", error);
       }
     };
 
@@ -159,7 +164,13 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         onChange={(e) => {
                           const value = e.target.value;
                           if (/^\d*$/.test(value)) {
-                            setBorrowingAmount(Number(value)); // Update the state only if valid
+                            if(value >= 1800){
+                              setBorrowingAmount(Number(value));
+                              setError('')
+                            }else{
+                              setBorrowingAmount(Number(value));
+                              setError("Borrowing Amount must be greater than 1800")
+                            }
                           }
                         }}
                         className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
@@ -179,6 +190,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 focus:border-gray-600 text-xs font-medium"
                       />
                     </div>
+                    {error && (
+                    <div className="text-red-500 text-xs mt-1">{error}</div>
+                  )}
                     <div className="py-2">
                       <RadioList className="list-none ps-0 my-4 mb-0 flex items-center justify-center gap-3">
                         <li className="position-relative">
@@ -224,7 +238,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                         type="button"
                         onClick={() => setStep(2)}
                         className="flex items-center justify-center btn commonBtn w-full"
-                        disabled={borrowingAmount === 0 ? true : false}
+                        disabled={borrowingAmount === 0 || error !== '' ? true : false}
                       >
                         Next
                       </button>
@@ -273,8 +287,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition }) => {
                       type="button"
                       className="flex items-center justify-center btn commonBtn w-full"
                       onClick={() => openTrove(borrowingAmount)}
+                      disabled={depositButton}
                     >
-                      Deposit
+                      {depositButton ? "Depositing..." : "Deposit"}
                     </button>
                   </div>
                 </>

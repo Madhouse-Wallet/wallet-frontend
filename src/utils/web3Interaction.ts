@@ -52,14 +52,9 @@ class Web3Interaction {
       try {
         const contract = this.getContractFetchPrice(address);
         if (!contract) throw new Error("Contract initialization failed");
-        console.log("line-93",contract,address)
         const tx = await contract?.latestAnswer();
-        console.log("line-53", tx.toString());
-        // const receipt = await tx.wait();
-
         resolve(tx.toString());
       } catch (error: any) {
-        console.log("errrrrrrr", error);
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
@@ -76,12 +71,8 @@ class Web3Interaction {
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log("values",typeof recommendedFee,recommendedFee)
         const contract = this.getContract(address);
-        console.log("line-41", contract);
         if (!contract) throw new Error("Contract initialization failed");
-        console.log("line-43", contract);
-
         const tx = await contract?.openTrove(
           ethers.BigNumber.from(_maxFeePercentage.toString()),
           ethers.BigNumber.from(_THUSDAmount.toString()),
@@ -90,12 +81,9 @@ class Web3Interaction {
           _lowerHint,
           { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(recommendedFee.toString())}
         );
-        console.log("line-53", tx);
         const receipt = await tx.wait();
-
-        resolve(receipt);
+        resolve (receipt);
       } catch (error: any) {
-        console.log("errrrrrrr", error);
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
@@ -263,22 +251,12 @@ class Web3Interaction {
   
   Troves = async (address: string, walletAddress: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
-      console.log("line-267", address, walletAddress);
       try {
         const contract = this.getContract(address);
         if (!contract) throw new Error("Contract initialization failed");
-  
-        console.log("line-271", contract);
-        
-        // Call the Troves function (view function, no need to wait for receipt)
         const data = await contract.Troves(walletAddress);
-        
-        // Log the raw data returned from the contract
-        console.log("Troves data:", data);
-  
-        resolve(data);  // Resolve with the data
+        resolve(data);
       } catch (error: any) {
-        console.log("line-279",error)
         reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
       }
     });
@@ -287,22 +265,12 @@ class Web3Interaction {
 
   balanceOf = async (address: string, walletAddress: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
-      console.log("line-267", address, walletAddress);
       try {
         const contract = this.getContract(address);
         if (!contract) throw new Error("Contract initialization failed");
-  
-        console.log("line-271", contract);
-        
-        // Call the Troves function (view function, no need to wait for receipt)
         const data = await contract.balanceOf(walletAddress);
-        
-        // Log the raw data returned from the contract
-        console.log("Troves data:", data);
-  
-        resolve(data);  // Resolve with the data
+        resolve(data);
       } catch (error: any) {
-        console.log("line-279",error)
         reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
       }
     });
@@ -310,22 +278,13 @@ class Web3Interaction {
 
   closeTrove = async (address: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
-      console.log("line-267", address);
       try {
         const contract = this.getContract(address);
         if (!contract) throw new Error("Contract initialization failed");
-  
-        console.log("line-271", contract);
-        
-        // Call the Troves function (view function, no need to wait for receipt)
         const data = await contract.closeTrove();
-        
-        // Log the raw data returned from the contract
-        console.log("Troves data:", data);
-  
-        resolve(data);  // Resolve with the data
+        const receipt = await data.wait();
+        resolve(receipt);
       } catch (error: any) {
-        console.log("line-279",error)
         reject(error.reason || error.data?.message || error.message || error);  // Handle errors properly
       }
     });
@@ -345,7 +304,6 @@ class Web3Interaction {
         const receipt = await tx.wait();
         resolve(receipt);
       } catch (error: any) {
-        console.log(error)
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
@@ -366,7 +324,6 @@ class Web3Interaction {
         const currentAllowance = await contract.allowance(owner, spender);
         resolve(ethers.BigNumber.from(currentAllowance));
       } catch (error: any) {
-        console.log(error);
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
@@ -386,13 +343,8 @@ class Web3Interaction {
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log("line-389",_collWithdrawal,_supplyValue)
-        console.log("line-390",ethers.BigNumber.from(_collWithdrawal.toString()),ethers.BigNumber.from(_supplyValue.toString()))
         const contract = this.getContract(address);
-        console.log("line-41", contract);
         if (!contract) throw new Error("Contract initialization failed");
-        console.log("line-43", contract);
-
         const tx = await contract?.adjustTrove(
           ethers.BigNumber.from(_maxFeePercentage.toString()),
           ethers.BigNumber.from(_collWithdrawal.toString()),
@@ -403,12 +355,9 @@ class Web3Interaction {
           _lowerHint,
           { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(_supplyValue.toString())}
         );
-        console.log("line-53", tx);
         const receipt = await tx.wait();
-
         resolve(receipt);
       } catch (error: any) {
-        console.log("errrrrrrr", error);
         reject(error.reason || error.data?.message || error.message || error);
       }
     });

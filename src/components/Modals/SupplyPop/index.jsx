@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 // img
 
-const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
+const SupplyPopUp = ({ supplyPop, setSupplyPop,fetchTroveData }) => {
   const calculateCollateralAmount = (baseAmount) => {
     if (!baseAmount) return 0;
     const fixedValue = 200;
@@ -19,6 +19,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
   };
 
   const [supplyAmount, setSupplyAmount] = useState(0);
+  const [nextButton, setNextButton] = useState(false);
 
 
   const addSupply = async (borrowingAmount) => {
@@ -26,12 +27,12 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
     if (!provider) {
       return toast.error("Please Coonect to wallet");
     }
-
+    setNextButton(true)
     const web3 = new Web3Interaction("sepolia", provider);
 
-    const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
-    const upperHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
-    const lowerHint = "0x8f4A19C85b39032A37f7a6dCc65234f966F72551";
+    const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+    const upperHint = process.env.NEXT_PUBLIC_THRESHOLD_UPPERHINT_CONTRACT_ADDRESS;
+    const lowerHint = process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
     const amount = ethers.utils.parseEther(
       supplyAmount.toString()
     );
@@ -44,13 +45,17 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
         lowerHint,
         amount
       );
+
+      toast.success("Supply Added Successfully")
+      setSupplyPop(false)
+      fetchTroveData(provider)
     } catch (error) {
-      console.error("Error calling openTrove:", error);
+      setNextButton(false)
+      toast.error(error)
     }
   };
 
   const handleSupplyPosition = () => setSupplyPop(!supplyPop);
-
   return (
     <>
       <Modal
@@ -114,8 +119,8 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
                     // onChange={(e) => setBorrowingAmount(Number(e.target.value))}
                     onChange={(e) => {
                       const value = e.target.value;
-                      if (/^\d*$/.test(value)) {
-                        setSupplyAmount(Number(value)); // Update the state only if valid
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        setSupplyAmount((value)); // Update the state only if valid
                       }
                     }}
                     className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
@@ -125,10 +130,10 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop }) => {
                   <button
                     type="button"
                     className="flex items-center justify-center btn commonBtn w-full"
-                    disabled={supplyAmount === 0 ? true : false}
+                    disabled={supplyAmount === '0' ||supplyAmount === 0 || nextButton ? true : false}
                     onClick={() => addSupply()}
                   >
-                    Next
+                    {nextButton ? "Adding Supply..." : "Next"}
                   </button>
                 </div>
               </form>
