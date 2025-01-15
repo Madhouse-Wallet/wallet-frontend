@@ -381,10 +381,13 @@ class Web3Interaction {
     _isDebtIncrease:boolean,
     _assetAmount: number | string,
     _upperHint: string,
-    _lowerHint: string
+    _lowerHint: string,
+    _supplyValue:number | string
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
+        console.log("line-389",_collWithdrawal,_supplyValue)
+        console.log("line-390",ethers.BigNumber.from(_collWithdrawal.toString()),ethers.BigNumber.from(_supplyValue.toString()))
         const contract = this.getContract(address);
         console.log("line-41", contract);
         if (!contract) throw new Error("Contract initialization failed");
@@ -398,7 +401,7 @@ class Web3Interaction {
           ethers.BigNumber.from(_assetAmount.toString()),
           _upperHint,
           _lowerHint,
-          // { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(recommendedFee.toString())}
+          { gasLimit: ethers.BigNumber.from("3000000"),value: ethers.BigNumber.from(_supplyValue.toString())}
         );
         console.log("line-53", tx);
         const receipt = await tx.wait();

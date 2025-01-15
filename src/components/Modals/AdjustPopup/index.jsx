@@ -9,9 +9,9 @@ import { toast } from "react-toastify";
 // img
 
 const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
-
   const [supplyAmount, setSupplyAmount] = useState(supply);
   const [totalDebtAmount, settotalDebtAmount] = useState();
+  const [changeInput, setChangeInput] = useState(false);
   const [borrowingFeee, setBorrowingFeee] = useState();
   const [debtAmount, setDebtAmount] = useState(debtvalue - 200);
   const [error, setError] = useState("");
@@ -23,35 +23,103 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
       toast.error("Invalid debt values provided");
       return;
     }
-  
+
     // Convert to numbers
     const netDebt = Number(debtvalue) - 200;
     const debtAmountNum = Number(debtAmount);
-  
+
     // Calculate absolute difference
     const differenceAmount = Math.abs(debtAmountNum - netDebt);
-  
+
     // Calculate borrowing fee (0.5% of the difference)
     const borrowingFeePercentage = 0.005; // 0.5%
     let borrowingAmount = differenceAmount * borrowingFeePercentage;
-  
+
     // Limit to 2 decimal places
+    console.log("line-39", borrowingAmount);
     borrowingAmount = parseFloat(borrowingAmount);
-  
+
     console.log("Debt Amount:", debtAmountNum);
     console.log("Net Debt:", netDebt);
     console.log("Difference Amount:", differenceAmount);
     console.log("Borrowing Amount:", borrowingAmount);
-  
+
     // Update states
     setBorrowingFeee(borrowingAmount);
     const totalDebt = debtAmountNum + 200 + borrowingAmount;
     settotalDebtAmount(parseFloat(totalDebt));
-  
+
     console.log("Total Debt Amount:", totalDebt);
+
+    calculateCollateralAndHealthFactor(supplyAmount, totalDebt);
   };
-  
-  
+
+  // const addSupply = async () => {
+  //   const provider = window.ethereum; // Ensure user has a wallet extension
+  //   if (!provider) {
+  //     return toast.error("Please Connect to wallet");
+  //   }
+
+  //   const web3 = new Web3Interaction("sepolia", provider);
+
+  //   const contractAddress = "0xe2eA5880effFdd234A065dBBC174D6cb8a867167";
+  //   const lowerHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
+  //   const maxFeePercentage = ethers.utils.parseEther("0.01");
+
+  //   let updatedSupplyAmount = supplyAmount;
+  //   let updatedDebtAmount = debtAmount;
+  //   // updatedSupplyAmount = supplyAmount - supply;
+  //   // updatedDebtAmount = debtAmount - (debtvalue - 200);
+  //   updatedSupplyAmount = Math.abs(supplyAmount - supply);
+  //   updatedDebtAmount = Math.abs(debtAmount - (debtvalue - 200));
+  //   const callWithFalse = debtAmount > debtvalue - 200 ? true : false;
+
+  //   let upperHint =
+  //     callWithFalse === true
+  //       ? "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e"
+  //       : "0x9A872029Ee44858EA17B79E30198947907a3a67A";
+
+  //   // Determine the condition and adjust amounts
+  //   // const callWithFalse = supplyAmount > supply && debtAmount === debtvalue;
+  //   console.log("line-43", callWithFalse);
+
+  //   // if (callWithFalse) {
+  //   //   console.log("inside if", supplyAmount, supply);
+  //   //   updatedSupplyAmount = supplyAmount - supply;
+  //   //   updatedDebtAmount = 0;
+  //   //   upperHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
+  //   // } else {
+  //   //   console.log("inside else", debtAmount, debtvalue);
+  //   //   updatedSupplyAmount = 0;
+  //   //   updatedDebtAmount = debtAmount - debtvalue;
+  //   //   upperHint = "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e";
+  //   // }
+
+  //   const supplyAmountInWei = ethers.utils.parseEther(
+  //     updatedSupplyAmount.toString()
+  //   );
+  //   const debtAmountInWei = ethers.utils.parseEther(
+  //     updatedDebtAmount.toString()
+  //   );
+  //   console.log("line-55", updatedSupplyAmount, updatedDebtAmount);
+  //   try {
+  //     await web3.adjustTrove(
+  //       contractAddress,
+  //       maxFeePercentage,
+  //       supplyAmountInWei,
+  //       debtAmountInWei,
+  //       callWithFalse,
+  //       "0",
+  //       upperHint,
+  //       lowerHint,
+  //       supplyValue
+  //     );
+  //     toast.success(`Contract called successfully`);
+  //   } catch (error) {
+  //     console.error("Error calling adjustTrove:", error);
+  //     toast.error("Error calling contract");
+  //   }
+  // };
 
   const addSupply = async () => {
     const provider = window.ethereum; // Ensure user has a wallet extension
@@ -67,10 +135,14 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
     let updatedSupplyAmount = supplyAmount;
     let updatedDebtAmount = debtAmount;
-    // updatedSupplyAmount = supplyAmount - supply;
-    // updatedDebtAmount = debtAmount - (debtvalue - 200);
-    updatedSupplyAmount = Math.abs(supplyAmount - supply);
-    updatedDebtAmount = Math.abs(debtAmount - (debtvalue - 200));
+
+    // Calculate the absolute difference
+    const supplyDifference = supplyAmount - supply; // Difference between supplyAmount and supply
+    updatedSupplyAmount = Math.abs(supplyDifference);
+
+    const debtDifference = debtAmount - (debtvalue - 200);
+    updatedDebtAmount = Math.abs(debtDifference);
+
     const callWithFalse = debtAmount > debtvalue - 200 ? true : false;
 
     let upperHint =
@@ -78,29 +150,34 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
         ? "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e"
         : "0x9A872029Ee44858EA17B79E30198947907a3a67A";
 
-    // Determine the condition and adjust amounts
-    // const callWithFalse = supplyAmount > supply && debtAmount === debtvalue;
     console.log("line-43", callWithFalse);
 
-    // if (callWithFalse) {
-    //   console.log("inside if", supplyAmount, supply);
-    //   updatedSupplyAmount = supplyAmount - supply;
-    //   updatedDebtAmount = 0;
-    //   upperHint = "0x9A872029Ee44858EA17B79E30198947907a3a67A";
-    // } else {
-    //   console.log("inside else", debtAmount, debtvalue);
-    //   updatedSupplyAmount = 0;
-    //   updatedDebtAmount = debtAmount - debtvalue;
-    //   upperHint = "0x7C2277b9054B6Fa32790Eb1B6Eb2a43F62e27F8e";
-    // }
+    // Set supplyValue and supplyAmountInWei based on the sign of supplyDifference
+    let supplyValue;
+    let supplyAmountInWei;
 
-    const supplyAmountInWei = ethers.utils.parseEther(
-      updatedSupplyAmount.toString()
-    );
+    if (supplyDifference > 0) {
+      supplyValue = ethers.utils.parseEther(updatedSupplyAmount.toString()); // Positive difference
+      supplyAmountInWei = ethers.utils.parseEther("0"); // Zero in Wei
+    } else {
+      supplyValue = ethers.utils.parseEther("0"); // Zero supplyValue
+      supplyAmountInWei = ethers.utils.parseEther(
+        updatedSupplyAmount.toString()
+      ); // Positive difference in Wei
+    }
+
     const debtAmountInWei = ethers.utils.parseEther(
       updatedDebtAmount.toString()
     );
-    console.log("line-55", updatedSupplyAmount, updatedDebtAmount);
+
+    console.log("line-55", {
+      updatedSupplyAmount,
+      updatedDebtAmount,
+      supplyValue,
+      supplyAmountInWei,
+      debtAmountInWei,
+    });
+
     try {
       await web3.adjustTrove(
         contractAddress,
@@ -110,7 +187,8 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
         callWithFalse,
         "0",
         upperHint,
-        lowerHint
+        lowerHint,
+        supplyValue
       );
       toast.success(`Contract called successfully`);
     } catch (error) {
@@ -175,7 +253,7 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
 
   const calculateCollateralAndHealthFactor = async (collateralAmount, debt) => {
     try {
-      setError('')
+      setError("");
       const provider = window.ethereum; // Ensure user has a wallet extension
       if (!provider) {
         return { collateralValue: "0.00", healthFactor: "0.00" };
@@ -191,21 +269,33 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
       // Convert collateralAmount and debt from string to number
       const collateral = parseFloat(collateralAmount);
       const debtAmount = parseFloat(debt);
-
+      console.log(collateral, debtAmount);
       if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
         setError("Invalid collateral amount or debt provided.");
-        return
+        return;
       }
 
       // Calculate collateral value and health factor
       const collateralValue = ethPrice * collateral; // Collateral value in USD
+      console.log(
+        "line-204",
+        ethPrice,
+        collateral,
+        collateralValue,
+        debtAmount
+      );
       const collateralRatio = (collateralValue * 100) / debtAmount; // Health factor calculation
-      console.log("line-169", collateralRatio,debt);
-      setCollRatio(collateralRatio)
-      if(collateralRatio < 110){
-        setError("Collateral ratio must be at least 110%.")
-      }if(debt < (debtvalue - 200)){
-        setError(`Total debt must be at least ${Number((debtvalue - 200)).toFixed(2)} thUSD.`)
+      console.log("line-169", collateralRatio, debt);
+      setCollRatio(collateralRatio);
+      if (collateralRatio < 110) {
+        setError("Collateral ratio must be at least 110%.");
+      }
+      if (debt < debtvalue - 200) {
+        setError(
+          `Total debt must be at least ${Number(debtvalue - 200).toFixed(
+            2
+          )} thUSD.`
+        );
       }
     } catch (error) {
       return { collateralValue: "0.00", healthFactor: "0.00" };
@@ -213,17 +303,14 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
   };
 
   useEffect(() => {
-    if(supplyAmount || debtAmount){
-      borrowingFee()
-      calculateCollateralAndHealthFactor(supplyAmount, debtAmount);
-
-      
+    if (supplyAmount || debtAmount) {
+      borrowingFee();
     }
-  }, [supplyAmount,debtAmount]);
+  }, [supplyAmount, debtAmount]);
 
   useEffect(() => {
- calculateCollateralAndHealthFactor(supplyAmount,debtvalue);
-  },[])
+    calculateCollateralAndHealthFactor(supplyAmount, debtvalue);
+  }, []);
   return (
     <>
       <Modal
@@ -326,7 +413,10 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
                   <input
                     type="text"
                     value={supplyAmount}
-                    onChange={handleSupplyAmountChange}
+                    onChange={(e) => {
+                      handleSupplyAmountChange(e);
+                      setChangeInput(true);
+                    }}
                     className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
                   />
                 </div>
@@ -341,7 +431,10 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
                   <input
                     type="text"
                     value={debtAmount}
-                    onChange={handleDebtAmountChange}
+                    onChange={(e) => {
+                      handleDebtAmountChange(e);
+                      setChangeInput(true);
+                    }}
                     className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)]  border-gray-600 text-xs font-medium"
                   />
                   {/* {debtError && (
@@ -360,33 +453,42 @@ const AdjustPopup = ({ adjustPop, setAdjustPop, supply, debtvalue }) => {
                       <p className="m-0 text-base font-bold themeClr">
                         Borrowing Fee
                       </p>
-                      <p className="m-0 font-medium text-xl">{Number(borrowingFeee).toFixed(2)}</p>
+                      <p className="m-0 font-medium text-xl">
+                        {Number(borrowingFeee).toFixed(2)}
+                      </p>
                     </li>
                     <li className="py-2 my-1 col-span-6">
                       <p className="m-0 text-base font-bold themeClr">
                         Collateral Ratio
                       </p>
-                      <p className="m-0 font-medium text-xl">{Number(collRatio).toFixed(2)}</p>
+                      <p className="m-0 font-medium text-xl">
+                        {Number(collRatio).toFixed(2)}
+                      </p>
                     </li>
                     <li className="py-2 my-1 col-span-6">
                       <p className="m-0 text-base font-bold themeClr">
                         Total Debt
                       </p>
-                      <p className="m-0 font-medium text-xl">{Number(totalDebtAmount).toFixed(2)}</p>
+                      <p className="m-0 font-medium text-xl">
+                        {Number(totalDebtAmount).toFixed(2)}
+                      </p>
                     </li>
-                    
                   </ul>
                 </div>
 
                 {error && (
-                    <div className="text-red-500 text-xs mt-1">{error}</div>
-                  )}
+                  <div className="text-red-500 text-xs mt-1">{error}</div>
+                )}
                 <div className="btnWrpper mt-3">
                   <button
                     type="button"
                     className="flex items-center justify-center btn commonBtn w-full"
                     // disabled={supplyAmount === 0 ? true : false}
-                    disabled={collRatio > 110 && error === ''  ? false : true}
+                    disabled={
+                      collRatio > 110 && error === "" && changeInput === true
+                        ? false
+                        : true
+                    }
                     // disabled={supplyAmount !== supply && debtAmount !== debtvalue && collRatio > 110 && error === ''  ? false : true}
                     onClick={() => addSupply()}
                   >
