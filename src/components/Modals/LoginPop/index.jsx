@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toast } from "react-toastify";
 import { extractPasskeyData } from "@safe-global/protocol-kit";
 import { create, get } from "../../../lib/passkey";
-import { getAccount, createAccount } from "../../../lib/pimlicoWallet";
+import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
@@ -145,7 +145,7 @@ const LoginPop = ({ login, setLogin }) => {
             base64ToBuffer(userExist.userId.rawId)
           );
           if (authenticated) {
-            let account = await getAccount(userExist.userId.passkey);
+            let account = await getAccounts(userExist.userId.passkey);
             console.log("account-->", account);
             if (account) {
               toast.success("Login Successfully!");
@@ -191,7 +191,7 @@ const LoginPop = ({ login, setLogin }) => {
         }
         const createdCredential = await create(registerEmail);
         if (createdCredential) {
-          let account = await createAccount(createdCredential);
+          let account = await createSafeAccount(createdCredential);
           // account, smartAccountClient
           console.log("account-->", account?.account?.address);
           // const passkey = await extractPasskeyData(createdCredential)
@@ -249,20 +249,22 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          let obj = {
-            email: registerEmail,
-            name: registerUsername,
-            otp: OTP,
-            subject: "Madhouse Account Verification OTP",
-            type: "registerOtp",
-          };
-          let sendEmailData = await sendOTP(obj);
-          if (sendEmailData.status && sendEmailData.status == "success") {
-            setRegisterTab(2);
-            toast.success(sendEmailData?.message);
-          } else {
-            toast.error(sendEmailData?.message || sendEmailData?.error);
-          }
+          console.log("OTP-->",OTP)
+          setRegisterTab(2);
+          // let obj = {
+          //   email: registerEmail,
+          //   name: registerUsername,
+          //   otp: OTP,
+          //   subject: "Madhouse Account Verification OTP",
+          //   type: "registerOtp",
+          // };
+          // let sendEmailData = await sendOTP(obj);
+          // if (sendEmailData.status && sendEmailData.status == "success") {
+          //   setRegisterTab(2);
+          //   toast.success(sendEmailData?.message);
+          // } else {
+          //   toast.error(sendEmailData?.message || sendEmailData?.error);
+          // }
         }
       }
       setRegisterOtpLoading(false);

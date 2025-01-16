@@ -2,7 +2,7 @@
 import { CowSwapWidget } from "@cowprotocol/widget-react";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
-import { getAccount } from "../../lib/pimlicoWallet";
+import { getAccounts } from "../../lib/pimlicoWallet";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 // Parameters for CowSwapWidget
@@ -50,7 +50,7 @@ const Swap = () => {
 
   const createProvider = async () => {
     if (userAuth?.passkeyCred) {
-      let account = await getAccount(userAuth?.passkeyCred)
+      let account = await getAccounts(userAuth?.passkeyCred)
       console.log("account---<",account)
       if(account){
         setProvider(account?.cowSwapProvider)
