@@ -189,9 +189,12 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        const createdCredential = await create(registerEmail);
+        let account = await createSafeAccount(registerEmail);
+        let createdCredential = false
+        // const createdCredential = await create(registerEmail);
         if (createdCredential) {
-          let account = await createSafeAccount(createdCredential);
+          // let account = await createSafeAccount(createdCredential);
+        
           // account, smartAccountClient
           console.log("account-->", account?.account?.address);
           // const passkey = await extractPasskeyData(createdCredential)
