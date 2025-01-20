@@ -449,7 +449,7 @@ const createNewKernelAccount = async (validator: any) => {
 
 export const getSmartAccount = async()=>{
   try {
-    let key = "0x651f447c494eecedf2c7ddadbf78358c305cb23c2a35d38111543783b7c7d1b2";
+    let key = "0x651f447c494eecedf2c7ddadbf78358c305cb23c2a35d38111543783b7c7d1b2" as `0x${string}`;
     let nh = privateKeyToAccount(key);
     const safeAccount = await toSafeSmartAccount({
       client: publicClient,
@@ -534,6 +534,9 @@ export const createSafeAccount = async (name: any) => {
     const newKernelAccount = await createNewKernelAccount(passkeyCred?.passkeyValidator)
     console.log("newKernelAccount-->", newKernelAccount?.kernelClient?.account)
     // Initialize the KernelEIP1193Provider with your KernelClient
+    if(newKernelAccount){
+
+ 
     const kernelProvider = new KernelEIP1193Provider(newKernelAccount?.kernelClient);
     console.log("kernelProvider-->", kernelProvider)
     // Use the KernelProvider with ethers
@@ -558,10 +561,14 @@ export const createSafeAccount = async (name: any) => {
 
     const decryptedBytes = await decryptFromBytes(encryptedBytes);
     const decryptedMessageString = fromBytes(decryptedBytes);
-    console.log('Decrypted message:', decryptedMessageString);
-    let nh = privateKeyToAccount(decryptedMessageString);
-    console.log("nh-->", nh)
-    await createSmartAccount(nh)
+    if(decryptedMessageString){
+      let key = decryptedMessageString as `0x${string}`;
+      console.log('Decrypted message:', decryptedMessageString);
+      let nh = privateKeyToAccount(key);
+      console.log("nh-->", nh)
+      await createSmartAccount(nh)
+    }
+  }
   } catch (error) {
     console.log("error---->", error)
   }
