@@ -17,7 +17,7 @@ import {
   WEBAUTHN_VALIDATOR_ADDRESS,
   getWebauthnValidatorSignature,
 } from "@rhinestone/module-sdk";
-import { createWeightedECDSAValidator } from "@zerodev/weighted-ecdsa-validator"
+import { createWeightedECDSAValidator, getUpdateConfigCall } from "@zerodev/weighted-ecdsa-validator"
 import { sepolia, baseSepolia, polygonAmoy } from "viem/chains";
 import { parsePublicKey, parseSignature, sign } from "webauthn-p256";
 import { Hex, createPublicClient, encodePacked, getContract, http, pad } from "viem";
@@ -29,7 +29,7 @@ import {
 } from "permissionless/accounts";
 import { KernelEIP1193Provider } from '@zerodev/sdk/providers';
 import { erc7579Actions } from "permissionless/actions/erc7579";
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import {
   entryPoint07Address,
   toWebAuthnAccount,
@@ -45,7 +45,7 @@ import { isAuthorized } from "@zerodev/social-validator"
 
 
 // tBTC SDK Initialization Function
-const publicClientSepolia = createPublicClient({
+const publicClientAmoy = createPublicClient({
   chain: polygonAmoy,
   transport: http('https://rpc-amoy.polygon.technology'),
 });
@@ -454,26 +454,24 @@ const createNewKernelAccount = async (validator: any) => {
 
 const createMultiSignerKernelAccount = async (signer: any) => {
   try {
-
-    let signerObj = signer.map((item:any) => (item.address))
-
+    const signer1 = privateKeyToAccount(generatePrivateKey());
+    let signerObj =   [{ address: signer[0].address, weight: 100}, { address: signer1.address, weight: 50 }]
+    //signer.map((item: any) => ({ address: item.address, weight: 100 }))
+    console.log("signerObj->", signerObj)
+    // Setting up a new multisig account
     const multisigValidator = await createWeightedECDSAValidator(publicClient, {
       entryPoint,
-      kernelVersion,
+      kernelVersion: KERNEL_V3_1,
       config: {
         threshold: 100,
-        signers: [
-          { address: signerA.address, weight: 100 },
-          { address: signerB.address, weight: 50 },
-          { address: signerC.address, weight: 50 },
-        ]
+        signers: signerObj
       },
-      signers: [signerB, signerC],
+      signers: signer,
     })
-
+    // account creation
     const account = await createKernelAccount(publicClient, {
       plugins: {
-        sudo: validator,
+        sudo: multisigValidator,
       },
       entryPoint,
       kernelVersion: KERNEL_V3_1
@@ -507,19 +505,61 @@ const createMultiSignerKernelAccount = async (signer: any) => {
       }
     })
     console.log("kernel Client-->", kernelClient);
-    const txHash = await kernelClient.sendTransaction({
-      calls: [
-        {
-          to: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-          value: BigInt(0),
-          data: "0x1234",
-        },
-      ],
+    // Using an existing multisig account
+    const multisigValidator2 = await createWeightedECDSAValidator(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      signers: signer,
     })
-    console.log("txHash-->", txHash)
-    console.log("https://polygonAmoy.etherscan.io/")
 
-    return { account, kernelClient }
+    const account2 = await createKernelAccount(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      address: account.address,
+      plugins: {
+        sudo: multisigValidator2,
+      }
+    })
+    console.log("kernel account2-->", account2);
+
+
+    const kernelClient2 = await createKernelAccountClient({
+      account: account2,
+
+      // Replace with your chain
+      chain: sepolia,
+
+      // Replace with your bundler RPC.
+      // For ZeroDev, you can find the RPC on your dashboard.
+      bundlerTransport: http(BUNDLER_RPC),
+
+      // Required - the public client
+      client: publicClient,
+
+      // Optional -- only if you want to use a paymaster
+      paymaster: {
+        getPaymasterData(userOperation) {
+          return paymasterClient.sponsorUserOperation({ userOperation })
+        }
+      },
+
+      // Required - the default gas prices might be too high
+      userOperation: {
+        estimateFeesPerGas: async ({ bundlerClient }) => {
+          return getUserOperationGasPrice(bundlerClient)
+        }
+      }
+    })
+    console.log("kernel Client 2 -->", kernelClient2, KERNEL_V3_1, signerObj);
+    await kernelClient.sendUserOperation(
+      getUpdateConfigCall(
+        {
+          threshold: 100,
+          signers: [{ address: signer.address, weight: 50 }],
+        }),
+    )
+
+    return { account }
   } catch (error) {
     console.log(" create kernel account error-->", error)
   }
@@ -609,7 +649,7 @@ const createSmartAccount = async (account: any) => {
 
 export const createSafeAccount = async (name: any) => {
   try {
-   await multiFac();
+    await multiFac();
     const passkeyCred = await registerPasskey(name);
     console.log("passkeyCred --->", passkeyCred);
     const newKernelAccount = await createNewKernelAccount(passkeyCred?.passkeyValidator)
@@ -660,35 +700,36 @@ const multiFac = async () => {
   try {
     const authorized = await isAuthorized({ projectId: 'ce53eff2-87bf-43ab-ab0a-513efb3e2421' });
     console.log("authorized-->", authorized); // true or false
-  
+
     // Await the initiateLogin process
     await initiateLogin({
       socialProvider: "google",
-     
+
       projectId: "ce53eff2-87bf-43ab-ab0a-513efb3e2421"
     });
-  
+
     // Only proceed to getSocialValidator after login completes successfully
     const socialValidator = await getSocialValidator(
-      publicClientSepolia,
+      publicClientAmoy,
       {
         entryPoint: getEntryPoint("0.7"),
         kernelVersion: KERNEL_V3_1,
         projectId: "ce53eff2-87bf-43ab-ab0a-513efb3e2421"
       }
     );
-  console.log("socialValidator-->",socialValidator)
+    console.log("socialValidator-->", socialValidator)
   } catch (error) {
     console.error("Error during login or validation:", error);
   }
-  
+
 }
 
-const multSign = async () =>{
+const multSign = async () => {
   try {
     const passkeyCred = await registerPasskey("test");
     console.log("passkeyCred --->", passkeyCred);
-    // const newKernelAccount = await createMultiSignerKernelAccount(passkeyCred?.passkeyValidator)
+    let signer = [passkeyCred?.passkeyValidator]
+    const newKernelAccount = await createMultiSignerKernelAccount(signer)
   } catch (error) {
     console.log("error multi sign -->", error)
   }
