@@ -74,6 +74,13 @@ const ThresholdWallet: React.FC = () => {
       },
     },
     {
+      head: "Fonbnk",
+      icn: dollarIcn,
+      onClick: () => {
+        router.push("/fonbnk");
+      },
+    },
+    {
       head: "Sell Bitcoin",
       icn: sellIcn,
       onClick: () => {
