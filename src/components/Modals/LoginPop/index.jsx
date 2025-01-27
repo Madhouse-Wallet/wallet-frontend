@@ -51,7 +51,7 @@ const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
 const contractABI = parseAbi([
   "function mint(address _to) public",
   "function balanceOf(address owner) external view returns (uint256 balance)"
-])
+]) 
 const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
   chain: CHAIN
