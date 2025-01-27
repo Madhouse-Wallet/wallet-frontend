@@ -1,19 +1,66 @@
+"use client";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { extractPasskeyData } from "@safe-global/protocol-kit";
-import { create, get } from "../../../lib/passkey";
-import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
+// import { create, get } from "../../../lib/passkey";
+// import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
 import { send } from "process";
+import { zeroAddress } from "viem"
+import {
+  createWeightedECDSAValidator,
+  getUpdateConfigCall,
+  getCurrentSigners,
+  getValidatorAddress,
+} from "@zerodev/weighted-ecdsa-validator";
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient,
+  getUserOperationGasPrice
+} from "@zerodev/sdk"
+import {
+  PasskeyValidatorContractVersion,
+  WebAuthnMode,
+  toPasskeyValidator,
+  toWebAuthnKey
+} from "@zerodev/passkey-validator"
+import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
+
+import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
+import { sepolia } from "viem/chains"
+
 import {
   generateOTP,
   bufferToBase64,
   base64ToBuffer,
 } from "../../../utils/globals";
+
+
+// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
+const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const CHAIN = sepolia
+const entryPoint = getEntryPoint("0.7")
+
+const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
+const contractABI = parseAbi([
+  "function mint(address _to) public",
+  "function balanceOf(address owner) external view returns (uint256 balance)"
+])
+const publicClient = createPublicClient({
+  transport: http(BUNDLER_URL),
+  chain: CHAIN
+})
+
+let kernelAccount;
+let kernelClient;
+
+
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -97,6 +144,106 @@ const LoginPop = ({ login, setLogin }) => {
       return false;
     }
   };
+  const passketCreate = async (username) => {
+    try {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Register,
+        passkeyServerHeaders: {}
+      })
+      console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      console.log("line-102", passkeyValidator)
+      return passkeyValidator;
+    } catch (error) {
+      console.log("error-->", error)
+    }
+  }
+  const passketCreated = async (username) => {
+    try {
+      let signer1 = await passketCreate("parvinder")
+      let signer2 = await passketCreate("heramb")
+
+      // const signer1 = privateKeyToAccount(generatePrivateKey())
+      // const signer2 = privateKeyToAccount(generatePrivateKey())
+      // let signer3 = await passketCreate("quincy")
+      const multisigValidator = await createWeightedECDSAValidator(publicClient, {
+        entryPoint,
+        config: {
+          threshold: 100,
+          signers: [
+            { address: signer1.address, weight: 50 },
+            { address: signer2.address, weight: 50 },
+          ],
+        },
+        signers: [signer1, signer2],
+        kernelVersion: KERNEL_V3_1,
+      });
+
+      const account = await createKernelAccount(publicClient, {
+        entryPoint,
+        plugins: {
+          sudo: multisigValidator,
+        },
+        kernelVersion: KERNEL_V3_1,
+      });
+      console.log("account-->", account)
+      const kernelPaymaster = createZeroDevPaymasterClient({
+        chain: sepolia,
+        transport: http(PAYMASTER_RPC),
+      });
+
+      const kernelClient = createKernelAccountClient({
+        account,
+        chain: sepolia,
+        bundlerTransport: http(BUNDLER_URL),
+        paymaster: {
+          getPaymasterData(userOperation) {
+            return kernelPaymaster.sponsorUserOperation({ userOperation });
+          },
+        },
+        userOperation: {
+          estimateFeesPerGas: async ({ bundlerClient }) => {
+            return getUserOperationGasPrice(bundlerClient)
+          }
+        }
+      });
+
+      console.log("My account:", kernelClient.account.address);
+
+      const op1Hash = await kernelClient.sendUserOperation({
+        callData: await kernelClient.account.encodeCalls([{
+          to: zeroAddress,
+          value: BigInt(0),
+          data: "0x",
+        }]),
+      });
+      console.log("op1Hash-->", op1Hash)
+      await kernelClient.waitForUserOperationReceipt({
+        hash: op1Hash,
+      });
+
+      console.log("userOp sent");
+
+      const currentSigners = await getCurrentSigners(publicClient, {
+        entryPoint,
+        multiSigAccountAddress: account.address,
+        kernelVersion: KERNEL_V3_1,
+      });
+
+      console.log("current signers:", currentSigners);
+
+
+    } catch (error) {
+      console.log("error-->", error)
+    }
+  }
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
@@ -141,11 +288,9 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = await get(
-            base64ToBuffer(userExist.userId.rawId)
-          );
+          const authenticated = true;
           if (authenticated) {
-            let account = await getAccounts(userExist.userId.passkey);
+            let account = true;
             console.log("account-->", account);
             if (account) {
               toast.success("Login Successfully!");
@@ -189,12 +334,12 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        let account = await createSafeAccount(registerEmail);
+        let account = false
         let createdCredential = false
         // const createdCredential = await create(registerEmail);
         if (createdCredential) {
           // let account = await createSafeAccount(createdCredential);
-        
+
           // account, smartAccountClient
           console.log("account-->", account?.account?.address);
           // const passkey = await extractPasskeyData(createdCredential)
@@ -252,7 +397,7 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          console.log("OTP-->",OTP)
+          console.log("OTP-->", OTP)
           setRegisterTab(2);
           // let obj = {
           //   email: registerEmail,
@@ -297,7 +442,7 @@ const LoginPop = ({ login, setLogin }) => {
             <div className="col-span-12">
               <button
                 disabled={loginLoading}
-                onClick={loginFn}
+                onClick={passketCreated}
                 className="btn text-xs commonBtn flex items-center justify-center btn w-full"
               >
                 {loginLoading ? "Loading" : "Submit"}
@@ -460,9 +605,8 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${
-                      activeTab === key && "active"
-                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${activeTab === key && "active"
+                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -477,9 +621,8 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${
-                        activeTab === key && "block"
-                      } tab-content border-0`}
+                      className={`${activeTab === key && "block"
+                        } tab-content border-0`}
                     >
                       {item.content}
                     </div>

@@ -2,8 +2,8 @@
 import { CowSwapWidget } from "@cowprotocol/widget-react";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
-import { getAccounts, getSmartAccount } from "../../lib/pimlicoWallet";
-import { createProviderCowSwap } from "../../lib/customProvider";
+// import { getAccounts, getSmartAccount } from "../../lib/pimlicoWallet";
+// import { createProviderCowSwap } from "../../lib/customProvider";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 // Parameters for CowSwapWidget
@@ -50,11 +50,11 @@ const Swap = () => {
   };
 
   const createProvider = async () => {
-   let prov = await getSmartAccount();
+   let prov = true;
    console.log("prov--->",prov)
-   let newProv = await createProviderCowSwap(prov?.safeAccount,prov?._smartAccountClient )
-   console.log("newProv-->",newProv )
-   setProvider(newProv)
+  //  let newProv = await createProviderCowSwap(prov?.safeAccount,prov?._smartAccountClient )
+  //  console.log("newProv-->",newProv )
+   setProvider(prov)
     // if (userAuth?.passkeyCred) {
     //   let account = await getAccounts(userAuth?.passkeyCred)
     //   console.log("account---<",account)
@@ -87,12 +87,12 @@ const Swap = () => {
               </div>
             </div>
             <div className="col-span-12">
-              <CowSwapCard>
+              {/* <CowSwapCard>
               <CowSwapWidget
                 params={cowSwapParams}
                 provider={provider} // Use the adapted provider
               />
-              </CowSwapCard>
+              </CowSwapCard> */}
             </div>
           </div>
         </div>
