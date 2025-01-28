@@ -13,7 +13,7 @@ export const NonceManager = ({ appId }: { appId: string }) => {
       appId,
     });
     if (nonce) {
-      localStorage.setItem("accountNonce", (nonce + 1n).toString());
+      localStorage.setItem("accountNonce", (nonce + BigInt(1)).toString());
     } else {
       localStorage.setItem("accountNonce", "1");
     }
