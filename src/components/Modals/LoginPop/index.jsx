@@ -1,19 +1,66 @@
+"use client";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { extractPasskeyData } from "@safe-global/protocol-kit";
-import { create, get } from "../../../lib/passkey";
-import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
+// import { create, get } from "../../../lib/passkey";
+// import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
 import { send } from "process";
+import { zeroAddress } from "viem"
+import {
+  createWeightedECDSAValidator,
+  getUpdateConfigCall,
+  getCurrentSigners,
+  getValidatorAddress,
+} from "@zerodev/weighted-ecdsa-validator";
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient,
+  getUserOperationGasPrice
+} from "@zerodev/sdk"
+import {
+  PasskeyValidatorContractVersion,
+  WebAuthnMode,
+  toPasskeyValidator,
+  toWebAuthnKey
+} from "@zerodev/passkey-validator"
+import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
+
+import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
+import { sepolia } from "viem/chains"
+
 import {
   generateOTP,
   bufferToBase64,
   base64ToBuffer,
 } from "../../../utils/globals";
+
+import { createAccount, getAccount } from "../../../lib/zeroDevWallet"
+// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
+const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const CHAIN = sepolia
+const entryPoint = getEntryPoint("0.7")
+
+const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
+const contractABI = parseAbi([
+  "function mint(address _to) public",
+  "function balanceOf(address owner) external view returns (uint256 balance)"
+])
+const publicClient = createPublicClient({
+  transport: http(BUNDLER_URL),
+  chain: CHAIN
+})
+
+let kernelAccount;
+let kernelClient;
+
+
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -97,6 +144,52 @@ const LoginPop = ({ login, setLogin }) => {
       return false;
     }
   };
+  const passketCreate = async (username) => {
+    try {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Register,
+        passkeyServerHeaders: {}
+      })
+      // console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      // console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
+    } catch (error) {
+      console.log("error-->", error)
+      return false
+    }
+  }
+
+  const passketLogin = async (username) => {
+    try {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Login,
+        passkeyServerHeaders: {}
+      })
+      // console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      // console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
+    } catch (error) {
+      console.log("error-->", error)
+      return false
+    }
+  }
+
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
@@ -141,31 +234,30 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = await get(
-            base64ToBuffer(userExist.userId.rawId)
-          );
-          if (authenticated) {
-            let account = await getAccounts(userExist.userId.passkey);
-            console.log("account-->", account);
-            if (account) {
-              toast.success("Login Successfully!");
-              dispatch(
-                loginSet({
-                  login: true,
-                  walletAddress: account?.account?.address || "",
-                  signer: "",
-                  username: userExist.userId.username,
-                  email: userExist.userId.email,
-                  passkeyCred: userExist.userId.passkey || "",
-                })
-              );
-              setLoginEmail();
-              handleLogin();
+          const createdCredential = await passketLogin(loginEmail);
+          if (createdCredential) {
+            let account = await getAccount(createdCredential.passkeyValidator);
+            if (!(account.status)) {
+              toast.error(account.msg);
             } else {
-              toast.error("Login Failed!");
+              if(userExist.userId.wallet == account?.account?.account?.address){
+                toast.success("Login Successfully!");
+                dispatch(
+                  loginSet({
+                    login: true,
+                    walletAddress: account?.account?.account?.address || "",
+                    signer: "",
+                    username: userExist.userId.username,
+                    email: userExist.userId.email,
+                    passkeyCred: createdCredential.passkeyValidator || "",
+                  })
+                );
+                setLoginEmail();
+                handleLogin();
+              }else{
+                toast.error("Please Login With Correct Account!");
+              }
             }
-          } else {
-            toast.error("Login Failed!");
           }
         }
       }
@@ -185,43 +277,40 @@ const LoginPop = ({ login, setLogin }) => {
         toast.error("Invalid OTP!");
       } else {
         let userExist = await getUser(registerEmail);
-        // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        let account = await createSafeAccount(registerEmail);
-        let createdCredential = false
-        // const createdCredential = await create(registerEmail);
+        const createdCredential = await passketCreate(registerEmail);
         if (createdCredential) {
-          // let account = await createSafeAccount(createdCredential);
-        
-          // account, smartAccountClient
-          console.log("account-->", account?.account?.address);
-          // const passkey = await extractPasskeyData(createdCredential)
-          let data = await addUser(
-            registerEmail,
-            registerUsername,
-            createdCredential,
-            createdCredential.publicKey,
-            createdCredential.id,
-            account?.account?.address
-          );
-          // console.log("logged user--->", data)
-          toast.success("Sign Up Successfully!");
-          setRegisterTab(2);
-          dispatch(
-            loginSet({
-              login: true,
-              walletAddress: account?.account?.address || "",
-              signer: "",
-              username: registerUsername,
-              email: registerEmail,
-              passkeyCred: createdCredential || "",
-            })
-          );
-          setRegisterEmail();
-          setRegisterUsername();
-          handleLogin();
+          let account = await createAccount(createdCredential.passkeyValidator);
+          if (!(account.status)) {
+            toast.error("Please Enter Email!");
+          } else {
+            console.log("account-->", account?.account?.account?.address);
+            let data = await addUser(
+              registerEmail,
+              registerUsername,
+              "",
+              "",
+              "",
+              account?.account?.account?.address
+            );
+            toast.success("Sign Up Successfully!");
+            setRegisterTab(2);
+            dispatch(
+              loginSet({
+                login: true,
+                walletAddress: account?.account?.account?.address || "",
+                signer: "",
+                username: registerUsername,
+                email: registerEmail,
+                passkeyCred: createdCredential.passkeyValidator || "",
+              })
+            );
+            setRegisterEmail();
+            setRegisterUsername();
+            handleLogin();
+          }
         }
       }
       setRegisterLoading(false);
@@ -252,7 +341,7 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          console.log("OTP-->",OTP)
+          console.log("OTP-->", OTP)
           setRegisterTab(2);
           // let obj = {
           //   email: registerEmail,
@@ -460,9 +549,8 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${
-                      activeTab === key && "active"
-                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${activeTab === key && "active"
+                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -477,9 +565,8 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${
-                        activeTab === key && "block"
-                      } tab-content border-0`}
+                      className={`${activeTab === key && "block"
+                        } tab-content border-0`}
                     >
                       {item.content}
                     </div>
