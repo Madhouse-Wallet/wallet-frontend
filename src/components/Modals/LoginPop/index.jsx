@@ -39,7 +39,7 @@ import {
   base64ToBuffer,
 } from "../../../utils/globals";
 
-
+import { createAccount, getAccount } from "../../../lib/zeroDevWallet"
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
 const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
 const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
@@ -51,7 +51,7 @@ const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
 const contractABI = parseAbi([
   "function mint(address _to) public",
   "function balanceOf(address owner) external view returns (uint256 balance)"
-]) 
+])
 const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
   chain: CHAIN
@@ -152,98 +152,44 @@ const LoginPop = ({ login, setLogin }) => {
         mode: WebAuthnMode.Register,
         passkeyServerHeaders: {}
       })
-      console.log("line-95", webAuthnKey)
+      // console.log("line-95", webAuthnKey)
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
         validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
       })
-      console.log("line-102", passkeyValidator)
-      return passkeyValidator;
+      // console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
     } catch (error) {
       console.log("error-->", error)
+      return false
     }
   }
-  const passketCreated = async (username) => {
+
+  const passketLogin = async (username) => {
     try {
-      let signer1 = await passketCreate("parvinder")
-      let signer2 = await passketCreate("heramb")
-
-      // const signer1 = privateKeyToAccount(generatePrivateKey())
-      // const signer2 = privateKeyToAccount(generatePrivateKey())
-      // let signer3 = await passketCreate("quincy")
-      const multisigValidator = await createWeightedECDSAValidator(publicClient, {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Login,
+        passkeyServerHeaders: {}
+      })
+      // console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
         entryPoint,
-        config: {
-          threshold: 100,
-          signers: [
-            { address: signer1.address, weight: 50 },
-            { address: signer2.address, weight: 50 },
-          ],
-        },
-        signers: [signer1, signer2],
         kernelVersion: KERNEL_V3_1,
-      });
-
-      const account = await createKernelAccount(publicClient, {
-        entryPoint,
-        plugins: {
-          sudo: multisigValidator,
-        },
-        kernelVersion: KERNEL_V3_1,
-      });
-      console.log("account-->", account)
-      const kernelPaymaster = createZeroDevPaymasterClient({
-        chain: sepolia,
-        transport: http(PAYMASTER_RPC),
-      });
-
-      const kernelClient = createKernelAccountClient({
-        account,
-        chain: sepolia,
-        bundlerTransport: http(BUNDLER_URL),
-        paymaster: {
-          getPaymasterData(userOperation) {
-            return kernelPaymaster.sponsorUserOperation({ userOperation });
-          },
-        },
-        userOperation: {
-          estimateFeesPerGas: async ({ bundlerClient }) => {
-            return getUserOperationGasPrice(bundlerClient)
-          }
-        }
-      });
-
-      console.log("My account:", kernelClient.account.address);
-
-      const op1Hash = await kernelClient.sendUserOperation({
-        callData: await kernelClient.account.encodeCalls([{
-          to: zeroAddress,
-          value: BigInt(0),
-          data: "0x",
-        }]),
-      });
-      console.log("op1Hash-->", op1Hash)
-      await kernelClient.waitForUserOperationReceipt({
-        hash: op1Hash,
-      });
-
-      console.log("userOp sent");
-
-      const currentSigners = await getCurrentSigners(publicClient, {
-        entryPoint,
-        multiSigAccountAddress: account.address,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      console.log("current signers:", currentSigners);
-
-
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      // console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
     } catch (error) {
       console.log("error-->", error)
+      return false
     }
   }
+
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
@@ -288,29 +234,30 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = true;
-          if (authenticated) {
-            let account = true;
-            console.log("account-->", account);
-            if (account) {
-              toast.success("Login Successfully!");
-              dispatch(
-                loginSet({
-                  login: true,
-                  walletAddress: account?.account?.address || "",
-                  signer: "",
-                  username: userExist.userId.username,
-                  email: userExist.userId.email,
-                  passkeyCred: userExist.userId.passkey || "",
-                })
-              );
-              setLoginEmail();
-              handleLogin();
+          const createdCredential = await passketLogin(loginEmail);
+          if (createdCredential) {
+            let account = await getAccount(createdCredential.passkeyValidator);
+            if (!(account.status)) {
+              toast.error(account.msg);
             } else {
-              toast.error("Login Failed!");
+              if(userExist.userId.wallet == account?.account?.account?.address){
+                toast.success("Login Successfully!");
+                dispatch(
+                  loginSet({
+                    login: true,
+                    walletAddress: account?.account?.account?.address || "",
+                    signer: "",
+                    username: userExist.userId.username,
+                    email: userExist.userId.email,
+                    passkeyCred: createdCredential.passkeyValidator || "",
+                  })
+                );
+                setLoginEmail();
+                handleLogin();
+              }else{
+                toast.error("Please Login With Correct Account!");
+              }
             }
-          } else {
-            toast.error("Login Failed!");
           }
         }
       }
@@ -330,43 +277,40 @@ const LoginPop = ({ login, setLogin }) => {
         toast.error("Invalid OTP!");
       } else {
         let userExist = await getUser(registerEmail);
-        // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        let account = false
-        let createdCredential = false
-        // const createdCredential = await create(registerEmail);
+        const createdCredential = await passketCreate(registerEmail);
         if (createdCredential) {
-          // let account = await createSafeAccount(createdCredential);
-
-          // account, smartAccountClient
-          console.log("account-->", account?.account?.address);
-          // const passkey = await extractPasskeyData(createdCredential)
-          let data = await addUser(
-            registerEmail,
-            registerUsername,
-            createdCredential,
-            createdCredential.publicKey,
-            createdCredential.id,
-            account?.account?.address
-          );
-          // console.log("logged user--->", data)
-          toast.success("Sign Up Successfully!");
-          setRegisterTab(2);
-          dispatch(
-            loginSet({
-              login: true,
-              walletAddress: account?.account?.address || "",
-              signer: "",
-              username: registerUsername,
-              email: registerEmail,
-              passkeyCred: createdCredential || "",
-            })
-          );
-          setRegisterEmail();
-          setRegisterUsername();
-          handleLogin();
+          let account = await createAccount(createdCredential.passkeyValidator);
+          if (!(account.status)) {
+            toast.error("Please Enter Email!");
+          } else {
+            console.log("account-->", account?.account?.account?.address);
+            let data = await addUser(
+              registerEmail,
+              registerUsername,
+              "",
+              "",
+              "",
+              account?.account?.account?.address
+            );
+            toast.success("Sign Up Successfully!");
+            setRegisterTab(2);
+            dispatch(
+              loginSet({
+                login: true,
+                walletAddress: account?.account?.account?.address || "",
+                signer: "",
+                username: registerUsername,
+                email: registerEmail,
+                passkeyCred: createdCredential.passkeyValidator || "",
+              })
+            );
+            setRegisterEmail();
+            setRegisterUsername();
+            handleLogin();
+          }
         }
       }
       setRegisterLoading(false);
@@ -442,7 +386,7 @@ const LoginPop = ({ login, setLogin }) => {
             <div className="col-span-12">
               <button
                 disabled={loginLoading}
-                onClick={passketCreated}
+                onClick={loginFn}
                 className="btn text-xs commonBtn flex items-center justify-center btn w-full"
               >
                 {loginLoading ? "Loading" : "Submit"}
