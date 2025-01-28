@@ -341,22 +341,22 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          console.log("OTP-->", OTP)
-          setRegisterTab(2);
-          // let obj = {
-          //   email: registerEmail,
-          //   name: registerUsername,
-          //   otp: OTP,
-          //   subject: "Madhouse Account Verification OTP",
-          //   type: "registerOtp",
-          // };
-          // let sendEmailData = await sendOTP(obj);
-          // if (sendEmailData.status && sendEmailData.status == "success") {
-          //   setRegisterTab(2);
-          //   toast.success(sendEmailData?.message);
-          // } else {
-          //   toast.error(sendEmailData?.message || sendEmailData?.error);
-          // }
+          // console.log("OTP-->", OTP)
+          // setRegisterTab(2);
+          let obj = {
+            email: registerEmail,
+            name: registerUsername,
+            otp: OTP,
+            subject: "Madhouse Account Verification OTP",
+            type: "registerOtp",
+          };
+          let sendEmailData = await sendOTP(obj);
+          if (sendEmailData.status && sendEmailData.status == "success") {
+            setRegisterTab(2);
+            toast.success(sendEmailData?.message);
+          } else {
+            toast.error(sendEmailData?.message || sendEmailData?.error);
+          }
         }
       }
       setRegisterOtpLoading(false);
