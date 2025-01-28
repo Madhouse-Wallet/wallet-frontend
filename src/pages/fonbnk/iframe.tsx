@@ -27,7 +27,8 @@ const IframeComponent = () => {
             
             <iframe
             
-              src="https://sandbox-pay.fonbnk.com/?source=x9REDkaz"
+              // src="https://sandbox-pay.fonbnk.com/?source=x9REDkaz"
+              src={`${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_SOURCE}`}
               className="w-full h-full border-0 rounded"
               title="Fonbnk Payment"
               allow="payment"
@@ -57,7 +58,7 @@ const IframeComponent = () => {
             
             <iframe
             
-              src="https://sandbox-pay.fonbnk.com/offramp/?source=x9REDkaz"
+            src={`${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_SOURCE}`}
               className="w-full h-full border-0 rounded"
               title="Fonbnk Payment"
               allow="payment"

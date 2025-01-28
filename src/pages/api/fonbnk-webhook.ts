@@ -55,7 +55,7 @@ export default async function handler(
   }
 
   // Your secret from Fonbnk dashboard (store securely, e.g., in environment variables)
-  const FONBNK_WEBHOOK_SECRET = '01JJHFM7CNFPHH2S6SFSN1SDP1';
+  const FONBNK_WEBHOOK_SECRET = process.env.NEXT_PUBLIC_FONBNK_ONRAMP_WEBHOOK_SECRET;
 
   if (!FONBNK_WEBHOOK_SECRET) {
     console.error('Fonbnk webhook secret is not configured');

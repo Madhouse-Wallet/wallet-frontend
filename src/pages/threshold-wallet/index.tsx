@@ -81,6 +81,13 @@ const ThresholdWallet: React.FC = () => {
       },
     },
     {
+      head: "Spherepay",
+      icn: dollarIcn,
+      onClick: () => {
+        router.push("/sphere");
+      },
+    },
+    {
       head: "Sell Bitcoin",
       icn: sellIcn,
       onClick: () => {
