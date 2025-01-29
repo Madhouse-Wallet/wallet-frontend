@@ -8,20 +8,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
-import { send } from "process";
-import { zeroAddress } from "viem"
-import {
-  createWeightedECDSAValidator,
-  getUpdateConfigCall,
-  getCurrentSigners,
-  getValidatorAddress,
-} from "@zerodev/weighted-ecdsa-validator";
-import {
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-  getUserOperationGasPrice
-} from "@zerodev/sdk"
+
 import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
@@ -39,11 +26,11 @@ import {
   base64ToBuffer,
 } from "../../../utils/globals";
 
-import { createAccount, getAccount } from "../../../lib/zeroDevWallet"
+import { createAccount, getAccount, getMnemonic } from "../../../lib/zeroDevWallet"
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
-const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
-const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
+const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
+const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
 
@@ -56,10 +43,6 @@ const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
   chain: CHAIN
 })
-
-let kernelAccount;
-let kernelClient;
-
 
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
@@ -74,12 +57,25 @@ const LoginPop = ({ login, setLogin }) => {
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
+  const [addressPhrase, setAddressPhrase] = useState("");
   async function isValidEmail(email) {
     // Define the email regex pattern
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Test the email against the regex
     return emailRegex.test(email);
+  }
+
+  const handleCopy = async () => {
+    try {
+      if (addressPhrase) {
+        await navigator.clipboard.writeText(addressPhrase);
+      } else {
+
+      }
+    } catch (error) {
+      console.log("error-->", error)
+    }
   }
 
   const addUser = async (
@@ -240,7 +236,7 @@ const LoginPop = ({ login, setLogin }) => {
             if (!(account.status)) {
               toast.error(account.msg);
             } else {
-              if(userExist.userId.wallet == account?.account?.account?.address){
+              if (userExist.userId.wallet == account?.account?.account?.address) {
                 toast.success("Login Successfully!");
                 dispatch(
                   loginSet({
@@ -254,7 +250,7 @@ const LoginPop = ({ login, setLogin }) => {
                 );
                 setLoginEmail();
                 handleLogin();
-              }else{
+              } else {
                 toast.error("Please Login With Correct Account!");
               }
             }
@@ -282,7 +278,7 @@ const LoginPop = ({ login, setLogin }) => {
         }
         const createdCredential = await passketCreate(registerEmail);
         if (createdCredential) {
-          let account = await createAccount(createdCredential.passkeyValidator);
+          let account = await createAccount(createdCredential.passkeyValidator, addressPhrase);
           if (!(account.status)) {
             toast.error("Please Enter Email!");
           } else {
@@ -320,6 +316,33 @@ const LoginPop = ({ login, setLogin }) => {
     }
   };
 
+
+  const registerOtpFn = async () => {
+    try {
+      setRegisterLoading(true);
+      if (!registerOTP) {
+        toast.error("Please Enter OTP!");
+      } else if (registerOTP != checkOTP) {
+        toast.error("Invalid OTP!");
+      } else {
+        let userExist = await getUser(registerEmail);
+        if (userExist.status && userExist.status == "success") {
+          return toast.error("User Already Exist!");
+        }
+        let phrase = await getMnemonic();
+        console.log("phrase -->",phrase)
+        if (phrase) {
+          setAddressPhrase(phrase);
+          setRegisterTab(3);
+        }
+      }
+      setRegisterLoading(false);
+    } catch (error) {
+      console.log("error---->", error);
+      setRegisterLoading(false);
+    }
+  };
+
   const sendRegisterOtp = async () => {
     try {
       setRegisterOtpLoading(true);
@@ -341,22 +364,22 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          // console.log("OTP-->", OTP)
-          // setRegisterTab(2);
-          let obj = {
-            email: registerEmail,
-            name: registerUsername,
-            otp: OTP,
-            subject: "Madhouse Account Verification OTP",
-            type: "registerOtp",
-          };
-          let sendEmailData = await sendOTP(obj);
-          if (sendEmailData.status && sendEmailData.status == "success") {
-            setRegisterTab(2);
-            toast.success(sendEmailData?.message);
-          } else {
-            toast.error(sendEmailData?.message || sendEmailData?.error);
-          }
+          console.log("OTP-->", OTP)
+          setRegisterTab(2);
+          // let obj = {
+          //   email: registerEmail,
+          //   name: registerUsername,
+          //   otp: OTP,
+          //   subject: "Madhouse Account Verification OTP",
+          //   type: "registerOtp",
+          // };
+          // let sendEmailData = await sendOTP(obj);
+          // if (sendEmailData.status && sendEmailData.status == "success") {
+          //   setRegisterTab(2);
+          //   toast.success(sendEmailData?.message);
+          // } else {
+          //   toast.error(sendEmailData?.message || sendEmailData?.error);
+          // }
         }
       }
       setRegisterOtpLoading(false);
@@ -467,7 +490,7 @@ const LoginPop = ({ login, setLogin }) => {
                 <div className="col-span-12">
                   <button
                     disabled={registerLoading}
-                    onClick={registerFn}
+                    onClick={registerOtpFn}
                     className="btn text-xs commonBtn flex items-center justify-center btn w-full"
                   >
                     {registerLoading ? "Loading" : "Submit"}
@@ -475,6 +498,31 @@ const LoginPop = ({ login, setLogin }) => {
                 </div>
               </>
             )}
+
+            {registerTab == 3 && <>
+              {addressPhrase.split(" ").map((item, key) => (
+                <div className="col-span-6 " key={key}>
+                  <div className="iconWithText relative">
+                    <label htmlFor="" className="form-label rounded-circle flex items-center justify-center m-0 text-dark font-medium absolute left-1 icn" style={{ height: 40, width: 40, background: "#ff8735" }}>{key + 1}</label>
+                    <input type="text" value={item} readOnly={true} className="form-control pl-12 text-xs rounded-pill w-full bg-[#ff87352e] focus:bg-[#ff87352e]" style={{ border: "1px solid #ff8735" }} />
+                  </div>
+                </div>
+              ))}
+              <div className="col-span-12 text-center my-2">
+                <button onClick={handleCopy} className="inline-flex items-center justify-center btn commonBtn rounded-pill">
+                  Copy to Clipboard
+                </button>
+              </div>
+              <div className="col-span-12">
+                  <button
+                    disabled={registerLoading}
+                    onClick={registerFn}
+                    className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+                  >
+                    {registerLoading ? "Loading" : "Submit"}
+                  </button>
+                </div>
+            </>}
           </div>
           {/* </form> */}
         </>

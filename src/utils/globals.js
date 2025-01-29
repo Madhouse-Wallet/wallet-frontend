@@ -32,3 +32,13 @@ export const base64ToBuffer = (base64) => {
         return null; // Handle error as needed (e.g., return an empty buffer or throw an error)
     }
 };
+
+export const handleCopy = async (address) => {
+    try {
+      await navigator.clipboard.writeText(address);
+     return true
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      return false
+    }
+  };

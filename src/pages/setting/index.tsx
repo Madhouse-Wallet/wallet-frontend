@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { AccordionItem } from "@/components/common/index";
+import { createPortal } from "react-dom";
+import SetupRecoveryPop from "@/components/Modals/SetupRecovery"
 
 const Setting: React.FC = () => {
   const tabs = [
@@ -58,30 +60,17 @@ const Setting: React.FC = () => {
       ),
     },
     {
-      title: "Set Up Email Recovery",
+      title: "Recovery",
       content: (
         <>
-          <form action="" className="pb-3">
-            <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
-                <label
-                  htmlFor=""
-                  className="form-label m-0 text-xs font-medium"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
-                />
-              </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
-                  Submit
-                </button>
-              </div>
+          <div className="grid gap-3 grid-cols-12">
+
+            <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
+              <button onClick={()=> setSetUp(!setUp)} className="btn flex items-center justify-center commonBtn">
+                Setup
+              </button>
             </div>
-          </form>
+          </div>
         </>
       ),
     },
@@ -286,6 +275,7 @@ const Setting: React.FC = () => {
     },
   ];
   const [activeTab, setActiveTab] = useState(1);
+  const [setUp, setSetUp] = useState(false);
   const showTab = (tab: number) => {
     console.log(tab, "tab");
 
@@ -315,6 +305,14 @@ const Setting: React.FC = () => {
   };
   return (
     <>
+      {setUp &&
+        createPortal(
+          <SetupRecoveryPop
+            setUp={setUp}
+            setSetUp={setSetUp}
+          />,
+          document.body
+        )}
       <section className="position-relative dashboard py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -344,9 +342,8 @@ const Setting: React.FC = () => {
                         <button
                           key={key}
                           onClick={() => showTab(key)}
-                          className={`${
-                            activeTab === key && "active"
-                          } tab-button font-medium relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                          className={`${activeTab === key && "active"
+                            } tab-button font-medium relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                         >
                           {item.title}
                         </button>
@@ -363,9 +360,8 @@ const Setting: React.FC = () => {
                           <div
                             key={key}
                             id="tabContent1"
-                            className={`${
-                              activeTab === key && "block"
-                            } tab-content border-0`}
+                            className={`${activeTab === key && "block"
+                              } tab-content border-0`}
                           >
                             {item.content}
                           </div>

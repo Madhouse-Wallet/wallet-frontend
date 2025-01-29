@@ -63,7 +63,7 @@ input.file {
   opacity: 0;
 }
 
-.iconWithText .icn.position-absolute {
+.iconWithText .icn.absolute {
   top: 50%;
   transform: translateY(-50%);
 }
