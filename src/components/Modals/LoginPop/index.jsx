@@ -28,9 +28,9 @@ import {
 
 import { createAccount, getAccount, getMnemonic } from "../../../lib/zeroDevWallet"
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
-const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
-const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
 
