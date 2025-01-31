@@ -271,40 +271,40 @@ const CreateWallet = () => {
   const registerFn = async () => {
     try {
       let userExist = await getUser(registerData.email);
-        if (userExist.status && userExist.status == "success") {
-           toast.error("User Already Exist!");
-           return false
+      if (userExist.status && userExist.status == "success") {
+        toast.error("User Already Exist!");
+        return false
+      }
+      const createdCredential = await passketCreate(registerData.email);
+      if (createdCredential) {
+        let account = await createAccount(createdCredential.passkeyValidator, addressPhrase);
+        if (!(account.status)) {
+          toast.error(account.msg);
+          return false;
+        } else {
+          console.log("account-->", account?.account?.account?.address);
+          let data = await addUser(
+            registerData.email,
+            registerData.username,
+            "",
+            "",
+            "",
+            account?.account?.account?.address
+          );
+          toast.success("Sign Up Successfully!");
+          dispatch(
+            loginSet({
+              login: true,
+              walletAddress: account?.account?.account?.address || "",
+              signer: "",
+              username: registerData.username,
+              email: registerData.email,
+              passkeyCred: createdCredential.passkeyValidator || "",
+            })
+          );
+          return true
         }
-        const createdCredential = await passketCreate(registerData.email);
-        if (createdCredential) {
-          let account = await createAccount(createdCredential.passkeyValidator, addressPhrase);
-          if (!(account.status)) {
-            toast.error(account.msg);
-            return false;
-          } else {
-            console.log("account-->", account?.account?.account?.address);
-            let data = await addUser(
-              registerData.email,
-              registerData.username,
-              "",
-              "",
-              "",
-              account?.account?.account?.address
-            );
-            toast.success("Sign Up Successfully!");
-            dispatch(
-              loginSet({
-                login: true,
-                walletAddress: account?.account?.account?.address || "",
-                signer: "",
-                username:  registerData.username,
-                email:  registerData.email,
-                passkeyCred: createdCredential.passkeyValidator || "",
-              })
-            );
-            return true
-          }
-        }
+      }
     } catch (error) {
       console.log("registerFn error---->", error);
       return false
@@ -349,28 +349,27 @@ const CreateWallet = () => {
       } else {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
-        console.log("OTP-->", OTP)
+        // console.log("OTP-->", OTP)
         setRegisterData({
           "email": data.email,
           "username": data.username
         })
-        return true;
-        // let obj = {
-        //   email: data.email,
-        //   name: data.username,
-        //   otp: OTP,
-        //   subject: "Madhouse Account Verification OTP",
-        //   type: "registerOtp",
-        // };
-        // let sendEmailData = await sendOTP(obj);
-        // if (sendEmailData.status && sendEmailData.status == "success") {
-        //   setRegisterTab(2);
-        //   toast.success(sendEmailData?.message);
-        // return true;
-        // } else {
-        //   toast.error(sendEmailData?.message || sendEmailData?.error);
-        // return false;
-        // }
+        let obj = {
+          email: data.email,
+          name: data.username,
+          otp: OTP,
+          subject: "Madhouse Account Verification OTP",
+          type: "registerOtp",
+        };
+        let sendEmailData = await sendOTP(obj);
+        if (sendEmailData.status && sendEmailData.status == "success") {
+          setRegisterTab(2);
+          toast.success(sendEmailData?.message);
+          return true;
+        } else {
+          toast.error(sendEmailData?.message || sendEmailData?.error);
+          return false;
+        }
       }
     } catch (error) {
       console.log("sendRegisterOtp error---->", error);
