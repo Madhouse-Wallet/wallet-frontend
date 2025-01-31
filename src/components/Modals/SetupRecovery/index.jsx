@@ -16,6 +16,7 @@ import {
 } from "@zerodev/passkey-validator"
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
 import { useDispatch, useSelector } from "react-redux";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
 import { sepolia } from "viem/chains"
@@ -26,11 +27,11 @@ import {
   base64ToBuffer,
 } from "../../../utils/globals";
 
-import { createAccount, getAccount, getMnemonic } from "../../../lib/zeroDevWallet"
+import { createAccount, getAccount, getMnemonic, getRecoverAccount, doRecoveryNewSigner } from "../../../lib/zeroDevWallet"
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
-const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
-const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
 
@@ -45,18 +46,26 @@ const publicClient = createPublicClient({
 })
 
 
+
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const userAuth = useSelector((state) => state.Auth);
 
   const [step, setStep] = useState(1)
   const [phrase, setPhrase] = useState()
+  console.log(userAuth)
 
   const checkPhrase = async () => {
     try {
-      console.log("ph",phrase.trim().split(" ").length, phrase.trim().split(" "))
-      if (!userAuth?.login) return toast.error("Please Login!")
-      if (phrase && phrase.trim().split(" ") == 12) {
-        setStep(2)
+      console.log("ph", phrase.trim().split(" ").length, phrase.trim().split(" "))
+      // if (!userAuth?.login) return toast.error("Please Login!")
+      if (phrase && phrase.trim().split(" ").length == 12) {
+        console.log(userAuth)
+        let checkAccount = await getRecoverAccount(userAuth?.passkeyCred, phrase)
+        if (checkAccount && (checkAccount.address == userAuth.walletAddress)) {
+          setStep(2)
+        } else {
+          toast.error("Invalid Phrase!")
+        }
       } else {
         toast.error("Invalid Phrase!")
       }
@@ -67,6 +76,74 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
     }
   }
 
+  const passketCreate = async (username) => {
+    try {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Register,
+        passkeyServerHeaders: {}
+      })
+      // console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      // console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
+    } catch (error) {
+      console.log("error-->", error)
+      return false
+    }
+  }
+  const passketLogin = async (username) => {
+    try {
+      const webAuthnKey = await toWebAuthnKey({
+        passkeyName: username,
+        passkeyServerUrl: PASSKEY_SERVER_URL,
+        mode: WebAuthnMode.Login,
+        passkeyServerHeaders: {}
+      })
+      console.log("line-95", webAuthnKey)
+      const passkeyValidator = await toPasskeyValidator(publicClient, {
+        webAuthnKey,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
+      })
+      console.log("line-102", passkeyValidator)
+      return { passkeyValidator, webAuthnKey };
+    } catch (error) {
+      console.log("error-->", error)
+      return false
+    }
+  }
+
+  const createNewSigner = async () => {
+    try {
+      // const newSigner = await passketCreate("ajay01.com");
+      const newSigner = privateKeyToAccount(generatePrivateKey());
+
+      if (newSigner) {
+        // let oldSigner = await passketLogin("ajay")
+        let result = await doRecoveryNewSigner(userAuth?.passkeyCred, phrase, newSigner)
+        console.log("result-->", result)
+        if (result.status) {
+          toast.success("created !")
+        } else {
+          toast.error(result.msg)
+        }
+
+      } else {
+        toast.error("Please set new Signer!")
+      }
+      // doRecoveryNewSigner 
+    } catch (error) {
+      console.log("error new sigenr -->", error)
+    }
+  }
 
   const handleSetupRecovery = () => setSetUp(!setUp);
   return (
@@ -138,7 +215,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                 </form></> : step == 2 ? <>
                   <div className="grid gap-3 grid-cols-12">
 
-                    {[1, 2, 3, 4].map((item, key) => (
+                    {phrase.split(" ").map((item, key) => (
                       <div className="col-span-6 " key={key}>
                         <div className="iconWithText relative">
                           <label htmlFor="" className="form-label rounded-circle flex items-center justify-center m-0 text-dark font-medium absolute left-1 icn" style={{ height: 40, width: 40, background: "#ff8735" }}>{key + 1}</label>
@@ -146,10 +223,9 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                         </div>
                       </div>
                     ))}
-                    <div className="col-span-12 text-center my-2">
+                    <div onClick={createNewSigner} className="col-span-12 text-center my-2">
                       <button className="inline-flex items-center justify-center btn commonBtn rounded-pill">
-                        Copy to Clipboard
-                      </button>
+                        Create a new Signer                      </button>
                     </div>
                   </div>
                 </> : <></>}

@@ -28,9 +28,9 @@ import {
 
 import { createAccount, getAccount, getMnemonic } from "../../../lib/zeroDevWallet"
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
-const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
-const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/d6e742a7-f666-4f0d-b1cf-7e70c5a4e443"
+const BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PAYMASTER_RPC = "https://rpc.zerodev.app/api/v2/paymaster/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
+const PASSKEY_SERVER_URL = "https://passkeys.zerodev.app/api/v3/bfac7d2b-bb09-4aa5-be54-8c56270fff2e"
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
 
@@ -171,14 +171,14 @@ const LoginPop = ({ login, setLogin }) => {
         mode: WebAuthnMode.Login,
         passkeyServerHeaders: {}
       })
-      // console.log("line-95", webAuthnKey)
+      console.log("line-95", webAuthnKey)
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
         validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
       })
-      // console.log("line-102", passkeyValidator)
+      console.log("line-102", passkeyValidator)
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
       console.log("error-->", error)
