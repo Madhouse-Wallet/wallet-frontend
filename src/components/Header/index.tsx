@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
           <LoginPop login={login} setLogin={setLogin} />,
           document.body
         )}
-      <header className="siteHeader sticky top-0 py-2 w-full shadow z-[999] bg-[var(--backgroundColor)]">
+      <header className="siteHeader sticky top-0 py-2 w-full shadow z-[999] border-b border-gray-700 ">
         <div className="container-fluid mx-auto">
           <Nav className="flex items-center justify-between ">
             {/* <div className="">
@@ -104,7 +104,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             <div className="flex items-center gap-2">
               <a
                 href="#"
-                className="text-[var(--textColor)] font-bold text-lg whitespace-nowrap lg:hidden"
+                className="text-[#83838D] font-normal text-base whitespace-nowrap flex items-center gap-2"
               >
                 {isChecked ? (
                   <>
@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                       height={10000}
                       width={10000}
                       className="max-w-full object-contain w-auto"
-                      style={{ height: 40 }}
+                      style={{ height: 28 }}
                     />
                   </>
                 ) : (
@@ -125,10 +125,11 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                       height={10000}
                       width={10000}
                       className="max-w-full object-contain w-auto"
-                      style={{ height: 40 }}
+                      style={{ height: 28 }}
                     />
                   </>
                 )}
+                <span className="md:block hidden">MadHouse Wallet</span>
               </a>
             </div>
 
@@ -151,8 +152,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                       {/* {userAuth?.username} */}
                       {userAuth?.walletAddress ? (
                         <>
-                          {splitAddress(userAuth?.walletAddress)}{" "}
-                          {copyIcn}
+                          {splitAddress(userAuth?.walletAddress)} {copyIcn}
                         </>
                       ) : (
                         "Loading..."
@@ -199,12 +199,12 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   <button
                     // onClick={loginTry}
                     onClick={() => setLogin(!login)}
-                    className="btn flex items-center justify-center commonBtn"
+                    className="btn flex items-center justify-center commonBtn rounded-20"
                   >
                     Login
                   </button>
                 )}
-                <button
+                {/* <button
                   className="border-0 p-0 bg-transpraent"
                   onClick={toggleTheme}
                   data-tooltip-id="theme"
@@ -213,29 +213,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   }
                 >
                   {!isChecked ? darkIcn : lightIcn}
-                  {/* <GradientHandleSwitch
-                    uncheckedIcon={undefined}
-                    checkedIcon={undefined}
-                    height={16}
-                    width={48}
-                    handleDiameter={24}
-                    offColor="#4C4C57"
-                    onColor="#4C4C57"
-                    checked={isChecked}
-                    onChange={toggleTheme}
-                    boxShadow="0px 0px 0px 0px"
-                    activeBoxShadow="0px 0px 0px 0px"
-                  /> */}
-                </button>
-                <div className="lg:hidden">
-                  <button
-                    onClick={() => setSidebar(!sidebar)}
-                    aria-controls="navbarScroll"
-                    className="border-0 p-0"
-                  >
-                    {menuIcn}
-                  </button>
-                </div>
+                </button> */}
               </div>
             </div>
           </Nav>
@@ -257,7 +235,6 @@ const Nav = styled.nav`
       padding: 5px;
       font-size: 12px !important;
       height: 35px !important;
-      border-radius: 3px !important;
     }
   }
 `;

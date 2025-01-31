@@ -9,11 +9,23 @@ class Web3Interaction {
 
   constructor(currentNetwork?: any, provider?: any) {
     if (provider) {
-      this.PROVIDER = new ethers.providers.Web3Provider(
-        provider || (window as any).ethereum,
-        currentNetwork || "sepolia"
-      );
+      // this.PROVIDER = new ethers.providers.Web3Provider(
+      //   provider || (window as any).ethereum,
+      //   currentNetwork || "sepolia"
+      // );
+      this.PROVIDER = provider;
       this.SIGNER = this.PROVIDER.getSigner();
+      console.log("line-18",this.PROVIDER, this.SIGNER)
+
+      // Using signer to get balance
+      const getBalanceWithSigner = async () => {
+        const balance = await this.SIGNER.getBalance();
+        const ethBalance = ethers.utils.formatEther(balance);
+        console.log('Balance using signer:', ethBalance);
+        return ethBalance;
+      }
+
+      getBalanceWithSigner();
     }
   }
 

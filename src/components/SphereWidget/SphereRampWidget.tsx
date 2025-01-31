@@ -47,7 +47,9 @@ export default function SphereRampWidget({
 
     // Initialize Sphere Ramp when script loads
     script.onload = () => {
-      if (window.SphereRamp) {
+      const container = document.getElementById("sphere-ramp-container");
+      if (container && window.SphereRamp) {
+      // if (window.SphereRamp) {
         new window.SphereRamp({
           containerId: "sphere-ramp-container",
           applicationId,

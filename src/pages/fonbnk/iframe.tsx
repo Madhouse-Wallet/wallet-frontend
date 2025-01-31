@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const IframeComponent = () => {
   const [showIframe, setShowIframe] = useState(false);
   const [showIframe1, setShowIframe1] = useState(false);
+  const userAuth = useSelector((state: any) => state.Auth);
 
   return (
     <>
@@ -28,7 +30,7 @@ const IframeComponent = () => {
             <iframe
             
               // src="https://sandbox-pay.fonbnk.com/?source=x9REDkaz"
-              src={`${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_SOURCE}`}
+              src={`${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_SOURCE}&address=${userAuth?.walletAddress}`}
               className="w-full h-full border-0 rounded"
               title="Fonbnk Payment"
               allow="payment"

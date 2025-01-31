@@ -39,7 +39,7 @@ const LiquitdityProtectionPop = ({ liquidity, setLiquidity }) => {
         <div
           className={`modalDialog relative p-2 mx-auto w-full rounded z-10 bg-[var(--backgroundColor)]`}
         >
-          <div className={`position-relative rounded`}>
+          <div className={`relative rounded`}>
             <button
               onClick={handleLiquidity}
               className="border-0 p-0 position-absolute"

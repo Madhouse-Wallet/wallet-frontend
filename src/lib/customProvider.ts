@@ -1,4 +1,4 @@
-import { sepolia, baseSepolia, sepolia } from "viem/chains";
+import { sepolia, baseSepolia } from "viem/chains";
 import { Hex, createPublicClient, encodePacked, getContract, http, pad } from "viem";
 const publicClient   = createPublicClient({
     chain: sepolia,

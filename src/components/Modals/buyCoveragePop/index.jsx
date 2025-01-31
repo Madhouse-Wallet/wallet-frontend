@@ -20,7 +20,7 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
         <div
           className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >
-          <div className={`position-relative rounded`}>
+          <div className={`relative rounded`}>
             <button
               onClick={handleBuyCoverage}
               className="border-0 p-0 position-absolute"
@@ -87,7 +87,7 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
                       </div>
                       <div className="right">
                         <p
-                          className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
+                          className={`greenStatus status d-inline-flex m-0 rounded-20 px-2 text-capitalize py-1 fw-sbold`}
                         >
                           ID: 232
                         </p>
@@ -123,7 +123,7 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
                       </div>
                       <div className="right">
                         <p
-                          className={`greenStatus status d-inline-flex m-0 rounded-pill px-2 text-capitalize py-1 fw-sbold`}
+                          className={`greenStatus status d-inline-flex m-0 rounded-20 px-2 text-capitalize py-1 fw-sbold`}
                         >
                           ID: 232
                         </p>

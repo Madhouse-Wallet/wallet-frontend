@@ -23,40 +23,35 @@ const Approvals: React.FC = () => {
   };
   return (
     <>
-      <section className="position-relative dashboard py-3">
+      <section className="relative dashboard pt-12">
         <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12 my-2">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-2">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">Approvals</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12 my-2">
-              <div className="d-flex align-items-start justify-content-between flex-wrap">
-                <div className="left ">
-                  <h4 className="m-0 text-xl font-bold">
-                    Recent <span className="themeClr">Approvals</span>
-                  </h4>
-                </div>
-                {/* <div className="right">
-                  <div className="d-flex align-items-center gap-3">
-                    <button className="d-flex align-items-center justify-content-center commonBtn">
-                      Approval History
-                    </button>
+          <div
+            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
+           transition-[opacity,transform] ease-out 
+          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
+          >
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
+              style={{ background: "transparent" }}
+            >
+              {closeIcn}
+            </button>
+            <div className="grid gap-3 grid-cols-12">
+              <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
+                <div className="sectionHeader ">
+                  <div className="d-flex align-items-center gap-2">
+                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Approvals
+                    </h4>
                   </div>
-                </div> */}
+                </div>
               </div>
-            </div>
-            <div className="col-span-12 my-2">
-              <RecentApprovals />
+              <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12 ">
+                <div className="bg-white/5 rounded-3 p-3">
+                  <RecentApprovals />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -84,5 +79,19 @@ const backIcn = (
       stroke-width="2"
       stroke-linejoin="round"
     />
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
   </svg>
 );

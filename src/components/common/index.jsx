@@ -27,16 +27,31 @@ export const AccordionItem = ({
         <span>{title}</span>
         <AccordionIcon className="accordionIcn">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="23"
-            viewBox="0 0 22 23"
+            width="24"
+            height="24"
+            viewBox="0 0 38 38"
             fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M10.9974 18.8332V11.4998M10.9974 11.4998V4.1665M10.9974 11.4998H18.3307M10.9974 11.4998H3.66406"
-              stroke="#C0C0C0"
-              stroke-width="1.375"
+              d="M14.2503 34.8332H23.7503C31.667 34.8332 34.8337 31.6665 34.8337 23.7498V14.2498C34.8337 6.33317 31.667 3.1665 23.7503 3.1665H14.2503C6.33366 3.1665 3.16699 6.33317 3.16699 14.2498V23.7498C3.16699 31.6665 6.33366 34.8332 14.2503 34.8332Z"
+              fill=""
+              stroke="#999999"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M18.9999 25.3369V12.6631"
+              stroke="#999999"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M25.3368 19H12.6631"
+              stroke="#999999"
+              stroke-width="1.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             />

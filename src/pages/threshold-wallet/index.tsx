@@ -8,9 +8,23 @@ import { createPortal } from "react-dom";
 import CounterList from "../../components/CounterList";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import Image, { StaticImageData } from "next/image";
+import ti1 from "@/Assets/Images/sendReceive.svg";
+import pi1 from "@/Assets/Images/sendReceive.png";
+import ti2 from "@/Assets/Images/BitcoinLoan.svg";
+import pi2 from "@/Assets/Images/BitcoinLoan.png";
+import ti3 from "@/Assets/Images/BuyBitcoin.svg";
+import pi3 from "@/Assets/Images/BuyBitcoin.png";
+import ti4 from "@/Assets/Images/WithdrawDeposit.svg";
+import pi4 from "@/Assets/Images/WithdrawDeposit.png";
+import ti5 from "@/Assets/Images/SellBitcoin.svg";
+import pi5 from "@/Assets/Images/SellBitcoin.png";
+import ti6 from "@/Assets/Images/BuySmartContract.svg";
+import pi6 from "@/Assets/Images/BuySmartContract.png";
+
 interface CardData {
   head: string;
-  icn: React.ReactNode;
+  icn: string | StaticImageData; // For string paths or imported static images
   onClick: () => void;
 }
 interface CardMetrics {
@@ -42,134 +56,53 @@ const ThresholdWallet: React.FC = () => {
     { head: "USD Balance", value: "$234234", icn: icn33 },
     { head: "Loan Health", value: "$234234", icn: icn11 },
   ];
-
   const cardData: CardData[] = [
     {
       head: "Send & Receive Bitcoin",
-      icn: icn1,
+      icn: pi1,
       onClick: () => {
         router.push("/btc-exhange");
       },
     },
     {
       head: "Bitcoin Loan",
-      icn: bitcoin,
+      icn: pi2,
       onClick: () => {
         router.push("/debt-position");
       },
     },
     {
       head: "Buy Bitcoin",
-      icn: buyIcn,
+      icn: pi3,
       onClick: () => {
-        // setBuy(!buy);
         router.push("/stripePaymentPage");
       },
     },
     {
       head: "Withdraw/Deposit Dollars",
-      icn: dollarIcn,
+      icn: pi4,
       onClick: () => {
         router.push("/identity");
       },
     },
     {
-      head: "Fonbnk",
-      icn: dollarIcn,
-      onClick: () => {
-        router.push("/fonbnk");
-      },
-    },
-    {
-      head: "Spherepay",
-      icn: dollarIcn,
-      onClick: () => {
-        router.push("/sphere");
-      },
-    },
-    {
       head: "Sell Bitcoin",
-      icn: sellIcn,
+      icn: pi5,
       onClick: () => {
         if (userAuth.login) {
           router.push("/swap");
         } else {
           toast.error("Please Login!");
         }
-        // setBuy(!buy);
       },
     },
     {
       head: "Buy Smart Contract Coverage",
-      icn: icn5,
+      icn: pi6,
       onClick: () => {
         setBuyCoverage(!buycoverage);
       },
     },
-    // {
-    //   head: "Buy Yubikeys",
-    //   icn: icn2,
-    //   onClick: () => {
-    //     router.push("/purchase");
-    //   },
-    // },
-    // {
-    //   head: "Bitcoin Debit Card",
-    //   icn: icn3,
-    //   onClick: () => {
-    //     router.push("/bitcoin-debt-card");
-    //   },
-    // },
-    // {
-    //   head: "Bitcoin Debit Positions",
-    //   icn: icn4,
-    //   onClick: () => {
-    //     router.push("/debt-position");
-    //   },
-    // },
-
-    // {
-    //   head: "Swap",
-    //   icn: icn1,
-    //   onClick: () => {
-    //     router.push("/swap");
-    //   },
-    // },
-    // {
-    //   head: "Identity",
-    //   icn: icn1,
-    //   onClick: () => {
-    //     router.push("/identity");
-    //   },
-    // },
-    // {
-    //   head: "Approvals",
-    //   icn: icn7,
-    //   onClick: () => {
-    //     router.push("/approval");
-    //   },
-    // },
-    // {
-    //   head: "Stake Bitcoin",
-    //   icn: icn8,
-    //   onClick: () => {
-    //     router.push("/stake-bitcoin");
-    //   },
-    // },
-    // {
-    //   head: "Setting & Support",
-    //   icn: icn9,
-    //   onClick: () => {
-    //     router.push("/setting");
-    //   },
-    // },
-    // {
-    //   head: "Contact Us",
-    //   icn: icn10,
-    //   onClick: () => {
-    //     console.log("Send & Receive Bitcoin clicked");
-    //   },
-    // },
   ];
 
   return (
@@ -184,13 +117,14 @@ const ThresholdWallet: React.FC = () => {
           />,
           document.body
         )}
-      <section className="position-relative dashboard py-3">
+      <DashboardSec className="relative dashboard pt-5">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
-            <div className="my-2 col-span-12">
-              <div className="sectionHeader pb-2 border-bottom border-secondary">
-                <h4 className="m-0 text-2xl font-bold">Threshold Wallet</h4>
-              </div>
+            <div className="col-span-12">
+              <h4 className="m-0 text-base text-center">
+                Good Morning,{" "}
+                <span className="text-xl font-semibold">Rock</span>
+              </h4>
             </div>
             {/* <div className="col-span-12 my-2">
               <div className="d-flex align-items-start justify-content-between flex-wrap pt-4">
@@ -210,76 +144,73 @@ const ThresholdWallet: React.FC = () => {
             </div>
 
             <div className="col-span-12 my-2">
-              <h4 className="m-0 text-base fw-medium flex items-center gap-2">
-                Health Factor:{" "}
-                <span className="text-green-500 text-xl font-bold ms-2">
-                  1.27
-                </span>
+              <div className="px-lg-4 text-center px-3 pb-3 pb-lg-4 pt-0 bg-[#21222f70] backdrop-blur-[17.5px] rounded-4 mt-5">
                 <div
-                  className="rounded border text-xs border-secondary bg-[var(--backgroundColor)]"
-                  style={{ fontSize: 10, padding: "2px 5px" }}
+                  className="inline-flex py-2 px-3 align-items-center justify-center gap-3 rounded-4 bg-[#9999998f]
+                  backdrop-blur-[17.5px] mb-4"
+                  style={{ marginTop: -20 }}
                 >
-                  Risk Factor
-                </div>
-              </h4>
-              {/* <div className="mt-3">
-                <div className="flex text-center">
-                  <div className="p-3 bg-green-500 w-100 opacity-40">
-                    <p className="m-0 font-medium text-white">Healthy</p>
-                  </div>
-
-                  <div className="p-3 bg-orange-500 w-100 opacity-40">
-                    <p className="m-0 font-medium text-white">Caution</p>
-                  </div>
-                  <div className="p-3 bg-red-500 w-100 ">
-                    <p className="m-0 font-medium text-white">Unhealthy</p>
-                  </div>
-                  <div className="p-3 bg-purple-500 w-100 opacity-40">
-                    <p className="m-0 font-medium text-white">Liquidated</p>
+                  <p className="m-0 text-white">
+                    Health Factor: <span className="text-[#00FF0A]">1.27</span>
+                  </p>
+                  <div
+                    className="rounded-20 p-2 pe-3 flex items-center gap-1 
+                    bg-[rgba(255, 255, 255, 0.12)]
+                  backdrop-blur-[17.5px]
+"
+                  >
+                    <span className="icn rounded-20 bg-[#00FF0A] h-2 w-2"></span>
+                    <span className="text-white text-xs">Risk Factor</span>
                   </div>
                 </div>
-              </div> */}
-            </div>
-            <div className="col-span-12 my-2">
-              <DashboardLinks className="grid gap-3 grid-cols-12">
-                {cardData.map((item, key) => (
-                  <div key={key} className=" md:col-span-4 col-span-6">
-                    <CardCstm
+                <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 flex-wrap">
+                  {cardData.map((item, key) => (
+                    <li
                       onClick={item.onClick}
-                      className="cardcstm p-3 rounded-3 h-100 position-relative cursor-pointer flex items-center justify-start gap-2"
+                      key={key}
+                      className="mx-auto"
+                      style={{ maxWidth: 135 }}
                     >
-                      <div className="text-end">{item.icn}</div>
-                      <h6 className="m-0 fw-sbold">{item.head}</h6>
-                    </CardCstm>
-                  </div>
-                ))}
-              </DashboardLinks>
+                      <button className="border-0 p-0 bg-transparent">
+                        <Image
+                          src={item.icn}
+                          alt={""}
+                          className="max-w-full mx-auto object-contain"
+                          height={60000}
+                          width={60000}
+                          style={{ height: 60, width: 60 }}
+                        />
+                        <span className="block text-xs mt-1 font-medium text-center">
+                          {item.head}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </DashboardLink>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </DashboardSec>
     </>
   );
 };
 
-const DashboardLinks = styled.div`
-  @media (max-width: 420px) {
-    .cardcstm {
-      flex-wrap: wrap;
-    }
+const DashboardSec = styled.section`
+  padding-bottom: 90px;
+  @media (max-width: 767px) {
+    padding-bottom: 70px;
   }
 `;
 
-const CardCstm = styled.div`
-  background-color: var(--cardBg);
-  border: 1px solid #737373;
-  font-size: 14px;
-  line-height: 20px;
-  svg {
-    height: 40px;
-    width: 40px;
-    path {
-      fill: #ff8029;
+const DashboardLink = styled.ul`
+  li {
+    width: 16.666%;
+    flex-shrink: 0;
+  }
+  @media (max-width: 575px) {
+    li {
+      width: 29.9%;
     }
   }
 `;

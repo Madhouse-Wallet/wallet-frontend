@@ -13,8 +13,11 @@ import AdjustPopup from "@/components/Modals/AdjustPopup";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers, providers } from "ethers";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 
 const DebtPosition: React.FC = () => {
+  const userAuth = useSelector((state: any) => state.Auth);
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [liquidity, setLiquidity] = useState(false);
@@ -25,6 +28,7 @@ const DebtPosition: React.FC = () => {
   const [adjustPop, setAdjustPop] = useState<boolean>(false);
   const [supply, setSupply] = useState<string>("0");
   const [debtvalue, setDebtvalue] = useState<string>("0");
+  const [providerr, setProviderr] = useState<any>(null);
   const [healthValue, setHealthtvalue] = useState<string>("0");
   const [walletBalance, setWalletBalance] = useState<string>("0");
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,14 +38,14 @@ const DebtPosition: React.FC = () => {
     debt: string // in USD
   ) => {
     try {
-      const provider = (window as any).ethereum;
-      if (!provider) {
+      if (!providerr) {
         return { collateralValue: "0.00", healthFactor: "0.00" };
       }
 
       // Fetch ETH price
-      const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
-      const web3 = new Web3Interaction("sepolia", provider);
+      const contractAddress =
+        process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+      const web3 = new Web3Interaction("sepolia", providerr);
       const receipt = await web3.fetchPrice(contractAddress!);
       const receiptInEther = ethers.utils.formatEther(receipt);
       const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
@@ -63,17 +67,18 @@ const DebtPosition: React.FC = () => {
 
   const fetchTroveData = async (provider: any) => {
     try {
-      // Get wallet address
-      const accounts = await provider.request({
-        method: "eth_requestAccounts",
-      });
-      const walletAddress = accounts[0];
-
+      if(!provider){
+        return
+      }
+    
+      const walletAddress = userAuth?.walletAddress;
+      console.log("walletAddress-->",walletAddress)
       // Create web3 instance
       const web3 = new Web3Interaction("sepolia", provider);
 
       // Contract address
-      const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_CONTRACT_ADDRESS;
+      const contractAddress =
+        process.env.NEXT_PUBLIC_THRESHOLD_CONTRACT_ADDRESS;
       const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
 
       // Fetch data from the contract
@@ -87,39 +92,49 @@ const DebtPosition: React.FC = () => {
       const debtInEther = ethers.utils.formatEther(debt);
       const balance = ethers.utils.formatEther(balanceResponse);
       calculateCollateralAndHealthFactor(collInEther, debtInEther);
-      setSupply(collInEther); 
+      setSupply(collInEther);
       setDebtvalue(debtInEther);
       setWalletBalance(balance);
       setLoading(false);
     } catch (err: any) {
+      console.log(err)
       toast.error("Failed to fetch trove data");
       setLoading(false);
     }
   };
 
+
   useEffect(() => {
     const connectWallet = async () => {
-      const provider = (window as any).ethereum;
-
-      if (!provider) {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            console.log("provider -line-114", provider);
+            setProviderr(provider?.ethersProvider)
+            try {
+              fetchTroveData(provider?.ethersProvider);
+            } catch (err: any) {
+              toast.error("Failed to connect wallet");
+              setLoading(false);
+            }
+            // kernelProvider, ethersProvider
+          } else {
+            toast.error(
+              "MetaMask not detected. Please install MetaMask to proceed."
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      }else{
         toast.error(
-          "MetaMask not detected. Please install MetaMask to proceed."
+          "Please Login"
         );
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Request account connection from MetaMask
-        const accounts = await provider.request({
-          method: "eth_requestAccounts",
-        });
-
-        // Fetch trove data once connected
-        fetchTroveData(provider);
-      } catch (err: any) {
-        toast.error("Failed to connect wallet");
-        setLoading(false);
+        return
       }
     };
 
@@ -141,25 +156,24 @@ const DebtPosition: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
-
   const Withdraw = async () => {
-    const provider = (window as any).ethereum;
 
-    if (!provider) {
-      toast.error("MetaMask not detected. Please install MetaMask to proceed.");
+    if (!providerr) {
+      toast.error("Please Login");
       setLoading(false);
       return;
     }
 
     try {
       setWithdrawButton(true);
-      const web3 = new Web3Interaction("sepolia", provider);
-      const spenderAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS; // Replace with actual spender address
+      const web3 = new Web3Interaction("sepolia", providerr);
+      const spenderAddress =
+        process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS; // Replace with actual spender address
       const troveResponse = await web3.closeTrove(spenderAddress!);
       setLoading(false);
       setWithdrawButton(false);
       toast.success("Transaction Completed");
-      fetchTroveData(provider);
+      fetchTroveData(providerr);
     } catch (err: any) {
       toast.error(err || "Caller doesn't have enough THUSD to make repayment");
       setLoading(false);
@@ -208,254 +222,254 @@ const DebtPosition: React.FC = () => {
           />,
           document.body
         )}
-      <section className="position-relative dashboard py-3">
+      <section className="relative dashboard pt-12">
         <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12 my-2">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">
-                    Collateral Debt Position
-                  </h4>
+          <div
+            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
+           transition-[opacity,transform] ease-out 
+          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
+          >
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
+              style={{ background: "transparent" }}
+            >
+              {closeIcn}
+            </button>
+            <div className="grid gap-3 grid-cols-12 px-lg-4">
+              <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <div className="sectionHeader ">
+                  <div className="flex items-center gap-3">
+                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Collateral Debt Position
+                    </h4>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="md:col-span-6 col-span-12 my-2">
-              <CardCstm
-                className="p-3 rounded position-relative"
-                style={{ maxWidth: 300 }}
-              >
-                <div className="top pb-3 d-flex align-items-center justify-content-between gap-3">
-                  <div className="content">
-                    <p className="m-0">Assets</p>
-                  </div>
-                  <span className="icn">
-                    {/* <button
-                      className="d-flex align-items-center justify-content-center commonBtn fw-sbold"
+              <div className="md:col-span-6 col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <CardCstm
+                  className="p-3 rounded-8 relative"
+                  style={{ maxWidth: 300 }}
+                >
+                  <div className="top pb-3 flex items-center justify-between gap-3">
+                    <div className="content">
+                      <p className="m-0">Assets</p>
+                    </div>
+                    <span className="icn">
+                      {/* <button
+                      className="flex items-center justify-content-center commonBtn fw-sbold"
                       style={{ minWidth: "unset" }}
                     > */}
-                    THUSD
-                    {/* </button> */}
-                  </span>
-                </div>
-                <div
-                  className="pt-3 p-3 rounded"
-                  style={{ background: "var(--cardBg2)" }}
-                >
-                  <ul
-                    className="list-unstyled ps-0 mb-0"
-                    style={{ fontSize: 12 }}
+                      THUSD
+                      {/* </button> */}
+                    </span>
+                  </div>
+                  <div
+                    className="pt-3 p-3 rounded"
+                    style={{ background: "var(--cardBg2)" }}
                   >
-                    <li className=" d-flex align-items-center justify-content-between">
-                      <p className="m-0 fw-sbold">Net Balance</p>
-                      <p className="m-0 fw-sbold">
-                        {Number(walletBalance).toFixed(4)}
-                      </p>
-                    </li>
-                    <li
-                      className=" d-flex align-items-center justify-content-between"
-                      style={{ fontSize: 10 }}
+                    <ul
+                      className="list-unstyled ps-0 mb-0"
+                      style={{ fontSize: 12 }}
                     >
-                      <p className="m-0 fw-sbold">Health Factor</p>
-                      <p className="m-0 fw-sbold">{healthValue}</p>
-                    </li>
-                  </ul>
-                </div>
-              </CardCstm>
-            </div>
-            <div className="col-span-12 my-2">
-              <div className="grid gap-3 grid-cols-12">
-                <div className="md:col-span-6 col-span-12 my-2">
-                  <div className="sectionHeader pb-3">
-                    <h4 className="m-0 font-semibold text-xl">Position</h4>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Supply</p>
-                        {/* <p className="m-0">APY 1%</p> */}
-                      </div>
-                      <div className="right">
-                        <p className="m-0 fw-sbold">{supply}</p>
-                      </div>
-                    </CardCstm>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Debt</p>
-                        {/* <p className="m-0">APY 1%</p> */}
-                      </div>
-                      <div className="right">
+                      <li className=" flex items-center justify-between">
+                        <p className="m-0 fw-sbold">Net Balance</p>
                         <p className="m-0 fw-sbold">
-                          {Number(debtvalue).toFixed(4)}
+                          {Number(walletBalance).toFixed(4)}
                         </p>
-                      </div>
-                    </CardCstm>
+                      </li>
+                      <li
+                        className=" flex items-center justify-between"
+                        style={{ fontSize: 10 }}
+                      >
+                        <p className="m-0 fw-sbold">Health Factor</p>
+                        <p className="m-0 fw-sbold">{healthValue}</p>
+                      </li>
+                    </ul>
                   </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded "
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="d-flex align-items-center justify-content-between">
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Auto Pay Loan</p>
-                      </div>
-                      </div>
-                      <div className="content pt-3">
-                      <form action="" className="">
-            <div className="grid gap-3 grid-cols-12">
-              <div className=" sm:col-span-6 col-span-12">
-         
-                <input
-                  type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
-                />
+                </CardCstm>
               </div>
-              <div className=" sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </form>
-                      </div>
-                    </CardCstm>
+              <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <div className="grid gap-3 grid-cols-12">
+                  <div className="md:col-span-6 col-span-12 my-2">
+                    <div className="sectionHeader pb-3">
+                      <h4 className="m-0 font-semibold text-xl">Position</h4>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-white/5"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Supply</p>
+                          {/* <p className="m-0">APY 1%</p> */}
+                        </div>
+                        <div className="right">
+                          <p className="m-0 fw-sbold">{supply}</p>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-white/5"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Debt</p>
+                          {/* <p className="m-0">APY 1%</p> */}
+                        </div>
+                        <div className="right">
+                          <p className="m-0 fw-sbold">
+                            {Number(debtvalue).toFixed(4)}
+                          </p>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 bg-white/5"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="left">
+                            <p className="m-0 fw-sbold">Auto Pay Loan</p>
+                          </div>
+                        </div>
+                        <div className="content pt-3">
+                          <form action="" className="">
+                            <div className="grid gap-3 grid-cols-12">
+                              <div className=" sm:col-span-6 col-span-12">
+                                <input
+                                  type="text"
+                                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 text-white focus:bg-[var(--backgroundColor2)]"
+                                />
+                              </div>
+                              <div className=" sm:col-span-6 col-span-12 self-end">
+                                <button className="btn flex items-center justify-center commonBtn w-full">
+                                  Submit
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </CardCstm>
+                    </div>
                   </div>
-                </div>
-                <div className="md:col-span-6 col-span-12 my-2">
-                  <div className="sectionHeader pb-3">
-                    <h4 className="m-0 fw-bold text-xl">Management</h4>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Liquidation Protection</p>
-                      </div>
-                      <div className="right">
-                        <GradientHandleSwitch
-                          uncheckedIcon={undefined}
-                          checkedIcon={undefined}
-                          height={16}
-                          width={48}
-                          handleDiameter={24}
-                          offColor="#4C4C57"
-                          onColor="#4C4C57"
-                          checked={liquidity}
-                          onChange={() => setLiquidity(!liquidity)}
-                          boxShadow="0px 0px 0px 0px"
-                          activeBoxShadow="0px 0px 0px 0px"
-                        />
-                      </div>
-                    </CardCstm>
-                  </div>
+                  <div className="md:col-span-6 col-span-12 my-2">
+                    <div className="sectionHeader pb-3">
+                      <h4 className="m-0 fw-bold text-xl">Management</h4>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Liquidation Protection</p>
+                        </div>
+                        <div className="right">
+                          <GradientHandleSwitch
+                            uncheckedIcon={undefined}
+                            checkedIcon={undefined}
+                            height={16}
+                            width={48}
+                            handleDiameter={24}
+                            offColor="#4C4C57"
+                            onColor="#4C4C57"
+                            checked={liquidity}
+                            onChange={() => setLiquidity(!liquidity)}
+                            boxShadow="0px 0px 0px 0px"
+                            activeBoxShadow="0px 0px 0px 0px"
+                          />
+                        </div>
+                      </CardCstm>
+                    </div>
 
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between flex-wrap"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Open or Close CDP</p>
-                      </div>
-                      <div className="right">
-                        <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
-                          <li className="">
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Open or Close CDP</p>
+                        </div>
+                        <div className="right">
+                          <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
+                            <li className="">
+                              <button
+                                onClick={() => setDebtPosition(!debtPosition)}
+                                className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4 py-1"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Open CDP
+                              </button>
+                            </li>
+                            <li className="">
+                              <button
+                                className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                                onClick={Withdraw}
+                                disabled={withdrawButton}
+                              >
+                                {withdrawButton ? "Withdrawing.." : "Withdraw"}
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Health Management</p>
+                        </div>
+                        <div className="right">
+                          <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
+                            <li className="">
+                              <button
+                                onClick={() => setSupplyPop(!supplyPop)}
+                                className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Supply
+                              </button>
+                            </li>
+                            <li className="">
+                              <button
+                                onClick={() => setAdjustPop(!adjustPop)}
+                                className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Adjust
+                              </button>
+                            </li>
+                            {/* <li className="">
                             <button
-                              onClick={() => setDebtPosition(!debtPosition)}
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Open CDP
-                            </button>
-                          </li>
-                          <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                              onClick={Withdraw}
-                              disabled={withdrawButton}
-                            >
-                              {withdrawButton ? "Withdrawing.." : "Withdraw"}
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </CardCstm>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between flex-wrap"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Health Management</p>
-                      </div>
-                      <div className="right">
-                        <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
-                          <li className="">
-                            <button
-                              onClick={() => setSupplyPop(!supplyPop)}
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Supply
-                            </button>
-                          </li>
-                          <li className="">
-                            <button
-                              onClick={() => setAdjustPop(!adjustPop)}
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Adjust
-                            </button>
-                          </li>
-                          {/* <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
+                              className="flex items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
                               Switch
                             </button>
                           </li> */}
-                        </ul>
-                      </div>
-                    </CardCstm>
+                          </ul>
+                        </div>
+                      </CardCstm>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -474,9 +488,17 @@ const GradientHandleSwitch = styled(Switch)`
 `;
 const CardCstm = styled.div`
   background-color: var(--cardBg);
-  // border: 1px solid #ff8735;
   font-size: 14px;
   line-height: 20px;
+  border: 1px solid #282828a6;
+  transition: 0.4s;
+  &:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+  input,
+  button {
+    height: 40px;
+  }
 `;
 
 export default DebtPosition;
@@ -550,5 +572,19 @@ const btcIcn = (
         <rect width="16" height="16" fill="white" />
       </clipPath>
     </defs>
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
   </svg>
 );
