@@ -20,97 +20,7 @@ const Setting: React.FC = () => {
     setWmOpacity,
   } = useBackground();
 
-  const tabs = [
-    {
-      title: "Export Private Key",
-      content: <>asdfasdf</>,
-    },
-    {
-      title: "Set Up Email Recovery",
-      content: <>asdfasdf as2213123</>,
-    },
-    {
-      title: "Set Up MFA",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Whitelisted Address Book",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "ENS username",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Set Login Email/Phone",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Update Owners",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Autopay loan",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Scheduled Transfer ",
-      content: <>asdfasf 4234234234243234</>,
-    },
-  ];
   const accordionTabs = [
-    {
-      title: "Export Private Key",
-      content: (
-        <>
-          <div className="pb-3">
-            <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
-              Export Key
-            </button>
-          </div>
-        </>
-      ),
-    },
-    {
-      title: "Recovery Phrase",
-      content: (
-        <>
-          <div className="pb-3">
-            <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
-              Set up
-            </button>
-          </div>
-        </>
-      ),
-    },
-    {
-      title: "Set Up MFA",
-      content: (
-        <>
-          <form action="" className="pb-3">
-            <div className="grid gap-3 grid-cols-12">
-              <div className=" sm:col-span-6 col-span-12">
-                <label
-                  htmlFor=""
-                  className="form-label m-0 text-xs font-medium"
-                >
-                  Set Up MFA
-                </label>
-                <input
-                  type="text"
-                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                />
-              </div>
-              <div className=" sm:col-span-6 col-span-12 self-end">
-                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </form>
-        </>
-      ),
-    },
     {
       title: "Whitelisted Address Book",
       content: (
@@ -183,7 +93,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -333,8 +243,19 @@ const Setting: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="sm:col-span-4 col-span-12 sticky top-2">
+              <div className="sm:col-span-4 col-span-12 sm:sticky top-2">
                 <div className="grid gap-3 grid-cols-12">
+                  <div className="col-span-12">
+                    <div className="rounded-12 bg-white/5 px-3 py-3">
+                      <iframe
+                        src="/dashboard"
+                        width="500px"
+                        height="500px"
+                        className="rounded w-full h-full"
+                        style={{ border: "none", aspectRatio: 1.4 }}
+                      />
+                    </div>
+                  </div>
                   <BlogCard classN={"col-span-12"} />
                 </div>
               </div>
@@ -374,17 +295,17 @@ const Setting: React.FC = () => {
                     <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
                       <div
                         tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-4 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
                         <div className="flex flex-col gap-1">
-                          <h3 className="text-14 font-medium leading-none -tracking-2">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             Account
                           </h3>
-                          <p className="text-12 leading-none -tracking-2 text-white/40">
+                          <p className="text-xs leading-none -tracking-2 text-white/40">
                             Your name and password
                           </p>
                         </div>
-                        <div className="flex flex-wrap gap-2 pt-3">
+                        <div className="flex flex-wrap gap-2">
                           <a
                             className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
                             href="/settings/account/change-name"
@@ -427,13 +348,13 @@ const Setting: React.FC = () => {
                       </div>
                       <div
                         tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-4 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
                         <div className="flex flex-col gap-1">
-                          <h3 className="text-14 font-medium leading-none -tracking-2">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             Wallpaper
                           </h3>
-                          <p className="text-12 leading-none -tracking-2 text-white/40">
+                          <p className="text-xs leading-none -tracking-2 text-white/40">
                             Your Madhouse wallpaper and theme
                           </p>
                         </div>
@@ -463,13 +384,13 @@ const Setting: React.FC = () => {
                       </div>
                       <div
                         tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-4 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
                         <div className="flex flex-col gap-1">
-                          <h3 className="text-14 font-medium leading-none -tracking-2">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             Wallpaper Opacity
                           </h3>
-                          <p className="text-12 leading-none -tracking-2 text-white/40">
+                          <p className="text-xs leading-none -tracking-2 text-white/40">
                             Your Madhouse wallpaper opacity
                           </p>
                         </div>
@@ -491,10 +412,10 @@ const Setting: React.FC = () => {
                       </div>
                       <div
                         tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-4 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
                         <div className="flex flex-col gap-1">
-                          <h3 className="text-14 font-medium leading-none -tracking-2">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             Watermark
                           </h3>
                         </div>
@@ -524,10 +445,10 @@ const Setting: React.FC = () => {
                       </div>
                       <div
                         tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-4 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
                         <div className="flex flex-col gap-1">
-                          <h3 className="text-14 font-medium leading-none -tracking-2">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             Watermark Opacity
                           </h3>
                         </div>
@@ -546,6 +467,63 @@ const Setting: React.FC = () => {
                             />
                           </div>
                         </div>
+                      </div>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Export Private Keys
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                            Export
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Setup MFA
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                            Setup
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            2FA
+                          </h3>
+                          <p className="text-xs leading-none -tracking-2 text-white/40">
+                            A second layer of security for your Umbrel login and
+                            apps
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked="false"
+                          data-state="unchecked"
+                          value="on"
+                          className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                        >
+                          <span
+                            data-state="unchecked"
+                            className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+                          />
+                        </button>
                       </div>
                       <AccordionWrpper className="grid gap-3 grid-cols-12">
                         <div className=" col-span-12">

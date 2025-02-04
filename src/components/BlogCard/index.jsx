@@ -18,13 +18,15 @@ const BlogCard = ({ classN }) => {
           <CardCstm style={{ opacity: 1, transform: "none" }}>
             <div className="flex w-full flex-col items-center justify-between">
               <button
-                className={`${
+                className={`
+                ${
                   theme == "dark"
                     ? "bg-white/5"
                     : theme == "light"
                     ? "bg-[#fff3ed] border border-[#ffad84] shadow-[inset_12.7px_-12.7px_12.7px_rgba(161,70,25,0.1),inset_-12.7px_12.7px_12.7px_rgba(255,255,255,0.1)] backdrop-blur-[12.7px]"
                     : ""
-                } rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                }
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
               >
                 <span className="chartSvg absolute top-0 left-0 h-full w-full">
                   {chartSvg}

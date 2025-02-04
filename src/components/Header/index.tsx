@@ -106,10 +106,10 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                 href="#"
                 className=" font-normal text-base whitespace-nowrap flex items-center gap-2"
               >
-                {isChecked ? (
+                {theme ? (
                   <>
                     <Image
-                      src={logomw}
+                      src={Wlogomw}
                       alt="logo"
                       height={10000}
                       width={10000}
@@ -120,7 +120,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                 ) : (
                   <>
                     <Image
-                      src={Wlogomw}
+                      src={logomw}
                       alt="logo"
                       height={10000}
                       width={10000}

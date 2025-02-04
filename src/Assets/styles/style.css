@@ -75,6 +75,27 @@ body.light .pageCard {
   background-color: #f9bfa1 !important;
   border-color: #df723b !important;
 }
+.umbrel-divide-y > * {
+  position: relative;
+}
+.umbrel-divide-y > * + *::before {
+  content: "";
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  height: 1px;
+  width: 100%;
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  --tw-gradient-from: transparent var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from),
+    rgb(255 255 255 / 0.05) var(--tw-gradient-via-position),
+    var(--tw-gradient-to);
+  --tw-gradient-to: transparent var(--tw-gradient-to-position);
+}
 .btn {
   min-height: unset !important;
   padding: 10px;

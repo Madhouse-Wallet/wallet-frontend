@@ -27,12 +27,12 @@ const ThemeContext = createContext(undefined);
 
 // ThemeProvider Component
 export const ThemeProvider = ({ children }) => {
-  // Initialize theme (use 'dark' by default or localStorage value)
+  // Initialize theme (default: dark)
   const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") || "dark"; // Ensure dark mode is default
     }
-    return "dark";
+    return "dark"; // Fallback for SSR
   });
 
   // Toggle theme
@@ -44,7 +44,6 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
-  // Apply the theme variables to the root element
   // Apply the theme variables to the root element and update body class
   useEffect(() => {
     if (typeof document !== "undefined") {
