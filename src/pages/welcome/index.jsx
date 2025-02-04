@@ -1,9 +1,13 @@
 import { useRouter } from "next/router";
 import React from "react";
-import logo from "@/Assets/Images/logow.png";
+import logow from "@/Assets/Images/logow.png";
+import logo from "@/Assets/Images/logo.png";
 import Image from "next/image";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const Welcome = () => {
+  const { theme, toggleTheme } = useTheme();
+
   const router = useRouter();
   return (
     <>
@@ -13,7 +17,7 @@ const Welcome = () => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logo}
+                src={theme == "dark" ? logow : logo}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}
@@ -34,14 +38,22 @@ const Welcome = () => {
           <button
             onClick={() => router.push("/create-wallet")}
             type="submit"
-            className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+            className={`${
+              theme == "dark"
+                ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                : "commonBtn"
+            } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
           >
             Create Wallet
           </button>
           <button
             onClick={() => router.push("/login")}
             type="submit"
-            className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+            className={`${
+              theme == "dark"
+                ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                : "commonBtn"
+            } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
           >
             Log in
           </button>

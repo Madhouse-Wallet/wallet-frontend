@@ -1,45 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import styled from "styled-components";
 import bg from "@/Assets/Images/cardBg.png";
 import Image from "next/image";
+import { createPortal } from "react-dom";
+import LiveBlogPopup from "@/components/Modals/LiveblogPop";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const CounterList = ({ data }) => {
-  var settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    prevArrow: (
-      <button className="slick-arrow slick-prev z-[9999] shrink-0 w-10 h-10 rounded-full backdrop-blur-sm contrast-more:bg-neutral-800 contrast-more:backdrop-blur-none grid place-items-center bg-white/5 shadow-glass-button text-white/75 disabled:text-white/30 transition-all hover:bg-white/10 contrast-more:hover:bg-neutral-700 active:bg-white/5 cursor-default">
-        {" "}
-        {leftIcn}
-      </button>
-    ),
-    nextArrow: (
-      <button className="slick-arrow slick-next z-[9999] shrink-0 w-10 h-10 rounded-full backdrop-blur-sm contrast-more:bg-neutral-800 contrast-more:backdrop-blur-none grid place-items-center bg-white/5 shadow-glass-button text-white/75 disabled:text-white/30 transition-all hover:bg-white/10 contrast-more:hover:bg-neutral-700 active:bg-white/5 cursor-default">
-        {" "}
-        {rightIcn}
-      </button>
-    ),
-    responsive: [
-      {
-        breakpoint: 600,
-        settings: {
-          arrows: false,
-        },
-      },
-      {
-        breakpoint: 575,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-    ],
-  };
+  const [liveBlog, setLiveBlog] = useState();
+  const { theme, toggleTheme } = useTheme();
+  console.log(theme, "themeCheck");
+
   return (
     <>
+      {liveBlog &&
+        createPortal(
+          <LiveBlogPopup liveBlog={liveBlog} setLiveBlog={setLiveBlog} />,
+          document.body
+        )}
       <div className="grid gap-4 grid-cols-12 w-full">
         {/* <SliderWrpper className="col-span-12">
           <Slider {...settings}> */}
@@ -47,9 +26,21 @@ const CounterList = ({ data }) => {
           data.length > 0 &&
           data.map((item, key) => (
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
-              <CardCstm style={{ opacity: 1, transform: "none" }}>
+              <CardCstm
+                onClick={() => setLiveBlog(!liveBlog)}
+                style={{ opacity: 1, transform: "none" }}
+              >
                 <div className="flex w-full flex-col items-center justify-between ">
-                  <button className="rounded-12 w-full md:rounded-20 shrink-0 flex flex-col gap-2 text-left transition-[transform,box-shadow] duration-300 hover:scale-105 bg-neutral-900/70 backdrop-blur-xl backdrop-saturate-150 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%] shadow-widget cursor-pointer ring-white/25 focus:outline-none focus-visible:ring-6 active:scale-95 p-2 md:p-5">
+                  <button
+                    className={` ${
+                      theme == "dark"
+                        ? "bg-neutral-900/70 shadow-widget"
+                        : theme == "light"
+                        ? "bg-[#fff3ed] border border-[#ffad84] shadow-[inset_12.7px_-12.7px_12.7px_rgba(161,70,25,0.1),inset_-12.7px_12.7px_12.7px_rgba(255,255,255,0.1)] backdrop-blur-[12.7px]"
+                        : ""
+                    }
+                  backdrop-blur-xl backdrop-saturate-150 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%]  ring-white/25 transition-[transform,box-shadow] rounded-12 w-full md:rounded-20 shrink-0 flex flex-col gap-2 text-left  duration-300 hover:scale-105   cursor-pointer  focus:outline-none focus-visible:ring-6 active:scale-95 p-2 md:p-5`}
+                  >
                     <div className="flex flex-col gap-1 tabular-nums md:gap-2">
                       <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                         {item.head}
@@ -71,12 +62,20 @@ const CounterList = ({ data }) => {
                       role="progressbar"
                       data-state="indeterminate"
                       data-max={100}
-                      className="relative w-full overflow-hidden rounded-full bg-white/10 h-1.5"
+                      className={`${
+                        theme == "dark"
+                          ? "bg-white/10"
+                          : theme == "light"
+                          ? " bg-[#fff]"
+                          : ""
+                      } relative w-full overflow-hidden rounded-full h-1.5`}
                     >
                       <div
                         data-state="indeterminate"
                         data-max={100}
-                        className="h-full w-full flex-1 transition-all duration-700 rounded-full bg-white"
+                        className={`${
+                          theme == "dark" ? "bg-white" : "bg-[#ffad84]"
+                        } h-full w-full flex-1 transition-all duration-700 rounded-full `}
                         style={{ transform: "translateX(-55%)" }}
                       />
                     </div>
@@ -95,49 +94,8 @@ const CounterList = ({ data }) => {
   );
 };
 
-const SliderWrpper = styled.div`
-  .slick-arrow {
-    &:before {
-      display: none;
-    }
-    height: 35px;
-    width: 35px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-  .slick-dots {
-    li {
-      height: auto;
-      width: auto;
-      margin: 0 1px;
-      button {
-        padding: 0;
-        height: 3px;
-        width: 12px;
-        background: #fff;
-        border-radius: 6px;
-        opacity: 0.4;
-      }
-      &.slick-active {
-        button {
-          opacity: 1;
-        }
-      }
-    }
-  }
-  @media (max-width: 600px) {
-    .slick-arrow {
-      display: none !important;
-    }
-  }
-`;
-
 const CardCstm = styled.div`
   button {
-    ${"" /* max-width: max-content !important; */}
-    ${"" /* max-height: max-content !important; */}
   }
 `;
 

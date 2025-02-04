@@ -1,7 +1,10 @@
 import Link from "next/link";
 import React from "react";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const KeyStep = ({ step, setStep }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -23,13 +26,21 @@ const KeyStep = ({ step, setStep }) => {
               <div className="col-span-12">
                 <div className="relative mt-3">
                   <div
-                    className="cursor-pointer border rounded-10 py-2 px-3 flex items-center justify-between
-                      border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className={`${
+                      theme == "dark"
+                        ? "border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
+                        : "bg-[#fff3ed] border border-[#ffad84]"
+                    } cursor-pointer border rounded-10 py-2 px-3 flex items-center justify-between
+                      border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     <div className="left flex items-center gap-2">
                       <div
-                        className="flex-shrink-0 flex items-center justify-center rounded h-[60px] w-[60px]
-                          border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className={`${
+                          theme == "dark"
+                            ? "border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
+                            : "bg-[#fff3ed] border border-[#ffad84]"
+                        } cursor-pointer border h-[60px] w-[60px] rounded-10 py-2 px-3 flex items-center justify-between
+                      border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                       >
                         {keyIcn}
                       </div>
@@ -50,7 +61,11 @@ const KeyStep = ({ step, setStep }) => {
                     href="/dashboard"
                     // onClick={() => router.push("/dashboard")}
                     // type="submit"
-                    className="inline-flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                    className={`${
+                      theme == "dark"
+                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                        : "commonBtn"
+                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Next
                   </Link>
@@ -103,7 +118,7 @@ const keyIcn = (
     <g opacity="0.5">
       <path
         d="M21 10H12.65C12.2381 8.83048 11.4733 7.81762 10.4613 7.10116C9.44934 6.3847 8.23994 5.99995 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C8.23994 18 9.44934 17.6153 10.4613 16.8988C11.4733 16.1824 12.2381 15.1695 12.65 14H13L15 16L17 14L19 16L23 11.96L21 10ZM7 15C5.35 15 4 13.65 4 12C4 10.35 5.35 9 7 9C8.65 9 10 10.35 10 12C10 13.65 8.65 15 7 15Z"
-        fill="white"
+        fill="currentColor"
       />
     </g>
   </svg>

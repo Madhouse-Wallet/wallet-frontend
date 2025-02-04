@@ -3,7 +3,7 @@ import styled from "styled-components";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
-import LightningTab from "./LightningTab"
+import LightningTab from "./LightningTab";
 
 import loader from "@/Assets/Images/loading.gif";
 import Image from "next/image";
@@ -31,7 +31,7 @@ const BtcExchangePop = ({
     two: false,
     three: false,
   });
-  const sendBitcoin = true
+  const sendBitcoin = true;
 
   const [step, setStep] = useState(2);
   const [tab, setTab] = useState(0);
@@ -70,7 +70,7 @@ const BtcExchangePop = ({
         setStep(2);
         setLoading(true);
       } else toast.error("Wow so easy!");
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleTab = (key) => {
@@ -82,7 +82,7 @@ const BtcExchangePop = ({
       setDepositSetup("");
       setDepositFound("");
       setBtcExchange(!btcExchange);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const tabData = [
@@ -92,7 +92,6 @@ const BtcExchangePop = ({
         <>
           {" "}
           <div className="cardCstm p-3 text-center">
-
             {step == 1 ? (
               <>
                 <form action="">
@@ -142,7 +141,6 @@ const BtcExchangePop = ({
                       width={10000}
                       className="max-w-full mx-auto h-auto w-auto"
                       style={{ height: 150 }}
-
                     />
                   </>
                 )}
@@ -151,7 +149,9 @@ const BtcExchangePop = ({
                     {" "}
                     <div className="content mt-2" style={{ fontSize: 12 }}>
                       <div className="text-center py-5">
-                        <h6 className="m-0 text-base pb-2">Your Wallet Address</h6>
+                        <h6 className="m-0 text-base pb-2">
+                          Your Wallet Address
+                        </h6>
                         <div className="px-2 py-3 rounded border border-gray-700 rounded">
                           <Tooltip id="my-tooltip" />
                           <p
@@ -162,8 +162,6 @@ const BtcExchangePop = ({
                           >
                             {walletAddress || "Wallet Address"}
                           </p>
-
-
                         </div>
                         <div className="btnWrpper flex items-center justify-center gap-2 mt-3">
                           <button
@@ -342,7 +340,10 @@ const BtcExchangePop = ({
         </>
       ),
     },
-    { title: "Lightning Network", component: <LightningTab walletAddress={walletAddress} /> },
+    {
+      title: "Lightning Network",
+      component: <LightningTab walletAddress={walletAddress} />,
+    },
     { title: "Liquid Network", component: "asfsdf1233" },
   ];
 
@@ -362,11 +363,10 @@ const BtcExchangePop = ({
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          <div className={`position-relative rounded`}>
-
+          <div className={`relative rounded`}>
             <div className="top pb-3">
               <h5 className="m-0 text-xl font-bold">
-                {sendBitcoin ? "Send" : "Receive"}   Bitcoin
+                {sendBitcoin ? "Send" : "Receive"} Bitcoin
               </h5>
               {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
@@ -375,11 +375,12 @@ const BtcExchangePop = ({
             <div className="content p-3">
               <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
                 {tabData.map((data, key) => (
-                  <div key={key} className="position-relative">
+                  <div key={key} className="relative">
                     <button
                       onClick={() => handleTab(key)}
-                      className={`${tab == key && "active"
-                        } flex items-center justify-center font-semibold btn`}
+                      className={`${
+                        tab == key && "active"
+                      } flex items-center justify-center font-semibold btn`}
                     >
                       {data.title}
                     </button>
@@ -391,9 +392,7 @@ const BtcExchangePop = ({
                   tab === key ? <>{item.component}</> : <></>
                 )}
               </div>
-              <div className="btnWrpper mt-3">
-
-              </div>
+              <div className="btnWrpper mt-3"></div>
             </div>
             {/* {step != 1 && !loading && (
               <div className="btnWRpper mt-4">
@@ -425,16 +424,15 @@ const RadioList = styled.ul`
     font-size: 12px;
     background: var(--cardBg);
     border-color: var(--cardBg);
- 
   }
-  input:checked + button,  button.active  {
+  input:checked + button,
+  button.active {
     background: #df723b;
     border-color: #df723b;
     color: #000;
   }
 `;
 export default BtcExchangePop;
-
 
 const qrCode = (
   <svg

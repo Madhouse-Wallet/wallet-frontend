@@ -141,11 +141,7 @@ const BTCEchange = () => {
         )}
       <section className="relative dashboard pt-12">
         <div className="container h-full">
-          <div
-            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-          >
+          <div className="pageCard bg-white/5 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -153,7 +149,7 @@ const BTCEchange = () => {
             >
               {closeIcn}
             </button>
-            <div className="grid gap-3 grid-cols-12">
+            <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className="sectionHeader ">
                   <div className="d-flex align-items-center gap-3">
@@ -163,7 +159,7 @@ const BTCEchange = () => {
                     >
                       {backIcn}
                     </button> */}
-                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Threshold Wallet
                     </h4>
                   </div>
@@ -171,7 +167,7 @@ const BTCEchange = () => {
               </div>
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className="px-3 px-lg-4 ">
-                  <TopHead className="flex p-2 py-lg-3 px-lg-4 items-center justify-between flex-wrap  px-2 py-2 md:px-[26px] md:py-[36px] bg-gradient-to-b from-[#24242499] to-[#18181899]">
+                  <TopHead className="flex p-2 py-lg-3 px-lg-4 items-center justify-between flex-wrap  px-2 py-2 md:px-[26px] md:py-[36px] overflow-hidden bg-white/5">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
                         Balance
@@ -251,7 +247,6 @@ const backIcn = (
     />
   </svg>
 );
-
 const closeIcn = (
   <svg
     stroke="currentColor"

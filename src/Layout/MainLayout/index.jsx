@@ -22,7 +22,7 @@ const MainLayout = ({ Component, pageProps }) => {
       </div> */}
 
       <Main className="ml-auto ms-auto">
-        {/* <Header sidebar={sidebar} setSidebar={setSidebar} /> */}
+        <Header sidebar={sidebar} setSidebar={setSidebar} />
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={router.route}
@@ -67,6 +67,7 @@ const MainLayout = ({ Component, pageProps }) => {
 
 const Main = styled.main`
   min-height: 100vh;
+  padding-top: 70px;
   @media (max-width: 1024px) {
     width: 100%;
   }

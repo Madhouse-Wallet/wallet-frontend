@@ -67,12 +67,12 @@ const DebtPosition: React.FC = () => {
 
   const fetchTroveData = async (provider: any) => {
     try {
-      if(!provider){
-        return
+      if (!provider) {
+        return;
       }
-    
+
       const walletAddress = userAuth?.walletAddress;
-      console.log("walletAddress-->",walletAddress)
+      console.log("walletAddress-->", walletAddress);
       // Create web3 instance
       const web3 = new Web3Interaction("sepolia", provider);
 
@@ -97,12 +97,11 @@ const DebtPosition: React.FC = () => {
       setWalletBalance(balance);
       setLoading(false);
     } catch (err: any) {
-      console.log(err)
+      console.log(err);
       toast.error("Failed to fetch trove data");
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -114,7 +113,7 @@ const DebtPosition: React.FC = () => {
           console.log("provider-->", provider);
           if (provider) {
             console.log("provider -line-114", provider);
-            setProviderr(provider?.ethersProvider)
+            setProviderr(provider?.ethersProvider);
             try {
               fetchTroveData(provider?.ethersProvider);
             } catch (err: any) {
@@ -130,11 +129,9 @@ const DebtPosition: React.FC = () => {
             return;
           }
         }
-      }else{
-        toast.error(
-          "Please Login"
-        );
-        return
+      } else {
+        toast.error("Please Login");
+        return;
       }
     };
 
@@ -157,7 +154,6 @@ const DebtPosition: React.FC = () => {
     }
   };
   const Withdraw = async () => {
-
     if (!providerr) {
       toast.error("Please Login");
       setLoading(false);
@@ -224,11 +220,7 @@ const DebtPosition: React.FC = () => {
         )}
       <section className="relative dashboard pt-12">
         <div className="container">
-          <div
-            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-          >
+          <div className="pageCard bg-white/5 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -240,7 +232,7 @@ const DebtPosition: React.FC = () => {
               <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
                 <div className="sectionHeader ">
                   <div className="flex items-center gap-3">
-                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Collateral Debt Position
                     </h4>
                   </div>

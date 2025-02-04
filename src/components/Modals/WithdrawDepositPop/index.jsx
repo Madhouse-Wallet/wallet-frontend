@@ -4,12 +4,15 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 // css
 
 // img
 
 const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
+  const { theme, toggleTheme } = useTheme();
+
   const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
   return (
     <>
@@ -18,7 +21,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
       >
         <button
           onClick={handleWithdrawDep}
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+          className="bg-white/6 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
           {closeIcn}
@@ -39,7 +42,11 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                 <div className="col-span-6">
                   <Link
                     href="/fonbnk"
-                    className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                    className={`${
+                      theme == "dark"
+                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                        : "commonBtn"
+                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Fonbnk
                   </Link>
@@ -47,7 +54,11 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                 <div className="col-span-6">
                   <Link
                     href="/stripe"
-                    className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                    className={`${
+                      theme == "dark"
+                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                        : "commonBtn"
+                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Stripe
                   </Link>
@@ -55,17 +66,25 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                 <div className="col-span-6">
                   <Link
                     href="/identity"
-                    className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                    className={`${
+                      theme == "dark"
+                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                        : "commonBtn"
+                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                   Identity
+                    Identity
                   </Link>
                 </div>
                 <div className="col-span-6">
                   <Link
                     href="/spherepay"
-                    className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                    className={`${
+                      theme == "dark"
+                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                        : "commonBtn"
+                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                   Spherepay Buy Bitcoin
+                    Spherepay Buy Bitcoin
                   </Link>
                 </div>
               </div>

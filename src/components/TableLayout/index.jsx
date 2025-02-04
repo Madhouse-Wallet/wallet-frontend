@@ -10,15 +10,24 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 // css
 
 // image
 
 const TableLayout = ({ column, data }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
-      <TableC className="w-full caption-bottom text-sm">
+      <TableC
+        className={`${
+          theme == "dark"
+            ? "divide-white/6 bg-white/5"
+            : "divide-black/6 bg-black/5"
+        } w-full caption-bottom text-sm divide-y  rounded-12 `}
+      >
         <TableHeader>
           <TableRow className="border-0">
             {column &&
@@ -27,7 +36,11 @@ const TableLayout = ({ column, data }) => {
                 <>
                   <TableHead
                     key={key}
-                    className="h-10 px-2 px-lg-4 text-left font-semibold align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                    className={`${
+                      theme === "dark"
+                        ? "bg-[rgba(255,255,255,0.08)]"
+                        : "bg-[rgba(226,104,43,0.1)]"
+                    }  backdrop-blur-[7.747px] h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
                   >
                     {item.head}
                   </TableHead>
@@ -98,10 +111,13 @@ const TableC = styled(Table)`
       border-top-right-radius: 10px;
       border-bottom-right-radius: 10px;
     }
+    tr {
+      border-bottom: 0 !important;
+    }
     th {
       font-weight: 400;
       ${"" /* background-color: var(--cardBg); */}
-      background: rgba(255, 255, 255, 0.08);
+
       backdrop-filter: blur(39.6px);
       white-space: nowrap;
       color: var(--textColor);

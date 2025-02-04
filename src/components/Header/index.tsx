@@ -87,9 +87,9 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
           <LoginPop login={login} setLogin={setLogin} />,
           document.body
         )}
-      <header className="siteHeader sticky top-0 py-2 w-full shadow z-[999] border-b border-gray-700 ">
-        <div className="container-fluid mx-auto">
-          <Nav className="flex items-center justify-between ">
+      <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+        <div className="container mx-auto">
+          <Nav className="flex items-center justify-between px-3 py-2 rounded-full shadow">
             {/* <div className="">
               <button
                 onClick={() => setMenu(!menu)}
@@ -104,7 +104,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             <div className="flex items-center gap-2">
               <a
                 href="#"
-                className="text-[#83838D] font-normal text-base whitespace-nowrap flex items-center gap-2"
+                className=" font-normal text-base whitespace-nowrap flex items-center gap-2"
               >
                 {isChecked ? (
                   <>
@@ -129,7 +129,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                     />
                   </>
                 )}
-                <span className="md:block hidden">MadHouse Wallet</span>
+                {/* {logo} */}
+                {/* <span className="md:block hidden">MadHouse Wallet</span> */}
               </a>
             </div>
 
@@ -137,10 +138,16 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
               className={`lg:flex items-center lg:justify-end w-full gap-3 flex-wrap px-0 menu`}
               id="navbarScroll"
             >
-              <div className="flex items-center gap-2 ms-auto flex-wrap">
+              <div className="flex items-center gap-2 ms-auto flex-wrap justify-end">
                 <Tooltip
                   id="theme"
-                  style={{ backgroundColor: "#000", color: "#fff" }}
+                  style={{
+                    background: "var(--textColor2)",
+                    backdropFilter: "blur(12.8px)",
+                    borderRadius: 30,
+                    fontSize: 12,
+                    color: "var(--backgroundColor2)",
+                  }}
                 />
 
                 {userAuth.login ? (
@@ -196,13 +203,14 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                     </div> */}
                   </>
                 ) : (
-                  <button
+                  <Link
+                    href={"/welcome"}
                     // onClick={loginTry}
-                    onClick={() => setLogin(!login)}
-                    className="btn flex items-center justify-center commonBtn rounded-20"
+                    // onClick={() => setLogin(!login)}
+                    className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
                   >
                     Login
-                  </button>
+                  </Link>
                 )}
                 {/* <button
                   className="border-0 p-0 bg-transpraent"
@@ -230,6 +238,9 @@ const GradientHandleSwitch = styled(Switch)`
 `;
 
 const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(12.8px);
   @media (max-width: 575px) {
     button {
       padding: 5px;
@@ -243,24 +254,31 @@ export default Header;
 
 const logo = (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="70"
-    height="70"
-    viewBox="0 0 100 70"
+    width="40"
+    height="40"
+    viewBox="0 0 53 35"
     fill="none"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M21 20H29V30L21 30V20ZM21 38H10V30H21V38ZM29 38V49H21V38L29 38ZM29 38H40V30H29V38Z"
-      fill="currentColor"
-    />
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M71.2143 54.4276H66.3571V60.4857H60.2857V54.4276H58.7011V54.4143H53V48.3429H58.7011V21.1429H53V15.0714H60.2857V9H66.3571V15.0714H71.2143V9H77.2857V15.0714H75.8286C83.2211 15.0714 87.8573 18.8624 87.8573 24.8901C87.8573 29.1996 84.6394 32.8 80.4659 33.4266V33.6451C85.8112 34.0544 89.7394 37.9546 89.7394 43.1639C89.7394 49.8668 84.8616 54.1447 76.9336 54.4143H77.2857V60.4857H71.2143V54.4276ZM66.9388 21.2084V31.4364H72.8572C77.2481 31.4364 79.7568 29.4996 79.7568 26.1724C79.7568 23.008 77.5468 21.2084 73.7024 21.2084H66.9388ZM66.9388 48.2906H74.0302C78.7756 48.2906 81.339 46.2725 81.339 42.5094C81.339 38.8265 78.6931 36.863 73.8384 36.863H66.94L66.9388 48.2906Z"
-      fill="currentColor"
-    />
+    <g clip-path="url(#clip0_4_18924)">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M7.0702 7.44995H12.4302V14.15H7.0702V7.44995ZM7.0702 19.51H-0.299805V14.15H7.0702V19.51ZM12.4302 19.51V26.8799H7.0702V19.51H12.4302ZM12.4302 19.51H19.8002V14.15H12.4302V19.51Z"
+        fill="currentColor"
+      />
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M40.7133 30.5166H37.459V34.5755H33.3912V30.5166H32.3295V30.5077H28.5098V26.4398H32.3295V8.21582H28.5098V4.14792H33.3912V0.0800781H37.459V4.14792H40.7133V0.0800781H44.7812V4.14792H43.8049C48.7579 4.14792 51.8642 6.68789 51.8642 10.7264C51.8642 13.6138 49.7082 16.0261 46.9119 16.4459V16.5923C50.4933 16.8665 53.1252 19.4797 53.1252 22.9699C53.1252 27.4608 49.857 30.327 44.5453 30.5077H44.7812V34.5755H40.7133V30.5166ZM37.8488 8.25971V15.1125H41.8141C44.756 15.1125 46.4368 13.8148 46.4368 11.5856C46.4368 9.46544 44.9561 8.25971 42.3804 8.25971H37.8488ZM37.8488 26.4048H42.6C45.7794 26.4048 47.4969 25.0527 47.4969 22.5314C47.4969 20.0638 45.7241 18.7483 42.4715 18.7483H37.8496L37.8488 26.4048Z"
+        fill="currentColor"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_4_18924">
+        <rect width="53" height="35" fill="white" />
+      </clipPath>
+    </defs>
   </svg>
 );
 
@@ -301,8 +319,8 @@ const menuIcn = (
 
 const lightIcn = (
   <svg
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -317,8 +335,8 @@ const lightIcn = (
 );
 const darkIcn = (
   <svg
-    width="24"
-    height="24"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

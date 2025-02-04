@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import logo from "@/Assets/Images/logow.png";
+import logow from "@/Assets/Images/logow.png";
+import logo from "@/Assets/Images/logo.png";
 import OtpInput from "react-otp-input";
 import Image from "next/image";
 import styled from "styled-components";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const OtpStep = ({ step, setStep, registerOtpFn }) => {
+  const { theme, toggleTheme } = useTheme();
+
   const [registerOTP, setRegisterOTP] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
 
@@ -17,17 +21,17 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
       } else {
         let response = await registerOtpFn({
           otp: registerOTP,
-        })
+        });
         if (response) {
-          setStep(3)
+          setStep(3);
         }
-        setRegisterOtpLoading(false)
+        setRegisterOtpLoading(false);
       }
     } catch (error) {
-      console.log("createRegister error -->", error)
+      console.log("createRegister error -->", error);
       setRegisterOtpLoading(false);
     }
-  }
+  };
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -35,7 +39,7 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logo}
+                src={theme == "dark" ? logow : logo}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}
@@ -52,20 +56,20 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <div className="text-center">
-                <h4 className="m-0 text-xl pb-1 font-semibold text-white">
+                <h4 className="m-0 text-xl pb-1 font-semibold ">
                   OTP Code Verification
                 </h4>
                 <p className=" text-sm font-medium  md:text-xs py-5">
                   <span className="opacity-50">Code has been send to </span>
                   <br />{" "}
-                  <span className="font-bold text-white opacity-100">
+                  <span className="font-bold  opacity-100">
                     and***ley@yourdomain.com
                   </span>
                 </p>{" "}
               </div>
             </div>
             <div className="col-span-12">
-              <OtpWrpper>
+              <OtpWrpper theme={theme}>
                 <OtpInput
                   value={registerOTP}
                   onChange={setRegisterOTP}
@@ -76,7 +80,7 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
               </OtpWrpper>
             </div>
             <div className="col-span-12">
-              <p className="m-0 text-center text-white opacity-80 font-medium">
+              <p className="m-0 text-center  opacity-80 font-medium">
                 Resend code in <span className="themeClr">55</span> s
               </p>
             </div>
@@ -86,10 +90,13 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
                   onClick={otpRegister}
                   disabled={registerOtpLoading}
                   // type="submit"
-                  className="inline-flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                  className={`${
+                    theme == "dark"
+                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                      : "commonBtn"
+                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   {registerOtpLoading ? "Loading" : "Verify"}
-
                 </button>
               </div>
             </div>
@@ -109,9 +116,12 @@ const OtpWrpper = styled.div`
       width: 50px !important;
       border-radius: 8px;
       outline: 0;
-      color: rgb(255 255 255 / 0.4);
-      background: rgb(255 255 255 / 0.04);
+      ${"" /* color: rgb(255 255 255 / 0.4); */}
+      background: ${({ theme }) =>
+        theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
       border: 1px solid rgb(255 255 255 / 0.1);
+      border-color: ${({ theme }) =>
+        theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
       font-size: 24px;
       font-weight: 600;
     }

@@ -4,8 +4,22 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { AccordionItem } from "@/components/common/index";
+import { useBackground } from "@/ContextApi/backgroundContent";
+import Image from "next/image";
+import BlogCard from "@/components/BlogCard";
 
 const Setting: React.FC = () => {
+  const {
+    backgrounds,
+    setSelectedBackground,
+    bgOpacity,
+    setBgOpacity,
+    watermarks,
+    setSelectedWatermark,
+    wmOpacity,
+    setWmOpacity,
+  } = useBackground();
+
   const tabs = [
     {
       title: "Export Private Key",
@@ -84,7 +98,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -112,7 +126,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -141,7 +155,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -198,7 +212,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -255,7 +269,7 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
               <div className=" sm:col-span-6 col-span-12 self-end">
@@ -301,11 +315,7 @@ const Setting: React.FC = () => {
     <>
       <section className="relative dashboard pt-12">
         <div className="container">
-          <div
-            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-          >
+          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -313,69 +323,185 @@ const Setting: React.FC = () => {
             >
               {closeIcn}
             </button>
-            <div className="grid gap-3 grid-cols-12">
+            <div className="grid gap-3 md:gap-4 grid-cols-12 md:px-3 pt-3">
               <div className="col-span-12">
                 <div className="sectionHeader p-2 ">
                   <div className="d-flex align-items-center gap-3">
-                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Setting & Support
                     </h4>
                   </div>
                 </div>
               </div>
-              <div className="col-span-12">
-                <AccordionWrpper className="grid gap-3 grid-cols-12 pb-4 p-2 px-3 px-lg-4 py-0">
-                  <div className="md:col-span-6 col-span-12">
-                    {accordionTabs &&
-                      accordionTabs.length > 0 &&
-                      accordionTabs
-                        .slice(0, Math.ceil(accordionTabs.length / 2))
-                        .map((item, key) => (
-                          <AccordionItem
-                            svg={false}
-                            key={key}
-                            wrpperClass={
-                              "my-3 bg-white/5 px-lg-4 AccordionItem"
-                            }
-                            onClick={() => handleAccordionClick(key)}
-                            isOpen={openIndex === key}
-                            btnClass={`accordionBtn flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
-                            btnIcnClass={``}
-                            title={item.title}
-                          >
-                            <div className="px-3">{item.content}</div>
-                          </AccordionItem>
-                        ))}
+              <div className="sm:col-span-4 col-span-12">
+                <div className="grid gap-3 grid-cols-12">
+                  <BlogCard classN={"col-span-12"} />
+                </div>
+              </div>
+              <div className="sm:col-span-8 col-span-12">
+                <div className="grid gap-3 grid-cols-12">
+                  <div className="col-span-12">
+                    <div
+                      className={` bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
+                    >
+                      <div className="left">
+                        <h4 className="m-0 font-bold text-xl">Ritesh</h4>
+                        <ul className="list-none pl-0 mb-0 text-xs">
+                          <li className="flex gap-2">
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 80 }}
+                            >
+                              wallet ID:
+                            </div>
+                            <span className="text-white flex items-center">
+                              asdrwrewerwe{" "}
+                              <button className="border-0 p-0 bg-transparent pl-1">
+                                {copyIcn}
+                              </button>
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="right">
+                        <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
+                          {logoutIcn} Logout
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="md:col-span-6 col-span-12">
-                    {accordionTabs &&
-                      accordionTabs.length > 0 &&
-                      accordionTabs
-                        .slice(Math.ceil(accordionTabs.length / 2))
-                        .map((item, key) => (
-                          <AccordionItem
-                            svg={false}
-                            key={key}
-                            wrpperClass={
-                              "my-3 bg-white/5 px-lg-4 AccordionItem"
-                            }
-                            onClick={() =>
-                              handleAccordionClick(
-                                accordionTabs.length / 2 + key
-                              )
-                            }
-                            isOpen={
-                              openIndex === accordionTabs.length / 2 + key
-                            }
-                            btnClass={`accordionBtn flex items-center text-xs text-left gap-2 px-3 py-3 h-[50px] relative text-white font-medium`}
-                            btnIcnClass={``}
-                            title={item.title}
-                          >
-                            <div className="px-3">{item.content}</div>
-                          </AccordionItem>
-                        ))}
+                  <div className="col-span-12">
+                    <div
+                      className={` bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4  lg:p-6  justify-between umbrel-divide-y`}
+                    >
+                      <div className="">
+                        {" "}
+                        <label className="block text-sm font-semibold mb-2">
+                          Background Opacity
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={bgOpacity}
+                          onChange={(e) =>
+                            setBgOpacity(parseFloat(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {backgrounds.map((bg: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => setSelectedBackground(bg)}
+                                className="border-0 p-0 bg-transparent"
+                              >
+                                <Image
+                                  src={bg}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 50, width: 60 }}
+                                  className="max-w-full object-cover rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="">
+                        <label className="block text-sm font-semibold mb-2">
+                          watermark Opacity
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={wmOpacity}
+                          onChange={(e) =>
+                            setWmOpacity(parseFloat(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {watermarks.map((wm: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => setSelectedWatermark(wm)}
+                                className="border-0 p-0 bg-transparent"
+                              >
+                                <Image
+                                  src={wm}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 50, width: 60 }}
+                                  className="max-w-full object-cover rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                </AccordionWrpper>
+                  <div className="col-span-12">
+                    <AccordionWrpper className="grid gap-3 grid-cols-12 pb-4 p-2 px-3 px-lg-4 py-0">
+                      <div className="md:col-span-6 col-span-12">
+                        {accordionTabs &&
+                          accordionTabs.length > 0 &&
+                          accordionTabs
+                            .slice(0, Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                svg={false}
+                                key={key}
+                                wrpperClass={
+                                  "my-3 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() => handleAccordionClick(key)}
+                                isOpen={openIndex === key}
+                                btnClass={`accordionBtn flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                      </div>
+                      <div className="md:col-span-6 col-span-12">
+                        {accordionTabs &&
+                          accordionTabs.length > 0 &&
+                          accordionTabs
+                            .slice(Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                svg={false}
+                                key={key}
+                                wrpperClass={
+                                  "my-3 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() =>
+                                  handleAccordionClick(
+                                    accordionTabs.length / 2 + key
+                                  )
+                                }
+                                isOpen={
+                                  openIndex === accordionTabs.length / 2 + key
+                                }
+                                btnClass={`accordionBtn flex items-center text-xs text-left gap-2 px-3 py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                      </div>
+                    </AccordionWrpper>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -520,5 +646,39 @@ const closeIcn = (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);
+
+const copyIcn = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
+      fill="currentColor"
+    />
+    <path
+      opacity="0.5"
+      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const logoutIcn = (
+  <svg
+    height={14}
+    width={14}
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C15.2713 2 18.1757 3.57078 20.0002 5.99923L17.2909 5.99931C15.8807 4.75499 14.0285 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C14.029 20 15.8816 19.2446 17.2919 17.9998L20.0009 17.9998C18.1765 20.4288 15.2717 22 12 22ZM19 16V13H11V11H19V8L24 12L19 16Z"></path>
   </svg>
 );

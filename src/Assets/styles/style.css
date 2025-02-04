@@ -16,10 +16,11 @@
 } */
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap");
-:root  body {
+:root body {
   font-family: "Inter", sans-serif;
-  background: black;
-  color: white;
+  background: var(--backgroundColor2);
+  color: #fff;
+  /* color: var(--textColor); */
   /* background-image: url(../Images//umbrel/1.jpg); */
   background-attachment: fixed;
   background-size: cover;
@@ -39,7 +40,7 @@ body::-webkit-scrollbar,
   color: #df723b;
 }
 .container {
-  max-width: 900px !important;
+  max-width: 1000px !important;
   padding: 0 10px !important;
 }
 .modalDialog {
@@ -52,16 +53,26 @@ body::-webkit-scrollbar,
   scrollbar-width: none;
   overflow: scroll;
   border: 1px solid #dddddd21;
+  background: #00000099;
+}
+body.light .pageCard {
+  background: var(--cardBg);
 }
 .pageCard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   padding-bottom: 90px !important;
-  min-height: calc(100vh - 47px);
+  min-height: calc(100vh - 117px);
   width: 100% !important;
 }
 .commonBtn {
   background-color: #df723b !important;
+  border-color: #df723b !important;
+  transition: 0.4s;
+}
+
+.commonBtn:hover {
+  background-color: #f9bfa1 !important;
   border-color: #df723b !important;
 }
 .btn {

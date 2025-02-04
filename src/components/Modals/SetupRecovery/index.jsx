@@ -12,14 +12,14 @@ import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
   toPasskeyValidator,
-  toWebAuthnKey
-} from "@zerodev/passkey-validator"
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
+  toWebAuthnKey,
+} from "@zerodev/passkey-validator";
+import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia } from "viem/chains"
+import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
+import { sepolia } from "viem/chains";
 
 import {
   generateOTP,
@@ -27,54 +27,65 @@ import {
   base64ToBuffer,
 } from "../../../utils/globals";
 
-import { createAccount, getAccount, getMnemonic, getRecoverAccount, doRecoveryNewSigner } from "../../../lib/zeroDevWallet"
+import {
+  createAccount,
+  getAccount,
+  getMnemonic,
+  getRecoverAccount,
+  doRecoveryNewSigner,
+} from "../../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const CHAIN = sepolia
-const entryPoint = getEntryPoint("0.7")
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const CHAIN = sepolia;
+const entryPoint = getEntryPoint("0.7");
 
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
+const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
 const contractABI = parseAbi([
   "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)"
-])
+  "function balanceOf(address owner) external view returns (uint256 balance)",
+]);
 const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
-  chain: CHAIN
-})
-
-
+  chain: CHAIN,
+});
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const userAuth = useSelector((state) => state.Auth);
 
-  const [step, setStep] = useState(1)
-  const [phrase, setPhrase] = useState()
-  console.log(userAuth)
+  const [step, setStep] = useState(1);
+  const [phrase, setPhrase] = useState();
+  console.log(userAuth);
 
   const checkPhrase = async () => {
     try {
-      console.log("ph", phrase.trim().split(" ").length, phrase.trim().split(" "))
+      console.log(
+        "ph",
+        phrase.trim().split(" ").length,
+        phrase.trim().split(" ")
+      );
       // if (!userAuth?.login) return toast.error("Please Login!")
       if (phrase && phrase.trim().split(" ").length == 12) {
-        console.log(userAuth)
-        let checkAccount = await getRecoverAccount(userAuth?.passkeyCred, phrase)
-        if (checkAccount && (checkAccount.address == userAuth.walletAddress)) {
-          setStep(2)
+        console.log(userAuth);
+        let checkAccount = await getRecoverAccount(
+          userAuth?.passkeyCred,
+          phrase
+        );
+        if (checkAccount && checkAccount.address == userAuth.walletAddress) {
+          setStep(2);
         } else {
-          toast.error("Invalid Phrase!")
+          toast.error("Invalid Phrase!");
         }
       } else {
-        toast.error("Invalid Phrase!")
+        toast.error("Invalid Phrase!");
       }
     } catch (error) {
-      toast.error("Invalid Phrase!")
-      console.log("error-->", error)
-      setStep(1)
+      toast.error("Invalid Phrase!");
+      console.log("error-->", error);
+      setStep(1);
     }
-  }
+  };
 
   const passketCreate = async (username) => {
     try {
@@ -82,44 +93,44 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
         passkeyName: username,
         passkeyServerUrl: PASSKEY_SERVER_URL,
         mode: WebAuthnMode.Register,
-        passkeyServerHeaders: {}
-      })
+        passkeyServerHeaders: {},
+      });
       // console.log("line-95", webAuthnKey)
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
-      })
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+      });
       // console.log("line-102", passkeyValidator)
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
   const passketLogin = async (username) => {
     try {
       const webAuthnKey = await toWebAuthnKey({
         passkeyName: username,
         passkeyServerUrl: PASSKEY_SERVER_URL,
         mode: WebAuthnMode.Login,
-        passkeyServerHeaders: {}
-      })
-      console.log("line-95", webAuthnKey)
+        passkeyServerHeaders: {},
+      });
+      console.log("line-95", webAuthnKey);
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
-      })
-      console.log("line-102", passkeyValidator)
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+      });
+      console.log("line-102", passkeyValidator);
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
 
   const createNewSigner = async () => {
     try {
@@ -128,22 +139,25 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
 
       if (newSigner) {
         // let oldSigner = await passketLogin("ajay")
-        let result = await doRecoveryNewSigner(userAuth?.passkeyCred, phrase, newSigner)
-        console.log("result-->", result)
+        let result = await doRecoveryNewSigner(
+          userAuth?.passkeyCred,
+          phrase,
+          newSigner
+        );
+        console.log("result-->", result);
         if (result.status) {
-          toast.success("created !")
+          toast.success("created !");
         } else {
-          toast.error(result.msg)
+          toast.error(result.msg);
         }
-
       } else {
-        toast.error("Please set new Signer!")
+        toast.error("Please set new Signer!");
       }
-      // doRecoveryNewSigner 
+      // doRecoveryNewSigner
     } catch (error) {
-      console.log("error new sigenr -->", error)
+      console.log("error new sigenr -->", error);
     }
-  }
+  };
 
   const handleSetupRecovery = () => setSetUp(!setUp);
   return (
@@ -155,7 +169,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
         <div
           className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >
-          <div className={`position-relative rounded px-3`}>
+          <div className={`relative rounded px-3`}>
             <button
               onClick={handleSetupRecovery}
               className="border-0 p-0 absolute"
@@ -194,42 +208,80 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             {/* <div className="top pb-3">
             </div> */}
             <div className="modalBody">
-              {step == 1 ? <>
-                <div className="py-2 text-center">
-                  <h5 className="m-0 text-xl fw-bold">Your Recovery Phrase</h5>
-                  <p className="m-0 text-gray-400">Please select each phone in order to make sure it is correct</p>
-                </div>
-                <form action="">
-                  <div className="py-2">
-                    <textarea name="" value={phrase} onChange={(e) => (setPhrase(e.target.value))} rows={5} id="" className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] text-white text-xs h-auto p-2" placeholder="message"></textarea>
+              {step == 1 ? (
+                <>
+                  <div className="py-2 text-center">
+                    <h5 className="m-0 text-xl fw-bold">
+                      Your Recovery Phrase
+                    </h5>
+                    <p className="m-0 text-gray-400">
+                      Please select each phone in order to make sure it is
+                      correct
+                    </p>
                   </div>
-                  <div className="btnWrpper mt-3 text-center">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center btn commonBtn border-0"
-                      onClick={checkPhrase}
-                    >
-                      Paste
-                    </button>
-                  </div>
-                </form></> : step == 2 ? <>
+                  <form action="">
+                    <div className="py-2">
+                      <textarea
+                        name=""
+                        value={phrase}
+                        onChange={(e) => setPhrase(e.target.value)}
+                        rows={5}
+                        id=""
+                        className="form-control bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] text-white text-xs h-auto p-2"
+                        placeholder="message"
+                      ></textarea>
+                    </div>
+                    <div className="btnWrpper mt-3 text-center">
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center btn commonBtn border-0"
+                        onClick={checkPhrase}
+                      >
+                        Paste
+                      </button>
+                    </div>
+                  </form>
+                </>
+              ) : step == 2 ? (
+                <>
                   <div className="grid gap-3 grid-cols-12">
-
                     {phrase.split(" ").map((item, key) => (
                       <div className="col-span-6 " key={key}>
                         <div className="iconWithText relative">
-                          <label htmlFor="" className="form-label rounded-circle flex items-center justify-center m-0 text-dark font-medium absolute left-1 icn" style={{ height: 40, width: 40, background: "#ff8735" }}>{key + 1}</label>
-                          <input type="text" value={item} readOnly={true} className="form-control pl-12 text-xs rounded-pill w-full bg-[#ff87352e] focus:bg-[#ff87352e]" style={{ border: "1px solid #ff8735" }} />
+                          <label
+                            htmlFor=""
+                            className="form-label rounded-circle flex items-center justify-center m-0 text-dark font-medium absolute left-1 icn"
+                            style={{
+                              height: 40,
+                              width: 40,
+                              background: "#ff8735",
+                            }}
+                          >
+                            {key + 1}
+                          </label>
+                          <input
+                            type="text"
+                            value={item}
+                            readOnly={true}
+                            className="form-control pl-12 text-xs rounded-pill w-full bg-[#ff87352e] focus:bg-[#ff87352e]"
+                            style={{ border: "1px solid #ff8735" }}
+                          />
                         </div>
                       </div>
                     ))}
-                    <div onClick={createNewSigner} className="col-span-12 text-center my-2">
+                    <div
+                      onClick={createNewSigner}
+                      className="col-span-12 text-center my-2"
+                    >
                       <button className="inline-flex items-center justify-center btn commonBtn rounded-pill">
-                        Create a new Signer                      </button>
+                        Create a new Signer{" "}
+                      </button>
                     </div>
                   </div>
-                </> : <></>}
-
+                </>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>

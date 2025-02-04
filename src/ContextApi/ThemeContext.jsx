@@ -7,13 +7,13 @@ const themeVariables = {
     backgroundColor2: "#fffefe",
     textColor: "#000000",
     textColor2: "#383838",
-    cardBg: "#fff5f1",
+    cardBg: "#ffece5",
     cardBg2: "#e7e7e7",
     lightBtn: "#b8b8b8",
   },
   dark: {
-    backgroundColor: "#0d1017",
-    backgroundColor2: "#2c2c2c",
+    backgroundColor: "#0a0915",
+    backgroundColor2: "#0a0915",
     textColor: "#fff",
     textColor2: "#fff",
     cardBg: "#1e1e1e",
@@ -45,14 +45,21 @@ export const ThemeProvider = ({ children }) => {
   };
 
   // Apply the theme variables to the root element
+  // Apply the theme variables to the root element and update body class
   useEffect(() => {
     if (typeof document !== "undefined") {
       const root = document.documentElement;
+      const body = document.body;
       const currentTheme = themeVariables[theme];
 
+      // Set CSS variables
       Object.entries(currentTheme).forEach(([key, value]) => {
         root.style.setProperty(`--${key}`, value);
       });
+
+      // Remove existing theme class and add new one
+      body.classList.remove("light", "dark");
+      body.classList.add(theme);
     }
   }, [theme]);
 

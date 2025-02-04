@@ -4,12 +4,15 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 // css
 
 // img
 
 const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
+  const { theme, toggleTheme } = useTheme();
+
   const handleBuySell = () => setBuySell(!buySell);
   return (
     <>
@@ -18,7 +21,7 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
       >
         <button
           onClick={handleBuySell}
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+          className="bg-white/6 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
           {closeIcn}
@@ -38,7 +41,11 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
               <div className="py-2">
                 <Link
                   href="/buy"
-                  className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                  className={`${
+                    theme == "dark"
+                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                      : "commonBtn"
+                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Buy{" "}
                 </Link>
@@ -46,7 +53,11 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
               <div className="py-2">
                 <Link
                   href="/sell"
-                  className="flex w-full h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                  className={`${
+                    theme == "dark"
+                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                      : "commonBtn"
+                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Sell
                 </Link>

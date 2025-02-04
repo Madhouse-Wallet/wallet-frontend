@@ -3,22 +3,19 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import styles from "@/styles/Identity.module.css";
-import StripePaymentPage from "../stripePaymentPage"
+import StripePaymentPage from "../stripePaymentPage";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 export default function Identity() {
-  const router = useRouter()
+  const { theme, toggleTheme } = useTheme();
+
+  const router = useRouter();
 
   return (
     <>
- 
-
       <section className="pt-12 realtive identity">
         <div className="container">
-          <div
-            className="pageCard relative pb-3 px-3 lg:p-6 lg:pt-0  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-          >
+          <div className="pageCard bg-white/5 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -27,10 +24,14 @@ export default function Identity() {
               {closeIcn}
             </button>
             <div className="grid gap-3 grid-cols-12">
-              <div className=" col-span-12 sticky top-0 z-10">
-                <div className="sectionHeader bg-[#000] py-4 contrast-more:bg-black border-b border-gray-900">
+              <div className=" col-span-12  z-10">
+                <div
+                  className={`${
+                    theme == "dark" ? "" : "bg-[#fff3ed]"
+                  } sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
+                >
                   <div className="d-flex align-items-center gap-3 pb-3">
-                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Stripe Payment
                     </h4>
                   </div>

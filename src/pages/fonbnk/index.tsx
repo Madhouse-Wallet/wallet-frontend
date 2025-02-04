@@ -2,32 +2,36 @@ import { useRouter } from "next/router";
 import IframeComponent from "./iframe";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 export default function Fonbnk() {
-  const router = useRouter()
+  const { theme, toggleTheme } = useTheme();
+
+  const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
 
   const [activeTab, setActiveTab] = useState(0);
 
   const tabData = [
     {
-      title: "Onramp Fonbnk", component:
+      title: "Onramp Fonbnk",
+      component: (
         <iframe
-           height={650}
+          height={650}
           // src="https://sandbox-pay.fonbnk.com/?source=x9REDkaz"
           src={`${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_SOURCE}&address=${userAuth?.walletAddress}`}
           className="w-full  border-0 rounded"
           title="Fonbnk Payment"
           allow="payment"
         />
+      ),
     },
     {
       title: "Onramp Fonbnk",
       component: (
         <>
           <iframe
-           height={650}
-
+            height={650}
             src={`${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_SOURCE}`}
             className="w-full  border-0 rounded"
             title="Fonbnk Payment"
@@ -46,13 +50,9 @@ export default function Fonbnk() {
     }
   };
   return (
-    <section className="ifrmae pt-12 position-relative">
+    <section className="ifrmae pt-12 relative">
       <div className="container">
-        <div
-          className="pageCard relative pb-3 px-3 lg:p-6 lg:pt-0  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-        >
+        <div className="pageCard bg-white/5 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
           <button
             onClick={() => router.push("/dashboard")}
             className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -61,10 +61,14 @@ export default function Fonbnk() {
             {closeIcn}
           </button>
           <div className="grid gap-3 grid-cols-12">
-            <div className=" col-span-12 sticky top-0 z-10">
-              <div className="sectionHeader bg-[#000] py-4 contrast-more:bg-black border-b border-gray-900">
+            <div className=" col-span-12  z-10">
+              <div
+                className={`${
+                  theme == "dark" ? "" : "bg-[#fff3ed]"
+                } sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
+              >
                 <div className="d-flex align-items-center gap-3 pb-3">
-                  <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                  <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                     Fonbnk
                   </h4>
                 </div>
@@ -72,10 +76,11 @@ export default function Fonbnk() {
                   {tabData.map((item, index) => (
                     <li key={index} className="py-1">
                       <button
-                        className={` ${activeTab === index
-                          ? "bg-[#CB89FF] border-[#CB89FF]"
-                          : "bg-white border-white"
-                          }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+                        className={` ${
+                          activeTab === index
+                            ? "bg-[#ffad84] border-[#ffad84]"
+                            : "bg-white border-white"
+                        }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
              // Highlight active tab
               `}
                         onClick={() => setActiveTab(index)}
@@ -97,8 +102,6 @@ export default function Fonbnk() {
         </div>
       </div>
     </section>
-
-
   );
 }
 const backIcn = (

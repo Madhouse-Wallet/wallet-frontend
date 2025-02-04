@@ -13,10 +13,10 @@ export default function Home() {
       {/* <BTCEchange /> */}
       {/* <ThresholdWallet /> */}
       {/* <UmbrelOsPage /> */}
-      {/* <Dashboard /> */}
-      <Welcome />
+      <Dashboard />
+      {/* <Welcome /> */}
     </>
   );
 }
 
-Home.authRoute = true;
+// Home.authRoute = true;

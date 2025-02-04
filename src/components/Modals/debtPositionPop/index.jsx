@@ -143,7 +143,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-                <div className="top pb-3">
+            <div className="top pb-3">
               <h5 className="m-0 text-xl fw-bold">
                 {step == 1 ? "Open a Debt Position" : "Debt Position Summary"}{" "}
               </h5>
@@ -199,7 +199,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                     )}
                     <div className="py-2">
                       <RadioList className="list-none ps-0 my-4 mb-0 flex items-center justify-center gap-3">
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             checked={ltv === 1.3 && true}
@@ -211,7 +211,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Safe (LTV 1.3)
                           </button>
                         </li>
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             checked={ltv === 1.2 && true}
@@ -223,7 +223,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Moderate (LTV 1.2)
                           </button>
                         </li>
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             name="wallet"
@@ -311,8 +311,11 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                           Loan to Value (LTV)
                         </span>
                         <span className="text-xs font-semibold">
-                          {((calculateCollateralAmount(borrowingAmount) * 100) /
-                            (recommendedCollateral * currentBTCPrice)).toFixed(1)} %
+                          {(
+                            (calculateCollateralAmount(borrowingAmount) * 100) /
+                            (recommendedCollateral * currentBTCPrice)
+                          ).toFixed(1)}{" "}
+                          %
                         </span>
                       </li>
                     </ul>

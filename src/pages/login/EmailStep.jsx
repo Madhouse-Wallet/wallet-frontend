@@ -1,15 +1,18 @@
 import React from "react";
-import logo from "@/Assets/Images/logow.png";
+import logow from "@/Assets/Images/logow.png";
+import logo from "@/Assets/Images/logo.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 const EmailStep = ({ step, setStep, loginFn }) => {
+  const { theme, toggleTheme } = useTheme();
+
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerEmail, setRegisterEmail] = useState();
   const router = useRouter();
-
 
   async function isValidEmail(email) {
     // Define the email regex pattern
@@ -18,10 +21,6 @@ const EmailStep = ({ step, setStep, loginFn }) => {
     // Test the email against the regex
     return emailRegex.test(email);
   }
-
-
-
- 
 
   const loginTry = async () => {
     try {
@@ -36,19 +35,19 @@ const EmailStep = ({ step, setStep, loginFn }) => {
           return toast.error("Please Enter Valid Email!");
         }
         let response = await loginFn({
-          email: registerEmail
+          email: registerEmail,
         });
         if (response) {
-          router.push("/dashboard")
+          router.push("/dashboard");
         } else {
-          setLoginLoading(false)
+          setLoginLoading(false);
         }
       }
     } catch (error) {
-      console.log("loginTry error --->", error)
+      console.log("loginTry error --->", error);
       setLoginLoading(false);
     }
-  }
+  };
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -56,7 +55,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logo}
+                src={theme == "dark" ? logow : logo}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}
@@ -72,9 +71,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
         <div className="formBody pt-4 text-xs">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <h4 className="m-0 text-xl pb-1 font-semibold text-white">
-                Login
-              </h4>
+              <h4 className="m-0 text-xl pb-1 font-semibold">Login</h4>
               <p className=" text-sm font-medium opacity-50 md:text-xs">
                 Get an account and control your finances better with full
                 control of your budgets and savings.
@@ -86,7 +83,11 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                   type="email"
                   value={registerEmail}
                   onChange={(e) => setRegisterEmail(e.target.value)}
-                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                  className={`${
+                    theme == "dark"
+                      ? "border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30"
+                      : "bg-[#fff3ed]  border-[#ffad84]"
+                  } flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                   placeholder="Enter your email address"
                   defaultValue=""
                 />
@@ -102,7 +103,11 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                   onClick={loginTry}
                   disabled={loginLoading}
                   type="submit"
-                  className="inline-flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                  className={`${
+                    theme == "dark"
+                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
+                      : "commonBtn"
+                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   {loginLoading ? "Loading" : "Log in"}
                 </button>

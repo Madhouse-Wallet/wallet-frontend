@@ -1,56 +1,55 @@
-import React from 'react'
-import { CardCstm } from '../../Assets/styles/DashboardStyled'
-import TableLayout from '../../components/TableLayout/index'
+import React from "react";
+import { CardCstm } from "../../Assets/styles/DashboardStyled";
+import TableLayout from "../../components/TableLayout/index";
 
 const MyActivity = () => {
   const column = [
     {
-      head: 'TBTC',
-      accessor: 'TBTC'
+      head: "TBTC",
+      accessor: "TBTC",
     },
     {
-      head: 'STATE',
-      accessor: 'STATE',
+      head: "STATE",
+      accessor: "STATE",
       isComponent: true,
       component: (item, ind) => (
         <p
           className={`${
-            item.STATE == 'Pending'
-              ? 'redStatus'
-              : item.STATE == 'Minted'
-                ? 'greenStatus'
-                : ''
+            item.STATE == "Pending"
+              ? "redStatus"
+              : item.STATE == "Minted"
+              ? "greenStatus"
+              : ""
           } status d-inline-flex m-0 rounded-pill px-3 text-capitalize py-1 fw-sbold`}
         >
           {item.STATE}
         </p>
-      )
-    }
-  ]
+      ),
+    },
+  ];
   const data = [
     {
-      TBTC: '1.20',
-      STATE: 'Pending'
+      TBTC: "1.20",
+      STATE: "Pending",
     },
     {
-      TBTC: '1.20',
-      STATE: 'Minted'
-    }
-  ]
+      TBTC: "1.20",
+      STATE: "Minted",
+    },
+  ];
   return (
     <>
-      <CardCstm className="p-3 rounded-3 position-relative">
+      <CardCstm className="p-3 rounded-3 relative">
         <div className="top">
           <p className="m-0">
-            Threshold BTC Transaction Addresses:{' '}
+            Threshold BTC Transaction Addresses:{" "}
             <span className="themeClr d-block"> XXXX.....XXX</span>
           </p>
-          <div className='grid gap-3 grid-cols-12'>
-          <div className="my-2 md:col-span-5 sm:col-span-6 col-span-12">
-
+          <div className="grid gap-3 grid-cols-12">
+            <div className="my-2 md:col-span-5 sm:col-span-6 col-span-12">
               <CardCstm
                 className=" p-3 p-lg-4 rounded-4 "
-                style={{ background: 'var(--cardBg2)', fontSize: 12 }}
+                style={{ background: "var(--cardBg2)", fontSize: 12 }}
               >
                 <div className="icnWrp d-flex align-items-center">
                   <span className="icn me-1">{btcIcn}</span>
@@ -58,7 +57,7 @@ const MyActivity = () => {
                 </div>
                 <div className="content pt-2">
                   <h4 className="m-0 fw-normal">
-                    12.35{' '}
+                    12.35{" "}
                     <sub className="themeClr" style={{ fontSize: 12 }}>
                       tBTC
                     </sub>
@@ -79,10 +78,10 @@ const MyActivity = () => {
         </div>
       </CardCstm>
     </>
-  )
-}
+  );
+};
 
-export default MyActivity
+export default MyActivity;
 
 const btcIcn = (
   <svg
@@ -119,4 +118,4 @@ const btcIcn = (
       </clipPath>
     </defs>
   </svg>
-)
+);

@@ -4,17 +4,16 @@ import { useRouter } from "next/router";
 import KeyStep from "./KeyStep";
 import EmailStep from "./EmailStep";
 
-
 import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
   toPasskeyValidator,
-  toWebAuthnKey
-} from "@zerodev/passkey-validator"
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
+  toWebAuthnKey,
+} from "@zerodev/passkey-validator";
+import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia } from "viem/chains"
+import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
+import { sepolia } from "viem/chains";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
@@ -25,31 +24,33 @@ import {
   base64ToBuffer,
 } from "../../utils/globals";
 
-import { createAccount, getAccount, getMnemonic } from "../../lib/zeroDevWallet"
+import {
+  createAccount,
+  getAccount,
+  getMnemonic,
+} from "../../lib/zeroDevWallet";
 
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const CHAIN = sepolia
-const entryPoint = getEntryPoint("0.7")
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const CHAIN = sepolia;
+const entryPoint = getEntryPoint("0.7");
 
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
+const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
 const contractABI = parseAbi([
   "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)"
-])
+  "function balanceOf(address owner) external view returns (uint256 balance)",
+]);
 const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
-  chain: CHAIN
-})
-
-
+  chain: CHAIN,
+});
 
 const Login = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [registerData, setRegisterData] = useState({ "email": "" })
+  const [registerData, setRegisterData] = useState({ email: "" });
   const dispatch = useDispatch();
   async function isValidEmail(email) {
     // Define the email regex pattern
@@ -59,44 +60,41 @@ const Login = () => {
     return emailRegex.test(email);
   }
 
- const passketLogin = async (username) => {
+  const passketLogin = async (username) => {
     try {
       const webAuthnKey = await toWebAuthnKey({
         passkeyName: username,
         passkeyServerUrl: PASSKEY_SERVER_URL,
         mode: WebAuthnMode.Login,
-        passkeyServerHeaders: {}
-      })
-      console.log("line-95", webAuthnKey)
+        passkeyServerHeaders: {},
+      });
+      console.log("line-95", webAuthnKey);
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
-      })
-      console.log("line-102", passkeyValidator)
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+      });
+      console.log("line-102", passkeyValidator);
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
-
-
+  };
 
   const handleCopy = async (text) => {
     try {
       if (addressPhrase) {
         await navigator.clipboard.writeText(text);
-        toast.success("Copied Successfully!")
+        toast.success("Copied Successfully!");
       } else {
-
       }
     } catch (error) {
-      console.log("error-->", error)
+      console.log("error-->", error);
     }
-  }
- const getUser = async (email) => {
+  };
+  const getUser = async (email) => {
     try {
       try {
         // console.log(email)
@@ -124,23 +122,22 @@ const Login = () => {
 
   const loginFn = async (data) => {
     try {
-
       let validEmail = await isValidEmail(data.email);
       if (!validEmail) {
         toast.error("Please Enter Valid Email!");
-        return false
+        return false;
       }
       let userExist = await getUser(data.email);
       if (userExist.status && userExist.status == "failure") {
         toast.error("User Not Found!");
-        return false
+        return false;
       } else {
         // console.log(base64ToBuffer(userExist.userId.rawId))
         //base64ToBuffer(userExist.rawId)
         const createdCredential = await passketLogin(data.email);
         if (createdCredential) {
           let account = await getAccount(createdCredential.passkeyValidator);
-          if (!(account.status)) {
+          if (!account.status) {
             toast.error(account.msg);
             return false;
           } else {
@@ -156,10 +153,10 @@ const Login = () => {
                   passkeyCred: createdCredential.passkeyValidator || "",
                 })
               );
-              return true
+              return true;
             } else {
               toast.error("Please Login With Correct Account!");
-              return false
+              return false;
             }
           }
         }
@@ -167,7 +164,7 @@ const Login = () => {
     } catch (error) {
       console.log("error---->", error);
     }
-  }; 
+  };
 
   return (
     <>

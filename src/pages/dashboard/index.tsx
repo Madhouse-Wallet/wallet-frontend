@@ -74,7 +74,7 @@ const Dashboard = () => {
       icn: pi4,
       onClick: () => {
         // router.push("/identity");
-        setWithdrawDep(!withdrawDep)
+        setWithdrawDep(!withdrawDep);
       },
     },
     {
@@ -102,10 +102,10 @@ const Dashboard = () => {
     two: false,
     three: false,
   });
-  const handleCopy = async (text:any) => {
+  const handleCopy = async (text: any) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Copied Successfully!")
+      toast.success("Copied Successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -116,7 +116,13 @@ const Dashboard = () => {
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
 
       {withdrawDep &&
-        createPortal(<WithdrawDepositPopup withdrawDep={withdrawDep} setWithdrawDep={setWithdrawDep} />, document.body)}
+        createPortal(
+          <WithdrawDepositPopup
+            withdrawDep={withdrawDep}
+            setWithdrawDep={setWithdrawDep}
+          />,
+          document.body
+        )}
 
       {buySell &&
         createPortal(
@@ -132,13 +138,13 @@ const Dashboard = () => {
           document.body
         )}
 
-      <DashboardMain className="relative flex h-[100dvh] w-full flex-col items-center">
+      <DashboardMain className="relative flex w-full flex-col items-center">
         <div
           className="flex h-full w-full select-none flex-col items-center container"
           style={{ opacity: 1, transform: "none" }}
         >
-          <div className="pt-6 md:pt-8" />
-          <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
+          <div className="pt-6 md:pt-8 sm:block hidden" />
+          {/* <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-3 px-4 md:gap-4">
               <Image
                 src={logo}
@@ -153,7 +159,7 @@ const Dashboard = () => {
                 Setup your <span className="themeClr">Madhouse</span> Wallet
               </h1>
             </div>
-          </div>
+          </div> */}
           <div className="pt-6 md:pt-8" />
           <div
             className="flex w-full  animate-in fade-in slide-in-from-bottom-8"
@@ -168,7 +174,7 @@ const Dashboard = () => {
                 style={{ maxHeight: "max-content" }}
               >
                 <div
-                  className="umbrel-hide-scrollbar flex w-full snap-x snap-mandatory  md:max-w-[var(--apps-max-w)] pb-10"
+                  className="umbrel-hide-scrollbar flex w-full snap-x snap-mandatory  md:max-w-[var(--apps-max-w)] "
                   style={{ maxHeight: "max-content" }}
                 >
                   <div
@@ -191,33 +197,38 @@ const Dashboard = () => {
           <div className="w-full pt-5 my-2">
             <div className="text-center pb-3 pb-lg-4 pt-0 py-8  inlin-flex flex-col min-w-0 rounded-4 md:max-w-[var(--apps-max-w)] mx-auto">
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                {
-                  userAuth.login && (<> <div
-                    onClick={() => handleCopy(userAuth?.walletAddress)}
-  
-                    className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5 py-4 text-14 backdrop-blur-md"
-                    style={{ border: " 1px solid #565656a3" }}
-                  >
-                    <p className="m-0 text-white">
-                      Wallet Address: <span className="text-[#00FF0A]">{splitAddress(userAuth?.walletAddress)}</span>
-                    </p>
+                {userAuth.login && (
+                  <>
+                    {" "}
                     <div
-                      className="rounded-20 p-1 flex items-center gap-1 
+                      onClick={() => handleCopy(userAuth?.walletAddress)}
+                      className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5 py-4 text-14 backdrop-blur-md"
+                      style={{ border: " 1px solid #565656a3" }}
+                    >
+                      <p className="m-0 ">
+                        Wallet Address:{" "}
+                        <span className="text-[#00FF0A]">
+                          {splitAddress(userAuth?.walletAddress)}
+                        </span>
+                      </p>
+                      <div
+                        className="rounded-20 p-1 flex items-center gap-1 
                       bg-[#5858583d]
                     backdrop-blur-[17.5px]
   "
-                      style={{ borderRadius: 20 }}
-                    >
-                      <span className="text-white text-xs">{copyIcn}</span>
+                        style={{ borderRadius: 20 }}
+                      >
+                        <span className=" text-xs">{copyIcn}</span>
+                      </div>
                     </div>
-                  </div></>)
-                }
-               
+                  </>
+                )}
+
                 <div
-                  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5 py-4 text-14 backdrop-blur-md"
+                  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] pl-5 pr-1 py-4 text-14 backdrop-blur-md"
                   style={{ border: " 1px solid #565656a3" }}
                 >
-                  <p className="m-0 text-white">
+                  <p className="m-0">
                     Health Factor: <span className="text-[#00FF0A]">1.27</span>
                   </p>
                   <div
@@ -228,11 +239,11 @@ const Dashboard = () => {
                     style={{ borderRadius: 20 }}
                   >
                     <span className="icn rounded-10 bg-[#00FF0A] h-2 w-2"></span>
-                    <span className="text-white text-xs">Risk Factor</span>
+                    <span className=" text-xs">Risk Factor</span>
                   </div>
                 </div>
               </div>
-              <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 pt-20 flex-wrap">
+              <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 pt-10 flex-wrap">
                 {cardData.map((item, key) => (
                   <li
                     onClick={item.onClick}

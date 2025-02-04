@@ -43,12 +43,12 @@ const BTCEchange = () => {
     try {
       setLoading(true);
       setDepositSetup("");
-      setDepositFound("")
+      setDepositFound("");
       if (signer) {
         const sdk = await initializeTBTC(signer);
         if (sdk) {
           depo(sdk);
-          setBtcExchange(!btcExchange)
+          setBtcExchange(!btcExchange);
         }
       } else {
         toast.error("Please Login First");
@@ -63,24 +63,25 @@ const BTCEchange = () => {
       const qr = await QRCode.toDataURL(text);
       setQRCode(qr);
       setLoading(false);
-
     } catch (err) {
       setLoading(false);
       console.error(err);
     }
   };
   useEffect(() => {
-    console.log("depositSetup test",depositSetup)
+    console.log("depositSetup test", depositSetup);
     if (depositSetup) {
-      mint(depositSetup)
+      mint(depositSetup);
     }
-  }, [depositSetup, depositSetupCheck])
-  console.log("setDepositSetup-->", depositSetup)
+  }, [depositSetup, depositSetupCheck]);
+  console.log("setDepositSetup-->", depositSetup);
   const depo = async (tbtcSdk: any) => {
     const bitcoinRecoveryAddress = "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"; // Replace with a valid BTC address
     try {
       console.log(tbtcSdk.deposits.initiateDeposit);
-      const deposit = await tbtcSdk.deposits.initiateDeposit(bitcoinRecoveryAddress);
+      const deposit = await tbtcSdk.deposits.initiateDeposit(
+        bitcoinRecoveryAddress
+      );
       console.log("Deposit initiated:", deposit);
       setDepositSetup(deposit);
       // Step 5: Get the Bitcoin deposit address
@@ -88,34 +89,31 @@ const BTCEchange = () => {
       console.log("Bitcoin deposit address:", bitcoinDepositAddress);
       setWalletAddressDepo(bitcoinDepositAddress);
       await generateQRCode(bitcoinDepositAddress);
-
     } catch (error) {
       console.error("Error during deposit process:", error);
     }
   };
 
- 
-
   const mint = async (depo: any) => {
     try {
-      console.log("mint-->", depo)
+      console.log("mint-->", depo);
       if (depo) {
         const fundingUTXOs = await depo.detectFunding();
         console.log("fundingUTXOs---->", fundingUTXOs);
         if (fundingUTXOs.length > 0) {
           const txHash = await depo.initiateMinting(fundingUTXOs[0]);
           console.log("txHash---->", txHash);
-          setDepositFound(txHash)
+          setDepositFound(txHash);
         } else {
-          console.log("depo-->",depo)
-          if(depo){
-            setDepositSetupCheck(!depositSetupCheck)
+          console.log("depo-->", depo);
+          if (depo) {
+            setDepositSetupCheck(!depositSetupCheck);
           }
         }
       }
     } catch (error) {
       console.log("setSdkTbtc-->", error);
-      setDepositSetupCheck(!depositSetupCheck)
+      setDepositSetupCheck(!depositSetupCheck);
     }
   };
 
@@ -139,7 +137,7 @@ const BTCEchange = () => {
           />,
           document.body
         )}
-      <section className="position-relative dashboard py-3">
+      <section className="relative dashboard py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="my-2 col-span-12">

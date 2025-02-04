@@ -8,12 +8,12 @@ import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
   toPasskeyValidator,
-  toWebAuthnKey
-} from "@zerodev/passkey-validator"
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
+  toWebAuthnKey,
+} from "@zerodev/passkey-validator";
+import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia } from "viem/chains"
+import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
+import { sepolia } from "viem/chains";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
@@ -24,23 +24,27 @@ import {
   base64ToBuffer,
 } from "../../utils/globals";
 
-import { createAccount, getAccount, getMnemonic } from "../../lib/zeroDevWallet"
+import {
+  createAccount,
+  getAccount,
+  getMnemonic,
+} from "../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const CHAIN = sepolia
-const entryPoint = getEntryPoint("0.7")
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const CHAIN = sepolia;
+const entryPoint = getEntryPoint("0.7");
 
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863"
+const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
 const contractABI = parseAbi([
   "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)"
-])
+  "function balanceOf(address owner) external view returns (uint256 balance)",
+]);
 const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
-  chain: CHAIN
-})
+  chain: CHAIN,
+});
 
 const CreateWallet = () => {
   const router = useRouter();
@@ -58,8 +62,7 @@ const CreateWallet = () => {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [addressPhrase, setAddressPhrase] = useState("");
-  const [registerData, setRegisterData] = useState({ "email": "", "username": "" })
-
+  const [registerData, setRegisterData] = useState({ email: "", username: "" });
 
   async function isValidEmail(email) {
     // Define the email regex pattern
@@ -73,14 +76,13 @@ const CreateWallet = () => {
     try {
       if (addressPhrase) {
         await navigator.clipboard.writeText(text);
-        toast.success("Copied Successfully!")
+        toast.success("Copied Successfully!");
       } else {
-
       }
     } catch (error) {
-      console.log("error-->", error)
+      console.log("error-->", error);
     }
-  }
+  };
 
   const addUser = async (
     email,
@@ -150,22 +152,22 @@ const CreateWallet = () => {
         passkeyName: username,
         passkeyServerUrl: PASSKEY_SERVER_URL,
         mode: WebAuthnMode.Register,
-        passkeyServerHeaders: {}
-      })
+        passkeyServerHeaders: {},
+      });
       // console.log("line-95", webAuthnKey)
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
-      })
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+      });
       // console.log("line-102", passkeyValidator)
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
+  };
 
   const passketLogin = async (username) => {
     try {
@@ -173,23 +175,22 @@ const CreateWallet = () => {
         passkeyName: username,
         passkeyServerUrl: PASSKEY_SERVER_URL,
         mode: WebAuthnMode.Login,
-        passkeyServerHeaders: {}
-      })
-      console.log("line-95", webAuthnKey)
+        passkeyServerHeaders: {},
+      });
+      console.log("line-95", webAuthnKey);
       const passkeyValidator = await toPasskeyValidator(publicClient, {
         webAuthnKey,
         entryPoint,
         kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2
-      })
-      console.log("line-102", passkeyValidator)
+        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+      });
+      console.log("line-102", passkeyValidator);
       return { passkeyValidator, webAuthnKey };
     } catch (error) {
-      console.log("error-->", error)
-      return false
+      console.log("error-->", error);
+      return false;
     }
-  }
-
+  };
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
@@ -237,10 +238,12 @@ const CreateWallet = () => {
           const createdCredential = await passketLogin(loginEmail);
           if (createdCredential) {
             let account = await getAccount(createdCredential.passkeyValidator);
-            if (!(account.status)) {
+            if (!account.status) {
               toast.error(account.msg);
             } else {
-              if (userExist.userId.wallet == account?.account?.account?.address) {
+              if (
+                userExist.userId.wallet == account?.account?.account?.address
+              ) {
                 toast.success("Login Successfully!");
                 dispatch(
                   loginSet({
@@ -273,12 +276,15 @@ const CreateWallet = () => {
       let userExist = await getUser(registerData.email);
       if (userExist.status && userExist.status == "success") {
         toast.error("User Already Exist!");
-        return false
+        return false;
       }
       const createdCredential = await passketCreate(registerData.email);
       if (createdCredential) {
-        let account = await createAccount(createdCredential.passkeyValidator, addressPhrase);
-        if (!(account.status)) {
+        let account = await createAccount(
+          createdCredential.passkeyValidator,
+          addressPhrase
+        );
+        if (!account.status) {
           toast.error(account.msg);
           return false;
         } else {
@@ -302,47 +308,46 @@ const CreateWallet = () => {
               passkeyCred: createdCredential.passkeyValidator || "",
             })
           );
-          return true
+          return true;
         }
       }
     } catch (error) {
       console.log("registerFn error---->", error);
-      return false
+      return false;
     }
   };
-
 
   const registerOtpFn = async (data) => {
     try {
       if (data.otp != checkOTP) {
         toast.error("Invalid OTP!");
-        return false
+        return false;
       } else {
         let userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status == "success") {
           toast.error("User Already Exist!");
-          return false
+          return false;
         }
         let phrase = await getMnemonic();
-        console.log("phrase -->", phrase)
+        console.log("phrase -->", phrase);
         if (phrase) {
           setAddressPhrase(phrase);
-          return true
+          return true;
         } else {
           toast.error("Try Again After some time!!");
-          return false
+          return false;
         }
       }
     } catch (error) {
       console.log("registerOtpFn error---->", error);
-      return false
+      return false;
     }
   };
 
   const sendRegisterOtp = async (data) => {
     try {
       let userExist = await getUser(data.email);
-      console.log("userExist-->", userExist)
+      console.log("userExist-->", userExist);
       if (userExist.status && userExist.status == "success") {
         toast.error("User Already Exist!");
         return false;
@@ -351,9 +356,9 @@ const CreateWallet = () => {
         setCheckOTP(OTP);
         // console.log("OTP-->", OTP)
         setRegisterData({
-          "email": data.email,
-          "username": data.username
-        })
+          email: data.email,
+          username: data.username,
+        });
         let obj = {
           email: data.email,
           name: data.username,
@@ -373,24 +378,41 @@ const CreateWallet = () => {
       }
     } catch (error) {
       console.log("sendRegisterOtp error---->", error);
-      return false
+      return false;
     }
   };
-
 
   return (
     <>
       {step == 1 ? (
         <>
-          <CreateWalletStep sendRegisterOtp={sendRegisterOtp} step={step} setStep={setStep} />
+          {/* <CreateWalletStep
+            sendRegisterOtp={sendRegisterOtp}
+            step={step}
+            setStep={setStep}
+          /> */}
+          <OtpStep
+            registerOtpFn={registerOtpFn}
+            step={step}
+            setStep={setStep}
+          />
         </>
       ) : step == 2 ? (
         <>
-          <OtpStep registerOtpFn={registerOtpFn} step={step} setStep={setStep} />
+          <OtpStep
+            registerOtpFn={registerOtpFn}
+            step={step}
+            setStep={setStep}
+          />
         </>
       ) : step == 3 ? (
         <>
-          <WalletBackup handleCopy={handleCopy} addressPhrase={addressPhrase} step={step} setStep={setStep} />
+          <WalletBackup
+            handleCopy={handleCopy}
+            addressPhrase={addressPhrase}
+            step={step}
+            setStep={setStep}
+          />
         </>
       ) : step == 4 ? (
         <>
