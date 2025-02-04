@@ -18,7 +18,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap");
 :root body {
   font-family: "Inter", sans-serif;
-  background: var(--backgroundColor2);
+  background: #0a0915;
   color: #fff;
   /* color: var(--textColor); */
   /* background-image: url(../Images//umbrel/1.jpg); */
@@ -54,9 +54,6 @@ body::-webkit-scrollbar,
   overflow: scroll;
   border: 1px solid #dddddd21;
   background: #00000099;
-}
-body.light .pageCard {
-  background: var(--cardBg);
 }
 .pageCard {
   border-top-left-radius: 20px;

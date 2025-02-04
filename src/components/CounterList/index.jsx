@@ -32,13 +32,7 @@ const CounterList = ({ data }) => {
               >
                 <div className="flex w-full flex-col items-center justify-between ">
                   <button
-                    className={` ${
-                      theme == "dark"
-                        ? "bg-neutral-900/70 shadow-widget"
-                        : theme == "light"
-                        ? "bg-[#fff3ed] border border-[#ffad84] shadow-[inset_12.7px_-12.7px_12.7px_rgba(161,70,25,0.1),inset_-12.7px_12.7px_12.7px_rgba(255,255,255,0.1)] backdrop-blur-[12.7px]"
-                        : ""
-                    }
+                    className={` bg-neutral-900/70 shadow-widget
                   backdrop-blur-xl backdrop-saturate-150 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%]  ring-white/25 transition-[transform,box-shadow] rounded-12 w-full md:rounded-20 shrink-0 flex flex-col gap-2 text-left  duration-300 hover:scale-105   cursor-pointer  focus:outline-none focus-visible:ring-6 active:scale-95 p-2 md:p-5`}
                   >
                     <div className="flex flex-col gap-1 tabular-nums md:gap-2">
@@ -62,20 +56,12 @@ const CounterList = ({ data }) => {
                       role="progressbar"
                       data-state="indeterminate"
                       data-max={100}
-                      className={`${
-                        theme == "dark"
-                          ? "bg-white/10"
-                          : theme == "light"
-                          ? " bg-[#fff]"
-                          : ""
-                      } relative w-full overflow-hidden rounded-full h-1.5`}
+                      className={`bg-white/10 relative w-full overflow-hidden rounded-full h-1.5`}
                     >
                       <div
                         data-state="indeterminate"
                         data-max={100}
-                        className={`${
-                          theme == "dark" ? "bg-white" : "bg-[#ffad84]"
-                        } h-full w-full flex-1 transition-all duration-700 rounded-full `}
+                        className={`bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
                         style={{ transform: "translateX(-55%)" }}
                       />
                     </div>

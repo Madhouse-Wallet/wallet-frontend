@@ -22,11 +22,7 @@ const TableLayout = ({ column, data }) => {
   return (
     <>
       <TableC
-        className={`${
-          theme == "dark"
-            ? "divide-white/6 bg-white/5"
-            : "divide-black/6 bg-black/5"
-        } w-full caption-bottom text-sm divide-y  rounded-12 `}
+        className={`divide-white/6 bg-white/5 w-full caption-bottom text-sm divide-y  rounded-12 `}
       >
         <TableHeader>
           <TableRow className="border-0">
@@ -36,11 +32,7 @@ const TableLayout = ({ column, data }) => {
                 <>
                   <TableHead
                     key={key}
-                    className={`${
-                      theme === "dark"
-                        ? "bg-[rgba(255,255,255,0.08)]"
-                        : "bg-[rgba(226,104,43,0.1)]"
-                    }  backdrop-blur-[7.747px] h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
+                    className={`bg-[rgba(255,255,255,0.08)]  backdrop-blur-[7.747px] h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
                   >
                     {item.head}
                   </TableHead>

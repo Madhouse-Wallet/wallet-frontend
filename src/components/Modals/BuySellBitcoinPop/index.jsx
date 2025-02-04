@@ -41,11 +41,7 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
               <div className="py-2">
                 <Link
                   href="/buy"
-                  className={`${
-                    theme == "dark"
-                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
-                      : "commonBtn"
-                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Buy{" "}
                 </Link>
@@ -53,11 +49,7 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
               <div className="py-2">
                 <Link
                   href="/sell"
-                  className={`${
-                    theme == "dark"
-                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
-                      : "commonBtn"
-                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Sell
                 </Link>

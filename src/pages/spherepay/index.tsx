@@ -33,9 +33,7 @@ function Spharepay() {
             <div className="grid gap-3 grid-cols-12">
               <div className=" col-span-12  z-10">
                 <div
-                  className={`${
-                    theme == "dark" ? "" : "bg-[#fff3ed]"
-                  } sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
+                  className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
                 >
                   <div className="d-flex align-items-center gap-3 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">

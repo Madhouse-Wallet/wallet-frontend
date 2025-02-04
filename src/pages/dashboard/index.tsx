@@ -143,7 +143,7 @@ const Dashboard = () => {
           className="flex h-full w-full select-none flex-col items-center container"
           style={{ opacity: 1, transform: "none" }}
         >
-          <div className="pt-6 md:pt-8 sm:block hidden" />
+          <div className="pt-3 md:pt-8 sm:block hidden" />
           {/* <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-3 px-4 md:gap-4">
               <Image
@@ -160,7 +160,7 @@ const Dashboard = () => {
               </h1>
             </div>
           </div> */}
-          <div className="pt-6 md:pt-8" />
+          <div className="pt-3 md:pt-6" />
           <div
             className="flex w-full  animate-in fade-in slide-in-from-bottom-8"
             style={{ opacity: 1, transform: "none" }}
@@ -194,7 +194,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="w-full pt-10 mt-5 my-2">
+          <div className="w-full pt-5 md:pt-10 mt-5 my-2">
             <div
               className="text-center pb-3 pb-lg-4 px-5 py-8 min-w-0 rounded-xl md:max-w-[var(--apps-max-w)] mx-auto bg-neutral-900/70 shadow-widget
                   backdrop-blur-md backdrop-saturate-250 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%]  ring-white/25"
@@ -228,25 +228,15 @@ const Dashboard = () => {
                 )}
 
                 <div
-                  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] pl-5 pr-1 py-4 text-14 backdrop-blur-md"
+                  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5  py-4 text-14 backdrop-blur-md"
                   style={{ border: " 1px solid #565656a3", marginTop: 0 }}
                 >
                   <p className="m-0">
                     Health Factor: <span className="text-[#00FF0A]">1.27</span>
                   </p>
-                  <div
-                    className="rounded-20 p-2 pe-3 flex items-center gap-1 
-                    bg-[#5858583d]
-                  backdrop-blur-[17.5px]
-"
-                    style={{ borderRadius: 20 }}
-                  >
-                    <span className="icn rounded-10 bg-[#00FF0A] h-2 w-2"></span>
-                    <span className=" text-xs">Risk Factor</span>
-                  </div>
                 </div>
               </div>
-              <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 pt-10 flex-wrap">
+              <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 pt-6 flex-wrap">
                 {cardData.map((item, key) => (
                   <li
                     onClick={item.onClick}

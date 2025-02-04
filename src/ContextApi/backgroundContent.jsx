@@ -13,8 +13,8 @@ import w4 from "@/Assets/Images/umbrel/w4.png";
 const BackgroundContext = createContext();
 
 export const BackgroundProvider = ({ children }) => {
-  const backgrounds = [img1, img2, img3, img4, img5];
-  const watermarks = [w1, w2, w3, w4];
+  const backgrounds = [img4, img5, img2, img3, img1];
+  const watermarks = [w3, w4, w1, w2];
 
   const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
   const [selectedWatermark, setSelectedWatermark] = useState(watermarks[0]);

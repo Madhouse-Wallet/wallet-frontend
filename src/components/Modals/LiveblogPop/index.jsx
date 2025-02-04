@@ -58,13 +58,7 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog }) => {
                 <BlogCard classN={"col-span-6 md:col-span-4"} />
                 <div className="col-span-12 mt-3">
                   <div
-                    className={`${
-                      theme == "dark"
-                        ? "bg-white/5 divide-white/6"
-                        : theme == "light"
-                        ? "bg-[#fff3ed] border border-[#ffad84] shadow-[inset_12.7px_-12.7px_12.7px_rgba(161,70,25,0.1),inset_-12.7px_12.7px_12.7px_rgba(255,255,255,0.1)] backdrop-blur-[12.7px] divide-gray/6"
-                        : ""
-                    } divide-y  rounded-12`}
+                    className={` bg-white/5 divide-white/6 divide-y  rounded-12`}
                   >
                     <div className="flex items-center gap-2 p-3">
                       <img

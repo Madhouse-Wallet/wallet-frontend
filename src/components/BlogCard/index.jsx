@@ -19,13 +19,7 @@ const BlogCard = ({ classN }) => {
             <div className="flex w-full flex-col items-center justify-between">
               <button
                 className={`
-                ${
-                  theme == "dark"
-                    ? "bg-white/5"
-                    : theme == "light"
-                    ? "bg-[#fff3ed] border border-[#ffad84] shadow-[inset_12.7px_-12.7px_12.7px_rgba(161,70,25,0.1),inset_-12.7px_12.7px_12.7px_rgba(255,255,255,0.1)] backdrop-blur-[12.7px]"
-                    : ""
-                }
+                
                  bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
               >
                 <span className="chartSvg absolute top-0 left-0 h-full w-full">
@@ -49,20 +43,12 @@ const BlogCard = ({ classN }) => {
                   role="progressbar"
                   data-state="indeterminate"
                   data-max={100}
-                  className={`${
-                    theme == "dark"
-                      ? "bg-white/10"
-                      : theme == "light"
-                      ? " bg-[#fff]"
-                      : ""
-                  } relative w-full overflow-hidden rounded-full h-1.5`}
+                  className={` bg-white/10 relative w-full overflow-hidden rounded-full h-1.5`}
                 >
                   <div
                     data-state="indeterminate"
                     data-max={100}
-                    className={`${
-                      theme == "dark" ? "bg-white" : "bg-[#ffad84]"
-                    } h-full w-full flex-1 transition-all duration-700 rounded-full `}
+                    className={` bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
                     style={{ transform: "translateX(-55%)" }}
                   />
                 </div>

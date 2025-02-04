@@ -225,7 +225,10 @@ const Setting: React.FC = () => {
     <>
       <section className="relative dashboard pt-12">
         <div className="container">
-          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 dat
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -233,7 +236,7 @@ const Setting: React.FC = () => {
             >
               {closeIcn}
             </button>
-            <div className="grid gap-3 md:gap-4 grid-cols-12 md:px-3 pt-3 items-start">
+            <div className="grid gap-3 md:gap-4 grid-cols-12 px-3 pt-3 items-start">
               <div className="col-span-12 ">
                 <div className="sectionHeader p-2 ">
                   <div className="d-flex align-items-center gap-3">
@@ -489,21 +492,6 @@ const Setting: React.FC = () => {
                       >
                         <div className="flex flex-col gap-1">
                           <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Setup MFA
-                          </h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
-                            Setup
-                          </button>
-                        </div>
-                      </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
                             2FA
                           </h3>
                           <p className="text-xs leading-none -tracking-2 text-white/40">
@@ -538,7 +526,7 @@ const Setting: React.FC = () => {
                                 }
                                 onClick={() => handleAccordionClick(key)}
                                 isOpen={openIndex === key}
-                                btnClass={`accordionBtn flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
                                 btnIcnClass={``}
                                 title={item.title}
                               >
@@ -566,7 +554,7 @@ const AccordionWrpper = styled.div`
     border: 1px solid #5252525e;
     .accordionBtn {
       justify-content: start;
-      color: var(--textColor) !important;
+      ${"" /* color: var(--textColor) !important; */}
     }
     input {
       color: var(--textColor);

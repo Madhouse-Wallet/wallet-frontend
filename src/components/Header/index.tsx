@@ -89,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         )}
       <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
         <div className="container mx-auto">
-          <Nav className="flex items-center justify-between px-3 py-2 rounded-full shadow">
+          <Nav className="flex items-center justify-between px-3 py-2 rounded-full shadow relative">
             {/* <div className="">
               <button
                 onClick={() => setMenu(!menu)}
@@ -106,36 +106,23 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                 href="#"
                 className=" font-normal text-base whitespace-nowrap flex items-center gap-2"
               >
-                {theme ? (
-                  <>
-                    <Image
-                      src={Wlogomw}
-                      alt="logo"
-                      height={10000}
-                      width={10000}
-                      className="max-w-full object-contain w-auto"
-                      style={{ height: 28 }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Image
-                      src={logomw}
-                      alt="logo"
-                      height={10000}
-                      width={10000}
-                      className="max-w-full object-contain w-auto"
-                      style={{ height: 28 }}
-                    />
-                  </>
-                )}
                 {/* {logo} */}
                 {/* <span className="md:block hidden">MadHouse Wallet</span> */}
+                <Image
+                  src={Wlogomw}
+                  alt="logo"
+                  height={10000}
+                  width={10000}
+                  className="max-w-full object-contain w-auto"
+                  style={{ height: 28 }}
+                />
               </a>
             </div>
-
+            <h4 className="m-0 font-bold themeClr sm:text-xl ">
+              Madhouse Wallet
+            </h4>
             <div
-              className={`lg:flex items-center lg:justify-end w-full gap-3 flex-wrap px-0 menu`}
+              className={`lg:flex items-center lg:justify-end gap-3 flex-wrap px-0 menu`}
               id="navbarScroll"
             >
               <div className="flex items-center gap-2 ms-auto flex-wrap justify-end">

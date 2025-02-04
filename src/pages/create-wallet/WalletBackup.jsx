@@ -28,11 +28,7 @@ const WalletBackup = ({ step, setStep, addressPhrase, handleCopy }) => {
                     readOnly={true}
                     value={item}
                     type="text"
-                    className={`${
-                      theme == "dark"
-                        ? "border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30"
-                        : "bg-[#fff3ed]  border-[#ffad84]"
-                    } flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                   />
                 </div>
               ))}
@@ -41,11 +37,7 @@ const WalletBackup = ({ step, setStep, addressPhrase, handleCopy }) => {
                 <button
                   onClick={() => handleCopy(addressPhrase)}
                   // type="submit"
-                  className={`${
-                    theme == "dark"
-                      ? "bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white"
-                      : "bg-[#fff3ed] border border-[#ffad84] themeClr"
-                  } inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   <span className="icn">{copyIcn}</span> Copy to clipboard
                 </button>
@@ -56,11 +48,7 @@ const WalletBackup = ({ step, setStep, addressPhrase, handleCopy }) => {
                 <button
                   onClick={() => setStep(4)}
                   // type="submit"
-                  className={`${
-                    theme == "dark"
-                      ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
-                      : "commonBtn"
-                  } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Next
                 </button>

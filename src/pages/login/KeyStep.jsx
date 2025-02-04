@@ -26,20 +26,13 @@ const KeyStep = ({ step, setStep }) => {
               <div className="col-span-12">
                 <div className="relative mt-3">
                   <div
-                    className={`${
-                      theme == "dark"
-                        ? "border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
-                        : "bg-[#fff3ed] border border-[#ffad84]"
-                    } cursor-pointer border rounded-10 py-2 px-3 flex items-center justify-between
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
+                        : "bg-[#fff3ed] border border-[#ffad84] cursor-pointer border rounded-10 py-2 px-3 flex items-center justify-between
                       border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     <div className="left flex items-center gap-2">
                       <div
-                        className={`${
-                          theme == "dark"
-                            ? "border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
-                            : "bg-[#fff3ed] border border-[#ffad84]"
-                        } cursor-pointer border h-[60px] w-[60px] rounded-10 py-2 px-3 flex items-center justify-between
+                        className={`border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50 cursor-pointer border h-[60px] w-[60px] rounded-10 py-2 px-3 flex items-center justify-between
                       border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                       >
                         {keyIcn}
@@ -61,11 +54,7 @@ const KeyStep = ({ step, setStep }) => {
                     href="/dashboard"
                     // onClick={() => router.push("/dashboard")}
                     // type="submit"
-                    className={`${
-                      theme == "dark"
-                        ? "bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90"
-                        : "commonBtn"
-                    } flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Next
                   </Link>

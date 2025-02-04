@@ -36,7 +36,7 @@ const Footer = () => {
             color: "var(--backgroundColor2)",
           }}
         />
-        <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-[var(--cardBg)] contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
+        <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-white/5 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
           <li className="relative aspect-square">
             <Link
               data-tooltip-id="my-tooltip"
