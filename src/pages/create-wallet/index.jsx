@@ -386,13 +386,8 @@ const CreateWallet = () => {
     <>
       {step == 1 ? (
         <>
-          {/* <CreateWalletStep
+          <CreateWalletStep
             sendRegisterOtp={sendRegisterOtp}
-            step={step}
-            setStep={setStep}
-          /> */}
-          <OtpStep
-            registerOtpFn={registerOtpFn}
             step={step}
             setStep={setStep}
           />

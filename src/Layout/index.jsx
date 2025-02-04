@@ -96,7 +96,7 @@ const Layout = ({ Component, pageProps }) => {
         quality={100}
         alt=""
         className=" fill-mode-both mx-auto opacity-100 pointer-events-none fixed inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  "
-        style={{ opacity: wmOpacity }}
+        style={{ opacity: wmOpacity, maxHeight: 500 }}
       />
       {isAuth &&
         (Component.authRoute ? (
