@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SVGProps } from "react";
 import InstallFirstApp from "./InstallFirstApp";
 import Link from "next/link";
 import logo from "@/Assets/Images/logow.png";
@@ -22,32 +23,32 @@ import styled from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { splitAddress } from "../../utils/globals";
 
-interface CardMetrics {
-  head: string;
-  value: string;
-  icn: React.ReactNode;
-}
+// interface CardMetrics {
+//   head: string;
+//   value: string;
+//   icn: React.ReactNode;
+// }
 
-interface CardData {
-  head: string;
-  icn: React.FC<SVGProps<SVGSVGElement>> | StaticImageData;
-  onClick: () => void;
-}
+// interface CardData {
+//   head: string;
+//   icn: React.FC<SVGProps<SVGSVGElement>> | StaticImageData;
+//   onClick: () => void;
+// }
 
 const Dashboard = () => {
   const router = useRouter();
-  const userAuth = useSelector((state: any) => state.Auth);
+  const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
   const [withdrawDep, setWithdrawDep] = useState(false);
   const [buySell, setBuySell] = useState(false);
   const [buycoverage, setBuyCoverage] = useState(false);
-  const cardMetrics: CardMetrics[] = [
+  const cardMetrics = [
     { head: "Total Deposit", value: "$234234", icn: icn11 },
     { head: "BTC Balance", value: "$234234", icn: icn22 },
     { head: "USD Balance", value: "$234234", icn: icn33 },
     { head: "Loan Health", value: "$234234", icn: icn11 },
   ];
-  const cardData: CardData[] = [
+  const cardData = [
     {
       head: "Send & Receive Bitcoin",
       icn: icn1,
@@ -102,7 +103,7 @@ const Dashboard = () => {
     two: false,
     three: false,
   });
-  const handleCopy = async (text: any) => {
+  const handleCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
       toast.success("Copied Successfully!");

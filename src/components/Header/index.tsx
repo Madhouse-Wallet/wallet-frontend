@@ -113,8 +113,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   alt="logo"
                   height={10000}
                   width={10000}
-                  className="max-w-full object-contain w-auto"
-                  style={{ height: 28 }}
+                  className="max-w-full object-contain w-auto logo"
+                  // style={{ height: 28 }}
                 />
               </a>
             </div>
@@ -228,7 +228,16 @@ const Nav = styled.nav`
   // background: var(--cardBg);
   background: rgba(255, 255, 255, 0.09);
   backdrop-filter: blur(12.8px);
+  .logo {
+    height: 28px;
+  }
   @media (max-width: 575px) {
+    .logo {
+      height: 15px;
+    }
+    h4 {
+      font-size: 10px;
+    }
     button {
       padding: 5px;
       font-size: 12px !important;

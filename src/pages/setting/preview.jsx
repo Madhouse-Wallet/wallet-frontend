@@ -124,7 +124,7 @@ const PreviewBox = () => {
                 className="max-w-full w-auto mx-auto"
                 srcSet="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-home.ea7cd600.png&w=1080&q=75 1x, /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-home.ea7cd600.png&w=2048&q=75 2x"
                 src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-home.ea7cd600.png&w=2048&q=75"
-                style={{ color: "transparent", height: 20 }}
+                style={{ color: "transparent", height: 14 }}
               />
               <span
                 className=" font-medium block text-center text-white/50"
@@ -151,7 +151,7 @@ const PreviewBox = () => {
                 className="max-w-full w-auto mx-auto"
                 srcSet="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-app-store.e4b31ad1.png&w=1080&q=75 1x, /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-app-store.e4b31ad1.png&w=2048&q=75 2x"
                 src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-app-store.e4b31ad1.png&w=2048&q=75"
-                style={{ color: "transparent", height: 20 }}
+                style={{ color: "transparent", height: 14 }}
               />
               <span
                 className=" font-medium block text-center text-white/50"
@@ -178,7 +178,7 @@ const PreviewBox = () => {
                 className="max-w-full w-auto mx-auto"
                 srcSet="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-settings.02b2baf0.png&w=1080&q=75 1x, /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-settings.02b2baf0.png&w=2048&q=75 2x"
                 src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-settings.02b2baf0.png&w=2048&q=75"
-                style={{ color: "transparent", height: 20 }}
+                style={{ color: "transparent", height: 14 }}
               />
               <span
                 className=" font-medium block text-center text-white/50"
@@ -205,7 +205,7 @@ const PreviewBox = () => {
                 className="max-w-full w-auto mx-auto"
                 srcSet="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-widgets.aaeced43.png&w=1080&q=75 1x, /_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-widgets.aaeced43.png&w=2048&q=75 2x"
                 src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdock-widgets.aaeced43.png&w=2048&q=75"
-                style={{ color: "transparent", height: 20 }}
+                style={{ color: "transparent", height: 14 }}
               />
               <span
                 className=" font-medium block text-center text-white/50"
