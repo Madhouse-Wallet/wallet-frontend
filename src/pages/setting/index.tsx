@@ -7,18 +7,49 @@ import { AccordionItem } from "@/components/common/index";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
 import BlogCard from "@/components/BlogCard";
+import s1 from "@/Assets/Images/screenshot.png";
+import PreviewBox from "./preview";
 
 const Setting: React.FC = () => {
   const {
+    selectBg,
     backgrounds,
-    setSelectedBackground,
     bgOpacity,
     setBgOpacity,
+    selectWm,
     watermarks,
     setSelectedWatermark,
     wmOpacity,
     setWmOpacity,
+    changeBgOpacity,
+    changeWmOpacity,
+    selectedBackground,
+    selectedWatermark,
   } = useBackground();
+
+  const getPreview = async () => {
+    try {
+      console.log("email");
+      return await fetch(`/api/get-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: "https://devstack.madhousewallet.com/dashboard",
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+  // useEffect(() => {
+  //   getPreview(); // Call the function
+  // }, []);
 
   const accordionTabs = [
     {
@@ -221,22 +252,23 @@ const Setting: React.FC = () => {
   const handleAccordionClick = (index: number) => {
     setOpenIndex(index === openIndex ? null : index);
   };
+
   return (
     <>
       <section className="relative dashboard pt-12">
-        <div className="container">
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
           <div
-            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 dat
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
           a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
           >
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
-              style={{ background: "transparent" }}
-            >
-              {closeIcn}
-            </button>
-            <div className="grid gap-3 md:gap-4 grid-cols-12 px-3 pt-3 items-start">
+            <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-3">
               <div className="col-span-12 ">
                 <div className="sectionHeader p-2 ">
                   <div className="d-flex align-items-center gap-3">
@@ -246,283 +278,308 @@ const Setting: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="sm:col-span-4 col-span-12 sm:sticky top-2">
+              <div className="sm:col-span-4 col-span-12">
                 <div className="grid gap-3 grid-cols-12">
                   <div className="col-span-12">
-                    <div className="rounded-12 bg-white/5 px-3 py-3">
-                      <iframe
-                        src="/dashboard"
-                        width="500px"
-                        height="500px"
-                        className="rounded w-full h-full"
-                        style={{ border: "none", aspectRatio: 1.4 }}
+                    <div className="rounded-12 bg-white/5 px-3 py-3 relative overflow-hidden z-[99]">
+                      <Image
+                        src={selectedBackground}
+                        height={100000}
+                        width={100000}
+                        quality={100}
+                        alt="Background"
+                        className="transition-opacity fill-mode-both pointer-events-none  inset-0 w-full scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700"
+                        style={{
+                          transform: "scale(1.25)",
+                          opacity: bgOpacity,
+                          height: 150, // 🔥 Dynamic Opacity from Context
+                        }}
                       />
+                      <Image
+                        src={selectedWatermark}
+                        height={100000}
+                        width={100000}
+                        quality={100}
+                        alt=""
+                        className=" fill-mode-both mx-auto opacity-100 pointer-events-none absolute inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  z-[-1]"
+                        style={{ opacity: wmOpacity, height: "50%" }}
+                      />
+                      <div
+                        className="absolute left-0 right-0 bottom-0 w-full h-full flex-col justify-between flex"
+                        style={{ pointerEvents: "none" }}
+                      >
+                        <PreviewBox />
+                      </div>
                     </div>
                   </div>
-                  <BlogCard classN={"col-span-12"} />
+                  {/* <BlogCard classN={"col-span-12"} /> */}
                 </div>
               </div>
               <div className="sm:col-span-8 col-span-12">
-                <div className="grid gap-3 grid-cols-12">
-                  <div className="col-span-12">
-                    <div
-                      className={` bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
-                    >
-                      <div className="left">
-                        <h4 className="m-0 font-bold text-xl">Ritesh</h4>
-                        <ul className="list-none pl-0 mb-0 text-xs">
-                          <li className="flex gap-2">
-                            <div
-                              className="block text-gray-500"
-                              style={{ width: 80 }}
-                            >
-                              wallet ID:
-                            </div>
-                            <span className="text-white flex items-center">
-                              asdrwrewerwe{" "}
-                              <button className="border-0 p-0 bg-transparent pl-1">
-                                {copyIcn}
+                <div
+                  className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
+                >
+                  <div className="left">
+                    <h4 className="m-0 font-bold text-xl">Ritesh</h4>
+                    <ul className="list-none pl-0 mb-0 text-xs">
+                      <li className="flex gap-2">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 80 }}
+                        >
+                          wallet ID:
+                        </div>
+                        <span className="text-white flex items-center">
+                          asdrwrewerwe{" "}
+                          <button className="border-0 p-0 bg-transparent pl-1">
+                            {copyIcn}
+                          </button>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="right">
+                    <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
+                      {logoutIcn} Logout
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12">
+                <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Account
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your name and password
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
+                        href="/settings/account/change-name"
+                      >
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth={0}
+                          viewBox="0 0 24 24"
+                          className="shrink-0 opacity-80"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ width: 14, height: 14 }}
+                        >
+                          <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
+                        </svg>
+                        Change name
+                      </a>
+                      <a
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
+                        href="/settings/account/change-password"
+                      >
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth={0}
+                          viewBox="0 0 24 24"
+                          className="shrink-0 opacity-80"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ width: 14, height: 14 }}
+                        >
+                          <path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z" />
+                        </svg>
+                        Change password
+                      </a>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper and theme
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {backgrounds.map((bg: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => {
+                                  selectBg(index);
+                                  getPreview();
+                                }}
+                                className="border-0 p-0 bg-transparent"
+                              >
+                                <Image
+                                  src={bg}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-cover rounded"
+                                />
                               </button>
-                            </span>
-                          </li>
+                            </li>
+                          ))}
                         </ul>
-                      </div>
-                      <div className="right">
-                        <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
-                          {logoutIcn} Logout
-                        </button>
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-12">
-                    <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Account
-                          </h3>
-                          <p className="text-xs leading-none -tracking-2 text-white/40">
-                            Your name and password
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <a
-                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
-                            href="/settings/account/change-name"
-                          >
-                            <svg
-                              stroke="currentColor"
-                              fill="currentColor"
-                              strokeWidth={0}
-                              viewBox="0 0 24 24"
-                              className="shrink-0 opacity-80"
-                              height="1em"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                              style={{ width: 14, height: 14 }}
-                            >
-                              <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
-                            </svg>
-                            Change name
-                          </a>
-                          <a
-                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
-                            href="/settings/account/change-password"
-                          >
-                            <svg
-                              stroke="currentColor"
-                              fill="currentColor"
-                              strokeWidth={0}
-                              viewBox="0 0 24 24"
-                              className="shrink-0 opacity-80"
-                              height="1em"
-                              width="1em"
-                              xmlns="http://www.w3.org/2000/svg"
-                              style={{ width: 14, height: 14 }}
-                            >
-                              <path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z" />
-                            </svg>
-                            Change password
-                          </a>
-                        </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper Opacity
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper opacity
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={bgOpacity}
+                          onChange={(e) => {
+                            changeBgOpacity(parseFloat(e.target.value));
+                            getPreview();
+                          }}
+                          className="w-full cursor-pointer"
+                        />
                       </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Wallpaper
-                          </h3>
-                          <p className="text-xs leading-none -tracking-2 text-white/40">
-                            Your Madhouse wallpaper and theme
-                          </p>
-                        </div>
-                        <div className="-mx-2 max-w-full">
-                          <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
-                            <ul className="list-none pl-0 mb-0 flex items-center gap-2">
-                              {backgrounds.map((bg: string, index: number) => (
-                                <li className="" key={index}>
-                                  <button
-                                    onClick={() => setSelectedBackground(bg)}
-                                    className="border-0 p-0 bg-transparent"
-                                  >
-                                    <Image
-                                      src={bg}
-                                      height={10000}
-                                      width={10000}
-                                      alt=""
-                                      style={{ height: 30, width: 40 }}
-                                      className="max-w-full object-cover rounded"
-                                    />
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {watermarks.map((wm: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => selectWm(index)}
+                                className="border-0 p-0 bg-black rounded"
+                              >
+                                <Image
+                                  src={wm}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-contain rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Wallpaper Opacity
-                          </h3>
-                          <p className="text-xs leading-none -tracking-2 text-white/40">
-                            Your Madhouse wallpaper opacity
-                          </p>
-                        </div>
-                        <div className="-mx-2 max-w-full">
-                          <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
-                            <input
-                              type="range"
-                              min="0"
-                              max="1"
-                              step="0.05"
-                              value={bgOpacity}
-                              onChange={(e) =>
-                                setBgOpacity(parseFloat(e.target.value))
-                              }
-                              className="w-full cursor-pointer"
-                            />
-                          </div>
-                        </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark Opacity
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={wmOpacity}
+                          onChange={(e) =>
+                            changeWmOpacity(parseFloat(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
                       </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Watermark
-                          </h3>
-                        </div>
-                        <div className="-mx-2 max-w-full">
-                          <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
-                            <ul className="list-none pl-0 mb-0 flex items-center gap-2">
-                              {watermarks.map((wm: string, index: number) => (
-                                <li className="" key={index}>
-                                  <button
-                                    onClick={() => setSelectedWatermark(wm)}
-                                    className="border-0 p-0 bg-black rounded"
-                                  >
-                                    <Image
-                                      src={wm}
-                                      height={10000}
-                                      width={10000}
-                                      alt=""
-                                      style={{ height: 30, width: 40 }}
-                                      className="max-w-full object-contain rounded"
-                                    />
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Watermark Opacity
-                          </h3>
-                        </div>
-                        <div className="-mx-2 max-w-full">
-                          <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
-                            <input
-                              type="range"
-                              min="0"
-                              max="1"
-                              step="0.05"
-                              value={wmOpacity}
-                              onChange={(e) =>
-                                setWmOpacity(parseFloat(e.target.value))
-                              }
-                              className="w-full cursor-pointer"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Export Private Keys
-                          </h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
-                            Export
-                          </button>
-                        </div>
-                      </div>
-                      <div
-                        tabIndex={-1}
-                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                      >
-                        <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            2FA
-                          </h3>
-                          <p className="text-xs leading-none -tracking-2 text-white/40">
-                            A second layer of security for your Umbrel login and
-                            apps
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked="false"
-                          data-state="unchecked"
-                          value="on"
-                          className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
-                        >
-                          <span
-                            data-state="unchecked"
-                            className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
-                          />
-                        </button>
-                      </div>
-                      <AccordionWrpper className="grid gap-3 grid-cols-12">
-                        <div className=" col-span-12">
-                          {accordionTabs &&
-                            accordionTabs.length > 0 &&
-                            accordionTabs.map((item, key) => (
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Export Private Keys
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                        Export
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        2FA
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        A second layer of security for your Umbrel login and
+                        apps
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked="false"
+                      data-state="unchecked"
+                      value="on"
+                      className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                    >
+                      <span
+                        data-state="unchecked"
+                        className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+                      />
+                    </button>
+                  </div>
+                  <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">
+                    {accordionTabs && accordionTabs.length > 0 && (
+                      <>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(0, Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
                               <AccordionItem
-                                svg={false}
                                 key={key}
+                                svg={false}
                                 wrpperClass={
-                                  "my-3 bg-white/5 px-lg-4 AccordionItem"
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
                                 }
                                 onClick={() => handleAccordionClick(key)}
                                 isOpen={openIndex === key}
@@ -534,10 +591,36 @@ const Setting: React.FC = () => {
                               </AccordionItem>
                             ))}
                         </div>
-                      </AccordionWrpper>
-                    </div>
-                  </div>
-                  <div className="col-span-12"></div>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                key={key + Math.ceil(accordionTabs.length / 2)}
+                                svg={false}
+                                wrpperClass={
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() =>
+                                  handleAccordionClick(
+                                    key + Math.ceil(accordionTabs.length / 2)
+                                  )
+                                }
+                                isOpen={
+                                  openIndex ===
+                                  key + Math.ceil(accordionTabs.length / 2)
+                                }
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                        </div>
+                      </>
+                    )}
+                  </AccordionWrpper>
                 </div>
               </div>
             </div>

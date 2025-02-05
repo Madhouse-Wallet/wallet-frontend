@@ -127,16 +127,16 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                 </div> */}
             </div>
             <div className="col-span-12">
-              {/* <div className="relative mt-3">
+              <div className="relative">
                 <input
                   type="email"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  // value={registerEmail}
+                  // onChange={(e) => setRegisterEmail(e.target.value)}
                   className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                  placeholder="Enter your email address"
+                  placeholder="Passkey name"
                   defaultValue=""
                 />
-              </div> */}
+              </div>
               {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
                   {infoIcn}
                   Incorrect email

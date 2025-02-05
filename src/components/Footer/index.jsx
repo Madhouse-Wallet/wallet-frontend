@@ -26,7 +26,7 @@ const Footer = () => {
           width={1000}
           className="max-w-full max-h-full absolute w-100  bottom-0 left-0 h-auto  opacity-30 object-cover right-0 z-[-1]"
         /> */}
-        <Tooltip
+        {/* <Tooltip
           id="my-tooltip"
           style={{
             background: "var(--textColor2)",
@@ -35,8 +35,8 @@ const Footer = () => {
             fontSize: 12,
             color: "var(--backgroundColor2)",
           }}
-        />
-        <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-white/5 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
+        /> */}
+        <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-black/50 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
           <li className="relative aspect-square">
             <Link
               data-tooltip-id="my-tooltip"
@@ -48,15 +48,18 @@ const Footer = () => {
                 src={b2}
                 height={1000}
                 width={1000}
-                className="max-w-full w-auto"
+                className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 50 }}
+                style={{ height: 42 }}
               />
+              <span className=" font-medium block text-center text-white/50">
+                Home
+              </span>
             </Link>
-            <div
+            {/* <div
               className="absolute -bottom-[7px] left-1/2 h-[2px] w-[10px] -translate-x-1/2 rounded-full bg-white"
               style={{ opacity: 1 }}
-            ></div>
+            ></div> */}
           </li>
           <li className="relative aspect-square">
             <Link
@@ -70,10 +73,13 @@ const Footer = () => {
                 src={b1}
                 height={1000}
                 width={1000}
-                className="max-w-full w-auto"
+                className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 50 }}
+                style={{ height: 42 }}
               />
+              <span className=" font-medium block text-center text-white/50">
+                Approvals
+              </span>
             </Link>
           </li>
           {/* <li>
@@ -82,9 +88,9 @@ const Footer = () => {
                       src={b3}
                       height={1000}
                       width={1000}
-                      className="max-w-full w-auto"
+                      className="max-w-full w-auto mx-auto"
                       alt=""
-                      style={{ height: 50 }}
+                      style={{ height: 42 }}
                     />
                   </Link>
                 </li> */}
@@ -100,10 +106,13 @@ const Footer = () => {
                 src={b4}
                 height={1000}
                 width={1000}
-                className="max-w-full w-auto"
+                className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 50 }}
+                style={{ height: 42 }}
               />
+              <span className=" font-medium block text-center text-white/50">
+                Setting
+              </span>
             </Link>
           </li>
           <li className="relative aspect-square">
@@ -118,10 +127,13 @@ const Footer = () => {
                 src={b5}
                 height={1000}
                 width={1000}
-                className="max-w-full w-auto"
+                className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 50 }}
+                style={{ height: 42 }}
               />
+              <span className=" font-medium block text-center text-white/50">
+                Docs
+              </span>
             </Link>
           </li>
         </FootNav>
@@ -131,18 +143,25 @@ const Footer = () => {
 };
 const FooterDiv = styled.footer`
   font-family: "Funnel Display", serif;
+  width: 100%;
+  max-width: max-content;
 `;
 const FootNav = styled.ul`
-  height: 74px;
-  padding-bottom: 12px;
   opacity: 1;
   transform: none;
   li {
-    width: 50px;
+    padding: 5px 0;
+    flex-shrink: 0;
   }
   a {
     transition: 0.4s;
     display: block;
+    img {
+      transition: 0.4s;
+    }
+    span {
+      font-size: 10px;
+    }
     ${
       "" /* svg {
       height: 28px;
@@ -150,7 +169,9 @@ const FootNav = styled.ul`
     } */
     }
     &:hover {
-      transform: translateY(-18px) scale(1.3);
+      img {
+        transform: translateY(-18px) scale(1.3);
+      }
     }
   }
   @media (max-width: 767px) {

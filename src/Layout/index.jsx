@@ -41,42 +41,6 @@ const Layout = ({ Component, pageProps }) => {
 
   return (
     <div className={`${inter.className} relative w-100 overflow-hidden`}>
-      {/* {theme == "dark" ? (
-        <>
-          <Image
-            src={bg}
-            height={100000}
-            width={100000}
-            quality={100}
-            alt=""
-            className="transition-opacity fill-mode-both opacity-100 pointer-events-none fixed inset-0 w-full scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700 h-lvh object-center"
-            style={{ transform: "scale(1.25)", opacity: 0.4 }}
-          />
-          <Image
-            src={dwm}
-            height={100000}
-            width={100000}
-            quality={100}
-            alt=""
-            className=" fill-mode-both mx-auto opacity-100 pointer-events-none fixed inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-cover object-center blur-[var(--wallpaper-blur)] duration-700  object-center"
-            style={{ opacity: ".6" }}
-          />
-        </>
-      ) : theme == "light" ? (
-        <>
-          <Image
-            src={bgw}
-            height={100000}
-            width={100000}
-            quality={100}
-            alt=""
-            className="transition-opacity fill-mode-both opacity-100 pointer-events-none fixed inset-0 w-full scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700 h-lvh object-center"
-            style={{ transform: "scale(1.25)", opacity: 0.6 }}
-          />
-        </>
-      ) : (
-        <></>
-      )} */}
       <Image
         src={selectedBackground}
         height={100000}

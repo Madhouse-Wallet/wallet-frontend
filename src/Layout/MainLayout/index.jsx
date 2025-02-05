@@ -67,7 +67,7 @@ const MainLayout = ({ Component, pageProps }) => {
 
 const Main = styled.main`
   min-height: 100vh;
-  padding-top: 70px;
+  padding-top: 60px;
   @media (max-width: 1024px) {
     width: 100%;
   }

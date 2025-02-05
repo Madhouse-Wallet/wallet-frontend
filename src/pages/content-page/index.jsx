@@ -20,15 +20,15 @@ const ContentPage = () => {
   return (
     <>
       <section className="relative dashboard pt-12">
-        <div className="container">
-          <div className="pageCard bg-white/5 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
-              style={{ background: "transparent" }}
-            >
-              {closeIcn}
-            </button>
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <div className="grid gap-3 grid-cols-12 md:px-3 pt-3">
               {step == "all" && (
                 <div className="col-span-12">
@@ -53,7 +53,7 @@ const ContentPage = () => {
                           <h4 className="m-0 font-bold text-xl">
                             Help and Support
                           </h4>
-                          <p className="m-0 text-xs pt-2 text-gray-500">
+                          <p className="m-0 text-xs pt-2 text-gray-400">
                             Welcome to the Madhouse Wallet Help Center. We're
                             here to assist you with any issues or questions you
                             may have.
@@ -76,7 +76,7 @@ const ContentPage = () => {
                           <h4 className="m-0 font-bold text-xl">
                             Documentation
                           </h4>
-                          <p className="m-0 text-xs pt-2 text-gray-500">
+                          <p className="m-0 text-xs pt-2 text-gray-400">
                             Welcome to the official documentation for Madhouse
                             Wallet. This page provides essential information to
                             help you get started and maximize your experience.
@@ -99,7 +99,7 @@ const ContentPage = () => {
                           <h4 className="m-0 font-bold text-xl">
                             Terms of Service
                           </h4>
-                          <p className="m-0 text-xs pt-2 text-gray-500">
+                          <p className="m-0 text-xs pt-2 text-gray-400">
                             Please read these Terms of Service (the “Terms”) and
                             our Privacy Policy (Privacy Policy v1.0) (“Privacy
                             Policy”) carefully because they govern your use of
@@ -125,7 +125,7 @@ const ContentPage = () => {
                           <h4 className="m-0 font-bold text-xl">
                             Privacy Policy
                           </h4>
-                          <p className="m-0 text-xs pt-2 text-gray-500">
+                          <p className="m-0 text-xs pt-2 text-gray-400">
                             At Madhouse, we respect the privacy of our users and
                             are committed to protecting their personal
                             information. This page is used to inform visitors
