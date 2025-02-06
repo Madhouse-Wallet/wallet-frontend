@@ -26,10 +26,38 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
   const [borrowingAmount, setBorrowingAmount] = useState(0); // State for Borrowing Amount (USD)
   const [ltv, setLtv] = useState(1.3); // State for Safe (1.3), Moderate (1.2), Risky (1.1)
   const [currentBTCPrice, setCurrentBTCPrice] = useState(0);
-  const [baseCollateralRatio, setBaseCollataeralRatio] = useState(333);
+  const [baseCollateralRatio, setBaseCollataeralRatio] = useState(115);
   const [error, setError] = useState("");
   const [depositButton, setDepositButton] = useState(false);
 
+  const fetchCollateralData = async () => {
+    try {
+      console.log("inside ttry");
+      const response = await fetch("/api/get-collateralData", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log("ddddd", data);
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch collateral data");
+      }
+
+      if (data.status === "success") {
+        console.log("ddddd", data?.collateralData?.currentCollateralRatio);
+        setBaseCollataeralRatio(data?.collateralData?.currentCollateralRatio);
+      } else {
+        setBaseCollataeralRatio(null);
+      }
+    } catch (err) {
+      setBaseCollataeralRatio(null);
+    }
+  };
+
+  console.log("llllllll", baseCollateralRatio);
   const handleDebtPosition = () => setDebtPosition(!debtPosition);
 
   // const calculateRecommendedCollateral = (borrowingAmount, btcPrice, ltv) => {
@@ -49,13 +77,36 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     currentBTCPrice,
     ltv
   );
+
+  async function addUserCollateral(data) {
+    try {
+      const response = await fetch("/api/add-collateral", {
+        // Replace with the actual API route
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Something went wrong");
+      }
+      return result;
+    } catch (error) {
+      console.error("Error calling API:", error);
+      return { error: error.message };
+    }
+  }
+
   const openTrove = async (borrowingAmount) => {
     if (!providerr) {
       return toast.error("Please Coonect to wallet");
     }
     setDepositButton(true);
     const web3 = new Web3Interaction("sepolia", providerr);
-
+    console.log("line-58");
     const contractAddress =
       process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
     const upperHint =
@@ -69,20 +120,44 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     const recommendedCollaterall = ethers.utils.parseEther(
       recommendedCollateral.toString()
     );
-
+    let account = await getAccount(userAuth?.passkeyCred);
     try {
-      const result = await web3.openTrove(
+      const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+      const approve = await web3.approve(
+        process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
         contractAddress,
-        "0",
-        maxFeePercentage,
-        collateralAmount,
-        recommendedCollaterall,
-        upperHint,
-        lowerHint
+        MAX_UINT256
       );
-      fetchTroveData(providerr);
-      setDebtPosition(false);
-      toast.success("Transaction Completed");
+      console.log("approve",approve)
+      console.log(
+        "line-74",
+        BigInt(maxFeePercentage.toString()),
+        BigInt(collateralAmount.toString()),
+        BigInt(recommendedCollaterall.toString())
+      );
+        const result = await web3.openTrove(
+          contractAddress,
+          "0",
+          maxFeePercentage,
+          collateralAmount,
+          recommendedCollaterall,
+          upperHint,
+          lowerHint,
+          account?.kernelClient
+        );
+        console.log("resultresult",result)
+        fetchTroveData(providerr);
+        setDebtPosition(false);
+        toast.success("Transaction Completed");
+        const userData = {
+          userId: "67a0b4711547e9d5b11dc825",
+          email: "heramb@yopmail.com",
+          colleralAmount: recommendedCollaterall,
+          borrowAmount: maxFeePercentage,
+          walletAddress: account?.address,
+      };
+
+      addUserCollateral(userData).then(response => console.log(response));
     } catch (error) {
       console.log("Open trove Error", error);
       toast.error(error);
@@ -113,6 +188,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
               const adjustedPrice =
                 parseFloat(receiptInEther) * Math.pow(10, 10);
               setCurrentBTCPrice(adjustedPrice);
+              // fetchCollateralData()
             } else {
               console.log("No wallet detected. Please install Metamask.");
               return;
@@ -132,7 +208,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
       >
         <button
           onClick={handleDebtPosition}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
           {closeIcn}
@@ -199,7 +275,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                     )}
                     <div className="py-2">
                       <RadioList className="list-none ps-0 my-4 mb-0 flex items-center justify-center gap-3">
-                        <li className="relative">
+                        <li className="position-relative">
                           <input
                             type="radio"
                             checked={ltv === 1.3 && true}
@@ -211,7 +287,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Safe (LTV 1.3)
                           </button>
                         </li>
-                        <li className="relative">
+                        <li className="position-relative">
                           <input
                             type="radio"
                             checked={ltv === 1.2 && true}
@@ -223,7 +299,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Moderate (LTV 1.2)
                           </button>
                         </li>
-                        <li className="relative">
+                        <li className="position-relative">
                           <input
                             type="radio"
                             name="wallet"

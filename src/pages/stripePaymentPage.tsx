@@ -202,8 +202,9 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
           },
           body: JSON.stringify({
             wallet_address: btcAddress,
-            amount: amountValue,
-            currency: currencyValue
+            sourceCurrency:"usd",
+            destinationCurrency:"btc",
+            destinationNetwork:"bitcoin"
           })
         });
 

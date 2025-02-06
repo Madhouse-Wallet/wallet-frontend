@@ -149,7 +149,12 @@ export default async function handler(
   try {
     await runMiddleware(req, res, corsMiddleware);
 
-    const { wallet_address, amount = 10, currency = "usd" } = req.body;
+    const {
+      wallet_address,
+      sourceCurrency,
+      destinationCurrency,
+      destinationNetwork,
+    } = req.body;
 
     if (!wallet_address) {
       return res.status(400).json({ error: "Wallet address is required" });
@@ -177,21 +182,40 @@ export default async function handler(
 
     const requestBody = new URLSearchParams();
 
-    requestBody.append("source_currency", "usd");
-    requestBody.append("destination_currency", "btc");
-    requestBody.append("destination_network", "bitcoin");
-    requestBody.append("wallet_addresses[bitcoin]", wallet_address);
-    requestBody.append('lock_wallet_address', 'true');
+    // requestBody.append("source_currency", "usd");
+    // requestBody.append("destination_currency", "btc");
+    // requestBody.append("destination_network", "bitcoin");
+    // requestBody.append("wallet_addresses[bitcoin]", wallet_address);
+    // requestBody.append("lock_wallet_address", "true");
+    // requestBody.append(
+    //   "customer_ip_address",
+    //   req.socket.remoteAddress || "127.0.0.1"
+    // );
+
+    // // Correctly structure arrays
+    // ["btc"].forEach((currency) =>
+    //   requestBody.append("destination_currencies[]", currency)
+    // );
+    // ["bitcoin"].forEach((network) =>
+    //   requestBody.append("destination_networks[]", network)
+    // );
+
+
+    requestBody.append("source_currency", sourceCurrency);
+    requestBody.append("destination_currency", destinationCurrency);
+    requestBody.append("destination_network", destinationNetwork);
+    requestBody.append(`wallet_addresses[${destinationNetwork}]`, wallet_address);
+    requestBody.append("lock_wallet_address", "true");
     requestBody.append(
       "customer_ip_address",
       req.socket.remoteAddress || "127.0.0.1"
     );
 
     // Correctly structure arrays
-    ["btc"].forEach((currency) =>
+    [destinationCurrency].forEach((currency) =>
       requestBody.append("destination_currencies[]", currency)
     );
-    ["bitcoin"].forEach((network) =>
+    [destinationNetwork].forEach((network) =>
       requestBody.append("destination_networks[]", network)
     );
 

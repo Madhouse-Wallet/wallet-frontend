@@ -3,7 +3,7 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import styles from "@/styles/Identity.module.css";
-import StripePaymentPage from "../stripePaymentPage";
+import StripePaymentPageETH from "../stripePaymentPageETH";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
 export default function Identity() {
@@ -30,13 +30,13 @@ export default function Identity() {
                 >
                   <div className="d-flex align-items-center gap-3 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Stripe Payment
+                      Stripe Paymentyyy
                     </h4>
                   </div>
                 </div>
               </div>
               <div className="col-span-12 pt-8">
-                <StripePaymentPage />
+                <StripePaymentPageETH />
               </div>
             </div>
           </div>

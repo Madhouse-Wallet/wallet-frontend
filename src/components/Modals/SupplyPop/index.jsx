@@ -4,7 +4,7 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { getAccount,getProvider } from "@/lib/zeroDevWallet";
 
 // css
 
@@ -42,14 +42,15 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
     const amount = ethers.utils.parseEther(supplyAmount.toString());
 
     try {
-      await web3.addColl(contractAddress, "0", upperHint, lowerHint, amount);
+      let account = await getAccount(userAuth?.passkeyCred);
+      await web3.addColl(contractAddress, "0", upperHint, lowerHint, amount,account?.kernelClient);
       toast.success("Supply Added Successfully");
       setSupplyPop(false);
       fetchTroveData(providerr);
     } catch (error) {
       setNextButton(false);
       toast.error(error);
-      console.log("Add supply", error);
+      console.log("Add supply",error)
     }
   };
 
@@ -84,7 +85,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
       >
         <button
           onClick={handleSupplyPosition}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
           {closeIcn}
@@ -95,7 +96,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
+          <div className="top pb-3">
               <h5 className="m-0 text-xl fw-bold">Add Supply</h5>
             </div>
             <div className="modalBody">
