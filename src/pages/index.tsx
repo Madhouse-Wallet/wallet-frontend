@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <>
-      {splash ? (
+      {/* {splash ? (
         <div className="mx-auto max-w-sm">
           <div className="top pb-3">
             <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
@@ -45,8 +45,8 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <Dashboard />
-      )}
+      )} */}
+      <Dashboard />
     </>
   );
 }
