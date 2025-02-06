@@ -454,7 +454,7 @@ class Web3Interaction {
           functionName: "adjustTrove",
           args: [
             BigInt(_maxFeePercentage.toString()),
-            BigInt(_collWithdrawal.toString()),
+            BigInt(_supplyValue.toString()),
             BigInt(_THUSDChange.toString()),
             _isDebtIncrease,
             BigInt(_assetAmount.toString()),

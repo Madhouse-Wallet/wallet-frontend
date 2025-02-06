@@ -26,7 +26,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
   const [borrowingAmount, setBorrowingAmount] = useState(0); // State for Borrowing Amount (USD)
   const [ltv, setLtv] = useState(1.3); // State for Safe (1.3), Moderate (1.2), Risky (1.1)
   const [currentBTCPrice, setCurrentBTCPrice] = useState(0);
-  const [baseCollateralRatio, setBaseCollataeralRatio] = useState(115);
+  const [baseCollateralRatio, setBaseCollataeralRatio] = useState();
   const [error, setError] = useState("");
   const [depositButton, setDepositButton] = useState(false);
 
@@ -188,7 +188,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
               const adjustedPrice =
                 parseFloat(receiptInEther) * Math.pow(10, 10);
               setCurrentBTCPrice(adjustedPrice);
-              // fetchCollateralData()
+              fetchCollateralData()
             } else {
               console.log("No wallet detected. Please install Metamask.");
               return;
@@ -275,7 +275,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                     )}
                     <div className="py-2">
                       <RadioList className="list-none ps-0 my-4 mb-0 flex items-center justify-center gap-3">
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             checked={ltv === 1.3 && true}
@@ -287,7 +287,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Safe (LTV 1.3)
                           </button>
                         </li>
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             checked={ltv === 1.2 && true}
@@ -299,7 +299,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                             Moderate (LTV 1.2)
                           </button>
                         </li>
-                        <li className="position-relative">
+                        <li className="relative">
                           <input
                             type="radio"
                             name="wallet"
@@ -342,7 +342,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                           {recommendedCollateral} BTC
                         </span>
                       </li>
-                      <li
+                      {/* <li
                         className="py-2 flex items-center justify-between"
                         style={{ borderBottom: "1px dashed #525252" }}
                       >
@@ -350,7 +350,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                           Loan to Value
                         </span>
                         <span className="text-xs font-semibold">{ltv}</span>
-                      </li>
+                      </li> */}
                       <li
                         className="py-2 flex items-center justify-between"
                         style={{ borderBottom: "1px dashed #525252" }}
