@@ -22,13 +22,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const existingUser = await usersCollection.findOne({ email });
         if (existingUser) {
             //   return res.status(400).json({ error: 'Email already exists' });
-            return res.status(200).json({ status: "success", message: 'User fetched successfully', userId: existingUser });
+            return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
 
         // Insert the new user
         const result = await usersCollection.insertOne({ email, username, passkey, publickeyId, rawId, wallet, createdAt: new Date() });
         console.log("result-->", result)
-        return res.status(201).json({ status: "success", message: 'User added successfully', userId: result.insertedId });
+        return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
         console.error('Error adding user:', error);
         return res.status(500).json({ error: 'Internal server error' });

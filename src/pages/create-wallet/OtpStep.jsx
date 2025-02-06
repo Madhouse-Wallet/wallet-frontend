@@ -6,7 +6,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
-const OtpStep = ({ step, setStep, registerOtpFn }) => {
+const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const { theme, toggleTheme } = useTheme();
 
   const [registerOTP, setRegisterOTP] = useState();
@@ -27,6 +27,16 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
         }
         setRegisterOtpLoading(false);
       }
+    } catch (error) {
+      console.log("createRegister error -->", error);
+      setRegisterOtpLoading(false);
+    }
+  };
+
+
+  const resendOtp = async () => {
+    try {
+      let response = await resendOtpFunc();
     } catch (error) {
       console.log("createRegister error -->", error);
       setRegisterOtpLoading(false);
@@ -60,11 +70,11 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
                   OTP Code Verification
                 </h4>
                 <p className=" text-sm font-medium  md:text-xs py-5">
-                  <span className="opacity-50">Code has been send to </span>
+                  <span className="opacity-50">Code has been send to You Email </span>
                   <br />{" "}
-                  <span className="font-bold  opacity-100">
+                  {/* <span className="font-bold  opacity-100">
                     and***ley@yourdomain.com
-                  </span>
+                  </span> */}
                 </p>{" "}
               </div>
             </div>
@@ -80,9 +90,11 @@ const OtpStep = ({ step, setStep, registerOtpFn }) => {
               </OtpWrpper>
             </div>
             <div className="col-span-12">
-              <p className="m-0 text-center  opacity-80 font-medium">
-                Resend code in <span className="themeClr">55</span> s
-              </p>
+              <div className="text-center">
+              <button onClick={resendOtp} className="m-0 text-center themeClr inline-flex hover:opacity-50 font-medium">
+                Resend OTP
+              </button>
+              </div>
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">

@@ -5,83 +5,31 @@ import KeyStep from "./KeyStep";
 import EmailStep from "./EmailStep";
 
 import {
-  PasskeyValidatorContractVersion,
-  WebAuthnMode,
-  toPasskeyValidator,
-  toWebAuthnKey,
-} from "@zerodev/passkey-validator";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+  getAccount,
+  passkeyValidator,
+  loginPasskey
+} from "../../lib/zeroDevWallet";
 
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
-import { sepolia } from "viem/chains";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 
 import {
-  generateOTP,
-  bufferToBase64,
-  base64ToBuffer,
+  isValidEmail,
+  webAuthKeyStore,
+  storedataLocalStorage
 } from "../../utils/globals";
 
-import {
-  createAccount,
-  getAccount,
-  getMnemonic,
-} from "../../lib/zeroDevWallet";
 
-// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const CHAIN = sepolia;
-const entryPoint = getEntryPoint("0.7");
-
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
-const contractABI = parseAbi([
-  "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)",
-]);
-const publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
-  chain: CHAIN,
-});
 
 const Login = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [registerData, setRegisterData] = useState({ email: "" });
   const dispatch = useDispatch();
-  async function isValidEmail(email) {
-    // Define the email regex pattern
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Test the email against the regex
-    return emailRegex.test(email);
-  }
 
-  const passketLogin = async (username) => {
-    try {
-      const webAuthnKey = await toWebAuthnKey({
-        passkeyName: username,
-        passkeyServerUrl: PASSKEY_SERVER_URL,
-        mode: WebAuthnMode.Login,
-        passkeyServerHeaders: {},
-      });
-      console.log("line-95", webAuthnKey);
-      const passkeyValidator = await toPasskeyValidator(publicClient, {
-        webAuthnKey,
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
-      });
-      console.log("line-102", passkeyValidator);
-      return { passkeyValidator, webAuthnKey };
-    } catch (error) {
-      console.log("error-->", error);
-      return false;
-    }
-  };
+
 
   const handleCopy = async (text) => {
     try {
@@ -134,35 +82,61 @@ const Login = () => {
       } else {
         // console.log(base64ToBuffer(userExist.userId.rawId))
         //base64ToBuffer(userExist.rawId)
-        const createdCredential = await passketLogin(data.email);
-        if (createdCredential) {
-          let account = await getAccount(createdCredential.passkeyValidator);
-          if (!account.status) {
-            toast.error(account.msg);
+        const createdWebAuthKey = await loginPasskey(data.email);
+        if (!createdWebAuthKey.status) {
+          toast.error(createdWebAuthKey.msg);
+          return false;
+        } else {
+          const { newPasskeyValidator = "", msg = "", status = "" } = await passkeyValidator(createdWebAuthKey.webAuthnKey);
+          //webAuthnKey
+          if (!status) {
+            toast.error(msg);
             return false;
           } else {
-            if (userExist.userId.wallet == account?.account?.account?.address) {
-              toast.success("Login Successfully!");
-              dispatch(
-                loginSet({
+            let { msg = "", status = true, account = "", kernelClient = "", address = "" } = await getAccount(newPasskeyValidator);
+            if (!status) {
+              toast.error(msg);
+              return false;
+            } else {
+              if (userExist.userId.wallet == address) {
+                toast.success("Login Successfully!");
+                console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
+                dispatch(
+                  loginSet({
+                    login: true,
+                    walletAddress: address || "",
+                    signer: "",
+                    username: userExist.userId.username,
+                    email: userExist.userId.email,
+                    passkeyCred: newPasskeyValidator,
+                    webauthKey: createdWebAuthKey.webAuthnKey,
+                    id: userExist.userId._id
+                  })
+                );
+                let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+                storedataLocalStorage({
                   login: true,
-                  walletAddress: account?.account?.account?.address || "",
+                  walletAddress: address || "",
                   signer: "",
                   username: userExist.userId.username,
                   email: userExist.userId.email,
-                  passkeyCred: createdCredential.passkeyValidator || "",
-                })
-              );
-              return true;
-            } else {
-              toast.error("Please Login With Correct Account!");
-              return false;
+                  passkeyCred: "",
+                  webauthKey: webAuthKeyStringObj,
+                  id: userExist.userId._id
+                }, "authUser")
+                return true;
+              } else {
+                toast.error("Login failed! Please use the correct email and passkey. Account not found.");
+                return false;
+              }
             }
           }
         }
       }
     } catch (error) {
       console.log("error---->", error);
+      toast.error(error.message);
+      return false;
     }
   };
 

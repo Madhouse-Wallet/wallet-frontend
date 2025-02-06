@@ -14,7 +14,7 @@ const WalletBackup = ({ step, setStep, addressPhrase, handleCopy }) => {
                 Back Up Your Wallet
               </h1>
               <p className="text-center text-sm font-medium opacity-50 md:text-xs">
-                Create 12 Phase Key recovery
+                Save This 12 Phase Key recovery
               </p>
             </div>
           </div>

@@ -9,6 +9,10 @@ import Image from "next/image";
 import BlogCard from "@/components/BlogCard";
 import s1 from "@/Assets/Images/screenshot.png";
 import PreviewBox from "./preview";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../lib/redux/slices/auth/authSlice";
+import { logoutStorage } from "../../utils/globals";
+import { toast } from "react-toastify";
 
 const Setting: React.FC = () => {
   const {
@@ -26,7 +30,9 @@ const Setting: React.FC = () => {
     selectedBackground,
     selectedWatermark,
   } = useBackground();
-
+  const dispatch = useDispatch();
+    const userAuth = useSelector((state: any) => state.Auth);
+  
   const getPreview = async () => {
     try {
       console.log("email");
@@ -47,6 +53,9 @@ const Setting: React.FC = () => {
       return false;
     }
   };
+
+
+
   // useEffect(() => {
   //   getPreview(); // Call the function
   // }, []);
@@ -253,6 +262,26 @@ const Setting: React.FC = () => {
     setOpenIndex(index === openIndex ? null : index);
   };
 
+  const LogoutFuc = async () =>{
+    try {
+      logoutStorage()
+      dispatch(
+        loginSet({
+          login: false,
+          walletAddress:  "",
+          signer: "",
+          username: "",
+          email: "",
+          passkeyCred: "",
+          webauthKey: "",
+          id: ""
+        })
+      );
+      toast.success("Logout Successfully!")
+    } catch (error) {
+      console.log("logout error --->",error)
+    }
+  }
   return (
     <>
       <section className="relative dashboard pt-12">
@@ -339,9 +368,9 @@ const Setting: React.FC = () => {
                     </ul>
                   </div>
                   <div className="right">
-                    <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
+                    {userAuth?.login && (  <button onClick={LogoutFuc}  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
                       {logoutIcn} Logout
-                    </button>
+                    </button>)}
                   </div>
                 </div>
               </div>
