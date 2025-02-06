@@ -254,8 +254,8 @@ export const getProvider = async (kernelClient) => {
   try {
     const kernelProvider = new KernelEIP1193Provider(kernelClient);
     const ethersProvider = new ethers.providers.Web3Provider(kernelProvider);
-
-    return { kernelProvider, ethersProvider };
+    const signer = await ethersProvider.getSigner();
+    return { kernelProvider, ethersProvider, signer };
   } catch (error) {
     console.log("get provider error-->", error)
     return false;

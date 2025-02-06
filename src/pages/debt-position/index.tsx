@@ -105,6 +105,7 @@ const DebtPosition: React.FC = () => {
 
 
   useEffect(() => {
+    console.log("userAuth-->",userAuth)
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);

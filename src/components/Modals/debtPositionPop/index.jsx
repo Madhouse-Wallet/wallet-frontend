@@ -233,7 +233,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                         htmlFor=""
                         className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
                       >
-                        Borrowing Amount (USD)
+                        Borrowing Amount (THUSD)
                       </label>
                       <input
                         type="text"
@@ -261,7 +261,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
                         htmlFor=""
                         className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
                       >
-                        Recommended Collateral amount (BTC)
+                        Recommended Collateral amount (TBTC)
                       </label>
                       <input
                         type="number"

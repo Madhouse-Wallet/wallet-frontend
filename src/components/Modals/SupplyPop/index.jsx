@@ -106,7 +106,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
                     htmlFor=""
                     className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
                   >
-                    Supply Amount (BTC)
+                    Supply Amount (TBTC)
                   </label>
                   <input
                     type="text"

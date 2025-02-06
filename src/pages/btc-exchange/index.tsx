@@ -9,13 +9,14 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
 import styled from "styled-components";
 const BTCEchange = () => {
   const router = useRouter();
-  const { walletAddress, provider, signer, login } = useSelector(
+  const userAuth = useSelector(
     (state: any) => state.Auth
   );
   const [showFirstComponent, setShowFirstComponent] = useState(true);
@@ -27,11 +28,8 @@ const BTCEchange = () => {
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
   console.log(
-    "walletAddress, provider, signer, login-->",
-    walletAddress,
-    provider,
-    signer,
-    login
+    "walletAddress-->",
+    userAuth
   );
 
   const handleGoBack = () => {
@@ -46,11 +44,28 @@ const BTCEchange = () => {
       setLoading(true);
       setDepositSetup("");
       setDepositFound("");
-      if (signer) {
-        const sdk = await initializeTBTC(signer);
-        if (sdk) {
-          depo(sdk);
-          setBtcExchange(!btcExchange);
+       
+      // const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // await window.ethereum.request({ method: "eth_requestAccounts" });
+
+      // const signer = provider.getSigner();
+      // const address = await signer.getAddress();
+// console.log("signer00>",signer,address)
+      if (userAuth.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            // kernelProvider, ethersProvider, signer
+            const sdk = await initializeTBTC(provider.signer);
+            console.log("sdk -->",sdk)
+            if (sdk) {
+              depo(sdk);
+              setBtcExchange(!btcExchange);
+            }
+          }
         }
       } else {
         toast.error("Please Login First");
@@ -78,7 +93,8 @@ const BTCEchange = () => {
   }, [depositSetup, depositSetupCheck]);
   console.log("setDepositSetup-->", depositSetup);
   const depo = async (tbtcSdk: any) => {
-    const bitcoinRecoveryAddress = "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"; // Replace with a valid BTC address
+    const bitcoinRecoveryAddress = "tb1qfpu7q7326kp7ydfjuez0x0k5834dnv8npx553w"; // Replace with a valid BTC address
+    console.log("bitcoinRecoveryAddress00>",bitcoinRecoveryAddress)
     try {
       console.log(tbtcSdk.deposits.initiateDeposit);
       const deposit = await tbtcSdk.deposits.initiateDeposit(
@@ -135,7 +151,7 @@ const BTCEchange = () => {
             setDepositSetup={setDepositSetup}
             depositFound={depositFound}
             setDepositFound={setDepositFound}
-            userAddress={walletAddress}
+            userAddress={userAuth.walletAddress}
           />,
           document.body
         )}

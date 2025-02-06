@@ -19,6 +19,7 @@ if (typeof window !== "undefined") {
       pubY: BigInt(data.webauthKey.pubY),
     }
   }
+  
 }
 // JSON.stringify(response.data)
 const initialState = {

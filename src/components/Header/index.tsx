@@ -16,7 +16,9 @@ import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
-
+import {
+  passkeyValidator,
+} from "../../lib/zeroDevWallet";
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -31,6 +33,35 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const [login, setLogin] = useState<boolean>(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const dispatch = useDispatch();
+
+const reloadPasskey = async()=>{
+if(userAuth.login){
+  const { newPasskeyValidator = "", msg = "", status = "" } = await passkeyValidator(userAuth.webauthKey);
+  console.log("newPasskeyValidator-->",newPasskeyValidator)
+  if(status){
+    dispatch(
+      loginSet({
+        login : userAuth.login,
+        username : userAuth.username,
+        email : userAuth.email,
+        walletAddress : userAuth.walletAddress,
+        passkeyCred : newPasskeyValidator,
+        webauthKey : userAuth.webauthKey,
+        id : userAuth.id,
+        signer : userAuth.signer
+      })
+    );
+  }
+
+}
+  
+  }
+
+useEffect(()=>{
+  reloadPasskey()
+},[])
+
+
 
   const logout = async () => {
     // await web3auth.logout();
