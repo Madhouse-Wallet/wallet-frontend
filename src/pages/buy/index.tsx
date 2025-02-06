@@ -117,7 +117,6 @@ const BuyCoin: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="grid gap-3 md:gap-4 grid-cols-12">
-                  <div className=" col-span-12 "></div>
                   <div className=" col-span-12">
                     <div className="tabContent">
                       <div className="">{tabData[activeTab].component}</div>
