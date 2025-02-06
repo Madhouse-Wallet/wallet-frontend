@@ -59,7 +59,7 @@ body::-webkit-scrollbar,
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   padding-bottom: 90px !important;
-  min-height: calc(100vh - 117px);
+  min-height: calc(100vh - 108px);
   width: 100% !important;
 }
 .commonBtn {
