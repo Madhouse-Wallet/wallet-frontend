@@ -46,6 +46,8 @@ const entryPoint = getEntryPoint("0.7")
 const recoveryExecutorAddress = '0x2f65dB8039fe5CAEE0a8680D2879deB800F31Ae1'
 const recoveryExecutorFunction = 'function doRecovery(address _validator, bytes calldata _data)'
 const recoveryExecutorSelector = toFunctionSelector(recoveryExecutorFunction)
+
+
 const paymasterClient = createZeroDevPaymasterClient({
   chain: sepolia,
   transport: http(PAYMASTER_RPC),
@@ -132,15 +134,10 @@ const accountCreateClient = async (signer1, phrase) => {
 
     console.log("account accountCreateClient-->", account)
 
-
-
-
     const kernelClient = createKernelAccountClient({
       account,
-
       // Replace with your chain
       chain: sepolia,
-
       // Replace with your bundler RPC.
       // For ZeroDev, you can find the RPC on your dashboard.
       bundlerTransport: http(BUNDLER_URL),
@@ -330,6 +327,8 @@ export const createAccount = async (signer1, phrase) => {
         status: false, msg: "Error In creating Account!"
       }
     }
+    // account,
+    // kernelClient
     console.log("create Account-->", getAccount)
     const accountDeploymentTrxn = await zeroTrxn(getAccount?.kernelClient)
     if (!accountDeploymentTrxn) {
@@ -338,11 +337,11 @@ export const createAccount = async (signer1, phrase) => {
       }
     }
     return {
-      status: true, account: getAccount, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address
+      status: true, account: getAccount.account, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address
     }
   } catch (error) {
     console.log("create account error-->", error)
-    return { status: false, msg: "Please Try again ALter!" }
+    return { status: false, msg: "Problem creating kernel account. Please Try again ALter!" }
   }
 }
 
@@ -441,6 +440,8 @@ const getAccountPrivateKey = async () => {
 
   }
 }
+
+
 export const doRecoveryNewSigner = async (signer1, phrase, newSigner) => {
   try {
     const getAccount = await accountRecoveryCreateClient(signer1, phrase)
@@ -518,3 +519,66 @@ export const getMnemonic = async () => {
     return false
   }
 }
+
+
+
+export const registerPasskey = async (passkeyName) => {
+  try {
+    const webAuthnKey = await toWebAuthnKey({
+      passkeyName: passkeyName,
+      passkeyServerUrl: PASSKEY_SERVER_URL,
+      mode: WebAuthnMode.Register,
+      passkeyServerHeaders: {},
+    });
+    return {
+      status: true, webAuthnKey
+    }
+  } catch (error) {
+    return {
+      status: false, msg: error.message
+    }
+  }
+}
+
+
+
+export const passkeyValidator = async (webAuthnKey) => {
+  try {
+    const newPasskeyValidator = await toPasskeyValidator(publicClient, {
+      webAuthnKey,
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
+    });
+    return {
+      status: true, newPasskeyValidator
+    }
+  } catch (error) {
+    return {
+      status: false, msg: error.message
+    }
+  }
+}
+
+
+
+
+export const loginPasskey = async (passkeyName) => {
+  try {
+    const webAuthnKey = await toWebAuthnKey({
+      passkeyName: passkeyName,
+      passkeyServerUrl: PASSKEY_SERVER_URL,
+      mode: WebAuthnMode.Login,
+      passkeyServerHeaders: {},
+    });
+    return {
+      status: true, webAuthnKey
+    }
+  } catch (error) {
+    return {
+      status: false, msg: error.message
+    }
+  }
+}
+
+

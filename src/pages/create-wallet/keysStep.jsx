@@ -29,7 +29,7 @@ const KeyStep = ({ step, setStep, registerFn }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <h1 className="text-center text-base font-medium  m-0">
-                Your new wallet will have 3 keys
+                Your new wallet will have Passkey Access.
               </h1>
               <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                 They will be stored in different location for better security

@@ -6,7 +6,9 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
+import {
+  isValidEmail,
+} from "../../utils/globals";
 const EmailStep = ({ step, setStep, loginFn }) => {
   const { theme, toggleTheme } = useTheme();
 
@@ -14,13 +16,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
   const [registerEmail, setRegisterEmail] = useState();
   const router = useRouter();
 
-  async function isValidEmail(email) {
-    // Define the email regex pattern
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Test the email against the regex
-    return emailRegex.test(email);
-  }
+ 
 
   const loginTry = async () => {
     try {

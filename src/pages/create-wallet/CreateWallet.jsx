@@ -1,54 +1,16 @@
 import React, { useState } from "react";
 import logow from "@/Assets/Images/logow.png";
-import logo from "@/Assets/Images/logo.png";
 import Image from "next/image";
-
 import {
-  PasskeyValidatorContractVersion,
-  WebAuthnMode,
-  toPasskeyValidator,
-  toWebAuthnKey,
-} from "@zerodev/passkey-validator";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+  isValidEmail,
+} from "../../utils/globals";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
-import { sepolia } from "viem/chains";
-import { asyncThunkCreator } from "@reduxjs/toolkit";
-// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const CHAIN = sepolia;
-const entryPoint = getEntryPoint("0.7");
-
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
-const contractABI = parseAbi([
-  "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)",
-]);
-const publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
-  chain: CHAIN,
-});
-
 import { toast } from "react-toastify";
 
 const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
-  const { theme, toggleTheme } = useTheme();
-
   const [registerUsername, setRegisterUsername] = useState();
   const [registerEmail, setRegisterEmail] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
-
-  // onClick={() => setStep(2)}
-  async function isValidEmail(email) {
-    // Define the email regex pattern
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Test the email against the regex
-    return emailRegex.test(email);
-  }
 
   const createRegister = async () => {
     try {
@@ -57,7 +19,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
         toast.error("Please Enter Email!");
         setRegisterOtpLoading(false);
       } else if (!registerUsername) {
-        toast.error("Please Enter Username!");
+        toast.error("Please Enter Passkey Name!");
         setRegisterOtpLoading(false);
       } else {
         let validEmail = await isValidEmail(registerEmail);
@@ -114,8 +76,8 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
               <div className="relative mt-3">
                 <input
                   type="email"
-                  value={registerUsername}
-                  onChange={(e) => setRegisterUsername(e.target.value)}
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                   placeholder="Enter your email address"
                   defaultValue=""
@@ -129,9 +91,9 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
             <div className="col-span-12">
               <div className="relative">
                 <input
-                  type="email"
-                  // value={registerEmail}
-                  // onChange={(e) => setRegisterEmail(e.target.value)}
+                  type="text"
+                  value={registerUsername}
+                  onChange={(e) => setRegisterUsername(e.target.value)}
                   className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                   placeholder="Passkey name"
                   defaultValue=""

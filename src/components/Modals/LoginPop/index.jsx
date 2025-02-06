@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { create, get } from "../../../lib/passkey";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
@@ -139,9 +138,7 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = await get(
-            base64ToBuffer(userExist.userId.rawId)
-          );
+          const authenticated = false;
           if (authenticated) {
             let account = false;
             console.log("account-->", account);
@@ -187,7 +184,7 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        const createdCredential = await create(registerEmail);
+        const createdCredential = false;
         if (createdCredential) {
           let account = false;
           // account, smartAccountClient

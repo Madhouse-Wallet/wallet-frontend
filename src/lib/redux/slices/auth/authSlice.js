@@ -6,20 +6,30 @@ import { createSlice } from "@reduxjs/toolkit";
 // import {
 // } from "./actions";
 
-// let storedDataString = null;
-// let data = null;
+let storedDataString = null;
+let data = null;
 
-// if (typeof window !== "undefined") {
-//   storedDataString = localStorage.getItem("authUser");
-//   data = storedDataString ? JSON.parse(storedDataString) : null;
-// }
-
+if (typeof window !== "undefined") {
+  storedDataString = localStorage.getItem("authUser");
+  data = storedDataString ? JSON.parse(storedDataString) : null;
+  if (data) {
+    data.webauthKey = {
+      ...data.webauthKey,
+      pubX: BigInt(data.webauthKey.pubX),
+      pubY: BigInt(data.webauthKey.pubY),
+    }
+  }
+}
+// JSON.stringify(response.data)
 const initialState = {
-  walletAddress: "",
-  passkeyCred:  "",
-  username: "",
-  signer:"",
-  login: false
+  walletAddress: (data?.walletAddress || ""),
+  webauthKey: (data?.webauthKey || ""),
+  passkeyCred: "",
+  username: (data?.username || ""),
+  email: (data?.email || ""),
+  id: (data?.id || ""),
+  login: (data?.login || false),
+  signer: ""
 };
 
 export const authSlice = createSlice({
@@ -33,6 +43,8 @@ export const authSlice = createSlice({
       state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
       state.passkeyCred = action.payload.passkeyCred;
+      state.webauthKey = action.payload.webauthKey;
+      state.id = action.payload.id;
       state.signer = action.payload.signer;
     },
   },
