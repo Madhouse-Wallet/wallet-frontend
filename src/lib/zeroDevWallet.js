@@ -272,9 +272,9 @@ const zeroTrxn = async (kernelClient) => {
       }]),
     });
     console.log("op1Hash-->", op1Hash)
-    await kernelClient.waitForUserOperationReceipt({
-      hash: op1Hash,
-    });
+    // await kernelClient.waitForUserOperationReceipt({
+    //   hash: op1Hash,
+    // });
 
     console.log("userOp sent");
     return op1Hash;
