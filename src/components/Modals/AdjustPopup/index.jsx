@@ -25,7 +25,7 @@ const AdjustPopup = ({
   const [changeInput, setChangeInput] = useState(false);
   const [nextButton, setNextButton] = useState(false);
   const [borrowingFeee, setBorrowingFeee] = useState();
-  const [debtAmount, setDebtAmount] = useState(debtvalue === '0.0' ? 0 : debtvalue - 200 );
+  const [debtAmount, setDebtAmount] = useState(debtvalue === '0.0' || debtvalue === '0'? 0 : debtvalue - 200 );
   const [error, setError] = useState("");
   const [debtError, setDebtError] = useState("");
   const [collRatio, setCollRatio] = useState();
@@ -162,10 +162,10 @@ const AdjustPopup = ({
   const calculateCollateralAndHealthFactor = async (collateralAmount, debt) => {
     try {
       setError("");
-      if (!providerr) {
-        setCollRatio(0)
-        return;
-      }
+      // if (!providerr) {
+      //   setCollRatio(0)
+      //   return;
+      // }
 
       // Fetch ETH price
       const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
@@ -220,10 +220,11 @@ const AdjustPopup = ({
               setProviderr(provider?.ethersProvider);
             }
           }
-        } else {
-          toast.error("Please Login");
-          return;
-        }
+        } 
+        // else {
+        //   toast.error("Please Login");
+        //   return;
+        // }
       };
   
       connectWallet();

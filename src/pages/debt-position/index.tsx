@@ -131,13 +131,14 @@ const DebtPosition: React.FC = () => {
             return;
           }
         }
-      }else{
-        // toast.error(
-        //   "Please Login"
-        // );
-        router.push("/welcome");
-        return
       }
+      // else{
+      //   // toast.error(
+      //   //   "Please Login"
+      //   // );
+      //   router.push("/welcome");
+      //   return
+      // }
     };
 
     connectWallet();
@@ -183,15 +184,15 @@ const DebtPosition: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <h4>Loading trove data...</h4>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="container py-5">
+  //       <div className="text-center">
+  //         <h4>Loading trove data...</h4>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
@@ -226,11 +227,7 @@ const DebtPosition: React.FC = () => {
         )}
       <section className="relative dashboard pt-12">
         <div className="container">
-          <div
-            className="pageCard relative p-3 lg:p-6  mx-auto w-full fixed bg-[#000] contrast-more:bg-black  
-           transition-[opacity,transform] ease-out 
-          h-[calc(100dvh-var(--sheet-top))] max-w-[1320px] md:w-[calc(100vw-50px)] lg:h-[calc(100dvh-60px)] lg:w-[calc(100vw-120px)]"
-          >
+        <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -250,7 +247,7 @@ const DebtPosition: React.FC = () => {
               </div>
               <div className="md:col-span-6 col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
                 <CardCstm
-                  className="p-3 rounded-8 relative"
+                  className="p-3 rounded-8 relative bg-black/50"
                   style={{ maxWidth: 300 }}
                 >
                   <div className="top pb-3 flex items-center justify-between gap-3">
@@ -299,7 +296,7 @@ const DebtPosition: React.FC = () => {
                     </div>
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 flex items-center justify-between bg-white/5"
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50 "
                         style={{
                           fontSize: 12,
                         }}
@@ -315,7 +312,7 @@ const DebtPosition: React.FC = () => {
                     </div>
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 flex items-center justify-between bg-white/5"
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50"
                         style={{
                           fontSize: 12,
                         }}
@@ -333,7 +330,7 @@ const DebtPosition: React.FC = () => {
                     </div>
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 bg-white/5"
+                        className="relative p-3 rounded-8 bg-black/50"
                         style={{
                           fontSize: 12,
                         }}
@@ -349,11 +346,11 @@ const DebtPosition: React.FC = () => {
                               <div className=" sm:col-span-6 col-span-12">
                                 <input
                                   type="text"
-                                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 text-white focus:bg-[var(--backgroundColor2)]"
+                                 className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                                 />
                               </div>
                               <div className=" sm:col-span-6 col-span-12 self-end">
-                                <button className="btn flex items-center justify-center commonBtn w-full">
+                                <button  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}>
                                   Submit
                                 </button>
                               </div>
@@ -369,7 +366,7 @@ const DebtPosition: React.FC = () => {
                     </div>
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 flex items-center justify-between"
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50"
                         style={{
                           fontSize: 12,
                         }}
@@ -397,7 +394,7 @@ const DebtPosition: React.FC = () => {
 
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap"
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50 flex-wrap"
                         style={{
                           fontSize: 12,
                         }}
@@ -432,7 +429,7 @@ const DebtPosition: React.FC = () => {
                     </div>
                     <div className="py-2">
                       <CardCstm
-                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap"
+                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap bg-black/50"
                         style={{
                           fontSize: 12,
                         }}
@@ -489,7 +486,6 @@ const GradientHandleSwitch = styled(Switch)`
   }
 `;
 const CardCstm = styled.div`
-  background-color: var(--cardBg);
   font-size: 14px;
   line-height: 20px;
   border: 1px solid #282828a6;
