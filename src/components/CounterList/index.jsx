@@ -27,7 +27,7 @@ const CounterList = ({ data }) => {
           data.map((item, key) => (
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
-                onClick={() => setLiveBlog(!liveBlog)}
+                // onClick={() => setLiveBlog(!liveBlog)}
                 style={{ opacity: 1, transform: "none" }}
               >
                 <div className="flex w-full flex-col items-center justify-between ">
