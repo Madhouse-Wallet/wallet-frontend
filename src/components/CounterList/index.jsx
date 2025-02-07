@@ -47,9 +47,9 @@ const CounterList = ({ data }) => {
                       </div>
                     </div>
                     <div className="flex-1" />
-                    <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                    {/* <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                       +20.1% from last month
-                    </div>
+                    </div> */}
                     <div
                       aria-valuemax={100}
                       aria-valuemin={0}

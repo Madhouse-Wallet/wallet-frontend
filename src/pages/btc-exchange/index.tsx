@@ -68,7 +68,9 @@ const BTCEchange = () => {
           }
         }
       } else {
-        toast.error("Please Login First");
+        setBtcExchange(!btcExchange);
+
+        // toast.error("Please Login First");
       }
     } catch (error) {
       console.log("error rec-->", error);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SVGProps } from "react";
 import InstallFirstApp from "./InstallFirstApp";
 import Link from "next/link";
@@ -22,6 +22,12 @@ import { toast } from "react-toastify";
 import styled from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { splitAddress } from "../../utils/globals";
+import {
+  fetchTokenBalances,
+} from "../../lib/utils";
+import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers } from "ethers";
 
 // interface CardMetrics {
 //   head: string;
@@ -42,11 +48,16 @@ const Dashboard = () => {
   const [withdrawDep, setWithdrawDep] = useState(false);
   const [buySell, setBuySell] = useState(false);
   const [buycoverage, setBuyCoverage] = useState(false);
+  const [tbtcBalance, setTbtcBalance] = useState(0);
+  const [thusdBalance, setThusdBalance] = useState(0);
+  const [healthFactor, setHealthFactor] = useState(0);
+  const [collateralRatio, setCollateralRatio] = useState(0);
+
   const cardMetrics = [
     { head: "Total Deposit", value: "$234234", icn: icn11 },
-    { head: "BTC Balance", value: "$234234", icn: icn22 },
-    { head: "USD Balance", value: "$234234", icn: icn33 },
-    { head: "Loan Health", value: "$234234", icn: icn11 },
+    { head: "TBTC Balance", value: tbtcBalance, icn: icn22 },
+    { head: "THUSD Balance", value: thusdBalance, icn: icn33 },
+    { head: "Colateral Ratio", value: collateralRatio, icn: icn11 },
   ];
   const cardData = [
     {
@@ -82,11 +93,11 @@ const Dashboard = () => {
       head: "Earn",
       icn: icn5,
       onClick: () => {
-        if (userAuth.login) {
-          router.push("/swap");
-        } else {
-          toast.error("Please Login!");
-        }
+        // if (userAuth.login) {
+          router.push("/curve-deposit");
+        // } else {
+        //   toast.error("Please Login!");
+        // }
       },
     },
     {
@@ -111,6 +122,117 @@ const Dashboard = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+  const fetchTroveData = async (provider) => {
+    try {
+      if (!provider) return;
+
+      const walletAddress = userAuth?.walletAddress;
+
+      // Create Web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Fetch BTC price
+      const receipt = await web3.fetchPrice(
+        process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS
+      );
+      const receiptInEther = ethers.utils.formatEther(receipt);
+      const btcPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+
+      // Fetch Trove data
+      const troveResponse = await web3.Troves(
+        process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS,
+        walletAddress
+      );
+
+      const coll = troveResponse?.coll;
+      const debt = troveResponse?.debt;
+
+      const collInEther = ethers.utils.formatEther(coll);
+      const debtInEther = ethers.utils.formatEther(debt);
+      // Calculate collateral ratio
+      calculateCollateralAndHealthFactor(collInEther, debtInEther, btcPrice);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const calculateCollateralAndHealthFactor = (collateral, debt, btcPrice) => {
+    const collateralValue = parseFloat(collateral);
+    const collateralValueUSD = parseFloat(collateral) * btcPrice;
+    const debtValue = parseFloat(debt);
+    const collateralRatio =
+      debtValue > 0 ? (collateralValueUSD / debtValue) * 100 : 0;
+    const collateralValuee = btcPrice * collateralValue;
+    const healthFactor = (collateralValuee * 1.1) / debtValue;
+    setHealthFactor(healthFactor ? healthFactor : 0);
+    setCollateralRatio(collateralRatio.toFixed(2));
+  };
+
+  // useEffect(() => {
+  //   if(userAuth?.walletAddress){
+  //     const fetcData = async () => {
+  //       const balance = await fetchTokenBalances(
+  //        [process.env.NEXT_PUBLIC_TBTC_ADDRESS,process.env.NEXT_PUBLIC_THUSD_ADDRESS],
+  //         userAuth?.walletAddress
+  //       );
+  //       console.log(balance);
+  //       // fetchWalletHistory().catch(console.error);
+  //       // fetchTokenTransfers().catch(console.error);
+  //     };
+
+  //     fetcData();
+  //   }
+
+  // }, []);
+
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      const fetchData = async () => {
+        try {
+          if (userAuth?.passkeyCred) {
+            let account = await getAccount(userAuth?.passkeyCred);
+            if (account) {
+              let provider = await getProvider(account.kernelClient);
+              if (provider) {
+                try {
+                  const balances = await fetchTokenBalances(
+                    [
+                      process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
+                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS,
+                    ],
+                    userAuth.walletAddress
+                  );
+                  balances.forEach((token) => {
+                    const formattedBalance =
+                      Number(token.balance) / 10 ** token.decimals;
+                    if (
+                      token.token_address.toLowerCase() ===
+                      process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS.toLowerCase()
+                    ) {
+                      setTbtcBalance(formattedBalance.toFixed(2));
+                    }
+                    if (
+                      token.token_address.toLowerCase() ===
+                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS.toLowerCase()
+                    ) {
+                      setThusdBalance(formattedBalance.toFixed(2));
+                    }
+                  });
+                  fetchTroveData(provider?.ethersProvider);
+                } catch (err) {}
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching token balances:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
+
   return (
     <>
       {buy &&
@@ -233,7 +355,8 @@ const Dashboard = () => {
                   style={{ border: " 1px solid #565656a3", marginTop: 0 }}
                 >
                   <p className="m-0">
-                    Health Factor: <span className="text-[#00FF0A]">1.27</span>
+                    Health Factor:{" "}
+                    <span className="text-[#00FF0A]">{healthFactor.toFixed(2)}</span>
                   </p>
                 </div>
               </div>

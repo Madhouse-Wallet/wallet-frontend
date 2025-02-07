@@ -1,115 +1,358 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import Web3Interaction from "../../utils/web3Interaction";
+import { toast } from "react-toastify";
 
-const DepositTab = () => {
+const DepositTab = ({ provider, account }) => {
+  console.log(provider, account);
+  const SPENDER_ADDRESS = process.env.NEXT_PUBLIC_CURVE_SPENDER_CONTRACT_ADDRESS;
+
+  const tokens = [
+    {
+      name: "THUSD",
+      address: process.env.NEXT_PUBLIC_THUSD_EARN_CONTRACT_ADDRESS,
+      decimals: 18,
+    },
+    {
+      name: "DAI",
+      address: process.env.NEXT_PUBLIC_DAI_CONTRACT_ADDRESS,
+      decimals: 18,
+    },
+    {
+      name: "USDC",
+      address: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+      decimals: 6,
+    },
+    {
+      name: "USDT",
+      address: process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS,
+      decimals: 6,
+    },
+  ];
+
+  const [amounts, setAmounts] = useState({
+    THUSD: "",
+    DAI: "",
+    USDC: "",
+    USDT: "",
+  });
+
+  const [approvalStatus, setApprovalStatus] = useState({
+    THUSD: false,
+    DAI: false,
+    USDC: false,
+    USDT: false,
+  });
+
+  const [balances, setBalances] = useState({
+    THUSD: "0",
+    DAI: "0",
+    USDC: "0",
+    USDT: "0",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch balances for all tokens
+  const fetchTokenBalances = async () => {
+    if (!provider || !account) return;
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      const balancePromises = tokens.map(async (token) => {
+        try {
+          const balance = await web3.balanceOf(token.address, account);
+          // Convert balance to a readable format
+          return {
+            token: token.name,
+            balance: ethers.utils.formatUnits(balance, token.decimals),
+          };
+        } catch (error) {
+          console.error(`Error fetching balance for ${token.name}:`, error);
+          return {
+            token: token.name,
+            balance: "0",
+          };
+        }
+      });
+
+      const balanceResults = await Promise.all(balancePromises);
+
+      // Convert array of results to an object
+      const newBalances = balanceResults.reduce((acc, curr) => {
+        acc[curr.token] = curr.balance;
+        return acc;
+      }, {});
+
+      setBalances(newBalances);
+    } catch (error) {
+      console.error("Error fetching token balances:", error);
+    }
+  };
+
+  // Fetch balances when provider or account changes
+  useEffect(() => {
+    fetchTokenBalances();
+  }, [provider, account]);
+
+  const validateAndFormatInput = (value) => {
+    // Remove any non-numeric characters except decimal point
+    let formattedValue = value.replace(/[^\d.]/g, "");
+
+    // Ensure only one decimal point
+    const decimalCount = (formattedValue.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      const firstDecimalIndex = formattedValue.indexOf(".");
+      formattedValue =
+        formattedValue.slice(0, firstDecimalIndex + 1) +
+        formattedValue.slice(firstDecimalIndex + 1).replace(/\./g, "");
+    }
+
+    // Prevent leading zeros before decimal
+    if (
+      formattedValue.length > 1 &&
+      formattedValue[0] === "0" &&
+      formattedValue[1] !== "."
+    ) {
+      formattedValue = formattedValue.slice(1);
+    }
+
+    // Limit decimal places to 18 (maximum for ERC20 tokens)
+    if (formattedValue.includes(".")) {
+      const [whole, decimal] = formattedValue.split(".");
+      formattedValue = `${whole}.${decimal.slice(0, 18)}`;
+    }
+
+    return formattedValue;
+  };
+
+  const handleInputChange = (token, value) => {
+    const formattedValue = validateAndFormatInput(value);
+
+    // Only update if it's empty or a valid number
+    if (
+      formattedValue === "" ||
+      (!isNaN(parseFloat(formattedValue)) && parseFloat(formattedValue) >= 0)
+    ) {
+      setApprovalStatus((prev) => ({
+        ...prev,
+        [token]: false,
+      }));
+
+      setAmounts((prev) => ({
+        ...prev,
+        [token]: formattedValue,
+      }));
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    // Allow: backspace, delete, tab, escape, enter, decimal point
+    if (
+      [46, 8, 9, 27, 13, 110, 190].includes(e.keyCode) ||
+      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+      (e.keyCode === 65 && e.ctrlKey === true) ||
+      (e.keyCode === 67 && e.ctrlKey === true) ||
+      (e.keyCode === 86 && e.ctrlKey === true) ||
+      (e.keyCode === 88 && e.ctrlKey === true) ||
+      // Allow: home, end, left, right
+      (e.keyCode >= 35 && e.keyCode <= 39)
+    ) {
+      return;
+    }
+    // Block any other input that isn't a number
+    if (
+      (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
+      (e.keyCode < 96 || e.keyCode > 105)
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  const getActiveTokens = () => {
+    return Object.entries(amounts)
+      .filter(([_, value]) => value && parseFloat(value) > 0)
+      .map(([token]) => token);
+  };
+
+  const formatAmount = (amount, decimals) => {
+    return ethers.utils.parseUnits(amount, decimals).toString();
+  };
+
+  const checkAllowance = async (tokenAddress, amount, decimals) => {
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+      const currentAllowance = await web3.allowance(
+        tokenAddress,
+        account,
+        SPENDER_ADDRESS
+      );
+
+      const requiredAmount = ethers.utils.parseUnits(amount, decimals);
+      return currentAllowance.gte(requiredAmount);
+    } catch (error) {
+      console.error("Allowance check error:", error);
+      return false;
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!provider) {
+      toast.error("Please connect your wallet.");
+      return;
+    }
+    const activeTokens = getActiveTokens();
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+      console.log("line-159", activeTokens);
+      for (const tokenName of activeTokens) {
+        console.log("token");
+        const token = tokens.find((t) => t.name === tokenName);
+        // const amount = amounts[tokenName];
+
+        // Check if approval is needed
+        // const hasAllowance = await checkAllowance(
+        //   token.address,
+        //   amount,
+        //   token.decimals
+        // );
+
+        // if (!hasAllowance) {
+        // Only approve if allowance is insufficient
+        const MAX_UINT256 =
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        const approve = await web3.approve(
+          token.address,
+          SPENDER_ADDRESS,
+          MAX_UINT256
+        );
+        console.log("approve", approve);
+        // }
+
+        setApprovalStatus((prev) => ({
+          ...prev,
+          [tokenName]: true,
+        }));
+      }
+    } catch (error) {
+      console.error("Approval error:", error);
+      activeTokens.forEach((token) => {
+        setApprovalStatus((prev) => ({
+          ...prev,
+          [token]: false,
+        }));
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDepositAndStake = async () => {
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+      const amountValues = tokens.map((token) => {
+        if (amounts[token.name] && parseFloat(amounts[token.name]) > 0) {
+          return formatAmount(amounts[token.name], token.decimals);
+        }
+        return "0";
+      });
+
+      await web3.depositAndStakeCurve(
+        SPENDER_ADDRESS,
+        process.env.NEXT_PUBLIC_CURVE_DEPOSIT_CONTRACT_ADDRESS,
+        process.env.NEXT_PUBLIC_LP_TOKEN_CONTRACT_ADDRESS,
+        process.env.NEXT_PUBLIC_GAUGE_CONTRACT_ADDRESS,
+        4,
+        tokens.map((t) => t.address),
+        amountValues,
+        "0",
+        false,
+        false,
+        process.env.NEXT_PUBLIC_CURVE_POOL_CONTRACT_ADDRESS,
+        provider
+      );
+    } catch (error) {
+      console.error("Deposit error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isApprovalNeeded = () => {
+    const activeTokens = getActiveTokens();
+    return (
+      activeTokens.length > 0 &&
+      !activeTokens.every((token) => approvalStatus[token])
+    );
+  };
+
   return (
-    <>
-      <div className="mx-auto max-w-md">
-        <div className="bg-black/50 rounded-20 p-3">
-          <div className="my-2">
+    <div className="mx-auto max-w-md">
+      <div className="bg-black/50 rounded-20 p-3">
+        {tokens.map((token) => (
+          <div className="my-2" key={token.name}>
             <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
               <div className="left">
                 <p className="m-0 text-white opacity-50 text-xs">
-                  thUSD Avail. 0
+                  {token.name} Avail. {balances[token.name]}
                 </p>
                 <input
                   style={{ height: 30 }}
                   placeholder="0.00"
                   type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
+                  value={amounts[token.name]}
+                  onChange={(e) =>
+                    handleInputChange(token.name, e.target.value)
+                  }
+                  onKeyDown={handleKeyDown}
+                  inputMode="decimal"
+                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent text-white"
                 />
               </div>
               <div className="right">
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
-                    Max
-                  </button>
-                  {usa}
-                </div>
+                <div className="flex items-center gap-2">{usa}</div>
               </div>
             </div>
           </div>
-          <div className="my-2">
-            <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
-              <div className="left">
-                <p className="m-0 text-white opacity-50 text-xs">
-                  thUSD Avail. 0
-                </p>
-                <input
-                  style={{ height: 30 }}
-                  placeholder="0.00"
-                  type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
-                />
-              </div>
-              <div className="right">
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
-                    Max
-                  </button>
-                  {usa}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
-              <div className="left">
-                <p className="m-0 text-white opacity-50 text-xs">
-                  thUSD Avail. 0
-                </p>
-                <input
-                  style={{ height: 30 }}
-                  placeholder="0.00"
-                  type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
-                />
-              </div>
-              <div className="right">
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
-                    Max
-                  </button>
-                  {usa}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
-              <div className="left">
-                <p className="m-0 text-white opacity-50 text-xs">
-                  thUSD Avail. 0
-                </p>
-                <input
-                  style={{ height: 30 }}
-                  placeholder="0.00"
-                  type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
-                />
-              </div>
-              <div className="right">
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
-                    Max
-                  </button>
-                  {usa}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="py-2">
-            <div className="flex gap-2 items-center justify-center">
-              <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                Approve Spending
-              </button>
-              <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                Deposit & Stake
-              </button>
-            </div>
+        ))}
+
+        <div className="py-2">
+          <div className="flex gap-2 items-center justify-center">
+            <button
+              className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                !isApprovalNeeded() || isLoading ? "opacity-50" : ""
+              }`}
+              onClick={handleApprove}
+              disabled={!isApprovalNeeded() || isLoading}
+            >
+              {isLoading ? "Processing..." : "Approve Spending"}
+            </button>
+            <button
+              className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                isApprovalNeeded() ||
+                isLoading ||
+                getActiveTokens().length === 0
+                  ? "opacity-50"
+                  : ""
+              }`}
+              onClick={handleDepositAndStake}
+              disabled={
+                isApprovalNeeded() ||
+                isLoading ||
+                getActiveTokens().length === 0
+              }
+            >
+              {isLoading ? "Processing..." : "Deposit & Stake"}
+            </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

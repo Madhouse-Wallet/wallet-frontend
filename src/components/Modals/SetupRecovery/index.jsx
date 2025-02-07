@@ -3,70 +3,40 @@ import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
-
-// css
-
-// img
-
-import {
-  PasskeyValidatorContractVersion,
-  WebAuthnMode,
-  toPasskeyValidator,
-  toWebAuthnKey,
-} from "@zerodev/passkey-validator";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
-import { sepolia } from "viem/chains";
 
 import {
-  generateOTP,
-  bufferToBase64,
-  base64ToBuffer,
+  webAuthKeyStore,
+  storedataLocalStorage
 } from "../../../utils/globals";
-
 import {
-  createAccount,
-  getAccount,
-  getMnemonic,
   getRecoverAccount,
   doRecovery,
-  doRecoveryNewSigner,
 } from "../../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-const CHAIN = sepolia;
-const entryPoint = getEntryPoint("0.7");
 
-const contractAddress = "0x34bE7f35132E97915633BC1fc020364EA5134863";
-const contractABI = parseAbi([
-  "function mint(address _to) public",
-  "function balanceOf(address owner) external view returns (uint256 balance)",
-]);
-const publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
-  chain: CHAIN,
-});
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const userAuth = useSelector((state) => state.Auth);
-
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
+  const [loadingNewSigner, setLoadingNewSigner] = useState(false);
   const [phrase, setPhrase] = useState();
   console.log(userAuth);
 
   const checkPhrase = async () => {
     try {
+      setLoadingNewSigner(true)
       console.log(
         "ph",
         phrase.trim().split(" ").length,
         phrase.trim().split(" ")
       );
-      if (!userAuth?.login) return toast.error("Please Login!")
+      if (!userAuth?.login) {
+        setLoadingNewSigner(false)
+        return toast.error("Please Login!")
+      }
       if (phrase && phrase.trim().split(" ").length == 12) {
         console.log(userAuth);
         let checkAccount = await getRecoverAccount(
@@ -82,31 +52,58 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
       } else {
         toast.error("Invalid Phrase!");
       }
+      setLoadingNewSigner(false)
     } catch (error) {
       toast.error("Invalid Phrase!");
+      setLoadingNewSigner(false)
       console.log("error-->", error);
       setStep(1);
     }
   };
 
- 
-  
 
   const createNewSigner = async () => {
     try {
-      
+      setLoadingNewSigner(true)
       let checkAccount = await doRecovery(
         userAuth?.walletAddress,
         userAuth?.passkeyCred,
         phrase.trim()
       );
       if (checkAccount.status) {
+        console.log("checkAccount--<?>",checkAccount)
+        // passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
+        dispatch(
+          loginSet({
+            login: userAuth.login,
+            username: userAuth.username,
+            email: userAuth.email,
+            walletAddress: userAuth.walletAddress,
+            passkeyCred: checkAccount.passkeyValidatorNew,
+            webauthKey: checkAccount.newwebAuthKey,
+            id: userAuth.id,
+            signer: userAuth.signer,
+          })
+        );
+        let webAuthKeyStringObj = await webAuthKeyStore(checkAccount.newwebAuthKey)
+        storedataLocalStorage({
+          login: true,
+          walletAddress: userAuth.walletAddress || "",
+          signer: "",
+          username: userAuth.username,
+          email: userAuth.email,
+          passkeyCred: "",
+          webauthKey: webAuthKeyStringObj,
+          id: userAuth.id
+        }, "authUser")
         toast.success("New Key Recovered!");
       } else {
         toast.error(checkAccount.msg);
       }
+      setLoadingNewSigner(false)
       // doRecoveryNewSigner
     } catch (error) {
+      setLoadingNewSigner(false)
       console.log("error new sigenr -->", error);
     }
   };
@@ -172,13 +169,13 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                     {phrase.split(" ").map((item, key) => (
                       <div key={key} className="col-span-6">
                         <div className="iconWithText relative">
-                        <div className="flex items-center justify-center rounded-full left-1 absolute icn h-[40px] w-[40px] bg-white text-black text-xs">{key + 1}</div>
-                        <input
-                          readOnly={true}
-                          value={item}
-                          type="text"
-                          className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pl-14`}
-                        />
+                          <div className="flex items-center justify-center rounded-full left-1 absolute icn h-[40px] w-[40px] bg-white text-black text-xs">{key + 1}</div>
+                          <input
+                            readOnly={true}
+                            value={item}
+                            type="text"
+                            className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pl-14`}
+                          />
                         </div>
                       </div>
                     ))}
@@ -187,9 +184,10 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                       onClick={createNewSigner}
                       className="col-span-12 text-center my-2"
                     >
-                      <button 
-                          className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}>
-                        Create a new Signer{" "}
+                      <button
+                        disabled={loadingNewSigner}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}>
+                        {loadingNewSigner ? ("creating") : ("Create a new Signer")} {" "}
                       </button>
                     </div>
                   </div>

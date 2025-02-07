@@ -27,7 +27,7 @@ async function initializeMoralis() {
 
 async function getTokenBalances(tokenAddresses: string[], address: string) {
   const response = await Moralis.EvmApi.token.getWalletTokenBalances({
-    chain: "0x1",
+    chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
     tokenAddresses,
     address,
   });
@@ -38,7 +38,7 @@ async function getWalletHistory(address: string) {
   try {
     console.log("Fetching wallet history for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletHistory({
-      chain: "0x1",
+      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
       address: address,
     });
@@ -54,13 +54,14 @@ async function getWalletHistory(address: string) {
   }
 }
 
-async function getWalletTokenTransfers(address: string) {
+async function getWalletTokenTransfers(contractAddresses: string[],walletAddress: string) {
   try {
-    console.log("Fetching token transfers for address:", address);
+    console.log("Fetching token transfers for address:", walletAddress);
     const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
-      chain: "0x1",
+      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
-      address: address,
+      address: walletAddress,
+      contractAddresses:contractAddresses
     });
 
     if (!response || !response.raw) {
@@ -99,10 +100,8 @@ export default async function handler(
         return res.status(200).json(history);
 
       case "getWalletTokenTransfers":
-        if (!params.address) {
-          return res.status(400).json({ error: "Address is required" });
-        }
-        const transfers = await getWalletTokenTransfers(params.address);
+        const { contractAddresses, walletAddress } = params;
+        const transfers = await getWalletTokenTransfers(contractAddresses, walletAddress);
         return res.status(200).json({ data: transfers });
 
       default:

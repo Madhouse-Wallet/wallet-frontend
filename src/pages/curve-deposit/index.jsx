@@ -1,21 +1,45 @@
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DepositTab from "./DepositTab";
 import WithdrawTab from "./WithdrawTab";
 import UnstakeTab from "./UnstakeTab";
+import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { useSelector } from "react-redux";
 
 const CurveDeposit = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  const userAuth = useSelector((state) => state.Auth);
+  const [providerr, setProviderr] = useState(null);
 
   const tabData = [
-    { title: "Deposit", component: <DepositTab /> },
+    { title: "Deposit", component: <DepositTab provider={providerr} account={userAuth?.walletAddress}/> },
     {
       title: "Withdraw",
-      component: <WithdrawTab />,
+      component: <WithdrawTab provider={providerr} account={userAuth?.walletAddress}/>,
     },
-    { title: "Remove Liquidity", component: <UnstakeTab /> },
+    { title: "Remove Liquidity", component: <UnstakeTab provider={providerr} account={userAuth?.walletAddress}/> },
   ];
+
+  useEffect(() => {
+    console.log("userAuth-->",userAuth)
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            console.log("provider -line-114", provider);
+            setProviderr(provider?.ethersProvider)
+          } 
+        }
+      }
+    };
+
+    connectWallet();
+  }, []);
   return (
     <>
       <section className="relative curve pt-12">

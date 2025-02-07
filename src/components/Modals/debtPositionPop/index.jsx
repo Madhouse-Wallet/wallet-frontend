@@ -102,7 +102,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
 
   const openTrove = async (borrowingAmount) => {
     if (!providerr) {
-      return toast.error("Please Coonect to wallet");
+      return toast.error("Please Connect to wallet");
     }
     setDepositButton(true);
     const web3 = new Web3Interaction("sepolia", providerr);
@@ -122,48 +122,85 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     );
     let account = await getAccount(userAuth?.passkeyCred);
     try {
-      const MAX_UINT256 = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+      const MAX_UINT256 =
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
       const approve = await web3.approve(
         process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
         contractAddress,
         MAX_UINT256
       );
-      console.log("approve",approve)
+      console.log("approve", approve);
       console.log(
         "line-74",
         BigInt(maxFeePercentage.toString()),
         BigInt(collateralAmount.toString()),
         BigInt(recommendedCollaterall.toString())
       );
-        const result = await web3.openTrove(
-          contractAddress,
-          "0",
-          maxFeePercentage,
-          collateralAmount,
-          recommendedCollaterall,
-          upperHint,
-          lowerHint,
-          account?.kernelClient
-        );
-        console.log("resultresult",result)
-        fetchTroveData(providerr);
-        setDebtPosition(false);
-        toast.success("Transaction Completed");
-        const userData = {
-          userId: "67a0b4711547e9d5b11dc825",
-          email: "heramb@yopmail.com",
-          colleralAmount: recommendedCollaterall,
-          borrowAmount: maxFeePercentage,
-          walletAddress: account?.address,
+      const result = await web3.openTrove(
+        contractAddress,
+        "0",
+        maxFeePercentage,
+        collateralAmount,
+        recommendedCollaterall,
+        upperHint,
+        lowerHint,
+        account?.kernelClient
+      );
+      console.log("resultresult", result);
+      fetchTroveData(providerr);
+      setDebtPosition(false);
+      toast.success("Transaction Completed");
+      const userData = {
+        userId: "67a0b4711547e9d5b11dc825",
+        email: "heramb@yopmail.com",
+        colleralAmount: recommendedCollaterall,
+        borrowAmount: maxFeePercentage,
+        walletAddress: account?.address,
       };
 
-      addUserCollateral(userData).then(response => console.log(response));
+      addUserCollateral(userData).then((response) => console.log(response));
     } catch (error) {
       console.log("Open trove Error", error);
       toast.error(error);
       setDepositButton(false);
     }
   };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       if (userAuth?.passkeyCred) {
+  //         let account = await getAccount(userAuth?.passkeyCred);
+  //         console.log("account---<", account);
+  //         if (account) {
+  //           let provider = await getProvider(account.kernelClient);
+  //           console.log("provider-->", provider);
+  //           if (provider) {
+  //             console.log("provider -line-114", provider);
+  //             setProviderr(provider?.ethersProvider);
+  //             const contractAddress =
+  //               process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+  //             const web3 = new Web3Interaction(
+  //               "sepolia",
+  //               provider?.ethersProvider
+  //             );
+  //             const receipt = await web3.fetchPrice(contractAddress);
+  //             const receiptInEther = ethers.utils.formatEther(receipt);
+  //             const adjustedPrice =
+  //               parseFloat(receiptInEther) * Math.pow(10, 10);
+  //             setCurrentBTCPrice(adjustedPrice);
+  //             fetchCollateralData()
+  //           } else {
+  //             console.log("No wallet detected. Please install Metamask.");
+  //             return;
+  //           }
+  //         }
+  //       }
+  //     } catch (error) {}
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -188,7 +225,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
               const adjustedPrice =
                 parseFloat(receiptInEther) * Math.pow(10, 10);
               setCurrentBTCPrice(adjustedPrice);
-              fetchCollateralData()
+              fetchCollateralData();
             } else {
               console.log("No wallet detected. Please install Metamask.");
               return;
@@ -201,6 +238,25 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("line-244")
+        const contractAddress =
+          process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+        const web3 = new Web3Interaction("sepolia",null);
+        console.log("web3",web3)
+        const receipt = await web3.fetchPrice(contractAddress);
+        console.log("receipt",receipt)
+        const receiptInEther = ethers.utils.formatEther(receipt);
+        const adjustedPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+        setCurrentBTCPrice(adjustedPrice);
+        fetchCollateralData();
+      } catch (error) {}
+    };
+
+    fetchData();
+  }, []);
   return (
     <>
       <Modal
