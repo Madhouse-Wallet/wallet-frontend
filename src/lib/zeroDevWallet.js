@@ -2,6 +2,12 @@
 import { send } from "process";
 import { zeroAddress } from "viem"
 import {
+  createWeightedKernelAccountClient,
+  createWeightedValidator,
+  toWebAuthnSigner,
+  getRecoveryFallbackActionInstallModuleData
+} from "@zerodev/weighted-validator";
+import {
   createWeightedECDSAValidator,
   getRecoveryAction,
   getUpdateConfigCall,
@@ -18,8 +24,11 @@ import {
   createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
-  getUserOperationGasPrice
+  getUserOperationGasPrice,
 } from "@zerodev/sdk"
+import {
+  getValidatorPluginInstallModuleData,
+} from "@zerodev/sdk";
 import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
@@ -37,9 +46,17 @@ import { english, generateMnemonic } from 'viem/accounts'
 
 
 
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+// const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+// const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+// const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+
+
+export const PASSKEY_SERVER_URL =
+  "https://passkeys.zerodev.app/api/v3/efbc1add-1c14-476e-b3f1-206db80e673c";
+export const BUNDLER_URL =
+  "https://rpc.zerodev.app/api/v2/bundler/efbc1add-1c14-476e-b3f1-206db80e673c?provider=PIMLICO";
+export const PAYMASTER_RPC =
+  "https://rpc.zerodev.app/api/v2/paymaster/efbc1add-1c14-476e-b3f1-206db80e673c?provider=PIMLICO";
 
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
@@ -112,25 +129,67 @@ const accountCreateClient = async (signer1, phrase) => {
   try {
     const guardian = await mnemonicToAccount(phrase)
     console.log("account-->", guardian)
-    const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    // const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    //   entryPoint,
+    //   config: {
+    //     threshold: 100,
+    //     signers: [{ address: guardian.address, weight: 100 }],
+    //   },
+    //   signers: [guardian],
+    //   kernelVersion: KERNEL_V3_1,
+    // });
+
+    const recoveryValidator = await createWeightedECDSAValidator(publicClient, {
+      signers: [guardian],
+      kernelVersion: KERNEL_V3_1,
       entryPoint,
       config: {
         threshold: 100,
-        signers: [{ address: guardian.address, weight: 100 }],
+        signers: [
+          {
+            address: guardian.address,
+            weight: 100,
+          },
+        ],
       },
-      signers: [guardian],
-      kernelVersion: KERNEL_V3_1,
     });
+  
+    const recoveryAction = getRecoveryAction(entryPoint.version);
+  
+    const recoveryPluginInstallModuleData =
+      await getValidatorPluginInstallModuleData({
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        plugin: recoveryValidator,
+        action: recoveryAction,
+      });
 
     const account = await createKernelAccount(publicClient, {
       entryPoint,
+      kernelVersion: KERNEL_V3_1,
       plugins: {
         sudo: signer1,
-        regular: guardianValidator,
-        // action: getRecoveryAction(entryPoint.version),
       },
-      kernelVersion: KERNEL_V3_1,
+      pluginMigrations: [
+        recoveryPluginInstallModuleData,
+        getRecoveryFallbackActionInstallModuleData(entryPoint.version),
+      ],
+      // Only needed to set after changing the sudo validator config i.e.
+      // changing the threshold or adding/removing/updating signers
+      // After doing recovery
+      // address: accountAddress,
     });
+  
+
+    // const account = await createKernelAccount(publicClient, {
+    //   entryPoint,
+    //   plugins: {
+    //     sudo: signer1,
+    //     regular: guardianValidator,
+    //     // action: getRecoveryAction(entryPoint.version),
+    //   },
+    //   kernelVersion: KERNEL_V3_1,
+    // });
 
     console.log("account accountCreateClient-->", account)
 
@@ -171,53 +230,78 @@ const accountCreateClient = async (signer1, phrase) => {
 }
 
 
-const accountRecoveryCreateClient = async (signer1, phrase) => {
+const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
   try {
     const guardian = await mnemonicToAccount(phrase)
     console.log("account-->", guardian)
-    const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    // const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    //   entryPoint,
+    //   config: {
+    //     threshold: 100,
+    //     signers: [{ address: guardian.address, weight: 100 }],
+    //   },
+    //   signers: [guardian],
+    //   kernelVersion: KERNEL_V3_1,
+    // });
+
+    const recoveryValidator = await createWeightedECDSAValidator(publicClient, {
+      signers: [guardian],
+      kernelVersion: KERNEL_V3_1,
       entryPoint,
       config: {
         threshold: 100,
-        signers: [{ address: guardian.address, weight: 100 }],
+        signers: [
+          {
+            address: guardian.address,
+            weight: 100,
+          },
+        ],
       },
-      signers: [guardian],
-      kernelVersion: KERNEL_V3_1,
     });
-    //  tried this way too
+  
+    const recoveryAction = getRecoveryAction(entryPoint.version);
+  
+    const recoveryPluginInstallModuleData =
+      await getValidatorPluginInstallModuleData({
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        plugin: recoveryValidator,
+        action: recoveryAction,
+      });
+
+    const account = await createKernelAccount(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      plugins: {
+        sudo: signer1,
+      },
+      pluginMigrations: [
+        recoveryPluginInstallModuleData,
+        getRecoveryFallbackActionInstallModuleData(entryPoint.version),
+      ],
+      // Only needed to set after changing the sudo validator config i.e.
+      // changing the threshold or adding/removing/updating signers
+      // After doing recovery
+      // address: accountAddress,
+    });
+  
+
     // const account = await createKernelAccount(publicClient, {
     //   entryPoint,
     //   plugins: {
-    // sudo: signer1,
-    // regular: guardianValidator,
-    //     action: getRecoveryAction(entryPoint.version),
+    //     sudo: signer1,
+    //     regular: guardianValidator,
+    //     // action: getRecoveryAction(entryPoint.version),
     //   },
     //   kernelVersion: KERNEL_V3_1,
     // });
-    const account = await createKernelAccount(publicClient, {
-      entryPoint,
-      plugins: {
-        sudo: signer1,
-        regular: guardianValidator,
-        action: {
-          address: recoveryExecutorAddress,
-          selector: recoveryExecutorSelector,
-        },
-      },
-      kernelVersion: KERNEL_V3_1,
-    });
 
-    console.log("account-->", account)
-
-
-
+    console.log("account accountCreateClient-->", account)
 
     const kernelClient = createKernelAccountClient({
       account,
-
       // Replace with your chain
       chain: sepolia,
-
       // Replace with your bundler RPC.
       // For ZeroDev, you can find the RPC on your dashboard.
       bundlerTransport: http(BUNDLER_URL),
@@ -239,7 +323,6 @@ const accountRecoveryCreateClient = async (signer1, phrase) => {
         }
       }
     })
-
     return {
       account,
       kernelClient
@@ -365,15 +448,63 @@ export const getAccount = async (signer1) => {
 }
 
 
-export const getRecoverAccount = async (signer1, phrase) => {
+export const getRecoverAccount = async (address, signer1, phrase) => {
   try {
-    const getAccount = await accountRecoveryCreateClient(signer1, phrase)
+    const getAccount = await accountRecoveryCreateClient(address, signer1, phrase)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"
       }
     }
     console.log("create getRecoverAccount-->", getAccount)
+
+    const publicKey3 = await registerPasskey("passkey3");
+    console.log("publicKey3.webAuthnKey-->",publicKey3.webAuthnKey)
+    const webAuthnKey3 = await toWebAuthnKey({
+      passkeyName: "passkey3",
+      passkeyServerUrl: PASSKEY_SERVER_URL,
+      webAuthnKey: publicKey3.webAuthnKey,
+      rpID: publicKey3.webAuthnKey.rpID,
+    });
+    console.log("webAuthnKey3",webAuthnKey3)
+    const passKeySigner3 = await toWebAuthnSigner(publicClient, {
+      webAuthnKey: webAuthnKey3,
+    });
+    console.log("passKeySigner3",passKeySigner3)
+    const newValidator = await createWeightedValidator(publicClient, {
+      kernelVersion: KERNEL_V3_1,
+      entryPoint,
+      signer: passKeySigner3,
+      config: {
+        threshold: 100,
+        signers: [
+          {
+            publicKey: publicKey3.webAuthnKey,
+            weight: 100,
+          },
+        ],
+      },
+    });
+    console.log("newValidator",newValidator.address, await newValidator.getEnableData())
+    // abi: parseAbi([recoveryExecutorFunction]),
+    //   functionName: "doRecovery",
+    //   args: [getValidatorAddress(entryPoint, KERNEL_V3_1), newSigner.address],
+    console.log("Sending Recovery Operation");
+    const userOpHash = await getAccount.kernelClient.sendUserOperation({
+      callData: encodeFunctionData({
+        abi: parseAbi([recoveryExecutorFunction]),
+        functionName: "doRecovery",
+        args: [newValidator.address, await newValidator.getEnableData()],
+      }),
+    });
+    console.log({ userOpHash });
+    const txReceipt = await getAccount.kernelClient.waitForUserOperationReceipt({
+      hash: userOpHash,
+    });
+    setStatus("Recovery Operation Receipt Received");
+    console.log({ txReceipt });
+
+
     return {
       status: true, account: getAccount, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address
     }

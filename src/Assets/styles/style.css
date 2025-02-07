@@ -67,7 +67,10 @@ body::-webkit-scrollbar,
   border-color: #df723b !important;
   transition: 0.4s;
 }
-
+.iconWithText .icn.absolute {
+  top: 50%;
+  transform: translateY(-50%);
+}
 .commonBtn:hover {
   background-color: #f9bfa1 !important;
   border-color: #df723b !important;

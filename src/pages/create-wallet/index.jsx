@@ -244,27 +244,27 @@ const CreateWallet = () => {
       } else {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
-        // console.log("OTP-->", OTP)
+        console.log("OTP-->", OTP)
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
-        let obj = {
-          email: data.email,
-          name: data.username,
-          otp: OTP,
-          subject: "Madhouse Account Verification OTP",
-          type: "registerOtp",
-        };
-        let sendEmailData = await sendOTP(obj);
-        if (sendEmailData.status && sendEmailData.status == "success") {
-          toast.success(sendEmailData?.message);
-          return true;
-        } else {
-          toast.error(sendEmailData?.message || sendEmailData?.error);
-          return false;
-        }
+        return true;
+        // let obj = {
+        //   email: data.email,
+        //   name: data.username,
+        //   otp: OTP,
+        //   subject: "Madhouse Account Verification OTP",
+        //   type: "registerOtp",
+        // };
+        // let sendEmailData = await sendOTP(obj);
+        // if (sendEmailData.status && sendEmailData.status == "success") {
+        //   toast.success(sendEmailData?.message);
+        //   return true;
+        // } else {
+        //   toast.error(sendEmailData?.message || sendEmailData?.error);
+        //   return false;
+        // }
       }
     } catch (error) {
       console.log("sendRegisterOtp error---->", error);
