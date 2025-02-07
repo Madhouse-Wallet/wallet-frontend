@@ -32,6 +32,7 @@ import {
   getAccount,
   getMnemonic,
   getRecoverAccount,
+  doRecovery,
   doRecoveryNewSigner,
 } from "../../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
@@ -65,13 +66,13 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
         phrase.trim().split(" ").length,
         phrase.trim().split(" ")
       );
-      // if (!userAuth?.login) return toast.error("Please Login!")
+      if (!userAuth?.login) return toast.error("Please Login!")
       if (phrase && phrase.trim().split(" ").length == 12) {
         console.log(userAuth);
         let checkAccount = await getRecoverAccount(
           userAuth?.walletAddress,
           userAuth?.passkeyCred,
-          phrase
+          phrase.trim()
         );
         if (checkAccount && checkAccount.address == userAuth.walletAddress) {
           setStep(2);
@@ -88,71 +89,21 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
     }
   };
 
-  const passketCreate = async (username) => {
-    try {
-      const webAuthnKey = await toWebAuthnKey({
-        passkeyName: username,
-        passkeyServerUrl: PASSKEY_SERVER_URL,
-        mode: WebAuthnMode.Register,
-        passkeyServerHeaders: {},
-      });
-      // console.log("line-95", webAuthnKey)
-      const passkeyValidator = await toPasskeyValidator(publicClient, {
-        webAuthnKey,
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
-      });
-      // console.log("line-102", passkeyValidator)
-      return { passkeyValidator, webAuthnKey };
-    } catch (error) {
-      console.log("error-->", error);
-      return false;
-    }
-  };
-  const passketLogin = async (username) => {
-    try {
-      const webAuthnKey = await toWebAuthnKey({
-        passkeyName: username,
-        passkeyServerUrl: PASSKEY_SERVER_URL,
-        mode: WebAuthnMode.Login,
-        passkeyServerHeaders: {},
-      });
-      console.log("line-95", webAuthnKey);
-      const passkeyValidator = await toPasskeyValidator(publicClient, {
-        webAuthnKey,
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-        validatorContractVersion: PasskeyValidatorContractVersion.V0_0_2,
-      });
-      console.log("line-102", passkeyValidator);
-      return { passkeyValidator, webAuthnKey };
-    } catch (error) {
-      console.log("error-->", error);
-      return false;
-    }
-  };
+ 
+  
 
   const createNewSigner = async () => {
     try {
-      // const newSigner = await passketCreate("ajay01.com");
-      const newSigner = privateKeyToAccount(generatePrivateKey());
-
-      if (newSigner) {
-        // let oldSigner = await passketLogin("ajay")
-        let result = await doRecoveryNewSigner(
-          userAuth?.passkeyCred,
-          phrase,
-          newSigner
-        );
-        console.log("result-->", result);
-        if (result.status) {
-          toast.success("created !");
-        } else {
-          toast.error(result.msg);
-        }
+      
+      let checkAccount = await doRecovery(
+        userAuth?.walletAddress,
+        userAuth?.passkeyCred,
+        phrase.trim()
+      );
+      if (checkAccount.status) {
+        toast.success("New Key Recovered!");
       } else {
-        toast.error("Please set new Signer!");
+        toast.error(checkAccount.msg);
       }
       // doRecoveryNewSigner
     } catch (error) {
