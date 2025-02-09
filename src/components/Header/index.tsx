@@ -235,7 +235,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                     // onClick={() => setLogin(!login)}
                     className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
                   >
-                    Login
+                    Sign-Up/Login
                   </Link>
                 )}
                 {/* <button

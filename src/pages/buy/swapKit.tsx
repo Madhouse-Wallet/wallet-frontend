@@ -24,7 +24,7 @@ const SwapKit = () => {
                       </div>
                       <div className="right">
                         <div className="flex items-center gap-2">
-                          {usa} <span className="text-xs font-medium">USA</span>
+                          {usa} <span className="text-xs font-medium">USD</span>
                         </div>
                       </div>
                     </div>

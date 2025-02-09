@@ -178,7 +178,7 @@ const BTCEchange = () => {
                       {backIcn}
                     </button> */}
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Threshold Wallet
+                      Send & Recieve
                     </h4>
                   </div>
                 </div>
@@ -217,7 +217,7 @@ const BTCEchange = () => {
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
                     <div className="d-flex align-items-center gap-3 mb-3">
-                      <h4 className="m-0 text-xl">Recent Transaction</h4>
+                      <h4 className="m-0 text-xl">Recent Transactions</h4>
                     </div>
                     <RecentTransaction />
                   </div>

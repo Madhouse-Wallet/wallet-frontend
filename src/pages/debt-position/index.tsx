@@ -242,7 +242,7 @@ console.log("web3-->",web3)
                 <div className="sectionHeader ">
                   <div className="flex items-center gap-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Collateral Debt Position
+                      Bitcoin Loan
                     </h4>
                   </div>
                 </div>
@@ -254,14 +254,14 @@ console.log("web3-->",web3)
                 >
                   <div className="top pb-3 flex items-center justify-between gap-3">
                     <div className="content">
-                      <p className="m-0">Assets</p>
+                      <p className="m-0">Asset</p>
                     </div>
                     <span className="icn">
                       {/* <button
                       className="flex items-center justify-content-center commonBtn fw-sbold"
                       style={{ minWidth: "unset" }}
                     > */}
-                      THUSD
+                      Bitcoin
                       {/* </button> */}
                     </span>
                   </div>
@@ -274,7 +274,7 @@ console.log("web3-->",web3)
                       style={{ fontSize: 12 }}
                     >
                       <li className=" flex items-center justify-between">
-                        <p className="m-0 fw-sbold">Net Balance</p>
+                        <p className="m-0 fw-sbold">Loan Balance</p>
                         <p className="m-0 fw-sbold">
                           {Number(walletBalance).toFixed(4)}
                         </p>
@@ -283,7 +283,7 @@ console.log("web3-->",web3)
                         className=" flex items-center justify-between"
                         style={{ fontSize: 10 }}
                       >
-                        <p className="m-0 fw-sbold">Health Factor</p>
+                        <p className="m-0 fw-sbold">Loan-to-Value Ratio</p>
                         <p className="m-0 fw-sbold">{healthValue}</p>
                       </li>
                     </ul>
@@ -304,7 +304,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Supply</p>
+                          <p className="m-0 fw-sbold">Bitcoin Collateral</p>
                           {/* <p className="m-0">APY 1%</p> */}
                         </div>
                         <div className="right">
@@ -320,7 +320,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Debt</p>
+                          <p className="m-0 fw-sbold">USD Debt</p>
                           {/* <p className="m-0">APY 1%</p> */}
                         </div>
                         <div className="right">
@@ -364,7 +364,7 @@ console.log("web3-->",web3)
                   </div>
                   <div className="md:col-span-6 col-span-12 my-2">
                     <div className="sectionHeader pb-3">
-                      <h4 className="m-0 fw-bold text-xl">Management</h4>
+                      <h4 className="m-0 fw-bold text-xl">Configurations</h4>
                     </div>
                     <div className="py-2">
                       <CardCstm
@@ -374,7 +374,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Liquidation Protection</p>
+                          <p className="m-0 fw-sbold">Liquidation Alerts</p>
                         </div>
                         <div className="right">
                           <GradientHandleSwitch
@@ -402,7 +402,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Open or Close CDP</p>
+                          <p className="m-0 fw-sbold">Loan Management</p>
                         </div>
                         <div className="right">
                           <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
@@ -412,7 +412,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4 py-1"
                                 style={{ minWidth: "unset" }}
                               >
-                                Open CDP
+                                Open a Loan
                               </button>
                             </li>
                             <li className="">
@@ -422,7 +422,7 @@ console.log("web3-->",web3)
                                 onClick={Withdraw}
                                 disabled={withdrawButton}
                               >
-                                {withdrawButton ? "Withdrawing.." : "Withdraw"}
+                                {withdrawButton ? "Withdrawing.." : "Close a Loan"}
                               </button>
                             </li>
                           </ul>
@@ -437,7 +437,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Health Management</p>
+                          <p className="m-0 fw-sbold">Loan Health</p>
                         </div>
                         <div className="right">
                           <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
@@ -447,7 +447,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
                                 style={{ minWidth: "unset" }}
                               >
-                                Supply
+                                Add Collateral
                               </button>
                             </li>
                             <li className="">
@@ -456,7 +456,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
                                 style={{ minWidth: "unset" }}
                               >
-                                Adjust
+                                Adjust Debt
                               </button>
                             </li>
                             {/* <li className="">
