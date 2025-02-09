@@ -14,9 +14,7 @@ const RecentApprovals = () => {
       accessor: "Amount",
       isComponent: true,
       component: (item, ind) => (
-        <p
-          className={` d-inline-flex m-0 rounded-pill text-capitalize py-1 fw-sbold`}
-        >
+        <p className={` d-inline-flex m-0 rounded-20 text-capitalize py-1 `}>
           {item.Amount}
         </p>
       ),
@@ -33,7 +31,7 @@ const RecentApprovals = () => {
               : item.Status?.includes("Success")
               ? "greenStatus"
               : ""
-          } status d-inline-flex m-0 rounded-pill px-3 text-capitalize fw-sbold`}
+          } status d-inline-flex m-0 rounded-20 py-1 px-3 text-capitalize `}
         >
           {item.Status}
         </p>
@@ -64,7 +62,7 @@ const RecentApprovals = () => {
   ];
   return (
     <>
-      <div className="shadow-sm rounded">
+      <div className=" rounded">
         <TableLayout data={data} column={column} />
       </div>
     </>

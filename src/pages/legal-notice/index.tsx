@@ -12,24 +12,20 @@ const LegalNotice = () => {
   };
   return (
     <>
-      <section className="contentPage py-4 relative">
+      <section className="contentPage pt-5 relative">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
+              <div className="sectionHeader p-2 px-3 px-lg-4 py-lg-3">
                 <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">Terms of Service</h4>
+                  <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                    Terms of Service
+                  </h4>
                 </div>
               </div>
             </div>
             <div className="col-span-12">
-              <div className="max-w-4xl mx-auto space-y-6">
+              <div className=" mx-auto p-2 px-3 px-lg-4 py-lg-3 space-y-6 text-xs">
                 <p className="text-lg mb-6">Last Updated: 04/19/2023</p>
 
                 <p className="mb-6 text-gray-400">

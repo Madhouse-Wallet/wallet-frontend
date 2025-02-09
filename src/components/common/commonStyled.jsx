@@ -37,7 +37,7 @@ export const AccordionButton = styled.button`
 
 export const AccordionIcon = styled.span`
   position: absolute;
-  right: 2px;
+  right: 15px;
   display: inline-flex;
   justify-content: center;
   align-items: center;

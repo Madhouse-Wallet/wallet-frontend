@@ -28,14 +28,12 @@ const nextConfig = {
       }
     );
 
-
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
     // Add fallback for browser polyfills
-   
 
-     // Add fallback for browser polyfills
-     config.resolve.fallback = {
+    // Add fallback for browser polyfills
+    config.resolve.fallback = {
       ...config.resolve.fallback,
       crypto: "crypto-browserify",
       stream: "stream-browserify",
@@ -48,7 +46,7 @@ const nextConfig = {
       http: "stream-http",
       net: false, // Node.js-only module
       tls: false, // Node.js-only module
-      fs: false,  // Node.js-only module
+      fs: false, // Node.js-only module
     };
 
     // Add plugins

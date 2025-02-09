@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Layout from "@/Layout/index";
 import { initializeTBTC } from "../lib/tbtcSdkInitializer";
 import { ThemeProvider } from "@/ContextApi/ThemeContext";
+import { BackgroundProvider } from "@/ContextApi/backgroundContent";
 import { useEffect, useState } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
 import { useRouter } from "next/router";
@@ -58,9 +59,11 @@ export default function App({ Component, pageProps, ...props }: AppProps) {
     <>
       <Providers>
         <ToastContainer />
-        <ThemeProvider>
-          <Layout Component={Component} pageProps={pageProps} {...props} />
-        </ThemeProvider>
+        <BackgroundProvider>
+          <ThemeProvider>
+            <Layout Component={Component} pageProps={pageProps} {...props} />
+          </ThemeProvider>
+        </BackgroundProvider>
       </Providers>
     </>
   );

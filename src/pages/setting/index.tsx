@@ -1,125 +1,75 @@
 "use client";
 import BTCAddressPop from "@/components/Modals/BtcAddressPop";
+import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { AccordionItem } from "@/components/common/index";
+import { useBackground } from "@/ContextApi/backgroundContent";
+import Image from "next/image";
+import BlogCard from "@/components/BlogCard";
+import s1 from "@/Assets/Images/screenshot.png";
+import PreviewBox from "./preview";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../lib/redux/slices/auth/authSlice";
+import { logoutStorage } from "../../utils/globals";
+import { toast } from "react-toastify";
+import { createPortal } from "react-dom";
 
 const Setting: React.FC = () => {
-  const tabs = [
-    {
-      title: "Export Private Key",
-      content: <>asdfasdf</>,
-    },
-    {
-      title: "Set Up Email Recovery",
-      content: <>asdfasdf as2213123</>,
-    },
-    {
-      title: "Set Up MFA",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Whitelisted Address Book",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "ENS username",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Set Login Email/Phone",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Update Owners",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Autopay loan",
-      content: <>asdfasf 4234234234243234</>,
-    },
-    {
-      title: "Scheduled Transfer ",
-      content: <>asdfasf 4234234234243234</>,
-    },
-  ];
+  const {
+    selectBg,
+    backgrounds,
+    bgOpacity,
+    setBgOpacity,
+    selectWm,
+    watermarks,
+    setSelectedWatermark,
+    wmOpacity,
+    setWmOpacity,
+    changeBgOpacity,
+    changeWmOpacity,
+    selectedBackground,
+    selectedWatermark,
+  } = useBackground();
+  const dispatch = useDispatch();
+    const userAuth = useSelector((state: any) => state.Auth);
+    const [setUp, setSetUp] = useState<boolean>(false);
+  const getPreview = async () => {
+    try {
+      console.log("email");
+      return await fetch(`/api/get-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: "https://devstack.madhousewallet.com/dashboard",
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
+
+
+  // useEffect(() => {
+  //   getPreview(); // Call the function
+  // }, []);
+
   const accordionTabs = [
     {
-      title: "Export Private Key",
-      content: (
-        <>
-          <div className="pb-3">
-            <button className="inline-flex items-center justify-center btn commonBtn">
-              Export Key
-            </button>
-          </div>
-        </>
-      ),
-    },
-    {
-      title: "Set Up Email Recovery",
-      content: (
-        <>
-          <form action="" className="pb-3">
-            <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
-                <label
-                  htmlFor=""
-                  className="form-label m-0 text-xs font-medium"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
-                />
-              </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </form>
-        </>
-      ),
-    },
-    {
-      title: "Set Up MFA",
-      content: (
-        <>
-          <form action="" className="pb-3">
-            <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
-                <label
-                  htmlFor=""
-                  className="form-label m-0 text-xs font-medium"
-                >
-                  Set Up MFA
-                </label>
-                <input
-                  type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
-                />
-              </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
-                  Submit
-                </button>
-              </div>
-            </div>
-          </form>
-        </>
-      ),
-    },
-    {
       title: "Whitelisted Address Book",
       content: (
         <>
           <form action="" className="pb-3">
             <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+              <div className=" sm:col-span-6 col-span-12">
                 <label
                   htmlFor=""
                   className="form-label m-0 text-xs font-medium"
@@ -128,11 +78,11 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
                   Submit
                 </button>
               </div>
@@ -148,7 +98,7 @@ const Setting: React.FC = () => {
           {" "}
           <form action="" className="pb-3">
             <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+              <div className=" sm:col-span-6 col-span-12">
                 <label
                   htmlFor=""
                   className="form-label m-0 text-xs font-medium"
@@ -157,11 +107,11 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
                   Submit
                 </button>
               </div>
@@ -176,7 +126,7 @@ const Setting: React.FC = () => {
         <>
           <form action="" className="pb-3">
             <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+              <div className=" sm:col-span-6 col-span-12">
                 <label
                   htmlFor=""
                   className="form-label m-0 text-xs font-medium"
@@ -185,11 +135,11 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
                   Submit
                 </button>
               </div>
@@ -205,7 +155,7 @@ const Setting: React.FC = () => {
           {" "}
           <form action="" className="pb-3">
             <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+              <div className=" sm:col-span-6 col-span-12">
                 <label
                   htmlFor=""
                   className="form-label m-0 text-xs font-medium"
@@ -214,11 +164,11 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
                   Submit
                 </button>
               </div>
@@ -233,7 +183,7 @@ const Setting: React.FC = () => {
     //     <>
     //       <form action="" className="pb-3">
     //         <div className="grid gap-3 grid-cols-12">
-    //           <div className="md:col-span-4 sm:col-span-6 col-span-12">
+    //           <div className=" sm:col-span-6 col-span-12">
     //             <label
     //               htmlFor=""
     //               className="form-label m-0 text-xs font-medium"
@@ -245,8 +195,8 @@ const Setting: React.FC = () => {
     //               className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
     //             />
     //           </div>
-    //           <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-    //             <button className="btn flex items-center justify-center commonBtn">
+    //           <div className=" sm:col-span-6 col-span-12 self-end">
+    //             <button className="btn flex items-center justify-center commonBtn text-xs h-[45px]">
     //               Submit
     //             </button>
     //           </div>
@@ -262,7 +212,7 @@ const Setting: React.FC = () => {
           {" "}
           <form action="" className="pb-3">
             <div className="grid gap-3 grid-cols-12">
-              <div className="md:col-span-4 sm:col-span-6 col-span-12">
+              <div className=" sm:col-span-6 col-span-12">
                 <label
                   htmlFor=""
                   className="form-label m-0 text-xs font-medium"
@@ -271,11 +221,11 @@ const Setting: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                 />
               </div>
-              <div className="md:col-span-4 sm:col-span-6 col-span-12 self-end">
-                <button className="btn flex items-center justify-center commonBtn">
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
                   Submit
                 </button>
               </div>
@@ -313,89 +263,424 @@ const Setting: React.FC = () => {
   const handleAccordionClick = (index: number) => {
     setOpenIndex(index === openIndex ? null : index);
   };
+
+  const LogoutFuc = async () =>{
+    try {
+      logoutStorage()
+      dispatch(
+        loginSet({
+          login: false,
+          walletAddress:  "",
+          signer: "",
+          username: "",
+          email: "",
+          passkeyCred: "",
+          webauthKey: "",
+          id: ""
+        })
+      );
+      toast.success("Logout Successfully!")
+    } catch (error) {
+      console.log("logout error --->",error)
+    }
+  }
   return (
     <>
-      <section className="position-relative dashboard py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12 my-2">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">Setting & Support</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12 my-2 hidden">
-              <div className="grid gap-3 grid-cols-12">
-                <div className=" col-span-12">
-                  <div
-                    className="flex nav navpillsTab  flex-nowrap border-b gap-2  overflow-x-auto pb-3"
-                    style={{ borderColor: "#424242" }}
-                  >
-                    {tabs &&
-                      tabs.length > 0 &&
-                      tabs.map((item, key) => (
-                        <button
-                          key={key}
-                          onClick={() => showTab(key)}
-                          className={`${
-                            activeTab === key && "active"
-                          } tab-button font-medium relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
-                        >
-                          {item.title}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-                <div className=" col-span-12">
-                  <div className={` tabContent pt-3`}>
-                    {tabs &&
-                      tabs.length > 0 &&
-                      tabs.map((item, key) => {
-                        if (activeTab !== key) return;
-                        return (
-                          <div
-                            key={key}
-                            id="tabContent1"
-                            className={`${
-                              activeTab === key && "block"
-                            } tab-content border-0`}
-                          >
-                            {item.content}
-                          </div>
-                        );
-                      })}
+      {setUp &&
+        createPortal(
+          <SetupRecoveryPop
+          setUp={setUp}
+          setSetUp={setSetUp}
+          />,
+          document.body
+        )}
+      <section className="relative dashboard pt-12">
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
+            <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-3">
+              <div className="col-span-12 ">
+                <div className="sectionHeader p-2 ">
+                  <div className="d-flex align-items-center gap-3">
+                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Setting & Support
+                    </h4>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-span-12">
-              <AccordionWrpper className="grid gap-3 grid-cols-12 pb-4">
-                <div className="col-span-12">
-                  {accordionTabs &&
-                    accordionTabs.length > 0 &&
-                    accordionTabs.map((item, key) => (
-                      <AccordionItem
-                        svg={false}
-                        key={key}
-                        wrpperClass={"my-3 AccordionItem"}
-                        onClick={() => handleAccordionClick(key)}
-                        isOpen={openIndex === key}
-                        btnClass={`accordionBtn flex items-center text-left gap-2 px-3 py-2 relative text-white font-medium`}
-                        btnIcnClass={``}
-                        title={item.title}
+              <div className="sm:col-span-4 col-span-12">
+                <div className="grid gap-3 grid-cols-12">
+                  <div className="col-span-12">
+                    <div className="rounded-12 bg-white/5 px-3 py-3 relative overflow-hidden z-[99]">
+                      <Image
+                        src={selectedBackground}
+                        height={100000}
+                        width={100000}
+                        quality={100}
+                        alt="Background"
+                        className="transition-opacity fill-mode-both pointer-events-none  inset-0 w-full scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700"
+                        style={{
+                          transform: "scale(1.25)",
+                          opacity: bgOpacity,
+                          height: 150, // 🔥 Dynamic Opacity from Context
+                        }}
+                      />
+                      <Image
+                        src={selectedWatermark}
+                        height={100000}
+                        width={100000}
+                        quality={100}
+                        alt=""
+                        className=" fill-mode-both mx-auto opacity-100 pointer-events-none absolute inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  z-[-1]"
+                        style={{ opacity: wmOpacity, height: "50%" }}
+                      />
+                      <div
+                        className="absolute left-0 right-0 bottom-0 w-full h-full flex-col justify-between flex"
+                        style={{ pointerEvents: "none" }}
                       >
-                        <div className="px-3">{item.content}</div>
-                      </AccordionItem>
-                    ))}
+                        <PreviewBox />
+                      </div>
+                    </div>
+                  </div>
+                  {/* <BlogCard classN={"col-span-12"} /> */}
                 </div>
-              </AccordionWrpper>
+              </div>
+              <div className="sm:col-span-8 col-span-12">
+                <div
+                  className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
+                >
+                  <div className="left">
+                    <h4 className="m-0 font-bold text-xl">Ritesh</h4>
+                    <ul className="list-none pl-0 mb-0 text-xs">
+                      <li className="flex gap-2">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 80 }}
+                        >
+                          wallet ID:
+                        </div>
+                        <span className="text-white flex items-center">
+                          asdrwrewerwe{" "}
+                          <button className="border-0 p-0 bg-transparent pl-1">
+                            {copyIcn}
+                          </button>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="right">
+                    {userAuth?.login && (  <button onClick={LogoutFuc}  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
+                      {logoutIcn} Logout
+                    </button>)}
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12">
+                <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Account
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your name and password
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
+                        href="/settings/account/change-name"
+                      >
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth={0}
+                          viewBox="0 0 24 24"
+                          className="shrink-0 opacity-80"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ width: 14, height: 14 }}
+                        >
+                          <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
+                        </svg>
+                        Change name
+                      </a>
+                      <a
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
+                        href="/settings/account/change-password"
+                      >
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth={0}
+                          viewBox="0 0 24 24"
+                          className="shrink-0 opacity-80"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                          style={{ width: 14, height: 14 }}
+                        >
+                          <path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z" />
+                        </svg>
+                        Change password
+                      </a>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper and theme
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {backgrounds.map((bg: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => {
+                                  selectBg(index);
+                                  getPreview();
+                                }}
+                                className="border-0 p-0 bg-transparent"
+                              >
+                                <Image
+                                  src={bg}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-cover rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper Opacity
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper opacity
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={bgOpacity}
+                          onChange={(e) => {
+                            changeBgOpacity(parseFloat(e.target.value));
+                            getPreview();
+                          }}
+                          className="w-full cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {watermarks.map((wm: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => selectWm(index)}
+                                className="border-0 p-0 bg-black rounded"
+                              >
+                                <Image
+                                  src={wm}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-contain rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark Opacity
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={wmOpacity}
+                          onChange={(e) =>
+                            changeWmOpacity(parseFloat(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Export Private Keys
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                        Export
+                      </button>
+                    </div>
+                  </div>
+                  {
+                    userAuth?.login &&  (<div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Setup Recovery
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={()=> setSetUp(!setUp)} className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                          Recover
+                        </button>
+                      </div>
+                    </div>)
+                  }
+                  
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        2FA
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        A second layer of security for your Umbrel login and
+                        apps
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked="false"
+                      data-state="unchecked"
+                      value="on"
+                      className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                    >
+                      <span
+                        data-state="unchecked"
+                        className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+                      />
+                    </button>
+                  </div>
+                  <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">
+                    {accordionTabs && accordionTabs.length > 0 && (
+                      <>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(0, Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                key={key}
+                                svg={false}
+                                wrpperClass={
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() => handleAccordionClick(key)}
+                                isOpen={openIndex === key}
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                        </div>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                key={key + Math.ceil(accordionTabs.length / 2)}
+                                svg={false}
+                                wrpperClass={
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() =>
+                                  handleAccordionClick(
+                                    key + Math.ceil(accordionTabs.length / 2)
+                                  )
+                                }
+                                isOpen={
+                                  openIndex ===
+                                  key + Math.ceil(accordionTabs.length / 2)
+                                }
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                        </div>
+                      </>
+                    )}
+                  </AccordionWrpper>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -406,16 +691,15 @@ const Setting: React.FC = () => {
 
 const AccordionWrpper = styled.div`
   .AccordionItem {
-    background: var(--cardBg);
-    backdrop-filter: blur(21.5px);
-    border-radius: 10px;
+    border-radius: 8px;
+    border: 1px solid #5252525e;
     .accordionBtn {
-      height: 70px;
       justify-content: start;
-      color: var(--textColor) !important;
+      ${"" /* color: var(--textColor) !important; */}
     }
     input {
       color: var(--textColor);
+      height: 45px;
     }
   }
 `;
@@ -526,5 +810,53 @@ const backIcn = (
       stroke-width="2"
       stroke-linejoin="round"
     />
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);
+
+const copyIcn = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
+      fill="currentColor"
+    />
+    <path
+      opacity="0.5"
+      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const logoutIcn = (
+  <svg
+    height={14}
+    width={14}
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C15.2713 2 18.1757 3.57078 20.0002 5.99923L17.2909 5.99931C15.8807 4.75499 14.0285 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C14.029 20 15.8816 19.2446 17.2919 17.9998L20.0009 17.9998C18.1765 20.4288 15.2717 22 12 22ZM19 16V13H11V11H19V8L24 12L19 16Z"></path>
   </svg>
 );

@@ -1,9 +1,6 @@
-
 import { CowSwapWidget } from "@cowprotocol/widget-react";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
-import { getAccounts, getSmartAccount } from "../../lib/pimlicoWallet";
-import { createProviderCowSwap } from "../../lib/customProvider";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 // Parameters for CowSwapWidget
@@ -34,8 +31,6 @@ const cowSwapParams = {
   hideOrdersTable: false,
 };
 
-
-
 const Swap = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
@@ -50,23 +45,17 @@ const Swap = () => {
   };
 
   const createProvider = async () => {
-   let prov = await getSmartAccount();
-   console.log("prov--->",prov)
-   let newProv = await createProviderCowSwap(prov?.safeAccount,prov?._smartAccountClient )
-   console.log("newProv-->",newProv )
-   setProvider(newProv)
-    // if (userAuth?.passkeyCred) {
-    //   let account = await getAccounts(userAuth?.passkeyCred)
-    //   console.log("account---<",account)
-    //   if(account){
-    //     setProvider(account?.cowSwapProvider)
-    //   }
-    // }
-
-  }
+    if (userAuth?.passkeyCred) {
+      let account = false;
+      console.log("account---<", account);
+      if (account) {
+        // setProvider(account?.cowSwapProvider)
+      }
+    }
+  };
   useEffect(() => {
-    createProvider()
-  }, [])
+    createProvider();
+  }, []);
 
   return (
     <>
@@ -74,24 +63,11 @@ const Swap = () => {
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">Cowswap</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12">
               <CowSwapCard>
-              <CowSwapWidget
-                params={cowSwapParams}
-                provider={provider} // Use the adapted provider
-              />
+                <CowSwapWidget
+                  params={cowSwapParams}
+                  provider={provider} // Use the adapted provider
+                />
               </CowSwapCard>
             </div>
           </div>
@@ -101,15 +77,15 @@ const Swap = () => {
   );
 };
 const CowSwapCard = styled.div`
- > div {
-  display: flex;
-  justify-content: center; 
- }
+  > div {
+    display: flex;
+    justify-content: center;
+  }
   iframe {
     max-width: 450px;
     border-radius: 25px;
   }
-`
+`;
 export default Swap;
 
 // Back button icon
@@ -135,4 +111,3 @@ const backIcn = (
 function useSelecto(arg0: (state: any) => any) {
   throw new Error("Function not implemented.");
 }
-

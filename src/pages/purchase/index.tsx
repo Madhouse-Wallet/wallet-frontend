@@ -25,7 +25,7 @@ const PurchasePage: React.FC = () => {
   };
   return (
     <>
-      <section className="position-relative dashboard py-3">
+      <section className="relative dashboard py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12 my-2">
@@ -44,7 +44,7 @@ const PurchasePage: React.FC = () => {
             <div className="col-span-12 my-2">
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12 my-2">
-                  <CardCstm className="position-relative p-3 p-lg-4 rounded-3">
+                  <CardCstm className="relative p-3 lg:p-6 rounded-3">
                     <div className="top pb-3">
                       <h4 className="m-0 fw-bold">Details</h4>
                     </div>

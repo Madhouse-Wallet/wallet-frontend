@@ -2,9 +2,6 @@ import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { extractPasskeyData } from "@safe-global/protocol-kit";
-import { create, get } from "../../../lib/passkey";
-import { getAccounts, createAccount, createSafeAccount } from "../../../lib/pimlicoWallet";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import loginVerify from "./loginVerify";
@@ -141,11 +138,9 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
-          const authenticated = await get(
-            base64ToBuffer(userExist.userId.rawId)
-          );
+          const authenticated = false;
           if (authenticated) {
-            let account = await getAccounts(userExist.userId.passkey);
+            let account = false;
             console.log("account-->", account);
             if (account) {
               toast.success("Login Successfully!");
@@ -189,15 +184,11 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
-        let account = await createSafeAccount(registerEmail);
-        let createdCredential = false
-        // const createdCredential = await create(registerEmail);
+        const createdCredential = false;
         if (createdCredential) {
-          // let account = await createSafeAccount(createdCredential);
-        
+          let account = false;
           // account, smartAccountClient
           console.log("account-->", account?.account?.address);
-          // const passkey = await extractPasskeyData(createdCredential)
           let data = await addUser(
             registerEmail,
             registerUsername,
@@ -252,22 +243,20 @@ const LoginPop = ({ login, setLogin }) => {
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
-          console.log("OTP-->",OTP)
-          setRegisterTab(2);
-          // let obj = {
-          //   email: registerEmail,
-          //   name: registerUsername,
-          //   otp: OTP,
-          //   subject: "Madhouse Account Verification OTP",
-          //   type: "registerOtp",
-          // };
-          // let sendEmailData = await sendOTP(obj);
-          // if (sendEmailData.status && sendEmailData.status == "success") {
-          //   setRegisterTab(2);
-          //   toast.success(sendEmailData?.message);
-          // } else {
-          //   toast.error(sendEmailData?.message || sendEmailData?.error);
-          // }
+          let obj = {
+            email: registerEmail,
+            name: registerUsername,
+            otp: OTP,
+            subject: "Madhouse Account Verification OTP",
+            type: "registerOtp",
+          };
+          let sendEmailData = await sendOTP(obj);
+          if (sendEmailData.status && sendEmailData.status == "success") {
+            setRegisterTab(2);
+            toast.success(sendEmailData?.message);
+          } else {
+            toast.error(sendEmailData?.message || sendEmailData?.error);
+          }
         }
       }
       setRegisterOtpLoading(false);
@@ -486,7 +475,7 @@ const LoginPop = ({ login, setLogin }) => {
                   );
                 })}
             </div>
-            {/* <div className="formInner position-relative px-lg-3">
+            {/* <div className="formInner relative px-lg-3">
               <div className="w-100 inner text-center">
                 <h2 className="m-0 fw-bold themeClr pb-3 pb-lg-4">
                   Use Safe Account via Passkeys
@@ -501,7 +490,7 @@ const LoginPop = ({ login, setLogin }) => {
                   </button>
                 </div>
                 <div
-                  className={`py-3 py-lg-4 position-relative d-flex align-items-center justify-content-center`}
+                  className={`py-3 py-lg-4 relative d-flex align-items-center justify-content-center`}
                 >
                   <p className="m-0 px-2  fw-light">OR</p>
                 </div>

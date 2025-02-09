@@ -10,71 +10,20 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 // css
 
 // image
 
 const TableLayout = ({ column, data }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
-      {/* <div className="relative w-full overflow-auto">
-        <TableC className="w-full caption-bottom text-sm">
-          <thead className="">
-            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              {column &&
-                column.length > 0 &&
-                column.map((item, key) => (
-                  <>
-                    <th
-                      key={key}
-                      className="h-10 px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
-                    >
-                      {item.head}
-                    </th>
-                  </>
-                ))}
-            </tr>
-          </thead>
-          <tbody className="[&_tr:last-child]:border-0">
-            {data &&
-              data?.length > 0 &&
-              data.map((data, columnkey) => {
-                return (
-                  <tr
-                    key={columnkey}
-                    className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-                  >
-                    {column &&
-                      column.length > 0 &&
-                      column.map((item, key) => {
-                        if (item.component) {
-                          return (
-                            <td
-                              key={key}
-                              className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
-                            >
-                              {item.component(data, columnkey, data)}
-                            </td>
-                          );
-                        }
-
-                        return (
-                          <td
-                            key={key}
-                            className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
-                          >
-                            {data[item?.accessor]}
-                          </td>
-                        );
-                      })}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </TableC>
-      </div> */}
-      <TableC className="w-full caption-bottom text-sm">
+      <TableC
+        className={`divide-white/6 bg-white/5 w-full caption-bottom text-sm divide-y  rounded-12 `}
+      >
         <TableHeader>
           <TableRow className="border-0">
             {column &&
@@ -83,7 +32,7 @@ const TableLayout = ({ column, data }) => {
                 <>
                   <TableHead
                     key={key}
-                    className="h-10 px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                    className={`bg-[rgba(255,255,255,0.08)]  backdrop-blur-[7.747px] h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
                   >
                     {item.head}
                   </TableHead>
@@ -97,10 +46,7 @@ const TableLayout = ({ column, data }) => {
             data.map((data, columnkey) => {
               return (
                 <>
-                  <TableRow
-                    key={columnkey}
-                    className="border-0 bg-[var(--cardBg2)] hover:bg-[var(--backgroundColor)]"
-                  >
+                  <TableRow key={columnkey} className="border-0">
                     {column &&
                       column.length > 0 &&
                       column.map((item, key) => {
@@ -109,7 +55,7 @@ const TableLayout = ({ column, data }) => {
                             <>
                               <TableCell
                                 key={key}
-                                className="h-10 p-2 border-0 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                                className="h-10 p-2 px-lg-4 text-left align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
                               >
                                 {item.component(data, columnkey, data)}
                               </TableCell>
@@ -120,7 +66,7 @@ const TableLayout = ({ column, data }) => {
                         return (
                           <TableCell
                             key={key}
-                            className="h-10 p-2  text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                            className="h-10 p-2 px-lg-4 text-left align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
                           >
                             {data[item?.accessor]}
                           </TableCell>
@@ -140,16 +86,31 @@ const TableC = styled(Table)`
   th,
   td {
     padding: 10px 15px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 20px;
     max-width: 200px;
     min-width: 120px;
     vertical-align: middle;
+    border: 0;
+    box-shadow: unset !important;
   }
   thead {
+    tr > th:first-child {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+    tr > th:last-child {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+    tr {
+      border-bottom: 0 !important;
+    }
     th {
       font-weight: 400;
-      background-color: var(--cardBg);
+      ${"" /* background-color: var(--cardBg); */}
+
+      backdrop-filter: blur(39.6px);
       white-space: nowrap;
       color: var(--textColor);
     }

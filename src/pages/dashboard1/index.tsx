@@ -43,7 +43,7 @@ interface BtcCardItem {
   list: string[];
 }
 
-const Dashboard: React.FC = () => {
+const Dashboard1: React.FC = () => {
   const cardData: CardData[] = [
     { head: "Total Deposit", value: "$234234", icn: icn1 },
     { head: "Earned", value: "$234234", icn: icn2 },
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
           />,
           document.body
         )}
-      <section className="position-relative dashboard py-3">
+      <section className="relative dashboard py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="my-2 col-span-12">
@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard1;
 
 const icn1 = (
   <svg

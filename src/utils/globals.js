@@ -32,3 +32,46 @@ export const base64ToBuffer = (base64) => {
         return null; // Handle error as needed (e.g., return an empty buffer or throw an error)
     }
 };
+
+export const storedataLocalStorage = async (data, name) => {
+    try {
+        localStorage.setItem(name, JSON.stringify(data));
+        return true
+    } catch (error) {
+        console.log("storedataLocalStorage error--->", error)
+        return true
+    }
+}
+
+export const logoutStorage = async () => {
+    try {
+        localStorage.removeItem("authUser");
+        localStorage.clear();   
+        return true
+    } catch (error) {
+        console.log("storedataLocalStorage error--->", error)
+        return true
+    }
+}
+
+export const webAuthKeyStore = async (webAuthnKey) => {
+    try {
+        return {
+            authenticatorId: (webAuthnKey.authenticatorId),
+            authenticatorIdHash: (webAuthnKey.authenticatorIdHash),
+            pubX: BigInt(webAuthnKey.pubX).toString(),
+            pubY: BigInt(webAuthnKey.pubY).toString(),
+            rpID: "",
+        }
+    } catch (error) {
+        console.log("webAuthKeyStore error -->",error)
+    }
+}
+
+export const isValidEmail = async (email) => {
+    // Define the email regex pattern
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Test the email against the regex
+    return emailRegex.test(email);
+}

@@ -25,7 +25,7 @@ const StakeBitcoin: React.FC = () => {
   return (
     <>
       <section
-        className="position-relative flex items-center dashboard py-3"
+        className="relative flex items-center dashboard py-3"
         style={{ minHeight: 500 }}
       >
         <div className="container">

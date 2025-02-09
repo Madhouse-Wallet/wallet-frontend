@@ -20,7 +20,7 @@ const BuyBitcoin = ({ buy, setBuy }) => {
         <div
           className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >
-          <div className={`position-relative rounded`}>
+          <div className={`relative rounded`}>
             <button
               onClick={handleBuy}
               className="border-0 p-0 position-absolute"
