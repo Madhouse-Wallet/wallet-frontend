@@ -144,7 +144,7 @@ const CreateWallet = () => {
         toast.error("User Already Exist!");
         return false;
       }
-      const createdWebAuthKey = await registerPasskey(registerData.username);
+      const createdWebAuthKey = await registerPasskey(registerData.email + "_passkey_1");
       if (!createdWebAuthKey.status) {
         toast.error(createdWebAuthKey.msg);
         return false;
@@ -164,10 +164,11 @@ const CreateWallet = () => {
             return false;
           } else {
             console.log("new account-->", account, address);
+            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
             let data = await addUser(
               registerData.email,
               registerData.username,
-              "",
+              [webAuthKeyStringObj],
               "",
               "",
               address
@@ -186,7 +187,7 @@ const CreateWallet = () => {
                 id: data.userData._id
               })
             );
-            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+          
             storedataLocalStorage({
               login: true,
               walletAddress: address || "",
@@ -244,27 +245,27 @@ const CreateWallet = () => {
       } else {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
-        // console.log("OTP-->", OTP)
+        console.log("OTP-->", OTP)
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
-        let obj = {
-          email: data.email,
-          name: data.username,
-          otp: OTP,
-          subject: "Madhouse Account Verification OTP",
-          type: "registerOtp",
-        };
-        let sendEmailData = await sendOTP(obj);
-        if (sendEmailData.status && sendEmailData.status == "success") {
-          toast.success(sendEmailData?.message);
-          return true;
-        } else {
-          toast.error(sendEmailData?.message || sendEmailData?.error);
-          return false;
-        }
+        return true;
+        // let obj = {
+        //   email: data.email,
+        //   name: data.username,
+        //   otp: OTP,
+        //   subject: "Madhouse Account Verification OTP",
+        //   type: "registerOtp",
+        // };
+        // let sendEmailData = await sendOTP(obj);
+        // if (sendEmailData.status && sendEmailData.status == "success") {
+        //   toast.success(sendEmailData?.message);
+        //   return true;
+        // } else {
+        //   toast.error(sendEmailData?.message || sendEmailData?.error);
+        //   return false;
+        // }
       }
     } catch (error) {
       console.log("sendRegisterOtp error---->", error);

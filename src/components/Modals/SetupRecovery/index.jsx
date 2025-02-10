@@ -15,7 +15,10 @@ import {
   doRecovery,
 } from "../../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-
+import {
+  getUser,
+  updtUser,
+} from "../../../lib/apiCall";
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -25,20 +28,24 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const [phrase, setPhrase] = useState();
   console.log(userAuth);
 
+
+
+
+
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true)
-      console.log(
-        "ph",
-        phrase.trim().split(" ").length,
-        phrase.trim().split(" ")
-      );
+      // console.log(
+      //   "ph",
+      //   phrase.trim().split(" ").length,
+      //   phrase.trim().split(" ")
+      // );
       if (!userAuth?.login) {
         setLoadingNewSigner(false)
         return toast.error("Please Login!")
       }
       if (phrase && phrase.trim().split(" ").length == 12) {
-        console.log(userAuth);
+        // console.log(userAuth);
         let checkAccount = await getRecoverAccount(
           userAuth?.walletAddress,
           userAuth?.passkeyCred,
@@ -65,41 +72,55 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const createNewSigner = async () => {
     try {
       setLoadingNewSigner(true)
-      let checkAccount = await doRecovery(
-        userAuth?.walletAddress,
-        userAuth?.passkeyCred,
-        phrase.trim()
-      );
-      if (checkAccount.status) {
-        console.log("checkAccount--<?>",checkAccount)
-        // passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
-        dispatch(
-          loginSet({
-            login: userAuth.login,
+      // updtUser
+      let userExist = await getUser(userAuth.email);
+      if (userExist.status && userExist.status == "failure") {
+        toast.error("User Not Found!");
+      } else {
+        let passkeyNo = ((userExist?.userId?.passkey_number && (userExist?.userId?.passkey_number + 1)) || 2);
+        let checkAccount = await doRecovery(
+          userAuth?.walletAddress,
+          userAuth?.passkeyCred,
+          phrase.trim(),
+          (userAuth.email + "_passkey_" + passkeyNo)
+        );
+        if (checkAccount.status) {
+          // console.log("checkAccount--<?>", checkAccount)
+          let webAuthKeyStringObj = await webAuthKeyStore(checkAccount.newwebAuthKey)
+          let data = await updtUser({ email: userAuth.email }, {
+            $push: { passkey: webAuthKeyStringObj },
+            $set: { passkey_number: passkeyNo } // Ensure this is inside `$set`
+          })
+          // console.log("updated data==>",data)
+          // passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
+          dispatch(
+            loginSet({
+              login: userAuth.login,
+              username: userAuth.username,
+              email: userAuth.email,
+              walletAddress: userAuth.walletAddress,
+              passkeyCred: checkAccount.passkeyValidatorNew,
+              webauthKey: checkAccount.newwebAuthKey,
+              id: userAuth.id,
+              signer: userAuth.signer,
+            })
+          );
+          storedataLocalStorage({
+            login: true,
+            walletAddress: userAuth.walletAddress || "",
+            signer: "",
             username: userAuth.username,
             email: userAuth.email,
-            walletAddress: userAuth.walletAddress,
-            passkeyCred: checkAccount.passkeyValidatorNew,
-            webauthKey: checkAccount.newwebAuthKey,
-            id: userAuth.id,
-            signer: userAuth.signer,
-          })
-        );
-        let webAuthKeyStringObj = await webAuthKeyStore(checkAccount.newwebAuthKey)
-        storedataLocalStorage({
-          login: true,
-          walletAddress: userAuth.walletAddress || "",
-          signer: "",
-          username: userAuth.username,
-          email: userAuth.email,
-          passkeyCred: "",
-          webauthKey: webAuthKeyStringObj,
-          id: userAuth.id
-        }, "authUser")
-        toast.success("New Key Recovered!");
-      } else {
-        toast.error(checkAccount.msg);
+            passkeyCred: "",
+            webauthKey: webAuthKeyStringObj,
+            id: userAuth.id
+          }, "authUser")
+          toast.success("New Key Recovered!");
+        } else {
+          toast.error(checkAccount.msg);
+        }
       }
+
       setLoadingNewSigner(false)
       // doRecoveryNewSigner
     } catch (error) {

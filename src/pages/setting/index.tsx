@@ -13,6 +13,9 @@ import PreviewBox from "./preview";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
+import { zeroTrxn,getAccount } from "@/lib/zeroDevWallet";
+
+
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 
@@ -572,12 +575,17 @@ const Setting: React.FC = () => {
                   >
                     <div className="flex flex-col gap-1">
                       <h3 className="text-xs font-medium leading-none -tracking-2">
-                        Export Private Keys
+                        Test Trxn
                       </h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
-                        Export
+                      <button onClick={async ()=>{
+                        let account = await getAccount(userAuth?.passkeyCred, userAuth?.walletAddress);
+
+                       await zeroTrxn(account?.kernelClient)
+
+                      }}className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                        Zero Trxn
                       </button>
                     </div>
                   </div>

@@ -78,15 +78,15 @@ const publicClient = createPublicClient({
   chain: CHAIN
 })
 
-const accountClient = async (signer1) => {
+const accountClient = async (signer1,accountAddress) => {
   try {
     const account = await createKernelAccount(publicClient, {
       entryPoint,
       plugins: {
         sudo: signer1
       },
-      kernelVersion: KERNEL_V3_1
-
+      kernelVersion: KERNEL_V3_1,
+      address: accountAddress,
     });
     console.log("account accountClient-->", account)
 
@@ -225,6 +225,7 @@ const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
       },
       address: accountAddress,
     });
+    console.log("account, t", account)
 
     const kernelClient = createWeightedKernelAccountClient({
       account,
@@ -261,7 +262,7 @@ export const getProvider = async (kernelClient) => {
   }
 }
 
-const zeroTrxn = async (kernelClient) => {
+export const zeroTrxn = async (kernelClient) => {
   try {
 
 
@@ -347,9 +348,9 @@ export const createAccount = async (signer1, phrase) => {
 }
 
 
-export const getAccount = async (signer1) => {
+export const getAccount = async (signer1,  address="") => {
   try {
-    const getAccount = await accountClient(signer1)
+    const getAccount = await accountClient(signer1, address)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"
@@ -386,7 +387,7 @@ export const getRecoverAccount = async (address, signer1, phrase) => {
 
 
 
-export const doRecovery = async (address, signer1, phrase) => {
+export const doRecovery = async (address, signer1, phrase, name) => {
   try {
     const getAccount = await accountRecoveryCreateClient(address, signer1, phrase)
     if (!getAccount) {
@@ -395,7 +396,7 @@ export const doRecovery = async (address, signer1, phrase) => {
       }
     }
     console.log("create getRecoverAccount-->", getAccount)
-    const publicKey3 = await registerPasskey("random12");
+    const publicKey3 = await registerPasskey(name);
     console.log("publicKey3.webAuthnKey-->", publicKey3.webAuthnKey)
     //newPasskeyValidator
     const passkeyValidator1 = await passkeyValidator(publicKey3.webAuthnKey);
@@ -525,9 +526,10 @@ export const doRecoveryNewSigner = async (signer1, phrase, newSigner) => {
 
 
 //this function works
-export const getTrxn = async (signer1) => {
+export const getTrxn = async (signer1, address=""
+) => {
   try {
-    const getAccount = await accountClient(signer1)
+    const getAccount = await accountClient(signer1, address)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"

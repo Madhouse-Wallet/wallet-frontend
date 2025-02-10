@@ -42,7 +42,7 @@ const Login = () => {
       console.log("error-->", error);
     }
   };
-  const getUser = async (email) => {
+  const getUser = async (email, type = "", webAuthKey = "") => {
     try {
       try {
         // console.log(email)
@@ -51,6 +51,8 @@ const Login = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
+            type,
+            webAuthKey
           }),
         })
           .then((res) => res.json())
@@ -98,7 +100,14 @@ const Login = () => {
               toast.error(msg);
               return false;
             } else {
-              if (userExist.userId.wallet == address) {
+              let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+              userExist = await getUser(data.email, "passkeyCheck",
+                webAuthKeyStringObj);
+              if (userExist.status && userExist.status == "failure") {
+                toast.error("Login failed! Please use the correct email and passkey. Account not found.");
+                return false;
+              }
+              // if (userExist.userId.wallet == address) {
                 toast.success("Login Successfully!");
                 console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
                 dispatch(
@@ -113,7 +122,7 @@ const Login = () => {
                     id: userExist.userId._id
                   })
                 );
-                let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+
                 storedataLocalStorage({
                   login: true,
                   walletAddress: address || "",
@@ -125,10 +134,10 @@ const Login = () => {
                   id: userExist.userId._id
                 }, "authUser")
                 return true;
-              } else {
-                toast.error("Login failed! Please use the correct email and passkey. Account not found.");
-                return false;
-              }
+              // } else {
+              //   toast.error("Login failed! Please use the correct email and passkey. Account not found.");
+              //   return false;
+              // }
             }
           }
         }
