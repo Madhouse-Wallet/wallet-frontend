@@ -6,18 +6,18 @@ import QRCode from "qrcode";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const LightningTab = (walletAddress) => {
+const LightningSendTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState(""); // State for amount
+  const [amount, setInvoice] = useState(""); // State for amount
   const [error, setError] = useState("");
   const [isCopied, setIsCopied] = useState({
     one: false,
     two: false,
     three: false,
   });
-  const [invoice, setInvoice] = useState("");
+  const [sendWalletAddress, setSendWalletAddress] = useState("");
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -47,17 +47,14 @@ const LightningTab = (walletAddress) => {
     }
   };
 
-  const createSwap = async (amount, walletAddress) => {
+  const createReverseSwap = async (invoice) => {
     try {
-      const response = await fetch("/api/swap/route", {
+      const response = await fetch("/api/swap/reverseSwap", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          invoiceAmount: amount,
-          destinationAddress: walletAddress,
-        }),
+        body: JSON.stringify({ invoice }),
       });
 
       const data = await response.json();
@@ -82,25 +79,26 @@ const LightningTab = (walletAddress) => {
   };
 
   const handleNext = async () => {
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      setError("Please enter a valid amount");
-      return;
-    }
+    // if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+    //   setError("Please enter a valid amount");
+    //   return;
+    // }
 
     setError("");
     setLoading(true);
       console.log("line-59", walletAddress?.walletAddress);
-      const result = await createSwap(Number(amount),walletAddress?.walletAddress);
+      const result = await createReverseSwap(amount);
 
       if (result.status === "error") {
         setError(result.error);
         setLoading(false);
         return;
       }
-      console.log("Swap created:", result?.data?.invoice);
+      console.log("Swap created:", result);
       setStep(2);
-      generateQRCode(result?.data?.invoice);
-      setInvoice(result?.data?.invoice);
+      generateQRCode(result?.data?.address);
+      setSendWalletAddress(result?.data?.address);
+      // Use data.data.invoice for the Lightning invoice
   };
 
   const splitAddress = (address, charDisplayed = 10) => {
@@ -119,13 +117,13 @@ const LightningTab = (walletAddress) => {
                 htmlFor="btcAmount"
                 className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
               >
-                Enter BTC Amount
+                Enter Invoice
               </label>
               <input
                 id="btcAmount"
                 type="text"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setInvoice(e.target.value)}
                 className="form-control text-[var(--textColor)] focus:text-[var(--textColor)] bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
               />
               {error && (
@@ -151,7 +149,7 @@ const LightningTab = (walletAddress) => {
         ) : step == 2 ? (
           <div className="py-2">
             <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
-              Use this generated address to send Lightening BTC.
+              Use this generated address to send BTC.
             </p>
             <Image
               src={qrCode}
@@ -169,13 +167,13 @@ const LightningTab = (walletAddress) => {
                 data-tooltip-content={"walletAddress"}
                 style={{ maxWidth: 200 }}
               >
-                {splitAddress(invoice)}
+                {splitAddress(sendWalletAddress)}
               </p>
             </div>
             <div className="py-2">
               <button
                 type="button"
-                onClick={() => handleCopy(invoice, "one")}
+                onClick={() => handleCopy(sendWalletAddress, "one")}
                 className="btn flex items-center justify-center w-full commonBtn p-0 bg-transparent themeClr"
               >
                 Copy Invoice
@@ -189,7 +187,7 @@ const LightningTab = (walletAddress) => {
   );
 };
 
-export default LightningTab;
+export default LightningSendTab;
 
 const copyIcn = (
   <svg
