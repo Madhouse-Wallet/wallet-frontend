@@ -12,25 +12,11 @@ const LightningTab = (walletAddress) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(""); // State for amount
   const [error, setError] = useState("");
-  const [isCopied, setIsCopied] = useState({
-    one: false,
-    two: false,
-    three: false,
-  });
+ 
   const [invoice, setInvoice] = useState("");
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
-      setIsCopied((prev) => ({ ...prev, [type]: true }));
-      setTimeout(
-        () =>
-          setIsCopied({
-            one: false,
-            two: false,
-            three: false,
-          }),
-        2000
-      ); // Reset the copied state after 2 seconds
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -111,7 +97,6 @@ const LightningTab = (walletAddress) => {
 
   return (
     <>
-      <form action="">
         {step == 1 ? (
           <>
             <div className="py-2">
@@ -173,7 +158,6 @@ const LightningTab = (walletAddress) => {
               />
               <button
                 onClick={() => handleCopy(invoice, "one")}
-              
                 className="rounded-4 px-1.5 ring-inset transition-colors hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 data-state="closed"
               >
@@ -219,7 +203,6 @@ const LightningTab = (walletAddress) => {
             </div> */}
           </div>
         ) : null}
-      </form>
     </>
   );
 };
