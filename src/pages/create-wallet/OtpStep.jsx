@@ -84,6 +84,7 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
                   value={registerOTP}
                   onChange={setRegisterOTP}
                   numInputs={4}
+                  inputType={"number"}
                   renderSeparator={<span></span>}
                   renderInput={(props) => <input {...props} />}
                 />

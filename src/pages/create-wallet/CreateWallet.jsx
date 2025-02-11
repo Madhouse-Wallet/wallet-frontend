@@ -18,10 +18,12 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
       if (!registerEmail) {
         toast.error("Please Enter Email!");
         setRegisterOtpLoading(false);
-      } else if (!registerUsername) {
-        toast.error("Please Enter Passkey Name!");
-        setRegisterOtpLoading(false);
-      } else {
+      }
+      //  else if (!registerUsername) {
+      //   toast.error("Please Enter Passkey Name!");
+      //   setRegisterOtpLoading(false);
+      // }
+       else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
@@ -88,7 +90,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                   Incorrect email
                 </div> */}
             </div>
-            <div className="col-span-12">
+            {/* <div className="col-span-12">
               <div className="relative">
                 <input
                   type="text"
@@ -99,11 +101,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                   defaultValue=""
                 />
               </div>
-              {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
-                  {infoIcn}
-                  Incorrect email
-                </div> */}
-            </div>
+            </div> */}
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
