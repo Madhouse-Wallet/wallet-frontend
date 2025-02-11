@@ -21,16 +21,6 @@ const LightningSendTab = (walletAddress) => {
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
-      setIsCopied((prev) => ({ ...prev, [type]: true }));
-      setTimeout(
-        () =>
-          setIsCopied({
-            one: false,
-            two: false,
-            three: false,
-          }),
-        2000
-      ); // Reset the copied state after 2 seconds
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -109,7 +99,6 @@ const LightningSendTab = (walletAddress) => {
 
   return (
     <>
-      <form action="">
         {step == 1 ? (
           <>
             <div className="py-2">
@@ -163,14 +152,14 @@ const LightningSendTab = (walletAddress) => {
             <div className="flex max-w-full items-stretch rounded-4 border border-dashed border-white/5 bg-white/4 text-14 leading-none text-white/40 outline-none focus-visible:border-white/40">
               <input
                 data-tooltip-id="my-tooltip"
-                data-tooltip-content={invoice || "address"}
+                data-tooltip-content={sendWalletAddress || "address"}
                 className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
                 type="text"
                 defaultValue={"Address"}
-                value={invoice || "incoice"}
+                value={sendWalletAddress || "incoice"}
               />
               <button
-                onClick={() => handleCopy(invoice, "one")}
+                onClick={() => handleCopy(sendWalletAddress, "one")}
               
                 className="rounded-4 px-1.5 ring-inset transition-colors hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                 data-state="closed"
@@ -216,7 +205,6 @@ const LightningSendTab = (walletAddress) => {
             </div> */}
           </div>
         ) : null}
-      </form>
     </>
   );
 };

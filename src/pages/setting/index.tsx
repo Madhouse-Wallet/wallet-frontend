@@ -1,5 +1,6 @@
 "use client";
 import BTCAddressPop from "@/components/Modals/BtcAddressPop";
+import ConfirmationPop from "@/components/Modals/ConfirmationPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -38,6 +39,7 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
     const userAuth = useSelector((state: any) => state.Auth);
     const [setUp, setSetUp] = useState<boolean>(false);
+    const [ confirm, setConfirm ] = useState<boolean>(false);
   const getPreview = async () => {
     try {
       console.log("email");
@@ -294,6 +296,14 @@ const Setting: React.FC = () => {
           <SetupRecoveryPop
           setUp={setUp}
           setSetUp={setSetUp}
+          />,
+          document.body
+        )}
+        {confirm &&
+        createPortal(
+          <ConfirmationPop
+          confirm={confirm}
+          setConfirm={setConfirm}
           />,
           document.body
         )}
@@ -602,6 +612,25 @@ const Setting: React.FC = () => {
                       <div className="flex flex-wrap gap-2">
                         <button onClick={()=> setSetUp(!setUp)} className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
                           Recover
+                        </button>
+                      </div>
+                    </div>)
+                  }
+
+
+{
+                    userAuth?.login &&  (<div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                         Delete Account
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={()=> setConfirm(!confirm)} className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                          Delete
                         </button>
                       </div>
                     </div>)

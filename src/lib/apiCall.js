@@ -51,3 +51,30 @@ export const updtUser = async (findData, updtData) => {
         return false;
     }
 };
+
+
+
+export const delUser = async (email) => {
+    try {
+        try {
+            return await fetch(`/api/del-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    // console.log("data-->", data);
+                    return data;
+                });
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    } catch (error) {
+        console.log("error-->", error);
+        return false;
+    }
+};
