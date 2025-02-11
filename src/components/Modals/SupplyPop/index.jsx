@@ -28,7 +28,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
 
   const addSupply = async () => {
     if (!providerr) {
-      return toast.error("Please Coonect to wallet");
+      return toast.error("Please Connect to wallet");
     }
     setNextButton(true);
     const web3 = new Web3Interaction("sepolia", providerr);
@@ -69,10 +69,11 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
             setProviderr(provider?.ethersProvider);
           }
         }
-      } else {
-        toast.error("Please Login");
-        return;
-      }
+      } 
+      // else {
+      //   toast.error("Please Login");
+      //   return;
+      // }
     };
 
     connectWallet();

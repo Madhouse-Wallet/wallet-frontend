@@ -27,7 +27,7 @@ const CounterList = ({ data }) => {
           data.map((item, key) => (
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
-                onClick={() => setLiveBlog(!liveBlog)}
+                // onClick={() => setLiveBlog(!liveBlog)}
                 style={{ opacity: 1, transform: "none" }}
               >
                 <div className="flex w-full flex-col items-center justify-between ">
@@ -47,9 +47,9 @@ const CounterList = ({ data }) => {
                       </div>
                     </div>
                     <div className="flex-1" />
-                    <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                    {/* <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                       +20.1% from last month
-                    </div>
+                    </div> */}
                     <div
                       aria-valuemax={100}
                       aria-valuemin={0}

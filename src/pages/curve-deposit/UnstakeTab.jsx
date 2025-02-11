@@ -1,6 +1,185 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import Web3Interaction from "../../utils/web3Interaction";
+import { toast } from "react-toastify";
 
-const UnstakeTab = () => {
+const UnstakeTab = ({ provider, account }) => {
+  // LP Token contract address (replace with actual address)
+  const LP_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_CURVE_POOL_CONTRACT_ADDRESS;
+  const SPENDER_ADDRESS = process.env.NEXT_PUBLIC_CURVE_DEPOSIT_CONTRACT_ADDRESS;
+
+  const [lpTokenBalance, setLpTokenBalance] = useState("0");
+  const [unstakeAmount, setUnstakeAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState(false);
+
+  // Fetch LP Token balance
+  const fetchLPTokenBalance = async () => {
+    if (!provider || !account) return;
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+      const balance = await web3.balanceOf(LP_TOKEN_ADDRESS, account);
+
+      // Convert balance to a readable format
+      const formattedBalance = ethers.utils.formatUnits(balance, 18); // Assuming 18 decimals
+      setLpTokenBalance(formattedBalance);
+    } catch (error) {
+      console.error("Error fetching LP Token balance:", error);
+    }
+  };
+
+  // Handle approval of LP tokens
+  const handleApprove = async () => {
+    if (!provider) {
+      toast.error("Please connect your wallet.");
+      return;
+    }
+
+    if (!unstakeAmount || parseFloat(unstakeAmount) <= 0) {
+      toast.error("Please enter a valid unstake amount.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Check current allowance
+      const currentAllowance = await web3.allowance(
+        LP_TOKEN_ADDRESS,
+        account,
+        SPENDER_ADDRESS
+      );
+
+      // Convert unstake amount to BigNumber
+      const unstakeAmountBN = ethers.utils.parseUnits(unstakeAmount, 18);
+
+      // Check if approval is needed
+      if (currentAllowance.lt(unstakeAmountBN)) {
+        // Use max uint256 for unlimited approval
+        const MAX_UINT256 =
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+        await web3.approve(LP_TOKEN_ADDRESS, SPENDER_ADDRESS, MAX_UINT256);
+
+        toast.success("Approval successful!");
+      } else {
+        toast.info("Sufficient allowance already exists.");
+      }
+
+      // Update approval status
+      setApprovalStatus(true);
+    } catch (error) {
+      console.error("Approval error:", error);
+      toast.error("Approval failed");
+      setApprovalStatus(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle unstaking of LP tokens
+  const handleUnstake = async () => {
+    if (!provider) {
+      toast.error("Please connect your wallet.");
+      return;
+    }
+
+    // Validate unstake amount
+    if (!unstakeAmount || parseFloat(unstakeAmount) <= 0) {
+      toast.error("Please enter a valid unstake amount.");
+      return;
+    }
+
+    if (parseFloat(unstakeAmount) > parseFloat(lpTokenBalance)) {
+      toast.error("Insufficient LP Token balance.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Format unstake amount
+      const formattedAmount = ethers.utils.parseUnits(unstakeAmount, 18);
+
+      // Call unstake function
+      // Replace with actual unstake method from your contract
+      await web3.unstakeLPTokens(
+        SPENDER_ADDRESS, // spender address
+        LP_TOKEN_ADDRESS,
+        formattedAmount, // amount to unstake
+        ["0","0","0","0"],
+        provider // provider
+      );
+
+      toast.success("Unstake successful!");
+
+      // Refresh balance after unstaking
+      await fetchLPTokenBalance();
+
+      // Reset unstake amount
+      setUnstakeAmount("");
+    } catch (error) {
+      console.error("Unstake error:", error);
+      toast.error("Unstake failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch balance and approval status on mount and when account/provider changes
+  useEffect(() => {
+    fetchLPTokenBalance();
+  }, [provider, account]);
+
+  // Input validation and formatting
+  const validateAndFormatInput = (value) => {
+    // Remove any non-numeric characters except decimal point
+    let formattedValue = value.replace(/[^\d.]/g, "");
+
+    // Ensure only one decimal point
+    const decimalCount = (formattedValue.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      const firstDecimalIndex = formattedValue.indexOf(".");
+      formattedValue =
+        formattedValue.slice(0, firstDecimalIndex + 1) +
+        formattedValue.slice(firstDecimalIndex + 1).replace(/\./g, "");
+    }
+
+    // Prevent leading zeros before decimal
+    if (
+      formattedValue.length > 1 &&
+      formattedValue[0] === "0" &&
+      formattedValue[1] !== "."
+    ) {
+      formattedValue = formattedValue.slice(1);
+    }
+
+    // Limit decimal places to 18
+    if (formattedValue.includes(".")) {
+      const [whole, decimal] = formattedValue.split(".");
+      formattedValue = `${whole}.${decimal.slice(0, 18)}`;
+    }
+
+    return formattedValue;
+  };
+
+  const handleInputChange = (value) => {
+    const formattedValue = validateAndFormatInput(value);
+
+    // Only update if it's empty or a valid number
+    if (
+      formattedValue === "" ||
+      (!isNaN(parseFloat(formattedValue)) && parseFloat(formattedValue) >= 0)
+    ) {
+      setUnstakeAmount(formattedValue);
+    }
+  };
+
   return (
     <>
       <div className="mx-auto max-w-md">
@@ -9,28 +188,40 @@ const UnstakeTab = () => {
             <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
               <div className="left">
                 <p className="m-0 text-white opacity-50 text-xs">
-                  LP Tokens Avail. 0
+                  LP Tokens Avail. {lpTokenBalance}
                 </p>
                 <input
                   style={{ height: 30 }}
                   placeholder="0.00"
                   type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
+                  value={unstakeAmount}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent text-white"
                 />
-              </div>
-              <div className="right">
-                <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
-                    Max
-                  </button>
-                </div>
               </div>
             </div>
           </div>
           <div className="py-2">
             <div className="flex gap-2 items-center justify-center">
-              <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                Unstake
+              <button
+                className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                  approvalStatus || isLoading ? "opacity-50" : ""
+                }`}
+                onClick={handleApprove}
+                disabled={approvalStatus || isLoading}
+              >
+                {isLoading ? "Processing..." : "Approve Spending"}
+              </button>
+              <button
+                className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                  !approvalStatus || isLoading || !unstakeAmount
+                    ? "opacity-50"
+                    : ""
+                }`}
+                onClick={handleUnstake}
+                disabled={!approvalStatus || isLoading || !unstakeAmount}
+              >
+                {isLoading ? "Processing..." : "Unstake"}
               </button>
             </div>
           </div>

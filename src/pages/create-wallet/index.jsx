@@ -144,7 +144,7 @@ const CreateWallet = () => {
         toast.error("User Already Exist!");
         return false;
       }
-      const createdWebAuthKey = await registerPasskey(registerData.username);
+      const createdWebAuthKey = await registerPasskey(registerData.email + "_passkey_1");
       if (!createdWebAuthKey.status) {
         toast.error(createdWebAuthKey.msg);
         return false;
@@ -164,10 +164,11 @@ const CreateWallet = () => {
             return false;
           } else {
             console.log("new account-->", account, address);
+            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
             let data = await addUser(
               registerData.email,
               registerData.username,
-              "",
+              [webAuthKeyStringObj],
               "",
               "",
               address
@@ -186,7 +187,7 @@ const CreateWallet = () => {
                 id: data.userData._id
               })
             );
-            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+          
             storedataLocalStorage({
               login: true,
               walletAddress: address || "",

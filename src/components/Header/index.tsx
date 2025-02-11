@@ -9,16 +9,14 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import user from "@/Assets/Images/user.png";
-import logomw from "@/Assets/Images/logo.png";
+import logo2 from "@/Assets/Images/logow1.png";
 import Wlogomw from "@/Assets/Images/logow.png";
 import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
-import {
-  passkeyValidator,
-} from "../../lib/zeroDevWallet";
+import { passkeyValidator } from "../../lib/zeroDevWallet";
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,34 +32,34 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const dispatch = useDispatch();
 
-const reloadPasskey = async()=>{
-if(userAuth.login){
-  const { newPasskeyValidator = "", msg = "", status = "" } = await passkeyValidator(userAuth.webauthKey);
-  console.log("newPasskeyValidator-->",newPasskeyValidator)
-  if(status){
-    dispatch(
-      loginSet({
-        login : userAuth.login,
-        username : userAuth.username,
-        email : userAuth.email,
-        walletAddress : userAuth.walletAddress,
-        passkeyCred : newPasskeyValidator,
-        webauthKey : userAuth.webauthKey,
-        id : userAuth.id,
-        signer : userAuth.signer
-      })
-    );
-  }
+  const reloadPasskey = async () => {
+    if (userAuth.login) {
+      const {
+        newPasskeyValidator = "",
+        msg = "",
+        status = "",
+      } = await passkeyValidator(userAuth.webauthKey);
+      console.log("newPasskeyValidator-->", newPasskeyValidator);
+      if (status) {
+        dispatch(
+          loginSet({
+            login: userAuth.login,
+            username: userAuth.username,
+            email: userAuth.email,
+            walletAddress: userAuth.walletAddress,
+            passkeyCred: newPasskeyValidator,
+            webauthKey: userAuth.webauthKey,
+            id: userAuth.id,
+            signer: userAuth.signer,
+          })
+        );
+      }
+    }
+  };
 
-}
-  
-  }
-
-useEffect(()=>{
-  reloadPasskey()
-},[])
-
-
+  useEffect(() => {
+    reloadPasskey();
+  }, []);
 
   const logout = async () => {
     // await web3auth.logout();
@@ -140,18 +138,27 @@ useEffect(()=>{
                 {/* {logo} */}
                 {/* <span className="md:block hidden">MadHouse Wallet</span> */}
                 <Image
-                  src={Wlogomw}
+                  src={logo2}
                   alt="logo"
                   height={10000}
                   width={10000}
-                  className="max-w-full object-contain w-auto logo"
+                  className="max-w-full object-contain w-auto smlogo"
                   // style={{ height: 28 }}
                 />
               </a>
             </div>
-            <h4 className="m-0 font-bold themeClr sm:text-xl ">
+
+            <Image
+              src={Wlogomw}
+              alt="logo"
+              height={10000}
+              width={10000}
+              className="max-w-full object-contain w-auto logo"
+              // style={{ height: 28 }}
+            />
+            {/* <h4 className="m-0 font-bold themeClr sm:text-xl ">
               Madhouse Wallet
-            </h4>
+            </h4> */}
             <div
               className={`lg:flex items-center lg:justify-end gap-3 flex-wrap px-0 menu`}
               id="navbarScroll"
@@ -172,12 +179,13 @@ useEffect(()=>{
                   <>
                     <button
                       onClick={() => handleCopy(userAuth?.walletAddress, "one")}
-                      className="btn flex items-center justify-center commonBtn font-normal rounded"
+                      className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
                     >
                       {/* {userAuth?.username} */}
                       {userAuth?.walletAddress ? (
                         <>
-                          {splitAddress(userAuth?.walletAddress)} {copyIcn}
+                          {splitAddress(userAuth?.walletAddress)} <span className="ml-1">
+                          {copyIcn}</span> 
                         </>
                       ) : (
                         "Loading..."
@@ -262,19 +270,38 @@ const Nav = styled.nav`
   .logo {
     height: 28px;
   }
+  .smlogo {
+    height: 35px;
+  }
   @media (max-width: 575px) {
     .logo {
       height: 15px;
     }
+       .smlogo {
+    height: 25px;
+  }
     h4 {
       font-size: 10px;
     }
+      .commonBtn {
+      font-size: 10px !important;}
     button {
       padding: 5px;
       font-size: 12px !important;
       height: 35px !important;
     }
   }
+    @media (max-width: 420px){
+     .logo {
+      height: 10px;
+    }
+      .commonBtn {
+      height: 30px !important;
+      font-size: 6px;}
+       .smlogo {
+    height: 20px;
+  }
+    }
 `;
 
 export default Header;
@@ -311,8 +338,8 @@ const logo = (
 
 const copyIcn = (
   <svg
-    width="20"
-    height="20"
+    width="15"
+    height="15"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

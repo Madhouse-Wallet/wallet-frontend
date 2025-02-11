@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
 import BtcExchangePop from "../../components/Modals/BtcExchangePop";
+import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
@@ -16,21 +17,17 @@ import QRCode from "qrcode";
 import styled from "styled-components";
 const BTCEchange = () => {
   const router = useRouter();
-  const userAuth = useSelector(
-    (state: any) => state.Auth
-  );
+  const userAuth = useSelector((state: any) => state.Auth);
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
+  const [btcExchangeSend, setBtcExchangeSend] = useState(false);
   const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
-  console.log(
-    "walletAddress-->",
-    userAuth
-  );
+  console.log("walletAddress-->", userAuth);
 
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -44,13 +41,13 @@ const BTCEchange = () => {
       setLoading(true);
       setDepositSetup("");
       setDepositFound("");
-       
+
       // const provider = new ethers.providers.Web3Provider(window.ethereum);
       // await window.ethereum.request({ method: "eth_requestAccounts" });
 
       // const signer = provider.getSigner();
       // const address = await signer.getAddress();
-// console.log("signer00>",signer,address)
+      // console.log("signer00>",signer,address)
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
@@ -60,7 +57,7 @@ const BTCEchange = () => {
           if (provider) {
             // kernelProvider, ethersProvider, signer
             const sdk = await initializeTBTC(provider.signer);
-            console.log("sdk -->",sdk)
+            console.log("sdk -->", sdk);
             if (sdk) {
               depo(sdk);
               setBtcExchange(!btcExchange);
@@ -68,7 +65,9 @@ const BTCEchange = () => {
           }
         }
       } else {
-        toast.error("Please Login First");
+        setBtcExchange(!btcExchange);
+
+        // toast.error("Please Login First");
       }
     } catch (error) {
       console.log("error rec-->", error);
@@ -94,7 +93,7 @@ const BTCEchange = () => {
   console.log("setDepositSetup-->", depositSetup);
   const depo = async (tbtcSdk: any) => {
     const bitcoinRecoveryAddress = "tb1qfpu7q7326kp7ydfjuez0x0k5834dnv8npx553w"; // Replace with a valid BTC address
-    console.log("bitcoinRecoveryAddress00>",bitcoinRecoveryAddress)
+    console.log("bitcoinRecoveryAddress00>", bitcoinRecoveryAddress);
     try {
       console.log(tbtcSdk.deposits.initiateDeposit);
       const deposit = await tbtcSdk.deposits.initiateDeposit(
@@ -137,6 +136,24 @@ const BTCEchange = () => {
 
   return (
     <>
+      {btcExchangeSend &&
+        createPortal(
+          <BtcExchangeSendPop
+            btcExchangeSend={btcExchangeSend}
+            setBtcExchangeSend={setBtcExchangeSend}
+            walletAddress={walletAddressDepo}
+            qrCode={qrCode}
+            loading={loading}
+            setLoading={setLoading}
+            mint={mint}
+            startReceive={startReceive}
+            setDepositSetup={setDepositSetup}
+            depositFound={depositFound}
+            setDepositFound={setDepositFound}
+            userAddress={userAuth.walletAddress}
+          />,
+          document.body
+        )}
       {btcExchange &&
         createPortal(
           <BtcExchangePop
@@ -182,8 +199,8 @@ const BTCEchange = () => {
                 </div>
               </div>
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
-                <div className="px-3 px-lg-4 ">
-                  <TopHead className="flex p-2 py-lg-3 px-lg-4 items-center justify-between flex-wrap  px-2 py-2 md:px-[26px] md:py-[36px] overflow-hidden bg-white/5">
+                <div className=" px-lg-4 ">
+                  <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
                         Balance
@@ -195,7 +212,7 @@ const BTCEchange = () => {
                     <div className="right">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setBtcExchange(!btcExchange)}
+                          onClick={() => setBtcExchangeSend(!btcExchangeSend)}
                           className="flex items-center justify-center bg-[#FFEC8A] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Send
@@ -238,6 +255,24 @@ const TopHead = styled.div`
     &:hover {
       background: #000;
       color: #fff !important;
+    }
+  }
+  @media (max-width: 575px) {
+    .left {
+      width: 100%;
+      text-align: center;
+      h4 {
+        justify-content: center;
+      }
+    }
+    .right {
+      width: 100%;
+      > div {
+        width: 100%;
+        button {
+          width: 100%;
+        }
+      }
     }
   }
 `;

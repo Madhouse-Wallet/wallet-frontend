@@ -3,6 +3,7 @@ import borrowerContractABI from "../../borrowerContract.json";
 import { ethers } from "ethers";
 import fetchPriceAbi from "../../fetchPriceContractAbi.json";
 import { getContract } from "viem";
+import curveContractAbi from "../../curveAbi.json";
 
 class Web3Interaction {
   private PROVIDER: any;
@@ -32,7 +33,10 @@ class Web3Interaction {
 
   getContractFetchPrice = (address: string) => {
     try {
-      const contract = new ethers.Contract(address, fetchPriceAbi, this.SIGNER);
+      const provider = new ethers.providers.JsonRpcProvider(
+        "https://eth-sepolia.public.blastapi.io"
+      ); // Use your provider
+      const contract = new ethers.Contract(address, fetchPriceAbi, provider);
       return contract;
     } catch (error) {
       console.log("error", error);
@@ -114,7 +118,7 @@ class Web3Interaction {
         //     value: BigInt(recommendedFee.toString()),
         //   }
         // );
-        console.log("txtxtx",tx)
+        console.log("txtxtx", tx);
         const receipt = tx;
         resolve(receipt);
       } catch (error: any) {
@@ -399,13 +403,16 @@ class Web3Interaction {
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
+        console.log(address, spender);
         const contract = this.getContract(address);
+        console.log("line-406", contract);
         if (!contract) throw new Error("Contract initialization failed");
 
         const tx = await contract.approve(
           spender,
           ethers.BigNumber.from(amount)
         );
+        console.log("line tx", tx);
         const receipt = await tx.wait();
         resolve(receipt);
       } catch (error: any) {
@@ -480,6 +487,135 @@ class Web3Interaction {
         //     value: BigInt(_supplyValue.toString()),
         //   }
         // );
+        const receipt = tx;
+        resolve(receipt);
+      } catch (error: any) {
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
+
+  depositAndStakeCurve = async (
+    address: string,
+    _depositAddress: string,
+    _lpTokenAddress: string,
+    _gaugeAddress: string,
+    _nCoins: number | string,
+    _coinsAddress: string[],
+    _amounts: string[],
+    _minMinAmount: number | string,
+    _userUnderlying: boolean,
+    _useDynarray: boolean,
+    _poolAddress: string,
+    provider: any
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        console.log(
+          "providerogggg",
+          address,
+          _depositAddress,
+          _lpTokenAddress,
+          _gaugeAddress,
+          BigInt(_nCoins.toString()),
+          _coinsAddress,
+          _amounts.map((amount) => BigInt(amount.toString())),
+          BigInt(_minMinAmount.toString()),
+          _userUnderlying,
+          _useDynarray,
+          _poolAddress,
+          provider
+        );
+        const tx = await provider.writeContract({
+          address,
+          abi: curveContractAbi,
+          functionName: "deposit_and_stake",
+          args: [
+            _depositAddress,
+            _lpTokenAddress,
+            _gaugeAddress,
+            BigInt(_nCoins.toString()),
+            _coinsAddress,
+            _amounts.map((amount) => BigInt(amount.toString())),
+            BigInt(_minMinAmount.toString()),
+            _userUnderlying,
+            _useDynarray,
+            _poolAddress,
+          ],
+          gasLimit: BigInt("3000000"),
+        });
+
+        console.log("transaction:", tx);
+        const receipt = tx;
+        resolve(receipt);
+      } catch (error: any) {
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
+
+  withdrawLPTokens = async (
+    address: string,
+    _withdrawAmount: number | string,
+    provider: any
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        console.log(
+          "providerogggg",
+          address,
+          BigInt(_withdrawAmount.toString()),
+          provider
+        );
+        const tx = await provider.writeContract({
+          address,
+          abi: curveContractAbi,
+          functionName: "withdraw",
+          args: [
+            BigInt(_withdrawAmount.toString()),
+          ],
+          gasLimit: BigInt("3000000"),
+        });
+
+        console.log("transaction:", tx);
+        const receipt = tx;
+        resolve(receipt);
+      } catch (error: any) {
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
+  };
+
+  unstakeLPTokens = async (
+    address: string,
+    PoolAddress: string,
+    _burnAmount: number | string,
+    _amounts: string[],
+    provider: any
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        console.log(
+          "providerogggg",
+          address,
+          PoolAddress,
+          BigInt(_burnAmount.toString()),
+          _amounts.map((amount) => BigInt(amount.toString())),
+          provider
+        );
+        const tx = await provider.writeContract({
+          address,
+          abi: curveContractAbi,
+          functionName: "remove_liquidity",
+          args: [
+            PoolAddress,
+            BigInt(_burnAmount.toString()),
+            _amounts.map((amount) => BigInt(amount.toString())),
+          ],
+          gasLimit: BigInt("3000000"),
+        });
+
+        console.log("transaction:", tx);
         const receipt = tx;
         resolve(receipt);
       } catch (error: any) {

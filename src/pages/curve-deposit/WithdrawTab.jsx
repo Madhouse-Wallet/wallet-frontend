@@ -1,6 +1,188 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import Web3Interaction from "../../utils/web3Interaction";
+import { toast } from "react-toastify";
 
-const WithdrawTab = () => {
+const WithdrawTab = ({ provider, account }) => {
+  // LP Token contract address (replace with actual address)
+  const LP_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_CURVE_WITHDRAW_CONTRACT_ADDRESS;
+  const SPENDER_ADDRESS = process.env.NEXT_PUBLIC_CURVE_WITHDRAW_CONTRACT_ADDRESS;
+
+  const [lpTokenBalance, setLpTokenBalance] = useState("0");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [approvalStatus, setApprovalStatus] = useState(false);
+
+  // Fetch LP Token balance
+  const fetchLPTokenBalance = async () => {
+    if (!provider || !account) return;
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+      const balance = await web3.balanceOf(LP_TOKEN_ADDRESS, account);
+
+      // Convert balance to a readable format
+      const formattedBalance = ethers.utils.formatUnits(balance, 18); // Assuming 18 decimals
+      setLpTokenBalance(formattedBalance);
+    } catch (error) {
+      console.error("Error fetching LP Token balance:", error);
+    }
+  };
+
+  // Handle approval of LP tokens
+  const handleApprove = async () => {
+    if (!provider) {
+      toast.error("Please connect your wallet.");
+      return;
+    }
+
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+      toast.error("Please enter a valid withdrawal amount.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Check current allowance
+      const currentAllowance = await web3.allowance(
+        LP_TOKEN_ADDRESS,
+        account,
+        SPENDER_ADDRESS
+      );
+
+      // Convert withdrawal amount to BigNumber
+      const withdrawAmountBN = ethers.utils.parseUnits(withdrawAmount, 18);
+
+      // Check if approval is needed
+      if (currentAllowance.lt(withdrawAmountBN)) {
+        // Use max uint256 for unlimited approval
+        const MAX_UINT256 =
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+        await web3.approve(LP_TOKEN_ADDRESS, SPENDER_ADDRESS, MAX_UINT256);
+
+        toast.success("Approval successful!");
+      } else {
+        toast.info("Sufficient allowance already exists.");
+      }
+
+      // Update approval status
+      setApprovalStatus(true);
+    } catch (error) {
+      console.error("Approval error:", error);
+      toast.error("Approval failed");
+      setApprovalStatus(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle withdrawal of LP tokens
+  const handleWithdraw = async () => {
+    if (!provider) {
+      toast.error("Please connect your wallet.");
+      return;
+    }
+
+    // Validate withdrawal amount
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+      toast.error("Please enter a valid withdrawal amount.");
+      return;
+    }
+
+    if (parseFloat(withdrawAmount) > parseFloat(lpTokenBalance)) {
+      toast.error("Insufficient LP Token balance.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const web3 = new Web3Interaction("sepolia", provider);
+
+      // Format withdrawal amount
+      const formattedAmount = ethers.utils.parseUnits(withdrawAmount, 18);
+
+      // Call withdraw function
+      // Replace with actual withdraw method from your contract
+      await web3.withdrawLPTokens(
+        SPENDER_ADDRESS, // spender address
+        formattedAmount, // amount to withdraw
+        provider // provider
+      );
+
+      toast.success("Withdrawal successful!");
+
+      // Refresh balance after withdrawal
+      await fetchLPTokenBalance();
+
+      // Reset withdrawal amount
+      setWithdrawAmount("");
+    } catch (error) {
+      console.error("Withdrawal error:", error);
+      toast.error("Withdrawal failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch balance and approval status on mount and when account/provider changes
+  useEffect(() => {
+    fetchLPTokenBalance();
+  }, [provider, account]);
+
+  // Input validation and formatting
+  const validateAndFormatInput = (value) => {
+    // Remove any non-numeric characters except decimal point
+    let formattedValue = value.replace(/[^\d.]/g, "");
+
+    // Ensure only one decimal point
+    const decimalCount = (formattedValue.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      const firstDecimalIndex = formattedValue.indexOf(".");
+      formattedValue =
+        formattedValue.slice(0, firstDecimalIndex + 1) +
+        formattedValue.slice(firstDecimalIndex + 1).replace(/\./g, "");
+    }
+
+    // Prevent leading zeros before decimal
+    if (
+      formattedValue.length > 1 &&
+      formattedValue[0] === "0" &&
+      formattedValue[1] !== "."
+    ) {
+      formattedValue = formattedValue.slice(1);
+    }
+
+    // Limit decimal places to 18
+    if (formattedValue.includes(".")) {
+      const [whole, decimal] = formattedValue.split(".");
+      formattedValue = `${whole}.${decimal.slice(0, 18)}`;
+    }
+
+    return formattedValue;
+  };
+
+  const handleInputChange = (value) => {
+    const formattedValue = validateAndFormatInput(value);
+
+    // Only update if it's empty or a valid number
+    if (
+      formattedValue === "" ||
+      (!isNaN(parseFloat(formattedValue)) && parseFloat(formattedValue) >= 0)
+    ) {
+      setWithdrawAmount(formattedValue);
+    }
+  };
+
+  // // Max button functionality
+  // const handleMaxWithdraw = () => {
+  //   setWithdrawAmount(lpTokenBalance);
+  // };
+
   return (
     <>
       <div className="mx-auto max-w-md">
@@ -9,31 +191,50 @@ const WithdrawTab = () => {
             <div className="bg-black/50 p-3 rounded-lg flex items-center justify-between">
               <div className="left">
                 <p className="m-0 text-white opacity-50 text-xs">
-                  LP Tokens Avail. 0
+                  LP Tokens Avail. {lpTokenBalance}
                 </p>
                 <input
                   style={{ height: 30 }}
                   placeholder="0.00"
                   type="text"
-                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
+                  value={withdrawAmount}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent text-white"
                 />
               </div>
               <div className="right">
                 <div className="flex items-center gap-2">
-                  <button className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]">
+                  {/* <button 
+                    className="flex items-center justify-center btn bg-white font-medium text-xs rounded-full h-[35px] text-black min-w-[70px]"
+                    onClick={handleMaxWithdraw}
+                  >
                     Max
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
           </div>
           <div className="py-2">
             <div className="flex gap-2 items-center justify-center">
-              <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                Approve Spending
+              <button
+                className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                  approvalStatus || isLoading ? "opacity-50" : ""
+                }`}
+                onClick={handleApprove}
+                disabled={approvalStatus || isLoading}
+              >
+                {isLoading ? "Processing..." : "Approve Spending"}
               </button>
-              <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                Withdraw
+              <button
+                className={`btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium ${
+                  !approvalStatus || isLoading || !withdrawAmount
+                    ? "opacity-50"
+                    : ""
+                }`}
+                onClick={handleWithdraw}
+                disabled={!approvalStatus || isLoading || !withdrawAmount}
+              >
+                {isLoading ? "Processing..." : "Withdraw"}
               </button>
             </div>
           </div>
@@ -44,6 +245,8 @@ const WithdrawTab = () => {
 };
 
 export default WithdrawTab;
+
+// SVG icons remain the same as in the original file
 
 const usa = (
   <svg

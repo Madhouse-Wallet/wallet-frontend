@@ -1,6 +1,13 @@
 "use client";
 import { send } from "process";
 import { zeroAddress } from "viem"
+// import { getWalletNetWorth } from "./balance";
+import {
+  createWeightedKernelAccountClient,
+  createWeightedValidator,
+  toWebAuthnSigner,
+  getRecoveryFallbackActionInstallModuleData
+} from "@zerodev/weighted-validator";
 import {
   createWeightedECDSAValidator,
   getRecoveryAction,
@@ -18,8 +25,11 @@ import {
   createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
-  getUserOperationGasPrice
+  getUserOperationGasPrice,
 } from "@zerodev/sdk"
+import {
+  getValidatorPluginInstallModuleData,
+} from "@zerodev/sdk";
 import {
   PasskeyValidatorContractVersion,
   WebAuthnMode,
@@ -34,12 +44,22 @@ import { sepolia } from "viem/chains"
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { mnemonicToAccount } from 'viem/accounts'
 import { english, generateMnemonic } from 'viem/accounts'
-
+// const providerUrl = "https://eth-mainnet.public.blastapi.io";
+//     const etherscanApiKey = "KVWMJPYH9177M3KTVSKAHVWX9PTK6H2UHP";
+//     getWalletNetWorth("0x0ADA3111B866fF1aD0477F0C5D2e8eD35A36Eb5b", providerUrl, etherscanApiKey);
 
 
 const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+
+
+// export const PASSKEY_SERVER_URL =
+//   "https://passkeys.zerodev.app/api/v3/efbc1add-1c14-476e-b3f1-206db80e673c";
+// export const BUNDLER_URL =
+//   "https://rpc.zerodev.app/api/v2/bundler/efbc1add-1c14-476e-b3f1-206db80e673c?provider=PIMLICO";
+// export const PAYMASTER_RPC =
+//   "https://rpc.zerodev.app/api/v2/paymaster/efbc1add-1c14-476e-b3f1-206db80e673c?provider=PIMLICO";
 
 const CHAIN = sepolia
 const entryPoint = getEntryPoint("0.7")
@@ -58,15 +78,15 @@ const publicClient = createPublicClient({
   chain: CHAIN
 })
 
-const accountClient = async (signer1) => {
+const accountClient = async (signer1,accountAddress) => {
   try {
     const account = await createKernelAccount(publicClient, {
       entryPoint,
       plugins: {
         sudo: signer1
       },
-      kernelVersion: KERNEL_V3_1
-
+      kernelVersion: KERNEL_V3_1,
+      address: accountAddress,
     });
     console.log("account accountClient-->", account)
 
@@ -110,41 +130,53 @@ const accountClient = async (signer1) => {
 
 const accountCreateClient = async (signer1, phrase) => {
   try {
-    const guardian = await mnemonicToAccount(phrase)
-    console.log("account-->", guardian)
-    const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    const recoverySigner = await mnemonicToAccount(phrase)
+    console.log("account-->", recoverySigner)
+
+
+    const recoveryValidator = await createWeightedECDSAValidator(publicClient, {
+      signers: [recoverySigner],
+      kernelVersion: KERNEL_V3_1,
       entryPoint,
       config: {
         threshold: 100,
-        signers: [{ address: guardian.address, weight: 100 }],
+        signers: [
+          {
+            address: recoverySigner.address,
+            weight: 100,
+          },
+        ],
       },
-      signers: [guardian],
-      kernelVersion: KERNEL_V3_1,
     });
+    const recoveryAction = getRecoveryAction(entryPoint.version);
 
+    const recoveryPluginInstallModuleData =
+      await getValidatorPluginInstallModuleData({
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        plugin: recoveryValidator,
+        action: recoveryAction,
+      });
     const account = await createKernelAccount(publicClient, {
       entryPoint,
+      kernelVersion: KERNEL_V3_1,
       plugins: {
         sudo: signer1,
-        regular: guardianValidator,
-        // action: getRecoveryAction(entryPoint.version),
       },
-      kernelVersion: KERNEL_V3_1,
+      pluginMigrations: [
+        recoveryPluginInstallModuleData,
+        getRecoveryFallbackActionInstallModuleData(entryPoint.version),
+      ],
+      // Only needed to set after changing the sudo validator config i.e.
+      // changing the threshold or adding/removing/updating signers
+      // After doing recovery
+      // address: accountAddress,
     });
 
-    console.log("account accountCreateClient-->", account)
-
-    const kernelClient = createKernelAccountClient({
+    const kernelClient = createWeightedKernelAccountClient({
       account,
-      // Replace with your chain
       chain: sepolia,
-      // Replace with your bundler RPC.
-      // For ZeroDev, you can find the RPC on your dashboard.
       bundlerTransport: http(BUNDLER_URL),
-
-      // Required - the public client
-      client: publicClient,
-
       // Optional -- only if you want to use a paymaster
       paymaster: {
         getPaymasterData(userOperation) {
@@ -152,14 +184,8 @@ const accountCreateClient = async (signer1, phrase) => {
         }
       },
 
-      // Required - the default gas prices might be too high
-      userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient)
-        }
-      }
-    })
-
+    });
+    console.log("account accountCreateClient-->", account)
     return {
       account,
       kernelClient
@@ -171,60 +197,40 @@ const accountCreateClient = async (signer1, phrase) => {
 }
 
 
-const accountRecoveryCreateClient = async (signer1, phrase) => {
+const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
   try {
-    const guardian = await mnemonicToAccount(phrase)
-    console.log("account-->", guardian)
-    const guardianValidator = await createWeightedECDSAValidator(publicClient, {
+    const signer = await mnemonicToAccount(phrase)
+    console.log("account-->", signer)
+
+    const recoveryValidator = await createWeightedECDSAValidator(publicClient, {
+      signers: [signer],
+      kernelVersion: KERNEL_V3_1,
       entryPoint,
       config: {
         threshold: 100,
-        signers: [{ address: guardian.address, weight: 100 }],
+        signers: [
+          {
+            address: signer.address,
+            weight: 100,
+          },
+        ],
       },
-      signers: [guardian],
-      kernelVersion: KERNEL_V3_1,
     });
-    //  tried this way too
-    // const account = await createKernelAccount(publicClient, {
-    //   entryPoint,
-    //   plugins: {
-    // sudo: signer1,
-    // regular: guardianValidator,
-    //     action: getRecoveryAction(entryPoint.version),
-    //   },
-    //   kernelVersion: KERNEL_V3_1,
-    // });
+
     const account = await createKernelAccount(publicClient, {
       entryPoint,
-      plugins: {
-        sudo: signer1,
-        regular: guardianValidator,
-        action: {
-          address: recoveryExecutorAddress,
-          selector: recoveryExecutorSelector,
-        },
-      },
       kernelVersion: KERNEL_V3_1,
+      plugins: {
+        regular: recoveryValidator,
+      },
+      address: accountAddress,
     });
+    console.log("account, t", account)
 
-    console.log("account-->", account)
-
-
-
-
-    const kernelClient = createKernelAccountClient({
+    const kernelClient = createWeightedKernelAccountClient({
       account,
-
-      // Replace with your chain
       chain: sepolia,
-
-      // Replace with your bundler RPC.
-      // For ZeroDev, you can find the RPC on your dashboard.
       bundlerTransport: http(BUNDLER_URL),
-
-      // Required - the public client
-      client: publicClient,
-
       // Optional -- only if you want to use a paymaster
       paymaster: {
         getPaymasterData(userOperation) {
@@ -232,13 +238,7 @@ const accountRecoveryCreateClient = async (signer1, phrase) => {
         }
       },
 
-      // Required - the default gas prices might be too high
-      userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient)
-        }
-      }
-    })
+    });
 
     return {
       account,
@@ -262,8 +262,10 @@ export const getProvider = async (kernelClient) => {
   }
 }
 
-const zeroTrxn = async (kernelClient) => {
+export const zeroTrxn = async (kernelClient) => {
   try {
+
+
     const op1Hash = await kernelClient.sendUserOperation({
       callData: await kernelClient.account.encodeCalls([{
         to: zeroAddress,
@@ -346,9 +348,9 @@ export const createAccount = async (signer1, phrase) => {
 }
 
 
-export const getAccount = async (signer1) => {
+export const getAccount = async (signer1,  address="") => {
   try {
-    const getAccount = await accountClient(signer1)
+    const getAccount = await accountClient(signer1, address)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"
@@ -365,9 +367,9 @@ export const getAccount = async (signer1) => {
 }
 
 
-export const getRecoverAccount = async (signer1, phrase) => {
+export const getRecoverAccount = async (address, signer1, phrase) => {
   try {
-    const getAccount = await accountRecoveryCreateClient(signer1, phrase)
+    const getAccount = await accountRecoveryCreateClient(address, signer1, phrase)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"
@@ -376,6 +378,52 @@ export const getRecoverAccount = async (signer1, phrase) => {
     console.log("create getRecoverAccount-->", getAccount)
     return {
       status: true, account: getAccount, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address
+    }
+  } catch (error) {
+    console.log("create account error-->", error)
+    return { status: false, msg: "Please Try again ALter!" }
+  }
+}
+
+
+
+export const doRecovery = async (address, signer1, phrase, name) => {
+  try {
+    const getAccount = await accountRecoveryCreateClient(address, signer1, phrase)
+    if (!getAccount) {
+      return {
+        status: false, msg: "No Account Found!"
+      }
+    }
+    console.log("create getRecoverAccount-->", getAccount)
+    const publicKey3 = await registerPasskey(name);
+    console.log("publicKey3.webAuthnKey-->", publicKey3.webAuthnKey)
+    //newPasskeyValidator
+    const passkeyValidator1 = await passkeyValidator(publicKey3.webAuthnKey);
+
+    console.log("passkeyValidator.newPasskeyValidator -->", passkeyValidator1.newPasskeyValidator)
+
+
+    // abi: parseAbi([recoveryExecutorFunction]),
+    //   functionName: "doRecovery",
+    //   args: [getValidatorAddress(entryPoint, KERNEL_V3_1), newSigner.address],
+    console.log("Sending Recovery Operation");
+
+    const userOpHash = await getAccount.kernelClient.sendUserOperation({
+      callData: encodeFunctionData({
+        abi: parseAbi([recoveryExecutorFunction]),
+        functionName: "doRecovery",
+        args: [passkeyValidator1.newPasskeyValidator.address, await passkeyValidator1.newPasskeyValidator.getEnableData()],
+      }),
+    });
+    console.log({ userOpHash });
+    console.log("Waiting for Recovery Operation Receipt");
+    const txReceipt = await getAccount.kernelClient.waitForUserOperationReceipt({
+      hash: userOpHash,
+    });
+
+    return {
+      status: true, account: getAccount, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address, passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
     }
   } catch (error) {
     console.log("create account error-->", error)
@@ -478,9 +526,10 @@ export const doRecoveryNewSigner = async (signer1, phrase, newSigner) => {
 
 
 //this function works
-export const getTrxn = async (signer1) => {
+export const getTrxn = async (signer1, address=""
+) => {
   try {
-    const getAccount = await accountClient(signer1)
+    const getAccount = await accountClient(signer1, address)
     if (!getAccount) {
       return {
         status: false, msg: "No Account Found!"
