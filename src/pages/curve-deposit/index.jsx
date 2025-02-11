@@ -5,6 +5,7 @@ import WithdrawTab from "./WithdrawTab";
 import UnstakeTab from "./UnstakeTab";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
+import styled from "styled-components";
 
 const CurveDeposit = () => {
   const router = useRouter();
@@ -13,16 +14,28 @@ const CurveDeposit = () => {
   const [providerr, setProviderr] = useState(null);
 
   const tabData = [
-    { title: "Deposit", component: <DepositTab provider={providerr} account={userAuth?.walletAddress}/> },
+    {
+      title: "Deposit",
+      component: (
+        <DepositTab provider={providerr} account={userAuth?.walletAddress} />
+      ),
+    },
     {
       title: "Withdraw",
-      component: <WithdrawTab provider={providerr} account={userAuth?.walletAddress}/>,
+      component: (
+        <WithdrawTab provider={providerr} account={userAuth?.walletAddress} />
+      ),
     },
-    { title: "Remove Liquidity", component: <UnstakeTab provider={providerr} account={userAuth?.walletAddress}/> },
+    {
+      title: "Remove Liquidity",
+      component: (
+        <UnstakeTab provider={providerr} account={userAuth?.walletAddress} />
+      ),
+    },
   ];
 
   useEffect(() => {
-    console.log("userAuth-->",userAuth)
+    console.log("userAuth-->", userAuth);
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
@@ -32,8 +45,8 @@ const CurveDeposit = () => {
           console.log("provider-->", provider);
           if (provider) {
             console.log("provider -line-114", provider);
-            setProviderr(provider?.ethersProvider)
-          } 
+            setProviderr(provider?.ethersProvider);
+          }
         }
       }
     };
@@ -62,9 +75,9 @@ const CurveDeposit = () => {
                       Curve Deposit
                     </h4>
                   </div>
-                  <ul className="list-none pl-0 mb-0 flex items-center gap-3 ">
+                  <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 ">
                     {tabData.map((item, index) => (
-                      <li key={index} className="py-1">
+                      <li key={index} className="">
                         <button
                           className={` ${
                             activeTab === index
@@ -79,7 +92,7 @@ const CurveDeposit = () => {
                         </button>
                       </li>
                     ))}
-                  </ul>
+                  </TabNav>
                 </div>
               </div>
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12 ">
@@ -94,6 +107,19 @@ const CurveDeposit = () => {
     </>
   );
 };
+const TabNav = styled.div`
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 8px;
+    li {
+      width: 48%;
+      button {
+        font-size: 10px;
+        height: 35px;
+      }
+    }
+  }
+`;
 
 export default CurveDeposit;
 

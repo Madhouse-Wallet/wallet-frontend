@@ -136,11 +136,11 @@ const BTCEchange = () => {
 
   return (
     <>
-     {btcExchangeSend &&
+      {btcExchangeSend &&
         createPortal(
           <BtcExchangeSendPop
-          btcExchangeSend={btcExchangeSend}
-          setBtcExchangeSend={setBtcExchangeSend}
+            btcExchangeSend={btcExchangeSend}
+            setBtcExchangeSend={setBtcExchangeSend}
             walletAddress={walletAddressDepo}
             qrCode={qrCode}
             loading={loading}
@@ -199,8 +199,8 @@ const BTCEchange = () => {
                 </div>
               </div>
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
-                <div className="px-3 px-lg-4 ">
-                  <TopHead className="flex p-2 py-lg-3 px-lg-4 items-center justify-between flex-wrap  px-2 py-2 md:px-[26px] md:py-[36px] overflow-hidden bg-white/5">
+                <div className=" px-lg-4 ">
+                  <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
                         Balance
@@ -255,6 +255,24 @@ const TopHead = styled.div`
     &:hover {
       background: #000;
       color: #fff !important;
+    }
+  }
+  @media (max-width: 575px) {
+    .left {
+      width: 100%;
+      text-align: center;
+      h4 {
+        justify-content: center;
+      }
+    }
+    .right {
+      width: 100%;
+      > div {
+        width: 100%;
+        button {
+          width: 100%;
+        }
+      }
     }
   }
 `;

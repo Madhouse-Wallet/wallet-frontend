@@ -40,7 +40,9 @@ const BTCDebitCard: React.FC = () => {
                     style={{ maxHeight: 300 }}
                   />
                   <ContentWrp className=" text-center">
-                    <h2 className="m-0 font-bold py-2">Coming Soon</h2>
+                    <h2 className="m-0 md:text-6xl text-3xl font-bold py-2">
+                      Coming Soon
+                    </h2>
                   </ContentWrp>
                 </div>
               </div>
@@ -54,9 +56,6 @@ const BTCDebitCard: React.FC = () => {
 
 export const ContentWrp = styled.div`
   h2 {
-    font-size: 50px;
-    line-height: 120px;
-
     background: linear-gradient(90.5deg, #e2682b 0.43%, #ffb38c 128%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
