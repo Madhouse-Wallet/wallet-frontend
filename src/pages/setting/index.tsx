@@ -14,8 +14,7 @@ import PreviewBox from "./preview";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import { zeroTrxn,getAccount } from "@/lib/zeroDevWallet";
-
+import { zeroTrxn, getAccount } from "@/lib/zeroDevWallet";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -37,9 +36,9 @@ const Setting: React.FC = () => {
     selectedWatermark,
   } = useBackground();
   const dispatch = useDispatch();
-    const userAuth = useSelector((state: any) => state.Auth);
-    const [setUp, setSetUp] = useState<boolean>(false);
-    const [ confirm, setConfirm ] = useState<boolean>(false);
+  const userAuth = useSelector((state: any) => state.Auth);
+  const [setUp, setSetUp] = useState<boolean>(false);
+  const [confirm, setConfirm] = useState<boolean>(false);
   const getPreview = async () => {
     try {
       console.log("email");
@@ -60,8 +59,6 @@ const Setting: React.FC = () => {
       return false;
     }
   };
-
-
 
   // useEffect(() => {
   //   getPreview(); // Call the function
@@ -269,42 +266,36 @@ const Setting: React.FC = () => {
     setOpenIndex(index === openIndex ? null : index);
   };
 
-  const LogoutFuc = async () =>{
+  const LogoutFuc = async () => {
     try {
-      logoutStorage()
+      logoutStorage();
       dispatch(
         loginSet({
           login: false,
-          walletAddress:  "",
+          walletAddress: "",
           signer: "",
           username: "",
           email: "",
           passkeyCred: "",
           webauthKey: "",
-          id: ""
+          id: "",
         })
       );
-      toast.success("Logout Successfully!")
+      toast.success("Logout Successfully!");
     } catch (error) {
-      console.log("logout error --->",error)
+      console.log("logout error --->", error);
     }
-  }
+  };
   return (
     <>
       {setUp &&
         createPortal(
-          <SetupRecoveryPop
-          setUp={setUp}
-          setSetUp={setSetUp}
-          />,
+          <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
           document.body
         )}
-        {confirm &&
+      {confirm &&
         createPortal(
-          <ConfirmationPop
-          confirm={confirm}
-          setConfirm={setConfirm}
-          />,
+          <ConfirmationPop confirm={confirm} setConfirm={setConfirm} />,
           document.body
         )}
       <section className="relative dashboard pt-12">
@@ -333,34 +324,35 @@ const Setting: React.FC = () => {
               <div className="sm:col-span-4 col-span-12">
                 <div className="grid gap-3 grid-cols-12">
                   <div className="col-span-12">
-                    <div className="rounded-12 bg-white/5 px-3 py-3 relative overflow-hidden z-[99]">
-                      <Image
-                        src={selectedBackground}
-                        height={100000}
-                        width={100000}
-                        quality={100}
-                        alt="Background"
-                        className="transition-opacity fill-mode-both pointer-events-none  inset-0 w-full scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700"
-                        style={{
-                          transform: "scale(1.25)",
-                          opacity: bgOpacity,
-                          height: 150, // 🔥 Dynamic Opacity from Context
-                        }}
-                      />
-                      <Image
-                        src={selectedWatermark}
-                        height={100000}
-                        width={100000}
-                        quality={100}
-                        alt=""
-                        className=" fill-mode-both mx-auto opacity-100 pointer-events-none absolute inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  z-[-1]"
-                        style={{ opacity: wmOpacity, height: "50%" }}
-                      />
-                      <div
-                        className="absolute left-0 right-0 bottom-0 w-full h-full flex-col justify-between flex"
-                        style={{ pointerEvents: "none" }}
-                      >
-                        <PreviewBox />
+                    <div className="rounded-20 bg-white/5 px-3 py-3 relative overflow-hidden z-[99]">
+                      <div className="relative">
+                        <Image
+                          src={selectedBackground}
+                          height={100000}
+                          width={100000}
+                          quality={100}
+                          alt="Background"
+                          className="transition-opacity fill-mode-both pointer-events-none rounded-12 inset-0 w-full object-cover object-center blur-[var(--wallpaper-blur)] duration-700"
+                          style={{
+                            opacity: bgOpacity,
+                            height: 200, // 🔥 Dynamic Opacity from Context
+                          }}
+                        />
+                        <Image
+                          src={selectedWatermark}
+                          height={100000}
+                          width={100000}
+                          quality={100}
+                          alt=""
+                          className=" fill-mode-both mx-auto opacity-100 pointer-events-none absolute inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  z-[-1]"
+                          style={{ opacity: wmOpacity, height: "50%" }}
+                        />
+                        <div
+                          className="absolute left-0 right-0 bottom-0 w-full h-full flex-col justify-between flex"
+                          style={{ pointerEvents: "none" }}
+                        >
+                          <PreviewBox />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -372,12 +364,22 @@ const Setting: React.FC = () => {
                   className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
                 >
                   <div className="left">
-                    <h4 className="m-0 font-bold text-xl">Ritesh</h4>
                     <ul className="list-none pl-0 mb-0 text-xs">
-                      <li className="flex gap-2">
+                      <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
-                          style={{ width: 80 }}
+                          style={{ width: 100 }}
+                        >
+                          Email Address:
+                        </div>
+                        <span className="text-white flex items-center">
+                          abc@gmail.com
+                        </span>
+                      </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 100 }}
                         >
                           wallet ID:
                         </div>
@@ -391,9 +393,14 @@ const Setting: React.FC = () => {
                     </ul>
                   </div>
                   <div className="right">
-                    {userAuth?.login && (  <button onClick={LogoutFuc}  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest">
-                      {logoutIcn} Logout
-                    </button>)}
+                    {userAuth?.login && (
+                      <button
+                        onClick={LogoutFuc}
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
+                      >
+                        {logoutIcn} Logout
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -474,7 +481,9 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className="border-0 p-0 bg-transparent"
+                                className={`${
+                                  selectedBackground === bg ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -536,7 +545,9 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className="border-0 p-0 bg-black rounded"
+                                className={`${
+                                  selectedWatermark === wm ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -578,7 +589,7 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                
+
                   <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -589,18 +600,23 @@ const Setting: React.FC = () => {
                       </h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button onClick={async ()=>{
-                        let account = await getAccount(userAuth?.passkeyCred, userAuth?.walletAddress);
+                      <button
+                        onClick={async () => {
+                          let account = await getAccount(
+                            userAuth?.passkeyCred,
+                            userAuth?.walletAddress
+                          );
 
-                       await zeroTrxn(account?.kernelClient)
-
-                      }}className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                          await zeroTrxn(account?.kernelClient);
+                        }}
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                      >
                         Zero Trxn
                       </button>
                     </div>
                   </div>
-                  {
-                    userAuth?.login &&  (<div
+                  {userAuth?.login && (
+                    <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                     >
@@ -610,32 +626,37 @@ const Setting: React.FC = () => {
                         </h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={()=> setSetUp(!setUp)} className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                        <button
+                          onClick={() => setSetUp(!setUp)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
                           Recover
                         </button>
                       </div>
-                    </div>)
-                  }
+                    </div>
+                  )}
 
-
-{
-                    userAuth?.login &&  (<div
+                  {userAuth?.login && (
+                    <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                     >
                       <div className="flex flex-col gap-1">
                         <h3 className="text-xs font-medium leading-none -tracking-2">
-                         Delete Account
+                          Delete Account
                         </h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        <button onClick={()=> setConfirm(!confirm)} className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]">
+                        <button
+                          onClick={() => setConfirm(!confirm)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
                           Delete
                         </button>
                       </div>
-                    </div>)
-                  }
-                  
+                    </div>
+                  )}
+
                   <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"

@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React from "react";
 // src/pages/sphere/page.tsx
 import SphereRampWidget from "@/components/SphereWidget/SphereRampWidget";
-import Wlogomw from "@/Assets/Images/logow.png";
+import Wlogomw from "@/Assets/Images/logow1.png";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
@@ -14,13 +14,13 @@ function Spharepay() {
     color: "gray" as const,
     radius: "lg" as const,
     components: {
-      logo: `./favicn.png`, // Add your logo to the public folder
+      logo: `./logow1.png`, // Add your logo to the public folder
     },
   };
 
   return (
     <>
-      <section className="ifrmae pt-12 relative">
+      <SpherePaysec className="ifrmae pt-12 relative">
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -55,16 +55,39 @@ function Spharepay() {
             </div>
           </div>
         </div>
-      </section>
+      </SpherePaysec>
     </>
   );
 }
+
+const SpherePaysec = styled.section`
+  .ramp-bg-background {
+    background-color: #00000099;
+  }
+  div#sphere-ramp-container div#sphere-ramp > .ramp-absolute {
+    display: none;
+  }
+  input {
+    background-color: #00000099;
+    height: 45px;
+    font-size: 12px;
+  }
+  button {
+    color: #fff !important;
+  }
+  .ramp-text-primary {
+    color: #fff !important;
+  }
+`;
 
 const Wrpper = styled.div`
   position: relative;
   div#sphere-ramp-container {
     .ramp-w-dvw {
       width: 100%;
+    }
+    form.ramp-w-full button span {
+      color: #fff;
     }
   }
 `;
