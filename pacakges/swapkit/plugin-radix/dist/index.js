@@ -1,0 +1,3 @@
+import{AssetValue as F,Chain as G,ProviderName as H,SwapKitError as q}from"@swapkit/helpers";function J({getWallet:x}){async function y({route:b}){let{sellAmount:z,sellAsset:f}=b,j=await F.from({asset:f==="XRD.XRD"?"XRD.XRD-resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd":f,value:z,asyncTokenLookup:!0});if(G.Radix!==j.chain)throw new q("core_swap_invalid_params");let B=x(j.chain);try{return B.signAndBroadcast({manifest:b.tx})}catch(D){throw new q("core_swap_invalid_params",D)}}return{swap:y,supportedSwapkitProviders:[H.CAVIAR_V1]}}var M={radix:{plugin:J}};export{M as RadixPlugin};
+
+//# debugId=4BD28CBB0059F26A64756E2164756E21

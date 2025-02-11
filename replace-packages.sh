@@ -1,6 +1,6 @@
 # Set base directories
-export NODE_MODULES="/home/heramb/Documents/madhouse_wallet_frontend/wallet-frontend/node_modules"
-export PACKAGES_DIR="/home/heramb/Documents/madhouse_wallet_frontend/wallet-frontend/pacakges/swapkit"
+export NODE_MODULES="/home/parvinderkumar/frontend/wallet-frontend/node_modules"
+export PACKAGES_DIR="/home/parvinderkumar/frontend/wallet-frontend/pacakges/swapkit"
 
 echo "Replacing @swapkit packages..."
 

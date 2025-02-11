@@ -1,0 +1,34 @@
+{
+  "description": "SwapKit Wallet - Bitget",
+  "dependencies": {
+    "@solana/web3.js": "1.95.8",
+    "@swapkit/helpers": "2.4.3",
+    "@swapkit/toolbox-cosmos": "1.8.9",
+    "@swapkit/toolbox-evm": "1.8.7",
+    "@swapkit/toolbox-solana": "1.4.5",
+    "@swapkit/toolbox-utxo": "1.2.18"
+  },
+  "files": [
+    "src/",
+    "dist/"
+  ],
+  "homepage": "https://github.com/thorswap/SwapKit",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "name": "@swapkit/wallet-bitget",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thorswap/SwapKit.git"
+  },
+  "scripts": {
+    "build": "bun run ./build.ts",
+    "clean": "rm -rf dist node_modules *.tsbuildinfo",
+    "lint": "biome check --diagnostic-level=error --write ./src",
+    "test": "echo 'bun test'",
+    "test:coverage": "bun test --coverage",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.1.12"
+}
