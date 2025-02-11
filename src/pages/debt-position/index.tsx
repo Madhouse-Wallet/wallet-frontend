@@ -11,7 +11,7 @@ import LiquitdityProtectionPop from "@/components/Modals/LiquidityProtectionPop"
 import SupplyPopUp from "@/components/Modals/SupplyPop";
 import AdjustPopup from "@/components/Modals/AdjustPopup";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers, providers } from "ethers";
+import ethers  from "../../../ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
