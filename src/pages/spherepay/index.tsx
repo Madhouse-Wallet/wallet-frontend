@@ -78,6 +78,11 @@ const SpherePaysec = styled.section`
   .ramp-text-primary {
     color: #fff !important;
   }
+    @media (max-width: 575px){
+    div#sphere-ramp-container .ramp-w-dvw{
+     position: unset !important;
+    }
+    }
 `;
 
 const Wrpper = styled.div`

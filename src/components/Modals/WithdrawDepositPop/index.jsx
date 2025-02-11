@@ -37,7 +37,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                 Add Supply
               </h5> */}
             </div>
-            <div className="modalBody">
+            <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
                 <div className="col-span-6">
                   <Link

@@ -38,6 +38,7 @@ const BTCEchange = () => {
   };
   const startReceive = async () => {
     try {
+      console.log("receice")
       setLoading(true);
       setDepositSetup("");
       setDepositFound("");
@@ -219,6 +220,7 @@ const BTCEchange = () => {
                         </button>
                         <button
                           onClick={() => startReceive()}
+                          // onClick={() => setBtcExchange(!btcExchange)}
                           className="flex items-center justify-center btn bg-[#CB89FF] border-0 text-white rounded-20 text-white text-xs font-bold"
                         >
                           Receive

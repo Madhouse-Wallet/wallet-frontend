@@ -122,6 +122,7 @@ const BtcExchangePop = ({
                 {loading ? (
                   <>
                     <Image
+                    alt=""
                       src={loader}
                       height={10000}
                       width={10000}
@@ -136,6 +137,7 @@ const BtcExchangePop = ({
                       mint as tBTC.
                     </p>
                     <Image
+                    alt=""
                       src={qrCode}
                       height={10000}
                       width={10000}
@@ -369,7 +371,7 @@ const BtcExchangePop = ({
           <div className={`relative hidden rounded`}>
             <div className="top pb-3">
               <h5 className="m-0 text-xl font-bold">
-                {sendBitcoin ? "Send" : "Receive"} Bitcoin
+              Receive Bitcoin
               </h5>
               {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
@@ -409,7 +411,7 @@ const BtcExchangePop = ({
           </div>
           <div className="top pb-3">
             <h5 className="m-0 text-xl font-bold">
-              {sendBitcoin ? "Send" : "Receive"} Bitcoin
+            Receive Bitcoin
             </h5>
             {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
