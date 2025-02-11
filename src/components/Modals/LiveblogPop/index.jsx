@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import umbrlIcn from "@/Assets/Images/umbrlIcn.svg";

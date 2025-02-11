@@ -8,7 +8,6 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
 const BTCEchange = () => {

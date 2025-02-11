@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 import webpack from "webpack";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const nextConfig = {
   reactStrictMode: true,
   webpack(config, { isServer }) {
@@ -52,6 +54,7 @@ const nextConfig = {
     // Add plugins
     config.plugins.push(
       new webpack.ProvidePlugin({
+        global: require.resolve("global"),
         process: "process/browser",
         Buffer: ["buffer", "Buffer"],
       })

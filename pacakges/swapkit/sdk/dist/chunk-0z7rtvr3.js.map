@@ -1,0 +1,14 @@
+{
+  "version": 3,
+  "sources": ["../../../../node_modules/es-errors/type.js", "../../../../node_modules/gopd/gOPD.js", "../../../../node_modules/gopd/index.js", "../../../../node_modules/es-define-property/index.js", "../../../../node_modules/es-errors/syntax.js"],
+  "sourcesContent": [
+    "'use strict';\n\n/** @type {import('./type')} */\nmodule.exports = TypeError;\n",
+    "'use strict';\n\n/** @type {import('./gOPD')} */\nmodule.exports = Object.getOwnPropertyDescriptor;\n",
+    "'use strict';\n\n/** @type {import('.')} */\nvar $gOPD = require('./gOPD');\n\nif ($gOPD) {\n\ttry {\n\t\t$gOPD([], 'length');\n\t} catch (e) {\n\t\t// IE 8 has a broken gOPD\n\t\t$gOPD = null;\n\t}\n}\n\nmodule.exports = $gOPD;\n",
+    "'use strict';\n\n/** @type {import('.')} */\nvar $defineProperty = Object.defineProperty || false;\nif ($defineProperty) {\n\ttry {\n\t\t$defineProperty({}, 'a', { value: 1 });\n\t} catch (e) {\n\t\t// IE 8 has a broken defineProperty\n\t\t$defineProperty = false;\n\t}\n}\n\nmodule.exports = $defineProperty;\n",
+    "'use strict';\n\n/** @type {import('./syntax')} */\nmodule.exports = SyntaxError;\n"
+  ],
+  "mappings": "yDAGA,EAAO,QAAU,4BCAjB,EAAO,QAAU,OAAO,2CCAxB,IAAI,MAEJ,GAAI,EACH,GAAI,CACH,EAAM,CAAC,EAAG,QAAQ,QACV,EAAP,CAED,EAAQ,KAIV,EAAO,QAAU,oBCXjB,IAAI,EAAkB,OAAO,gBAAkB,GAC/C,GAAI,EACH,GAAI,CACH,EAAgB,CAAC,EAAG,IAAK,CAAE,MAAO,CAAE,CAAC,QAC7B,EAAP,CAED,EAAkB,GAIpB,EAAO,QAAU,oBCVjB,EAAO,QAAU",
+  "debugId": "CBF230670B8CC9E264756E2164756E21",
+  "names": []
+}

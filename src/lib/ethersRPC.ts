@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ethers } from "ethers";
+import  ethers  from "../../ethers";
 
 const getChainId = async (provider: any): Promise<any> => {
   try {

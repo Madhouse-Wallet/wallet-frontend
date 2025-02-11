@@ -1,5 +1,5 @@
 import { TBTC } from "@keep-network/tbtc-v2.ts";
-import { ethers } from "ethers";
+import ethers  from "../../ethers";
 
 // tBTC SDK Initialization Function
 export async function initializeTBTC(signer: ethers.Signer) {

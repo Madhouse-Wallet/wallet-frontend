@@ -1,6 +1,6 @@
 // Import ABIs
 import borrowerContractABI from "../../borrowerContract.json";
-import { ethers } from "ethers";
+import ethers  from "../../ethers";
 import fetchPriceAbi from "../../fetchPriceContractAbi.json";
 import { getContract } from "viem";
 import curveContractAbi from "../../curveAbi.json";

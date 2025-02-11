@@ -10,7 +10,6 @@ import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
-import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
 import styled from "styled-components";

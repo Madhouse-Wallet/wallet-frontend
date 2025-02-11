@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import  ethers  from "../../ethers";
 import axios from "axios";
 
 const ERC20_ABI = [

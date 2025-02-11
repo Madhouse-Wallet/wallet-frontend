@@ -38,7 +38,7 @@ import {
 } from "@zerodev/passkey-validator"
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
 // import ethers from "../manualPackage/ethers";
-import { ethers } from "ethers";
+import ethers  from "../../ethers";
 import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
 import { sepolia } from "viem/chains"
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";

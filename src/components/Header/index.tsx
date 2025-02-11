@@ -13,7 +13,6 @@ import logo2 from "@/Assets/Images/logow1.png";
 import Wlogomw from "@/Assets/Images/logow.png";
 import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
-import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
 import { passkeyValidator } from "../../lib/zeroDevWallet";

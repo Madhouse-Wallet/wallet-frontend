@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import  ethers  from "../../../ethers";
 import Web3Interaction from "../../utils/web3Interaction";
 import { toast } from "react-toastify";
 

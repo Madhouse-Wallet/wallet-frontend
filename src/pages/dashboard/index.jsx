@@ -27,7 +27,7 @@ import {
 } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
+import ethers  from "../../../ethers";
 
 // interface CardMetrics {
 //   head: string;
