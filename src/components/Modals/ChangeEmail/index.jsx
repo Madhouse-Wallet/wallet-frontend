@@ -157,7 +157,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                     value={email}
                     onChange={(e) => (setEmail(e.target.value))}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11 h-[45px]`}
-                    placeholder="message"
+                    placeholder="Email"
                   />
                 </div>
                 <div className="btnWrpper mt-3 text-center">
@@ -176,7 +176,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                     OTP Code Verification
                   </h5>
                   <p className="m-0 text-xs ">
-                    Code has been send to You Email
+                    Code has been sent to Your Current Email
                   </p>
                 </div>
                 <div className="py-2">

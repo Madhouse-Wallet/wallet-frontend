@@ -27,6 +27,7 @@ const BTCEchange = () => {
   const [depositSetup, setDepositSetup] = useState<any>("");
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
+  const [sendSdk, setSendSdk] = useState<any>("");
   console.log("walletAddress-->", userAuth);
 
   const handleGoBack = () => {
@@ -67,13 +68,39 @@ const BTCEchange = () => {
         }
       } else {
         setBtcExchange(!btcExchange);
-
         // toast.error("Please Login First");
       }
     } catch (error) {
       console.log("error rec-->", error);
     }
   };
+
+  const startSend = async () => {
+    try {
+      console.log("start send")
+      if (userAuth.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            // kernelProvider, ethersProvider, signer
+            const sdk = await initializeTBTC(provider.signer);
+            if (sdk) {
+              setSendSdk(sdk)
+            }
+            setBtcExchangeSend(!btcExchangeSend);
+          }
+        }
+      } else {
+        setBtcExchangeSend(!btcExchangeSend);
+        // toast.error("Please Login First");
+      }
+    } catch (error) {
+      console.log("startSend error-->")
+    }
+  }
 
   const generateQRCode = async (text: any) => {
     try {
@@ -141,6 +168,7 @@ const BTCEchange = () => {
         createPortal(
           <BtcExchangeSendPop
             btcExchangeSend={btcExchangeSend}
+            sendSdk={sendSdk}
             setBtcExchangeSend={setBtcExchangeSend}
             walletAddress={walletAddressDepo}
             qrCode={qrCode}
@@ -213,7 +241,7 @@ const BTCEchange = () => {
                     <div className="right">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setBtcExchangeSend(!btcExchangeSend)}
+                          onClick={() => startSend()}
                           className="flex items-center justify-center bg-[#FFEC8A] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Send
