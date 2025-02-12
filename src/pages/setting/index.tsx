@@ -1,5 +1,6 @@
 "use client";
 import BTCAddressPop from "@/components/Modals/BtcAddressPop";
+import ChangeEmailPop from "@/components/Modals/ChangeEmail";
 import ConfirmationPop from "@/components/Modals/ConfirmationPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import { useRouter } from "next/navigation";
@@ -39,6 +40,7 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
   const [setUp, setSetUp] = useState<boolean>(false);
+  const [ changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
   const handleCopy = async (address: string) => {
     try {
@@ -302,6 +304,11 @@ const Setting: React.FC = () => {
           <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
           document.body
         )}
+         {changeEmail &&
+        createPortal(
+          <ChangeEmailPop changeEmail={changeEmail} setChangeEmail={setChangeEmail} />,
+          document.body
+        )}
       {confirm &&
         createPortal(
           <ConfirmationPop confirm={confirm} setConfirm={setConfirm} />,
@@ -451,7 +458,7 @@ const Setting: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                  <div
+                {userAuth?.login ?(  <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                   >
@@ -464,9 +471,10 @@ const Setting: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <a
+                      <button
+                        onClick={()=> setChangeEmail(!changeEmail)}
                         className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
-                        href="/settings/account/change-name"
+                        
                       >
                         <svg
                           stroke="currentColor"
@@ -482,9 +490,10 @@ const Setting: React.FC = () => {
                           <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
                         </svg>
                         Change email
-                      </a>
+                      </button>
                     </div>
-                  </div>
+                  </div>):(<></>)}
+                
                   <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"

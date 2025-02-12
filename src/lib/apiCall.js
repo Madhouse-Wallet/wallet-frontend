@@ -24,7 +24,6 @@ export const getUser = async (email) => {
     }
 };
 
-
 export const updtUser = async (findData, updtData) => {
     try {
         try {
@@ -52,8 +51,6 @@ export const updtUser = async (findData, updtData) => {
     }
 };
 
-
-
 export const delUser = async (email) => {
     try {
         try {
@@ -78,3 +75,30 @@ export const delUser = async (email) => {
         return false;
     }
 };
+
+export const sendOTP = async ({ email, name, otp, subject, type }) => {
+    try {
+      // console.log(email)
+      return await fetch(`/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          subject,
+          emailData: {
+            name: name,
+            verificationCode: otp,
+          },
+          email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log("error-->", error);
+      return false;
+    }
+  };
