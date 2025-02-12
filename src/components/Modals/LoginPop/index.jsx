@@ -149,7 +149,7 @@ const LoginPop = ({ login, setLogin }) => {
                   login: true,
                   walletAddress: account?.account?.address || "",
                   signer: "",
-                  username: userExist.userId.username,
+                  username: (userExist.userId.username || ""),
                   email: userExist.userId.email,
                   passkeyCred: userExist.userId.passkey || "",
                 })
