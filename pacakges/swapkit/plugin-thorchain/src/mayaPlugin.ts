@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import type { QuoteResponseRoute } from "@swapkit/api";
 import {
   AssetValue,

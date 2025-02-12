@@ -37,6 +37,7 @@ const nextConfig = {
     // Add fallback for browser polyfills
     config.resolve.fallback = {
       ...config.resolve.fallback,
+      "@noble/hashes/_assert": require.resolve("@noble/hashes/_assert"),
       crypto: "crypto-browserify",
       stream: "stream-browserify",
       buffer: "buffer",

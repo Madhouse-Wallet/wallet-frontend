@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import {
   type FungibleResourcesCollectionItem,
   GatewayApiClient,

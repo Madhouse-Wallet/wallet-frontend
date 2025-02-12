@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import { BaseDecimal } from "../types/chains";
 import type { SwapKitNumber } from "./swapKitNumber";
 

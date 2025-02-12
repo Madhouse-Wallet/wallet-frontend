@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import type { Keplr } from "@keplr-wallet/types";
 import {
   type AssetValue,

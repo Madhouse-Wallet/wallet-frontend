@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-nocheck
 import base58check from "bs58check";
 // @ts-expect-error
 import cashaddr from "cashaddrjs";

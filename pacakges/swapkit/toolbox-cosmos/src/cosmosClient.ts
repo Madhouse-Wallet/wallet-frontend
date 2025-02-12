@@ -39,7 +39,7 @@ export class CosmosClient {
     return base64.encode(walletAccount.pubkey);
   };
 
-  checkAddress = (address: any) => {
+  checkAddress = (address: string) => {
     if (!address.startsWith(this.prefix)) return false;
 
     try {

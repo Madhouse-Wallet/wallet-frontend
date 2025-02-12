@@ -8,7 +8,7 @@ import {
   getInputSize,
   getOutputSize,
   getScriptTypeForAddress,
-} from "../utils/index";
+} from "./index";
 
 export const getDustThreshold = (chain: UTXOChain) => {
   switch (chain) {
