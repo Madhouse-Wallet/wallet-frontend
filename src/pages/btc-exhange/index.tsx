@@ -149,7 +149,7 @@ const BTCEchange = () => {
                   >
                     {backIcn}
                   </button>
-                  <h4 className="m-0 text-2xl font-bold">Threshold Wallet</h4>
+                  <h4 className="m-0 text-2xl font-bold">Exchange</h4>
                 </div>
               </div>
             </div>

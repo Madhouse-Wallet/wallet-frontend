@@ -72,7 +72,7 @@ const CurveDeposit = () => {
                 >
                   <div className="d-flex align-items-center gap-2 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Curve Deposit
+                      Lend USDC and Earn Interest
                     </h4>
                   </div>
                   <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 ">

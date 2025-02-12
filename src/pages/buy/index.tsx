@@ -19,9 +19,9 @@ const stripePromise = loadStripe(
 const BuyCoin: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const tabData = [
-    { title: "Swap Kit", component: <SwapKit /> },
+    { title: "Buy with USDC", component: <SwapKit /> },
     {
-      title: "Stripe",
+      title: "Buy with Debit/Credit Card",
       component: (
         <>
           <StripePaymentPage />

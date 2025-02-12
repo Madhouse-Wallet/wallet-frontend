@@ -43,7 +43,7 @@ const Setting: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Copied Successfully!")
+      toast.success("Copied Successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -103,7 +103,7 @@ const Setting: React.FC = () => {
       ),
     },
     {
-      title: "ENS username",
+      title: "Configure Subdomain Name",
       content: (
         <>
           {" "}
@@ -373,38 +373,59 @@ const Setting: React.FC = () => {
                   className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
                 >
                   <div className="left">
+                    <h4 className="m-0 font-bold text-xl">Information</h4>
                     <ul className="list-none pl-0 mb-0 text-xs">
-                        <li className="flex gap-2 py-1">
-                          <div
-                            className="block text-gray-500"
-                            style={{ width: 100 }}
-                          >
-                            Email Address:
-                          </div>
-                          {userAuth?.email && 
-                          <span className="text-white flex items-center">
-                            {userAuth?.email}
-                          </span>
-}
-                        </li>
-                        <li className="flex gap-2 py-1">
-                          <div
-                            className="block text-gray-500"
-                            style={{ width: 100 }}
-                          >
-                            wallet ID:
-                          </div>
-                          {userAuth?.walletAddress && 
-                          <span className="text-white flex items-center">
-                            {splitAddress(userAuth?.walletAddress)}
-                            <button onClick={() => handleCopy(userAuth?.walletAddress)}
-                              className="border-0 p-0 bg-transparent pl-1">
-                              {copyIcn}
-                            </button>
-                          </span>
-                          }
-                        </li> 
-
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          wallet ID:
+                        </div>
+                        {/* {userAuth?.walletAddress && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.walletAddress ? (
+                            <>
+                              {splitAddress(userAuth?.walletAddress)}
+                              <button
+                                onClick={() =>
+                                  handleCopy(userAuth?.walletAddress)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          ) : (
+                            "--"
+                          )}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Email Address:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.email ? userAuth?.email : "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Subdomain Name:
+                        </div>
+                        <span className="text-white flex items-center">
+                          quincy120{" "}
+                        </span>
+                      </li>
                     </ul>
                   </div>
                   <div className="right">
@@ -415,13 +436,16 @@ const Setting: React.FC = () => {
                       >
                         {logoutIcn} Logout
                       </button>
-                    ): <>
-                      <button
-                        onClick={()=> router.push("/welcome")}
-                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
-                      >
-                        Login
-                      </button></>}
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => router.push("/welcome")}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
+                        >
+                          Login
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -436,7 +460,7 @@ const Setting: React.FC = () => {
                         Account
                       </h3>
                       <p className="text-xs leading-none -tracking-2 text-white/40">
-                        Your name and password
+                        Your email
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -457,26 +481,7 @@ const Setting: React.FC = () => {
                         >
                           <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
                         </svg>
-                        Change name
-                      </a>
-                      <a
-                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
-                        href="/settings/account/change-password"
-                      >
-                        <svg
-                          stroke="currentColor"
-                          fill="currentColor"
-                          strokeWidth={0}
-                          viewBox="0 0 24 24"
-                          className="shrink-0 opacity-80"
-                          height="1em"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                          style={{ width: 14, height: 14 }}
-                        >
-                          <path d="M12.917 13C12.441 15.8377 9.973 18 7 18C3.68629 18 1 15.3137 1 12C1 8.68629 3.68629 6 7 6C9.973 6 12.441 8.16229 12.917 11H23V13H21V17H19V13H17V17H15V13H12.917ZM7 16C9.20914 16 11 14.2091 11 12C11 9.79086 9.20914 8 7 8C4.79086 8 3 9.79086 3 12C3 14.2091 4.79086 16 7 16Z" />
-                        </svg>
-                        Change password
+                        Change email
                       </a>
                     </div>
                   </div>
@@ -502,8 +507,9 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${selectedBackground === bg ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedBackground === bg ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -565,8 +571,9 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${selectedWatermark === wm ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedWatermark === wm ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -608,32 +615,34 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {userAuth?.login && (   <div
-                    tabIndex={-1}
-                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-xs font-medium leading-none -tracking-2">
-                        Test Trxn
-                      </h3>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={async () => {
-                          let account = await getAccount(
-                            userAuth?.passkeyCred,
-                            userAuth?.walletAddress
-                          );
+                  {userAuth?.login && (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Test Trxn
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            let account = await getAccount(
+                              userAuth?.passkeyCred,
+                              userAuth?.walletAddress
+                            );
 
-                          await zeroTrxn(account?.kernelClient);
-                        }}
-                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
-                      >
-                        Zero Trxn
-                      </button>
+                            await zeroTrxn(account?.kernelClient);
+                          }}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
+                          Zero Trxn
+                        </button>
+                      </div>
                     </div>
-                  </div>)}
-                
+                  )}
+
                   {userAuth?.login && (
                     <div
                       tabIndex={-1}
@@ -675,35 +684,36 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   )}
-    {userAuth?.login && ( <div
-                    tabIndex={-1}
-                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                  >
-                             
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-xs font-medium leading-none -tracking-2">
-                        2FA
-                      </h3>
-                      <p className="text-xs leading-none -tracking-2 text-white/40">
-                        A second layer of security for your Umbrel login and
-                        apps
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked="false"
-                      data-state="unchecked"
-                      value="on"
-                      className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                  {userAuth?.login && (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                     >
-                      <span
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Multifactor Authentication
+                        </h3>
+                        <p className="text-xs leading-none -tracking-2 text-white/40">
+                          A second layer of security for your Madhouse Wallet
+                          login
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked="false"
                         data-state="unchecked"
-                        className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
-                      />
-                    </button>
-                  </div>) }
-                 
+                        value="on"
+                        className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                      >
+                        <span
+                          data-state="unchecked"
+                          className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+                        />
+                      </button>
+                    </div>
+                  )}
+
                   <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">
                     {accordionTabs && accordionTabs.length > 0 && (
                       <>

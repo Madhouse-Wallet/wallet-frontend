@@ -67,47 +67,46 @@ const DebtPosition: React.FC = () => {
 
   const fetchTroveData = async (provider: any) => {
     try {
-      if(!provider){
-        return
+      if (!provider) {
+        return;
       }
-    
+
       const walletAddress = userAuth?.walletAddress;
-      console.log("walletAddress-->",walletAddress)
+      console.log("walletAddress-->", walletAddress);
       // Create web3 instance
       const web3 = new Web3Interaction("sepolia", provider);
-console.log("web3-->",web3)
+      console.log("web3-->", web3);
       // Contract address
       const contractAddress =
         process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
       const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
-      console.log("TUSDAddress-->93",TUSDAddress, contractAddress)
+      console.log("TUSDAddress-->93", TUSDAddress, contractAddress);
       // Fetch data from the contract
       const troveResponse = await web3.Troves(contractAddress!, walletAddress);
-      console.log("troveResponse-->93",troveResponse)
+      console.log("troveResponse-->93", troveResponse);
       const balanceResponse = await web3.balanceOf(TUSDAddress!, walletAddress);
-      console.log("balanceResponse-->93",balanceResponse)
+      console.log("balanceResponse-->93", balanceResponse);
       const coll = troveResponse?.coll;
       const debt = troveResponse?.debt;
 
       const collInEther = ethers.utils.formatEther(coll);
       const debtInEther = ethers.utils.formatEther(debt);
       const balance = ethers.utils.formatEther(balanceResponse);
-      console.log("balance-->93",balance)
+      console.log("balance-->93", balance);
       calculateCollateralAndHealthFactor(collInEther, debtInEther);
       setSupply(collInEther);
       setDebtvalue(debtInEther);
       setWalletBalance(balance);
       setLoading(false);
     } catch (err: any) {
-      console.log(err)
+      console.log(err);
       toast.error("Failed to fetch trove data");
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
-    console.log("userAuth-->",userAuth)
+    console.log("userAuth-->", userAuth);
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
@@ -117,7 +116,7 @@ console.log("web3-->",web3)
           console.log("provider-->", provider);
           if (provider) {
             console.log("provider -line-114", provider);
-            setProviderr(provider?.ethersProvider)
+            setProviderr(provider?.ethersProvider);
             try {
               fetchTroveData(provider?.ethersProvider);
             } catch (err: any) {
@@ -162,7 +161,6 @@ console.log("web3-->",web3)
     }
   };
   const Withdraw = async () => {
-
     if (!providerr) {
       toast.error("Please Login");
       setLoading(false);
@@ -229,7 +227,7 @@ console.log("web3-->",web3)
         )}
       <section className="relative dashboard pt-12">
         <div className="container">
-        <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
+          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <button
               onClick={() => router.push("/dashboard")}
               className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
@@ -242,7 +240,7 @@ console.log("web3-->",web3)
                 <div className="sectionHeader ">
                   <div className="flex items-center gap-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Collateral Debt Position
+                      Bitcoin Loan
                     </h4>
                   </div>
                 </div>
@@ -254,14 +252,14 @@ console.log("web3-->",web3)
                 >
                   <div className="top pb-3 flex items-center justify-between gap-3">
                     <div className="content">
-                      <p className="m-0">Assets</p>
+                      <p className="m-0">Asset</p>
                     </div>
                     <span className="icn">
                       {/* <button
                       className="flex items-center justify-content-center commonBtn fw-sbold"
                       style={{ minWidth: "unset" }}
                     > */}
-                      THUSD
+                      Bitcoin
                       {/* </button> */}
                     </span>
                   </div>
@@ -274,7 +272,7 @@ console.log("web3-->",web3)
                       style={{ fontSize: 12 }}
                     >
                       <li className=" flex items-center justify-between">
-                        <p className="m-0 fw-sbold">Net Balance</p>
+                        <p className="m-0 fw-sbold">Loan Balance</p>
                         <p className="m-0 fw-sbold">
                           {Number(walletBalance).toFixed(4)}
                         </p>
@@ -283,7 +281,7 @@ console.log("web3-->",web3)
                         className=" flex items-center justify-between"
                         style={{ fontSize: 10 }}
                       >
-                        <p className="m-0 fw-sbold">Health Factor</p>
+                        <p className="m-0 fw-sbold">Loan-to-Value Ratio</p>
                         <p className="m-0 fw-sbold">{healthValue}</p>
                       </li>
                     </ul>
@@ -304,7 +302,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Supply</p>
+                          <p className="m-0 fw-sbold">Bitcoin Collateral</p>
                           {/* <p className="m-0">APY 1%</p> */}
                         </div>
                         <div className="right">
@@ -320,7 +318,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Debt</p>
+                          <p className="m-0 fw-sbold">USD Debt</p>
                           {/* <p className="m-0">APY 1%</p> */}
                         </div>
                         <div className="right">
@@ -348,11 +346,13 @@ console.log("web3-->",web3)
                               <div className=" sm:col-span-6 col-span-12">
                                 <input
                                   type="text"
-                                 className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                                 />
                               </div>
                               <div className=" sm:col-span-6 col-span-12 self-end">
-                                <button  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}>
+                                <button
+                                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                                >
                                   Submit
                                 </button>
                               </div>
@@ -364,7 +364,7 @@ console.log("web3-->",web3)
                   </div>
                   <div className="md:col-span-6 col-span-12 my-2">
                     <div className="sectionHeader pb-3">
-                      <h4 className="m-0 fw-bold text-xl">Management</h4>
+                      <h4 className="m-0 fw-bold text-xl">Configurations</h4>
                     </div>
                     <div className="py-2">
                       <CardCstm
@@ -374,7 +374,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Liquidation Protection</p>
+                          <p className="m-0 fw-sbold">Liquidation Alerts</p>
                         </div>
                         <div className="right">
                           <GradientHandleSwitch
@@ -402,7 +402,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Open or Close CDP</p>
+                          <p className="m-0 fw-sbold">Loan Management</p>
                         </div>
                         <div className="right">
                           <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
@@ -412,7 +412,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4 py-1"
                                 style={{ minWidth: "unset" }}
                               >
-                                Open CDP
+                                Open a Loan
                               </button>
                             </li>
                             <li className="">
@@ -422,7 +422,9 @@ console.log("web3-->",web3)
                                 onClick={Withdraw}
                                 disabled={withdrawButton}
                               >
-                                {withdrawButton ? "Withdrawing.." : "Withdraw"}
+                                {withdrawButton
+                                  ? "Withdrawing.."
+                                  : "Close a Loan"}
                               </button>
                             </li>
                           </ul>
@@ -437,7 +439,7 @@ console.log("web3-->",web3)
                         }}
                       >
                         <div className="left">
-                          <p className="m-0 fw-sbold">Health Management</p>
+                          <p className="m-0 fw-sbold">Loan Health</p>
                         </div>
                         <div className="right">
                           <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
@@ -447,7 +449,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
                                 style={{ minWidth: "unset" }}
                               >
-                                Supply
+                                Add Collateral
                               </button>
                             </li>
                             <li className="">
@@ -456,7 +458,7 @@ console.log("web3-->",web3)
                                 className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
                                 style={{ minWidth: "unset" }}
                               >
-                                Adjust
+                                Adjust Debt
                               </button>
                             </li>
                             {/* <li className="">

@@ -22,9 +22,7 @@ import { toast } from "react-toastify";
 import styled from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { splitAddress } from "../../utils/globals";
-import {
-  fetchTokenBalances,
-} from "../../lib/utils";
+import { fetchTokenBalances } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
@@ -54,14 +52,14 @@ const Dashboard = () => {
   const [collateralRatio, setCollateralRatio] = useState(0);
 
   const cardMetrics = [
-    { head: "Total Deposit", value: "$234234", icn: icn11 },
-    { head: "TBTC Balance", value: tbtcBalance, icn: icn22 },
-    { head: "THUSD Balance", value: thusdBalance, icn: icn33 },
-    { head: "Colateral Ratio", value: collateralRatio, icn: icn11 },
+    { head: "Total Balance", value: "$234234", icn: icn11 },
+    { head: "Bitcoin", value: tbtcBalance, icn: icn22 },
+    { head: "USDC Balance", value: thusdBalance, icn: icn33 },
+    { head: "Loan Balance", value: collateralRatio, icn: icn11 },
   ];
   const cardData = [
     {
-      head: "Send & Receive Bitcoin",
+      head: "Send & Receive",
       icn: icn1,
       onClick: () => {
         router.push("/btc-exchange");
@@ -75,14 +73,14 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Buy/Sell Bitcoin",
+      head: "Buy & Sell Bitcoin",
       icn: icn3,
       onClick: () => {
         setBuySell(!buySell);
       },
     },
     {
-      head: "Withdraw/Deposit Dollars",
+      head: "Withdraw & Deposit Dollars",
       icn: icn4,
       onClick: () => {
         // router.push("/identity");
@@ -94,7 +92,7 @@ const Dashboard = () => {
       icn: icn5,
       onClick: () => {
         // if (userAuth.login) {
-          router.push("/curve-deposit");
+        router.push("/curve-deposit");
         // } else {
         //   toast.error("Please Login!");
         // }
@@ -355,8 +353,10 @@ const Dashboard = () => {
                   style={{ border: " 1px solid #565656a3", marginTop: 0 }}
                 >
                   <p className="m-0">
-                    Health Factor:{" "}
-                    <span className="text-[#00FF0A]">{healthFactor.toFixed(2)}</span>
+                    Loan-to-Value Ratio:{" "}
+                    <span className="text-[#00FF0A]">
+                      {healthFactor.toFixed(2)}
+                    </span>
                   </p>
                 </div>
               </div>

@@ -184,8 +184,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                       {/* {userAuth?.username} */}
                       {userAuth?.walletAddress ? (
                         <>
-                          {splitAddress(userAuth?.walletAddress)} <span className="ml-1">
-                          {copyIcn}</span> 
+                          {splitAddress(userAuth?.walletAddress)}{" "}
+                          <span className="ml-1">{copyIcn}</span>
                         </>
                       ) : (
                         "Loading..."
@@ -235,7 +235,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                     // onClick={() => setLogin(!login)}
                     className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
                   >
-                    Login
+                    Sign-Up/Login
                   </Link>
                 )}
                 {/* <button
@@ -277,31 +277,33 @@ const Nav = styled.nav`
     .logo {
       height: 15px;
     }
-       .smlogo {
-    height: 25px;
-  }
+    .smlogo {
+      height: 25px;
+    }
     h4 {
       font-size: 10px;
     }
-      .commonBtn {
-      font-size: 10px !important;}
+    .commonBtn {
+      font-size: 10px !important;
+    }
     button {
       padding: 5px;
       font-size: 12px !important;
       height: 35px !important;
     }
   }
-    @media (max-width: 420px){
-     .logo {
+  @media (max-width: 420px) {
+    .logo {
       height: 10px;
     }
-      .commonBtn {
+    .commonBtn {
       height: 30px !important;
-      font-size: 6px;}
-       .smlogo {
-    height: 20px;
-  }
+      font-size: 6px;
     }
+    .smlogo {
+      height: 20px;
+    }
+  }
 `;
 
 export default Header;
