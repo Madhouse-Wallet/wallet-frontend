@@ -116,6 +116,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             id: userAuth.id
           }, "authUser")
           toast.success("New Key Recovered!");
+          setSetUp(!setUp)
         } else {
           toast.error(checkAccount.msg);
         }
