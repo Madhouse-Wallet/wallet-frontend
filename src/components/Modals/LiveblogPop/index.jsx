@@ -8,20 +8,16 @@ import umbrlIcn from "@/Assets/Images/umbrlIcn.svg";
 import downloadApp from "@/Assets/Images/downloads-app.png";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import BlogCard from "@/components/BlogCard";
+import { useSelector } from "react-redux";
+import RecentTransaction from "./RecentTransaction";
 // css
 
 // img
 
-const LiveBlogPopup = ({ liveBlog, setLiveBlog }) => {
+const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const { theme, toggleTheme } = useTheme();
-
-  const data = [
-    { head: "Total Deposit", value: "$234234" },
-    { head: "BTC Balance", value: "$234234" },
-    { head: "USD Balance", value: "$234234" },
-    { head: "Loan Health", value: "$234234" },
-  ];
-
+  console.log("transactions", transactions);
   const handleLiveBlog = () => setLiveBlog(!liveBlog);
   return (
     <>
@@ -55,9 +51,9 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog }) => {
                 </div>
               </div>
               <div className="grid blogCard gap-3 grid-cols-12">
-                <BlogCard classN={"col-span-6 md:col-span-4"} />
+                <BlogCard classN={"col-span-6 md:col-span-4"} data={data} />
                 <div className="col-span-12 mt-3">
-                  <div
+                  {/* <div
                     className={` bg-white/5 divide-white/6 divide-y  rounded-12`}
                   >
                     <div className="flex items-center gap-2 p-3">
@@ -117,7 +113,8 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog }) => {
                         0 B
                       </span>
                     </div>
-                  </div>
+                  </div> */}
+                  <RecentTransaction transactions={transactions}/>
                 </div>
               </div>
             </div>

@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 import styled from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { splitAddress } from "../../utils/globals";
-import { fetchTokenBalances } from "../../lib/utils";
+import { fetchBalance, fetchTokenBalances } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
@@ -50,9 +50,11 @@ const Dashboard = () => {
   const [thusdBalance, setThusdBalance] = useState(0);
   const [healthFactor, setHealthFactor] = useState(0);
   const [collateralRatio, setCollateralRatio] = useState(0);
+  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+
 
   const cardMetrics = [
-    { head: "Total Balance", value: "$234234", icn: icn11 },
+    { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: tbtcBalance, icn: icn22 },
     { head: "USDC Balance", value: thusdBalance, icn: icn33 },
     { head: "Loan Balance", value: collateralRatio, icn: icn11 },
@@ -197,7 +199,7 @@ const Dashboard = () => {
                   const balances = await fetchTokenBalances(
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
-                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS,
+                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -212,11 +214,22 @@ const Dashboard = () => {
                     }
                     if (
                       token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS.toLowerCase()
+                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS.toLowerCase()
                     ) {
                       setThusdBalance(formattedBalance.toFixed(2));
                     }
                   });
+
+                  const walletBalance = await fetchBalance('0xcB4867789704f3C14f6b20F5848407086246db2e');
+                  console.log("Wallet Balance Data:", walletBalance);
+
+                  if (walletBalance?.result?.length) {
+                    const totalUsd = walletBalance.result.reduce(
+                      (sum, token) => sum + (token.usd_value || 0),
+                      0
+                    );
+                    setTotalUsdBalance(totalUsd.toFixed(2));
+                  }
                   fetchTroveData(provider?.ethersProvider);
                 } catch (err) {}
               }

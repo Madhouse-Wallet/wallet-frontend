@@ -233,9 +233,9 @@ const BTCEchange = () => {
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    {/* <div className="d-flex align-items-center gap-3 mb-3">
                       <h4 className="m-0 text-xl">Recent Transactions</h4>
-                    </div>
+                    </div> */}
                     <RecentTransaction />
                   </div>
                 </div>

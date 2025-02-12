@@ -28,14 +28,14 @@ export const fetchTokenBalances = async (tokenAddress:string[],walletAddress:str
   }
 };
 
-export const fetchWalletHistory = async () => {
+export const fetchWalletHistory = async (walletAddress:string) => {
   try {
     const response = await fetch("/api/moralis", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "getWalletHistory",
-        address: "0xcB1C1FdE09f811B294172696404e88E658659905",
+        address: walletAddress,
       }),
     });
 
@@ -83,6 +83,32 @@ export const fetchTokenTransfers = async (contractAddress:string[], walletAddres
     return data.data;
   } catch (error) {
     console.error("Error fetching token transfers:", error);
+    throw error;
+  }
+};
+
+
+export const fetchBalance = async (walletAddress: string) => {
+  try {
+    const response = await fetch("/api/moralis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "getWalletBalance",
+        address: walletAddress,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to fetch wallet balance");
+    }
+
+    const data = await response.json();
+    console.log("Wallet balance:", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching wallet balance:", error);
     throw error;
   }
 };

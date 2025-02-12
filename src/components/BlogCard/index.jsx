@@ -2,15 +2,9 @@ import { useTheme } from "@/ContextApi/ThemeContext";
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 
-const BlogCard = ({ classN }) => {
+const BlogCard = ({ classN,data }) => {
   const { theme, toggleTheme } = useTheme();
 
-  const data = [
-    { head: "Total Deposit", value: "$234234" },
-    { head: "BTC Balance", value: "$234234" },
-    { head: "USD Balance", value: "$234234" },
-    { head: "Loan Health", value: "$234234" },
-  ];
   return (
     <>
       {data?.map((item, index) => (
@@ -33,7 +27,7 @@ const BlogCard = ({ classN }) => {
                     <span className="min-w-0 truncate">{item.value}</span>
                   </div>
                 </div>
-                <div className="flex-1" />
+                {/* <div className="flex-1" />
                 <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                   +20.1% from last month
                 </div>
@@ -51,7 +45,7 @@ const BlogCard = ({ classN }) => {
                     className={` bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
                     style={{ transform: "translateX(-55%)" }}
                   />
-                </div>
+                </div> */}
               </button>
             </div>
           </CardCstm>
