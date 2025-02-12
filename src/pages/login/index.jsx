@@ -109,7 +109,7 @@ const Login = () => {
               }
               // if (userExist.userId.wallet == address) {
                 toast.success("Login Successfully!");
-                console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
+                console.log("data-->", data,userExist, createdWebAuthKey, newPasskeyValidator)
                 dispatch(
                   loginSet({
                     login: true,
