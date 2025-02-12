@@ -75,14 +75,19 @@ const SpherePaysec = styled.section`
   button {
     color: #fff !important;
   }
+  button[variant="outline"]:hover {
+    background: #00000099 !important;
+    color: #fff;
+  }
+
   .ramp-text-primary {
     color: #fff !important;
   }
-    @media (max-width: 575px){
-    div#sphere-ramp-container .ramp-w-dvw{
-     position: unset !important;
+  @media (max-width: 575px) {
+    div#sphere-ramp-container .ramp-w-dvw {
+      position: unset !important;
     }
-    }
+  }
 `;
 
 const Wrpper = styled.div`
