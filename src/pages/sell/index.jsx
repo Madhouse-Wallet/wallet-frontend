@@ -1,11 +1,23 @@
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import Swap from "../swap";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import Defi from "./Defi";
 
 const SellPage = () => {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const tabData = [
+    { title: "Defi", component: <Defi /> },
+    {
+      title: "Cowswap",
+      component: (
+        <Swap />
+      ),
+    },
+  ];
+  const [activeTab, setActiveTab] = useState(0);
+
 
   return (
     <>
@@ -26,13 +38,32 @@ const SellPage = () => {
                 >
                   <div className="d-flex align-items-center gap-3 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Buy Bitcoin
+                      Sell Bitcoin
                     </h4>
                   </div>
+                  <ul className="list-none pl-0 mb-0 flex items-center gap-3 ">
+                    {tabData.map((item, index) => (
+                      <li key={index} className="py-1">
+                        <button
+                          className={` ${activeTab === index
+                              ? "bg-[#ffad84] border-[#ffad84]"
+                              : "bg-white border-white"
+                            }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+             // Highlight active tab
+              `}
+                          onClick={() => setActiveTab(index)}
+                        >
+                          {item.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
               <div className="my-2 col-span-12">
-                <Swap />
+                <div className="tabContent">
+                  <div className="">{tabData[activeTab].component}</div>
+                </div>
               </div>
             </div>
           </div>

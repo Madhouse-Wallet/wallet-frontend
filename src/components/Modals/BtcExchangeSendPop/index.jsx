@@ -132,214 +132,49 @@ const BtcExchangeSendPop = ({
                 ) : (
                   <>
                     <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
-                      Use this generated address to send minimum 0.01 BTC, to
-                      mint as tBTC.
+                    Unminting requires one Ethereum transaction and it takes around 3-5 hours.
                     </p>
-                    <Image
-                    alt=""
-                      src={qrCode}
-                      height={10000}
-                      width={10000}
-                      className="max-w-full mx-auto h-auto w-auto"
-                      style={{ height: 150 }}
-                    />
+                    
                   </>
                 )}
-                {!loading && (
-                  <>
-                    {" "}
-                    <div className="content mt-2" style={{ fontSize: 12 }}>
-                      <div className="text-center py-5">
-                        <h6 className="m-0 text-base pb-2">
-                          Your Wallet Address
-                        </h6>
-                        <div className="flex max-w-full items-stretch rounded-4 border border-dashed border-white/5 bg-white/4 text-14 leading-none text-white/40 outline-none focus-visible:border-white/40">
-                          <input
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-content={walletAddress}
-                            readOnly=""
-                            className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
-                            type="text"
-                            defaultValue={walletAddress || "Wallet Address"}
-                          />
-                          <button
-                            onClick={() => handleCopy(walletAddress, "one")}
-                            className="rounded-4 px-1.5 ring-inset transition-colors hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-                            data-state="closed"
-                          >
-                            {copyIcn}
-                          </button>
-                        </div>
-                        {isCopied?.one && (
-                          <span style={{ marginLeft: "10px", color: "green" }}>
-                            Copied!
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        data-orientation="horizontal"
-                        role="none"
-                        className="shrink-0 from-transparent via-white/10 to-transparent h-[1px] w-full bg-gradient-to-r mb-5"
-                      />
-
-                      <div className="grid gap-3 grid-cols-12 my-2 bg-white/5 p-3 rounded-10">
-                        <div className="col-span-4 ">
-                          <div className="cardCstm text-center bg-white/5">
-                            <div className="top p-2 bg-white/5 ">
-                              <span className="font-bold text-base block themeClr">
-                                1 hour
-                              </span>
-                              <span className="text-xs font-light">
-                                + 1 confirmation
-                              </span>
-                            </div>
-                            <div className="bottom px-2 py-3">
-                              <p className="m-0 text-base text-gray-500 font-medium">
-                                {`<`} 0.10 <sub className="text-xs">BTC</sub>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-span-4 ">
-                          <div className="cardCstm text-center bg-white/5">
-                            <div className="top p-2 bg-white/5 ">
-                              <span className="font-bold text-base block themeClr">
-                                1.5 hours
-                              </span>
-                              <span className="text-xs font-light">
-                                + 3 confirmations
-                              </span>
-                            </div>
-                            <div className="bottom px-2 py-3">
-                              <p className="m-0 text-base text-gray-500 font-medium">
-                                {`<`} 1.00 <sub className="text-xs">BTC</sub>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-span-4 ">
-                          <div className="cardCstm text-center bg-white/5">
-                            <div className="top p-2 bg-white/5 ">
-                              <span className="font-bold text-base block themeClr">
-                                2 hours
-                              </span>
-                              <span className="text-xs font-light">
-                                + 6 confirmations
-                              </span>
-                            </div>
-                            <div className="bottom px-2 py-3">
-                              <p className="m-0 text-base text-gray-500 font-medium">
-                                {`≥`} 1.00 <sub className="text-xs">BTC</sub>
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bottom pt-3">
-                        <div className="bg-white/5 rounded-10 p-3">
-                          <h6 className="m-0 font-bold text-base">
-                            Provided Addresses Recap
-                          </h6>
-                          <ul className="list-none pl-0 mb-0">
-                            <li className="py-1 flex items-center justify-between">
-                              <span className=" text-xs text-white font-medium">
-                                ETH Address
-                              </span>
-                              <Tooltip id="my-tooltip1" />
-                              <div className="flex items-center gap-1">
-                                <p
-                                  className="m-0 text-truncate text-right text-white opacity-50"
-                                  data-tooltip-id="my-tooltip1"
-                                  data-tooltip-content={userAddress}
-                                  style={{ maxWidth: 200 }}
-                                >
-                                  {splitAddress(userAddress)}
-                                </p>
-
-                                <button
-                                  onClick={() => handleCopy(userAddress, "two")}
-                                  className="border-0 p-0 bg-transparent"
-                                >
-                                  {copyIcn}
-                                </button>
-                                {isCopied?.two && (
-                                  <span
-                                    style={{
-                                      marginLeft: "10px",
-                                      color: "green",
-                                    }}
-                                  >
-                                    Copied!
-                                  </span>
-                                )}
-                              </div>
-                            </li>
-                            <li className="py-1 flex items-center justify-between">
-                              <span className="text-xs text-white  font-medium">
-                                BTC Recovery Address
-                              </span>
-                              <Tooltip id="my-tooltip1" />
-                              <div className="flex items-center gap-1">
-                                <p
-                                  className="m-0 text-right text-truncate text-white opacity-50"
-                                  data-tooltip-id="my-tooltip1"
-                                  data-tooltip-content={
-                                    "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"
-                                  }
-                                  style={{ maxWidth: 200 }}
-                                >
-                                  {splitAddress(
-                                    "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf"
-                                  )}
-                                </p>
-
-                                <button
-                                  onClick={() =>
-                                    handleCopy(
-                                      "tb1q8sn2xmvgzg7jcakyz0ylmxt4mwtu0ne0qwl6zf",
-                                      "three"
-                                    )
-                                  }
-                                  className="border-0 p-0 bg-transparent "
-                                >
-                                  {copyIcn}
-                                </button>
-                                {isCopied?.three && (
-                                  <span
-                                    style={{
-                                      marginLeft: "10px",
-                                      color: "green",
-                                    }}
-                                  >
-                                    Copied!
-                                  </span>
-                                )}
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                
               </>
-            ) : depositFound ? (
-              <>
-                <div className="text-center p-3">
-                  <div className="py-2 flex items-center justify-center">
-                    {checkIcn}
-                  </div>
-                  <h2 className="m-0 text-green-500 text-base font-semibold">
-                    Successfully
-                  </h2>
-                  <p className="m-0 py-1">
-                    We have found deposit in generated address.
-                  </p>
-                </div>
-              </>
-            ) : (
+            )  : (
               <></>
             )}
+            <div className="py-2">
+              <div className="py-2">
+                <div className="flex items-center justify-between pb-1 px-3">
+                  <label htmlFor="" className="form-label m-0 text-xs font-medium">Amount</label>
+                  <span className="text-white opacity-60 text-xs">Balance: 0 tBTC
+                  </span>
+                </div>
+                <div className="iconWithText relative">
+                  <span className="absolute left-3 icn">
+                    {usdc}
+                  </span>
+                  <input type="text" className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`} />
+                  <button className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}>Max</button>
+                </div>
+              </div>
+              <div className="py-2">
+                <div className="flex items-center justify-between pb-1 px-3">
+                  <label htmlFor="" className="form-label m-0 text-xs font-medium">BTC Address</label>
+             
+                </div>
+                <div className="iconWithText relative">
+             
+                  <input type="text" className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`} />
+                </div>
+              </div>
+              <div className="py-2 mt-4">
+              <button
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Mint
+                </button>
+              </div>
+            </div>
           </div>
         </>
       ),
@@ -565,3 +400,6 @@ const closeIcn = (
     </defs>
   </svg>
 );
+
+
+const usdc  = <svg width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5127 23.2266C17.713 23.2266 22.7393 18.2003 22.7393 12C22.7393 5.79974 17.713 0.773438 11.5127 0.773438C5.31244 0.773438 0.286133 5.79974 0.286133 12C0.286133 18.2003 5.31244 23.2266 11.5127 23.2266Z" fill="#1D2229"></path><path d="M9.65153 11.0594H7.77167V12.9393H9.65153V11.0594Z" fill="white"></path><path d="M7.77165 9.17957H5.89178V11.0594H7.77165V9.17957Z" fill="white"></path><path d="M5.89146 11.0594H4.0116V12.9393H5.89146V11.0594Z" fill="white"></path><path d="M7.77165 12.9392H5.89178V14.8191H7.77165V12.9392Z" fill="white"></path><path d="M18.4577 9.58446C18.3252 8.20191 17.1319 7.73783 15.6248 7.60528V6.71969H14.4578V7.55476C14.1512 7.55476 13.8376 7.56064 13.5258 7.56652V6.71899H12.3596V7.60424C12.1069 7.60909 10.5548 7.6077 10.5548 7.6077L10.5513 8.63657L11.5252 8.64211V15.3853H10.5517L10.543 16.3996C10.8258 16.3996 12.0841 16.4052 12.3568 16.4069V17.2811H13.5231V16.4277C13.8428 16.4346 14.1529 16.4374 14.4554 16.437V17.2814H15.6227V16.4111C17.5853 16.2993 18.9595 15.8054 19.1301 13.963C19.2685 12.479 18.5709 11.8173 17.4569 11.5481C18.1338 11.202 18.557 10.596 18.4584 9.58412L18.4577 9.58446ZM16.8225 13.7314C16.8225 15.1811 14.3408 15.0154 13.549 15.0157V12.4458C14.3405 12.4458 16.8211 12.2198 16.8215 13.7314H16.8225ZM16.2809 10.1053C16.2809 11.4242 14.21 11.2695 13.5507 11.2695V8.93835C14.211 8.93869 16.2816 8.72967 16.2809 10.1053Z" fill="white"></path></svg>
