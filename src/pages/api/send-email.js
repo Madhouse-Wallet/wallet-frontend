@@ -61,6 +61,14 @@ export default async function handler(req, res) {
                 //     verificationCode: "1234"
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
+            } else if (type == "verifyOtp"){
+                templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
+                htmlTemplate = readFileSync(templatePath, 'utf-8');
+                // const placeholders = {
+                //     name: "user.name",
+                //     verificationCode: "1234"
+                // };
+                htmlBody = replacePlaceholders(htmlTemplate, emailData);
             }
 
             const params = {
