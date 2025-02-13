@@ -80,7 +80,7 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
             </div>
             <div className="col-span-12">
               <OtpWrpper theme={theme}>
-                <OTPInput
+                <OtpInput
                   value={registerOTP}
                   onChange={setRegisterOTP}
                   numInputs={4}
