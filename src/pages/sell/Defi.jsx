@@ -8,7 +8,7 @@ import { baseTokenAddresses } from "@zerodev/defi"
 import { parseUnits } from "viem"
 import { mainnet, sepolia, arbitrum } from "viem/chains"
 // Replace this with your network
-const chain = sepolia
+const chain = mainnet
 
 
 const Defi = () => {
@@ -32,7 +32,7 @@ const Defi = () => {
         console.log("defiClient-->", defiClient)
         const userOpHash = await defiClient.sendSwapUserOp({
           fromToken: baseTokenAddresses[chain.id].USDC,
-          fromAmount: parseUnits('1', 6),  // USDC uses 6 decimals
+          fromAmount: parseUnits('100', 6),  // USDC uses 6 decimals
 
           toToken: baseTokenAddresses[chain.id].USDT,
 
