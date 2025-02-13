@@ -422,9 +422,7 @@ const Setting: React.FC = () => {
                         >
                           Subdomain Name:
                         </div>
-                        <span className="text-white flex items-center">
-                          quincy120{" "}
-                        </span>
+                        <span className="text-white flex items-center">--</span>
                       </li>
                     </ul>
                   </div>
