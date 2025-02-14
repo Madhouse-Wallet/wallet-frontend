@@ -45,9 +45,9 @@ const SuccessPop = ({ success, setSuccess }) => {
                <p className="m-0 py-2">You've successfully Send USDC. 
                Thank you for using MadHouse Wallet!"</p>
                <div className="btnWrpper mt-5">
-                <button className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]">
+                <Link href={"/btc-exchange"} className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]">
                   Back to Home
-                </button>
+                </Link>
                </div>
             </div>
           </div>

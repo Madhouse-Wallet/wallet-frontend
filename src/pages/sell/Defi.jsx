@@ -3,9 +3,9 @@ import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { createKernelDefiClient } from "@zerodev/defi"
-import { baseTokenAddresses } from "@zerodev/defi"
-import { parseUnits } from "viem"
+// import { createKernelDefiClient } from "@zerodev/defi"
+// import { baseTokenAddresses } from "@zerodev/defi"
+// import { parseUnits } from "viem"
 import { mainnet, sepolia, arbitrum } from "viem/chains"
 // Replace this with your network
 const chain = mainnet
@@ -28,17 +28,17 @@ const Defi = () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account-->", account)
-        const defiClient = createKernelDefiClient(account?.kernelClient, process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID)
-        console.log("defiClient-->", defiClient)
-        const userOpHash = await defiClient.sendSwapUserOp({
-          fromToken: baseTokenAddresses[chain.id].USDC,
-          fromAmount: parseUnits('100', 6),  // USDC uses 6 decimals
+        // const defiClient = createKernelDefiClient(account?.kernelClient, process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID)
+        // console.log("defiClient-->", defiClient)
+        // const userOpHash = await defiClient.sendSwapUserOp({
+        //   fromToken: baseTokenAddresses[chain.id].USDC,
+        //   fromAmount: parseUnits('100', 6),  // USDC uses 6 decimals
 
-          toToken: baseTokenAddresses[chain.id].USDT,
+        //   toToken: baseTokenAddresses[chain.id].USDT,
 
-          gasToken: 'sponsored',
-        })
-        console.log("userOpHash-->", userOpHash)
+        //   gasToken: 'sponsored',
+        // })
+        // console.log("userOpHash-->", userOpHash)
       } else {
         toast.error("Please Login!");
       }

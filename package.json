@@ -26,7 +26,6 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.16",
     "@vulpemventures/secp256k1-zkp": "^3.2.1",
-    "@zerodev/defi": "^0.1.0",
     "@zerodev/ecdsa-validator": "^5.4.3",
     "@zerodev/passkey-validator": "^5.5.0",
     "@zerodev/sdk": "^5.4.19",
