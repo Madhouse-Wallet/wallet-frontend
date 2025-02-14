@@ -5,6 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
 import BtcExchangePop from "../../components/Modals/BtcExchangePop";
+import SuccessPop from "../../components/Modals/SuccessPop";
+import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
+import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
@@ -20,8 +23,11 @@ const BTCEchange = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
+  const [sendUsdc, setSendUsdc] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [btcExchangeSend, setBtcExchangeSend] = useState(false);
   const [qrCode, setQRCode] = useState("");
+  const [receiveUsdc, setReceiveUSDC] = useState("");
   const [loading, setLoading] = useState(false);
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
@@ -77,7 +83,7 @@ const BTCEchange = () => {
 
   const startSend = async () => {
     try {
-      console.log("start send")
+      console.log("start send");
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
@@ -88,7 +94,7 @@ const BTCEchange = () => {
             // kernelProvider, ethersProvider, signer
             const sdk = await initializeTBTC(provider.signer);
             if (sdk) {
-              setSendSdk(sdk)
+              setSendSdk(sdk);
             }
             setBtcExchangeSend(!btcExchangeSend);
           }
@@ -98,9 +104,9 @@ const BTCEchange = () => {
         // toast.error("Please Login First");
       }
     } catch (error) {
-      console.log("startSend error-->")
+      console.log("startSend error-->");
     }
-  }
+  };
 
   const generateQRCode = async (text: any) => {
     try {
@@ -180,6 +186,31 @@ const BTCEchange = () => {
             depositFound={depositFound}
             setDepositFound={setDepositFound}
             userAddress={userAuth.walletAddress}
+            setSendUsdc={setSendUsdc}
+            sendUsdc={sendUsdc}
+          />,
+          document.body
+        )}
+      {sendUsdc &&
+        createPortal(
+          <SendUSDCPop
+            setSendUsdc={setSendUsdc}
+            sendUsdc={sendUsdc}
+            success={success}
+            setSuccess={setSuccess}
+          />,
+          document.body
+        )}
+      {success &&
+        createPortal(
+          <SuccessPop success={success} setSuccess={setSuccess} />,
+          document.body
+        )}
+      {receiveUsdc &&
+        createPortal(
+          <ReceiveUSDCPop
+            receiveUsdc={receiveUsdc}
+            setReceiveUSDC={setReceiveUSDC}
           />,
           document.body
         )}
@@ -198,6 +229,8 @@ const BTCEchange = () => {
             depositFound={depositFound}
             setDepositFound={setDepositFound}
             userAddress={userAuth.walletAddress}
+            receiveUsdc={receiveUsdc}
+            setReceiveUSDC={setReceiveUSDC}
           />,
           document.body
         )}
