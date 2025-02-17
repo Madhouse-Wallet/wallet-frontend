@@ -283,7 +283,6 @@
 //   </svg>
 // );
 
-
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
@@ -304,7 +303,7 @@ const RecentTransaction = () => {
 
   // Format transactions from fetchWalletHistory
   const formatWalletHistoryData = (txs) => {
-    return txs.map(tx => {
+    return txs.map((tx) => {
       // Get the amount and currency from native transfers or value
       let amount = "";
       let currency = "ETH";
@@ -314,11 +313,15 @@ const RecentTransaction = () => {
         const transfer = tx.native_transfers[0];
         const ethValue = parseFloat(transfer.value || tx.value) / 1e18;
         amount = ethValue.toFixed(4);
-        isSend = tx.from_address.toLowerCase() === userAuth?.walletAddress?.toLowerCase();
+        isSend =
+          tx.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
       } else if (tx.value) {
         const ethValue = parseFloat(tx.value) / 1e18;
         amount = ethValue.toFixed(4);
-        isSend = tx.from_address.toLowerCase() === userAuth?.walletAddress?.toLowerCase();
+        isSend =
+          tx.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
       }
 
       // Check for ERC20 transfers
@@ -326,7 +329,9 @@ const RecentTransaction = () => {
         const transfer = tx.erc20_transfers[0];
         amount = parseFloat(transfer.value_decimal).toFixed(4);
         currency = transfer.token_symbol;
-        isSend = transfer.from_address.toLowerCase() === userAuth?.walletAddress?.toLowerCase();
+        isSend =
+          transfer.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
       }
 
       return {
@@ -335,31 +340,37 @@ const RecentTransaction = () => {
         from: tx.from_address,
         to: tx.to_address,
         date: new Date(tx.block_timestamp).toLocaleString(),
-        status: tx.receipt_status === "1" ? "confirmed" : (tx.receipt_status === "0" ? "rejected" : "pending"),
+        status:
+          tx.receipt_status === "1"
+            ? "confirmed"
+            : tx.receipt_status === "0"
+            ? "rejected"
+            : "pending",
         amount: amount ? `${amount} ${currency}` : "",
         // type: isSend ? "send" : "receive",
         type: tx?.category,
-        summary: tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
+        summary:
+          tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
         category: tx.category,
-        rawData: tx
+        rawData: tx,
       };
     });
   };
 
   // Format transactions from fetchWalletInternalTransactions
   const formatInternalTransactionsData = (txs) => {
-    return txs.map(tx => {
+    return txs.map((tx) => {
       // Determine if this is a deposit or redemption transaction
       const isDeposit = tx.deposits && tx.deposits.length > 0;
       const isRedemption = tx.redemptions && tx.redemptions.length > 0;
-      
+
       // Get the transaction details based on type
       let amount = "";
       let status = "pending";
       let type = "";
       let summary = "";
       let transactionDetails = null;
-      
+
       if (isDeposit) {
         const deposit = tx.deposits[0];
         amount = (parseFloat(tx.amount) / 1e8).toFixed(8); // Assuming amount is in satoshis
@@ -389,7 +400,7 @@ const RecentTransaction = () => {
         isDeposit: isDeposit,
         isRedemption: isRedemption,
         transactionDetails: transactionDetails,
-        rawData: tx
+        rawData: tx,
       };
     });
   };
@@ -397,40 +408,43 @@ const RecentTransaction = () => {
   // Map deposit status to display status
   const mapDepositStatus = (status) => {
     switch (status) {
-      case 'CONFIRMED':
-        return 'confirmed';
-      case 'REQUESTED':
-        return 'pending';
+      case "CONFIRMED":
+        return "confirmed";
+      case "REQUESTED":
+        return "pending";
       default:
-        return 'pending';
+        return "pending";
     }
   };
 
   // Map redemption status to display status
   const mapRedemptionStatus = (status) => {
     switch (status) {
-      case 'CONFIRMED':
-        return 'confirmed';
-      case 'REQUESTED':
-        return 'pending';
-      case 'FAILED':
-        return 'rejected';
+      case "CONFIRMED":
+        return "confirmed";
+      case "REQUESTED":
+        return "pending";
+      case "FAILED":
+        return "rejected";
       default:
-        return 'pending';
+        return "pending";
     }
   };
-
 
   // Function to fetch and process recent transactions
   const fetchRecentTransactions = async () => {
     try {
       setTransactionType("all");
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory("0xcB1C1FdE09f811B294172696404e88E658659905");
+      const data = await fetchWalletHistory(
+        "0xcB1C1FdE09f811B294172696404e88E658659905"
+      );
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
-        const formattedTransactions = formatWalletHistoryData(data.result.slice(0, 10));
+        const formattedTransactions = formatWalletHistoryData(
+          data.result.slice(0, 10)
+        );
         setTransactions(formattedTransactions);
       }
     } catch (error) {
@@ -446,7 +460,9 @@ const RecentTransaction = () => {
       console.log("Internal transactions:", data);
 
       if (data?.length) {
-        const formattedTransactions = formatInternalTransactionsData(data.slice(0, 10));
+        const formattedTransactions = formatInternalTransactionsData(
+          data.slice(0, 10)
+        );
         setTransactions(formattedTransactions);
       }
     } catch (err) {
@@ -457,35 +473,43 @@ const RecentTransaction = () => {
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return 'text-green-500';
-      case 'rejected': return 'text-red-500';
-      case 'pending': return 'text-yellow-500';
-      default: return 'text-gray-500';
+      case "confirmed":
+        return "text-green-500";
+      case "rejected":
+        return "text-red-500";
+      case "pending":
+        return "text-yellow-500";
+      default:
+        return "text-gray-500";
     }
   };
 
   // Get status text
   const getStatusText = (status) => {
     switch (status) {
-      case 'confirmed': return 'Confirmed';
-      case 'rejected': return 'Rejected';
-      case 'pending': return 'Pending';
-      default: return 'Unknown';
+      case "confirmed":
+        return "Confirmed";
+      case "rejected":
+        return "Rejected";
+      case "pending":
+        return "Pending";
+      default:
+        return "Unknown";
     }
   };
 
   // Group transactions by date
   const groupTransactionsByDate = (txs) => {
     const groups = {};
-    
-    txs.forEach(tx => {
+
+    txs.forEach((tx) => {
       const date = new Date(tx.date).toLocaleDateString();
       if (!groups[date]) {
         groups[date] = [];
       }
       groups[date].push(tx);
     });
-    
+
     return groups;
   };
 
@@ -497,16 +521,23 @@ const RecentTransaction = () => {
 
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
-    setTransactionData(tx)
+    setTransactionData(tx);
   };
 
   const transactionsByDate = groupTransactionsByDate(transactions);
 
- return (
+  return (
     <>
       {detail &&
-        createPortal(<TransactionDetail detail={detail} setDetail={setDetail} transactionData={transactionData}/>, document.body)}
-      
+        createPortal(
+          <TransactionDetail
+            detail={detail}
+            setDetail={setDetail}
+            transactionData={transactionData}
+          />,
+          document.body
+        )}
+
       <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
         <h4 className="m-0 text-xl">Recent Transaction</h4>
         <div className="relative inline-block text-left">
@@ -542,12 +573,14 @@ const RecentTransaction = () => {
         <div className="bg-black/50 lg:p-4 rounded-lg p-3">
           {Object.entries(transactionsByDate).map(([date, txs]) => (
             <div key={date} className="py-3">
-              <p className="m-0 text-white text-xs font-semibold pb-2">{date}</p>
+              <p className="m-0 text-white text-xs font-semibold pb-2">
+                {date}
+              </p>
               <div className="grid gap-3 grid-cols-12">
                 {txs.map((tx, key) => (
                   <div key={key} className="md:col-span-6 col-span-12">
-                    <div 
-                      onClick={() => handleTransactionClick(tx)} 
+                    <div
+                      onClick={() => handleTransactionClick(tx)}
                       className="bg-black/50 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
                     >
                       <div className="left flex items-start gap-2">
@@ -556,19 +589,29 @@ const RecentTransaction = () => {
                         </div>
                         <div className="content">
                           <h4 className="m-0 font-bold md:text-xl text-base">
-                            {tx.isRedemption ? "Redemption" : 
-                             tx.isDeposit ? "Deposit" : 
-                             tx.type === "send" ? "Send" : "Receive"} {tx.amount?.split(' ')[1] || "ETH"}
+                            {tx.isRedemption
+                              ? "Redemption"
+                              : tx.isDeposit
+                              ? "Deposit"
+                              : tx.type === "send"
+                              ? "Send"
+                              : "Receive"}{" "}
+                            {tx.amount?.split(" ")[1] || "ETH"}
                           </h4>
-                          <p className={`m-0 ${getStatusColor(tx.status)} font-medium md:text-base text-xs`}>
+                          <p
+                            className={`m-0 ${getStatusColor(
+                              tx.status
+                            )} font-medium md:text-base text-xs`}
+                          >
                             {getStatusText(tx.status)}
                           </p>
                         </div>
                       </div>
                       <div className="right">
                         <p className="m-0 md:text-base text-xs font-medium">
-                          {tx.status === "rejected" ? "Insufficient Balance" : 
-                           `${tx.type === "send" ? "-" : "+"} ${tx.amount}`}
+                          {tx.status === "rejected"
+                            ? "Insufficient Balance"
+                            : `${tx.type === "send" ? "-" : "+"} ${tx.amount}`}
                         </p>
                       </div>
                     </div>

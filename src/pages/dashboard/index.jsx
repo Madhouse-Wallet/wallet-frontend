@@ -26,6 +26,7 @@ import { fetchBalance, fetchTokenBalances } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
+import LoadingScreen from "@/components/LoadingScreen";
 
 // interface CardMetrics {
 //   head: string;
@@ -51,7 +52,6 @@ const Dashboard = () => {
   const [healthFactor, setHealthFactor] = useState(0);
   const [collateralRatio, setCollateralRatio] = useState(0);
   const [totalUsdBalance, setTotalUsdBalance] = useState(0);
-
 
   const cardMetrics = [
     { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
@@ -199,7 +199,8 @@ const Dashboard = () => {
                   const balances = await fetchTokenBalances(
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
-                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
+                      process.env
+                        .NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -220,7 +221,9 @@ const Dashboard = () => {
                     }
                   });
 
-                  const walletBalance = await fetchBalance('0xcB4867789704f3C14f6b20F5848407086246db2e');
+                  const walletBalance = await fetchBalance(
+                    "0xcB4867789704f3C14f6b20F5848407086246db2e"
+                  );
                   console.log("Wallet Balance Data:", walletBalance);
 
                   if (walletBalance?.result?.length) {
@@ -271,7 +274,7 @@ const Dashboard = () => {
           />,
           document.body
         )}
-
+      <LoadingScreen />
       <DashboardMain className="relative flex w-full flex-col items-center">
         <div
           className="flex h-full w-full select-none flex-col items-center container"
