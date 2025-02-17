@@ -12,6 +12,8 @@ import Image from "next/image";
 // img
 
 const BtcExchangePop = ({
+  receiveUsdc,
+  setReceiveUSDC,
   btcExchange,
   setBtcExchange,
   walletAddress,
@@ -32,6 +34,7 @@ const BtcExchangePop = ({
     three: false,
   });
   const sendBitcoin = true;
+  const [tokenReceive, setTokenReceive] = useState();
 
   const [step, setStep] = useState(2);
   const [tab, setTab] = useState(0);
@@ -122,7 +125,7 @@ const BtcExchangePop = ({
                 {loading ? (
                   <>
                     <Image
-                    alt=""
+                      alt=""
                       src={loader}
                       height={10000}
                       width={10000}
@@ -137,7 +140,7 @@ const BtcExchangePop = ({
                       mint as tBTC.
                     </p>
                     <Image
-                    alt=""
+                      alt=""
                       src={qrCode}
                       height={10000}
                       width={10000}
@@ -368,77 +371,58 @@ const BtcExchangePop = ({
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          <div className={`relative hidden rounded`}>
-            <div className="top pb-3">
-              <h5 className="m-0 text-xl font-bold">
-              Receive Bitcoin
-              </h5>
-              {/* <p className="m-0" style={{ fontSize: 12 }}>
+          {tokenReceive ? (
+            <>
+              <div className="top pb-3">
+                <h5 className="m-0 text-xl font-bold">Receive Bitcoin</h5>
+                {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
             </p> */}
-            </div>
-            <div className="content">
-              <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
-                {tabData.map((data, key) => (
-                  <div key={key} className="relative">
-                    <button
-                      onClick={() => handleTab(key)}
-                      className={`${
-                        tab == key && "active"
-                      } flex items-center justify-center font-semibold btn`}
-                    >
-                      {data.title}
-                    </button>
-                  </div>
-                ))}
-              </RadioList>
-              <div className="tabContent pt-3">
-                {tabData.map((item, key) =>
-                  tab === key ? <>{item.component}</> : <></>
-                )}
               </div>
-            </div>
-            {/* {step != 1 && !loading && (
-              <div className="btnWRpper mt-4">
-                <button
-                  onClick={() => mint()}
-                  className="d-flex align-items-center justify-content-center commonBtn w-100"
-                >
-                  Mint
-                </button>
+              <div className="content p-3">
+                <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
+                  {tabData.map((data, key) => (
+                    <div key={key} className="relative">
+                      <button
+                        onClick={() => handleTab(key)}
+                        className={`${
+                          tab == key && "active"
+                        } flex items-center justify-center font-semibold btn`}
+                      >
+                        {data.title}
+                      </button>
+                    </div>
+                  ))}
+                </RadioList>
+                <div className="tabContent pt-3">
+                  {tabData.map((item, key) =>
+                    tab === key ? <>{item.component}</> : <></>
+                  )}
+                </div>
+                <div className="btnWrpper mt-3"></div>
               </div>
-            )} */}
-          </div>
-          <div className="top pb-3">
-            <h5 className="m-0 text-xl font-bold">
-            Receive Bitcoin
-            </h5>
-            {/* <p className="m-0" style={{ fontSize: 12 }}>
-              Generate a QR code or wallet address to receive Bitcoin Securely
-            </p> */}
-          </div>
-          <div className="content p-3">
-            <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
-              {tabData.map((data, key) => (
-                <div key={key} className="relative">
+            </>
+          ) : (
+            <>
+             <div className="grid gap-3 grid-cols-12">
+                <div className="col-span-12">
                   <button
-                    onClick={() => handleTab(key)}
-                    className={`${
-                      tab == key && "active"
-                    } flex items-center justify-center font-semibold btn`}
+                   onClick={()=> {setReceiveUSDC(!receiveUsdc), setBtcExchange(!btcExchange)}}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {data.title}
+                   USDC
                   </button>
                 </div>
-              ))}
-            </RadioList>
-            <div className="tabContent pt-3">
-              {tabData.map((item, key) =>
-                tab === key ? <>{item.component}</> : <></>
-              )}
-            </div>
-            <div className="btnWrpper mt-3"></div>
-          </div>
+                <div className="col-span-12">
+                  <button
+                     onClick={()=> setTokenReceive(!tokenReceive)}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    Bitcoin
+                  </button>
+                </div>
+              </div></>
+          )}
         </div>
       </Modal>
     </>

@@ -40,7 +40,7 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
   const [setUp, setSetUp] = useState<boolean>(false);
-  const [ changeEmail, setChangeEmail] = useState<boolean>(false);
+  const [changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
   const handleCopy = async (address: string) => {
     try {
@@ -304,9 +304,12 @@ const Setting: React.FC = () => {
           <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
           document.body
         )}
-         {changeEmail &&
+      {changeEmail &&
         createPortal(
-          <ChangeEmailPop changeEmail={changeEmail} setChangeEmail={setChangeEmail} />,
+          <ChangeEmailPop
+            changeEmail={changeEmail}
+            setChangeEmail={setChangeEmail}
+          />,
           document.body
         )}
       {confirm &&
@@ -456,41 +459,45 @@ const Setting: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                  <div
-                    tabIndex={-1}
-                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-xs font-medium leading-none -tracking-2">
-                        Account
-                      </h3>
-                      <p className="text-xs leading-none -tracking-2 text-white/40">
-                        Your email
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={()=> setChangeEmail(!changeEmail)}
-                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
-                        
-                      >
-                        <svg
-                          stroke="currentColor"
-                          fill="currentColor"
-                          strokeWidth={0}
-                          viewBox="0 0 24 24"
-                          className="shrink-0 opacity-80"
-                          height="1em"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                          style={{ width: 14, height: 14 }}
+                  {userAuth?.login ? (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Account
+                        </h3>
+                        <p className="text-xs leading-none -tracking-2 text-white/40">
+                          Your email
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setChangeEmail(!changeEmail)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
                         >
-                          <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
-                        </svg>
-                        Change email
-                      </button>
+                          <svg
+                            stroke="currentColor"
+                            fill="currentColor"
+                            strokeWidth={0}
+                            viewBox="0 0 24 24"
+                            className="shrink-0 opacity-80"
+                            height="1em"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{ width: 14, height: 14 }}
+                          >
+                            <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
+                          </svg>
+                          Change email
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <></>
+                  )}
+
                   <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -639,12 +646,14 @@ const Setting: React.FC = () => {
                               userAuth?.walletAddress
                             );
 
-                          let data = await zeroTrxn(account?.kernelClient);
-                          if(data){
-                            toast.success("Trxn Success!")
-                          }else{
-                            toast.error("Trxn Failure. Please Check console for log!")
-                          }
+                            let data = await zeroTrxn(account?.kernelClient);
+                            if (data) {
+                              toast.success("Trxn Success!");
+                            } else {
+                              toast.error(
+                                "Trxn Failure. Please Check console for log!"
+                              );
+                            }
                           }}
                           className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
                         >

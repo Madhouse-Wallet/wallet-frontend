@@ -1,6 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
+import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+// import { createKernelDefiClient } from "@zerodev/defi"
+// import { baseTokenAddresses } from "@zerodev/defi"
+// import { parseUnits } from "viem"
+import { mainnet, sepolia, arbitrum } from "viem/chains"
+// Replace this with your network
+const chain = mainnet
+
 
 const Defi = () => {
+  const [amount, setAmount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const userAuth = useSelector((state) => state.Auth);
+
+  const swap = async () => {
+    try {
+      setLoading(true);
+      if (amount <= 0) {
+        setLoading(false);
+        return toast.error("Please Enter Valid Amount!");
+      }
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account-->", account)
+        // const defiClient = createKernelDefiClient(account?.kernelClient, process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID)
+        // console.log("defiClient-->", defiClient)
+        // const userOpHash = await defiClient.sendSwapUserOp({
+        //   fromToken: baseTokenAddresses[chain.id].USDC,
+        //   fromAmount: parseUnits('100', 6),  // USDC uses 6 decimals
+
+        //   toToken: baseTokenAddresses[chain.id].USDT,
+
+        //   gasToken: 'sponsored',
+        // })
+        // console.log("userOpHash-->", userOpHash)
+      } else {
+        toast.error("Please Login!");
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("swap error-->", error)
+      toast.error(error.message);
+    }
+  }
+
   return (
     <>
       <section className="swapkit py-5">
@@ -17,6 +66,8 @@ const Defi = () => {
                         </p>
                         <input
                           style={{ height: 30 }}
+                          onChange={(e) => (setAmount(e.target.value))}
+                          value={amount}
                           placeholder="0.00"
                           type="number"
                           className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
@@ -38,7 +89,7 @@ const Defi = () => {
                         <input
                           //   placeholder="0.00"
                           style={{ height: 30 }}
-                        //   value={150}
+                          //   value={150}
                           type="number"
                           className="form-control text-base h-auto outline-0 w-full border-0 p-0 bg-transparent"
                         />
@@ -48,12 +99,12 @@ const Defi = () => {
                       </div>
                       <div className="right">
                         <div className="flex items-center gap-2">
-                          {btc} <span className="text-xs font-medium">BTC</span>
+                          {btc} <span className="text-xs font-medium">USDT</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="my-2">
+                  {/* <div className="my-2">
                     <ul className="list-none pl-0 mb-0 text-xs">
                       <li className="py-1 flex items-center gap-2 text-white/50">
                         <span className="icn">{icn2}</span>
@@ -64,10 +115,10 @@ const Defi = () => {
                         5.98 GBP <span className="text-xs">Total Fees</span>
                       </li>
                     </ul>
-                  </div>
+                  </div> */}
                   <div className="py-2">
-                    <button className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
-                      Continue
+                    <button onClick={swap} disabled={loading} className="btn flex items-center justify-center commonBtn rounded-20 h-[45px] w-full text-xs font-medium">
+                      {loading ? "Please wait ..." : "Continue"}
                     </button>
                   </div>
                 </div>
@@ -154,6 +205,6 @@ const icn2 = (
 );
 
 
-const usdc  = <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M9 18C13.99 18 18 13.99 18 9C18 4.01 13.99 0 9 0C4.01 0 0 4.01 0 9C0 13.99 4.01 18 9 18ZM11.475 10.422C11.475 9.112 10.688 8.662 9.113 8.476C7.988 8.324 7.763 8.026 7.763 7.498C7.763 6.975 8.14 6.638 8.888 6.638C9.563 6.638 9.94 6.862 10.125 7.425C10.165 7.537 10.277 7.61 10.39 7.61H10.986C11.0205 7.61108 11.0549 7.60516 11.0871 7.59259C11.1193 7.58002 11.1486 7.56107 11.1733 7.53687C11.198 7.51267 11.2175 7.48372 11.2307 7.45178C11.2438 7.41984 11.2504 7.38555 11.25 7.351V7.312C11.098 6.485 10.423 5.698 9.563 5.625V4.798C9.563 4.646 9.45 4.533 9.265 4.5H8.77C8.618 4.5 8.477 4.612 8.438 4.798V5.625C7.313 5.776 6.565 6.637 6.565 7.576C6.565 8.814 7.313 9.298 8.888 9.489C9.94 9.674 10.278 9.899 10.278 10.501C10.278 11.098 9.748 11.514 9.04 11.514C8.06 11.514 7.724 11.098 7.611 10.535C7.577 10.389 7.465 10.31 7.352 10.31H6.711C6.67645 10.3096 6.64216 10.3162 6.61022 10.3293C6.57828 10.3425 6.54933 10.362 6.52513 10.3867C6.50093 10.4114 6.48198 10.4407 6.46941 10.4729C6.45684 10.5051 6.45092 10.5395 6.452 10.574V10.614C6.598 11.548 7.2 12.189 8.438 12.374V13.207C8.438 13.359 8.55 13.46 8.736 13.5H9.276C9.422 13.5 9.524 13.398 9.563 13.207V12.374C10.688 12.189 11.475 11.435 11.475 10.422ZM5.213 13.225C5.75714 13.7231 6.39434 14.1089 7.088 14.36C7.2 14.439 7.313 14.585 7.313 14.698V15.226C7.313 15.299 7.313 15.339 7.273 15.372C7.24 15.524 7.088 15.597 6.936 15.524C5.57163 15.089 4.38093 14.2314 3.536 13.0752C2.69107 11.919 2.2357 10.524 2.2357 9.092C2.2357 7.65996 2.69107 6.26502 3.536 5.1088C4.38093 3.95259 5.57163 3.095 6.936 2.66C6.976 2.626 7.048 2.626 7.088 2.626C7.24 2.66 7.313 2.773 7.313 2.924V3.448C7.313 3.638 7.24 3.751 7.088 3.824C6.32102 4.10085 5.62447 4.5433 5.04788 5.11988C4.4713 5.69647 4.02885 6.39302 3.752 7.16C3.36503 8.20157 3.29724 9.33483 3.55729 10.4151C3.81734 11.4954 4.39342 12.4736 5.212 13.225M10.726 2.812C10.76 2.66 10.912 2.587 11.064 2.66C12.0952 2.99475 13.0314 3.57121 13.7945 4.3413C14.5577 5.1114 15.1256 6.0528 15.451 7.087C16.576 10.647 14.624 14.439 11.064 15.564C11.024 15.597 10.951 15.597 10.912 15.597C10.76 15.564 10.687 15.451 10.687 15.299V14.776C10.687 14.585 10.76 14.473 10.912 14.399C11.6787 14.1221 12.375 13.6798 12.9514 13.1034C13.5278 12.527 13.9701 11.8307 14.247 11.064C14.5043 10.3725 14.6221 9.63695 14.5935 8.89972C14.5649 8.16249 14.3905 7.43823 14.0804 6.76877C13.7704 6.09931 13.3307 5.49793 12.7869 4.99936C12.243 4.50078 11.6058 4.1149 10.912 3.864C10.799 3.785 10.687 3.639 10.687 3.487V2.964C10.687 2.885 10.687 2.851 10.727 2.812" fill="#2775CA"/>
+const usdc = <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M9 18C13.99 18 18 13.99 18 9C18 4.01 13.99 0 9 0C4.01 0 0 4.01 0 9C0 13.99 4.01 18 9 18ZM11.475 10.422C11.475 9.112 10.688 8.662 9.113 8.476C7.988 8.324 7.763 8.026 7.763 7.498C7.763 6.975 8.14 6.638 8.888 6.638C9.563 6.638 9.94 6.862 10.125 7.425C10.165 7.537 10.277 7.61 10.39 7.61H10.986C11.0205 7.61108 11.0549 7.60516 11.0871 7.59259C11.1193 7.58002 11.1486 7.56107 11.1733 7.53687C11.198 7.51267 11.2175 7.48372 11.2307 7.45178C11.2438 7.41984 11.2504 7.38555 11.25 7.351V7.312C11.098 6.485 10.423 5.698 9.563 5.625V4.798C9.563 4.646 9.45 4.533 9.265 4.5H8.77C8.618 4.5 8.477 4.612 8.438 4.798V5.625C7.313 5.776 6.565 6.637 6.565 7.576C6.565 8.814 7.313 9.298 8.888 9.489C9.94 9.674 10.278 9.899 10.278 10.501C10.278 11.098 9.748 11.514 9.04 11.514C8.06 11.514 7.724 11.098 7.611 10.535C7.577 10.389 7.465 10.31 7.352 10.31H6.711C6.67645 10.3096 6.64216 10.3162 6.61022 10.3293C6.57828 10.3425 6.54933 10.362 6.52513 10.3867C6.50093 10.4114 6.48198 10.4407 6.46941 10.4729C6.45684 10.5051 6.45092 10.5395 6.452 10.574V10.614C6.598 11.548 7.2 12.189 8.438 12.374V13.207C8.438 13.359 8.55 13.46 8.736 13.5H9.276C9.422 13.5 9.524 13.398 9.563 13.207V12.374C10.688 12.189 11.475 11.435 11.475 10.422ZM5.213 13.225C5.75714 13.7231 6.39434 14.1089 7.088 14.36C7.2 14.439 7.313 14.585 7.313 14.698V15.226C7.313 15.299 7.313 15.339 7.273 15.372C7.24 15.524 7.088 15.597 6.936 15.524C5.57163 15.089 4.38093 14.2314 3.536 13.0752C2.69107 11.919 2.2357 10.524 2.2357 9.092C2.2357 7.65996 2.69107 6.26502 3.536 5.1088C4.38093 3.95259 5.57163 3.095 6.936 2.66C6.976 2.626 7.048 2.626 7.088 2.626C7.24 2.66 7.313 2.773 7.313 2.924V3.448C7.313 3.638 7.24 3.751 7.088 3.824C6.32102 4.10085 5.62447 4.5433 5.04788 5.11988C4.4713 5.69647 4.02885 6.39302 3.752 7.16C3.36503 8.20157 3.29724 9.33483 3.55729 10.4151C3.81734 11.4954 4.39342 12.4736 5.212 13.225M10.726 2.812C10.76 2.66 10.912 2.587 11.064 2.66C12.0952 2.99475 13.0314 3.57121 13.7945 4.3413C14.5577 5.1114 15.1256 6.0528 15.451 7.087C16.576 10.647 14.624 14.439 11.064 15.564C11.024 15.597 10.951 15.597 10.912 15.597C10.76 15.564 10.687 15.451 10.687 15.299V14.776C10.687 14.585 10.76 14.473 10.912 14.399C11.6787 14.1221 12.375 13.6798 12.9514 13.1034C13.5278 12.527 13.9701 11.8307 14.247 11.064C14.5043 10.3725 14.6221 9.63695 14.5935 8.89972C14.5649 8.16249 14.3905 7.43823 14.0804 6.76877C13.7704 6.09931 13.3307 5.49793 12.7869 4.99936C12.243 4.50078 11.6058 4.1149 10.912 3.864C10.799 3.785 10.687 3.639 10.687 3.487V2.964C10.687 2.885 10.687 2.851 10.727 2.812" fill="#2775CA" />
 </svg>

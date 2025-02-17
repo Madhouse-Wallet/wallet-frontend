@@ -5,12 +5,17 @@ import React, { useEffect, useRef, useState } from "react";
 import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
 import BtcExchangePop from "../../components/Modals/BtcExchangePop";
+import SuccessPop from "../../components/Modals/SuccessPop";
+import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
+import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import Loader from "@/components/loader";
+import LoadingScreen from "@/components/LoadingScreen";
 import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
@@ -20,13 +25,17 @@ const BTCEchange = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
+  const [sendUsdc, setSendUsdc] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [btcExchangeSend, setBtcExchangeSend] = useState(false);
   const [qrCode, setQRCode] = useState("");
+  const [receiveUsdc, setReceiveUSDC] = useState("");
   const [loading, setLoading] = useState(false);
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
+  const [sendSdk, setSendSdk] = useState<any>("");
   console.log("walletAddress-->", userAuth);
 
   const handleGoBack = () => {
@@ -67,11 +76,37 @@ const BTCEchange = () => {
         }
       } else {
         setBtcExchange(!btcExchange);
-
         // toast.error("Please Login First");
       }
     } catch (error) {
       console.log("error rec-->", error);
+    }
+  };
+
+  const startSend = async () => {
+    try {
+      console.log("start send");
+      if (userAuth.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            // kernelProvider, ethersProvider, signer
+            const sdk = await initializeTBTC(provider.signer);
+            if (sdk) {
+              setSendSdk(sdk);
+            }
+            setBtcExchangeSend(!btcExchangeSend);
+          }
+        }
+      } else {
+        setBtcExchangeSend(!btcExchangeSend);
+        // toast.error("Please Login First");
+      }
+    } catch (error) {
+      console.log("startSend error-->");
     }
   };
 
@@ -141,6 +176,7 @@ const BTCEchange = () => {
         createPortal(
           <BtcExchangeSendPop
             btcExchangeSend={btcExchangeSend}
+            sendSdk={sendSdk}
             setBtcExchangeSend={setBtcExchangeSend}
             walletAddress={walletAddressDepo}
             qrCode={qrCode}
@@ -152,6 +188,31 @@ const BTCEchange = () => {
             depositFound={depositFound}
             setDepositFound={setDepositFound}
             userAddress={userAuth.walletAddress}
+            setSendUsdc={setSendUsdc}
+            sendUsdc={sendUsdc}
+          />,
+          document.body
+        )}
+      {sendUsdc &&
+        createPortal(
+          <SendUSDCPop
+            setSendUsdc={setSendUsdc}
+            sendUsdc={sendUsdc}
+            success={success}
+            setSuccess={setSuccess}
+          />,
+          document.body
+        )}
+      {success &&
+        createPortal(
+          <SuccessPop success={success} setSuccess={setSuccess} />,
+          document.body
+        )}
+      {receiveUsdc &&
+        createPortal(
+          <ReceiveUSDCPop
+            receiveUsdc={receiveUsdc}
+            setReceiveUSDC={setReceiveUSDC}
           />,
           document.body
         )}
@@ -170,9 +231,12 @@ const BTCEchange = () => {
             depositFound={depositFound}
             setDepositFound={setDepositFound}
             userAddress={userAuth.walletAddress}
+            receiveUsdc={receiveUsdc}
+            setReceiveUSDC={setReceiveUSDC}
           />,
           document.body
         )}
+      {/* {createPortal(<LoadingScreen />, document.body)} */}
       <section className="relative dashboard pt-12">
         <div className="container h-full relative">
           <button
@@ -213,7 +277,7 @@ const BTCEchange = () => {
                     <div className="right">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setBtcExchangeSend(!btcExchangeSend)}
+                          onClick={() => startSend()}
                           className="flex items-center justify-center bg-[#FFEC8A] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Send
@@ -230,12 +294,12 @@ const BTCEchange = () => {
                   </TopHead>
                 </div>
               </div>
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
+              <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    {/* <div className="d-flex align-items-center gap-3 mb-3">
                       <h4 className="m-0 text-xl">Recent Transactions</h4>
-                    </div>
+                    </div> */}
                     <RecentTransaction />
                   </div>
                 </div>

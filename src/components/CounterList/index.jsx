@@ -6,17 +6,107 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import LiveBlogPopup from "@/components/Modals/LiveblogPop";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import { fetchTokenTransfers, fetchWalletHistory } from "@/lib/utils";
+import { useSelector } from "react-redux";
 
 const CounterList = ({ data }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const [liveBlog, setLiveBlog] = useState();
   const { theme, toggleTheme } = useTheme();
-  console.log(theme, "themeCheck");
+  const [transactions, setTransactions] = useState([]); // State for transactions
+
+  // Function to fetch recent transactions
+  const fetchRecentTransactions = async () => {
+    try {
+      const balance = await fetchWalletHistory(
+        "0xcB1C1FdE09f811B294172696404e88E658659905"
+      );
+      console.log("data", balance);
+
+      if (balance?.result?.length) {
+        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
+          transactionHash: tx.hash,
+          from: tx?.from_address || "",
+          to: tx?.to_address || "",
+          date: new Date(tx.block_timestamp).toLocaleString(),
+        }));
+
+        setTransactions(latestTransactions);
+        return latestTransactions; // Return data for LiveBlogPopup
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+  const handleCardClick = async (item) => {
+    if (item.head === "Total Balance" || item.head === "Loan Balance") {
+      await fetchRecentTransactions();
+    }
+    else  if (item.head === "Bitcoin") {
+      await fetchBitcoinRecentTransactions();
+    }else{
+      await fetchUSDCRecentTransactions()
+    }
+  };
+
+  const fetchBitcoinRecentTransactions = async () => {
+    try {
+      const balance = await fetchTokenTransfers(
+        [process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS],
+        userAuth.walletAddress
+      );
+      console.log("data", balance);
+
+      if (balance?.result?.length) {
+        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
+          transactionHash: tx.transaction_hash,
+          from: tx?.from_address || "",
+          to: tx?.to_address || "",
+          date: new Date(tx.block_timestamp).toLocaleString(),
+        }));
+
+        setTransactions(latestTransactions);
+        return latestTransactions; // Return data for LiveBlogPopup
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const fetchUSDCRecentTransactions = async () => {
+    try {
+      const balance = await fetchTokenTransfers(
+        [process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS],
+        userAuth.walletAddress
+      );
+      console.log("data", balance);
+
+      if (balance?.result?.length) {
+        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
+          transactionHash: tx.transaction_hash,
+          from: tx?.from_address || "",
+          to: tx?.to_address || "",
+          date: new Date(tx.block_timestamp).toLocaleString(),
+        }));
+
+        setTransactions(latestTransactions);
+        return latestTransactions; // Return data for LiveBlogPopup
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
 
   return (
     <>
       {liveBlog &&
         createPortal(
-          <LiveBlogPopup liveBlog={liveBlog} setLiveBlog={setLiveBlog} />,
+          <LiveBlogPopup
+            liveBlog={liveBlog}
+            setLiveBlog={setLiveBlog}
+            data={data}
+            transactions={transactions}
+          />,
           document.body
         )}
       <div className="grid gap-4 grid-cols-12 w-full">
@@ -27,7 +117,10 @@ const CounterList = ({ data }) => {
           data.map((item, key) => (
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
-                // onClick={() => setLiveBlog(!liveBlog)}
+                onClick={() => {
+                  setLiveBlog(!liveBlog);
+                  handleCardClick(item);
+                }}
                 style={{ opacity: 1, transform: "none" }}
               >
                 <div className="flex w-full flex-col items-center justify-between ">
@@ -46,11 +139,11 @@ const CounterList = ({ data }) => {
                             </span> */}
                       </div>
                     </div>
-                    <div className="flex-1" />
+                    {/* <div className="flex-1" /> */}
                     {/* <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                       +20.1% from last month
                     </div> */}
-                    <div
+                    {/* <div
                       aria-valuemax={100}
                       aria-valuemin={0}
                       role="progressbar"
@@ -64,7 +157,7 @@ const CounterList = ({ data }) => {
                         className={`bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
                         style={{ transform: "translateX(-55%)" }}
                       />
-                    </div>
+                    </div> */}
                   </button>
                   {/* <div className="desktop relative z-0 max-w-full truncate text-center text-13 leading-normal drop-shadow-desktop-label contrast-more:bg-black contrast-more:px-1">
                         Live Usage

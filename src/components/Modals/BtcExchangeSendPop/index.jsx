@@ -4,6 +4,7 @@ import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
+import { BigNumber } from "ethers";
 
 import loader from "@/Assets/Images/loading.gif";
 import Image from "next/image";
@@ -12,11 +13,14 @@ import Image from "next/image";
 // img
 
 const BtcExchangeSendPop = ({
+  sendUsdc,
+  setSendUsdc,
   btcExchangeSend,
   setBtcExchangeSend,
   walletAddress,
   qrCode,
   loading,
+  sendSdk,
   setLoading,
   mint,
   startReceive,
@@ -32,8 +36,13 @@ const BtcExchangeSendPop = ({
     three: false,
   });
 
+  const [tokenSend, setTokenSend] = useState();
+
   const [step, setStep] = useState(2);
   const [tab, setTab] = useState(0);
+  const [btcAmount, setBtcAmount] = useState(0);
+  const [btcAddress, setBtcAddress] = useState();
+  const [loadingSend, setLoadingSend] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState();
   // if (depositFound) {
   //   setStep(3)
@@ -83,7 +92,49 @@ const BtcExchangeSendPop = ({
       setBtcExchangeSend(!btcExchangeSend);
     } catch (error) {}
   };
+  console.log("sendSdk", sendSdk);
 
+  const sendNative = async () => {
+    try {
+      setLoadingSend(true);
+      if (!btcAmount) {
+        setLoadingSend(false);
+        return toast.error("Please Enter Valid Amount!");
+      }
+      if (!btcAddress) {
+        setLoadingSend(false);
+        return toast.error("Please Enter Valid Address!");
+      }
+      if (sendSdk) {
+        try {
+          // const amount = BigNumber.from(btcAmount * 1e18)
+          const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
+          console.log("weiAmount", weiAmount.toString());
+          const { targetChainTxHash, walletPublicKey } =
+            await sendSdk.redemptions.requestRedemption(
+              btcAddress,
+              weiAmount.toString()
+            );
+          console.log(
+            "targetChainTxHash walletPublicKey",
+            targetChainTxHash,
+            walletPublicKey
+          );
+          toast.success("Send BTC Success!");
+        } catch (error) {
+          console.log(" sendSdk error-->", error);
+          toast.error(error.message);
+        }
+      } else {
+        toast.error("Please Login!");
+      }
+      setLoadingSend(false);
+    } catch (error) {
+      console.log("sendNative error--->", error);
+      setLoadingSend(false);
+      toast.error(error.message);
+    }
+  };
   const tabData = [
     {
       title: "Native SegWit",
@@ -121,7 +172,7 @@ const BtcExchangeSendPop = ({
                 {loading ? (
                   <>
                     <Image
-                    alt=""
+                      alt=""
                       src={loader}
                       height={10000}
                       width={10000}
@@ -132,46 +183,70 @@ const BtcExchangeSendPop = ({
                 ) : (
                   <>
                     <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
-                    Unminting requires one Ethereum transaction and it takes around 3-5 hours.
+                      Unminting requires one Ethereum transaction and it takes
+                      around 3-5 hours.
                     </p>
-                    
                   </>
                 )}
-                
               </>
-            )  : (
+            ) : (
               <></>
             )}
             <div className="py-2">
               <div className="py-2">
                 <div className="flex items-center justify-between pb-1 px-3">
-                  <label htmlFor="" className="form-label m-0 text-xs font-medium">Amount</label>
-                  <span className="text-white opacity-60 text-xs">Balance: 0 tBTC
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 text-xs font-medium"
+                  >
+                    Amount
+                  </label>
+                  <span className="text-white opacity-60 text-xs">
+                    Balance: 0 tBTC
                   </span>
                 </div>
                 <div className="iconWithText relative">
-                  <span className="absolute left-3 icn">
+                  {/* <span className="absolute left-3 icn">
                     {usdc}
-                  </span>
-                  <input type="text" className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`} />
-                  <button className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}>Max</button>
+                  </span> */}
+                  <input
+                    type="number"
+                    value={btcAmount}
+                    onChange={(e) => setBtcAmount(e.target.value)}
+                    className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
+                  />
+                  <button
+                    className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    Max
+                  </button>
                 </div>
               </div>
               <div className="py-2">
                 <div className="flex items-center justify-between pb-1 px-3">
-                  <label htmlFor="" className="form-label m-0 text-xs font-medium">BTC Address</label>
-             
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 text-xs font-medium"
+                  >
+                    BTC Address
+                  </label>
                 </div>
                 <div className="iconWithText relative">
-             
-                  <input type="text" className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`} />
+                  <input
+                    type="text"
+                    value={btcAddress}
+                    onChange={(e) => setBtcAddress(e.target.value)}
+                    className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
+                  />
                 </div>
               </div>
               <div className="py-2 mt-4">
-              <button
+                <button
+                  onClick={sendNative}
+                  disabled={loadingSend}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  Mint
+                  {loadingSend ? "Please Wait ..." : "Send"}
                 </button>
               </div>
             </div>
@@ -202,55 +277,14 @@ const BtcExchangeSendPop = ({
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          <div className={`relative hidden rounded`}>
+          {tokenSend ? (
+            <>
             <div className="top pb-3">
-              <h5 className="m-0 text-xl font-bold">
-               Send Bitcoin
-              </h5>
+              <h5 className="m-0 text-xl font-bold">Send Bitcoin</h5>
               {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
             </p> */}
             </div>
-            <div className="content">
-              <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
-                {tabData.map((data, key) => (
-                  <div key={key} className="relative">
-                    <button
-                      onClick={() => handleTab(key)}
-                      className={`${
-                        tab == key && "active"
-                      } flex items-center justify-center font-semibold btn`}
-                    >
-                      {data.title}
-                    </button>
-                  </div>
-                ))}
-              </RadioList>
-              <div className="tabContent pt-3">
-                {tabData.map((item, key) =>
-                  tab === key ? <>{item.component}</> : <></>
-                )}
-              </div>
-            </div>
-            {/* {step != 1 && !loading && (
-              <div className="btnWRpper mt-4">
-                <button
-                  onClick={() => mint()}
-                  className="d-flex align-items-center justify-content-center commonBtn w-100"
-                >
-                  Mint
-                </button>
-              </div>
-            )} */}
-          </div>
-          <div className="top pb-3">
-            <h5 className="m-0 text-xl font-bold">
-             Send Bitcoin
-            </h5>
-            {/* <p className="m-0" style={{ fontSize: 12 }}>
-              Generate a QR code or wallet address to receive Bitcoin Securely
-            </p> */}
-          </div>
           <div className="content p-3">
             <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
               {tabData.map((data, key) => (
@@ -273,6 +307,34 @@ const BtcExchangeSendPop = ({
             </div>
             <div className="btnWrpper mt-3"></div>
           </div>
+            </>
+          ): <>
+               <div className="top pb-3">
+              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                Add Supply
+              </h5> */}
+            </div>
+            <div className="modalBody text-center">
+              <div className="grid gap-3 grid-cols-12">
+                <div className="col-span-12">
+                  <button
+                   onClick={()=> {setSendUsdc(!sendUsdc), setBtcExchangeSend(!btcExchangeSend)}}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                   USDC
+                  </button>
+                </div>
+                <div className="col-span-12">
+                  <button
+                     onClick={()=> setTokenSend(!tokenSend)}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    Bitcoin
+                  </button>
+                </div>
+              </div>
+            </div></>}
+
         </div>
       </Modal>
     </>
@@ -401,5 +463,37 @@ const closeIcn = (
   </svg>
 );
 
-
-const usdc  = <svg width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5127 23.2266C17.713 23.2266 22.7393 18.2003 22.7393 12C22.7393 5.79974 17.713 0.773438 11.5127 0.773438C5.31244 0.773438 0.286133 5.79974 0.286133 12C0.286133 18.2003 5.31244 23.2266 11.5127 23.2266Z" fill="#1D2229"></path><path d="M9.65153 11.0594H7.77167V12.9393H9.65153V11.0594Z" fill="white"></path><path d="M7.77165 9.17957H5.89178V11.0594H7.77165V9.17957Z" fill="white"></path><path d="M5.89146 11.0594H4.0116V12.9393H5.89146V11.0594Z" fill="white"></path><path d="M7.77165 12.9392H5.89178V14.8191H7.77165V12.9392Z" fill="white"></path><path d="M18.4577 9.58446C18.3252 8.20191 17.1319 7.73783 15.6248 7.60528V6.71969H14.4578V7.55476C14.1512 7.55476 13.8376 7.56064 13.5258 7.56652V6.71899H12.3596V7.60424C12.1069 7.60909 10.5548 7.6077 10.5548 7.6077L10.5513 8.63657L11.5252 8.64211V15.3853H10.5517L10.543 16.3996C10.8258 16.3996 12.0841 16.4052 12.3568 16.4069V17.2811H13.5231V16.4277C13.8428 16.4346 14.1529 16.4374 14.4554 16.437V17.2814H15.6227V16.4111C17.5853 16.2993 18.9595 15.8054 19.1301 13.963C19.2685 12.479 18.5709 11.8173 17.4569 11.5481C18.1338 11.202 18.557 10.596 18.4584 9.58412L18.4577 9.58446ZM16.8225 13.7314C16.8225 15.1811 14.3408 15.0154 13.549 15.0157V12.4458C14.3405 12.4458 16.8211 12.2198 16.8215 13.7314H16.8225ZM16.2809 10.1053C16.2809 11.4242 14.21 11.2695 13.5507 11.2695V8.93835C14.211 8.93869 16.2816 8.72967 16.2809 10.1053Z" fill="white"></path></svg>
+const usdc = (
+  <svg
+    width="23"
+    height="24"
+    viewBox="0 0 23 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M11.5127 23.2266C17.713 23.2266 22.7393 18.2003 22.7393 12C22.7393 5.79974 17.713 0.773438 11.5127 0.773438C5.31244 0.773438 0.286133 5.79974 0.286133 12C0.286133 18.2003 5.31244 23.2266 11.5127 23.2266Z"
+      fill="#1D2229"
+    ></path>
+    <path
+      d="M9.65153 11.0594H7.77167V12.9393H9.65153V11.0594Z"
+      fill="white"
+    ></path>
+    <path
+      d="M7.77165 9.17957H5.89178V11.0594H7.77165V9.17957Z"
+      fill="white"
+    ></path>
+    <path
+      d="M5.89146 11.0594H4.0116V12.9393H5.89146V11.0594Z"
+      fill="white"
+    ></path>
+    <path
+      d="M7.77165 12.9392H5.89178V14.8191H7.77165V12.9392Z"
+      fill="white"
+    ></path>
+    <path
+      d="M18.4577 9.58446C18.3252 8.20191 17.1319 7.73783 15.6248 7.60528V6.71969H14.4578V7.55476C14.1512 7.55476 13.8376 7.56064 13.5258 7.56652V6.71899H12.3596V7.60424C12.1069 7.60909 10.5548 7.6077 10.5548 7.6077L10.5513 8.63657L11.5252 8.64211V15.3853H10.5517L10.543 16.3996C10.8258 16.3996 12.0841 16.4052 12.3568 16.4069V17.2811H13.5231V16.4277C13.8428 16.4346 14.1529 16.4374 14.4554 16.437V17.2814H15.6227V16.4111C17.5853 16.2993 18.9595 15.8054 19.1301 13.963C19.2685 12.479 18.5709 11.8173 17.4569 11.5481C18.1338 11.202 18.557 10.596 18.4584 9.58412L18.4577 9.58446ZM16.8225 13.7314C16.8225 15.1811 14.3408 15.0154 13.549 15.0157V12.4458C14.3405 12.4458 16.8211 12.2198 16.8215 13.7314H16.8225ZM16.2809 10.1053C16.2809 11.4242 14.21 11.2695 13.5507 11.2695V8.93835C14.211 8.93869 16.2816 8.72967 16.2809 10.1053Z"
+      fill="white"
+    ></path>
+  </svg>
+);

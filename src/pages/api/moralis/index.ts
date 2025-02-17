@@ -38,30 +38,33 @@ async function getWalletHistory(address: string) {
   try {
     console.log("Fetching wallet history for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletHistory({
-      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
+      chain: "0x1",
       order: "DESC",
       address: address,
     });
+    console.log("response", response);
+    // if (!response || !response.raw) {
+    //   throw new Error("No data received from Moralis");
+    // }
 
-    if (!response || !response.raw) {
-      throw new Error("No data received from Moralis");
-    }
-
-    return response.raw;
+    return response;
   } catch (error) {
     console.error("Error in getWalletHistory:", error);
     throw error;
   }
 }
 
-async function getWalletTokenTransfers(contractAddresses: string[],walletAddress: string) {
+async function getWalletTokenTransfers(
+  contractAddresses: string[],
+  walletAddress: string
+) {
   try {
     console.log("Fetching token transfers for address:", walletAddress);
     const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
       chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
       address: walletAddress,
-      contractAddresses:contractAddresses
+      contractAddresses: contractAddresses,
     });
 
     if (!response || !response.raw) {
@@ -75,6 +78,24 @@ async function getWalletTokenTransfers(contractAddresses: string[],walletAddress
   }
 }
 
+async function getWalletBalance(address: string) {
+  try {
+    console.log("Fetching wallet balance for address:", address);
+    const response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
+      chain: "0x1",
+      address,
+    });
+
+    // if (!response || !response.raw) {
+    //   throw new Error("No balance data received from Moralis");
+    // }
+
+    return response;
+  } catch (error) {
+    console.error("Error in getWalletBalance:", error);
+    throw error;
+  }
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -101,8 +122,15 @@ export default async function handler(
 
       case "getWalletTokenTransfers":
         const { contractAddresses, walletAddress } = params;
-        const transfers = await getWalletTokenTransfers(contractAddresses, walletAddress);
+        const transfers = await getWalletTokenTransfers(
+          contractAddresses,
+          walletAddress
+        );
         return res.status(200).json({ data: transfers });
+
+      case "getWalletBalance":
+        const balance = await getWalletBalance(params.address);
+        return res.status(200).json(balance);
 
       default:
         return res.status(400).json({ message: "Invalid action" });

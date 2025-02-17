@@ -109,13 +109,13 @@ const Login = () => {
               }
               // if (userExist.userId.wallet == address) {
                 toast.success("Login Successfully!");
-                console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
+                console.log("data-->", data,userExist, createdWebAuthKey, newPasskeyValidator)
                 dispatch(
                   loginSet({
                     login: true,
                     walletAddress: address || "",
                     signer: "",
-                    username: userExist.userId.username,
+                    username: (userExist.userId.username || ""),
                     email: userExist.userId.email,
                     passkeyCred: newPasskeyValidator,
                     webauthKey: createdWebAuthKey.webAuthnKey,
@@ -127,7 +127,7 @@ const Login = () => {
                   login: true,
                   walletAddress: address || "",
                   signer: "",
-                  username: userExist.userId.username,
+                  username: (userExist.userId.username || ""),
                   email: userExist.userId.email,
                   passkeyCred: "",
                   webauthKey: webAuthKeyStringObj,

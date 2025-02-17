@@ -22,10 +22,11 @@ import { toast } from "react-toastify";
 import styled from "styled-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { splitAddress } from "../../utils/globals";
-import { fetchTokenBalances } from "../../lib/utils";
+import { fetchBalance, fetchTokenBalances } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
+import LoadingScreen from "@/components/LoadingScreen";
 
 // interface CardMetrics {
 //   head: string;
@@ -50,9 +51,10 @@ const Dashboard = () => {
   const [thusdBalance, setThusdBalance] = useState(0);
   const [healthFactor, setHealthFactor] = useState(0);
   const [collateralRatio, setCollateralRatio] = useState(0);
+  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
 
   const cardMetrics = [
-    { head: "Total Balance", value: "$234234", icn: icn11 },
+    { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: tbtcBalance, icn: icn22 },
     { head: "USDC Balance", value: thusdBalance, icn: icn33 },
     { head: "Loan Balance", value: collateralRatio, icn: icn11 },
@@ -197,7 +199,8 @@ const Dashboard = () => {
                   const balances = await fetchTokenBalances(
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
-                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS,
+                      process.env
+                        .NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -212,11 +215,24 @@ const Dashboard = () => {
                     }
                     if (
                       token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS.toLowerCase()
+                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS.toLowerCase()
                     ) {
                       setThusdBalance(formattedBalance.toFixed(2));
                     }
                   });
+
+                  const walletBalance = await fetchBalance(
+                    "0xcB4867789704f3C14f6b20F5848407086246db2e"
+                  );
+                  console.log("Wallet Balance Data:", walletBalance);
+
+                  if (walletBalance?.result?.length) {
+                    const totalUsd = walletBalance.result.reduce(
+                      (sum, token) => sum + (token.usd_value || 0),
+                      0
+                    );
+                    setTotalUsdBalance(totalUsd.toFixed(2));
+                  }
                   fetchTroveData(provider?.ethersProvider);
                 } catch (err) {}
               }
@@ -258,7 +274,7 @@ const Dashboard = () => {
           />,
           document.body
         )}
-
+      <LoadingScreen />
       <DashboardMain className="relative flex w-full flex-col items-center">
         <div
           className="flex h-full w-full select-none flex-col items-center container"
@@ -321,7 +337,7 @@ const Dashboard = () => {
                   backdrop-blur-md backdrop-saturate-250 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%]  ring-white/25"
             >
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                {userAuth.login && (
+                {/* {userAuth.login && (
                   <>
                     {" "}
                     <div
@@ -346,7 +362,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </>
-                )}
+                )} */}
 
                 <div
                   className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5  py-4 text-14 backdrop-blur-md"
