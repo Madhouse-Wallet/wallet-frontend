@@ -14,6 +14,8 @@ import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import Loader from "@/components/loader";
+import LoadingScreen from "@/components/LoadingScreen";
 import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
@@ -234,6 +236,7 @@ const BTCEchange = () => {
           />,
           document.body
         )}
+      {/* {createPortal(<LoadingScreen />, document.body)} */}
       <section className="relative dashboard pt-12">
         <div className="container h-full relative">
           <button
@@ -291,7 +294,7 @@ const BTCEchange = () => {
                   </TopHead>
                 </div>
               </div>
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
+              <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
                     {/* <div className="d-flex align-items-center gap-3 mb-3">

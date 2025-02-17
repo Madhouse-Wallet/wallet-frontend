@@ -7,21 +7,54 @@ export async function fetchTransactions(walletAddress) {
   }
 
   // Use a template literal to inject the wallet address into the query
+  // const query = `
+  //     query GetTransactions($address: String!) {
+  //       transactions(
+  //         first: 10
+  //         where: {from: $address}
+  //       ) {
+  //         id
+  //         txHash
+  //         timestamp
+  //         from
+  //         amount
+  //         to
+  //       }
+  //     }
+  //   `;
+
   const query = `
-      query GetTransactions($address: String!) {
-        transactions(
-          first: 10
-          where: {from: $address}
-        ) {
-          id
-          txHash
-          timestamp
-          from
-          amount
-          to
-        }
-      }
-    `;
+  query GetTransactions($address: String!) {
+    transactions(
+      first: 10
+      where: {from: $address}
+    ) {
+    id
+    txHash
+    timestamp
+    from
+    amount
+    description
+    to
+    deposits {
+      fundingTxHash
+      fundingOutputIndex
+      status
+      amount
+      updateTimestamp
+      treasuryFee
+    }
+    redemptions {
+      redemptionTimestamp
+      redemptionTxHash
+      status
+      amount
+      txMaxFee
+      updateTimestamp
+    }
+  }
+  }
+`;
 
   const variables = {
     // address: walletAddress,

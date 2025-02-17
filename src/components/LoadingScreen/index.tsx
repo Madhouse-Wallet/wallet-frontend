@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import logoW from "@/Assets/Images/logow.png";
-import logo from "@/Assets/Images/logo.png";
+import logo from "@/Assets/Images/logow1.png";
 import styled, { keyframes } from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
@@ -12,11 +12,11 @@ const LoadingScreen = () => {
   return (
     <>
       <div
-        className="flex items-center justify-center bg-[var(--cardBg2)] fixed top-0 left-0 w-full z-[9999999]"
+        className="flex items-center justify-center bg-[#000000a3] fixed top-0 left-0 w-full z-[9999999]"
         style={{ minHeight: "100vh" }}
       >
         <Image
-          src={isChecked ? logo : logoW}
+          src={logo}
           alt="loader"
           height={10000}
           width={10000}
