@@ -6,15 +6,39 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
-// css
-
-// img
-
-const TransactionDetailPop = ({ detail, setDetail,transactionData }) => {
+const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
   const { theme, toggleTheme } = useTheme();
-  console.log("transactionDatatransactionData",transactionData)
+  console.log('transactionDatatransactionData',transactionData)
+  
+  // Function to truncate address
+  const truncateAddress = (address) => {
+    if (!address) return "";
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
 
   const handleTransactionDetail = () => setDetail(!detail);
+  
+  // Default values if transactionData is not provided
+  const {
+    amount = "",
+    category = "",
+    date = "",
+    from = "",
+    id = "",
+    rawData = {},
+    status = "",
+    summary = "",
+    to = "",
+    transactionHash = "",
+    type = ""
+  } = transactionData || {};
+
+  // Get first letters of from address for avatar
+  const getInitials = (address) => {
+    if (!address) return "??";
+    return address.substring(2, 4).toUpperCase();
+  };
+
   return (
     <>
       <Modal
@@ -29,13 +53,12 @@ const TransactionDetailPop = ({ detail, setDetail,transactionData }) => {
         </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Send USDC
+                {type ? (type.charAt(0).toUpperCase() + type.slice(1)) : "Transaction Details"}
               </h5>
             </div>
             <div className="modalBody">
@@ -44,15 +67,26 @@ const TransactionDetailPop = ({ detail, setDetail,transactionData }) => {
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Status</h6>
-                      <span className="text-blue-500 text-xs font-medium">
+                      <a 
+                        href={`https://etherscan.io/tx/${transactionHash}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-500 text-xs font-medium"
+                      >
                         View on block explorer
-                      </span>
+                      </a>
                     </div>
                   </li>
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
-                      <h6 className="m-0 font-semibold text-base">Confirmed</h6>
-                      <span className="text-blue-500 text-xs font-medium">
+                      <h6 className="m-0 font-semibold text-base capitalize">{status || "Pending"}</h6>
+                      <span 
+                        className="text-blue-500 text-xs font-medium cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(transactionHash);
+                          toast.success("Transaction ID copied to clipboard!");
+                        }}
+                      >
                         Copy transaction ID
                       </span>
                     </div>
@@ -65,47 +99,74 @@ const TransactionDetailPop = ({ detail, setDetail,transactionData }) => {
                         </h6>
                         <div className="flex items-center gap-1">
                           <div className="flex-shrink-0 h-[30px] w-[30px] rounded-full text-xs font-medium bg-white/50 flex items-center justify-center">
-                            AH
+                            {getInitials(from)}
                           </div>
                           <span className="text-blue-500 text-xs font-medium">
-                            sdaser32234wdsas....
+                            {truncateAddress(from)}
                           </span>
                         </div>
                       </div>
-                      {/* <div className="">{}</div> */}
                       <div className="right text-right">
                         <h6 className="m-0 font-semibold text-base pb-1">To</h6>
                         <div className="rounded-20 px-2 py-1 bg-white/50">
-                          <span className=" text-xs font-medium">
-                          sdaser32234wdsas....
+                          <span className="text-xs font-medium">
+                            {truncateAddress(to)}
                           </span>
                         </div>
                       </div>
+                    </div>
+                  </li>
+                  <li className="py-2 border-b border-dashed border-white/50">
+                    <div className="flex items-center justify-between">
+                      <h6 className="m-0 font-semibold text-base">Date</h6>
+                      <span className="text-white text-xs font-medium">
+                        {date}
+                      </span>
                     </div>
                   </li>
                 </ul>
               </div>
               <div className="py-3">
                 <h6 className="m-0 font-medium text-xl pb-5">
-                  Transaction
+                  Transaction Details
                 </h6>
                 <ul className="list-unstyled ps-0 mb-0 text-xs">
+                  {rawData?.nonce && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Nonce</span>
+                      <span className="text-white font-medium">{rawData.nonce}</span>
+                    </li>
+                  )}
                   <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opactiy-80">Nounce</span>
-                    <span className="text-white font-medium">82</span>
+                    <span className="text-white opacity-80">Amount</span>
+                    <span className="text-white font-medium">{amount}</span>
                   </li>
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opactiy-80">Amount</span>
-                    <span className="text-white font-medium">-1 USDC</span>
-                  </li>
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opactiy-80">Nounce</span>
-                    <span className="text-white font-medium">82</span>
-                  </li>
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opactiy-80">Amount</span>
-                    <span className="text-white font-medium">-1 USDC</span>
-                  </li>
+                  {rawData?.gas_price && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Gas Price</span>
+                      <span className="text-white font-medium">
+                        {ethers.utils.formatUnits(rawData.gas_price, 'gwei')} Gwei
+                      </span>
+                    </li>
+                  )}
+                  {rawData?.gas_used && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Gas Used</span>
+                      <span className="text-white font-medium">{rawData.gas_used}</span>
+                    </li>
+                  )}
+                  {category && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Category</span>
+                      <span className="text-white font-medium capitalize">{category}</span>
+                    </li>
+                  )}
+                  {summary && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Summary</span>
+                      <span className="text-white font-medium">{summary}</span>
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
