@@ -1,1 +1,0 @@
-export { ledgerWallet } from "./ledger";
