@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "ES2020",  // Change this to "ES2020" or higher
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -12,10 +13,20 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@swapkit/*": [
+        "./packages/swapkit/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","src/components/Modals/BtcExchangePop/LightningTab.jsx"],
   "exclude": ["node_modules"]
 }
