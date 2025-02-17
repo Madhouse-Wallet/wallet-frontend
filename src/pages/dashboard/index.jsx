@@ -266,6 +266,7 @@ const Dashboard = () => {
           <BuySellBitcoinPop buySell={buySell} setBuySell={setBuySell} />,
           document.body
         )}
+       
       {buycoverage &&
         createPortal(
           <BuyCoveragePop
@@ -274,7 +275,7 @@ const Dashboard = () => {
           />,
           document.body
         )}
-      <LoadingScreen />
+      {/* <LoadingScreen /> */}
       <DashboardMain className="relative flex w-full flex-col items-center">
         <div
           className="flex h-full w-full select-none flex-col items-center container"

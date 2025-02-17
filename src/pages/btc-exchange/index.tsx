@@ -8,6 +8,7 @@ import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import SuccessPop from "../../components/Modals/SuccessPop";
 import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
+import TransactionApprovalPop from "../../components/Modals/TransactionApprovalPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 // import BtcExchangePop from "@/components/Modals/BtcExchangePop/index";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
@@ -30,6 +31,7 @@ const BTCEchange = () => {
   const [btcExchangeSend, setBtcExchangeSend] = useState(false);
   const [qrCode, setQRCode] = useState("");
   const [receiveUsdc, setReceiveUSDC] = useState("");
+  const [trxnApproval, settrxnApproval] = useState("");
   const [loading, setLoading] = useState(false);
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
   const [depositSetup, setDepositSetup] = useState<any>("");
@@ -236,6 +238,11 @@ const BTCEchange = () => {
           />,
           document.body
         )}
+      {/* {trxnApproval &&
+        createPortal(
+          <TransactionApprovalPop trxnApproval={trxnApproval} settrxnApproval={settrxnApproval} />,
+          document.body
+        )} */}
       {/* {createPortal(<LoadingScreen />, document.body)} */}
       <section className="relative dashboard pt-12">
         <div className="container h-full relative">

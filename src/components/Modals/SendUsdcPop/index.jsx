@@ -4,20 +4,22 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useTheme } from "@/ContextApi/ThemeContext";
-import { getProvider,getAccount } from "@/lib/zeroDevWallet";
+import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { useSelector } from "react-redux";
-
+import { createPortal } from "react-dom";
+import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop"
+import LoadingScreen from "@/components/LoadingScreen";
 
 const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   const userAuth = useSelector((state) => state.Auth);
   const { theme } = useTheme();
   const [toAddress, setToAddress] = useState("");
+  const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
   const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
-    const [providerr, setProviderr] = useState(null);
-  
+  const [providerr, setProviderr] = useState(null);
 
   // Validate Ethereum address
   const validateAddress = (address) => {
@@ -45,9 +47,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   };
 
   const handleClose = () => setSendUsdc(false);
-
-
-
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -147,84 +146,103 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
       toast.error("Failed to fetch USDC balance");
     }
   };
-    
+
   return (
-    <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-      <buttonbuy
-        onClick={handleClose}
-        className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-        style={{ border: "1px solid #5f5f5f59" }}
-      >
-        {closeIcn}
-      </buttonbuy>
-      <div className="absolute inset-0 backdrop-blur-xl"></div>
-      <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
-        <div className="relative rounded px-3">
-          <div className="top pb-3">
-            <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-              Send USDC
-            </h5>
-          </div>
-          <div className="modalBody">
-            <form onSubmit={handleSend}>
-              <div className="py-2">
-                <label className="form-label m-0 font-semibold text-xs ps-3">
-                  Chain
-                </label>
-                <div className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
-                  <span className="icn">{sepoliaIcn}</span>
-                  <span className="text-white">Sepolia</span>
-                </div>
-              </div>
-              <div className="py-2">
-                <label className="form-label m-0 font-semibold text-xs ps-3">
-                  To
-                </label>
-                <input
-                  placeholder="Address"
-                  type="text"
-                  value={toAddress}
-                  onChange={handleAddressChange}
-                  className={`border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full ${
-                    !isValidAddress && toAddress ? "border-red-500" : ""
-                  }`}
-                />
-                {!isValidAddress && toAddress && (
-                  <p className="text-red-500 text-xs mt-1 ps-3">Invalid address</p>
-                )}
-              </div>
-              <div className="py-2">
-                <label className="form-label m-0 font-semibold text-xs ps-3">
-                  Balance: {balance} USDC
-                </label>
-                <div className="iconWithText relative">
-                  <div className="absolute icn left-2 flex items-center gap-2 text-xs">
-                    {usdcIcn}
-                    USDC
+    <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionApprovalPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={settrxnApproval}
+            amount={amount}
+            toAddress={toAddress}
+            // fromAddress={userAuth?.walletAddress}
+            handleSend={handleSend}
+            handleClose={handleClose}
+          />,
+          document.body
+        )}
+        {isLoading && <LoadingScreen />}
+      <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
+        <buttonbuy
+          onClick={handleClose}
+          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+          style={{ border: "1px solid #5f5f5f59" }}
+        >
+          {closeIcn}
+        </buttonbuy>
+        <div className="absolute inset-0 backdrop-blur-xl"></div>
+        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
+          <div className="relative rounded px-3">
+            <div className="top pb-3">
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                Send USDC
+              </h5>
+            </div>
+            <div className="modalBody">
+              {/* <form> */}
+                <div className="py-2">
+                  <label className="form-label m-0 font-semibold text-xs ps-3">
+                    Chain
+                  </label>
+                  <div className="border-white/10 bg-white/50 roundded hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
+                    <span className="icn">{sepoliaIcn}</span>
+                    <span className="text-white">Sepolia</span>
                   </div>
-                  <input
-                    placeholder="Amount"
-                    type="text"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
-                  />
                 </div>
-              </div>
-              <div className="py-2 mt-4">
-                <button
-                  type="submit"
-                  disabled={!isValidAddress || !amount || isLoading}
-                  className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
-                >
-                  {isLoading ? "Sending..." : "Send"}
-                </button>
-              </div>
-            </form>
+                <div className="py-2">
+                  <label className="form-label m-0 font-semibold text-xs ps-3">
+                    To
+                  </label>
+                  <input
+                    placeholder="Address"
+                    type="text"
+                    value={toAddress}
+                    onChange={handleAddressChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full ${
+                      !isValidAddress && toAddress ? "border-red-500" : ""
+                    }`}
+                  />
+                  {!isValidAddress && toAddress && (
+                    <p className="text-red-500 text-xs mt-1 ps-3">
+                      Invalid address
+                    </p>
+                  )}
+                </div>
+                <div className="py-2">
+                  <label className="form-label m-0 font-semibold text-xs ps-3">
+                    Balance: {balance} USDC
+                  </label>
+                  <div className="iconWithText relative">
+                    <div className="absolute icn left-2 flex items-center gap-2 text-xs">
+                      {usdcIcn}
+                      USDC
+                    </div>
+                    <input
+                      placeholder="Amount"
+                      type="text"
+                      value={amount}
+                      onChange={handleAmountChange}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                    />
+                  </div>
+                </div>
+                <div className="py-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => settrxnApproval(!trxnApproval)}
+                    disabled={!isValidAddress || !amount || isLoading}
+                    className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                  >
+                    {isLoading ? "Sending..." : "Send"}
+                  </button>
+                </div>
+              {/* </form> */}
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 
