@@ -245,12 +245,12 @@ const CreateWallet = () => {
       } else {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
-        console.log("OTP-->", OTP)
+        // console.log("OTP-->", OTP)
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        return true;
+        // return true;
         let obj = {
           email: data.email,
           name: data.username,
