@@ -39,6 +39,7 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     return address.substring(2, 4).toUpperCase();
   };
 
+  console.log("datedate",date)
   return (
     <>
       <Modal

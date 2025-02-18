@@ -43,13 +43,7 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
               </h5> */}
             </div>
             <div className="modalBody">
-              <div className="top pb-3">
-                <div className="sectionHeader ">
-                  <h4 className="m-0 text-base font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                    Live Blog
-                  </h4>
-                </div>
-              </div>
+            
               <div className="grid blogCard gap-3 grid-cols-12">
                 <BlogCard classN={"col-span-6 md:col-span-4"} data={data} />
                 <div className="col-span-12 mt-3">

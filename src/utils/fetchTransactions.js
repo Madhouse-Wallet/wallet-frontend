@@ -57,9 +57,7 @@ export async function fetchTransactions(walletAddress) {
 `;
 
   const variables = {
-    // address: walletAddress,
-    address: '0xcb4867789704f3c14f6b20f5848407086246db2e',
-
+    address: walletAddress,
   };
 
   try {

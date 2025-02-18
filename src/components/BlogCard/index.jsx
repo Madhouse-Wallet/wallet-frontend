@@ -2,32 +2,42 @@ import { useTheme } from "@/ContextApi/ThemeContext";
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 
-const BlogCard = ({ classN,data }) => {
+const BlogCard = ({ classN, data }) => {
   const { theme, toggleTheme } = useTheme();
-
+console.log("data",data)
   return (
     <>
       {data?.map((item, index) => (
-        <CardWrpper key={index} className={`${classN} `}>
-          <CardCstm style={{ opacity: 1, transform: "none" }}>
-            <div className="flex w-full flex-col items-center justify-between">
-              <button
-                className={`
+        <>
+          <div className="col-span-12">
+            <div className="top pb-3">
+              <div className="sectionHeader ">
+                <h4 className="m-0 text-base font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                  {item?.head} Details
+                </h4>
+              </div>
+            </div>
+          </div>
+          <CardWrpper key={index} className={`${classN} `}>
+            <CardCstm style={{ opacity: 1, transform: "none" }}>
+              <div className="flex w-full flex-col items-center justify-between">
+                <button
+                  className={`
                 
                  bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
-              >
-                <span className="chartSvg absolute top-0 left-0 h-full w-full">
-                  {chartSvg}
-                </span>
-                <div className="flex flex-col gap-1 tabular-nums md:gap-2">
-                  <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
-                    {item.head}
+                >
+                  <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                    {chartSvg}
+                  </span>
+                  <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                    <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                      {item.head}
+                    </div>
+                    <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                      <span className="min-w-0 truncate">{item.value}</span>
+                    </div>
                   </div>
-                  <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
-                    <span className="min-w-0 truncate">{item.value}</span>
-                  </div>
-                </div>
-                {/* <div className="flex-1" />
+                  {/* <div className="flex-1" />
                 <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
                   +20.1% from last month
                 </div>
@@ -46,10 +56,11 @@ const BlogCard = ({ classN,data }) => {
                     style={{ transform: "translateX(-55%)" }}
                   />
                 </div> */}
-              </button>
-            </div>
-          </CardCstm>
-        </CardWrpper>
+                </button>
+              </div>
+            </CardCstm>
+          </CardWrpper>
+        </>
       ))}
     </>
   );

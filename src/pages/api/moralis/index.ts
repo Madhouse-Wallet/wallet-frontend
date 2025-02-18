@@ -38,7 +38,7 @@ async function getWalletHistory(address: string) {
   try {
     console.log("Fetching wallet history for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletHistory({
-      chain: "0x1",
+      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
       address: address,
     });
@@ -82,7 +82,7 @@ async function getWalletBalance(address: string) {
   try {
     console.log("Fetching wallet balance for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
-      chain: "0x1",
+      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       address,
     });
 
