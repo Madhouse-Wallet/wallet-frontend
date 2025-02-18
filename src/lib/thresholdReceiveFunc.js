@@ -1,4 +1,4 @@
-import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
+import { initializeTBTC } from "./tbtcSdkInitializer";
 
 export const initializetbtc = async () => {
     try {
