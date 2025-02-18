@@ -192,7 +192,7 @@ const CounterList = ({ data }) => {
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
                 onClick={() => {
-                  if(item.value === '' || item.value === 0 || !userAuth?.walletAddress){
+                  if(item.value === '' || item.value === '$0' || item.value === 0 || !userAuth?.walletAddress){
                     return
                   }
                     handleCardClick(item);
