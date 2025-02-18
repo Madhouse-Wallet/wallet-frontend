@@ -249,7 +249,7 @@ const CreateWallet = () => {
         setRegisterData({
           email: data.email,
           username: data.username,
-        });
+        }); 
         // return true;
         let obj = {
           email: data.email,
