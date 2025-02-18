@@ -26,20 +26,20 @@ export default function Fonbnk() {
         />
       ),
     },
-    {
-      title: "Onramp Fonbnk",
-      component: (
-        <>
-          <iframe
-            height={650}
-            src={`${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_SOURCE}`}
-            className="w-full  border-0 rounded"
-            title="Fonbnk Payment"
-            allow="payment"
-          />
-        </>
-      ),
-    },
+    // {
+    //   title: "Onramp Fonbnk",
+    //   component: (
+    //     <>
+    //       <iframe
+    //         height={650}
+    //         src={`${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_URL}/source=${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_SOURCE}`}
+    //         className="w-full  border-0 rounded"
+    //         title="Fonbnk Payment"
+    //         allow="payment"
+    //       />
+    //     </>
+    //   ),
+    // },
   ];
 
   const handleGoBack = () => {
