@@ -71,7 +71,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
       const web3 = new Web3Interaction("sepolia", providerr);
 
       const result = await web3.sendUSDC(
-        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
         toAddress,
         amount,
         providerr
@@ -131,7 +131,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
 
       const web3 = new Web3Interaction("sepolia", providerr);
       const result = await web3.getUSDCBalance(
-        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC contract address
+        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
         userAuth?.walletAddress,
         providerr
       );

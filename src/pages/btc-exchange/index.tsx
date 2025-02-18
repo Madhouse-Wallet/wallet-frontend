@@ -21,6 +21,7 @@ import { ethers } from "ethers";
 // @ts-ignore
 import QRCode from "qrcode";
 import styled from "styled-components";
+import { fetchBalance } from "@/lib/utils";
 const BTCEchange = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
@@ -39,6 +40,8 @@ const BTCEchange = () => {
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
   const [sendSdk, setSendSdk] = useState<any>("");
+  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+
   console.log("walletAddress-->", userAuth);
 
   const handleGoBack = () => {
@@ -176,6 +179,41 @@ const BTCEchange = () => {
     }
   };
 
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      const fetchData = async () => {
+        try {
+          if (userAuth?.passkeyCred) {
+            let account = await getAccount(userAuth?.passkeyCred);
+            if (account) {
+              let provider = await getProvider(account.kernelClient);
+              if (provider) {
+                try {
+                  const walletBalance = await fetchBalance(
+                    userAuth?.walletAddress
+                  );
+                  console.log("Wallet Balance Data:", walletBalance);
+
+                  if (walletBalance?.result?.length) {
+                    const totalUsd = walletBalance.result.reduce(
+                      (sum:any, token:any) => sum + (token.usd_value || 0),
+                      0
+                    );
+                    setTotalUsdBalance(totalUsd.toFixed(2));
+                  }
+                } catch (err) {}
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching token balances:", error);
+        }
+      };
+
+      fetchData();
+    }
+  }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
+
   return (
     <>
       {btcExchangeSend &&
@@ -281,7 +319,7 @@ const BTCEchange = () => {
                       <h4 className="m-0 font-normal text-base flex items-center">
                         Balance
                         <span className="font-bold ms-2 text-2xl">
-                          $ 12,345,00.00
+                          $ {totalUsdBalance}
                         </span>
                       </h4>
                     </div>
@@ -324,7 +362,7 @@ const BTCEchange = () => {
 };
 
 const TopHead = styled.div`
-  backdrop-filter: blur(39.6px);
+  // backdrop-filter: blur(39.6px);
   border-radius: 15px;
   button {
     min-width: 120px;

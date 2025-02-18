@@ -14,38 +14,91 @@ const CounterList = ({ data }) => {
   const [liveBlog, setLiveBlog] = useState();
   const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState([]); // State for transactions
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  // Function to fetch recent transactions
   const fetchRecentTransactions = async () => {
     try {
-      const balance = await fetchWalletHistory(
-        "0xcB1C1FdE09f811B294172696404e88E658659905"
+      // const data = await fetchWalletHistory(userAuth?.walletAddress);
+      const data = await fetchWalletHistory(
+        userAuth?.walletAddress
       );
-      console.log("data", balance);
+      console.log("Wallet history data:", data);
 
-      if (balance?.result?.length) {
-        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
-          transactionHash: tx.hash,
-          from: tx?.from_address || "",
-          to: tx?.to_address || "",
-          date: new Date(tx.block_timestamp).toLocaleString(),
-        }));
-
-        setTransactions(latestTransactions);
-        return latestTransactions; // Return data for LiveBlogPopup
+      if (data?.result?.length) {
+        const formattedTransactions = formatWalletHistoryData(
+          data.result.slice(0, 10)
+        );
+        setTransactions(formattedTransactions);
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
   };
+
+  // Format transactions from fetchWalletHistory
+  const formatWalletHistoryData = (txs) => {
+    return txs.map((tx) => {
+      // Get the amount and currency from native transfers or value
+      let amount = "";
+      let currency = "ETH";
+      let isSend = false;
+
+      if (tx.native_transfers && tx.native_transfers.length > 0) {
+        const transfer = tx.native_transfers[0];
+        const ethValue = parseFloat(transfer.value || tx.value) / 1e18;
+        amount = ethValue.toFixed(4);
+        isSend =
+          tx.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+      } else if (tx.value) {
+        const ethValue = parseFloat(tx.value) / 1e18;
+        amount = ethValue.toFixed(4);
+        isSend =
+          tx.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+      }
+
+      // Check for ERC20 transfers
+      if (tx.erc20_transfers && tx.erc20_transfers.length > 0) {
+        const transfer = tx.erc20_transfers[0];
+        amount = parseFloat(transfer.value_decimal).toFixed(4);
+        currency = transfer.token_symbol;
+        isSend =
+          transfer.from_address.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+      }
+
+      return {
+        id: tx.hash,
+        transactionHash: tx.hash,
+        from: tx.from_address,
+        to: tx.to_address,
+        date: new Date(tx.block_timestamp).toLocaleString(),
+        status:
+          tx.receipt_status === "1"
+            ? "confirmed"
+            : tx.receipt_status === "0"
+            ? "rejected"
+            : "pending",
+        amount: amount ? `${amount} ${currency}` : "",
+        // type: isSend ? "send" : "receive",
+        type: tx?.category,
+        summary:
+          tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
+        category: tx.category,
+        rawData: tx,
+      };
+    });
+  };
+
   const handleCardClick = async (item) => {
+    setSelectedItem([item]);
     if (item.head === "Total Balance" || item.head === "Loan Balance") {
       await fetchRecentTransactions();
-    }
-    else  if (item.head === "Bitcoin") {
+    } else if (item.head === "Bitcoin") {
       await fetchBitcoinRecentTransactions();
-    }else{
-      await fetchUSDCRecentTransactions()
+    } else {
+      await fetchUSDCRecentTransactions();
     }
   };
 
@@ -56,23 +109,33 @@ const CounterList = ({ data }) => {
         userAuth.walletAddress
       );
       console.log("data", balance);
-
+  
       if (balance?.result?.length) {
-        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
-          transactionHash: tx.transaction_hash,
-          from: tx?.from_address || "",
-          to: tx?.to_address || "",
-          date: new Date(tx.block_timestamp).toLocaleString(),
-        }));
-
+        const latestTransactions = balance.result.slice(0, 10).map(tx => {
+          // Create the new standardized transaction object
+          return {
+            amount: tx.value_decimal || "",
+            category: tx.token_symbol || "BTC",
+            date: new Date(tx.block_timestamp).toLocaleString() || "",
+            from: tx.from_address || "",
+            id: tx.transaction_hash || "",
+            rawData: tx, // Store the original transaction data
+            status: "confirmed", // Default status as it's on blockchain
+            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "BTC"} Transfer`,
+            to: tx.to_address || "",
+            transactionHash: tx.transaction_hash || "",
+            type: "Transfer" // Default type
+          };
+        });
+        
         setTransactions(latestTransactions);
-        return latestTransactions; // Return data for LiveBlogPopup
+        return latestTransactions;
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
   };
-
+  
   const fetchUSDCRecentTransactions = async () => {
     try {
       const balance = await fetchTokenTransfers(
@@ -80,23 +143,34 @@ const CounterList = ({ data }) => {
         userAuth.walletAddress
       );
       console.log("data", balance);
-
+  
       if (balance?.result?.length) {
-        const latestTransactions = balance.result.slice(0, 10).map((tx) => ({
-          transactionHash: tx.transaction_hash,
-          from: tx?.from_address || "",
-          to: tx?.to_address || "",
-          date: new Date(tx.block_timestamp).toLocaleString(),
-        }));
-
+        const latestTransactions = balance.result.slice(0, 10).map(tx => {
+          // Create the new standardized transaction object
+          return {
+            amount: tx.value_decimal || "",
+            category: tx.token_symbol || "USDC",
+            date: new Date(tx.block_timestamp).toLocaleString() || "",
+            from: tx.from_address || "",
+            id: tx.transaction_hash || "",
+            rawData: tx, // Store the original transaction data
+            status: "confirmed", // Default status as it's on blockchain
+            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
+            to: tx.to_address || "",
+            transactionHash: tx.transaction_hash || "",
+            type: "Transfer" // Default type
+          };
+        });
+        
         setTransactions(latestTransactions);
-        return latestTransactions; // Return data for LiveBlogPopup
+        return latestTransactions;
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
   };
 
+  console.log(data,"data")
   return (
     <>
       {liveBlog &&
@@ -104,7 +178,7 @@ const CounterList = ({ data }) => {
           <LiveBlogPopup
             liveBlog={liveBlog}
             setLiveBlog={setLiveBlog}
-            data={data}
+            data={selectedItem}
             transactions={transactions}
           />,
           document.body
@@ -118,8 +192,11 @@ const CounterList = ({ data }) => {
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
                 onClick={() => {
-                  setLiveBlog(!liveBlog);
-                  handleCardClick(item);
+                  if(item.value === '' || item.value === 0 || !userAuth?.walletAddress){
+                    return
+                  }
+                    handleCardClick(item);
+                    setLiveBlog(!liveBlog);    
                 }}
                 style={{ opacity: 1, transform: "none" }}
               >

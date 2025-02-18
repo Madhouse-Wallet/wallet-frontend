@@ -55,7 +55,7 @@ const Dashboard = () => {
 
   const cardMetrics = [
     { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
-    { head: "Bitcoin", value: tbtcBalance, icn: icn22 },
+    { head: "Bitcoin Balance", value: tbtcBalance, icn: icn22 },
     { head: "USDC Balance", value: thusdBalance, icn: icn33 },
     { head: "Loan Balance", value: collateralRatio, icn: icn11 },
   ];
@@ -222,7 +222,7 @@ const Dashboard = () => {
                   });
 
                   const walletBalance = await fetchBalance(
-                    "0xcB4867789704f3C14f6b20F5848407086246db2e"
+                    userAuth?.walletAddress
                   );
                   console.log("Wallet Balance Data:", walletBalance);
 
