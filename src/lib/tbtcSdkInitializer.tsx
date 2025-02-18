@@ -6,8 +6,15 @@ export async function initializeTBTC(signer: ethers.Signer) {
   try {
     // Initialize the SDK for Mainnet
     console.log("Initialize the SDK for Mainnet");
+    let sdk;
+    if (process.env.NEXT_PUBLIC_NODE_ENV == "development") {
+      console.log("dev tbtc")
+      sdk = await TBTC.initializeSepolia(signer);
+    } else {
+      console.log("pro tbtc")
+      sdk = await TBTC.initializeMainnet(signer);
+    }
     // const sdk = await TBTC.initializeMainnet(signer);
-    const sdk = await TBTC.initializeSepolia(signer);
 
     return {
       deposits: sdk.deposits,         // Access deposit functionalities

@@ -26,6 +26,7 @@ const BTCEchange = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [btcExchange, setBtcExchange] = useState(false);
+  const [loaderStatus, setLoaderStatus] = useState(false);
   const [sendUsdc, setSendUsdc] = useState(false);
   const [success, setSuccess] = useState(false);
   const [btcExchangeSend, setBtcExchangeSend] = useState(false);
@@ -156,8 +157,10 @@ const BTCEchange = () => {
         const fundingUTXOs = await depo.detectFunding();
         console.log("fundingUTXOs---->", fundingUTXOs);
         if (fundingUTXOs.length > 0) {
+          setLoaderStatus(true)
           const txHash = await depo.initiateMinting(fundingUTXOs[0]);
           console.log("txHash---->", txHash);
+          setLoaderStatus(false)
           setDepositFound(txHash);
         } else {
           console.log("depo-->", depo);
@@ -168,6 +171,7 @@ const BTCEchange = () => {
       }
     } catch (error) {
       console.log("setSdkTbtc-->", error);
+      setLoaderStatus(false)
       setDepositSetupCheck(!depositSetupCheck);
     }
   };
@@ -243,7 +247,7 @@ const BTCEchange = () => {
           <TransactionApprovalPop trxnApproval={trxnApproval} settrxnApproval={settrxnApproval} />,
           document.body
         )} */}
-      {/* {createPortal(<LoadingScreen />, document.body)} */}
+      { loaderStatus && (createPortal(<LoadingScreen />, document.body))}
       <section className="relative dashboard pt-12">
         <div className="container h-full relative">
           <button

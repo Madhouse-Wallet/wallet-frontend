@@ -13,7 +13,7 @@ const LoadingScreen = () => {
     <>
       <div
         className="flex items-center justify-center bg-[#000000a3] fixed top-0 left-0 w-full z-[9999999]"
-        style={{ minHeight: "100vh", backdropFilter: "blur(10px)" }}
+        style={{ minHeight: "100vh", backdropFilter: "blur(01px)" }}
       >
         <Loader className="flex items-center animate-bounce justify-center p-3  relative">
           <Image

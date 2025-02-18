@@ -40,7 +40,7 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
 // import ethers from "../manualPackage/ethers";
 import { ethers } from "ethers";
 import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia } from "viem/chains"
+import { sepolia, mainnet } from "viem/chains"
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { mnemonicToAccount } from 'viem/accounts'
 import { english, generateMnemonic } from 'viem/accounts'
@@ -61,7 +61,7 @@ const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NE
 // export const PAYMASTER_RPC =
 //   "https://rpc.zerodev.app/api/v2/paymaster/efbc1add-1c14-476e-b3f1-206db80e673c?provider=PIMLICO";
 
-const CHAIN = sepolia
+const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
 const entryPoint = getEntryPoint("0.7")
 const recoveryExecutorAddress = '0x2f65dB8039fe5CAEE0a8680D2879deB800F31Ae1'
 const recoveryExecutorFunction = 'function doRecovery(address _validator, bytes calldata _data)'
@@ -69,7 +69,7 @@ const recoveryExecutorSelector = toFunctionSelector(recoveryExecutorFunction)
 
 
 const paymasterClient = createZeroDevPaymasterClient({
-  chain: sepolia,
+  chain: CHAIN,
   transport: http(PAYMASTER_RPC),
 })
 
@@ -78,7 +78,7 @@ const publicClient = createPublicClient({
   chain: CHAIN
 })
 
-const accountClient = async (signer1,accountAddress) => {
+const accountClient = async (signer1, accountAddress) => {
   try {
     const account = await createKernelAccount(publicClient, {
       entryPoint,
@@ -95,7 +95,7 @@ const accountClient = async (signer1,accountAddress) => {
       account,
 
       // Replace with your chain
-      chain: sepolia,
+      chain: CHAIN,
 
       // Replace with your bundler RPC.
       // For ZeroDev, you can find the RPC on your dashboard.
@@ -175,7 +175,7 @@ const accountCreateClient = async (signer1, phrase) => {
 
     const kernelClient = createWeightedKernelAccountClient({
       account,
-      chain: sepolia,
+      chain: CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       // Optional -- only if you want to use a paymaster
       paymaster: {
@@ -229,7 +229,7 @@ const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
 
     const kernelClient = createWeightedKernelAccountClient({
       account,
-      chain: sepolia,
+      chain: CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       // Optional -- only if you want to use a paymaster
       paymaster: {
@@ -348,7 +348,7 @@ export const createAccount = async (signer1, phrase) => {
 }
 
 
-export const getAccount = async (signer1,  address="") => {
+export const getAccount = async (signer1, address = "") => {
   try {
     const getAccount = await accountClient(signer1, address)
     if (!getAccount) {
@@ -469,13 +469,13 @@ const getAccountPrivateKey = async () => {
 
 
     const paymasterClient = createZeroDevPaymasterClient({
-      chain: sepolia,
+      chain: CHAIN,
       transport: http(PAYMASTER_RPC),
     });
 
     const kernelClient = createKernelAccountClient({
       account: accountExample,
-      chain: sepolia,
+      chain: CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       paymaster: {
         getPaymasterData(userOperation) {
@@ -526,7 +526,7 @@ export const doRecoveryNewSigner = async (signer1, phrase, newSigner) => {
 
 
 //this function works
-export const getTrxn = async (signer1, address=""
+export const getTrxn = async (signer1, address = ""
 ) => {
   try {
     const getAccount = await accountClient(signer1, address)
