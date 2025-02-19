@@ -1,3 +1,0 @@
-import{SwapKit as a}from"@swapkit/core";import{ChainflipPlugin as i}from"@swapkit/plugin-chainflip";import{EVMPlugin as p}from"@swapkit/plugin-evm";import{KadoPlugin as l}from"@swapkit/plugin-kado";import{RadixPlugin as r}from"@swapkit/plugin-radix";import{MayachainPlugin as n,ThorchainPlugin as s}from"@swapkit/plugin-thorchain";import{wallets as m}from"@swapkit/wallets";export*from"@swapkit/core";import{getTokenIcon as S,tokenLists as h}from"@swapkit/tokens";import{SwapKitApi as M}from"@swapkit/api";var f={...i,...p,...l,...n,...s,...r},w=({plugins:t,wallets:e,...o}={})=>{return a({...o,wallets:e||m,plugins:t||f})};export{h as tokenLists,S as getTokenIcon,f as defaultPlugins,w as createSwapKit,M as SwapKitApi};
-
-//# debugId=BFD8064DFE92B73A64756E2164756E21
