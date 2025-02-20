@@ -11,6 +11,8 @@ import {
 } from "../../utils/globals";
 const EmailStep = ({ step, setStep, loginFn }) => {
   const { theme, toggleTheme } = useTheme();
+  const [error, setError] = useState("");
+
 
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerEmail, setRegisterEmail] = useState();
@@ -22,13 +24,16 @@ const EmailStep = ({ step, setStep, loginFn }) => {
     try {
       setLoginLoading(true);
       if (!registerEmail) {
-        toast.error("Please Enter Email!");
+        // toast.error("Please Enter Email!");
+        setError("Please Enter Email!"); 
         setLoginLoading(false);
       } else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setLoginLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          setError("Please Enter Valid Email!");
+          return 
+          // toast.error("Please Enter Valid Email!");
         }
         let response = await loginFn({
           email: registerEmail,
@@ -83,6 +88,11 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                   placeholder="Enter your email address"
                   defaultValue=""
                 />
+                 {error && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {error}
+                  </div>
+                )}
               </div>
               {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
                       {infoIcn}

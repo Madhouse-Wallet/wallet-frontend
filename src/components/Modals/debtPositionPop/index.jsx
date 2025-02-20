@@ -23,7 +23,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
   };
 
   const [step, setStep] = useState(1);
-  const [borrowingAmount, setBorrowingAmount] = useState(0); // State for Borrowing Amount (USD)
+  const [borrowingAmount, setBorrowingAmount] = useState(1800); // State for Borrowing Amount (USD)
   const [ltv, setLtv] = useState(1.3); // State for Safe (1.3), Moderate (1.2), Risky (1.1)
   const [currentBTCPrice, setCurrentBTCPrice] = useState(0);
   const [baseCollateralRatio, setBaseCollataeralRatio] = useState();

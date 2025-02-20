@@ -11,12 +11,14 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
   const [registerUsername, setRegisterUsername] = useState();
   const [registerEmail, setRegisterEmail] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const createRegister = async () => {
     try {
       setRegisterOtpLoading(true);
       if (!registerEmail) {
-        toast.error("Please Enter Email!");
+        // toast.error("Please Enter Email!");
+        setError("Please Enter Email!"); 
         setRegisterOtpLoading(false);
       }
       //  else if (!registerUsername) {
@@ -27,7 +29,8 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          // return toast.error("Please Enter Valid Email!");
+          setError("Please Enter Valid Email!");
         } else {
           let response = await sendRegisterOtp({
             email: registerEmail,
@@ -84,6 +87,11 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                   placeholder="Enter your email address"
                   defaultValue=""
                 />
+                {error && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {error}
+                  </div>
+                )}
               </div>
               {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
                   {infoIcn}

@@ -1,6 +1,6 @@
 import { initializeTBTC } from "./tbtcSdkInitializer";
 
-export const initializetbtc = async () => {
+export const initializetbtc = async (provider) => {
     try {
         const tbtcSdk = await initializeTBTC(provider.signer);
         console.log("tbtcSdk -->", tbtcSdk);

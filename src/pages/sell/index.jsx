@@ -8,7 +8,7 @@ const SellPage = () => {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const tabData = [
-    { title: "Defi", component: <Defi /> },
+    { title: "Sell with Bitcoin", component: <Defi /> },
     {
       title: "Cowswap",
       component: (

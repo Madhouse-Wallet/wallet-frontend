@@ -169,6 +169,7 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
   amount = 10,
   currency = 'USD' 
 }) => {
+  console.log("walletAddress",walletAddress)
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -188,7 +189,9 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
         setIsLoading(true);
         const amountValue = amount || Number(router.query.amount) || 10;
         const currencyValue = currency || router.query.currency as string || 'USD';
-        const btcAddress = walletAddress || 'bc1qclvu882xllqa74846nf3p424acl3atavthnfkk'; // Replace with your default Bitcoin address
+        // const btcAddress = walletAddress;
+
+        const btcAddress =  process.env.NEXT_PUBLIC_QUIENCY_BTC_WALLET_ADDRESS; // Replace with your default Bitcoin address
 
         if (!btcAddress) { 
           setMessage('Wallet address is required');
@@ -271,11 +274,11 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
               ) : (
                 <p className="text-center text-red-500">{message}</p>
               )}
-              {message && clientSecret && (
+              {/* {message && clientSecret && (
                 <div id="onramp-message" className="mt-4 text-gray-400">
                   {message}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
