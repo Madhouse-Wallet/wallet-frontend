@@ -57,8 +57,8 @@ const RecentApprovals = () => {
 
   const userDatata = async () => {
     const userData = await fetchUserData(
-      "0x8c6cab694f252933c89422c336dd01eae4e5f25b"
-      // "0xc96b4e2729556b7e24bd6d1de7df8f98a3f23605"
+      // "0x8c6cab694f252933c89422c336dd01eae4e5f25b"
+      "0xc96b4e2729556b7e24bd6d1de7df8f98a3f23605"
     );
     setData(userData);
   };
@@ -79,6 +79,37 @@ const RecentApprovals = () => {
     }
     return item.status;
   };
+
+  const TxLink = ({ hash }) => {
+    if (!hash) return "--";
+    return (
+      <a 
+        href={`https://blockstream.info/tx/${hash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 underline"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {formatAddress(hash)}
+      </a>
+    );
+  };
+
+  const EtherscanLink = ({ address }) => {
+    if (!address) return "--";
+    return (
+      <a 
+        href={`https://etherscan.io/address/${address}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-700 underline"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {formatAddress(address)}
+      </a>
+    );
+  };
+
 
   const getExpandedContent = (item) => {
     if (activeView === "redeemer") {
@@ -102,9 +133,7 @@ const RecentApprovals = () => {
                   <div>
                     <h6 className="font-bold themeClr">{tx.description}</h6>
                     by{" "}
-                    <span className="font-semibold">
-                      {formatAddress(tx.from)}
-                    </span>
+                     <EtherscanLink address={tx.from} />
                   </div>
                 </li>
               ))}
@@ -128,7 +157,9 @@ const RecentApprovals = () => {
               <li className="py-1">
                 {formatAddress(item.redeemerOutputScript)}
               </li>
-              <li className="py-1">{formatAddress(item.redemptionTxHash)}</li>
+              <li className="py-1">
+                <TxLink hash={item.completedTxHash} />
+              </li>
               <li className="py-1">{formatAmount(item.treasuryFee)}</li>
               <li className="py-1">{formatAmount(item.txMaxFee)} BTC</li>
               <li className="py-1">
@@ -165,9 +196,7 @@ const RecentApprovals = () => {
                 <div>
                   <h6 className="font-bold themeClr">{tx.description}</h6>
                   by{" "}
-                  <span className="font-semibold">
-                    {formatAddress(tx.from)}
-                  </span>
+                  <EtherscanLink address={tx.from} />
                 </div>
               </li>
             ))}
@@ -189,7 +218,9 @@ const RecentApprovals = () => {
           <ul className="list-none pl-0 mb-0">
             <li className="py-1">{formatAddress(item.id)}</li>
             <li className="py-1">{formatAddress(item.walletPubKeyHash)}</li>
-            <li className="py-1">{formatAddress(item.fundingTxHash)}</li>
+            <li className="py-1">
+              <TxLink hash={item.fundingTxHash} />
+            </li>
             <li className="py-1">{item.fundingOutputIndex}</li>
             <li className="py-1">{item.blindingFactor}</li>
             <li className="py-1">{formatAddress(item.refundPubKeyHash)}</li>
@@ -210,7 +241,6 @@ const RecentApprovals = () => {
         <li className="">
           <button
             onClick={() => setActiveView("depositor")}
-
             className={` ${
               activeView === "depositor"
                 ? "bg-[#ffad84] border-[#ffad84]"
@@ -222,12 +252,11 @@ const RecentApprovals = () => {
             Deposit
           </button>
         </li>
-        <li  className="">
+        <li className="">
           <button
             onClick={() => setActiveView("redeemer")}
-
             className={` ${
-               activeView === "redeemer"
+              activeView === "redeemer"
                 ? "bg-[#ffad84] border-[#ffad84]"
                 : "bg-white border-white"
             }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
@@ -239,8 +268,6 @@ const RecentApprovals = () => {
         </li>
       </TabNav>
       <div className="overflow-auto">
-       
-
         <TableC className="divide-white/6 bg-white/5 w-full caption-bottom text-sm divide-y rounded-12">
           <TableHeader>
             <TableRow className="border-0">
