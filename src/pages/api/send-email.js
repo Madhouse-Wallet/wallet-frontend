@@ -35,14 +35,17 @@ export default async function handler(req, res) {
             //     sessionToken: SessionToken,
             // });
            
-
             const ses = new AWS.SES({
-                region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
-                credentials: {
-                    accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-                    secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
-                }
+                // region: process.env.NEXT_PUBLIC_AWS_S3_REGION
+                region: "us-east-1"
             });
+            // const ses = new AWS.SES({
+            //     region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
+            //     credentials: {
+            //         accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
+            //         secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+            //     }
+            // });
           
             console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;

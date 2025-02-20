@@ -11,12 +11,16 @@ import StripePaymentPage from "../stripePaymentPage";
 import Swap from "../swap";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import SwapKit from "./swapKit";
+import {initializetbtc} from '../../lib/thresholdReceiveFunc'
+import { useSelector } from "react-redux";
+import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
 );
 
 const BuyCoin: React.FC = () => {
+  const [walletAddress, setWalletAddress] = useState('');
   const { theme, toggleTheme } = useTheme();
   const tabData = [
     { title: "Buy with USDC", component: <SwapKit /> },
@@ -24,7 +28,7 @@ const BuyCoin: React.FC = () => {
       title: "Buy with Debit/Credit Card",
       component: (
         <>
-          <StripePaymentPage />
+          <StripePaymentPage walletAddress={walletAddress}/>
         </>
       ),
     },
@@ -33,6 +37,7 @@ const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
+  const userAuth = useSelector((state: any) => state.Auth);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
   useEffect(() => {
@@ -43,6 +48,8 @@ const BuyCoin: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
+
   // useEffect(() => {
   //   if (selectedPaymentMethod === "Card") {
   //     fetch("http://localhost:5000/create-payment-intent", {
@@ -73,6 +80,35 @@ const BuyCoin: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchProvider()
+  },[])
+
+   const fetchProvider = async () => {
+      try {
+        if (userAuth.passkeyCred) {
+          let account = await getAccount(userAuth?.passkeyCred);
+          console.log("account---<", account);
+          if (account) {
+            let provider = await getProvider(account.kernelClient);
+            console.log("provider-->", provider);
+            if (provider) {
+              // kernelProvider, ethersProvider, signer
+              const sdk = await initializetbtc(provider);
+              console.log("sdk -->", sdk);
+              if (sdk) {
+                setWalletAddress(sdk.address!);
+              }
+            }
+          }
+        } else {
+          // setBtcExchange(!btcExchange);
+          // toast.error("Please Login First");
+        }
+      } catch (error) {
+        console.log("error rec-->", error);
+      }
+    };
   return (
     <>
       <section className="relative dashboard pt-12">

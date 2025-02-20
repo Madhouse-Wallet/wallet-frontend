@@ -2,10 +2,28 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import RecentApprovals from "./RecentApprovals";
+import styled from "styled-components";
 
 const Approvals: React.FC = () => {
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const tabData = [
+    {
+      title: "Deposits",
+      component: (
+       "asdfasdfa"
+      ),
+    },
+    {
+      title: "Redeems",
+      component: (
+        "asdfasdfaadsfasdfasd"
+
+      ),
+    },
+  ];
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
@@ -35,14 +53,15 @@ const Approvals: React.FC = () => {
           <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <div className="grid gap-3 grid-cols-12 lg:px-4 pt-3">
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
-                <div className="sectionHeader ">
-                  <div className="d-flex align-items-center gap-2">
+                <div className="sectionHeader pb-3 border-b border-gray-900">
+                  <div className="d-flex align-items-center gap-2 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Approvals
                     </h4>
                   </div>
                 </div>
               </div>
+          
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12 ">
                 <RecentApprovals />
               </div>
@@ -53,6 +72,19 @@ const Approvals: React.FC = () => {
     </>
   );
 };
+const TabNav = styled.div`
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 8px;
+    li {
+      width: 48%;
+      button {
+        font-size: 10px;
+        height: 35px;
+      }
+    }
+  }
+`;
 
 export default Approvals;
 

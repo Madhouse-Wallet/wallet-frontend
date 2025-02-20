@@ -41,6 +41,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 // }
 
 const Dashboard = () => {
+    const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
@@ -189,6 +190,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
+        setIsLoading(true)
         try {
           if (userAuth?.passkeyCred) {
             let account = await getAccount(userAuth?.passkeyCred);
@@ -200,7 +202,7 @@ const Dashboard = () => {
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
                       process.env
-                        .NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
+                        .NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -215,7 +217,7 @@ const Dashboard = () => {
                     }
                     if (
                       token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS.toLowerCase()
+                      process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS.toLowerCase()
                     ) {
                       setThusdBalance(formattedBalance.toFixed(2));
                     }
@@ -238,8 +240,10 @@ const Dashboard = () => {
               }
             }
           }
+        setIsLoading(false)
         } catch (error) {
           console.error("Error fetching token balances:", error);
+        setIsLoading(false)
         }
       };
 
@@ -249,6 +253,8 @@ const Dashboard = () => {
 
   return (
     <>
+        {isLoading && <LoadingScreen />}
+
       {buy &&
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
 

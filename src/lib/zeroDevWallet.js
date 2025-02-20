@@ -252,6 +252,7 @@ const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
 
 export const getProvider = async (kernelClient) => {
   try {
+    console.log(kernelClient)
     const kernelProvider = new KernelEIP1193Provider(kernelClient);
     const ethersProvider = new ethers.providers.Web3Provider(kernelProvider);
     const signer = await ethersProvider.getSigner();

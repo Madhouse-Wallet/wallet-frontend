@@ -1,18 +1,19 @@
 import { TBTC } from "@keep-network/tbtc-v2.ts";
 import { ethers } from "ethers";
+import { EthereumSigner } from "@keep-network/tbtc-v2.ts"; // Import EthereumSigner if available
 
 // tBTC SDK Initialization Function
-export async function initializeTBTC(signer: ethers.Signer) {
+export async function initializeTBTC(signer: EthereumSigner) {
   try {
     // Initialize the SDK for Mainnet
     console.log("Initialize the SDK for Mainnet");
     let sdk;
     if (process.env.NEXT_PUBLIC_NODE_ENV == "development") {
       console.log("dev tbtc")
-      sdk = await TBTC.initializeSepolia(signer);
+      sdk = await TBTC.initializeSepolia(signer as EthereumSigner);
     } else {
       console.log("pro tbtc")
-      sdk = await TBTC.initializeMainnet(signer);
+      sdk = await TBTC.initializeMainnet(signer as EthereumSigner);
     }
     // const sdk = await TBTC.initializeMainnet(signer);
 

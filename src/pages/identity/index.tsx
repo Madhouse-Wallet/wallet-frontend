@@ -49,7 +49,7 @@ export default function Identity() {
       if (stripe) {
         const { error } = await stripe.verifyIdentity(client_secret);
         if (!error) {
-          router.push("identity/submitted");
+          router.push("/");
         } else {
           // alert(error.message);
           console.log(error.message);

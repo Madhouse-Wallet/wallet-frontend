@@ -7,6 +7,7 @@ import LightningTab from "./LightningTab";
 
 import loader from "@/Assets/Images/loading.gif";
 import Image from "next/image";
+import Link from "next/link";
 // css
 
 // img
@@ -339,6 +340,12 @@ const BtcExchangePop = ({
                   <p className="m-0 py-1">
                     We have found deposit in generated address.
                   </p>
+                  <div className="btnWrpper mt-3">
+                    <Link href="/approval" className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+               >
+                      Check Approval status
+                    </Link>
+                  </div>
                 </div>
               </>
             ) : (

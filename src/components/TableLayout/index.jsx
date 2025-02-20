@@ -32,7 +32,7 @@ const TableLayout = ({ column, data }) => {
                 <>
                   <TableHead
                     key={key}
-                    className={`bg-[rgba(255,255,255,0.08)]  backdrop-blur-[7.747px] h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
+                    className={`bg-white/5  h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
                   >
                     {item.head}
                   </TableHead>
@@ -110,7 +110,6 @@ const TableC = styled(Table)`
       font-weight: 400;
       ${"" /* background-color: var(--cardBg); */}
 
-      backdrop-filter: blur(39.6px);
       white-space: nowrap;
       color: var(--textColor);
     }

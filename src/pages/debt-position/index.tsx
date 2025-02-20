@@ -194,35 +194,6 @@ const DebtPosition: React.FC = () => {
   //   );
   // }
 
-  const handleUSDCTransfer = async () => {
-    // To only handle approval:
-    const web3 = new Web3Interaction("sepolia", providerr);
-    console.log("web3", web3);
-    // const approvalResult = await web3.handleUSDCApproval(
-    //   "USDC_CONTRACT_ADDRESS",
-    //   "OWNER_ADDRESS",
-    //   "SPENDER_ADDRESS",
-    //   "1000000", // amount
-    //   providerr
-    // );
-
-    // To send USDC (with automatic approval if ownerAddress is provided):
-    const sendResult = await web3.sendUSDC(
-      "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-     '0x9A872029Ee44858EA17B79E30198947907a3a67A',
-      "1", // amount
-      providerr,
-      // "OWNER_ADDRESS" // optional, include if approval is needed
-    );
-
-    if (sendResult.success) {
-      console.log(
-        `Transfer successful. Transaction hash: ${sendResult.txHash}`
-      );
-    } else {
-      console.error(`Transfer failed: ${sendResult.error}`);
-    }
-  };
   return (
     <>
       {debtPosition &&
@@ -442,15 +413,6 @@ const DebtPosition: React.FC = () => {
                                 style={{ minWidth: "unset" }}
                               >
                                 Open a Loan
-                              </button>
-                            </li>
-                            <li className="">
-                              <button
-                                onClick={() => handleUSDCTransfer()}
-                                className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4 py-1"
-                                style={{ minWidth: "unset" }}
-                              >
-                                Transfer USDC
                               </button>
                             </li>
                             <li className="">
