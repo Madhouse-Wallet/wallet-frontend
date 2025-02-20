@@ -88,7 +88,8 @@ export default async function handler(req, res) {
                         Data: subject,
                     },
                 },
-                Source: process.env.NEXT_PUBLIC_EMAIL, // Replace with your verified email
+                Source: "info@madhousewallet.com"
+                // process.env.NEXT_PUBLIC_EMAIL, // Replace with your verified email
             };
 
             try {
