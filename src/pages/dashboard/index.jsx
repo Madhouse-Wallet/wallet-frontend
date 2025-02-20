@@ -200,7 +200,7 @@ const Dashboard = () => {
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
                       process.env
-                        .NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS,
+                        .NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -215,7 +215,7 @@ const Dashboard = () => {
                     }
                     if (
                       token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS.toLowerCase()
+                      process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS.toLowerCase()
                     ) {
                       setThusdBalance(formattedBalance.toFixed(2));
                     }

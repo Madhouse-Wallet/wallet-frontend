@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import styled from "styled-components";
 import { fetchUserData } from "../../utils/fetchUserData";
+import { useSelector } from "react-redux";
 
 const formatAddress = (address) => {
   if (!address) return "";
@@ -32,16 +33,8 @@ const formatAmount = (amount) => {
 };
 
 const RecentApprovals = () => {
-  const tabData = [
-    {
-      title: "Deposits",
-      component: "asdfasdfa",
-    },
-    {
-      title: "Redeems",
-      component: "asdfasdfaadsfasdfasd",
-    },
-  ];
+  const userAuth = useSelector((state) => state.Auth);
+
   const [expandedRow, setExpandedRow] = useState(null);
   const [data, setData] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -58,14 +51,18 @@ const RecentApprovals = () => {
   const userDatata = async () => {
     const userData = await fetchUserData(
       // "0x8c6cab694f252933c89422c336dd01eae4e5f25b"
-      "0xc96b4e2729556b7e24bd6d1de7df8f98a3f23605"
+      // "0xc96b4e2729556b7e24bd6d1de7df8f98a3f23605"
+      userAuth?.walletAddress
     );
     setData(userData);
   };
 
   useEffect(() => {
+    if(!userAuth?.walletAddress){
+      return
+    }
     userDatata();
-  }, []);
+  }, [userAuth?.walletAddress]);
 
   const formatReceivedAmount = (amount, treasuryFee) => {
     if (!amount || !treasuryFee) return "0";

@@ -43,7 +43,7 @@ const RecentTransaction = () => {
       // Check for ERC20 transfers
       if (tx.erc20_transfers && tx.erc20_transfers.length > 0) {
         const transfer = tx.erc20_transfers[0];
-        amount = parseFloat(transfer.value_decimal).toFixed(4);
+        amount = parseFloat(transfer.value_formatted).toFixed(4);
         currency = transfer.token_symbol;
         isSend =
           transfer.from_address.toLowerCase() ===
@@ -349,7 +349,7 @@ const RecentTransaction = () => {
                           >
                             <div className="left flex items-start gap-2">
                               <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "send" ? sendSvg : receiveSvg}
+                                {tx.type === "token send" ? sendSvg : receiveSvg}
                               </div>
                               <div className="content">
                                 <h4 className="m-0 font-bold md:text-base">
@@ -357,7 +357,7 @@ const RecentTransaction = () => {
                                     ? "Redemption"
                                     : tx.isDeposit
                                     ? "Deposit"
-                                    : tx.type === "send"
+                                    : tx.type === "token send"
                                     ? "Send"
                                     : "Receive"}{" "}
                                   {tx.amount?.split(" ")[1] || "ETH"}
@@ -375,7 +375,7 @@ const RecentTransaction = () => {
                               <p className="m-0  text-xs font-medium">
                                 {tx.status === "rejected"
                                   ? "Insufficient Balance"
-                                  : `${tx.type === "send" ? "-" : "+"} ${
+                                  : `${tx.type === "token send" ? "-" : "+"} ${
                                       tx.amount
                                     }`}
                               </p>
