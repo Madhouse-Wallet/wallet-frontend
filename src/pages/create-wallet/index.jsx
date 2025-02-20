@@ -184,10 +184,23 @@ const CreateWallet = () => {
                 email: registerData.email,
                 passkeyCred: newPasskeyValidator,
                 webauthKey: createdWebAuthKey.webAuthnKey,
-                id: data.userData._id
+                id: data.userData._id,
+                multisigAddress:  data.userData.multisigAddress,
+                passkey2:  data.userData.passkey2,
+                passkey3:  data.userData.passkey3,
+                multisigSetup:  data.userData.multisigSetup,
+                multisigActivate:  data.userData.multisigActivate
               })
-            );
-          
+            ); 
+            let webAuthKeyStringObj2 = ""
+            let webAuthKeyStringObj3 = ""
+            if(data.userData.passkey2){
+              webAuthKeyStringObj2 =  await webAuthKeyStore(data.userData.passkey2)
+            }
+            if(data.userData.passkey3){
+              webAuthKeyStringObj3 = await webAuthKeyStore(data.userData.passkey3)
+            }
+
             storedataLocalStorage({
               login: true,
               walletAddress: address || "",
@@ -196,7 +209,12 @@ const CreateWallet = () => {
               email: registerData.email,
               passkeyCred: "",
               webauthKey: webAuthKeyStringObj,
-              id: data.userData._id
+              id: data.userData._id,
+              multisigAddress:  data.userData.multisigAddress,
+              passkey2:  webAuthKeyStringObj2,
+              passkey3: webAuthKeyStringObj3,
+              multisigSetup:  data.userData.multisigSetup,
+              multisigActivate:  data.userData.multisigActivate
             }, "authUser")
             return true;
           }

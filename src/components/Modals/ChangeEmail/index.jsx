@@ -98,9 +98,14 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 email: email,
                 walletAddress: userAuth.walletAddress,
                 passkeyCred: userAuth.passkeyValidatorNew,
-                webauthKey: userAuth.newwebAuthKey,
+                webauthKey: userAuth.webauthKey,
                 id: userAuth.id,
                 signer: userAuth.signer,
+                multisigAddress: userAuth.multisigAddress,
+                passkey2: userAuth.passkey2,
+                passkey3: userAuth.passkey3,
+                multisigSetup: userAuth.multisigSetup,
+                multisigActivate: userAuth.multisigActivate
               })
             );
             handleChangeEmail()

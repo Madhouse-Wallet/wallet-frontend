@@ -409,11 +409,34 @@ export const doRecovery = async (address, signer1, phrase, name) => {
     //   args: [getValidatorAddress(entryPoint, KERNEL_V3_1), newSigner.address],
     console.log("Sending Recovery Operation");
 
+
+    // const passKeySigner3 = await toWebAuthnSigner(publicClient, {
+    //   webAuthnKey: publicKey3.webAuthnKey,
+    // });
+    // console.log("passKeySigner3-->", publicKey3.webAuthnKey, passKeySigner3)
+    // const newValidator = await createWeightedValidator(publicClient, {
+    //   kernelVersion: KERNEL_V3_1,
+    //   entryPoint,
+    //   signer: passKeySigner3,
+    //   config: {
+    //     threshold: 100,
+    //     signers: [
+    //       {
+    //         publicKey: publicKey3.webAuthnKey,
+    //         weight: 100,
+    //       }
+    //     ],
+    //   },
+    // });
+
+    // console.log("newValidator", newValidator.address)
+
     const userOpHash = await getAccount.kernelClient.sendUserOperation({
       callData: encodeFunctionData({
         abi: parseAbi([recoveryExecutorFunction]),
         functionName: "doRecovery",
         args: [passkeyValidator1.newPasskeyValidator.address, await passkeyValidator1.newPasskeyValidator.getEnableData()],
+        // args: [newValidator.address, await newValidator.getEnableData()],
       }),
     });
     console.log({ userOpHash });
@@ -631,3 +654,177 @@ export const loginPasskey = async (passkeyName) => {
 }
 
 
+
+export const multisigSetup = async (webauthKey, email, passkeyNo) => {
+  try {
+    // state.passkeyCred = action.payload.passkeyCred;
+    // state.webauthKey = action.payload.webauthKey;
+    console.log("publicKey1.webAuthnKey-->", webauthKey)
+    const passkeyValidator1 = await passkeyValidator(webauthKey);
+
+
+    const publicKey2 = await registerPasskey(email + "_passkey_" + passkeyNo);
+    console.log("publicKey2", publicKey2)
+    if (!publicKey2.status) {
+      return ({
+        status: false,
+        msg: "Please Enter Passkey"
+      })
+    }
+    console.log("publicKey2.webAuthnKey-->", publicKey2.webAuthnKey)
+    //newPasskeyValidator
+
+    const passkeyValidator2 = await passkeyValidator(publicKey2.webAuthnKey);
+    const publicKey3 = await registerPasskey(email + "_passkey_" + (passkeyNo + 1));
+    if (!publicKey3.status) {
+      return ({
+        status: false,
+        msg: "Please Enter Passkey"
+      })
+    }
+    console.log("publicKey3.webAuthnKey-->", publicKey3.webAuthnKey)
+    //newPasskeyValidator
+    const passkeyValidator3 = await passkeyValidator(publicKey3.webAuthnKey);
+    const signer = await toWebAuthnSigner(publicClient, {
+      webAuthnKey: webauthKey,
+    });
+    console.log("signer -->", signer)
+    const multiSigValidator = await createWeightedValidator(publicClient, {
+      entryPoint,
+      signer,
+      kernelVersion: KERNEL_V3_1,
+      config: {
+        threshold: 100,
+        signers: [
+          {
+            publicKey: webauthKey,
+            weight: 50,
+          },
+          {
+            publicKey: publicKey2.webAuthnKey,
+            weight: 50,
+          },
+          {
+            publicKey: publicKey3.webAuthnKey,
+            weight: 50,
+          },
+        ],
+      },
+    });
+    console.log("multiSigValidator-->", multiSigValidator)
+    const account = await createKernelAccount(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      plugins: {
+        sudo: multiSigValidator,
+      },
+    });
+
+    const paymasterClient = createZeroDevPaymasterClient({
+      chain: CHAIN,
+      transport: http(PAYMASTER_RPC),
+    });
+
+    const client = createWeightedKernelAccountClient({
+      account,
+      chain: CHAIN,
+      bundlerTransport: http(BUNDLER_URL),
+      paymaster: {
+        getPaymasterData: async (userOperation) => {
+          return await paymasterClient.sponsorUserOperation({
+            userOperation,
+          });
+        },
+      },
+    });
+    console.log(client)
+    return ({
+      address: client.account.address,
+      publicKey2: publicKey2.webAuthnKey,
+      publicKey3: publicKey3.webAuthnKey,
+      msg: "Multisig Account Setup",
+      status: true,
+    })
+  } catch (error) {
+    console.log("error-->")
+    return ({
+      status: false,
+      msg: error.message
+    })
+  }
+}
+
+
+export const createApproval = async () => {
+  try {
+
+  } catch (error) {
+
+  }
+}
+
+export const createPassKeyWeightedClient = async (signerPasskey, passkey1, passkey2, passkey3) => {
+  try {
+    const signer = await toWebAuthnSigner(publicClient, {
+      webAuthnKey: signerPasskey,
+    });
+    const multiSigValidator = await createWeightedValidator(publicClient, {
+      entryPoint,
+      signer,
+      kernelVersion: KERNEL_V3_1,
+      config: {
+        threshold: 100,
+        signers: [
+          {
+            publicKey: passkey1,
+            weight: 50,
+          },
+          {
+            publicKey: passkey2,
+            weight: 50,
+          },
+          {
+            publicKey: passkey3,
+            weight: 50,
+          },
+        ],
+      },
+    });
+    console.log("multiSigValidator-->", multiSigValidator)
+    const account = await createKernelAccount(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      plugins: {
+        sudo: multiSigValidator,
+      },
+    });
+    const paymasterClient = createZeroDevPaymasterClient({
+      chain: CHAIN,
+      transport: http(PAYMASTER_RPC),
+    });
+    const client = createWeightedKernelAccountClient({
+      account,
+      chain: CHAIN,
+      bundlerTransport: http(BUNDLER_URL),
+      paymaster: {
+        getPaymasterData: async (userOperation) => {
+          return await paymasterClient.sponsorUserOperation({
+            userOperation,
+          });
+        },
+      },
+    });
+    console.log(client)
+    return ({
+      address: client.account.address,
+      client: client,
+      msg: "Multisig Account Setup",
+      status: true,
+    })
+  } catch (error) {
+    return ({
+      status: false,
+      msg: error.message
+    })
+  }
+}

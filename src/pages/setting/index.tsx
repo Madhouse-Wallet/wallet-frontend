@@ -2,6 +2,7 @@
 import BTCAddressPop from "@/components/Modals/BtcAddressPop";
 import ChangeEmailPop from "@/components/Modals/ChangeEmail";
 import ConfirmationPop from "@/components/Modals/ConfirmationPop";
+import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,12 +16,19 @@ import PreviewBox from "./preview";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import { zeroTrxn, getAccount } from "@/lib/zeroDevWallet";
+import { zeroTrxn, getAccount, multisigSetup } from "@/lib/zeroDevWallet";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
-
+import {
+  getUser,
+  updtUser
+} from "../../lib/apiCall";
+import {
+  webAuthKeyStore,
+  storedataLocalStorage
+} from "../../utils/globals";
 const Setting: React.FC = () => {
   const {
     selectBg,
@@ -40,6 +48,7 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
   const [setUp, setSetUp] = useState<boolean>(false);
+  const [sign, setSign] = useState<boolean>(false);
   const [changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
   const handleCopy = async (address: string) => {
@@ -70,6 +79,75 @@ const Setting: React.FC = () => {
       return false;
     }
   };
+console.log("userAuth-->",userAuth)
+  const setupMultisig = async () => {
+    try {
+      let userExist = await getUser(userAuth.email);
+      let passkeyNo = ((userExist?.userId?.passkey_number && (userExist?.userId?.passkey_number + 1)) || 2);
+      let result = await multisigSetup(userAuth?.webauthKey, userAuth.email, passkeyNo);
+      console.log("result-->", result)
+      if (result.status) {
+        let webAuthKeyStringObj2: any = ""
+        let webAuthKeyStringObj3: any = ""
+        if (result.publicKey2) {
+          webAuthKeyStringObj2 = await webAuthKeyStore(result.publicKey2)
+        }
+        if (result.publicKey3) {
+          webAuthKeyStringObj3 = await webAuthKeyStore(result.publicKey3)
+        }
+        let webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey)
+        dispatch(
+          loginSet({
+            login: userAuth.login,
+            username: userAuth.username,
+            email: userAuth.email,
+            walletAddress: userAuth.walletAddress,
+            passkeyCred: userAuth.passkeyValidatorNew,
+            webauthKey: userAuth.webauthKey,
+            id: userAuth.id,
+            signer: userAuth.signer,
+            multisigAddress: result.address,
+            passkey2: result.publicKey2,
+            passkey3: result.publicKey3,
+            multisigSetup: true,
+            multisigActivate: true
+          }))
+        let data = await updtUser({ email: userAuth.email }, {
+          $set: {
+            multisigAddress: result.address,
+            passkey2: webAuthKeyStringObj2,
+            passkey3: webAuthKeyStringObj3,
+            multisigSetup: true,
+            multisigActivate: true,
+            passkey_number: (passkeyNo + 2)
+          } // Ensure this is inside `$set`
+        })
+        storedataLocalStorage({
+          login: true,
+          walletAddress: userAuth.walletAddress || "",
+          signer: "",
+          username: userAuth.username,
+          email: userAuth.email,
+          passkeyCred: "",
+          webauthKey: webAuthKeyStringObj,
+          id: userAuth.id,
+          multisigAddress: userAuth.multisigAddress,
+          passkey2: webAuthKeyStringObj2,
+          passkey3: webAuthKeyStringObj3,
+          multisigSetup: true,
+          multisigActivate:true
+        }, "authUser")
+
+
+
+        toast.success(result.msg)
+      } else {
+        toast.error(result.msg)
+      }
+    } catch (error) {
+      console.log("error-->", error)
+    }
+  }
 
   // useEffect(() => {
   //   getPreview(); // Call the function
@@ -290,6 +368,11 @@ const Setting: React.FC = () => {
           passkeyCred: "",
           webauthKey: "",
           id: "",
+          multisigAddress: "",
+          passkey2: "",
+          passkey3: "",
+          multisigSetup: false,
+          multisigActivate: false
         })
       );
       toast.success("Logout Successfully!");
@@ -299,6 +382,11 @@ const Setting: React.FC = () => {
   };
   return (
     <>
+      {sign &&
+        createPortal(
+          <MultiSignPop sign={sign} setSign={setSign} />,
+          document.body
+        )}
       {setUp &&
         createPortal(
           <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
@@ -520,9 +608,8 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -584,9 +671,8 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -704,7 +790,7 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  {userAuth?.login && (
+                  {userAuth?.login && (!userAuth.multisigSetup) && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -718,7 +804,7 @@ const Setting: React.FC = () => {
                           login
                         </p>
                       </div>
-                      <button
+                      {/* <button
                         type="button"
                         role="switch"
                         aria-checked="false"
@@ -730,9 +816,35 @@ const Setting: React.FC = () => {
                           data-state="unchecked"
                           className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
                         />
+                      </button> */}
+                      <button
+                        onClick={setupMultisig}
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                      >
+                        setup
                       </button>
                     </div>
                   )}
+                  {userAuth?.login && (userAuth.multisigSetup) && (<div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Multisign Trxn
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setSign(!sign)}
+                      className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                    >
+                      Trxn
+                    </button>
+                  </div>)
+                  }
+
 
                   <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">
                     {accordionTabs && accordionTabs.length > 0 && (

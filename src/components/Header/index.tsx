@@ -51,6 +51,11 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             webauthKey: userAuth.webauthKey,
             id: userAuth.id,
             signer: userAuth.signer,
+            multisigAddress: userAuth.multisigAddress,
+            passkey2: userAuth.passkey2,
+            passkey3: userAuth.passkey3,
+            multisigSetup: userAuth.multisigSetup,
+            multisigActivate: userAuth.multisigActivate
           })
         );
       }
@@ -76,6 +81,11 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         provider: "",
         signer: "",
         username: "",
+        multisigAddress: "",
+        passkey2: "",
+        passkey3: "",
+        multisigSetup: false,
+        multisigActivate: false
       })
     );
   };
@@ -143,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   height={10000}
                   width={10000}
                   className="max-w-full object-contain w-auto smlogo"
-                  // style={{ height: 28 }}
+                // style={{ height: 28 }}
                 />
               </a>
             </div>
@@ -154,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
               height={10000}
               width={10000}
               className="max-w-full object-contain w-auto logo"
-              // style={{ height: 28 }}
+            // style={{ height: 28 }}
             />
             {/* <h4 className="m-0 font-bold themeClr sm:text-xl ">
               Madhouse Wallet

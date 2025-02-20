@@ -18,8 +18,22 @@ if (typeof window !== "undefined") {
       pubX: BigInt(data.webauthKey.pubX),
       pubY: BigInt(data.webauthKey.pubY),
     }
+    if (data.passkey2) {
+      data.passkey2 = {
+        ...data.passkey2,
+        pubX: BigInt(data.passkey2.pubX),
+        pubY: BigInt(data.passkey2.pubY),
+      }
+    }
+    if (data.passkey3) {
+      data.passkey3 = {
+        ...data.passkey3,
+        pubX: BigInt(data.passkey3.pubX),
+        pubY: BigInt(data.passkey3.pubY),
+      }
+    }
   }
-  
+
 }
 // JSON.stringify(response.data)
 const initialState = {
@@ -30,7 +44,12 @@ const initialState = {
   email: (data?.email || ""),
   id: (data?.id || ""),
   login: (data?.login || false),
-  signer: ""
+  signer: "",
+  multisigAddress: (data?.multisigAddress || ""),
+  passkey2: (data?.passkey2 || ""),
+  passkey3: (data?.passkey3 || ""),
+  multisigSetup: (data?.multisigSetup || false),
+  multisigActivate: (data?.multisigSetup || false)
 };
 
 export const authSlice = createSlice({
@@ -47,6 +66,11 @@ export const authSlice = createSlice({
       state.webauthKey = action.payload.webauthKey;
       state.id = action.payload.id;
       state.signer = action.payload.signer;
+      state.multisigAddress = action.payload.multisigAddress;
+      state.passkey2 = action.payload.passkey2;
+      state.passkey3 = action.payload.passkey3;
+      state.multisigSetup = action.payload.multisigSetup;
+      state.multisigActivate = action.payload.multisigActivate
     },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,

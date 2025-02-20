@@ -103,8 +103,24 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               webauthKey: checkAccount.newwebAuthKey,
               id: userAuth.id,
               signer: userAuth.signer,
+              multisigAddress: userAuth.multisigAddress,
+              passkey2: userAuth.passkey2,
+              passkey3: userAuth.passkey3,
+              multisigSetup: userAuth.multisigSetup,
+              multisigActivate: userAuth.multisigActivate
             })
           );
+
+
+          let webAuthKeyStringObj2 = ""
+          let webAuthKeyStringObj3 = ""
+          if(userAuth.passkey2){
+            webAuthKeyStringObj2 =  await webAuthKeyStore(userAuth.passkey2)
+          }
+          if(userAuth.passkey3){
+            webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
+          }
+
           storedataLocalStorage({
             login: true,
             walletAddress: userAuth.walletAddress || "",
@@ -113,7 +129,12 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             email: userAuth.email,
             passkeyCred: "",
             webauthKey: webAuthKeyStringObj,
-            id: userAuth.id
+            id: userAuth.id,
+            multisigAddress:  userAuth.multisigAddress,
+            passkey2:  webAuthKeyStringObj2,
+            passkey3: webAuthKeyStringObj3,
+            multisigSetup:  userAuth.multisigSetup,
+            multisigActivate:  userAuth.multisigActivate
           }, "authUser")
           toast.success("New Key Recovered!");
           setSetUp(!setUp)

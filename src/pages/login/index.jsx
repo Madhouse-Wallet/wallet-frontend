@@ -108,32 +108,52 @@ const Login = () => {
                 return false;
               }
               // if (userExist.userId.wallet == address) {
-                toast.success("Login Successfully!");
-                console.log("data-->", data,userExist, createdWebAuthKey, newPasskeyValidator)
-                dispatch(
-                  loginSet({
-                    login: true,
-                    walletAddress: address || "",
-                    signer: "",
-                    username: (userExist.userId.username || ""),
-                    email: userExist.userId.email,
-                    passkeyCred: newPasskeyValidator,
-                    webauthKey: createdWebAuthKey.webAuthnKey,
-                    id: userExist.userId._id
-                  })
-                );
-
-                storedataLocalStorage({
+              toast.success("Login Successfully!");
+              console.log("data-->", data, userExist, createdWebAuthKey, newPasskeyValidator)
+              dispatch(
+                loginSet({
                   login: true,
                   walletAddress: address || "",
                   signer: "",
                   username: (userExist.userId.username || ""),
                   email: userExist.userId.email,
-                  passkeyCred: "",
-                  webauthKey: webAuthKeyStringObj,
-                  id: userExist.userId._id
-                }, "authUser")
-                return true;
+                  passkeyCred: newPasskeyValidator,
+                  webauthKey: createdWebAuthKey.webAuthnKey,
+                  id: userExist.userId._id,
+                  multisigAddress: (userExist.userId.multisigAddress || ""),
+                  passkey2: (userExist.userId.passkey2 || ""),
+                  passkey3: (userExist.userId.passkey3 || ""),
+                  multisigSetup: (userExist.userId.multisigSetup || false),
+                  multisigActivate: (userExist.userId.multisigActivate || false)
+                })
+              );
+
+
+              let webAuthKeyStringObj2 = ""
+              let webAuthKeyStringObj3 = ""
+              if (userExist.userId.passkey2) {
+                webAuthKeyStringObj2 = await webAuthKeyStore(userExist.userId.passkey2)
+              }
+              if (userExist.userId.passkey3) {
+                webAuthKeyStringObj3 = await webAuthKeyStore(userExist.userId.passkey3)
+              }
+
+              storedataLocalStorage({
+                login: true,
+                walletAddress: address || "",
+                signer: "",
+                username: (userExist.userId.username || ""),
+                email: userExist.userId.email,
+                passkeyCred: "",
+                webauthKey: webAuthKeyStringObj,
+                id: userExist.userId._id,
+                multisigAddress: (userExist.userId.multisigAddress || ""),
+                passkey2: webAuthKeyStringObj2,
+                passkey3: webAuthKeyStringObj3,
+                multisigSetup: (userExist.userId.multisigSetup || false),
+                multisigActivate: (userExist.userId.multisigActivate || false)
+              }, "authUser")
+              return true;
               // } else {
               //   toast.error("Login failed! Please use the correct email and passkey. Account not found.");
               //   return false;

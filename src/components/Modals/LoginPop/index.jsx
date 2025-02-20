@@ -152,6 +152,11 @@ const LoginPop = ({ login, setLogin }) => {
                   username: (userExist.userId.username || ""),
                   email: userExist.userId.email,
                   passkeyCred: userExist.userId.passkey || "",
+                  multisigAddress: userExist.userId.multisigAddress || "",
+                  passkey2: userExist.userId.passkey2 || "",
+                  passkey3: userExist.userId.passkey3 || "",
+                  multisigSetup: userExist.userId.multisigSetup || false,
+                  multisigActivate: userExist.userId.multisigActivate || false
                 })
               );
               setLoginEmail();
@@ -197,7 +202,7 @@ const LoginPop = ({ login, setLogin }) => {
             createdCredential.id,
             account?.account?.address
           );
-          // console.log("logged user--->", data)
+          console.log("logged user--->", data)
           toast.success("Sign Up Successfully!");
           setRegisterTab(2);
           dispatch(
@@ -208,6 +213,11 @@ const LoginPop = ({ login, setLogin }) => {
               username: registerUsername,
               email: registerEmail,
               passkeyCred: createdCredential || "",
+              multisigAddress: data.userData.multisigAddress || "",
+              passkey2: data.userData.passkey2 || "",
+              passkey3: data.userData.passkey3 || "",
+              multisigSetup: data.userData.multisigSetup || false,
+              multisigActivate: data.userData.multisigActivate || false
             })
           );
           setRegisterEmail();
@@ -449,9 +459,8 @@ const LoginPop = ({ login, setLogin }) => {
                   <button
                     key={key}
                     onClick={() => showTab(key)}
-                    className={`${
-                      activeTab === key && "active"
-                    } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                    className={`${activeTab === key && "active"
+                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
                   >
                     {item.title}
                   </button>
@@ -466,9 +475,8 @@ const LoginPop = ({ login, setLogin }) => {
                     <div
                       key={key}
                       id="tabContent1"
-                      className={`${
-                        activeTab === key && "block"
-                      } tab-content border-0`}
+                      className={`${activeTab === key && "block"
+                        } tab-content border-0`}
                     >
                       {item.content}
                     </div>

@@ -31,6 +31,11 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         provider: "",
         signer: "",
         username: "",
+        multisigAddress: "",
+        passkey2: "",
+        passkey3: "",
+        multisigSetup: false,
+        multisigActivate: false
       })
     );
     toast.success("Logout Successfully!");
