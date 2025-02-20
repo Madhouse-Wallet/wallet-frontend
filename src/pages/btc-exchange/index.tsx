@@ -134,7 +134,7 @@ const BTCEchange = () => {
   }, [depositSetup, depositSetupCheck]);
   console.log("setDepositSetup-->", depositSetup);
   const depo = async (tbtcSdk: any) => {
-    const bitcoinRecoveryAddress = "tb1qfpu7q7326kp7ydfjuez0x0k5834dnv8npx553w"; // Replace with a valid BTC address
+    const bitcoinRecoveryAddress = process.env.NEXT_PUBLIC_RECOVERY_ADDRESS; // Replace with a valid BTC address
     console.log("bitcoinRecoveryAddress00>", bitcoinRecoveryAddress);
     try {
       console.log(tbtcSdk.deposits.initiateDeposit);
