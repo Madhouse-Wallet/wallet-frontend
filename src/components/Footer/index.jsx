@@ -78,7 +78,7 @@ const Footer = () => {
                 style={{ height: 42 }}
               />
               <span className=" font-medium block text-center text-white/50">
-                Approvals
+                Point of Sale
               </span>
             </Link>
           </li>

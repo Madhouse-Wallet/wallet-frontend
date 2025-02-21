@@ -17,6 +17,7 @@ import { ethers } from "ethers";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
 import { passkeyValidator } from "../../lib/zeroDevWallet";
+import { toast } from "react-toastify";
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -99,6 +100,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
     try {
       await navigator.clipboard.writeText(address);
       setIsCopied((prev) => ({ ...prev, [type]: true }));
+      toast.success('Wallet Address copied successfully!');
       setTimeout(
         () =>
           setIsCopied({

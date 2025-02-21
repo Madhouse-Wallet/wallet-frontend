@@ -204,7 +204,7 @@ const Dashboard = () => {
                       process.env
                         .NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
-                    userAuth.walletAddress
+                    userAuth?.walletAddress
                   );
                   balances.forEach((token) => {
                     const formattedBalance =

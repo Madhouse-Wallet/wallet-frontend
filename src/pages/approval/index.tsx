@@ -3,6 +3,10 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import RecentApprovals from "./RecentApprovals";
 import styled from "styled-components";
+import Image from "next/image";
+import img from "@/Assets/Images/comingSoon.png";
+
+
 
 const Approvals: React.FC = () => {
   const router = useRouter();
@@ -12,16 +16,11 @@ const Approvals: React.FC = () => {
   const tabData = [
     {
       title: "Deposits",
-      component: (
-       "asdfasdfa"
-      ),
+      component: "asdfasdfa",
     },
     {
       title: "Redeems",
-      component: (
-        "asdfasdfaadsfasdfasd"
-
-      ),
+      component: "asdfasdfaadsfasdfasd",
     },
   ];
   useEffect(() => {
@@ -56,14 +55,29 @@ const Approvals: React.FC = () => {
                 <div className="sectionHeader pb-3 border-b border-gray-900">
                   <div className="d-flex align-items-center gap-2 pb-3">
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Approvals
+                      Point of Sale
                     </h4>
                   </div>
                 </div>
               </div>
-          
+
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12 ">
-                <RecentApprovals />
+                {/* <RecentApprovals /> */}
+                <div className="pt-4">
+                  <Image
+                    src={img}
+                    alt="comingsoon"
+                    height={10000}
+                    width={10000}
+                    className="max-w-full h-auto w-auto mx-auto"
+                    style={{ maxHeight: 300 }}
+                  />
+                  <ContentWrp className=" text-center">
+                    <h2 className="m-0 md:text-6xl text-3xl font-bold py-2">
+                      Coming Soon
+                    </h2>
+                  </ContentWrp>
+                </div>
               </div>
             </div>
           </div>
@@ -85,7 +99,15 @@ const TabNav = styled.div`
     }
   }
 `;
-
+export const ContentWrp = styled.div`
+  h2 {
+    background: linear-gradient(90.5deg, #e2682b 0.43%, #ffb38c 128%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+`;
 export default Approvals;
 
 const backIcn = (

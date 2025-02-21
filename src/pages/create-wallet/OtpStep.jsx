@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logow from "@/Assets/Images/logow.png";
 import logo from "@/Assets/Images/logo.png";
 import OtpInput from "react-otp-input";
@@ -8,9 +8,40 @@ import { useTheme } from "@/ContextApi/ThemeContext";
 
 const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const { theme, toggleTheme } = useTheme();
-
   const [registerOTP, setRegisterOTP] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isResendDisabled, setIsResendDisabled] = useState(false);
+  
+
+  useEffect(() => {
+    // Start the timer when component mounts
+    startResendTimer();
+  }, []);
+
+  useEffect(() => {
+    // Timer countdown logic
+    if (timeLeft > 0) {
+      const timerInterval = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+
+      return () => clearInterval(timerInterval);
+    } else {
+      setIsResendDisabled(false);
+    }
+  }, [timeLeft]);
+
+  const startResendTimer = () => {
+    setIsResendDisabled(true);
+    setTimeLeft(120); // 2 minutes in seconds
+  };
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const otpRegister = async () => {
     try {
@@ -37,11 +68,20 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const resendOtp = async () => {
     try {
       let response = await resendOtpFunc();
+      if (response) {
+        startResendTimer();
+      }
     } catch (error) {
       console.log("createRegister error -->", error);
       setRegisterOtpLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (registerOTP?.length === 4 && !registerOtpLoading) {
+      otpRegister();
+    }
+  }, [registerOTP]);
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -92,9 +132,13 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
             </div>
             <div className="col-span-12">
               <div className="text-center">
-              <button onClick={resendOtp} className="m-0 text-center themeClr inline-flex hover:opacity-50 font-medium">
-                Resend OTP
-              </button>
+              <button 
+                  onClick={resendOtp} 
+                  disabled={isResendDisabled}
+                  className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium ${isResendDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isResendDisabled ? `Resend OTP (${formatTime(timeLeft)})` : 'Resend OTP'}
+                </button>
               </div>
             </div>
             <div className="col-span-12">

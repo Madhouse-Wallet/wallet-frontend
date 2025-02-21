@@ -6,11 +6,14 @@ import { fetchWalletHistory } from "../../lib/utils";
 import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import img from "@/Assets/Images/noData.png";
+import InternalTab from "./InternalTab"
 
 const RecentTransaction = () => {
+
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
 
@@ -152,9 +155,7 @@ const RecentTransaction = () => {
     try {
       setTransactionType("all");
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(
-        userAuth?.walletAddress
-      );
+      const data = await fetchWalletHistory(userAuth?.walletAddress);
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
@@ -173,22 +174,22 @@ const RecentTransaction = () => {
   };
 
   // Function to fetch internal transactions
-  const fetchWalletInternalTransactions = async () => {
-    try {
-      setTransactionType("internal");
-      const data = await fetchTransactions(userAuth?.walletAddress);
-      console.log("Internal transactions:", data);
+  // const fetchWalletInternalTransactions = async () => {
+  //   try {
+  //     setTransactionType("internal");
+  //     const data = await fetchTransactions(userAuth?.walletAddress);
+  //     console.log("Internal transactions:", data);
 
-      if (data?.length) {
-        const formattedTransactions = formatInternalTransactionsData(
-          data.slice(0, 10)
-        );
-        setTransactions(formattedTransactions);
-      }
-    } catch (err) {
-      console.error("Error fetching internal transactions:", err);
-    }
-  };
+  //     if (data?.length) {
+  //       const formattedTransactions = formatInternalTransactionsData(
+  //         data.slice(0, 10)
+  //       );
+  //       setTransactions(formattedTransactions);
+  //     }
+  //   } catch (err) {
+  //     console.error("Error fetching internal transactions:", err);
+  //   }
+  // };
 
   // Get status color
   const getStatusColor = (status) => {
@@ -286,51 +287,11 @@ const RecentTransaction = () => {
   };
 
   const transactionsByDate = groupTransactionsByDate(transactions);
-
-  return (
-    <>
-      {detail &&
-        createPortal(
-          <TransactionDetail
-            detail={detail}
-            setDetail={setDetail}
-            transactionData={transactionData}
-          />,
-          document.body
-        )}
-      {userAuth?.walletAddress ? (
+  const tabs = [
+    {
+      title: "All",
+      component: (
         <>
-          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
-            <h4 className="m-0 text-xl">Recent Transaction</h4>
-            <div className="relative inline-block text-left">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="px-4 py-2 bg-black/50 text-white rounded-md"
-              >
-                Options
-              </button>
-
-              {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={fetchRecentTransactions}
-                  >
-                    All
-                  </a>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={fetchWalletInternalTransactions}
-                  >
-                    Internal
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-
           {transactions.length > 0 ? (
             <div className="bg-black/5 lg:p-4 rounded-lg p-3">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
@@ -349,7 +310,9 @@ const RecentTransaction = () => {
                           >
                             <div className="left flex items-start gap-2">
                               <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "token send" ? sendSvg : receiveSvg}
+                                {tx.type === "token send"
+                                  ? sendSvg
+                                  : receiveSvg}
                               </div>
                               <div className="content">
                                 <h4 className="m-0 font-bold md:text-base">
@@ -400,6 +363,55 @@ const RecentTransaction = () => {
               />
             </>
           )}
+        </>
+      ),
+    },
+    { title: "Internal", component: <InternalTab /> },
+  ];
+
+  return (
+    <>
+      {detail &&
+        createPortal(
+          <TransactionDetail
+            detail={detail}
+            setDetail={setDetail}
+            transactionData={transactionData}
+          />,
+          document.body
+        )}
+      {userAuth?.walletAddress ? (
+        <>
+          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
+            <h4 className="m-0 text-xl">Recent Transaction</h4>
+            <div className="relative inline-block text-left">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="px-4 py-2 bg-black/50 text-white rounded-md"
+              >
+                Options
+              </button>
+
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
+                  {tabs.map((item, key) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveTab(key)}
+                      // href="#"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                      // onClick={fetchRecentTransactions}
+                    >
+                      {item.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="py-2">
+            <div className="">{tabs[activeTab].component}</div>
+          </div>
         </>
       ) : (
         <>
