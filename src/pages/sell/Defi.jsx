@@ -48,7 +48,7 @@ const Defi = () => {
           fromAddress: userAuth.walletAddress,
           chainId: 1,
           amountIn: "1000000000000000000",
-          tokenIn: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          tokenIn: process.env.NEXT_PUBLIC_USDC1_CONTRACT_ADDRESS,
           tokenOut: process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS,
         });
         console.log("quoteData-->", quoteData)
@@ -56,7 +56,7 @@ const Defi = () => {
 
         const approvalData = await ensoClient.getApprovalData({
           fromAddress: userAuth.walletAddress,
-          tokenAddress: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          tokenAddress: process.env.NEXT_PUBLIC_USDC1_CONTRACT_ADDRESS,
           chainId: 1,
           amount: "1000000000000000000",
         });
@@ -79,7 +79,7 @@ const Defi = () => {
           spender: userAuth.walletAddress,
           chainId: 1,
           amountIn: "1000000000000000000",
-          tokenIn: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          tokenIn: process.env.NEXT_PUBLIC_USDC1_CONTRACT_ADDRESS,
           tokenOut: process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS,
           routingStrategy: "router", // optional
         });
