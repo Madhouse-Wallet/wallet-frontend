@@ -1,22 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { SupportedChainId, OrderKind, TradeParameters, TradingSdk } from '@cowprotocol/cow-sdk'
+import { EnsoClient } from "@ensofinance/sdk";
+// import SwapWidget from '@ensofinance/shortcuts-widget';
+
+// import { ZeroDevProvider, createConfig as createZdConfig } from "@zerodev/waas"
+// import { WagmiProvider, createConfig, http } from "wagmi"
+// import { sepolia, arbitrum, mainnet } from "wagmi/chains"
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+
+const ensoClient = new EnsoClient({
+  apiKey: process.env.NEXT_PUBLIC_ENSO_API_KEY
+});
+
 // import { createKernelDefiClient } from "@zerodev/defi"
 // import { baseTokenAddresses } from "@zerodev/defi"
 // import { parseUnits } from "viem"
 import { mainnet, sepolia, arbitrum } from "viem/chains";
 // Replace this with your network
 const chain = mainnet;
-
+console.log("chain->", chain.id)
 const Defi = () => {
   const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const userAuth = useSelector((state) => state.Auth);
-
   const swap = async () => {
     try {
       setLoading(true);
@@ -26,18 +39,88 @@ const Defi = () => {
       }
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
-        console.log("account-->", account);
-        // const defiClient = createKernelDefiClient(account?.kernelClient, process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID)
-        // console.log("defiClient-->", defiClient)
-        // const userOpHash = await defiClient.sendSwapUserOp({
-        //   fromToken: baseTokenAddresses[chain.id].USDC,
-        //   fromAmount: parseUnits('100', 6),  // USDC uses 6 decimals
+        let provider = await getProvider(account.kernelClient);
+        console.log("account-->", provider, provider.signer);
+//kernelProvider, ethersProvider, signer
 
-        //   toToken: baseTokenAddresses[chain.id].USDT,
 
-        //   gasToken: 'sponsored',
+        const quoteData = await ensoClient.getQuoteData({
+          fromAddress: userAuth.walletAddress,
+          chainId: 1,
+          amountIn: "1000000000000000000",
+          tokenIn: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          tokenOut: process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS,
+        });
+        console.log("quoteData-->", quoteData)
+
+
+        const approvalData = await ensoClient.getApprovalData({
+          fromAddress: userAuth.walletAddress,
+          tokenAddress: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          chainId: 1,
+          amount: "1000000000000000000",
+        });
+        console.log("approvalData--->", approvalData)
+
+        const op1Hash = await account.kernelClient.sendUserOperation({
+          callData: await account.kernelClient.account.encodeCalls([
+            {
+              to: approvalData.tx.to,
+              value: BigInt(0),
+              data: approvalData.tx.data,
+            },
+          ]),
+        });
+
+        console.log("Approval Transaction Hash:", op1Hash);
+        const routeData = await ensoClient.getRouterData({
+          fromAddress: userAuth.walletAddress,
+          receiver: userAuth.walletAddress,
+          spender: userAuth.walletAddress,
+          chainId: 1,
+          amountIn: "1000000000000000000",
+          tokenIn: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          tokenOut: process.env.NEXT_PUBLIC_USDT_CONTRACT_ADDRESS,
+          routingStrategy: "router", // optional
+        });
+        console.log("routeData-->", routeData)
+
+
+        const op2Hash = await account.kernelClient.sendUserOperation({
+          callData: await account.kernelClient.account.encodeCalls([
+            {
+              to: routeData.tx.to, // The contract handling the swap
+              value: BigInt(routeData.tx.value), // Amount of ETH to send if needed
+              data: routeData.tx.data, // The actual swap transaction data
+            },
+          ]),
+        });
+
+        console.log("Swap Transaction Hash:", op2Hash);
+
+
+
+        // // Initialize the SDK
+        // const sdk = new TradingSdk({
+        //   chainId: SupportedChainId.SEPOLIA,
+        //   signer: provider.signer,
+        //   appCode: 'trade-sdk-example'
         // })
-        // console.log("userOpHash-->", userOpHash)
+        // console.log("sdk-->", sdk)
+        // // Define trade parameters
+        // const parameters = {
+        //   kind: OrderKind.BUY,
+        //   sellToken: '0xfff9976782d46cc05630d1f6ebab18b2324d6b14',
+        //   sellTokenDecimals: 18,
+        //   buyToken: '0x0625afb445c3b6b7b929342a04a22599fd5dbb59',
+        //   buyTokenDecimals: 18,
+        //   amount: '120000000000000000'
+        // }
+
+        // // Post the order
+        // const orderId = await sdk.postSwapOrder(parameters)
+
+        // console.log('Order created, id: ', orderId)
       } else {
         toast.error("Please Login!");
       }
@@ -48,6 +131,8 @@ const Defi = () => {
       toast.error(error.message);
     }
   };
+
+
 
   return (
     <>
@@ -126,6 +211,17 @@ const Defi = () => {
                       {loading ? "Please wait ..." : "Continue"}
                     </button>
                   </div>
+                  {/* <WagmiProvider config={wagmiConfig}>
+                    <QueryClientProvider client={queryClient}>
+                      <ZeroDevProvider config={zdConfig}>
+                        <SwapWidget provider={"g"} chainId={1} tokenIn={"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"} tokenOut={"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"} apiKey={process.env.NEXT_PUBLIC_ENSO_API_KEY} indicateRoute={true} 
+                    enableShare={true}
+                    adaptive={true} />
+                      </ZeroDevProvider>
+                    </QueryClientProvider>
+                  </WagmiProvider> */}
+
+
                 </div>
               </div>
             </div>
