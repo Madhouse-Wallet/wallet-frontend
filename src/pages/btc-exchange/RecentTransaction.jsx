@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { fetchWalletHistory } from "../../lib/utils";
 import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
-import img from "@/Assets/Images/noData.png";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -152,9 +151,7 @@ const RecentTransaction = () => {
     try {
       setTransactionType("all");
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(
-        userAuth?.walletAddress
-      );
+      const data = await fetchWalletHistory(userAuth?.walletAddress);
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
@@ -349,7 +346,9 @@ const RecentTransaction = () => {
                           >
                             <div className="left flex items-start gap-2">
                               <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "token send" ? sendSvg : receiveSvg}
+                                {tx.type === "token send"
+                                  ? sendSvg
+                                  : receiveSvg}
                               </div>
                               <div className="content">
                                 <h4 className="m-0 font-bold md:text-base">
@@ -391,7 +390,7 @@ const RecentTransaction = () => {
           ) : (
             <>
               <Image
-                src={img}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
                 alt=""
                 height={10000}
                 width={10000}
@@ -405,7 +404,7 @@ const RecentTransaction = () => {
         <>
           <>
             <Image
-              src={img}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
               alt=""
               height={10000}
               width={10000}

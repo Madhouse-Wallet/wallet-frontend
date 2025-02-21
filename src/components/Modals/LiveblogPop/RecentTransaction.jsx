@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import TableLayout from "@/components/TableLayout/index";
 import { useSelector } from "react-redux";
-import img from "@/Assets/Images/noData.png";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import TransactionDetailPop from "../TransactionDetailPop";
@@ -160,7 +159,7 @@ const RecentTransaction = ({ transactions }) => {
       ) : (
         <>
           <Image
-            src={img}
+            src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
             alt=""
             height={10000}
             width={10000}

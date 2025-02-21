@@ -1,13 +1,25 @@
-/** @type {import('next').NextConfig} */
+// next.config.mjs
 import webpack from "webpack";
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    // For Next.js 12.3.0 and later
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "media.madhousewallet.com",
+        pathname: "/**",
+      },
+    ],
+    // Uncomment the following for Next.js versions prior to 12.3.0
+    // domains: ['media.madhousewallet.com'],
+  },
   webpack(config, { isServer }) {
-    // Configures webpack to handle SVG files with SVGR. SVGR optimizes and transforms SVG files
-    // into React components. See https://react-svgr.com/docs/next/
+    // Existing webpack configuration
 
     // Grab the existing rule that handles SVG imports
-    // @ts-ignore - rules is a private property that is not typed
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.(".svg")
     );
@@ -30,7 +42,6 @@ const nextConfig = {
 
     // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
-    // Add fallback for browser polyfills
 
     // Add fallback for browser polyfills
     config.resolve.fallback = {

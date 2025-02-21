@@ -6,11 +6,6 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { Tooltip } from "react-tooltip";
-import b1 from "@/Assets/Images/umbrel/dock-app-store.png";
-import b2 from "@/Assets/Images/umbrel/dock-home.png";
-import b3 from "@/Assets/Images/umbrel/dock-live-usage.png";
-import b4 from "@/Assets/Images/umbrel/dock-settings.png";
-import b5 from "@/Assets/Images/umbrel/dock-widgets.png";
 import { createPortal } from "react-dom";
 
 const Footer = () => {
@@ -45,7 +40,7 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                src={b2}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
@@ -70,7 +65,7 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                src={b1}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-app-store.png"}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
@@ -103,7 +98,7 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                src={b4}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-settings.png"}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
@@ -124,7 +119,7 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                src={b5}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-widgets.png"}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"

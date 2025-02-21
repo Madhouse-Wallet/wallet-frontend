@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import logow from "@/Assets/Images/logow.png";
-import logo from "@/Assets/Images/logo.png";
 import OtpInput from "react-otp-input";
 import Image from "next/image";
 import styled from "styled-components";
@@ -33,7 +31,6 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
     }
   };
 
-
   const resendOtp = async () => {
     try {
       let response = await resendOtpFunc();
@@ -49,7 +46,7 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logow}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}
@@ -70,7 +67,9 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
                   OTP Code Verification
                 </h4>
                 <p className=" text-sm font-medium  md:text-xs py-5">
-                  <span className="opacity-50">Code has been send to You Email </span>
+                  <span className="opacity-50">
+                    Code has been send to You Email{" "}
+                  </span>
                   <br />{" "}
                   {/* <span className="font-bold  opacity-100">
                     and***ley@yourdomain.com
@@ -92,9 +91,12 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
             </div>
             <div className="col-span-12">
               <div className="text-center">
-              <button onClick={resendOtp} className="m-0 text-center themeClr inline-flex hover:opacity-50 font-medium">
-                Resend OTP
-              </button>
+                <button
+                  onClick={resendOtp}
+                  className="m-0 text-center themeClr inline-flex hover:opacity-50 font-medium"
+                >
+                  Resend OTP
+                </button>
               </div>
             </div>
             <div className="col-span-12">

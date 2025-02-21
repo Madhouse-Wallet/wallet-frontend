@@ -1,22 +1,24 @@
 "use client";
 import { createContext, useState, useEffect, useContext } from "react";
-import img1 from "@/Assets/Images/umbrel/1.jpg";
-import img2 from "@/Assets/Images/umbrel/2.jpg";
-import img3 from "@/Assets/Images/umbrel/3.jpg";
-import img4 from "@/Assets/Images/umbrel/4.jpg";
-import img5 from "@/Assets/Images/umbrel/5.jpg";
-import img6 from "@/Assets/Images/umbrel/6.jpg";
-import w1 from "@/Assets/Images/umbrel/w1.png";
-import w2 from "@/Assets/Images/umbrel/w2.png";
-import w3 from "@/Assets/Images/umbrel/w3.png";
-import w4 from "@/Assets/Images/umbrel/w4.png";
 
 // Create Context
 const BackgroundContext = createContext();
 
 export const BackgroundProvider = ({ children }) => {
-  const backgrounds = [img6, img4, img5, img2, img3, img1];
-  const watermarks = [w3, w4, w1, w2];
+  const backgrounds = [
+    process.env.NEXT_PUBLIC_IMAGE_URL + "6.jpg",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "4.jpg",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "5.jpg",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "2.jpg",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "3.jpg",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "1.jpg",
+  ];
+  const watermarks = [
+    process.env.NEXT_PUBLIC_IMAGE_URL + "w3.png",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "w4.png",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "w1.png",
+    process.env.NEXT_PUBLIC_IMAGE_URL + "w2.png",
+  ];
 
   const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
   const [selectedWatermark, setSelectedWatermark] = useState(watermarks[0]);

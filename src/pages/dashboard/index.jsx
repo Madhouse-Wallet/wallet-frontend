@@ -2,16 +2,9 @@ import React, { useEffect, useState } from "react";
 import { SVGProps } from "react";
 import InstallFirstApp from "./InstallFirstApp";
 import Link from "next/link";
-import logo from "@/Assets/Images/logow.png";
 import Image, { StaticImageData } from "next/image";
 import CounterList from "@/components/CounterList";
 import { useRouter } from "next/router";
-import pi1 from "@/Assets/Images/sendReceive.png";
-import pi2 from "@/Assets/Images/BitcoinLoan.png";
-import pi3 from "@/Assets/Images/BuyBitcoin.png";
-import pi4 from "@/Assets/Images/WithdrawDeposit.png";
-import pi5 from "@/Assets/Images/SellBitcoin.png";
-import pi6 from "@/Assets/Images/BuySmartContract.png";
 import { createPortal } from "react-dom";
 import BuyBitcoin from "@/components/Modals/buyBitcoinPop";
 import BuySellBitcoinPop from "@/components/Modals/BuySellBitcoinPop";
@@ -41,7 +34,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 // }
 
 const Dashboard = () => {
-    const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
@@ -190,7 +183,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
-        setIsLoading(true)
+        setIsLoading(true);
         try {
           if (userAuth?.passkeyCred) {
             let account = await getAccount(userAuth?.passkeyCred);
@@ -201,8 +194,7 @@ const Dashboard = () => {
                   const balances = await fetchTokenBalances(
                     [
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
-                      process.env
-                        .NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+                      process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
                     userAuth.walletAddress
                   );
@@ -240,10 +232,10 @@ const Dashboard = () => {
               }
             }
           }
-        setIsLoading(false)
+          setIsLoading(false);
         } catch (error) {
           console.error("Error fetching token balances:", error);
-        setIsLoading(false)
+          setIsLoading(false);
         }
       };
 
@@ -253,7 +245,7 @@ const Dashboard = () => {
 
   return (
     <>
-        {isLoading && <LoadingScreen />}
+      {isLoading && <LoadingScreen />}
 
       {buy &&
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
@@ -272,7 +264,7 @@ const Dashboard = () => {
           <BuySellBitcoinPop buySell={buySell} setBuySell={setBuySell} />,
           document.body
         )}
-       
+
       {buycoverage &&
         createPortal(
           <BuyCoveragePop

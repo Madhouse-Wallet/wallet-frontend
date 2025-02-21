@@ -1,38 +1,31 @@
 import React from "react";
-import logow from "@/Assets/Images/logow.png";
-import logo from "@/Assets/Images/logo.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useTheme } from "@/ContextApi/ThemeContext";
-import {
-  isValidEmail,
-} from "../../utils/globals";
+import { isValidEmail } from "../../utils/globals";
 const EmailStep = ({ step, setStep, loginFn }) => {
   const { theme, toggleTheme } = useTheme();
   const [error, setError] = useState("");
 
-
   const [loginLoading, setLoginLoading] = useState(false);
   const [registerEmail, setRegisterEmail] = useState();
   const router = useRouter();
-
- 
 
   const loginTry = async () => {
     try {
       setLoginLoading(true);
       if (!registerEmail) {
         // toast.error("Please Enter Email!");
-        setError("Please Enter Email!"); 
+        setError("Please Enter Email!");
         setLoginLoading(false);
       } else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setLoginLoading(false);
           setError("Please Enter Valid Email!");
-          return 
+          return;
           // toast.error("Please Enter Valid Email!");
         }
         let response = await loginFn({
@@ -56,7 +49,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logow}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}
@@ -88,7 +81,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                   placeholder="Enter your email address"
                   defaultValue=""
                 />
-                 {error && (
+                {error && (
                   <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
                     {error}
                   </div>

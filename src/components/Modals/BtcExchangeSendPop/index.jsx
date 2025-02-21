@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
 import { BigNumber } from "ethers";
 
-import loader from "@/Assets/Images/loading.gif";
 import Image from "next/image";
 // css
 
@@ -173,7 +172,7 @@ const BtcExchangeSendPop = ({
                   <>
                     <Image
                       alt=""
-                      src={loader}
+                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                       height={10000}
                       width={10000}
                       className="max-w-full mx-auto w-auto"
@@ -279,62 +278,67 @@ const BtcExchangeSendPop = ({
         >
           {tokenSend ? (
             <>
-            <div className="top pb-3">
-              <h5 className="m-0 text-xl font-bold">Send Bitcoin</h5>
-              {/* <p className="m-0" style={{ fontSize: 12 }}>
+              <div className="top pb-3">
+                <h5 className="m-0 text-xl font-bold">Send Bitcoin</h5>
+                {/* <p className="m-0" style={{ fontSize: 12 }}>
               Generate a QR code or wallet address to receive Bitcoin Securely
             </p> */}
-            </div>
-          <div className="content p-3">
-            <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
-              {tabData.map((data, key) => (
-                <div key={key} className="relative">
-                  <button
-                    onClick={() => handleTab(key)}
-                    className={`${
-                      tab == key && "active"
-                    } flex items-center justify-center font-semibold btn`}
-                  >
-                    {data.title}
-                  </button>
+              </div>
+              <div className="content p-3">
+                <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
+                  {tabData.map((data, key) => (
+                    <div key={key} className="relative">
+                      <button
+                        onClick={() => handleTab(key)}
+                        className={`${
+                          tab == key && "active"
+                        } flex items-center justify-center font-semibold btn`}
+                      >
+                        {data.title}
+                      </button>
+                    </div>
+                  ))}
+                </RadioList>
+                <div className="tabContent pt-3">
+                  {tabData.map((item, key) =>
+                    tab === key ? <>{item.component}</> : <></>
+                  )}
                 </div>
-              ))}
-            </RadioList>
-            <div className="tabContent pt-3">
-              {tabData.map((item, key) =>
-                tab === key ? <>{item.component}</> : <></>
-              )}
-            </div>
-            <div className="btnWrpper mt-3"></div>
-          </div>
+                <div className="btnWrpper mt-3"></div>
+              </div>
             </>
-          ): <>
-               <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+          ) : (
+            <>
+              <div className="top pb-3">
+                {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Add Supply
               </h5> */}
-            </div>
-            <div className="modalBody text-center">
-              <div className="grid gap-3 grid-cols-12">
-                <div className="col-span-12">
-                  <button
-                   onClick={()=> {setSendUsdc(!sendUsdc), setBtcExchangeSend(!btcExchangeSend)}}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                   USDC
-                  </button>
-                </div>
-                <div className="col-span-12">
-                  <button
-                     onClick={()=> setTokenSend(!tokenSend)}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Bitcoin
-                  </button>
+              </div>
+              <div className="modalBody text-center">
+                <div className="grid gap-3 grid-cols-12">
+                  <div className="col-span-12">
+                    <button
+                      onClick={() => {
+                        setSendUsdc(!sendUsdc),
+                          setBtcExchangeSend(!btcExchangeSend);
+                      }}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      USDC
+                    </button>
+                  </div>
+                  <div className="col-span-12">
+                    <button
+                      onClick={() => setTokenSend(!tokenSend)}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Bitcoin
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div></>}
-
+            </>
+          )}
         </div>
       </Modal>
     </>
