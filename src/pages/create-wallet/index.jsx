@@ -31,9 +31,18 @@ const CreateWallet = () => {
   const [step, setStep] = useState(1);
   const dispatch = useDispatch();
   const [checkOTP, setCheckOTP] = useState();
+  const [otpTimestamp, setOtpTimestamp] = useState(null);
   const [loginEmail, setLoginEmail] = useState();
   const [addressPhrase, setAddressPhrase] = useState("");
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
+  
+  // Helper function to check OTP expiration
+  const isOtpExpired = () => {
+    if (!otpTimestamp) return true;
+    const currentTime = new Date().getTime();
+    const expirationTime = otpTimestamp + (10 * 60 * 1000); // 10 minutes in milliseconds
+    return currentTime > expirationTime;
+  };
 
   const handleCopy = async (text) => {
     try {
@@ -227,7 +236,14 @@ const CreateWallet = () => {
   };
 
   const registerOtpFn = async (data) => {
+    
     try {
+       // Check if OTP is expired
+       if (isOtpExpired()) {
+        toast.error("OTP has expired! Please request a new one.");
+        return false;
+      }
+
       if (data.otp != checkOTP) {
         toast.error("Invalid OTP!");
         return false;
@@ -263,6 +279,7 @@ const CreateWallet = () => {
       } else {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
+        setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
         // console.log("OTP-->", OTP)
         setRegisterData({
           email: data.email,
@@ -295,6 +312,7 @@ const CreateWallet = () => {
     try {
       let OTP = generateOTP(4);
       setCheckOTP(OTP);
+      setOtpTimestamp(new Date().getTime()); // Update timestamp when OTP is resent
       // console.log("OTP-->", OTP)
       let obj = {
         email: registerData.email,
@@ -305,7 +323,9 @@ const CreateWallet = () => {
       };
       let sendEmailData = await sendOTP(obj);
       if (sendEmailData.status && sendEmailData.status == "success") {
-        toast.success(sendEmailData?.message);
+        // toast.success(sendEmailData?.message);
+        toast.success("OTP sent to your email.");
+
         return true;
       } else {
         toast.error(sendEmailData?.message || sendEmailData?.error);
