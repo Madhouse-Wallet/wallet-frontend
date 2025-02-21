@@ -5,7 +5,6 @@ import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningTab";
 
-import loader from "@/Assets/Images/loading.gif";
 import Image from "next/image";
 import Link from "next/link";
 // css
@@ -127,7 +126,7 @@ const BtcExchangePop = ({
                   <>
                     <Image
                       alt=""
-                      src={loader}
+                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                       height={10000}
                       width={10000}
                       className="max-w-full mx-auto w-auto"
@@ -341,8 +340,10 @@ const BtcExchangePop = ({
                     We have found deposit in generated address.
                   </p>
                   <div className="btnWrpper mt-3">
-                    <Link href="/approval" className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-               >
+                    <Link
+                      href="/approval"
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
                       Check Approval status
                     </Link>
                   </div>
@@ -411,24 +412,28 @@ const BtcExchangePop = ({
             </>
           ) : (
             <>
-             <div className="grid gap-3 grid-cols-12">
+              <div className="grid gap-3 grid-cols-12">
                 <div className="col-span-12">
                   <button
-                   onClick={()=> {setReceiveUSDC(!receiveUsdc), setBtcExchange(!btcExchange)}}
+                    onClick={() => {
+                      setReceiveUSDC(!receiveUsdc),
+                        setBtcExchange(!btcExchange);
+                    }}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                   USDC
+                    USDC
                   </button>
                 </div>
                 <div className="col-span-12">
                   <button
-                     onClick={()=> setTokenReceive(!tokenReceive)}
+                    onClick={() => setTokenReceive(!tokenReceive)}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Bitcoin
                   </button>
                 </div>
-              </div></>
+              </div>
+            </>
           )}
         </div>
       </Modal>

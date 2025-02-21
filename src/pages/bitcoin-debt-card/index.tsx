@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import img from "@/Assets/Images/comingSoon.png";
 import Image from "next/image";
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
@@ -32,7 +31,7 @@ const BTCDebitCard: React.FC = () => {
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="pt-4">
                   <Image
-                    src={img}
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + "comingSoon.png"}
                     alt="comingsoon"
                     height={10000}
                     width={10000}

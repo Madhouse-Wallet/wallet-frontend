@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import logow from "@/Assets/Images/logow.png";
 import Image from "next/image";
-import {
-  isValidEmail,
-} from "../../utils/globals";
+import { isValidEmail } from "../../utils/globals";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { toast } from "react-toastify";
 
@@ -18,14 +15,14 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
       setRegisterOtpLoading(true);
       if (!registerEmail) {
         // toast.error("Please Enter Email!");
-        setError("Please Enter Email!"); 
+        setError("Please Enter Email!");
         setRegisterOtpLoading(false);
       }
       //  else if (!registerUsername) {
       //   toast.error("Please Enter Passkey Name!");
       //   setRegisterOtpLoading(false);
       // }
-       else {
+      else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
@@ -55,7 +52,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <Image
-                src={logow}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
                 alt="logo"
                 className="max-w-full mx-auto w-auto mb-2"
                 height={100000}

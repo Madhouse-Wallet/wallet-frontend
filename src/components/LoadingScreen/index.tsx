@@ -1,7 +1,5 @@
 import Image from "next/image";
 import React from "react";
-import gif from "@/Assets/Images/loading.gif";
-import logo from "@/Assets/Images/logow1.png";
 import styled, { keyframes } from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 
@@ -17,7 +15,7 @@ const LoadingScreen = () => {
       >
         <Loader className="flex items-center animate-bounce justify-center p-3  relative">
           <Image
-            src={logo}
+            src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow1.png"}
             alt="loader"
             height={10000}
             width={10000}

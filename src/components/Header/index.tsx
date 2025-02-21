@@ -8,9 +8,6 @@ import { useTheme } from "../../ContextApi/ThemeContext";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
-import user from "@/Assets/Images/user.png";
-import logo2 from "@/Assets/Images/logow1.png";
-import Wlogomw from "@/Assets/Images/logow.png";
 import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { ethers } from "ethers";
@@ -56,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
             multisigSetup: userAuth.multisigSetup,
-            multisigActivate: userAuth.multisigActivate
+            multisigActivate: userAuth.multisigActivate,
           })
         );
       }
@@ -86,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         passkey2: "",
         passkey3: "",
         multisigSetup: false,
-        multisigActivate: false
+        multisigActivate: false,
       })
     );
   };
@@ -150,23 +147,23 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                 {/* {logo} */}
                 {/* <span className="md:block hidden">MadHouse Wallet</span> */}
                 <Image
-                  src={logo2}
+                  src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow1.png"}
                   alt="logo"
                   height={10000}
                   width={10000}
                   className="max-w-full object-contain w-auto smlogo"
-                // style={{ height: 28 }}
+                  // style={{ height: 28 }}
                 />
               </a>
             </div>
 
             <Image
-              src={Wlogomw}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
               alt="logo"
               height={10000}
               width={10000}
               className="max-w-full object-contain w-auto logo"
-            // style={{ height: 28 }}
+              // style={{ height: 28 }}
             />
             {/* <h4 className="m-0 font-bold themeClr sm:text-xl ">
               Madhouse Wallet

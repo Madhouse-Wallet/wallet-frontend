@@ -354,7 +354,7 @@ const RecentTransaction = () => {
           ) : (
             <>
               <Image
-                src={img}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
                 alt=""
                 height={10000}
                 width={10000}
@@ -417,7 +417,7 @@ const RecentTransaction = () => {
         <>
           <>
             <Image
-              src={img}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
               alt=""
               height={10000}
               width={10000}
