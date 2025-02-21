@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OtpInput from "react-otp-input";
 import Image from "next/image";
 import styled from "styled-components";
