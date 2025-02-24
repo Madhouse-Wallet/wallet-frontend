@@ -60,7 +60,7 @@ const Footer = () => {
             <Link
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Approval"
-              href={"/approval"}
+              href={"/point-of-sale"}
               // onClick={() => setApprovalPop(!approvalPop)}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >

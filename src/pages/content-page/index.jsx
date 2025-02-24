@@ -5,6 +5,7 @@ import PrivacyPolicy from "../privacy-policy";
 import LegalNotice from "../legal-notice";
 import Documentation from "../documentation";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const ContentPage = () => {
   const router = useRouter();
@@ -143,6 +144,28 @@ const ContentPage = () => {
                           </div>
                         </CounterCard>
                       </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <CounterCard
+                          style={{ border: "1px solid #58585852" }}
+                          className="cardCstm bg-white/5 rounded-lg p-3 cursor-pointer"
+                        >
+                          <h4 className="m-0 font-bold text-xl">
+                            Proof of Reserve Reporting
+                          </h4>
+                          <p className="m-0 text-xs pt-2 text-gray-400">
+                          Provide insight into the workings of the Keep and tBTC systems - deposits, redemptions, who bonds for what, governance actions, etc.
+                          </p>
+                          <div className="btnWrpper mt-3">
+                            <Link
+                              target="_blank"
+                              href={"https://tbtcscan.com/wallets"}
+                              className="btn inline-flex items-center justify-center text-xs font-semibold h-8 rounded-20 px-3"
+                            >
+                              Learn More
+                            </Link>
+                          </div>
+                        </CounterCard>
+                      </div>
                     </div>
                   </>
                 ) : step == "help" ? (
@@ -183,7 +206,7 @@ const CounterCard = styled.div`
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  button {
+  button, a {
     background: #6a6a6aed;
     color: #ffffff;
     border-color: #6a6a6aed;

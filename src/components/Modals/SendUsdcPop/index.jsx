@@ -7,8 +7,10 @@ import { useTheme } from "@/ContextApi/ThemeContext";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
-import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop"
+import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
+import { QrReader } from "react-qr-reader";
+import QRScannerModal from "./qRScannerModal.jsx";
 
 const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -16,6 +18,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   const [toAddress, setToAddress] = useState("");
   const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
+  const [openCam, setOpenCam] = useState(false);
   const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
@@ -29,7 +32,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
       return false;
     }
   };
-
+console.log("test-->",openCam)
   // Handle address input change
   const handleAddressChange = (e) => {
     const address = e.target.value;
@@ -162,7 +165,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
           />,
           document.body
         )}
-        {isLoading && <LoadingScreen />}
+      {isLoading && <LoadingScreen />}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
         <buttonbuy
           onClick={handleClose}
@@ -179,18 +182,32 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
                 Send USDC
               </h5>
             </div>
-            <div className="modalBody">
-              {/* <form> */}
-                <div className="py-2">
-                  <label className="form-label m-0 font-semibold text-xs ps-3">
-                    Chain
-                  </label>
-                  <div className="border-white/10 bg-white/50 roundded hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
-                    <span className="icn">{sepoliaIcn}</span>
-                    <span className="text-white">Sepolia</span>
+            {openCam ? (
+              <>
+                <QRScannerModal
+                  setOpenCam={setOpenCam}
+                  openCam={openCam}
+                  onScan={(data) => {
+                    console.log("setToAddress")
+                    setToAddress(data);
+                    setOpenCam(!openCam)
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <div className="modalBody">
+                  {/* <form> */}
+                  <div className="py-2">
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Chain
+                    </label>
+                    <div className="border-white/10 bg-white/50 roundded hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
+                      <span className="icn">{sepoliaIcn}</span>
+                      <span className="text-white">Sepolia</span>
+                    </div>
                   </div>
-                </div>
-                <div className="py-2">
+                  {/* <div className="py-2">
                   <label className="form-label m-0 font-semibold text-xs ps-3">
                     To
                   </label>
@@ -208,37 +225,67 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
                       Invalid address
                     </p>
                   )}
-                </div>
-                <div className="py-2">
-                  <label className="form-label m-0 font-semibold text-xs ps-3">
-                    Balance: {balance} USDC
-                  </label>
-                  <div className="iconWithText relative">
-                    <div className="absolute icn left-2 flex items-center gap-2 text-xs">
-                      {usdcIcn}
-                      USDC
+                </div> */}
+                  <div className="py-2">
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      To
+                    </label>
+                    <div className="relative">
+                      <input
+                        placeholder="Address"
+                        type="text"
+                        value={toAddress}
+                        onChange={(e) => setToAddress(e.target.value)}
+                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
+                      />
+                      {/* QR Scanner Button */}
+                      <button
+                        onClick={() => {
+                          console.log("line-242",openCam)
+                          if (openCam) {
+                            setOpenCam(false);
+                          } else {
+                            setOpenCam(true);
+                          }
+                        }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
+                      >
+                        📷
+                      </button>
                     </div>
-                    <input
-                      placeholder="Amount"
-                      type="text"
-                      value={amount}
-                      onChange={handleAmountChange}
-                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
-                    />
                   </div>
+                  <div className="py-2">
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance: {balance} USDC
+                    </label>
+                    <div className="iconWithText relative">
+                      <div className="absolute icn left-2 flex items-center gap-2 text-xs">
+                        {usdcIcn}
+                        USDC
+                      </div>
+                      <input
+                        placeholder="Amount"
+                        type="text"
+                        value={amount}
+                        onChange={handleAmountChange}
+                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                      />
+                    </div>
+                  </div>
+                  <div className="py-2 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => settrxnApproval(!trxnApproval)}
+                      disabled={!isValidAddress || !amount || isLoading}
+                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                    >
+                      {isLoading ? "Sending..." : "Send"}
+                    </button>
+                  </div>
+                  {/* </form> */}
                 </div>
-                <div className="py-2 mt-4">
-                  <button
-                    type="button"
-                    onClick={() => settrxnApproval(!trxnApproval)}
-                    disabled={!isValidAddress || !amount || isLoading}
-                    className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
-                  >
-                    {isLoading ? "Sending..." : "Send"}
-                  </button>
-                </div>
-              {/* </form> */}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </Modal>
@@ -366,3 +413,13 @@ const usdcIcn = (
     </defs>
   </svg>
 );
+
+const QRModal = styled.div`
+  .qr-box {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+  }
+`;

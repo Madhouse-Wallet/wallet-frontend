@@ -5,6 +5,7 @@ import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
 import { BigNumber } from "ethers";
+import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
 // css
@@ -43,6 +44,7 @@ const BtcExchangeSendPop = ({
   const [btcAddress, setBtcAddress] = useState();
   const [loadingSend, setLoadingSend] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState();
+  const [openCam, setOpenCam] = useState(false);
   // if (depositFound) {
   //   setStep(3)
   // }
@@ -191,64 +193,88 @@ const BtcExchangeSendPop = ({
             ) : (
               <></>
             )}
-            <div className="py-2">
-              <div className="py-2">
-                <div className="flex items-center justify-between pb-1 px-3">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 text-xs font-medium"
-                  >
-                    Amount
-                  </label>
-                  <span className="text-white opacity-60 text-xs">
-                    Balance: 0 tBTC
-                  </span>
-                </div>
-                <div className="iconWithText relative">
-                  {/* <span className="absolute left-3 icn">
+            {openCam ? (
+              <>
+                <QRScannerModal
+                  setOpenCam={setOpenCam}
+                  openCam={openCam}
+                  onScan={(data) => {
+                    setBtcAddress(data);
+                    setOpenCam(!openCam)
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <div className="py-2">
+                  <div className="py-2">
+                    <div className="flex items-center justify-between pb-1 px-3">
+                      <label
+                        htmlFor=""
+                        className="form-label m-0 text-xs font-medium"
+                      >
+                        Amount
+                      </label>
+                      <span className="text-white opacity-60 text-xs">
+                        Balance: 0 tBTC
+                      </span>
+                    </div>
+                    <div className="iconWithText relative">
+                      {/* <span className="absolute left-3 icn">
                     {usdc}
                   </span> */}
-                  <input
-                    type="number"
-                    value={btcAmount}
-                    onChange={(e) => setBtcAmount(e.target.value)}
-                    className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
-                  />
-                  <button
-                    className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Max
-                  </button>
+                      <input
+                        type="number"
+                        value={btcAmount}
+                        onChange={(e) => setBtcAmount(e.target.value)}
+                        className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
+                      />
+                      <button
+                        className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Max
+                      </button>
+                    </div>
+                  </div>
+                  <div className="py-2">
+                    <div className="flex items-center justify-between pb-1 px-3">
+                      <label
+                        htmlFor=""
+                        className="form-label m-0 text-xs font-medium"
+                      >
+                        BTC Address
+                      </label>
+                    </div>
+                    <div className="iconWithText relative">
+                      <input
+                        type="text"
+                        value={btcAddress}
+                        onChange={(e) => setBtcAddress(e.target.value)}
+                        className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
+                      />
+                      {/* QR Scanner Button */}
+                      <button
+                        onClick={() => {
+                          setOpenCam(!openCam);
+                        }}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
+                      >
+                        📷
+                      </button>
+                    </div>
+                  </div>
+                  <div className="py-2 mt-4">
+                    <button
+                      onClick={sendNative}
+                      disabled={loadingSend}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      {loadingSend ? "Please Wait ..." : "Send"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="py-2">
-                <div className="flex items-center justify-between pb-1 px-3">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 text-xs font-medium"
-                  >
-                    BTC Address
-                  </label>
-                </div>
-                <div className="iconWithText relative">
-                  <input
-                    type="text"
-                    value={btcAddress}
-                    onChange={(e) => setBtcAddress(e.target.value)}
-                    className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
-                  />
-                </div>
-              </div>
-              <div className="py-2 mt-4">
-                <button
-                  onClick={sendNative}
-                  disabled={loadingSend}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  {loadingSend ? "Please Wait ..." : "Send"}
-                </button>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </>
       ),
