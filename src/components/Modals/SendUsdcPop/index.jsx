@@ -9,8 +9,8 @@ import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
-import { QrReader } from "react-qr-reader";
-import QRScannerModal from "./qRScannerModal.jsx";
+// import { QrReader } from "react-qr-reader";
+// import QRScannerModal from "./qRScannerModal.jsx";
 
 const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -182,7 +182,7 @@ console.log("test-->",openCam)
                 Send USDC
               </h5>
             </div>
-            {openCam ? (
+            {/* {openCam ? (
               <>
                 <QRScannerModal
                   setOpenCam={setOpenCam}
@@ -194,7 +194,7 @@ console.log("test-->",openCam)
                   }}
                 />
               </>
-            ) : (
+            ) : ( */}
               <>
                 <div className="modalBody">
                   {/* <form> */}
@@ -239,7 +239,7 @@ console.log("test-->",openCam)
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
                       {/* QR Scanner Button */}
-                      <button
+                      {/* <button
                         onClick={() => {
                           console.log("line-242",openCam)
                           if (openCam) {
@@ -251,7 +251,7 @@ console.log("test-->",openCam)
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
                       >
                         📷
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                   <div className="py-2">
@@ -285,7 +285,7 @@ console.log("test-->",openCam)
                   {/* </form> */}
                 </div>
               </>
-            )}
+            {/* )} */}
           </div>
         </div>
       </Modal>

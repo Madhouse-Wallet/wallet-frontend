@@ -5,7 +5,7 @@ import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
 import { BigNumber } from "ethers";
-import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
+// import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
 // css
@@ -193,7 +193,7 @@ const BtcExchangeSendPop = ({
             ) : (
               <></>
             )}
-            {openCam ? (
+            {/* {openCam ? (
               <>
                 <QRScannerModal
                   setOpenCam={setOpenCam}
@@ -204,7 +204,7 @@ const BtcExchangeSendPop = ({
                   }}
                 />
               </>
-            ) : (
+            ) : ( */}
               <>
                 <div className="py-2">
                   <div className="py-2">
@@ -253,14 +253,14 @@ const BtcExchangeSendPop = ({
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
                       {/* QR Scanner Button */}
-                      <button
+                      {/* <button
                         onClick={() => {
                           setOpenCam(!openCam);
                         }}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
                       >
                         📷
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                   <div className="py-2 mt-4">
@@ -274,7 +274,7 @@ const BtcExchangeSendPop = ({
                   </div>
                 </div>
               </>
-            )}
+            {/* )} */}
           </div>
         </>
       ),
