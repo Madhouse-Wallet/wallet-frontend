@@ -1,58 +1,3 @@
-// import React, { useRef, useEffect } from "react";
-// import { QrReader } from "react-qr-reader";
-
-// const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
-//   const videoRef = useRef(null);
-//   const qrReaderRef = useRef(null); // Reference for QrReader
-
-//   const handleScan = (result, error) => {
-//     if (!openCam) return; // Stop processing if modal is closed
-
-//     if (result) {
-//       console.log("onScan-->", result)
-//       onScan(result.text);
-//       stopCamera();
-//       setOpenCam(false);
-//       return;
-//     }else{
-//       console.log("no result-->")
-//       return;
-//     }
-//   };
-
-//   const stopCamera = () => {
-//     if (videoRef.current && videoRef.current.srcObject) {
-//       let tracks = videoRef.current.srcObject.getTracks();
-//       tracks.forEach((track) => track.stop());
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (!openCam) {
-//       stopCamera(); // Stop camera when modal closes
-//     }
-//   }, [openCam]);
-
-//   return openCam ? (
-//     <div className="relative w-full">
-//       <div className="aspect-square w-full relative bg-black rounded-lg overflow-hidden">
-//         <QrReader
-//           ref={qrReaderRef}
-//           constraints={{ facingMode: "environment" }}
-//           onResult={handleScan}
-//           className="w-full h-full"
-//           scanDelay={300} // Delay between scans
-//         />
-//       </div>
-//       <p className="text-sm text-white text-center mt-4">
-//         Place the QR code in front of your camera
-//       </p>
-//     </div>
-//   ) : null;
-// };
-
-// export default QRScannerModal;
-
 import React, { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
@@ -88,7 +33,8 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
         { facingMode: "environment" },
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
+          // qrbox: { width: 280, height: 200 },
+          qrbox: { width: 350, height: 250 },
         },
         async (decodedText) => {
           console.log("QR Code detected:", decodedText);
@@ -102,7 +48,7 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
           }
         }
       );
-      
+
       isScanning.current = true;
       console.log("Scanner started successfully");
     } catch (err) {
@@ -130,10 +76,14 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
   return (
     <div className="relative w-full">
       <div className="flex flex-col items-center">
-        <div 
-          id="qr-reader" 
+        <div
+          id="qr-reader"
           className="w-full aspect-square bg-black"
-          style={{ maxWidth: '500px' }}
+          // style={{ maxWidth: "500px" }}
+          style={{ 
+            maxWidth: "350px",
+            height: "250px"
+          }}
         />
         <p className="text-sm text-white text-center mt-4">
           Place the QR code in front of your camera
