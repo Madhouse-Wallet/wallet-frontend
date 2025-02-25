@@ -47,17 +47,17 @@ const WithdrawTab = ({ provider, account }) => {
       const web3 = new Web3Interaction("sepolia", provider);
 
       // Check current allowance
-      const currentAllowance = await web3.allowance(
-        LP_TOKEN_ADDRESS,
-        account,
-        SPENDER_ADDRESS
-      );
+      // const currentAllowance = await web3.allowance(
+      //   LP_TOKEN_ADDRESS,
+      //   account,
+      //   SPENDER_ADDRESS
+      // );
 
       // Convert withdrawal amount to BigNumber
       const withdrawAmountBN = ethers.utils.parseUnits(withdrawAmount, 18);
 
       // Check if approval is needed
-      if (currentAllowance.lt(withdrawAmountBN)) {
+      // if (currentAllowance.lt(withdrawAmountBN)) {
         // Use max uint256 for unlimited approval
         const MAX_UINT256 =
           "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -65,9 +65,9 @@ const WithdrawTab = ({ provider, account }) => {
         await web3.approve(LP_TOKEN_ADDRESS, SPENDER_ADDRESS, MAX_UINT256);
 
         toast.success("Approval successful!");
-      } else {
-        toast.info("Sufficient allowance already exists.");
-      }
+      // } else {
+      //   toast.info("Sufficient allowance already exists.");
+      // }
 
       // Update approval status
       setApprovalStatus(true);

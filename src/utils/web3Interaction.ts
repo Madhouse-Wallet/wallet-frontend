@@ -496,6 +496,64 @@ class Web3Interaction {
     });
   };
 
+  //   address: string,
+  //   _depositAddress: string,
+  //   _lpTokenAddress: string,
+  //   _gaugeAddress: string,
+  //   _nCoins: number | string,
+  //   _coinsAddress: string[],
+  //   _amounts: string[],
+  //   _minMinAmount: number | string,
+  //   _userUnderlying: boolean,
+  //   _useDynarray: boolean,
+  //   _poolAddress: string,
+  //   provider: any
+  // ): Promise<any> => {
+  //   return new Promise(async (resolve, reject) => {
+  //     try {
+  //       console.log(
+  //         "providerogggg",
+  //         address,
+  //         _depositAddress,
+  //         _lpTokenAddress,
+  //         _gaugeAddress,
+  //         BigInt(_nCoins.toString()),
+  //         _coinsAddress,
+  //         _amounts.map((amount) => BigInt(amount.toString())),
+  //         BigInt(_minMinAmount.toString()),
+  //         _userUnderlying,
+  //         _useDynarray,
+  //         _poolAddress,
+  //         provider
+  //       );
+  //       const tx = await provider.writeContract({
+  //         address,
+  //         abi: curveContractAbi,
+  //         functionName: "deposit_and_stake",
+  //         args: [
+  //           _depositAddress,
+  //           _lpTokenAddress,
+  //           _gaugeAddress,
+  //           BigInt(_nCoins.toString()),
+  //           _coinsAddress,
+  //           _amounts.map((amount) => BigInt(amount.toString())),
+  //           BigInt(_minMinAmount.toString()),
+  //           _userUnderlying,
+  //           _useDynarray,
+  //           _poolAddress,
+  //         ],
+  //         gasLimit: BigInt("3000000"),
+  //       });
+
+  //       console.log("transaction:", tx);
+  //       const receipt = tx;
+  //       resolve(receipt);
+  //     } catch (error: any) {
+  //       reject(error.reason || error.data?.message || error.message || error);
+  //     }
+  //   });
+  // };
+
   depositAndStakeCurve = async (
     address: string,
     _depositAddress: string,
@@ -527,33 +585,63 @@ class Web3Interaction {
           _poolAddress,
           provider
         );
-        const tx = await provider.writeContract({
+        const contract = new ethers.Contract(
           address,
-          abi: curveContractAbi,
-          functionName: "deposit_and_stake",
-          args: [
-            _depositAddress,
-            _lpTokenAddress,
-            _gaugeAddress,
-            BigInt(_nCoins.toString()),
-            _coinsAddress,
-            _amounts.map((amount) => BigInt(amount.toString())),
-            BigInt(_minMinAmount.toString()),
-            _userUnderlying,
-            _useDynarray,
-            _poolAddress,
-          ],
-          gasLimit: BigInt("3000000"),
-        });
+          curveContractAbi,
+          this.SIGNER
+        );
 
-        console.log("transaction:", tx);
-        const receipt = tx;
+        const tx = await contract.deposit_and_stake(
+          _depositAddress,
+          _lpTokenAddress,
+          _gaugeAddress,
+          BigInt(_nCoins.toString()),
+          _coinsAddress,
+          _amounts.map((amount) => BigInt(amount.toString())),
+          BigInt(_minMinAmount.toString()),
+          _userUnderlying,
+          _useDynarray
+          // _poolAddress
+        );
+        console.log("tx", tx);
+
+        const receipt = await tx.wait();
+        console.log("receipt", receipt);
         resolve(receipt);
       } catch (error: any) {
         reject(error.reason || error.data?.message || error.message || error);
       }
     });
   };
+
+  //   address: string,
+  //   _withdrawAmount: number | string,
+  //   provider: any
+  // ): Promise<any> => {
+  //   return new Promise(async (resolve, reject) => {
+  //     try {
+  //       console.log(
+  //         "providerogggg",
+  //         address,
+  //         BigInt(_withdrawAmount.toString()),
+  //         provider
+  //       );
+  //       const tx = await provider.writeContract({
+  //         address,
+  //         abi: curveContractAbi,
+  //         functionName: "withdraw",
+  //         args: [BigInt(_withdrawAmount.toString())],
+  //         gasLimit: BigInt("3000000"),
+  //       });
+
+  //       console.log("transaction:", tx);
+  //       const receipt = tx;
+  //       resolve(receipt);
+  //     } catch (error: any) {
+  //       reject(error.reason || error.data?.message || error.message || error);
+  //     }
+  //   });
+  // };
 
   withdrawLPTokens = async (
     address: string,
@@ -568,16 +656,16 @@ class Web3Interaction {
           BigInt(_withdrawAmount.toString()),
           provider
         );
-        const tx = await provider.writeContract({
+        const contract = new ethers.Contract(
           address,
-          abi: curveContractAbi,
-          functionName: "withdraw",
-          args: [BigInt(_withdrawAmount.toString())],
-          gasLimit: BigInt("3000000"),
-        });
+          curveContractAbi,
+          this.SIGNER
+        );
+
+        const tx = await contract.withdraw(BigInt(_withdrawAmount.toString()));
 
         console.log("transaction:", tx);
-        const receipt = tx;
+        const receipt = await tx.wait();
         resolve(receipt);
       } catch (error: any) {
         reject(error.reason || error.data?.message || error.message || error);
@@ -602,20 +690,20 @@ class Web3Interaction {
           _amounts.map((amount) => BigInt(amount.toString())),
           provider
         );
-        const tx = await provider.writeContract({
+        const contract = new ethers.Contract(
           address,
-          abi: curveContractAbi,
-          functionName: "remove_liquidity",
-          args: [
-            PoolAddress,
-            BigInt(_burnAmount.toString()),
-            _amounts.map((amount) => BigInt(amount.toString())),
-          ],
-          gasLimit: BigInt("3000000"),
-        });
+          curveContractAbi,
+          this.SIGNER
+        );
+
+        const tx = await contract.remove_liquidity(
+          PoolAddress,
+          BigInt(_burnAmount.toString()),
+          _amounts.map((amount) => BigInt(amount.toString()))
+        );
 
         console.log("transaction:", tx);
-        const receipt = tx;
+        const receipt = await tx.wait();
         resolve(receipt);
       } catch (error: any) {
         reject(error.reason || error.data?.message || error.message || error);
@@ -623,7 +711,6 @@ class Web3Interaction {
     });
   };
 
-  // New USDC-specific methods
   handleUSDCApproval = async (
     usdcAddress: string,
     ownerAddress: string,
@@ -862,6 +949,48 @@ class Web3Interaction {
       }
     });
   };
+
+  // depositAndStakeCurve = async (
+
+  // withdrawLPTokens = async (
+
+  // unstakeLPTokens = async (
+  //   address: string,
+  //   PoolAddress: string,
+  //   _burnAmount: number | string,
+  //   _amounts: string[],
+  //   provider: any
+  // ): Promise<any> => {
+  //   return new Promise(async (resolve, reject) => {
+  //     try {
+  //       console.log(
+  //         "providerogggg",
+  //         address,
+  //         PoolAddress,
+  //         BigInt(_burnAmount.toString()),
+  //         _amounts.map((amount) => BigInt(amount.toString())),
+  //         provider
+  //       );
+  //       const tx = await provider.writeContract({
+  //         address,
+  //         abi: curveContractAbi,
+  //         functionName: "remove_liquidity",
+  //         args: [
+  //           PoolAddress,
+  //           BigInt(_burnAmount.toString()),
+  //           _amounts.map((amount) => BigInt(amount.toString())),
+  //         ],
+  //         gasLimit: BigInt("3000000"),
+  //       });
+
+  //       console.log("transaction:", tx);
+  //       const receipt = tx;
+  //       resolve(receipt);
+  //     } catch (error: any) {
+  //       reject(error.reason || error.data?.message || error.message || error);
+  //     }
+  //   });
+  // };
 }
 
 export default Web3Interaction;

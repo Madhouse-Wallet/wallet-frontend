@@ -74,12 +74,19 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
     }
   }
 
-
+  const handleOtpChange = (value) => {
+    setOtp(value);
+    
+    // Automatically submit when all 4 digits are entered
+    if (value.length === 4 && !loading) {
+      verifyUserFunc();
+    }
+  };
 
   const verifyUserFunc = async () => {
     try {
       setLoading(true)
-      if (!otp) {
+      if(!otp || otp.length !== 4)  {
         toast.error("Invalid OTP!")
       } else {
         let checkUser = await getUser(email);
@@ -149,7 +156,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
               {step == 1 ? <>
                 <div className="py-2 text-center">
                   <h5 className="m-0 text-xl font-bold">
-                    Change Email
+                    Enter Change Email
                   </h5>
                   {/* <p className="m-0 text-xs ">
                     Please select each phone in order to make sure it is
@@ -168,7 +175,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 <div className="btnWrpper mt-3 text-center">
                   <button
                     type="button"
-                    disabled={loading}
+                    disabled={loading || email === ''}
                     onClick={sendOtpFunc}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
@@ -188,7 +195,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                   <OtpWrpper theme={theme}>
                     <OtpInput
                       value={otp}
-                      onChange={setOtp}
+                      onChange={handleOtpChange}
                       numInputs={4}
                       inputType={"number"}
                       renderSeparator={<span></span>}
@@ -200,7 +207,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                   <button
                     type="button"
                     onClick={verifyUserFunc}
-                    disabled={loading}
+                    disabled={loading || otp.length !== 4}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loading ? "Please Wait..." : "Submit"}

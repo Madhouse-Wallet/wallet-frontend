@@ -317,7 +317,7 @@ const BTCEchange = () => {
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
-                        Balance
+                        Total Balance
                         <span className="font-bold ms-2 text-2xl">
                           $ {totalUsdBalance}
                         </span>
