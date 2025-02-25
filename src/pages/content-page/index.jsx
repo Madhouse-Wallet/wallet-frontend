@@ -6,6 +6,8 @@ import LegalNotice from "../legal-notice";
 import Documentation from "../documentation";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { BackBtn } from "@/components/common";
+
 
 const ContentPage = () => {
   const router = useRouter();
@@ -34,7 +36,8 @@ const ContentPage = () => {
               {step == "all" && (
                 <div className="col-span-12">
                   <div className="sectionHeader p-2 ">
-                    <div className="d-flex align-items-center gap-3">
+                    <div className="flex align-items-center gap-3">
+                      <BackBtn />
                       <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                         Content Page
                       </h4>
@@ -153,7 +156,9 @@ const ContentPage = () => {
                             Proof of Reserve Reporting
                           </h4>
                           <p className="m-0 text-xs pt-2 text-gray-400">
-                          Provide insight into the workings of the Keep and tBTC systems - deposits, redemptions, who bonds for what, governance actions, etc.
+                            Provide insight into the workings of the Keep and
+                            tBTC systems - deposits, redemptions, who bonds for
+                            what, governance actions, etc.
                           </p>
                           <div className="btnWrpper mt-3">
                             <Link
@@ -206,7 +211,8 @@ const CounterCard = styled.div`
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  button, a {
+  button,
+  a {
     background: #6a6a6aed;
     color: #ffffff;
     border-color: #6a6a6aed;

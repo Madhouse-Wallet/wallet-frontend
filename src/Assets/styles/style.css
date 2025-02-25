@@ -26,6 +26,9 @@
   background-size: cover;
   min-height: 100vh;
 }
+html {
+  -webkit-text-size-adjust: 100%;
+}
 
 html,
 body {

@@ -18,7 +18,7 @@ const ComingSoon = () => {
             <div className="grid gap-3 grid-cols-12">
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="sectionHeader ">
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="flex align-items-center gap-2">
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Approvals
                     </h4>

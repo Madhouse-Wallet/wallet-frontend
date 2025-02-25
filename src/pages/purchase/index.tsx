@@ -30,7 +30,7 @@ const PurchasePage: React.FC = () => {
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12 my-2">
               <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
+                <div className="flex align-items-center gap-3">
                   <button
                     onClick={handleGoBack}
                     className="border-0 themeClr p-0"
@@ -98,7 +98,7 @@ const PurchasePage: React.FC = () => {
                       <a
                         href="https://www.yubico.com/support/resellers/"
                         target="_blank"
-                        className="d-flex btn fw-sbold  text-dark w-100 align-items-center justify-content-center commonBtn"
+                        className="flex btn fw-sbold  text-dark w-100 align-items-center justify-content-center commonBtn"
                       >
                         Purchase
                       </a>

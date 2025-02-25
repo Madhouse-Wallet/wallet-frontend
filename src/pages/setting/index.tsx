@@ -7,7 +7,7 @@ import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { AccordionItem } from "@/components/common/index";
+import { AccordionItem, BackBtn } from "@/components/common/index";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
 import BlogCard from "@/components/BlogCard";
@@ -421,7 +421,8 @@ console.log("userAuth-->",userAuth)
             <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-3">
               <div className="col-span-12 ">
                 <div className="sectionHeader p-2 ">
-                  <div className="d-flex align-items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Setting & Support
                     </h4>

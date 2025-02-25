@@ -156,7 +156,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
               {step == 1 ? <>
                 <div className="py-2 text-center">
                   <h5 className="m-0 text-xl font-bold">
-                    Enter Change Email
+                    Enter New Email
                   </h5>
                   {/* <p className="m-0 text-xs ">
                     Please select each phone in order to make sure it is

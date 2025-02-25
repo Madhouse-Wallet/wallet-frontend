@@ -492,13 +492,13 @@ const LoginPop = ({ login, setLogin }) => {
                   Create a new Safe using passkeys
                 </h5>
                 <div className="py-3 py-lg-4 btnWrpper">
-                  <button className="d-flex align-items-center justify-content-center commonBtn w-100 borderedBtn">
+                  <button className="flex items-center justify-content-center commonBtn w-100 borderedBtn">
                     <span className="icn me-1">{fignerPrintIcn}</span>
                     Create a new Passkey
                   </button>
                 </div>
                 <div
-                  className={`py-3 py-lg-4 relative d-flex align-items-center justify-content-center`}
+                  className={`py-3 py-lg-4 relative flex items-center justify-content-center`}
                 >
                   <p className="m-0 px-2  fw-light">OR</p>
                 </div>
@@ -508,7 +508,7 @@ const LoginPop = ({ login, setLogin }) => {
                 <div className="pt-3 pt-lg-4 btnWrpper">
                   <button
                     onClick={() => router.push("/dashboard")}
-                    className="d-flex align-items-center justify-content-center commonBtn w-100"
+                    className="flex items-center justify-content-center commonBtn w-100"
                   >
                     <span className="icn me-1">{fignerPrintIcn}</span>
                     Use an Existing passkey

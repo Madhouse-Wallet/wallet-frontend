@@ -6,6 +6,8 @@ import UnstakeTab from "./UnstakeTab";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { BackBtn } from "@/components/common";
+
 
 const CurveDeposit = () => {
   const router = useRouter();
@@ -70,7 +72,8 @@ const CurveDeposit = () => {
                 <div
                   className={`sectionHeadercontrast-more:bg-black pb-3 border-b border-gray-900`}
                 >
-                  <div className="d-flex align-items-center gap-2 pb-3">
+                  <div className="flex align-items-center gap-2 pb-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Lend USDC and Earn Interest
                     </h4>

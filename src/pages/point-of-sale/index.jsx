@@ -9,7 +9,7 @@ import { fetchBalance } from "@/lib/utils";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { splitAddress } from "../../utils/globals";
 import { toast } from "react-toastify";
-
+import { BackBtn } from "@/components/common";
 
 
 const PointOfSale = () => {
@@ -52,11 +52,10 @@ const PointOfSale = () => {
     </svg>
   );
 
-
   const generateQRCode = async (text) => {
     try {
       const qr = await QRCode.toDataURL(text);
-      console.log("qr-->", qr)
+      console.log("qr-->", qr);
       setQRCode(qr);
     } catch (err) {
       console.error("QR Code generation failed:", err);
@@ -83,10 +82,6 @@ const PointOfSale = () => {
     generateQRCode("https://crypto.link.com/");
   }, []);
 
-
-
-
-
   const startReceive = async () => {
     try {
       console.log("receice");
@@ -94,7 +89,7 @@ const PointOfSale = () => {
       setLoading(true);
       setDepositSetup("");
       setDepositFound("");
-      setStep(2)
+      setStep(2);
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
@@ -112,13 +107,10 @@ const PointOfSale = () => {
         }
       } else {
       }
-    
     } catch (error) {
       console.log("error rec-->", error);
     }
   };
-
-
 
   const depo = async (tbtcSdk) => {
     const bitcoinRecoveryAddress = process.env.NEXT_PUBLIC_RECOVERY_ADDRESS; // Replace with a valid BTC address
@@ -140,21 +132,19 @@ const PointOfSale = () => {
     }
   };
 
-
   const checkMint = async () => {
     try {
-      mint(depositSetup)
+      mint(depositSetup);
     } catch (error) {
-      console.log("error-->", error)
-      setDisable(false) 
+      console.log("error-->", error);
+      setDisable(false);
     }
-  }
-
+  };
 
   const mint = async (depo) => {
     try {
       console.log("mint-->", depo);
-      setDisable(true) 
+      setDisable(true);
       if (depo) {
         const fundingUTXOs = await depo.detectFunding();
         console.log("fundingUTXOs---->", fundingUTXOs);
@@ -162,24 +152,23 @@ const PointOfSale = () => {
           const txHash = await depo.initiateMinting(fundingUTXOs[0]);
           console.log("txHash---->", txHash);
           setDepositFound(txHash);
-          setDisable(false) 
-          setStep(3)
+          setDisable(false);
+          setStep(3);
         } else {
           console.log("depo-->", depo);
-          setDisable(false) 
-          toast.error("No Deposit Found!")
+          setDisable(false);
+          toast.error("No Deposit Found!");
         }
-      }else{
-        setDisable(false) 
-        toast.error("No Deposit Found!")
+      } else {
+        setDisable(false);
+        toast.error("No Deposit Found!");
       }
     } catch (error) {
       console.log("setSdkTbtc-->", error);
-      setDisable(false) 
-      toast.error("No Deposit Found!")
+      setDisable(false);
+      toast.error("No Deposit Found!");
     }
   };
-
 
   return (
     <>
@@ -196,7 +185,8 @@ const PointOfSale = () => {
             <div className="grid gap-3 grid-cols-12 lg:px-4 pt-3">
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="sectionHeader pb-3 border-b border-gray-900">
-                  <div className="d-flex align-items-center gap-2 pb-3">
+                  <div className="flex align-items-center gap-2 pb-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Point of Sale
                     </h4>
@@ -218,7 +208,6 @@ const PointOfSale = () => {
                       </div>
                       <div className="text-center">
                         <div className="qrCode inline-flex bg-white/5 rounded p-3 items-center justify-center">
-
                           {/* <Image
                             alt=""
                             src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
@@ -240,7 +229,6 @@ const PointOfSale = () => {
                             Crypto Link Account
                           </p>
                           <div className="flex items-center justify-center gap-2">
-
                             <Link
                               href="https://crypto.link.com/"
                               target="_blank"
@@ -249,7 +237,9 @@ const PointOfSale = () => {
                               https://crypto.link.com/
                             </Link>
                             <button
-                              onClick={() => handleCopy("https://crypto.link.com/", "one")}
+                              onClick={() =>
+                                handleCopy("https://crypto.link.com/", "one")
+                              }
                               className="border-0 p-0 bg-transparent mt-1"
                             >
                               {copyIcn}
@@ -281,52 +271,58 @@ const PointOfSale = () => {
                       </div>
                       <div className="text-center">
                         <div className="qrCode inline-flex bg-white/5 rounded p-3 items-center justify-center">
-                          {
-                            !walletAddressDepo ? (<Image
+                          {!walletAddressDepo ? (
+                            <Image
                               alt=""
-                              src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                              src={
+                                process.env.NEXT_PUBLIC_IMAGE_URL +
+                                "loading.gif"
+                              }
                               height={10000}
                               width={10000}
                               className="max-w-full mx-auto w-auto"
                               style={{ height: 40 }}
-                            />) : (<Image
+                            />
+                          ) : (
+                            <Image
                               alt=""
                               src={qrCode}
                               height={10000}
                               width={10000}
                               className="max-w-full w-auto h-auto object-contain"
-                            />)
-                          }
-
-
+                            />
+                          )}
                         </div>
-                        {
-                          walletAddressDepo ? (<div className="pt-2">
+                        {walletAddressDepo ? (
+                          <div className="pt-2">
                             <p className="m-0 text-white text-xs">
                               Merchant Bitcoin Address
                             </p>
                             <div className="flex items-center justify-center gap-2">
-
                               <p className="m-0 themeClr font-medium pt-3">
                                 {splitAddress(walletAddressDepo)}
                               </p>
                               <button
-                                onClick={() => handleCopy(walletAddressDepo, "two")}
+                                onClick={() =>
+                                  handleCopy(walletAddressDepo, "two")
+                                }
                                 className="border-0 p-0 bg-transparent mt-1"
                               >
                                 {copyIcn}
                               </button>
                             </div>
-                          </div>) : (<></>)
-                        }
-
+                          </div>
+                        ) : (
+                          <></>
+                        )}
 
                         <div className="btnWrpper mt-10">
-                          <button disabled={disable}
+                          <button
+                            disabled={disable}
                             onClick={checkMint}
                             className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                           >
-                            {disable?("Checking..."):("Next")}
+                            {disable ? "Checking..." : "Next"}
                           </button>
                         </div>
                       </div>
@@ -355,7 +351,9 @@ const PointOfSale = () => {
                       </div>
                     </div>
                   </>
-                ) : (<></>)}
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>
@@ -404,7 +402,6 @@ const qrCode = (
     />
   </svg>
 );
-
 
 const copyIcn = (
   <svg

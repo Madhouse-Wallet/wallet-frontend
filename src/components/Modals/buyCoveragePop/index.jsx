@@ -66,10 +66,10 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
                     style={{ borderBottom: "1px dashed #ddd" }}
                   >
                     <div
-                      className="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                      className="flex align-items-center justify-content-between flex-wrap gap-3"
                       style={{ fontSize: 12 }}
                     >
-                      <div className="left d-flex align-items-center gap-3">
+                      <div className="left flex align-items-center gap-3">
                         <div className="imgWrp flex-shrink-0">
                           <Image
                             src={""}
@@ -102,10 +102,10 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
                     style={{ borderBottom: "1px dashed #ddd" }}
                   >
                     <div
-                      className="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                      className="flex align-items-center justify-content-between flex-wrap gap-3"
                       style={{ fontSize: 12 }}
                     >
-                      <div className="left d-flex align-items-center gap-3">
+                      <div className="left flex align-items-center gap-3">
                         <div className="imgWrp flex-shrink-0">
                           <Image
                             src={""}
@@ -140,16 +140,16 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
                   className="list-unstyled ps-0 mb-0"
                   style={{ fontSize: 12 }}
                 >
-                  <li className="py-1 d-flex align-items-center justify-content-between">
+                  <li className="py-1 flex align-items-center justify-content-between">
                     <span className="">Principal to Cover</span>
                     <span className="themeClr">$20000</span>
                   </li>
-                  <li className="py-1 d-flex align-items-center justify-content-between">
+                  <li className="py-1 flex align-items-center justify-content-between">
                     <span className="">Expiry Date</span>
                     <span className="themeClr">Aug 14 2025</span>
                   </li>
                   <li
-                    className="py-1 mt-2 d-flex align-items-center justify-content-between"
+                    className="py-1 mt-2 flex align-items-center justify-content-between"
                     style={{ borderTop: "1px dashed #ddd" }}
                   >
                     <span className="fw-bold">Total</span>
@@ -159,7 +159,7 @@ const BuyCoveragePop = ({ buycoverage, setBuyCoverage }) => {
               </div>
             </div>
             <div className="btnWRpper mt-4">
-              <button className="d-flex align-items-center justify-content-center commonBtn w-100 fw-sbold">
+              <button className="flex align-items-center justify-content-center commonBtn w-100 fw-sbold">
                 Buy Coverage
               </button>
             </div>

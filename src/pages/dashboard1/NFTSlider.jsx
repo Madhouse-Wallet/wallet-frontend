@@ -36,25 +36,25 @@ const NFTSlider = () => {
         {[1, 2, 3, 4, 5, 6].map((item, key) => (
           <div key={key} className="px-2">
             <NFTCard className="rounded-4 p-3 relative">
-              <div className="top pb-2 d-flex align-items-center justify-content-between">
+              <div className="top pb-2 flex align-items-center justify-content-between">
                 <h5 className="m-0 fw-sbold">Cover Info</h5>
                 {icn1}
               </div>
               <div className="content py-3">
                 <ul className="list-unstyled ps-0 mb-0">
-                  <li className="d-flex align-items-center justify-content-between py-1">
+                  <li className="flex align-items-center justify-content-between py-1">
                     <p className="m-0">Product:</p>
                     <p className="m-0">Balancer v2</p>
                   </li>
-                  <li className="d-flex align-items-center justify-content-between py-1">
+                  <li className="flex align-items-center justify-content-between py-1">
                     <p className="m-0">Amount:</p>
                     <p className="m-0">140000.25 DAI</p>
                   </li>
-                  <li className="d-flex align-items-center justify-content-between py-1">
+                  <li className="flex align-items-center justify-content-between py-1">
                     <p className="m-0">Expiry Date:</p>
                     <p className="m-0">June 22 2023</p>
                   </li>
-                  <li className="d-flex align-items-center justify-content-between py-1">
+                  <li className="flex align-items-center justify-content-between py-1">
                     <p className="m-0">Cover ID:</p>
                     <p className="m-0">111</p>
                   </li>

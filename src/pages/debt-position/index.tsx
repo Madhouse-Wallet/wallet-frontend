@@ -15,6 +15,7 @@ import { ethers, providers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { BackBtn } from "@/components/common";
 
 const DebtPosition: React.FC = () => {
   const userAuth = useSelector((state: any) => state.Auth);
@@ -44,7 +45,7 @@ const DebtPosition: React.FC = () => {
 
       // Fetch ETH price
       const contractAddress =
-        process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
       const web3 = new Web3Interaction("sepolia", providerr);
       const receipt = await web3.fetchPrice(contractAddress!);
       const receiptInEther = ethers.utils.formatEther(receipt);
@@ -78,7 +79,7 @@ const DebtPosition: React.FC = () => {
       console.log("web3-->", web3);
       // Contract address
       const contractAddress =
-        process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+        process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS;
       const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
       console.log("TUSDAddress-->93", TUSDAddress, contractAddress);
       // Fetch data from the contract
@@ -171,7 +172,7 @@ const DebtPosition: React.FC = () => {
       setWithdrawButton(true);
       const web3 = new Web3Interaction("sepolia", providerr);
       const spenderAddress =
-        process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS; // Replace with actual spender address
+        process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS; // Replace with actual spender address
       const troveResponse = await web3.closeTrove(spenderAddress!);
       setLoading(false);
       setWithdrawButton(false);
@@ -239,6 +240,7 @@ const DebtPosition: React.FC = () => {
               <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
                 <div className="sectionHeader ">
                   <div className="flex items-center gap-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
                       Bitcoin Loan
                     </h4>

@@ -11,16 +11,17 @@ import StripePaymentPage from "../stripePaymentPage";
 import Swap from "../swap";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import SwapKit from "./swapKit";
-import {initializetbtc} from '../../lib/thresholdReceiveFunc'
+import { initializetbtc } from "../../lib/thresholdReceiveFunc";
 import { useSelector } from "react-redux";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { BackBtn } from "@/components/common";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
 );
 
 const BuyCoin: React.FC = () => {
-  const [walletAddress, setWalletAddress] = useState('');
+  const [walletAddress, setWalletAddress] = useState("");
   const { theme, toggleTheme } = useTheme();
   const tabData = [
     { title: "Buy with USDC", component: <SwapKit /> },
@@ -28,7 +29,7 @@ const BuyCoin: React.FC = () => {
       title: "Buy with Debit/Credit Card",
       component: (
         <>
-          <StripePaymentPage walletAddress={walletAddress}/>
+          <StripePaymentPage walletAddress={walletAddress} />
         </>
       ),
     },
@@ -48,7 +49,6 @@ const BuyCoin: React.FC = () => {
     // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
-
 
   // useEffect(() => {
   //   if (selectedPaymentMethod === "Card") {
@@ -81,34 +81,34 @@ const BuyCoin: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchProvider()
-  },[])
+    fetchProvider();
+  }, []);
 
-   const fetchProvider = async () => {
-      try {
-        if (userAuth.passkeyCred) {
-          let account = await getAccount(userAuth?.passkeyCred);
-          console.log("account---<", account);
-          if (account) {
-            let provider = await getProvider(account.kernelClient);
-            console.log("provider-->", provider);
-            if (provider) {
-              // kernelProvider, ethersProvider, signer
-              const sdk = await initializetbtc(provider);
-              console.log("sdk -->", sdk);
-              if (sdk) {
-                setWalletAddress(sdk.address!);
-              }
+  const fetchProvider = async () => {
+    try {
+      if (userAuth.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            // kernelProvider, ethersProvider, signer
+            const sdk = await initializetbtc(provider);
+            console.log("sdk -->", sdk);
+            if (sdk) {
+              setWalletAddress(sdk.address!);
             }
           }
-        } else {
-          // setBtcExchange(!btcExchange);
-          // toast.error("Please Login First");
         }
-      } catch (error) {
-        console.log("error rec-->", error);
+      } else {
+        // setBtcExchange(!btcExchange);
+        // toast.error("Please Login First");
       }
-    };
+    } catch (error) {
+      console.log("error rec-->", error);
+    }
+  };
   return (
     <>
       <section className="relative dashboard pt-12">
@@ -126,7 +126,8 @@ const BuyCoin: React.FC = () => {
                 <div
                   className={`sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
                 >
-                  <div className="d-flex align-items-center gap-3 pb-3">
+                  <div className="flex align-items-center gap-3 pb-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Buy Bitcoin
                     </h4>
@@ -169,7 +170,7 @@ const BuyCoin: React.FC = () => {
                     <button
                       onClick={handlePaymentMethodChange}
                       id="Card"
-                      className="form-label btn m-0 p-3 rounded w-100 d-flex align-items-center justify-content-center fw-sbold"
+                      className="form-label btn m-0 p-3 rounded w-100 flex align-items-center justify-content-center fw-sbold"
                     >
                       Credit/Debit Card
                     </button>

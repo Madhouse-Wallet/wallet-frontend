@@ -128,14 +128,14 @@ const Dashboard = () => {
 
       // Fetch BTC price
       const receipt = await web3.fetchPrice(
-        process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS
+        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
       );
       const receiptInEther = ethers.utils.formatEther(receipt);
       const btcPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
 
       // Fetch Trove data
       const troveResponse = await web3.Troves(
-        process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS,
+        process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS,
         walletAddress
       );
 

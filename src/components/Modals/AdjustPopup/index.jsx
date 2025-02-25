@@ -67,7 +67,7 @@ const AdjustPopup = ({
     setNextButton(true)
     const web3 = new Web3Interaction("sepolia", providerr);
 
-    const contractAddress = process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+    const contractAddress = process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
     const lowerHint = process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
     const maxFeePercentage = ethers.utils.parseEther("0.01");
 
@@ -168,7 +168,7 @@ const AdjustPopup = ({
       // }
 
       // Fetch ETH price
-      const contractAddress = process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+      const contractAddress = process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
       const web3 = new Web3Interaction("sepolia", providerr);
       const receipt = await web3.fetchPrice(contractAddress);
       const receiptInEther = ethers.utils.formatEther(receipt);

@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
+import { BackBtn } from "@/components/common";
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
 
@@ -21,7 +22,8 @@ const BTCDebitCard: React.FC = () => {
             <div className="grid gap-3 grid-cols-12 px-2 pt-3">
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="sectionHeader ">
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="flex align-items-center gap-2">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Bitcoin Debt Card
                     </h4>

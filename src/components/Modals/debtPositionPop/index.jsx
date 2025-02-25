@@ -108,7 +108,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     const web3 = new Web3Interaction("sepolia", providerr);
     console.log("line-58");
     const contractAddress =
-      process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+      process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
     const upperHint =
       process.env.NEXT_PUBLIC_THRESHOLD_UPPERHINT_CONTRACT_ADDRESS;
     const lowerHint =
@@ -179,7 +179,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
   //             console.log("provider -line-114", provider);
   //             setProviderr(provider?.ethersProvider);
   //             const contractAddress =
-  //               process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+  //               process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
   //             const web3 = new Web3Interaction(
   //               "sepolia",
   //               provider?.ethersProvider
@@ -215,7 +215,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
               console.log("provider -line-114", provider);
               setProviderr(provider?.ethersProvider);
               const contractAddress =
-                process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+                process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
               const web3 = new Web3Interaction(
                 "sepolia",
                 provider?.ethersProvider
@@ -243,7 +243,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
       try {
         console.log("line-244")
         const contractAddress =
-          process.env.NEXT_PUBLIC_ETH_PRICE_CONTRACT_ADDRESS;
+          process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
         const web3 = new Web3Interaction("sepolia",null);
         console.log("web3",web3)
         const receipt = await web3.fetchPrice(contractAddress);

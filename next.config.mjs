@@ -4,6 +4,9 @@ import webpack from "webpack";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  devIndicators: {
+    buildActivity: false,
+  },
   images: {
     // For Next.js 12.3.0 and later
     remotePatterns: [

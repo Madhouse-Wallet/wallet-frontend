@@ -167,8 +167,8 @@ const Dashboard1: React.FC = () => {
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="my-2 col-span-12">
-              <div className="d-flex align-items-center justify-content-between flex-wrap">
-                <div className="left d-flex align-items-center gap-3">
+              <div className="flex align-items-center justify-content-between flex-wrap">
+                <div className="left flex align-items-center gap-3">
                   {/* <div className="flex-shrink-0 rounded-circle">
                       <Image
                         src={p1}
@@ -179,7 +179,7 @@ const Dashboard1: React.FC = () => {
                     </div> */}
                   {/* <div className="content">
                       <h6 className="m-0 fw-normal">eth: 324rqwerqwer323423</h6>
-                      <div className="d-flex align-items-center gap-3">
+                      <div className="flex align-items-center gap-3">
                         <Button className="border-0 p-0" variant="transparent">
                           {shareIcn}
                         </Button>
@@ -229,7 +229,7 @@ const Dashboard1: React.FC = () => {
                       className="cardCstm rounded-3 p-3"
                       style={{ cursor: "pointer" }}
                     >
-                      <div className="top d-flex align-items-start justify-content-between pb-2">
+                      <div className="top flex align-items-start justify-content-between pb-2">
                         <span className="icn">{item.icn}</span>
                         <span className="icn">{item.icn1}</span>
                       </div>
@@ -239,7 +239,7 @@ const Dashboard1: React.FC = () => {
                           style={{ fontSize: 12 }}
                         >
                           <li
-                            className="py-1 d-flex align-items-center justify-content-between"
+                            className="py-1 flex align-items-center justify-content-between"
                             style={{
                               borderBottom: "1px dashed var(--lightBtn)",
                             }}
@@ -248,7 +248,7 @@ const Dashboard1: React.FC = () => {
                             <span className="fw-sbold">{item.liquidity}</span>
                           </li>
                           <li
-                            className="py-1 d-flex align-items-center justify-content-between"
+                            className="py-1 flex align-items-center justify-content-between"
                             style={{
                               borderBottom: "1px dashed var(--lightBtn)",
                             }}
@@ -257,7 +257,7 @@ const Dashboard1: React.FC = () => {
                             <span className="fw-sbold">{item.CurrentAPY}</span>
                           </li>
                           <li
-                            className="py-1 d-flex align-items-center justify-content-between"
+                            className="py-1 flex align-items-center justify-content-between"
                             style={{
                               borderBottom: "1px dashed var(--lightBtn)",
                             }}
@@ -276,7 +276,7 @@ const Dashboard1: React.FC = () => {
                             <li key={index} className="py-1">
                               <div
                                 onClick={handleAddressPop}
-                                className="rounded p-3 btn text-white d-flex align-items-center justify-content-center border"
+                                className="rounded p-3 btn text-white flex align-items-center justify-content-center border"
                                 style={{ fontSize: 12 }}
                               >
                                 {data}

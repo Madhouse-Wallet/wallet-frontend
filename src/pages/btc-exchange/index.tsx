@@ -22,6 +22,7 @@ import { ethers } from "ethers";
 import QRCode from "qrcode";
 import styled from "styled-components";
 import { fetchBalance } from "@/lib/utils";
+import { BackBtn } from "@/components/common";
 const BTCEchange = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
@@ -160,10 +161,10 @@ const BTCEchange = () => {
         const fundingUTXOs = await depo.detectFunding();
         console.log("fundingUTXOs---->", fundingUTXOs);
         if (fundingUTXOs.length > 0) {
-          setLoaderStatus(true)
+          setLoaderStatus(true);
           const txHash = await depo.initiateMinting(fundingUTXOs[0]);
           console.log("txHash---->", txHash);
-          setLoaderStatus(false)
+          setLoaderStatus(false);
           setDepositFound(txHash);
         } else {
           console.log("depo-->", depo);
@@ -174,7 +175,7 @@ const BTCEchange = () => {
       }
     } catch (error) {
       console.log("setSdkTbtc-->", error);
-      setLoaderStatus(false)
+      setLoaderStatus(false);
       setDepositSetupCheck(!depositSetupCheck);
     }
   };
@@ -196,7 +197,7 @@ const BTCEchange = () => {
 
                   if (walletBalance?.result?.length) {
                     const totalUsd = walletBalance.result.reduce(
-                      (sum:any, token:any) => sum + (token.usd_value || 0),
+                      (sum: any, token: any) => sum + (token.usd_value || 0),
                       0
                     );
                     setTotalUsdBalance(totalUsd.toFixed(2));
@@ -285,7 +286,7 @@ const BTCEchange = () => {
           <TransactionApprovalPop trxnApproval={trxnApproval} settrxnApproval={settrxnApproval} />,
           document.body
         )} */}
-      { loaderStatus && (createPortal(<LoadingScreen />, document.body))}
+      {loaderStatus && createPortal(<LoadingScreen />, document.body)}
       <section className="relative dashboard pt-12">
         <div className="container h-full relative">
           <button
@@ -299,13 +300,8 @@ const BTCEchange = () => {
             <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className="sectionHeader ">
-                  <div className="d-flex align-items-center gap-3">
-                    {/* <button
-                      onClick={handleGoBack}
-                      className="border-0 themeClr p-0"
-                    >
-                      {backIcn}
-                    </button> */}
+                  <div className="flex align-items-center gap-3">
+                    <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Send & Recieve
                     </h4>
@@ -346,7 +342,7 @@ const BTCEchange = () => {
               <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
-                    {/* <div className="d-flex align-items-center gap-3 mb-3">
+                    {/* <div className="flex align-items-center gap-3 mb-3">
                       <h4 className="m-0 text-xl">Recent Transactions</h4>
                     </div> */}
                     <RecentTransaction />

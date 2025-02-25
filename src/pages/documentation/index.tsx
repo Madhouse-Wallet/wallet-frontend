@@ -18,7 +18,7 @@ const Documentation = () => {
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <div className="sectionHeader p-2 px-3 px-lg-4 py-lg-3">
-                <div className="d-flex align-items-center gap-3">
+                <div className="flex align-items-center gap-3">
                   <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
                     Documentation
                   </h4>

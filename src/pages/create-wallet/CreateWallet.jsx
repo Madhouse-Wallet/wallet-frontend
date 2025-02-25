@@ -3,6 +3,7 @@ import Image from "next/image";
 import { isValidEmail } from "../../utils/globals";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { toast } from "react-toastify";
+import { BackBtn } from "@/components/common/index";
 
 const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
   const [registerUsername, setRegisterUsername] = useState();
@@ -51,14 +52,17 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
         <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
-              <Image
-                src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
-                alt="logo"
-                className="max-w-full mx-auto w-auto mb-2"
-                height={100000}
-                width={10000}
-                style={{ height: 40 }}
-              />
+              <div className="flex items-center justify-center mb-2 gap-3">
+                <BackBtn />
+                <Image
+                  src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
+                  alt="logo"
+                  className="max-w-full mx-auto w-auto "
+                  height={100000}
+                  width={10000}
+                  style={{ height: 40 }}
+                />
+              </div>
               <h1 className="text-center text-base font-medium  m-0">
                 Madhouse Wallet
               </h1>

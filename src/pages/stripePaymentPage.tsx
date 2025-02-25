@@ -239,7 +239,7 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
         <div className="grid gap-3 grid-cols-12">
           <div className="col-span-12">
             <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-              {/* <div className="d-flex align-items-center gap-3">
+              {/* <div className="flex align-items-center gap-3">
                 <button
                   onClick={handleGoBack}
                   className="border-0 themeClr p-0"

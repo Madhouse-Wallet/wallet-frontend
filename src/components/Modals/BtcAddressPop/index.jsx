@@ -58,20 +58,20 @@ const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
             </div>
             <ul className="list-unstyled ps-0 mb-0">
               <li
-                className="py-1 d-flex align-items-center justify-content-between"
+                className="py-1 flex align-items-center justify-content-between"
                 style={{ borderBottom: "1px dashed var(--cardBg2)" }}
               >
                 <p className="m-0">Bridge:</p>
                 <p className="m-0 fw-sbold">Threshold Network</p>
               </li>
               <li
-                className="py-1 d-flex align-items-center justify-content-between"
+                className="py-1 flex align-items-center justify-content-between"
                 style={{ borderBottom: "1px dashed var(--cardBg2)" }}
               >
                 <p className="m-0">Destination:</p>
                 <p className="m-0 fw-sbold">Base Network</p>
               </li>
-              <li className="py-1 d-flex align-items-center justify-content-between">
+              <li className="py-1 flex align-items-center justify-content-between">
                 <p className="m-0">Collateralized Debt Position:</p>
                 <p className="m-0 fw-sbold">tBTC{`==>`}USDC</p>
               </li>
@@ -87,13 +87,13 @@ const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
                   />
                 </div>
                 <div lg="12" className="my-2">
-                  <div className="d-flex align-items-center gap-3">
+                  <div className="flex align-items-center gap-3">
                     <input type="checkbox" className="form-check" />
                     <p className="m-0">Download Deposit Recipt (recommended)</p>
                   </div>
                 </div>
                 <div lg="12" className="my-2">
-                  <button className="d-flex align-items-center justify-content-center commonBtn w-100">
+                  <button className="flex align-items-center justify-content-center commonBtn w-100">
                     Generate Deposit Address
                   </button>
                   <button

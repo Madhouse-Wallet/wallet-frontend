@@ -51,7 +51,7 @@ const MyActivity = () => {
                 className=" p-3 lg:p-6 rounded-4 "
                 style={{ background: "var(--cardBg2)", fontSize: 12 }}
               >
-                <div className="icnWrp d-flex align-items-center">
+                <div className="icnWrp flex align-items-center">
                   <span className="icn me-1">{btcIcn}</span>
                   tBTC Balance
                 </div>

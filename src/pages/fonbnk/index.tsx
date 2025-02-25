@@ -3,6 +3,7 @@ import IframeComponent from "./iframe";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import { BackBtn } from "@/components/common";
 
 export default function Fonbnk() {
   const { theme, toggleTheme } = useTheme();
@@ -65,7 +66,8 @@ export default function Fonbnk() {
               <div
                 className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
               >
-                <div className="d-flex align-items-center gap-3 pb-3">
+                <div className="flex align-items-center gap-3 pb-3">
+                <BackBtn />
                   <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                     Fonbnk
                   </h4>

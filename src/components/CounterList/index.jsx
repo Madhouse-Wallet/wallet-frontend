@@ -139,7 +139,7 @@ const CounterList = ({ data }) => {
   const fetchUSDCRecentTransactions = async () => {
     try {
       const balance = await fetchTokenTransfers(
-        [process.env.NEXT_PUBLIC_NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS],
+        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
         userAuth.walletAddress
       );
       console.log("data", balance);

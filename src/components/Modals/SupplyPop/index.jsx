@@ -34,7 +34,7 @@ const SupplyPopUp = ({ supplyPop, setSupplyPop, fetchTroveData }) => {
     const web3 = new Web3Interaction("sepolia", providerr);
 
     const contractAddress =
-      process.env.NEXT_PUBLIC_THRESHOLD_WITHDRWAL_CONTRACT_ADDRESS;
+      process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
     const upperHint =
       process.env.NEXT_PUBLIC_THRESHOLD_UPPERHINT_CONTRACT_ADDRESS;
     const lowerHint =

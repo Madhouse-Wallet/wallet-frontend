@@ -10,7 +10,7 @@ const TransactionTable = () => {
       component: (item, key) => {
         return (
           <>
-            <div className="d-flex align-items-center gap-3">
+            <div className="flex align-items-center gap-3">
               <div className="imgWrp flex-shrink-0">{item.coin}</div>
               <div className="content">
                 <p className="m-0 themeClr">{item.CoinName}</p>
@@ -40,10 +40,10 @@ const TransactionTable = () => {
       <div className="grid gap-3 grid-cols-12">
         <div className="my-2 col-span-12">
           <div
-            className="top d-flex align-items-center justify-content-between flex-wrap pb-3"
+            className="top flex align-items-center justify-content-between flex-wrap pb-3"
             style={{ fontSize: 12 }}
           >
-            <div className="left d-flex align-items-center gap-3">
+            <div className="left flex align-items-center gap-3">
               <div className="px-2">
                 <p className="m-0">Net Worth</p>
                 <h4 className="m-0 fw-bold" style={{ fontSize: 18 }}>
@@ -72,11 +72,11 @@ const TransactionTable = () => {
         </div>
         <div className="my-2 lg:col-span-6 col-span-12">
           <CardCstm className={`  rounded-3 p-3 pb-2 px-lg-4 h-100 `}>
-            <div className="top d-flex align-items-center justify-content-between">
+            <div className="top flex align-items-center justify-content-between">
               <div className="left">
                 <h4 className="m-0 font-semibold text-xl">Your supplies</h4>
                 <ul
-                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3"
+                  className="list-unstyled ps-0 mb-0 flex align-items-center gap-3"
                   style={{ fontSize: 10 }}
                 >
                   <li className="">
@@ -99,11 +99,11 @@ const TransactionTable = () => {
         </div>
         <div className="my-2 lg:col-span-6 col-span-12">
           <CardCstm className={`  rounded-3 p-3 pb-2 px-lg-4 h-100 `}>
-            <div className="top d-flex align-items-center justify-content-between">
+            <div className="top flex align-items-center justify-content-between">
               <div className="left">
                 <h4 className="m-0 font-semibold text-xl">Your Borrows</h4>
                 <ul
-                  className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3"
+                  className="list-unstyled ps-0 mb-0 flex align-items-center gap-3"
                   style={{ fontSize: 10 }}
                 >
                   <li className="">

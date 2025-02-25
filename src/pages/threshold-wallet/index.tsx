@@ -127,7 +127,7 @@ const ThresholdWallet: React.FC = () => {
               </h4>
             </div>
             {/* <div className="col-span-12 my-2">
-              <div className="d-flex align-items-start justify-content-between flex-wrap pt-4">
+              <div className="flex align-items-start justify-content-between flex-wrap pt-4">
                 <div className="left ">
                   <h4 className="m-0 text-xl fw-bold">
                     Balance
