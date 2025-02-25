@@ -7,7 +7,6 @@ import { SupportedChainId, OrderKind, TradeParameters, TradingSdk } from '@cowpr
 import { EnsoClient } from "@ensofinance/sdk";
 // import SwapWidget from '@ensofinance/shortcuts-widget';
 
-// import { ZeroDevProvider, createConfig as createZdConfig } from "@zerodev/waas"
 // import { WagmiProvider, createConfig, http } from "wagmi"
 // import { sepolia, arbitrum, mainnet } from "wagmi/chains"
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
