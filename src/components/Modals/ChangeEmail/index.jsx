@@ -90,7 +90,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
   const verifyUserFunc = async () => {
     try {
       setLoading(true)
-      if (!otp || otp.length !== 4) {
+      if (!otp) {
         toast.error("Invalid OTP!")
       } else {
         let checkUser = await getUser(email);
