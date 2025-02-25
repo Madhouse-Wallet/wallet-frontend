@@ -83,7 +83,7 @@ const Defi = () => {
           routingStrategy: "router", // optional
         });
         console.log("routeData-->", routeData)
-
+ 
 
         const op2Hash = await account.kernelClient.sendUserOperation({
           callData: await account.kernelClient.account.encodeCalls([
