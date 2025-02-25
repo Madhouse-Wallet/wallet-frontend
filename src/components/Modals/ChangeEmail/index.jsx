@@ -11,6 +11,7 @@ import OtpInput from "react-otp-input";
 
 import {
   generateOTP,
+  isValidEmail
 } from "../../../utils/globals";
 
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
@@ -39,11 +40,14 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
       let checkUser = await getUser(email);
       console.log("checkUser-->", checkUser)
       let OTP = generateOTP(4);
-    
+      let validEmail = await isValidEmail(email);
+
       // console.log("otp-->",OTP)
       setCheckOTP(OTP)
       if (checkUser.status && checkUser.status == "success") {
         toast.error("Already Exist!")
+      } else if (!validEmail) {
+        toast.error("Please Enter Valid Email!");
       } else {
         let obj = {
           email: userAuth.email,
@@ -76,7 +80,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
 
   const handleOtpChange = (value) => {
     setOtp(value);
-    
+
     // Automatically submit when all 4 digits are entered
     if (value.length === 4 && !loading) {
       verifyUserFunc();
@@ -86,13 +90,13 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
   const verifyUserFunc = async () => {
     try {
       setLoading(true)
-      if(!otp || otp.length !== 4)  {
+      if (!otp || otp.length !== 4) {
         toast.error("Invalid OTP!")
       } else {
         let checkUser = await getUser(email);
         if (checkUser.status && checkUser.status == "success") {
           toast.error("Already Exist!")
-        }else{
+        } else {
           if (checkOTP == otp) {
             let data = await updtUser({ email: userAuth.email }, {
               $set: { email: email } // Ensure this is inside `$set`
@@ -120,7 +124,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
             toast.error("Invalid OTP!")
           }
         }
-          
+
       }
       setLoading(false)
     } catch (error) {
