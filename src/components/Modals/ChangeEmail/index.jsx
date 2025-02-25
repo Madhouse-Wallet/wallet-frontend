@@ -83,11 +83,11 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
 
     // Automatically submit when all 4 digits are entered
     if (value.length === 4 && !loading) {
-      verifyUserFunc();
+      verifyUserFunc(value);
     }
   };
 
-  const verifyUserFunc = async () => {
+  const verifyUserFunc = async (otp) => {
     try {
       setLoading(true)
       if (!otp) {
@@ -210,7 +210,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 <div className="btnWrpper mt-3 text-center">
                   <button
                     type="button"
-                    onClick={verifyUserFunc}
+                    onClick={()=>verifyUserFunc(otp)}
                     disabled={loading || otp.length !== 4}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
