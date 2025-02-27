@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const usersCollection = db.collection('users'); // Use 'users' collection
         const delusersCollection = db.collection('delusers');
         // const existingUser = await usersCollection.findOne({ email });
-        const existingUser = await usersCollection.findOne({ email });
+        const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (existingUser) {
             const result = await delusersCollection.insertOne({ email: (existingUser?.email || ""), userId: (existingUser?._id || ""), passkey_number: (existingUser?.passkey_number || ""), passkey_status: (existingUser?.passkey_status || ""), passkey: (existingUser?.passkey || ""), wallet: (existingUser?.wallet || ""), createdAt: new Date() });
 
