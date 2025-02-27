@@ -3,6 +3,7 @@ import OtpInput from "react-otp-input";
 import Image from "next/image";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import { BackBtn } from "@/components/common/index";
 
 const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const { theme, toggleTheme } = useTheme();
@@ -10,7 +11,6 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
-  
 
   useEffect(() => {
     // Start the timer when component mounts
@@ -38,7 +38,7 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const otpRegister = async () => {
@@ -85,14 +85,17 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
         <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
-              <Image
-                src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
-                alt="logo"
-                className="max-w-full mx-auto w-auto mb-2"
-                height={100000}
-                width={10000}
-                style={{ height: 40 }}
-              />
+              <div className="flex items-center justify-center mb-2 gap-3">
+                <BackBtn />
+                <Image
+                  src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow.png"}
+                  alt="logo"
+                  className="max-w-full mx-auto w-auto "
+                  height={100000}
+                  width={10000}
+                  style={{ height: 40 }}
+                />
+              </div>
               <h1 className="text-center text-base font-medium  m-0">
                 Madhouse Wallet
               </h1>
@@ -131,12 +134,14 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc }) => {
             </div>
             <div className="col-span-12">
               <div className="text-center">
-              <button 
-                  onClick={resendOtp} 
+                <button
+                  onClick={resendOtp}
                   disabled={isResendDisabled}
-                  className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium ${isResendDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium ${isResendDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {isResendDisabled ? `Resend OTP (${formatTime(timeLeft)})` : 'Resend OTP'}
+                  {isResendDisabled
+                    ? `Resend OTP (${formatTime(timeLeft)})`
+                    : "Resend OTP"}
                 </button>
               </div>
             </div>

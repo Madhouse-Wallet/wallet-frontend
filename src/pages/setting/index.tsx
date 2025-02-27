@@ -422,7 +422,7 @@ console.log("userAuth-->",userAuth)
               <div className="col-span-12 ">
                 <div className="sectionHeader p-2 ">
                   <div className="flex items-center gap-3">
-                    <BackBtn />
+                    {/* <BackBtn /> */}
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Setting & Support
                     </h4>

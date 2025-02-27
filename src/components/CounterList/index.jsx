@@ -155,10 +155,11 @@ const CounterList = ({ data }) => {
             id: tx.transaction_hash || "",
             rawData: tx, // Store the original transaction data
             status: "confirmed", // Default status as it's on blockchain
-            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
+            // summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
+            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${tx.from_address === userAuth.walletAddress?.toLowerCase() ? "Transfer": "Receive"}`,
             to: tx.to_address || "",
             transactionHash: tx.transaction_hash || "",
-            type: "Transfer" // Default type
+            type: tx.from_address === userAuth.walletAddress?.toLowerCase() ? "send" : 'receive' // Default type
           };
         });
         
@@ -192,7 +193,7 @@ const CounterList = ({ data }) => {
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
                 onClick={() => {
-                  if(item.value === '' || item.value === '$0' || item.value === 0 || !userAuth?.walletAddress){
+                  if(item.value === '' || item.value === '$0' || item.value === 0 || !userAuth?.walletAddress || item.head === 'Loan Balance'){
                     return
                   }
                     handleCardClick(item);
