@@ -2,10 +2,28 @@
 import borrowerContractABI from "../../borrowerContract.json";
 import { Contract, ethers } from "ethers";
 import fetchPriceAbi from "../../fetchPriceContractAbi.json";
+import fetchRegisterAbi from "../../registerContractAbi.json";
+import fetchResolverAbi from "../../resolverContractAbi.json";
 import { getContract } from "viem";
 import curveContractAbi from "../../curveAbi.json";
 import USDC_ABI from "../../usdcAbi.json";
+// Namehash implementation (unchanged)
+function namehash(name:any) {
+  let node = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
+  if (name) {
+    const labels = name.split(".");
+    for (let i = labels.length - 1; i >= 0; i--) {
+      node = ethers.utils.keccak256(
+        ethers.utils.concat([
+          ethers.utils.arrayify(node),
+          ethers.utils.keccak256(ethers.utils.toUtf8Bytes(labels[i]))
+        ])
+      );
+    }
+  }
+  return node;
+}
 class Web3Interaction {
   private PROVIDER: any;
   private SIGNER: any;
@@ -57,6 +75,103 @@ class Web3Interaction {
       console.log("error", error);
       return null;
     }
+  };
+
+  getRegisterContract = (address: string) => {
+    try {
+      const contract = new ethers.Contract(
+        address,
+        fetchRegisterAbi,
+        this.SIGNER
+      );
+      return contract;
+    } catch (error) {
+      console.log("error", error);
+      return null;
+    }
+  };
+
+  getResolverContract = (address: string) => {
+    try {
+      const contract = new ethers.Contract(
+        address,
+        fetchResolverAbi,
+        this.SIGNER
+      );
+      console.log("resolverContract-->",contract)
+      return contract;
+    } catch (error) {
+      console.log("error", error);
+      return null;
+    }
+  };
+
+  checkDomainAvailable = async (address: string, resolverAddress: string, name: string, kernelClinet: any): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const label = name.replace('.eth', '');
+        console.log(`Checking availability for: ${label}`);
+        const contract = this.getRegisterContract(address);
+        const resolverContract = this.getResolverContract(resolverAddress);
+        console.log("contract-->", contract, contract?.available)
+        if (!contract) throw new Error("Contract initialization failed");
+        if(!resolverContract) throw new Error("Contract initialization failed");
+        // 1. Check domain availability
+        const isAvailable = await contract.available(label);
+        if (!isAvailable) throw new Error('Domain not available');
+
+        // 2. Generate registration secret
+        const secret = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+        console.log("Generated secret:", secret);
+        const secretHex = ethers.utils.hexlify(secret);
+        console.log("Generated secret:", secretHex);
+
+        // 3. Prepare resolver data
+        const node = namehash(label);
+        console.log("node-->",node)
+        console.log("kernelClinet-->",kernelClinet, kernelClinet.account.address)
+
+        // const setAddrData = resolver.methods.setAddr(node, account.address).encodeABI();
+ 
+
+
+        const setAddrTx = await resolverContract.setAddr(node, kernelClinet.account.address);
+        await setAddrTx.wait();
+        console.log("Resolver address set", setAddrTx);
+
+        // const resolverData = []; // No additional resolver data in this case
+
+        // // 4. Generate commitment
+        // const commitment = await registrar.makeCommitment(
+        //   label,
+        //   account,
+        //   config.DURATION,
+        //   secretHex,
+        //   config.RESOLVER_ADDRESS,
+        //   resolverData,
+        //   false, // Reverse record
+        //   0 // No fuses
+        // );
+
+        // console.log("Commitment:", commitment);
+
+        // // 5. Send commit transaction
+        // console.log("Committing...");
+        // const commitTx = await registrar.commit(commitment, {
+        //   gasLimit: config.GAS_LIMIT
+        // });
+
+        // console.log(`Commit TX Hash: ${commitTx.hash}`);
+
+        // // Wait for confirmation
+        // await commitTx.wait();
+        // console.log("Commit transaction confirmed");
+
+        resolve(isAvailable);
+      } catch (error: any) {
+        reject(error.reason || error.data?.message || error.message || error);
+      }
+    });
   };
 
   fetchPrice = async (address: string): Promise<any> => {
