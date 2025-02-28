@@ -9,13 +9,17 @@ import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import OtpInput from "react-otp-input";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-
+import {
+  getUser,
+  updtUser
+} from "@/lib/apiCall";
 
 
 const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
   const [providerr, setProviderr] = useState(null);
   const [accountClinet, setAccountClinet] = useState(null);
   const [domainName, setDomainName] = useState(null);
+  const [loading, setLoading] = useState(false);
   const userAuth = useSelector((state) => state.Auth);
 
   const handleChangeEmail = () => {
@@ -49,12 +53,13 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
 
   const submitFunc = async () => {
     try {
-      if(!providerr){
+      if (!providerr) {
         return toast.error("Please Login!")
       }
-      if(!domainName){
+      if (!domainName) {
         return toast.error("Please Enter Domain Name!")
       }
+      setLoading(true)
       const web3 = new Web3Interaction("sepolia", providerr);
       const contractAddress = process.env.NEXT_PUBLIC_REGISTRAR_ADDRESS;
       const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_ADDRESS;
@@ -65,10 +70,23 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
         return toast.error("No Contract Address Found")
       }
       // address: string, resolverAddress: string, name: string, kernelClinet: any
-      const checkAvailability = await web3.checkDomainAvailable(contractAddress,resolverAddress, domainName, accountClinet);
+      const checkAvailability = await web3.checkDomainAvailable(contractAddress, resolverAddress, domainName, accountClinet);
+      if (checkAvailability) {
+        let data = await updtUser({ email: userAuth.email }, {
+          $set: {
+            ensName: checkAvailability,
+            ensSetup: true
+          } // Ensure this is inside `$set`
+        })
+        console.log("data-->",data, "checkAvailability-->", checkAvailability)
+        setLoading(false)
+        toast.success("Setup Done!")
+      }
       console.log("checkAvailability-->", checkAvailability)
     } catch (error) {
       console.log(" setup ens domain error-->", error)
+      setLoading(false)
+
       toast.error(error)
     }
   }
@@ -109,9 +127,10 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
               <div className="btnWrpper mt-3 text-center">
                 <button
                   onClick={submitFunc}
+                  disabled={loading}
                   type="button"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >Save
+                >{loading?"Please wait...":"Save"}
                 </button>
               </div>
             </div>

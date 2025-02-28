@@ -8,7 +8,7 @@ import { getContract } from "viem";
 import curveContractAbi from "../../curveAbi.json";
 import USDC_ABI from "../../usdcAbi.json";
 // Namehash implementation (unchanged)
-function namehash(name:any) {
+function namehash(name: any) {
   let node = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   if (name) {
@@ -98,7 +98,7 @@ class Web3Interaction {
         fetchResolverAbi,
         this.SIGNER
       );
-      console.log("resolverContract-->",contract)
+      console.log("resolverContract-->", contract)
       return contract;
     } catch (error) {
       console.log("error", error);
@@ -115,7 +115,7 @@ class Web3Interaction {
         const resolverContract = this.getResolverContract(resolverAddress);
         console.log("contract-->", contract, contract?.available)
         if (!contract) throw new Error("Contract initialization failed");
-        if(!resolverContract) throw new Error("Contract initialization failed");
+        if (!resolverContract) throw new Error("Contract initialization failed");
         // 1. Check domain availability
         const isAvailable = await contract.available(label);
         if (!isAvailable) throw new Error('Domain not available');
@@ -128,46 +128,73 @@ class Web3Interaction {
 
         // 3. Prepare resolver data
         const node = namehash(label);
-        console.log("node-->",node)
-        console.log("kernelClinet-->",kernelClinet, kernelClinet.account.address)
+        console.log("node-->", node)
+        console.log("kernelClinet-->", kernelClinet, kernelClinet.account.address)
 
         // const setAddrData = resolver.methods.setAddr(node, account.address).encodeABI();
- 
 
 
-        const setAddrTx = await resolverContract.setAddr(node, kernelClinet.account.address);
-        await setAddrTx.wait();
-        console.log("Resolver address set", setAddrTx);
+
+        // const setAddrTx = await resolverContract.setAddr(node, kernelClinet.account.address);
+        // console.log("setAddrTx0-->",setAddrTx)
+        // await setAddrTx.wait();
+        // console.log("Resolver address set", setAddrTx);
 
         // const resolverData = []; // No additional resolver data in this case
 
         // // 4. Generate commitment
-        // const commitment = await registrar.makeCommitment(
-        //   label,
-        //   account,
-        //   config.DURATION,
-        //   secretHex,
-        //   config.RESOLVER_ADDRESS,
-        //   resolverData,
-        //   false, // Reverse record
-        //   0 // No fuses
-        // );
+        const commitment = await contract.makeCommitment(
+          label,
+          kernelClinet.account.address,
+          31536000,
+          secret,
+          resolverAddress,
+          [],
+          false, // Set reverse record
+          0     // No fuses
+        );
 
-        // console.log("Commitment:", commitment);
+        console.log("Commitment:", commitment);
 
         // // 5. Send commit transaction
         // console.log("Committing...");
-        // const commitTx = await registrar.commit(commitment, {
-        //   gasLimit: config.GAS_LIMIT
-        // });
+        console.log("Committing...");
+        const commitTx = await contract.commit(commitment, {
+          gasLimit: 500000
+        });
 
+        await commitTx.wait();
+        console.log("Commit transaction confirmed:", commitTx);
+
+        console.log('Waiting 60 seconds...');
+        await new Promise(resolve => setTimeout(resolve, 61000));
         // console.log(`Commit TX Hash: ${commitTx.hash}`);
 
-        // // Wait for confirmation
-        // await commitTx.wait();
-        // console.log("Commit transaction confirmed");
+        // 7. Calculate price with buffer
+        const basePrice = await contract.rentPrice(label, 31536000);
+        const bufferPrice = Math.floor(parseInt(basePrice) * 1.05);
+        console.log(`Price with buffer:'ether')} ETH`, bufferPrice);
+        // 8. Send register transaction
+        console.log('Registering...');
+        const registerTx = await contract.register(
+          label,
+          kernelClinet.account.address,
+          31536000,  // Duration (1 year)
+          secret,
+          resolverAddress,
+          [],
+          false, // Set reverse record
+          0      // No fuses
+          , {
+            value: ethers.utils.parseEther(bufferPrice.toString()), // Ensure correct format
+            gasLimit: 500000
+          });
 
-        resolve(isAvailable);
+        // Wait for transaction confirmation
+        await registerTx.wait();
+        console.log("Domain registered successfully:", registerTx);
+        console.log(`Register TX: ${registerTx.transactionHash}`);
+        resolve(label);
       } catch (error: any) {
         reject(error.reason || error.data?.message || error.message || error);
       }
