@@ -38,7 +38,7 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
             <div className="top pb-3">
               {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Add Supply
-              </h5> */}
+              </h5> */} 
             </div>
             <div className="modalBody text-center">
               <div className="py-2">
