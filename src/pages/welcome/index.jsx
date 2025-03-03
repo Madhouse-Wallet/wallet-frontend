@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { BackBtn } from "@/components/common";
+import Link from "next/link";
 
 const Welcome = () => {
   const { theme, toggleTheme } = useTheme();
@@ -51,6 +52,10 @@ const Welcome = () => {
           >
             Log in
           </button>
+        </div>
+        <div className="mt-3 text-center">
+           <Link href={"/recover-wallet"} className="text-white font-medium text-xs">
+           Recover Wallet</Link>
         </div>
       </div>
     </>
