@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const usersCollection = db.collection('users'); // Use 'users' collection
 
         // Check if the email already exists
-        const existingUser = await usersCollection.findOne({ email });
+        const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (existingUser) {
             //   return res.status(400).json({ error: 'Email already exists' });
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });

@@ -173,7 +173,12 @@ const CreateWallet = () => {
             return false;
           } else {
             console.log("new account-->", account, address);
-            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey)
+            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey);
+            let userExist = await getUser(registerData.email);
+            if (userExist.status && userExist.status == "success") {
+              toast.error("User Already Exist!");
+              return false;
+            }
             let data = await addUser(
               registerData.email,
               registerData.username,

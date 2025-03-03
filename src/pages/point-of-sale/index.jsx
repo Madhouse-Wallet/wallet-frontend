@@ -186,7 +186,7 @@ const PointOfSale = () => {
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="sectionHeader pb-3 border-b border-gray-900">
                   <div className="flex align-items-center gap-2 pb-3">
-                    <BackBtn />
+                    {/* <BackBtn /> */}
                     <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Point of Sale
                     </h4>
