@@ -67,6 +67,7 @@ export default async function handler(req, res) {
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
             } else if (type == "verifyOtp"){
                 templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
+                console.log("templatePath-->",templatePath)
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
