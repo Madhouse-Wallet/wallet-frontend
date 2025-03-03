@@ -131,7 +131,7 @@ const RecentTransaction = ({ transactions }) => {
                               : tx.type === "send"
                               ? "Send"
                               : "Receive"}{" "}
-                            {tx.amount?.split(" ")[1] || "ETH"}
+                            {tx.amount?.split(" ")[1] || tx.category || 'ETH'}
                           </h4>
                           <p
                             className={`m-0 ${getStatusColor(

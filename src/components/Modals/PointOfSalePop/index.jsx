@@ -5,22 +5,25 @@ import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import SideShiftWidget from "@/components/SideShift/SideShiftWidget";
+import { useSelector } from "react-redux";
 
 // css
 
 // img
 
-const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
+const PointOfSalePop = ({ pointSale, setPointSale }) => {
   const { theme, toggleTheme } = useTheme();
+  const userAuth = useSelector((state) => state.Auth);
 
-  const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
+  const handlePointOfSale = () => setPointSale(!pointSale);
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <buttonbuy
-          onClick={handleWithdrawDep}
+          onClick={handlePointOfSale}
           className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
@@ -35,42 +38,32 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
             <div className="top pb-3">
               {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Add Supply
-              </h5> */}
+              </h5> */} 
             </div>
             <div className="modalBody text-center">
-              <div className="grid gap-3 grid-cols-12">
-                <div className="col-span-6">
-                  <Link
-                    href="/fonbnk"
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    African Transfers
-                  </Link>
-                </div>
-                <div className="col-span-6">
-                  <Link
-                    href="/stripe"
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Debit & Credit
-                  </Link>
-                </div>
-                <div className="col-span-6">
-                  <Link
-                    href="/identity"
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Identity
-                  </Link>
-                </div>
-                <div className="col-span-6">
-                  <Link
-                    href="/spherepay"
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Bank Account Transfer
-                  </Link>
-                </div>
+              <div className="py-2">
+                <Link
+                  href="/point-of-sale"
+                  onClick={() => setPointSale(false)}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Crypto Link
+                </Link>
+              </div>
+              <div className="py-2">
+                <SideShiftWidget
+                  // setPointSale={setPointSale}
+                  onClick={() => setPointSale(false)}
+                  // pointSale={pointSale}
+                  parentAffiliateId={process.env.NEXT_PUBLIC_SIDE_SHIFT_PARENT_ID}
+                  defaultDepositMethodId="btc"
+                  defaultSettleMethodId="usdcarb"
+                  theme="light"
+                  settleAddress={userAuth?.walletAddress}
+                  buttonText="Cash App"
+                  buttonColor="rgb(232, 90, 67)"
+                  textColor="rgb(17, 11, 11)"
+                />
               </div>
             </div>
           </div>
@@ -85,7 +78,7 @@ const Modal = styled.div`
 
   .modalDialog {
     max-height: calc(100vh - 160px);
-    max-width: 550px !important;
+    max-width: 350px !important;
     padding-bottom: 40px !important;
 
     input {
@@ -94,7 +87,7 @@ const Modal = styled.div`
   }
 `;
 
-export default WithdrawDepositPopup;
+export default PointOfSalePop;
 
 const closeIcn = (
   <svg
