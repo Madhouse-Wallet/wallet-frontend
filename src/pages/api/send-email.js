@@ -34,7 +34,7 @@ export default async function handler(req, res) {
             //     secretAccessKey: SecretAccessKey,
             //     sessionToken: SessionToken,
             // });
-           
+
             const ses = new AWS.SES({
                 // region: process.env.NEXT_PUBLIC_AWS_S3_REGION
                 region: "us-east-1"
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
             //         secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
             //     }
             // });
-          
+
             console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;
             console.log("type, subject, emailData, email", req.body)
@@ -58,14 +58,24 @@ export default async function handler(req, res) {
             // Path to the HTML template
             if (type == "registerOtp") {
                 templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
+                console.log("templatePath-->", templatePath)
+
+
+
+                const templatePateeh = path.resolve(process.cwd(), 'templates', 'registerotp.html');
+                console.log("Resolved templatePath -->", templatePateeh);
+
+
+
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
                 //     verificationCode: "1234"
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
-            } else if (type == "verifyOtp"){
+            } else if (type == "verifyOtp") {
                 templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
+                console.log("templatePath-->", templatePath)
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
