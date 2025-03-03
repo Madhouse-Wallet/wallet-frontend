@@ -24,6 +24,33 @@ export const getUser = async (email) => {
     }
 };
 
+
+export const getUserWallet = async (wallet) => {
+    try {
+        try {
+            // console.log(email)
+            return await fetch(`/api/get-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    wallet,
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    // console.log("data-->", data);
+                    return data;
+                });
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    } catch (error) {
+        console.log("error-->", error);
+        return false;
+    }
+};
+
 export const updtUser = async (findData, updtData) => {
     try {
         try {
