@@ -58,6 +58,7 @@ export default async function handler(req, res) {
             // Path to the HTML template
             if (type == "registerOtp") {
                 templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
+                console.log("templatePath-->",templatePath)
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
