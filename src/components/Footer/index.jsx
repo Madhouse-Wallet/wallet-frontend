@@ -7,12 +7,19 @@ import styled from "styled-components";
 import { useRouter } from "next/router";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
+import PointOfSalePop from "@/components/Modals/PointOfSalePop"
 
 const Footer = () => {
   const router = useRouter();
+  const [pointSale, setPointSale] = useState();
 
   return (
     <>
+      {pointSale &&
+        createPortal(
+          <PointOfSalePop pointSale={pointSale} setPointSale={setPointSale} />,
+          document.body
+        )}
       <FooterDiv className="fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-3">
         {/* <Image
           src={bg}
@@ -57,11 +64,11 @@ const Footer = () => {
             ></div> */}
           </li>
           <li className="relative aspect-square">
-            <Link
+            <button
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Approval"
-              href={"/point-of-sale"}
-              // onClick={() => setApprovalPop(!approvalPop)}
+              // href={"/point-of-sale"}
+              onClick={() => setPointSale(!pointSale)}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
@@ -75,7 +82,7 @@ const Footer = () => {
               <span className=" font-medium block text-center text-white/50">
                 Point of Sale
               </span>
-            </Link>
+            </button>
           </li>
           {/* <li>
                   <Link href={"/approval"} className="relative inline-block">
@@ -148,7 +155,7 @@ const FootNav = styled.ul`
     padding: 5px 0;
     flex-shrink: 0;
   }
-  a {
+  a, button {
     transition: 0.4s;
     display: block;
     img {

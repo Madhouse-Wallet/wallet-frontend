@@ -3,6 +3,64 @@ import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+
+class LegacyProviderWrapper {
+  private provider: any;
+  private eventListeners: Record<string, ((...args: any[]) => void)[]> = {};
+
+  constructor(provider: any) {
+    this.provider = provider;
+  }
+
+  async enable(): Promise<string[]> {
+    return this.provider.request({ method: "eth_requestAccounts" });
+  }
+
+  request(args: any): Promise<any> {
+    return this.provider.request(args);
+  }
+
+  sendAsync(payload: any, callback: (error: any, response: any) => void): void {
+    this.provider
+      .request(payload)
+      .then((result: any) =>
+        callback(null, { jsonrpc: "2.0", id: payload.id, result })
+      )
+      .catch((error: any) => callback(error, null));
+  }
+
+  send(payload: any, callback: (error: any, response: any) => void): void {
+    this.sendAsync(payload, callback);
+  }
+
+  // ✅ Add event listeners support
+  on(event: string, listener: (...args: any[]) => void) {
+    if (!this.eventListeners[event]) {
+      this.eventListeners[event] = [];
+    }
+    this.eventListeners[event].push(listener);
+
+    // Forward event to the underlying provider if it supports `on`
+    if (this.provider.on) {
+      this.provider.on(event, listener);
+    }
+  }
+
+  removeListener(event: string, listener: (...args: any[]) => void) {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event] = this.eventListeners[event].filter(
+        (l) => l !== listener
+      );
+    }
+
+    if (this.provider.removeListener) {
+      this.provider.removeListener(event, listener);
+    }
+  }
+}
+
+
 // Parameters for CowSwapWidget
 const cowSwapParams = {
   appCode: "My Cool App",
@@ -55,6 +113,32 @@ const Swap = () => {
   };
   useEffect(() => {
     createProvider();
+  }, []);
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            console.log("provider -line-114", provider);
+            const wrappedProvider = new LegacyProviderWrapper(provider?.kernelProvider);
+            console.log("wrappedProvider -line-114", wrappedProvider);
+
+            setProvider(wrappedProvider);
+          }
+        }
+      }
+      // else {
+      //   toast.error("Please Login");
+      //   return;
+      // }
+    };
+
+    connectWallet();
   }, []);
 
   return (

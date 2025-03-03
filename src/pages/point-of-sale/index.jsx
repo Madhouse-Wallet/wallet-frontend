@@ -11,7 +11,6 @@ import { splitAddress } from "../../utils/globals";
 import { toast } from "react-toastify";
 import { BackBtn } from "@/components/common";
 
-
 const PointOfSale = () => {
   const userAuth = useSelector((state) => state.Auth);
   const router = useRouter();
@@ -256,6 +255,7 @@ const PointOfSale = () => {
                         </div>
                       </div>
                     </div>
+                   
                   </>
                 ) : step == 2 ? (
                   <>
