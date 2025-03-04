@@ -121,7 +121,7 @@ const CreateWallet = () => {
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
-      // console.log(email)
+      console.log("process.env.NEXT_PUBLIC_DOMAIN", process.env.NEXT_PUBLIC_DOMAIN)
       return await fetch(`/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
