@@ -44,7 +44,7 @@ export default async function handler(req, res) {
                     RoleSessionName: 'AccessMongoDB'
                 })
                 .promise();
-
+            console.log("data -->", data)
             let ses = new AWS.SES({
                 region: "us-east-1",
                 credentials: {
@@ -70,8 +70,6 @@ export default async function handler(req, res) {
             console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;
             console.log("type, subject, emailData, email", req.body)
-            const __filename = fileURLToPath(import.meta.url);
-            const __dirname = path.dirname(__filename);
             let templatePath;
             let htmlTemplate;
             let htmlBody;
@@ -114,11 +112,8 @@ export default async function handler(req, res) {
                     ToAddresses: [email],
                 },
                 Message: {
-                    Body: {
-                        Html: {
-                            Data: htmlBody,
-                        },
-                    },
+                    Body: { Text: { Data: 'Hello from SES!' } },
+
                     Subject: {
                         Data: subject,
                     },
