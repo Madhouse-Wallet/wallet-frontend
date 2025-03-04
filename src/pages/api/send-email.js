@@ -36,40 +36,23 @@ export default async function handler(req, res) {
             //     sessionToken: SessionToken,
             // });
 
-
-            const sts = new AWS.STS()
-            const data = await sts
-                .assumeRole({
-                    RoleArn: "arn:aws:iam::145023121234:role/madhouse-ecs-role",
-                    RoleSessionName: 'AccessMongoDB'
-                })
-                .promise();
-            console.log("data -->", data)
-            let ses = new AWS.SES({
-                region: "us-east-1",
-                credentials: {
-                    accessKeyId: data.Credentials.AccessKeyId,
-                    secretAccessKey: data.Credentials.SecretAccessKey,
-                    sessionToken: data.Credentials.SessionToken,
-                },
-            })
-
-
             // const ses = new AWS.SES({
             //     // region: process.env.NEXT_PUBLIC_AWS_S3_REGION
             //     region: "us-east-1"
             // });
-            // const ses = new AWS.SES({
-            //     region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
-            //     credentials: {
-            //         accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-            //         secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
-            //     }
-            // });
+            const ses = new AWS.SES({
+                region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
+                credentials: {
+                    accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
+                    secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+                }
+            });
 
-            console.log("ses-->", ses)
+            // console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;
             console.log("type, subject, emailData, email", req.body)
+            // const __filename = fileURLToPath(import.meta.url);
+            // const __dirname = path.dirname(__filename);
             let templatePath;
             let htmlTemplate;
             let htmlBody;
@@ -106,6 +89,11 @@ export default async function handler(req, res) {
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
             }
+            // Body: {
+            //     Html: {
+            //         Data: htmlBody,
+            //     },
+            // },
             // console.log("htmlBody-->",htmlBody)
             const params = {
                 Destination: {
@@ -117,6 +105,7 @@ export default async function handler(req, res) {
                             Data: htmlBody,
                         },
                     },
+
                     Subject: {
                         Data: subject,
                     },
