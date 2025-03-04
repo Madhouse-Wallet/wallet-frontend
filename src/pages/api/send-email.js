@@ -62,8 +62,8 @@ export default async function handler(req, res) {
                 // console.log("templatePath-->", templatePath)
                 // htmlTemplate = readFileSync(templatePath, 'utf-8');
 console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
-                const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
-                 htmlTemplate = await response.text();
+                // const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
+                //  htmlTemplate = await response.text();
                 // console.log("htmlTemplatdde -->", htmlTemplate);  // Logs the HTML content
                 // let ghtmlBody = replacePlaceholders(htmlTemplate, emailData);
                 // console.log("ghtmlBody -->", ghtmlBody); 
@@ -77,7 +77,7 @@ console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
                 //     name: "user.name",
                 //     verificationCode: "1234"
                 // };
-                htmlBody = replacePlaceholders(htmlTemplate, emailData);
+                // htmlBody = replacePlaceholders(htmlTemplate, emailData);
             } else if (type == "verifyOtp") {
                 // templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
                 // console.log("templatePath-->", templatePath)
@@ -89,17 +89,19 @@ console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
             }
+            // Body: {
+            //     Html: {
+            //         Data: htmlBody,
+            //     },
+            // },
 // console.log("htmlBody-->",htmlBody)
             const params = {
                 Destination: {
                     ToAddresses: [email],
                 },
                 Message: {
-                    Body: {
-                        Html: {
-                            Data: htmlBody,
-                        },
-                    },
+                    Body: { Text: { Data: 'Hello from SES!' } },
+
                     Subject: {
                         Data: subject,
                     },
