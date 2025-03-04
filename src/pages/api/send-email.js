@@ -36,23 +36,23 @@ export default async function handler(req, res) {
             //     sessionToken: SessionToken,
             // });
 
-            const ses = new AWS.SES({
-                // region: process.env.NEXT_PUBLIC_AWS_S3_REGION
-                region: "us-east-1"
-            });
             // const ses = new AWS.SES({
-            //     region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
-            //     credentials: {
-            //         accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-            //         secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
-            //     }
+            //     // region: process.env.NEXT_PUBLIC_AWS_S3_REGION
+            //     region: "us-east-1"
             // });
+            const ses = new AWS.SES({
+                region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
+                credentials: {
+                    accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
+                    secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+                }
+            });
 
-            console.log("ses-->", ses)
+            // console.log("ses-->", ses)
             const { type, subject, emailData, email } = req.body;
             console.log("type, subject, emailData, email", req.body)
-            const __filename = fileURLToPath(import.meta.url);
-            const __dirname = path.dirname(__filename);
+            // const __filename = fileURLToPath(import.meta.url);
+            // const __dirname = path.dirname(__filename);
             let templatePath;
             let htmlTemplate;
             let htmlBody;
@@ -61,9 +61,9 @@ export default async function handler(req, res) {
                 // templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
                 // console.log("templatePath-->", templatePath)
                 // htmlTemplate = readFileSync(templatePath, 'utf-8');
-console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
-                // const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
-                //  htmlTemplate = await response.text();
+                console.log("process.env.NEXT_PUBLIC_DOMAIN-->", process.env.NEXT_PUBLIC_DOMAIN)
+                const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
+                htmlTemplate = await response.text();
                 // console.log("htmlTemplatdde -->", htmlTemplate);  // Logs the HTML content
                 // let ghtmlBody = replacePlaceholders(htmlTemplate, emailData);
                 // console.log("ghtmlBody -->", ghtmlBody); 
@@ -77,7 +77,7 @@ console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
                 //     name: "user.name",
                 //     verificationCode: "1234"
                 // };
-                // htmlBody = replacePlaceholders(htmlTemplate, emailData);
+                htmlBody = replacePlaceholders(htmlTemplate, emailData);
             } else if (type == "verifyOtp") {
                 // templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
                 // console.log("templatePath-->", templatePath)
@@ -94,13 +94,17 @@ console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
             //         Data: htmlBody,
             //     },
             // },
-// console.log("htmlBody-->",htmlBody)
+            // console.log("htmlBody-->",htmlBody)
             const params = {
                 Destination: {
                     ToAddresses: [email],
                 },
                 Message: {
-                    Body: { Text: { Data: 'Hello from SES!' } },
+                    Body: {
+                        Html: {
+                            Data: htmlBody,
+                        },
+                    },
 
                     Subject: {
                         Data: subject,
