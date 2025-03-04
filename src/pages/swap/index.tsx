@@ -66,7 +66,7 @@ const cowSwapParams = {
   appCode: "My Cool App",
   width: "100%",
   height: "640px",
-  chainId: 11155111,
+  chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
   tokenLists: [
     "https://files.cow.fi/tokens/CoinGecko.json",
     "https://files.cow.fi/tokens/CowSwap.json",
