@@ -61,7 +61,7 @@ export default async function handler(req, res) {
                 // templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
                 // console.log("templatePath-->", templatePath)
                 // htmlTemplate = readFileSync(templatePath, 'utf-8');
-
+console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
                 const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
                  htmlTemplate = await response.text();
                 // console.log("htmlTemplatdde -->", htmlTemplate);  // Logs the HTML content
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
             }
-
+// console.log("htmlBody-->",htmlBody)
             const params = {
                 Destination: {
                     ToAddresses: [email],
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
                         Data: subject,
                     },
                 },
-                Source: "info@madhousewallet.com"
+                Source: `${process.env.NEXT_PUBLIC_EMAIL}`
                 // process.env.NEXT_PUBLIC_EMAIL, // Replace with your verified email
             };
 
