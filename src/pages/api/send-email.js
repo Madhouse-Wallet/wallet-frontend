@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk';
 import { readFileSync } from 'fs';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // Initialize the SES service
@@ -57,25 +58,31 @@ export default async function handler(req, res) {
             let htmlBody;
             // Path to the HTML template
             if (type == "registerOtp") {
-                templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
-                console.log("templatePath-->", templatePath)
+                // templatePath = path.join(__dirname, '../../templates', 'registerotp.html');
+                // console.log("templatePath-->", templatePath)
+                // htmlTemplate = readFileSync(templatePath, 'utf-8');
+
+                const response = await fetch(`${NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
+                 htmlTemplate = await response.text();
+                // console.log("htmlTemplatdde -->", htmlTemplate);  // Logs the HTML content
+                // let ghtmlBody = replacePlaceholders(htmlTemplate, emailData);
+                // console.log("ghtmlBody -->", ghtmlBody); 
+
+                // Read the file synchronously
+                // const htmlTemplatee = fs.readFileSync(templatePath12, 'utf-8');
+                // console.log("htmlTemplatee-->", htmlTemplatee)
 
 
-
-                const templatePateeh = path.resolve(process.cwd(), 'templates', 'registerotp.html');
-                console.log("Resolved templatePath -->", templatePateeh);
-
-
-
-                htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
                 //     verificationCode: "1234"
                 // };
                 htmlBody = replacePlaceholders(htmlTemplate, emailData);
             } else if (type == "verifyOtp") {
-                templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
-                console.log("templatePath-->", templatePath)
+                // templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
+                // console.log("templatePath-->", templatePath)
+                const response = await fetch(`${NEXT_PUBLIC_DOMAIN}verifyEmail.html`);  // Fetching from public folder
+                htmlTemplate = await response.text();
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
