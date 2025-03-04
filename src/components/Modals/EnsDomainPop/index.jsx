@@ -61,16 +61,12 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
       }
       setLoading(true)
       const web3 = new Web3Interaction("sepolia", providerr);
-      const contractAddress = process.env.NEXT_PUBLIC_REGISTRAR_ADDRESS;
-      const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_ADDRESS;
+      const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
       if (!contractAddress) {
         return toast.error("No Contract Address Found")
-      }
-      if (!resolverAddress) {
-        return toast.error("No Contract Address Found")
-      }
+      } 
       // address: string, resolverAddress: string, name: string, kernelClinet: any
-      const checkAvailability = await web3.checkDomainAvailable(contractAddress, resolverAddress, domainName, accountClinet);
+      const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName);
       if (checkAvailability) {
         let data = await updtUser({ email: userAuth.email }, {
           $set: {

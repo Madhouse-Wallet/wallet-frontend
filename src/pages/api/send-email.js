@@ -112,8 +112,11 @@ export default async function handler(req, res) {
                     ToAddresses: [email],
                 },
                 Message: {
-                    Body: { Text: { Data: 'Hello from SES!' } },
-
+                    Body: {
+                        Html: {
+                            Data: htmlBody,
+                        },
+                    },
                     Subject: {
                         Data: subject,
                     },
