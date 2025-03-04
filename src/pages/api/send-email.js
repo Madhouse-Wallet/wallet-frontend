@@ -62,7 +62,7 @@ export default async function handler(req, res) {
                 // console.log("templatePath-->", templatePath)
                 // htmlTemplate = readFileSync(templatePath, 'utf-8');
 
-                const response = await fetch(`${NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
+                const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`);  // Fetching from public folder
                  htmlTemplate = await response.text();
                 // console.log("htmlTemplatdde -->", htmlTemplate);  // Logs the HTML content
                 // let ghtmlBody = replacePlaceholders(htmlTemplate, emailData);
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
             } else if (type == "verifyOtp") {
                 // templatePath = path.join(__dirname, '../../templates', 'verifyEmail.html');
                 // console.log("templatePath-->", templatePath)
-                const response = await fetch(`${NEXT_PUBLIC_DOMAIN}verifyEmail.html`);  // Fetching from public folder
+                const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}verifyEmail.html`);  // Fetching from public folder
                 htmlTemplate = await response.text();
                 htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
