@@ -102,6 +102,51 @@ export default function SideShiftIntegration({
       }
     };
 
+    // script.onload = () => {
+    //   console.log("✅ SideShift script loaded");
+    //   addLog("SideShift script loaded successfully");
+    //   setIsScriptLoaded(true);
+    
+    //   let checkInterval = setInterval(() => {
+    //     if (window.sideshift) {
+    //       console.log("🚀 SideShift initialized!");
+    //       clearInterval(checkInterval);
+    
+    //       window.sideshift.addEventListener("settled", (deposits) => {
+    //         addLog(`Settled event: ${deposits.length} deposits`);
+    //         console.log("Settled deposits:", deposits);
+    //       });
+    
+    //       window.sideshift.addEventListener("deposit", (deposits) => {
+    //         addLog(`Deposit event: ${deposits.length} deposits`);
+    //         console.log("Deposits:", deposits);
+    //       });
+    
+    //       window.sideshift.addEventListener("order", (order) => {
+    //         addLog(`Order created: ${order.orderId}`);
+    //         console.log("Order:", order);
+    //       });
+    
+    //       // Auto-show if programmatic option is enabled
+    //       console.log("line-98", showProgrammatic);
+    //       if (showProgrammatic) {
+    //         console.log("line-100", showProgrammatic);
+    //         setTimeout(() => {
+    //           console.log("🔥 Opening SideShift...");
+    //           window.sideshift.show();
+    //         }, 500);
+    //       }
+    //     }
+    //   }, 200); // Check every 200ms
+    
+    //   setTimeout(() => {
+    //     clearInterval(checkInterval);
+    //     if (!window.sideshift) {
+    //       console.error("❌ SideShift failed to initialize");
+    //     }
+    //   }, 5000); // Timeout after 5 seconds
+    // };
+
     script.onerror = (error) => {
       addLog("Error loading SideShift script");
       console.error("Error loading SideShift script:", error);
