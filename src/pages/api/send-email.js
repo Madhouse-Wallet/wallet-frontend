@@ -83,7 +83,6 @@ console.log("process.env.NEXT_PUBLIC_DOMAIN-->",process.env.NEXT_PUBLIC_DOMAIN)
                 // console.log("templatePath-->", templatePath)
                 const response = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}verifyEmail.html`);  // Fetching from public folder
                 htmlTemplate = await response.text();
-                htmlTemplate = readFileSync(templatePath, 'utf-8');
                 // const placeholders = {
                 //     name: "user.name",
                 //     verificationCode: "1234"
