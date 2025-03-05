@@ -34,7 +34,7 @@ const MainLayout = ({ Component, pageProps }) => {
 
       return () => clearTimeout(timer); // Cleanup timeout on unmount
     }
-  }, [ensDomain]);
+  }, [ensDomain, userAuth?.login]);
   return (
     <>
       {/* <div className="flex items-start justify-end relative">
