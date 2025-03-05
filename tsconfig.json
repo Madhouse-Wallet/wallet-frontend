@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","src/components/Modals/BtcExchangePop/LightningTab.jsx", "src/components/SideShiftWidget/index.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","src/components/Modals/BtcExchangePop/LightningTab.jsx", "src/components/SideShiftWidget/index.jsx", "src/components/SideShift/SideShiftWidget.jsx"],
   "exclude": ["node_modules"]
 }

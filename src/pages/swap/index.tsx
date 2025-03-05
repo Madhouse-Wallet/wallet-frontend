@@ -77,7 +77,7 @@ const cowSwapParams = {
     amount: "100000",
   },
   buy: {
-    asset: "COW",
+    asset: "TBTC",
     amount: "0",
   },
   enabledTradeTypes: ["swap", "limit", "advanced", "yield"],
@@ -125,7 +125,9 @@ const Swap = () => {
           console.log("provider-->", provider);
           if (provider) {
             console.log("provider -line-114", provider);
-            const wrappedProvider = new LegacyProviderWrapper(provider?.kernelProvider);
+            const wrappedProvider = new LegacyProviderWrapper(
+              provider?.kernelProvider
+            );
             console.log("wrappedProvider -line-114", wrappedProvider);
 
             setProvider(wrappedProvider);

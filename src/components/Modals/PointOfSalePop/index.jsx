@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import SideShiftWidget from "@/components/SideShift/SideShiftWidget";
 import { useSelector } from "react-redux";
+import LoadingScreen from "@/components/LoadingScreen";
+import { createPortal } from "react-dom";
 
 // css
 
@@ -15,6 +17,14 @@ import { useSelector } from "react-redux";
 const PointOfSalePop = ({ pointSale, setPointSale }) => {
   const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timer); // Cleanup on unmount
+  }, []);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
   return (
@@ -38,9 +48,10 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
             <div className="top pb-3">
               {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Add Supply
-              </h5> */} 
+              </h5> */}
             </div>
             <div className="modalBody text-center">
+              {isLoading && createPortal(<LoadingScreen />, document.body)}
               <div className="py-2">
                 <Link
                   href="/point-of-sale"
@@ -50,21 +61,25 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
                   Crypto Link
                 </Link>
               </div>
+              {/* {userAuth?.walletAddress && ( */}
               <div className="py-2">
                 <SideShiftWidget
                   // setPointSale={setPointSale}
                   onClick={() => setPointSale(false)}
                   // pointSale={pointSale}
-                  parentAffiliateId={process.env.NEXT_PUBLIC_SIDE_SHIFT_PARENT_ID}
-                  defaultDepositMethodId="btc"
-                  defaultSettleMethodId="usdcarb"
-                  theme="light"
+                  // parentAffiliateId={
+                  //   process.env.NEXT_PUBLIC_SIDE_SHIFT_PARENT_ID
+                  // }
+                  // defaultDepositMethodId="btc"
+                  // defaultSettleMethodId="usdcarb"
+                  // theme="light"
                   settleAddress={userAuth?.walletAddress}
                   buttonText="Cash App"
                   buttonColor="rgb(232, 90, 67)"
                   textColor="rgb(17, 11, 11)"
                 />
               </div>
+              {/* )} */}
             </div>
           </div>
         </div>
