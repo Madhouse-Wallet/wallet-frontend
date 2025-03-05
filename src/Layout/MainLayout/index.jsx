@@ -30,11 +30,11 @@ const MainLayout = ({ Component, pageProps }) => {
     if (userAuth?.login && (!(userAuth?.ensSetup)) ) {
       const timer = setTimeout(() => {
         setEnsDomain(true); // Set state to prevent reopening
-      }, 12000); // 10 seconds delay
+      }, 60000); // 10 seconds delay
 
       return () => clearTimeout(timer); // Cleanup timeout on unmount
     }
-  }, [userAuth?.login]);
+  }, [ensDomain]);
   return (
     <>
       {/* <div className="flex items-start justify-end relative">
