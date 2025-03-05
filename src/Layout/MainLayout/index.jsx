@@ -30,7 +30,7 @@ const MainLayout = ({ Component, pageProps }) => {
     if (userAuth?.login && (!(userAuth?.ensSetup)) ) {
       const timer = setTimeout(() => {
         setEnsDomain(true); // Set state to prevent reopening
-      }, 60000); // 10 seconds delay
+      }, 20000); // 10 seconds delay
 
       return () => clearTimeout(timer); // Cleanup timeout on unmount
     }

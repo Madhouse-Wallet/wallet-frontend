@@ -69,7 +69,8 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
       }
 
       let userExist = await getEnsName(domainName);
-      if (userExist) {
+      console.log("userExist-->",userExist)
+      if (userExist.status == "success") {
         return toast.error("Domain Already Exist!")
       }
       setLoading(true)
