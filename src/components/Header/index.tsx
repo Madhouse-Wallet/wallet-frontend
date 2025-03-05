@@ -52,6 +52,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             multisigAddress: userAuth.multisigAddress,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
             multisigSetup: userAuth.multisigSetup,
             multisigActivate: userAuth.multisigActivate,
           })
@@ -82,6 +84,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         multisigAddress: "",
         passkey2: "",
         passkey3: "",
+        ensName: "",
+        ensSetup: false,
         multisigSetup: false,
         multisigActivate: false,
       })

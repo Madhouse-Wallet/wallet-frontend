@@ -123,6 +123,8 @@ const Login = () => {
                   multisigAddress: (userExist.userId.multisigAddress || ""),
                   passkey2: (userExist.userId.passkey2 || ""),
                   passkey3: (userExist.userId.passkey3 || ""),
+                  ensName: userExist.userId.ensName || "",
+                  ensSetup: userExist.userId.ensSetup || false,
                   multisigSetup: (userExist.userId.multisigSetup || false),
                   multisigActivate: (userExist.userId.multisigActivate || false)
                 })
@@ -150,6 +152,8 @@ const Login = () => {
                 multisigAddress: (userExist.userId.multisigAddress || ""),
                 passkey2: webAuthKeyStringObj2,
                 passkey3: webAuthKeyStringObj3,
+                ensName: userExist.userId.ensName || "",
+                ensSetup: userExist.userId.ensSetup || false,
                 multisigSetup: (userExist.userId.multisigSetup || false),
                 multisigActivate: (userExist.userId.multisigActivate || false)
               }, "authUser")

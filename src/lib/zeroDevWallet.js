@@ -275,15 +275,15 @@ export const zeroTrxn = async (kernelClient) => {
       }]),
     });
     console.log("op1Hash-->", op1Hash)
-    // await kernelClient.waitForUserOperationReceipt({
-    //   hash: op1Hash,
-    // });
-
+    await kernelClient.waitForUserOperationReceipt({
+      hash: op1Hash,
+    });
     console.log("userOp sent");
     return op1Hash;
   } catch (error) {
     console.log("zeroTrxn error-->", error)
-    return false
+    let tr = await zeroTrxn(kernelClient)
+    return tr
   }
 }
 
@@ -323,6 +323,7 @@ const recoveryTrxn = async (kernelClient, newSigner) => {
 }
 export const createAccount = async (signer1, phrase) => {
   try {
+    console.log("signer1-->", signer1)
     const getAccount = await accountCreateClient(signer1, phrase)
     // const getAccount = await accountClient(signer1)
     if (!getAccount) {

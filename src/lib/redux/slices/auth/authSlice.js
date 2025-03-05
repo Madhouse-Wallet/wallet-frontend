@@ -48,6 +48,8 @@ const initialState = {
   multisigAddress: (data?.multisigAddress || ""),
   passkey2: (data?.passkey2 || ""),
   passkey3: (data?.passkey3 || ""),
+  ensName: (data?.ensName || ""),
+  ensSetup: (data?.ensSetup || false),
   multisigSetup: (data?.multisigSetup || false),
   multisigActivate: (data?.multisigSetup || false)
 };
@@ -69,6 +71,8 @@ export const authSlice = createSlice({
       state.multisigAddress = action.payload.multisigAddress;
       state.passkey2 = action.payload.passkey2;
       state.passkey3 = action.payload.passkey3;
+      state.ensName = action.payload.ensName;
+      state.ensSetup = action.payload.ensSetup;
       state.multisigSetup = action.payload.multisigSetup;
       state.multisigActivate = action.payload.multisigActivate
     },

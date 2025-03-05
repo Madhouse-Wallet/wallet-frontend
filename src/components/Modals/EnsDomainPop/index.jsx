@@ -11,16 +11,22 @@ import OtpInput from "react-otp-input";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import {
   getUser,
+  getSubdomainApproval,
   updtUser
 } from "@/lib/apiCall";
 
-
+import {
+  webAuthKeyStore,
+  storedataLocalStorage
+} from "../../../utils/globals";
 const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
   const [providerr, setProviderr] = useState(null);
   const [accountClinet, setAccountClinet] = useState(null);
   const [domainName, setDomainName] = useState(null);
   const [loading, setLoading] = useState(false);
   const userAuth = useSelector((state) => state.Auth);
+  const dispatch = useDispatch();
+
 
   const handleChangeEmail = () => {
     setEnsDomain(!ensDomain)
@@ -62,28 +68,93 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
       setLoading(true)
       const web3 = new Web3Interaction("sepolia", providerr);
       const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
+      const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_CONTRACT;
+      const parentDomain = process.env.NEXT_PUBLIC_PARENT_DOMAIN;
+      const defApiKey = process.env.NEXT_PUBLIC_DEFENDER_API_KEY;
+      const defApiSecret = process.env.NEXT_PUBLIC_DEFENDER_API_SECRET;
+      const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+
+
+
       if (!contractAddress) {
         return toast.error("No Contract Address Found")
-      } 
+      }
       // address: string, resolverAddress: string, name: string, kernelClinet: any
-      const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName);
-      if (checkAvailability) {
+      // const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAuth?.walletAddress);
+      let SubdomainApproval = await getSubdomainApproval(contractAddress, defApiKey, defApiSecret, userAuth?.walletAddress);
+      console.log("SubdomainApproval-->", SubdomainApproval)
+      const assignSubdomain = await web3.checkDomainAvailable(contractAddress, domainName, resolverAddress, parentDomain, userAuth?.walletAddress);
+
+      // checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any):
+
+      if (assignSubdomain) {
         let data = await updtUser({ email: userAuth.email }, {
           $set: {
-            ensName: checkAvailability,
+            ensName: assignSubdomain,
             ensSetup: true
           } // Ensure this is inside `$set`
         })
-        console.log("data-->",data, "checkAvailability-->", checkAvailability)
+        console.log("data-->", data, "assignSubdomain-->", assignSubdomain)
+        let webAuthKeyStringObj = ""
+        let webAuthKeyStringObj2 = ""
+        let webAuthKeyStringObj3 = ""
+        if (userAuth.webauthKey) {
+          webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey)
+        }
+        if (userAuth.passkey2) {
+          webAuthKeyStringObj2 = await webAuthKeyStore(userAuth.passkey2)
+        }
+        if (userAuth.passkey3) {
+          webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
+        }
+
+
+        dispatch(
+          loginSet({
+            login: userAuth.login,
+            username: userAuth.username,
+            email: userAuth.email,
+            walletAddress: userAuth.walletAddress,
+            passkeyCred: userAuth.passkeyCred,
+            webauthKey: userAuth.webauthKey,
+            id: userAuth.id,
+            signer: userAuth.signer,
+            multisigAddress: userAuth.multisigAddress,
+            passkey2: userAuth.passkey2,
+            passkey3: userAuth.passkey3,
+            ensName: assignSubdomain,
+            ensSetup: true,
+            multisigSetup: userAuth.multisigSetup,
+            multisigActivate: userAuth.multisigActivate,
+          })
+        );
+
+        storedataLocalStorage({
+          login: true,
+          walletAddress: userAuth.walletAddress || "",
+          signer: "",
+          username: userAuth.username,
+          email: userAuth.email,
+          passkeyCred: "",
+          webauthKey: webAuthKeyStringObj,
+          id: userAuth.id,
+          multisigAddress: userAuth.multisigAddress,
+          passkey2: webAuthKeyStringObj2,
+          passkey3: webAuthKeyStringObj3,
+          ensName: assignSubdomain,
+          ensSetup: true,
+          multisigSetup: userAuth.multisigSetup,
+          multisigActivate: userAuth.multisigActivate
+        }, "authUser")
         setLoading(false)
         toast.success("Setup Done!")
+        handleChangeEmail()
       }
-      console.log("checkAvailability-->", checkAvailability)
     } catch (error) {
       console.log(" setup ens domain error-->", error)
       setLoading(false)
 
-      toast.error(error)
+      toast.error((error?.message || error))
     }
   }
 
@@ -92,13 +163,14 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <buttonbuy
+
+        {/* <button
           onClick={handleChangeEmail}
           className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
         >
           {closeIcn}
-        </buttonbuy>
+        </button> */}
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
@@ -108,7 +180,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
             <div className="modalBody">
               <div className="py-2 text-center">
                 <h5 className="m-0 text-xl font-bold">
-                  Enter Ens Domain Name
+                  Please Setup Ens Domain Name
                 </h5>
               </div>
               <div className="py-2">
@@ -126,7 +198,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
                   disabled={loading}
                   type="button"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >{loading?"Please wait...":"Save"}
+                >{loading ? "Please wait..." : "Save"}
                 </button>
               </div>
             </div>

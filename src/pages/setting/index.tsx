@@ -106,6 +106,8 @@ const Setting: React.FC = () => {
             walletAddress: userAuth.walletAddress,
             passkeyCred: userAuth.passkeyValidatorNew,
             webauthKey: userAuth.webauthKey,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
             id: userAuth.id,
             signer: userAuth.signer,
             multisigAddress: result.address,
@@ -134,6 +136,8 @@ const Setting: React.FC = () => {
           webauthKey: webAuthKeyStringObj,
           id: userAuth.id,
           multisigAddress: userAuth.multisigAddress,
+          ensName: userAuth.ensName || "",
+          ensSetup: userAuth.ensSetup || false,
           passkey2: webAuthKeyStringObj2,
           passkey3: webAuthKeyStringObj3,
           multisigSetup: true,
@@ -374,7 +378,9 @@ const Setting: React.FC = () => {
           passkey2: "",
           passkey3: "",
           multisigSetup: false,
-          multisigActivate: false
+          multisigActivate: false,
+          ensName: "",
+          ensSetup: false,
         })
       );
       toast.success("Logout Successfully!");
@@ -852,7 +858,7 @@ const Setting: React.FC = () => {
                     </button>
                   </div>)
                   }
-                  {userAuth?.login && (<>
+                  {/* {userAuth?.login && (<>
                     <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -873,7 +879,7 @@ const Setting: React.FC = () => {
                       Setup
                     </button>
                   </div>
-                  </>)}
+                  </>)} */}
                 
 
                   <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">

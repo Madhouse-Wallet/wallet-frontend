@@ -102,6 +102,8 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               passkeyCred: checkAccount.passkeyValidatorNew,
               webauthKey: checkAccount.newwebAuthKey,
               id: userAuth.id,
+              ensName: userAuth.ensName || "",
+              ensSetup: userAuth.ensSetup || false,
               signer: userAuth.signer,
               multisigAddress: userAuth.multisigAddress,
               passkey2: userAuth.passkey2,
@@ -133,6 +135,8 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             multisigAddress:  userAuth.multisigAddress,
             passkey2:  webAuthKeyStringObj2,
             passkey3: webAuthKeyStringObj3,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
             multisigSetup:  userAuth.multisigSetup,
             multisigActivate:  userAuth.multisigActivate
           }, "authUser")

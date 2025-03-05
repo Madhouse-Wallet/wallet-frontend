@@ -25,6 +25,34 @@ export const getUser = async (email) => {
 };
 
 
+
+export const getSubdomainApproval = async (address, defApiKey, defApiSecret,  userAddress ) => {
+    try {
+        try {
+            // console.log(email)
+            return await fetch(`/api/relayer`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    address, defApiKey, defApiSecret,  userAddress 
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    // console.log("data-->", data);
+                    return data;
+                });
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    } catch (error) {
+        console.log("error-->", error);
+        return false;
+    }
+};
+
+
 export const getUserWallet = async (wallet) => {
     try {
         try {

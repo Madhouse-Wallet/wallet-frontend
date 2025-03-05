@@ -6,6 +6,7 @@ import fetchSubdomainContractAbi from "../../subdomainContractAbi.json";
 import { getContract } from "viem";
 import curveContractAbi from "../../curveAbi.json";
 import USDC_ABI from "../../usdcAbi.json";
+
 // Namehash implementation (unchanged)
 function namehash(name: any) {
   let node = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -92,18 +93,35 @@ class Web3Interaction {
 
 
 
-  checkDomainAvailable = async (address: string, name: string): Promise<any> => {
+  checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any): Promise<any> => {
+    //checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAddress);
     return new Promise(async (resolve, reject) => {
       try {
-        const label = name.replace('.eth', '');
-        console.log(`Checking availability for: ${label}`);
+
         const nameWrapper = this.getSubdomainContract(address);
         if (!nameWrapper) throw new Error("Contract initialization failed");
-        const tx = await nameWrapper.registerSubdomain(label)
+
+        const namehash = (name: any) => ethers.utils.namehash(name);
+        const parentNode = namehash(parentDomain);
+        console.log("Parent Node:", parentNode);
+        console.log(`Creating subdomain: ${name}.${parentDomain}`);
+        const subdomainLabel = "test1";
+        const ttl = 0;
+        const fuses = 0;
+        const expiry = 0;
+        const tx = await nameWrapper.setSubnodeRecord(
+          parentNode,
+          name,
+          userAddress,
+          resolverAddress,
+          ttl,
+          fuses,
+          expiry
+        );
         console.log("Transaction sent:", tx.hash);
         await tx.wait();
         console.log("Subdomain created successfully!");
-        resolve(label);
+        resolve(name)
       } catch (error: any) {
         reject(error.reason || error.data?.message || error.message || error);
       }

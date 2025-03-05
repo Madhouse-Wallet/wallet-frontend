@@ -26,7 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Insert the new user
-        const result = await usersCollection.insertOne({ email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, multisigAddress: "", passkey2:"", passkey3:"", multisigSetup: false, multisigActivate: false, createdAt: new Date() });
+        const result = await usersCollection.insertOne({ email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, multisigAddress: "", passkey2:"", passkey3:"", multisigSetup: false, multisigActivate: false,  ensName: "",
+            ensSetup: false, createdAt: new Date() });
         // console.log("result-->", result)
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
