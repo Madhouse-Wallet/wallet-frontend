@@ -49,8 +49,14 @@ import { english, generateMnemonic } from 'viem/accounts'
 //     getWalletNetWorth("0x0ADA3111B866fF1aD0477F0C5D2e8eD35A36Eb5b", providerUrl, etherscanApiKey);
 
 
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
+
+const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
+
+// ?provider=PIMLICO
+
+const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
+
+console.log("PAYMASTER_RPC-->",PAYMASTER_RPC)
 const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 
 
@@ -275,15 +281,16 @@ export const zeroTrxn = async (kernelClient) => {
       }]),
     });
     console.log("op1Hash-->", op1Hash)
-    await kernelClient.waitForUserOperationReceipt({
-      hash: op1Hash,
-    });
+    // await kernelClient.waitForUserOperationReceipt({
+    //   hash: op1Hash,
+    // });
     console.log("userOp sent");
     return op1Hash;
   } catch (error) {
     console.log("zeroTrxn error-->", error)
-    let tr = await zeroTrxn(kernelClient)
-    return tr
+    // let tr = await zeroTrxn(kernelClient)
+    // return tr
+    return false
   }
 }
 
