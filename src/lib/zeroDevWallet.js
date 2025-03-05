@@ -50,11 +50,11 @@ import { english, generateMnemonic } from 'viem/accounts'
 
 
 
-const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
+// const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
 
 // ?provider=PIMLICO
 
-const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
+// const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
 
 // console.log("PAYMASTER_RPC-->",PAYMASTER_RPC)
 const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
@@ -62,10 +62,10 @@ const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NE
 
 // export const PASSKEY_SERVER_URL =
 // "https://passkeys.zerodev.app/api/v3/efbc1add-1c14-476e-b3f1-206db80e673c";
-// export const BUNDLER_URL =
-// `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-// export const PAYMASTER_RPC =
-// `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+export const BUNDLER_URL =
+`https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+export const PAYMASTER_RPC =
+`https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
 const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
 const entryPoint = getEntryPoint("0.7")

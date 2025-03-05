@@ -25,6 +25,34 @@ export const getUser = async (email) => {
 };
 
 
+export const getEnsName = async (ensName) => {
+    try {
+        try {
+            // console.log(email)
+            return await fetch(`/api/get-user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ensName,
+                    type:"ens"
+                }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    // console.log("data-->", data);
+                    return data;
+                });
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    } catch (error) {
+        console.log("error-->", error);
+        return false;
+    }
+};
+
+
 
 export const getSubdomainApproval = async (address, defApiKey, defApiSecret,  userAddress ) => {
     try {

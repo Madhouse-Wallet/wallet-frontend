@@ -11,6 +11,7 @@ import OtpInput from "react-otp-input";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import {
   getUser,
+  getEnsName,
   getSubdomainApproval,
   updtUser
 } from "@/lib/apiCall";
@@ -59,11 +60,17 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
 
   const submitFunc = async () => {
     try {
+
       if (!providerr) {
         return toast.error("Please Login!")
       }
       if (!domainName) {
         return toast.error("Please Enter Domain Name!")
+      }
+
+      let userExist = await getEnsName(domainName);
+      if (userExist) {
+        return toast.error("Domain Already Exist!")
       }
       setLoading(true)
       const web3 = new Web3Interaction("sepolia", providerr);

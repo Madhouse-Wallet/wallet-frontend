@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         if (!isCurrentlyApproved) {
             console.log(`Approving ${userAddress} to manage subdomains...`);
             const tx = await ensContract.setApprovalForAll(userAddress, true);
-            
+            console.log("tx-->",tx)
             // Wait for transaction confirmation
             const receipt = await provider.waitForTransaction(tx.hash);
             console.log(`Approval TX: ${tx.hash}`);
