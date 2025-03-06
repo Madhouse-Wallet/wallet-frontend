@@ -363,7 +363,7 @@ const Dashboard = () => {
                   </>
                 )} */}
 
-                <div
+                {/* <div
                   className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5  py-4 text-14 backdrop-blur-md"
                   style={{ border: " 1px solid #565656a3", marginTop: 0 }}
                 >
@@ -373,7 +373,7 @@ const Dashboard = () => {
                       {healthFactor.toFixed(2)}
                     </span>
                   </p>
-                </div>
+                </div> */}
               </div>
               <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 sm:pt-6 pt-4 flex-wrap">
                 {cardData.map((item, key) => (
