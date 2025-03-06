@@ -19,6 +19,7 @@ import {
 import { ECDSA_VALIDATOR_ADDRESS } from "@zerodev/ecdsa-validator"
 import { toFunctionSelector } from "viem"
 
+import {delay} from "../utils/globals"
 
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
@@ -276,10 +277,12 @@ const checkDeployment = async (kernelClient) => {
     if (testDeployment) {
       return true
     } else {
+      await delay(60000)
       let t = await checkDeployment(kernelClient)
       return t
     }
   } catch (error) {
+    await delay(60000)
     let t = await checkDeployment(kernelClient)
     return t
   }

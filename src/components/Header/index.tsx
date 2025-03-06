@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const dispatch = useDispatch();
 
   const reloadPasskey = async () => {
-    if (userAuth.login) {
+    if (userAuth.login && (!(userAuth?.pos))) {
       const {
         newPasskeyValidator = "",
         msg = "",
@@ -44,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             login: userAuth.login,
             username: userAuth.username,
             email: userAuth.email,
+            pos:(userAuth?.pos || false),
             walletAddress: userAuth.walletAddress,
             passkeyCred: newPasskeyValidator,
             webauthKey: userAuth.webauthKey,

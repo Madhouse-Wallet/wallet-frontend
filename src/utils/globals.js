@@ -43,6 +43,9 @@ export const storedataLocalStorage = async (data, name) => {
     }
 }
 
+export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 export const logoutStorage = async () => {
     try {
         localStorage.removeItem("authUser");

@@ -46,7 +46,7 @@ class Web3Interaction {
         return ethBalance;
       };
 
-      getBalanceWithSigner();
+      // getBalanceWithSigner();
     }
   }
 

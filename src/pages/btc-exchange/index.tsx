@@ -65,6 +65,7 @@ const BTCEchange = () => {
       // const signer = provider.getSigner();
       // const address = await signer.getAddress();
       // console.log("signer00>",signer,address)
+      console.log("userAuth.passkeyCred-->",userAuth.passkeyCred)
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);

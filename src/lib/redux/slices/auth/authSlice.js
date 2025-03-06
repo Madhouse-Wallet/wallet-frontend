@@ -13,11 +13,14 @@ if (typeof window !== "undefined") {
   storedDataString = localStorage.getItem("authUser");
   data = storedDataString ? JSON.parse(storedDataString) : null;
   if (data) {
-    data.webauthKey = {
-      ...data.webauthKey,
-      pubX: BigInt(data.webauthKey.pubX),
-      pubY: BigInt(data.webauthKey.pubY),
+    if (data.webauthKey) {
+      data.webauthKey = {
+        ...data.webauthKey,
+        pubX: BigInt(data.webauthKey.pubX),
+        pubY: BigInt(data.webauthKey.pubY),
+      }
     }
+
     if (data.passkey2) {
       data.passkey2 = {
         ...data.passkey2,
@@ -44,6 +47,7 @@ const initialState = {
   email: (data?.email || ""),
   id: (data?.id || ""),
   login: (data?.login || false),
+  pos: (data?.pos || false),
   signer: "",
   multisigAddress: (data?.multisigAddress || ""),
   passkey2: (data?.passkey2 || ""),

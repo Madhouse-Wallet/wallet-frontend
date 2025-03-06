@@ -534,12 +534,12 @@ const Setting: React.FC = () => {
                         >
                           Subdomain Name:
                         </div>
-                        <span className="text-white flex items-center">--</span>
+                        <span className="text-white flex items-center">  {userAuth?.ensName  ? userAuth?.ensName : "--"}</span>
                       </li>
                     </ul>
                   </div>
                   <div className="right">
-                    {userAuth?.login ? (
+                    {userAuth?.login && (!(userAuth?.pos)) ? (
                       <button
                         onClick={LogoutFuc}
                         className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
@@ -561,7 +561,7 @@ const Setting: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                  {userAuth?.login ? (
+                  {userAuth?.login && (!(userAuth?.pos)) ? (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -728,7 +728,7 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  {userAuth?.login && (
+                  {userAuth?.login && (!(userAuth?.pos)) && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -763,7 +763,7 @@ const Setting: React.FC = () => {
                     </div>
                   )}
 
-                  {userAuth?.login && (
+                  {userAuth?.login && (!(userAuth?.pos)) && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -784,7 +784,7 @@ const Setting: React.FC = () => {
                     </div>
                   )}
 
-                  {userAuth?.login && (
+                  {userAuth?.login && (!(userAuth?.pos)) && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -804,7 +804,7 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  {userAuth?.login && (!userAuth.multisigSetup) && (
+                  {userAuth?.login && (!(userAuth?.pos)) && (!userAuth.multisigSetup) && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -839,7 +839,7 @@ const Setting: React.FC = () => {
                       </button>
                     </div>
                   )}
-                  {userAuth?.login && (userAuth.multisigSetup) && (<div
+                  {userAuth?.login && (!(userAuth?.pos)) && (userAuth.multisigSetup) && (<div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                   >
@@ -858,7 +858,7 @@ const Setting: React.FC = () => {
                     </button>
                   </div>)
                   }
-                  {/* {userAuth?.login && (<>
+                  {/* {userAuth?.login && (!(userAuth?.pos)) && (<>
                     <div
                     tabIndex={-1}
                     className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
