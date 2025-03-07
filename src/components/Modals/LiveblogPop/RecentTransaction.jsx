@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import TransactionDetailPop from "../TransactionDetailPop";
 
-const RecentTransaction = ({ transactions }) => {
+const RecentTransaction = ({ transactions,data }) => {
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   // Get status color
@@ -92,6 +92,13 @@ const RecentTransaction = ({ transactions }) => {
     setTransactionData(tx);
   };
   const transactionsByDate = groupTransactionsByDate(transactions);
+
+  const hasLoanBalance = data.some((item) => item.head === "Loan Balance");
+
+  // If "Loan Balance" is found, do not render anything
+  if (hasLoanBalance) {
+    return null;
+  }
 
   return (
     <>

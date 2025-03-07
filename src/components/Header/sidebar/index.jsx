@@ -32,6 +32,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         multisigAddress: "",
         passkey2: "",
         passkey3: "",
+        ensName: "",
+        ensSetup: false,
         multisigSetup: false,
         multisigActivate: false,
       })

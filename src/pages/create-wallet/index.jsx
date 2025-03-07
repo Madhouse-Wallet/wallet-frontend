@@ -202,6 +202,8 @@ const CreateWallet = () => {
                 multisigAddress:  data.userData.multisigAddress,
                 passkey2:  data.userData.passkey2,
                 passkey3:  data.userData.passkey3,
+                ensName: data.userData.ensName || "",
+                ensSetup: data.userData.ensSetup || false,
                 multisigSetup:  data.userData.multisigSetup,
                 multisigActivate:  data.userData.multisigActivate
               })
@@ -227,6 +229,8 @@ const CreateWallet = () => {
               multisigAddress:  data.userData.multisigAddress,
               passkey2:  webAuthKeyStringObj2,
               passkey3: webAuthKeyStringObj3,
+              ensName: data.userData.ensName || "",
+              ensSetup: data.userData.ensSetup || false,
               multisigSetup:  data.userData.multisigSetup,
               multisigActivate:  data.userData.multisigActivate
             }, "authUser")

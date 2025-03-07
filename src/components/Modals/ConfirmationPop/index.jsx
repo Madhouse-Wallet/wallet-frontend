@@ -34,6 +34,8 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
             login: false,
             walletAddress: "",
             signer: "",
+            ensName: "",
+            ensSetup: false,
             username: "",
             email: "",
             passkeyCred: "",

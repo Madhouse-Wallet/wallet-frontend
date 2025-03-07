@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const dispatch = useDispatch();
 
   const reloadPasskey = async () => {
-    if (userAuth.login) {
+    if (userAuth.login && (!(userAuth?.pos))) {
       const {
         newPasskeyValidator = "",
         msg = "",
@@ -44,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             login: userAuth.login,
             username: userAuth.username,
             email: userAuth.email,
+            pos:(userAuth?.pos || false),
             walletAddress: userAuth.walletAddress,
             passkeyCred: newPasskeyValidator,
             webauthKey: userAuth.webauthKey,
@@ -52,6 +53,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             multisigAddress: userAuth.multisigAddress,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
             multisigSetup: userAuth.multisigSetup,
             multisigActivate: userAuth.multisigActivate,
           })
@@ -82,6 +85,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         multisigAddress: "",
         passkey2: "",
         passkey3: "",
+        ensName: "",
+        ensSetup: false,
         multisigSetup: false,
         multisigActivate: false,
       })

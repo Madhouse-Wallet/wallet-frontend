@@ -1,10 +1,145 @@
 import { useTheme } from "@/ContextApi/ThemeContext";
-import React, { useState } from "react";
+import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import Web3Interaction from "@/utils/web3Interaction";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import styled, { keyframes } from "styled-components";
+import { ethers } from "ethers";
 
 const BlogCard = ({ classN, data }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const { theme, toggleTheme } = useTheme();
-console.log("data",data)
+  const [supply, setSupply] = useState("0");
+  const [debtvalue, setDebtvalue] = useState("0");
+  const [walletBalance, setWalletBalance] = useState("0");
+  const [providerr, setProviderr] = useState(null);
+  const [healthValue, setHealthtvalue] = useState("0");
+
+  const calculateCollateralAndHealthFactor = async (
+    collateralAmount, // in ETH
+    debt,
+    provider
+  ) => {
+    try {
+      console.log("line-24", collateralAmount, debt, provider);
+      if (!provider) {
+        console.log("line-26");
+        return { collateralValue: "0.00", healthFactor: "0.00" };
+      }
+
+      // Fetch ETH price
+      const contractAddress =
+        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
+      const web3 = new Web3Interaction("sepolia", provider);
+      const receipt = await web3.fetchPrice(contractAddress);
+      const receiptInEther = ethers.utils.formatEther(receipt);
+      const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+
+      const collateral = parseFloat(collateralAmount);
+      const debtAmount = parseFloat(debt);
+      console.log("line-39", collateral, debtAmount);
+
+      if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
+        throw new Error("Invalid collateral amount or debt provided.");
+      }
+
+      const collateralValue = ethPrice * collateral;
+      const healthFactor = (collateralValue * 1.1) / debtAmount;
+      console.log("line-47", collateralValue, healthFactor);
+
+      setHealthtvalue(healthFactor.toFixed(2));
+    } catch (error) {
+      return { collateralValue: "0.00", healthFactor: "0.00" };
+    }
+  };
+
+  const fetchTroveData = async (provider) => {
+    try {
+      if (!provider) {
+        return;
+      }
+
+      const walletAddress = userAuth?.walletAddress;
+      console.log("walletAddress-->", walletAddress);
+      // Create web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+      console.log("web3-->", web3);
+      // Contract address
+      const contractAddress =
+        process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS;
+      const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
+      console.log("TUSDAddress-->93", TUSDAddress, contractAddress);
+      // Fetch data from the contract
+      const troveResponse = await web3.Troves(contractAddress, walletAddress);
+      console.log("troveResponse-->93", troveResponse);
+      const balanceResponse = await web3.balanceOf(TUSDAddress, walletAddress);
+      console.log("balanceResponse-->93", balanceResponse);
+      const coll = troveResponse?.coll;
+      const debt = troveResponse?.debt;
+
+      const collInEther = ethers.utils.formatEther(coll);
+      const debtInEther = ethers.utils.formatEther(debt);
+      const balance = ethers.utils.formatEther(balanceResponse);
+      console.log("balance-->93", balance);
+      const result = calculateCollateralAndHealthFactor(
+        collInEther,
+        debtInEther,
+        provider
+      );
+      console.log("line-84", result);
+      setSupply(collInEther);
+      setDebtvalue(debtInEther);
+      setWalletBalance(balance);
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to fetch trove data");
+    }
+  };
+  console.log("data", data);
+
+  useEffect(() => {
+    console.log("userAuth-->", userAuth);
+
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            console.log("provider-107", provider);
+            setProviderr(provider?.ethersProvider);
+            try {
+              fetchTroveData(provider?.ethersProvider);
+            } catch (err) {
+              toast.error("Failed to connect wallet");
+              setLoading(false);
+            }
+          } else {
+            toast.error(
+              "MetaMask not detected. Please install MetaMask to proceed."
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      }
+    };
+
+    // Check if any item in data has head property equal to "Loan Balance"
+    const shouldConnectWallet = data?.some(
+      (item) => item.head === "Loan Balance"
+    );
+
+    // Only call connectWallet if shouldConnectWallet is true
+    if (shouldConnectWallet) {
+      connectWallet();
+    }
+  }, [data, userAuth]); // Added data to dependencies since we're using it
+
+  console.log("line-122", supply, debtvalue, walletBalance, healthValue);
   return (
     <>
       {data?.map((item, index) => (
@@ -18,48 +153,159 @@ console.log("data",data)
               </div>
             </div>
           </div>
-          <CardWrpper key={index} className={`${classN} `}>
-            <CardCstm style={{ opacity: 1, transform: "none" }}>
-              <div className="flex w-full flex-col items-center justify-between">
-                <button
-                  className={`
+          {item.head !== "Loan Balance" ? (
+            <>
+              {" "}
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
                 
                  bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
-                >
-                  <span className="chartSvg absolute top-0 left-0 h-full w-full">
-                    {chartSvg}
-                  </span>
-                  <div className="flex flex-col gap-1 tabular-nums md:gap-2">
-                    <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
-                      {item.head}
-                    </div>
-                    <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
-                      <span className="min-w-0 truncate">{item.value}</span>
-                    </div>
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          {item.head}
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">{item.value}</span>
+                        </div>
+                      </div>
+                    </button>
                   </div>
-                  {/* <div className="flex-1" />
-                <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
-                  +20.1% from last month
-                </div>
-                <div
-                  aria-valuemax={100}
-                  aria-valuemin={0}
-                  role="progressbar"
-                  data-state="indeterminate"
-                  data-max={100}
-                  className={` bg-white/10 relative w-full overflow-hidden rounded-full h-1.5`}
-                >
-                  <div
-                    data-state="indeterminate"
-                    data-max={100}
-                    className={` bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
-                    style={{ transform: "translateX(-55%)" }}
-                  />
-                </div> */}
-                </button>
-              </div>
-            </CardCstm>
-          </CardWrpper>
+                </CardCstm>
+              </CardWrpper>
+            </>
+          ) : (
+            <>
+              {" "}
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
+                
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          {item.head}
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">{item.value}</span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </CardCstm>
+              </CardWrpper>
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
+                
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          Loan-to-Value Ratio
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">
+                            {healthValue}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </CardCstm>
+              </CardWrpper>
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
+                
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          Bitcoin Collateral
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">
+                            {parseFloat(supply).toFixed(6)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </CardCstm>
+              </CardWrpper>
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
+                
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          USD Debt
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">{debtvalue}</span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </CardCstm>
+              </CardWrpper>
+              <CardWrpper key={index} className={`${classN} `}>
+                <CardCstm style={{ opacity: 1, transform: "none" }}>
+                  <div className="flex w-full flex-col items-center justify-between">
+                    <button
+                      className={`
+                
+                 bg-white/5 rounded-12 relative overflow-hidden  px-3 py-4 max-lg:min-h-[95px] w-full lg:p-6 flex flex-col gap-3`}
+                    >
+                      <span className="chartSvg absolute top-0 left-0 h-full w-full">
+                        {chartSvg}
+                      </span>
+                      <div className="flex flex-col gap-1 tabular-nums md:gap-2">
+                        <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
+                          Wallet Balance(THUSD)
+                        </div>
+                        <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
+                          <span className="min-w-0 truncate">
+                            {parseFloat(walletBalance).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </CardCstm>
+              </CardWrpper>
+            </>
+          )}
         </>
       ))}
     </>

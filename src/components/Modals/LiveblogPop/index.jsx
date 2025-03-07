@@ -108,7 +108,7 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
                       </span>
                     </div>
                   </div> */}
-                  <RecentTransaction transactions={transactions}/>
+                  <RecentTransaction transactions={transactions} data={data}/>
                 </div>
               </div>
             </div>

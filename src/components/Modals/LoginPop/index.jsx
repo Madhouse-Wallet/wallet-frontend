@@ -153,6 +153,8 @@ const LoginPop = ({ login, setLogin }) => {
                   email: userExist.userId.email,
                   passkeyCred: userExist.userId.passkey || "",
                   multisigAddress: userExist.userId.multisigAddress || "",
+                  ensName: userExist.userId.ensName || "",
+                  ensSetup: userExist.userId.ensSetup || false,
                   passkey2: userExist.userId.passkey2 || "",
                   passkey3: userExist.userId.passkey3 || "",
                   multisigSetup: userExist.userId.multisigSetup || false,
@@ -216,6 +218,8 @@ const LoginPop = ({ login, setLogin }) => {
               multisigAddress: data.userData.multisigAddress || "",
               passkey2: data.userData.passkey2 || "",
               passkey3: data.userData.passkey3 || "",
+              ensName: data.userData.ensName || "",
+              ensSetup: data.userData.ensSetup || false,
               multisigSetup: data.userData.multisigSetup || false,
               multisigActivate: data.userData.multisigActivate || false
             })

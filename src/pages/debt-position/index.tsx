@@ -36,17 +36,18 @@ const DebtPosition: React.FC = () => {
 
   const calculateCollateralAndHealthFactor = async (
     collateralAmount: string, // in ETH
-    debt: string // in USD
+    debt: string, // in USD
+    provider:any
   ) => {
     try {
-      if (!providerr) {
+      if (!provider) {
         return { collateralValue: "0.00", healthFactor: "0.00" };
       }
 
       // Fetch ETH price
       const contractAddress =
         process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
-      const web3 = new Web3Interaction("sepolia", providerr);
+      const web3 = new Web3Interaction("sepolia", provider);
       const receipt = await web3.fetchPrice(contractAddress!);
       const receiptInEther = ethers.utils.formatEther(receipt);
       const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
@@ -94,7 +95,7 @@ const DebtPosition: React.FC = () => {
       const debtInEther = ethers.utils.formatEther(debt);
       const balance = ethers.utils.formatEther(balanceResponse);
       console.log("balance-->93", balance);
-      calculateCollateralAndHealthFactor(collInEther, debtInEther);
+      calculateCollateralAndHealthFactor(collInEther, debtInEther,provider);
       setSupply(collInEther);
       setDebtvalue(debtInEther);
       setWalletBalance(balance);

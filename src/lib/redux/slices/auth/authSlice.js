@@ -13,11 +13,14 @@ if (typeof window !== "undefined") {
   storedDataString = localStorage.getItem("authUser");
   data = storedDataString ? JSON.parse(storedDataString) : null;
   if (data) {
-    data.webauthKey = {
-      ...data.webauthKey,
-      pubX: BigInt(data.webauthKey.pubX),
-      pubY: BigInt(data.webauthKey.pubY),
+    if (data.webauthKey) {
+      data.webauthKey = {
+        ...data.webauthKey,
+        pubX: BigInt(data.webauthKey.pubX),
+        pubY: BigInt(data.webauthKey.pubY),
+      }
     }
+
     if (data.passkey2) {
       data.passkey2 = {
         ...data.passkey2,
@@ -44,10 +47,13 @@ const initialState = {
   email: (data?.email || ""),
   id: (data?.id || ""),
   login: (data?.login || false),
+  pos: (data?.pos || false),
   signer: "",
   multisigAddress: (data?.multisigAddress || ""),
   passkey2: (data?.passkey2 || ""),
   passkey3: (data?.passkey3 || ""),
+  ensName: (data?.ensName || ""),
+  ensSetup: (data?.ensSetup || false),
   multisigSetup: (data?.multisigSetup || false),
   multisigActivate: (data?.multisigSetup || false)
 };
@@ -66,9 +72,12 @@ export const authSlice = createSlice({
       state.webauthKey = action.payload.webauthKey;
       state.id = action.payload.id;
       state.signer = action.payload.signer;
+      state.pos = (action.payload.pos || false);
       state.multisigAddress = action.payload.multisigAddress;
       state.passkey2 = action.payload.passkey2;
       state.passkey3 = action.payload.passkey3;
+      state.ensName = action.payload.ensName;
+      state.ensSetup = action.payload.ensSetup;
       state.multisigSetup = action.payload.multisigSetup;
       state.multisigActivate = action.payload.multisigActivate
     },
