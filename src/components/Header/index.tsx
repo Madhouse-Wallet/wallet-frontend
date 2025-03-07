@@ -1,6 +1,7 @@
 import React, { useState, useEffect, use } from "react";
 import styled from "styled-components";
 import Switch from "react-switch";
+import { initializeWeb3Auth } from "../../lib/web3AuthIntialize";
 
 import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "react-tooltip";
@@ -38,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         status = "",
       } = await passkeyValidator(userAuth.webauthKey);
       console.log("newPasskeyValidator-->", newPasskeyValidator);
+      let web3auth = await initializeWeb3Auth()
       if (status) {
         dispatch(
           loginSet({
@@ -51,6 +53,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             id: userAuth.id,
             signer: userAuth.signer,
             multisigAddress: userAuth.multisigAddress,
+            web3Auth: web3auth,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
             ensName: userAuth.ensName || "",

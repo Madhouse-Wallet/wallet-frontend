@@ -21,20 +21,20 @@ const MainLayout = ({ Component, pageProps }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [popupOpened, setPopupOpened] = useState(false);
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    // ensName: userAuth.ensName || "",
-    // ensSetup: 
+  //   // ensName: userAuth.ensName || "",
+  //   // ensSetup: 
 
 
-    if (userAuth?.login && (!(userAuth?.pos)) && (!(userAuth?.ensSetup)) ) {
-      const timer = setTimeout(() => {
-        setEnsDomain(true); // Set state to prevent reopening
-      }, 20000); // 10 seconds delay
+  //   if (userAuth?.login && (!(userAuth?.pos)) && (!(userAuth?.ensSetup)) ) {
+  //     const timer = setTimeout(() => {
+  //       setEnsDomain(true); // Set state to prevent reopening
+  //     }, 20000); // 10 seconds delay
 
-      return () => clearTimeout(timer); // Cleanup timeout on unmount
-    }
-  }, [ensDomain, userAuth?.login]);
+  //     return () => clearTimeout(timer); // Cleanup timeout on unmount
+  //   }
+  // }, [ensDomain, userAuth?.login]);
   return (
     <>
       {/* <div className="flex items-start justify-end relative">

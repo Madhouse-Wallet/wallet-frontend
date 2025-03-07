@@ -73,6 +73,7 @@ export const authSlice = createSlice({
       state.id = action.payload.id;
       state.signer = action.payload.signer;
       state.pos = (action.payload.pos || false);
+      state.web3Auth = (action.payload.web3Auth || "");
       state.multisigAddress = action.payload.multisigAddress;
       state.passkey2 = action.payload.passkey2;
       state.passkey3 = action.payload.passkey3;

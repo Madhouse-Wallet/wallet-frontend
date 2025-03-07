@@ -204,6 +204,96 @@ const accountCreateClient = async (signer1, phrase) => {
 }
 
 
+const accountSocialLoginAccountCreateClient = async (signer1, phrase, publicKey1,publicKey2) => {
+  try {
+    const recoverySigner = await mnemonicToAccount(phrase)
+    console.log("account-->", recoverySigner)
+
+
+    const recoveryValidator = await createWeightedECDSAValidator(publicClient, {
+      signers: [recoverySigner],
+      kernelVersion: KERNEL_V3_1,
+      entryPoint,
+      config: {
+        threshold: 100,
+        signers: [
+          {
+            address: recoverySigner.address,
+            weight: 100,
+          },
+        ],
+      },
+    });
+    const recoveryAction = getRecoveryAction(entryPoint.version);
+
+    const recoveryPluginInstallModuleData =
+      await getValidatorPluginInstallModuleData({
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+        plugin: recoveryValidator,
+        action: recoveryAction,
+      });
+console.log("multiSigValidator-->",signer1, publicKey1, publicKey2, signer1?.getPublicKey()
+)
+      const multiSigValidator = await createWeightedValidator(publicClient, {
+        entryPoint,
+        signer: signer1,
+        kernelVersion: KERNEL_V3_1,
+        config: {
+          threshold: 100,
+          signers: [
+            {
+              publicKey: publicKey1,
+              weight: 100,
+            },
+            {
+              publicKey:  publicKey2.address,
+              weight: 100,
+            }
+          ],
+        },
+      });
+      console.log("multiSigValidator-->",multiSigValidator)
+    const account = await createKernelAccount(publicClient, {
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+      plugins: {
+        sudo: multiSigValidator,
+      },
+      pluginMigrations: [
+        recoveryPluginInstallModuleData,
+        getRecoveryFallbackActionInstallModuleData(entryPoint.version),
+      ],
+      // Only needed to set after changing the sudo validator config i.e.
+      // changing the threshold or adding/removing/updating signers
+      // After doing recovery
+      // address: accountAddress,
+    });
+
+    const kernelClient = createWeightedKernelAccountClient({
+      account,
+      chain: CHAIN,
+      bundlerTransport: http(BUNDLER_URL),
+      // Optional -- only if you want to use a paymaster
+      paymaster: {
+        getPaymasterData(userOperation) {
+          return paymasterClient.sponsorUserOperation({ userOperation })
+        }
+      },
+
+    });
+    console.log("account accountCreateClient-->", account)
+    return {
+      account,
+      kernelClient
+    }
+  } catch (error) {
+    console.log("account client error--->", error)
+    return false
+  }
+}
+
+
 const accountRecoveryCreateClient = async (accountAddress, signer1, phrase) => {
   try {
     const signer = await mnemonicToAccount(phrase)
@@ -314,6 +404,36 @@ export const zeroTrxn = async (kernelClient) => {
   }
 }
 
+
+export const zeroTrxnSocialLogin = async (kernelClient,signatures=[]) => {
+  try {
+    const op1Hash = await kernelClient.sendUserOperationWithSignatures({
+      callData: await kernelClient.account.encodeCalls([
+        {
+          to: zeroAddress,
+          value: BigInt(0),
+          data: "0x",
+        },
+      ]),
+      signatures,
+    });
+    console.log("op1Hash-->", op1Hash)
+    let checkRecit = await kernelClient.waitForUserOperationReceipt({
+      hash: op1Hash,
+    });
+    console.log("userOp sent", checkRecit);
+    let tr = await checkDeployment(kernelClient)
+    return tr
+    // return op1Hash;
+  } catch (error) {
+    console.log("zeroTrxn error-->", error)
+    // let tr = await zeroTrxn(kernelClient)
+    // return tr
+    let tr = await checkDeployment(kernelClient)
+    return tr
+  }
+}
+
 const recoveryTrxn = async (kernelClient, newSigner) => {
   try {
     console.log("performing recovery...", newSigner);
@@ -362,6 +482,40 @@ export const createAccount = async (signer1, phrase) => {
     // kernelClient
     console.log("create Account-->", getAccount)
     const accountDeploymentTrxn = await zeroTrxn(getAccount?.kernelClient)
+    if (!accountDeploymentTrxn) {
+      return {
+        status: false, msg: "Error In Zero Trxn!"
+      }
+    }
+    return {
+      status: true, account: getAccount.account, kernelClient: getAccount.kernelClient, address: getAccount.kernelClient.account.address
+    }
+  } catch (error) {
+    console.log("create account error-->", error)
+    return { status: false, msg: "Problem creating kernel account. Please Try again ALter!" }
+  }
+}
+
+
+
+export const createMultisigSocialLoginAccount = async (phrase, publicKey1, publicKey2) => {
+  try {
+    const passKeySigner1 = await toWebAuthnSigner(publicClient, {
+      webAuthnKey: publicKey1,
+    });
+    console.log("signer1-->", passKeySigner1)
+
+    const getAccount = await accountSocialLoginAccountCreateClient(passKeySigner1, phrase, publicKey1, publicKey2)
+    // const getAccount = await accountClient(signer1)
+    if (!getAccount) {
+      return {
+        status: false, msg: "Error In creating Account!"
+      }
+    }
+    // account,
+    // kernelClient
+    console.log("create Account-->", getAccount)
+    const accountDeploymentTrxn = await zeroTrxnSocialLogin(getAccount?.kernelClient)
     if (!accountDeploymentTrxn) {
       return {
         status: false, msg: "Error In Zero Trxn!"

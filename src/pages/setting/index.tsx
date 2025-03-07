@@ -363,6 +363,10 @@ const Setting: React.FC = () => {
 
   const LogoutFuc = async () => {
     try {
+      console.log("userAuth.web3Auth",userAuth.web3Auth)
+      if(userAuth.web3Auth){
+        await userAuth.web3Auth.logout()
+      }
       logoutStorage();
       dispatch(
         loginSet({
@@ -370,6 +374,7 @@ const Setting: React.FC = () => {
           walletAddress: "",
           signer: "",
           username: "",
+          web3Auth: "",
           email: "",
           passkeyCred: "",
           webauthKey: "",

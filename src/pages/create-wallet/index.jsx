@@ -35,7 +35,7 @@ const CreateWallet = () => {
   const [loginEmail, setLoginEmail] = useState();
   const [addressPhrase, setAddressPhrase] = useState("");
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
-  
+
   // Helper function to check OTP expiration
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -199,21 +199,21 @@ const CreateWallet = () => {
                 passkeyCred: newPasskeyValidator,
                 webauthKey: createdWebAuthKey.webAuthnKey,
                 id: data.userData._id,
-                multisigAddress:  data.userData.multisigAddress,
-                passkey2:  data.userData.passkey2,
-                passkey3:  data.userData.passkey3,
+                multisigAddress: data.userData.multisigAddress,
+                passkey2: data.userData.passkey2,
+                passkey3: data.userData.passkey3,
                 ensName: data.userData.ensName || "",
                 ensSetup: data.userData.ensSetup || false,
-                multisigSetup:  data.userData.multisigSetup,
-                multisigActivate:  data.userData.multisigActivate
+                multisigSetup: data.userData.multisigSetup,
+                multisigActivate: data.userData.multisigActivate
               })
-            ); 
+            );
             let webAuthKeyStringObj2 = ""
             let webAuthKeyStringObj3 = ""
-            if(data.userData.passkey2){
-              webAuthKeyStringObj2 =  await webAuthKeyStore(data.userData.passkey2)
+            if (data.userData.passkey2) {
+              webAuthKeyStringObj2 = await webAuthKeyStore(data.userData.passkey2)
             }
-            if(data.userData.passkey3){
+            if (data.userData.passkey3) {
               webAuthKeyStringObj3 = await webAuthKeyStore(data.userData.passkey3)
             }
 
@@ -226,13 +226,13 @@ const CreateWallet = () => {
               passkeyCred: "",
               webauthKey: webAuthKeyStringObj,
               id: data.userData._id,
-              multisigAddress:  data.userData.multisigAddress,
-              passkey2:  webAuthKeyStringObj2,
+              multisigAddress: data.userData.multisigAddress,
+              passkey2: webAuthKeyStringObj2,
               passkey3: webAuthKeyStringObj3,
               ensName: data.userData.ensName || "",
               ensSetup: data.userData.ensSetup || false,
-              multisigSetup:  data.userData.multisigSetup,
-              multisigActivate:  data.userData.multisigActivate
+              multisigSetup: data.userData.multisigSetup,
+              multisigActivate: data.userData.multisigActivate
             }, "authUser")
             return true;
           }
@@ -245,10 +245,10 @@ const CreateWallet = () => {
   };
 
   const registerOtpFn = async (data) => {
-    
+
     try {
-       // Check if OTP is expired
-       if (isOtpExpired()) {
+      // Check if OTP is expired
+      if (isOtpExpired()) {
         toast.error("OTP has expired! Please request a new one.");
         return false;
       }
@@ -293,7 +293,7 @@ const CreateWallet = () => {
         setRegisterData({
           email: data.email,
           username: data.username,
-        }); 
+        });
         // return true;
         let obj = {
           email: data.email,
