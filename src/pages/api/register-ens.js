@@ -134,7 +134,7 @@ export default async function handler(req, res) {
     );
 
     const receipt = await registerTx.wait();
-
+    console.log("line-receipt", receipt);
     // Extract NFT ID from logs
     let nftId;
     if (receipt.logs.length > 1 && receipt.logs[1].topics.length > 3) {
@@ -144,25 +144,27 @@ export default async function handler(req, res) {
     } else {
       throw new Error("Transaction logs do not contain enough data");
     }
-
+    console.log("line-nftId", nftId);
     // Step 3: Set Address in Resolver
     const setAddrTx = await resolver.setAddr(node, smartAccount);
     await setAddrTx.wait();
+    console.log("4 setAddrTx, transferTx-->",setAddrTx)
 
     // Step 4: Set Reverse Record
     const setNameTx = await reverseRegistrar.setName("");
     await setNameTx.wait();
+    console.log("4 Reclaim, transferTx-->",setNameTx)
 
     // Step 5: Reclaim Ownership
     const reclaimTx = await baseRegistrar.reclaim(nftId, smartAccount);
     await reclaimTx.wait();
-
+    console.log("5 Reclaim, transferTx-->",reclaimTx)
     // Step 6: Transfer NFT to Smart Account
     const transferTx = await baseRegistrar[
       "safeTransferFrom(address,address,uint256)"
     ](signerAddress, smartAccount, nftId);
     await transferTx.wait();
-
+console.log("6 step, transferTx-->",transferTx)
     return res.status(201).json({
       status: "success",
       message: "ENS name registered successfully",
