@@ -13,13 +13,24 @@ const baseRegistrarAbi = [
   "function setName(string name) external",
   "function rentPrice(string name, uint256 duration) public view returns (tuple(uint256 base, uint256 premium))",
 ];
-
+const done = async (baseRegistrar, nftId, smartAccount, signerAddress) => {
+  try {
+    // Step 6: Transfer NFT to Smart Account
+    const transferTx = await baseRegistrar[
+      "safeTransferFrom(address,address,uint256)"
+    ](signerAddress, smartAccount, nftId);
+    await transferTx.wait();
+    console.log("6 step, transferTx-->", transferTx)
+  } catch (error) {
+    console.log("error done", error)
+  }
+}
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
   req.socket.setTimeout(5 * 60 * 1000); // 5 minutes timeout
-  
+
   try {
     console.log("line-20");
     const {
@@ -87,7 +98,7 @@ export default async function handler(req, res) {
     // Step 1: Get rent price
     const rentPrice = await Registrar.rentPrice(name, duration);
     const totalRentPrice = rentPrice.base.add(rentPrice.premium);
-    const ensfee = rentPrice.base ;
+    const ensfee = rentPrice.base;
 
 
     // Step 2: Register name
@@ -148,23 +159,18 @@ export default async function handler(req, res) {
     // Step 3: Set Address in Resolver
     const setAddrTx = await resolver.setAddr(node, smartAccount);
     await setAddrTx.wait();
-    console.log("4 setAddrTx, transferTx-->",setAddrTx)
+    console.log("4 setAddrTx, transferTx-->", setAddrTx)
 
     // Step 4: Set Reverse Record
     const setNameTx = await reverseRegistrar.setName("");
     await setNameTx.wait();
-    console.log("4 Reclaim, transferTx-->",setNameTx)
+    console.log("4 Reclaim, transferTx-->", setNameTx)
 
     // Step 5: Reclaim Ownership
     const reclaimTx = await baseRegistrar.reclaim(nftId, smartAccount);
     await reclaimTx.wait();
-    console.log("5 Reclaim, transferTx-->",reclaimTx)
-    // Step 6: Transfer NFT to Smart Account
-    const transferTx = await baseRegistrar[
-      "safeTransferFrom(address,address,uint256)"
-    ](signerAddress, smartAccount, nftId);
-    await transferTx.wait();
-console.log("6 step, transferTx-->",transferTx)
+    console.log("5 Reclaim, transferTx-->", reclaimTx)
+    done(baseRegistrar, nftId, smartAccount, signerAddress)
     return res.status(201).json({
       status: "success",
       message: "ENS name registered successfully",
