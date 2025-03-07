@@ -60,33 +60,61 @@ class LegacyProviderWrapper {
   }
 }
 
-
 // Parameters for CowSwapWidget
 const cowSwapParams = {
-  appCode: "My Cool App",
+  appCode: "Madhouse Wallet",
   width: "100%",
   height: "640px",
   chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
-  tokenLists: [
-    "https://files.cow.fi/tokens/CoinGecko.json",
-    "https://files.cow.fi/tokens/CowSwap.json",
-  ],
   tradeType: "swap",
+  tokenLists: [], // All default enabled token lists. Also see https://tokenlists.org
   sell: {
-    asset: "USDC",
-    amount: "100000",
+    // Sell token. Optionally add amount for sell orders
+    asset: "Bitcoin",
+    amount: "1",
   },
   buy: {
-    asset: "TBTC",
+    // Buy token. Optionally add amount for buy orders
+    asset: "USDC",
     amount: "0",
   },
-  enabledTradeTypes: ["swap", "limit", "advanced", "yield"],
-  theme: "dark",
+  partnerFee: {
+    // Partner fee, in Basis Points (BPS) and a receiver address
+    bps: 1,
+    recipient: {
+      "1": "0xB64963f95215FDe6510657e719bd832BB8bb941B",
+      "100": "0x6b3214fd11dc91de14718dee98ef59bcbfcfb432",
+      "8453": "0x3c4DBcCf8d80D3d92B0d82197aebf52574ED1F3B",
+      "42161": "0x451100Ffc88884bde4ce87adC8bB6c7Df7fACccd",
+      "11155111": "0xB64963f95215FDe6510657e719bd832BB8bb941B",
+    },
+  },
+  enabledTradeTypes: ["swap"],
+  theme: {
+    // light/dark or provide your own color palette
+    baseTheme: "dark",
+    primary: "#df723b",
+    paper: "#2c1913",
+    text: "#fff",
+  },
   standaloneMode: false,
   disableToastMessages: false,
   disableProgressBar: false,
   hideBridgeInfo: false,
   hideOrdersTable: false,
+  images: {},
+  sounds: {},
+  customTokens: [
+    {
+      chainId: 42161,
+      address: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+      name: "Bitcoin",
+      decimals: 18,
+      symbol: "BTC",
+      logoURI:
+        "https://media.madhousewallet.com/btc.svg",
+    },
+  ],
 };
 
 const Swap = () => {
