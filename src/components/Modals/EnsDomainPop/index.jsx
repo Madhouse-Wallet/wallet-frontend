@@ -13,7 +13,8 @@ import {
   getUser,
   getEnsName,
   getSubdomainApproval,
-  updtUser
+  updtUser,
+  registerEnsName
 } from "@/lib/apiCall";
 
 import {
@@ -58,51 +59,139 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
   }, []);
 
 
+  // const submitFunc = async () => {
+  //   try {
+
+  //     if (!providerr) {
+  //       return toast.error("Please Login!")
+  //     }
+  //     if (!domainName) {
+  //       return toast.error("Please Enter Domain Name!")
+  //     }
+
+  //     let userExist = await getEnsName(domainName);
+  //     console.log("userExist-->",userExist)
+  //     if (userExist.status == "success") {
+  //       return toast.error("Domain Already Exist!")
+  //     }
+  //     setLoading(true)
+  //     const web3 = new Web3Interaction("sepolia", providerr);
+  //     const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
+  //     const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_CONTRACT;
+  //     const parentDomain = process.env.NEXT_PUBLIC_PARENT_DOMAIN;
+  //     const defApiKey = process.env.NEXT_PUBLIC_DEFENDER_API_KEY;
+  //     const defApiSecret = process.env.NEXT_PUBLIC_DEFENDER_API_SECRET;
+  //     const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+
+
+
+  //     if (!contractAddress) {
+  //       return toast.error("No Contract Address Found")
+  //     }
+  //     // address: string, resolverAddress: string, name: string, kernelClinet: any
+  //     // const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAuth?.walletAddress);
+  //     let SubdomainApproval = await getSubdomainApproval(contractAddress, defApiKey, defApiSecret, userAuth?.walletAddress);
+  //     console.log("SubdomainApproval-->", SubdomainApproval)
+  //     const assignSubdomain = await web3.checkDomainAvailable(contractAddress, domainName, resolverAddress, parentDomain, userAuth?.walletAddress);
+
+  //     // checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any):
+
+  //     if (assignSubdomain) {
+  //       let data = await updtUser({ email: userAuth.email }, {
+  //         $set: {
+  //           ensName: assignSubdomain,
+  //           ensSetup: true
+  //         } // Ensure this is inside `$set`
+  //       })
+  //       console.log("data-->", data, "assignSubdomain-->", assignSubdomain)
+  //       let webAuthKeyStringObj = ""
+  //       let webAuthKeyStringObj2 = ""
+  //       let webAuthKeyStringObj3 = ""
+  //       if (userAuth.webauthKey) {
+  //         webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey)
+  //       }
+  //       if (userAuth.passkey2) {
+  //         webAuthKeyStringObj2 = await webAuthKeyStore(userAuth.passkey2)
+  //       }
+  //       if (userAuth.passkey3) {
+  //         webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
+  //       }
+
+
+  //       dispatch(
+  //         loginSet({
+  //           login: userAuth.login,
+  //           username: userAuth.username,
+  //           email: userAuth.email,
+  //           walletAddress: userAuth.walletAddress,
+  //           passkeyCred: userAuth.passkeyCred,
+  //           webauthKey: userAuth.webauthKey,
+  //           id: userAuth.id,
+  //           signer: userAuth.signer,
+  //           multisigAddress: userAuth.multisigAddress,
+  //           passkey2: userAuth.passkey2,
+  //           passkey3: userAuth.passkey3,
+  //           ensName: assignSubdomain,
+  //           ensSetup: true,
+  //           multisigSetup: userAuth.multisigSetup,
+  //           multisigActivate: userAuth.multisigActivate,
+  //         })
+  //       );
+
+  //       storedataLocalStorage({
+  //         login: true,
+  //         walletAddress: userAuth.walletAddress || "",
+  //         signer: "",
+  //         username: userAuth.username,
+  //         email: userAuth.email,
+  //         passkeyCred: "",
+  //         webauthKey: webAuthKeyStringObj,
+  //         id: userAuth.id,
+  //         multisigAddress: userAuth.multisigAddress,
+  //         passkey2: webAuthKeyStringObj2,
+  //         passkey3: webAuthKeyStringObj3,
+  //         ensName: assignSubdomain,
+  //         ensSetup: true,
+  //         multisigSetup: userAuth.multisigSetup,
+  //         multisigActivate: userAuth.multisigActivate
+  //       }, "authUser")
+  //       setLoading(false)
+  //       toast.success("Setup Done!")
+  //       handleChangeEmail()
+  //     }
+  //   } catch (error) {
+  //     console.log(" setup ens domain error-->", error)
+  //     setLoading(false)
+
+  //     toast.error((error?.message || error))
+  //   }
+  // }
+
+
   const submitFunc = async () => {
     try {
-
-      if (!providerr) {
-        return toast.error("Please Login!")
-      }
-      if (!domainName) {
-        return toast.error("Please Enter Domain Name!")
-      }
-
-      let userExist = await getEnsName(domainName);
-      console.log("userExist-->",userExist)
-      if (userExist.status == "success") {
-        return toast.error("Domain Already Exist!")
-      }
       setLoading(true)
-      const web3 = new Web3Interaction("sepolia", providerr);
-      const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
-      const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_CONTRACT;
-      const parentDomain = process.env.NEXT_PUBLIC_PARENT_DOMAIN;
-      const defApiKey = process.env.NEXT_PUBLIC_DEFENDER_API_KEY;
-      const defApiSecret = process.env.NEXT_PUBLIC_DEFENDER_API_SECRET;
-      const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+      const result = await registerEnsName(
+        domainName,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_SMART_ACCOUNT_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_DEFI_API_KEY,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_DEFI_API_SECRET,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_REGISTRAR_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_RESOLVER_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_REVERSE_REGISTRAR_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_BASE_REGISTRAR_ADDRESS
+      );
 
+      if (result.status === "success") {
+        console.log(`Successfully registered ${result.data.name}`);
 
-
-      if (!contractAddress) {
-        return toast.error("No Contract Address Found")
-      }
-      // address: string, resolverAddress: string, name: string, kernelClinet: any
-      // const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAuth?.walletAddress);
-      let SubdomainApproval = await getSubdomainApproval(contractAddress, defApiKey, defApiSecret, userAuth?.walletAddress);
-      console.log("SubdomainApproval-->", SubdomainApproval)
-      const assignSubdomain = await web3.checkDomainAvailable(contractAddress, domainName, resolverAddress, parentDomain, userAuth?.walletAddress);
-
-      // checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any):
-
-      if (assignSubdomain) {
         let data = await updtUser({ email: userAuth.email }, {
           $set: {
-            ensName: assignSubdomain,
+            ensName: domainName,
             ensSetup: true
           } // Ensure this is inside `$set`
         })
-        console.log("data-->", data, "assignSubdomain-->", assignSubdomain)
+        console.log("data-->", data, "domainName-->", domainName)
         let webAuthKeyStringObj = ""
         let webAuthKeyStringObj2 = ""
         let webAuthKeyStringObj3 = ""
@@ -130,7 +219,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
             multisigAddress: userAuth.multisigAddress,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
-            ensName: assignSubdomain,
+            ensName: domainName,
             ensSetup: true,
             multisigSetup: userAuth.multisigSetup,
             multisigActivate: userAuth.multisigActivate,
@@ -149,7 +238,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
           multisigAddress: userAuth.multisigAddress,
           passkey2: webAuthKeyStringObj2,
           passkey3: webAuthKeyStringObj3,
-          ensName: assignSubdomain,
+          ensName: domainName,
           ensSetup: true,
           multisigSetup: userAuth.multisigSetup,
           multisigActivate: userAuth.multisigActivate
@@ -157,14 +246,19 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
         setLoading(false)
         toast.success("Setup Done!")
         handleChangeEmail()
+
+
+      } else {
+        setLoading(false)
+        console.error("Registration failed:", result.error);
       }
     } catch (error) {
-      console.log(" setup ens domain error-->", error)
-      setLoading(false)
+      console.log(" setup ens domain error-->", error);
+      setLoading(false);
 
-      toast.error((error?.message || error))
+      toast.error(error?.message || error);
     }
-  }
+  };
 
   return (
     <>
