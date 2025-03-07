@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const getUser = async (email) => {
   try {
     try {
@@ -85,6 +87,58 @@ export const getSubdomainApproval = async (
   }
 };
 
+// export const registerEnsName = async (
+//   name,
+//   smartAccount,
+//   defApiKey,
+//   defApiSecret,
+//   registrarControllerAddress,
+//   resolverAddress,
+//   reverseRegistrarAddress,
+//   baseRegistrarAddress,
+//   duration = 31557600
+// ) => {
+//   try {
+//     console.log(
+//       "details",
+//       name,
+//       smartAccount,
+//       defApiKey,
+//       defApiSecret,
+//       registrarControllerAddress,
+//       resolverAddress,
+//       reverseRegistrarAddress,
+//       baseRegistrarAddress,
+//       duration
+//     );
+//     return await fetch(`/api/register-ens`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({
+//         name,
+//         smartAccount,
+//         defApiKey,
+//         defApiSecret,
+//         registrarControllerAddress,
+//         resolverAddress,
+//         reverseRegistrarAddress,
+//         baseRegistrarAddress,
+//         duration,
+//       }),
+//     })
+//       .then((res) => res.json())
+//       .then((data) => {
+//         console.log("Registration response:", data);
+//         return data;
+//       });
+//   } catch (error) {
+//     console.log("Registration error:", error);
+//     return false;
+//   }
+// };
+
+
+
 export const registerEnsName = async (
   name,
   smartAccount,
@@ -97,8 +151,9 @@ export const registerEnsName = async (
   duration = 31557600
 ) => {
   try {
-    console.log(
-      "details",
+    console.log("details", name, smartAccount, defApiKey);
+
+    const response = await axios.post("/api/register-ens", {
       name,
       smartAccount,
       defApiKey,
@@ -107,31 +162,16 @@ export const registerEnsName = async (
       resolverAddress,
       reverseRegistrarAddress,
       baseRegistrarAddress,
-      duration
-    );
-    return await fetch(`/api/register-ens`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        smartAccount,
-        defApiKey,
-        defApiSecret,
-        registrarControllerAddress,
-        resolverAddress,
-        reverseRegistrarAddress,
-        baseRegistrarAddress,
-        duration,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Registration response:", data);
-        return data;
-      });
+      duration,
+    }, {
+      timeout: 90000, // 60 seconds timeout
+    });
+
+    console.log("Registration response:", response.data);
+    return response.data;
   } catch (error) {
-    console.log("Registration error:", error);
-    return false;
+    console.error("Registration error:", error);
+    return { success: false, error: error.message };
   }
 };
 
