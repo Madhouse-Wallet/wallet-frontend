@@ -13,13 +13,11 @@ import {
   getUser,
   getEnsName,
   getSubdomainApproval,
-  updtUser
+  updtUser,
+  registerEnsName,
 } from "@/lib/apiCall";
 
-import {
-  webAuthKeyStore,
-  storedataLocalStorage
-} from "../../../utils/globals";
+import { webAuthKeyStore, storedataLocalStorage } from "../../../utils/globals";
 const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
   const [providerr, setProviderr] = useState(null);
   const [accountClinet, setAccountClinet] = useState(null);
@@ -28,11 +26,9 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
   const userAuth = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
 
-
   const handleChangeEmail = () => {
-    setEnsDomain(!ensDomain)
-  }
-
+    setEnsDomain(!ensDomain);
+  };
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -41,7 +37,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
         console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          setAccountClinet(account.kernelClient)
+          setAccountClinet(account.kernelClient);
           console.log("provider-->", provider);
           if (provider) {
             console.log("provider -line-114", provider);
@@ -54,124 +50,152 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
       //   return;
       // }
     };
-    connectWallet()
+    connectWallet();
   }, []);
 
+  // const submitFunc = async () => {
+  //   try {
+
+  //     if (!providerr) {
+  //       return toast.error("Please Login!")
+  //     }
+  //     if (!domainName) {
+  //       return toast.error("Please Enter Domain Name!")
+  //     }
+
+  //     let userExist = await getEnsName(domainName);
+  //     console.log("userExist-->",userExist)
+  //     if (userExist.status == "success") {
+  //       return toast.error("Domain Already Exist!")
+  //     }
+  //     setLoading(true)
+  //     const web3 = new Web3Interaction("sepolia", providerr);
+  //     const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
+  //     const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_CONTRACT;
+  //     const parentDomain = process.env.NEXT_PUBLIC_PARENT_DOMAIN;
+  //     const defApiKey = process.env.NEXT_PUBLIC_DEFENDER_API_KEY;
+  //     const defApiSecret = process.env.NEXT_PUBLIC_DEFENDER_API_SECRET;
+  //     const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+
+  //     if (!contractAddress) {
+  //       return toast.error("No Contract Address Found")
+  //     }
+  //     // address: string, resolverAddress: string, name: string, kernelClinet: any
+  //     // const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAuth?.walletAddress);
+  //     let SubdomainApproval = await getSubdomainApproval(contractAddress, defApiKey, defApiSecret, userAuth?.walletAddress);
+  //     console.log("SubdomainApproval-->", SubdomainApproval)
+  //     const assignSubdomain = await web3.checkDomainAvailable(contractAddress, domainName, resolverAddress, parentDomain, userAuth?.walletAddress);
+
+  //     // checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any):
+
+  //     if (assignSubdomain) {
+  //       let data = await updtUser({ email: userAuth.email }, {
+  //         $set: {
+  //           ensName: assignSubdomain,
+  //           ensSetup: true
+  //         } // Ensure this is inside `$set`
+  //       })
+  //       console.log("data-->", data, "assignSubdomain-->", assignSubdomain)
+  //       let webAuthKeyStringObj = ""
+  //       let webAuthKeyStringObj2 = ""
+  //       let webAuthKeyStringObj3 = ""
+  //       if (userAuth.webauthKey) {
+  //         webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey)
+  //       }
+  //       if (userAuth.passkey2) {
+  //         webAuthKeyStringObj2 = await webAuthKeyStore(userAuth.passkey2)
+  //       }
+  //       if (userAuth.passkey3) {
+  //         webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
+  //       }
+
+  //       dispatch(
+  //         loginSet({
+  //           login: userAuth.login,
+  //           username: userAuth.username,
+  //           email: userAuth.email,
+  //           walletAddress: userAuth.walletAddress,
+  //           passkeyCred: userAuth.passkeyCred,
+  //           webauthKey: userAuth.webauthKey,
+  //           id: userAuth.id,
+  //           signer: userAuth.signer,
+  //           multisigAddress: userAuth.multisigAddress,
+  //           passkey2: userAuth.passkey2,
+  //           passkey3: userAuth.passkey3,
+  //           ensName: assignSubdomain,
+  //           ensSetup: true,
+  //           multisigSetup: userAuth.multisigSetup,
+  //           multisigActivate: userAuth.multisigActivate,
+  //         })
+  //       );
+
+  //       storedataLocalStorage({
+  //         login: true,
+  //         walletAddress: userAuth.walletAddress || "",
+  //         signer: "",
+  //         username: userAuth.username,
+  //         email: userAuth.email,
+  //         passkeyCred: "",
+  //         webauthKey: webAuthKeyStringObj,
+  //         id: userAuth.id,
+  //         multisigAddress: userAuth.multisigAddress,
+  //         passkey2: webAuthKeyStringObj2,
+  //         passkey3: webAuthKeyStringObj3,
+  //         ensName: assignSubdomain,
+  //         ensSetup: true,
+  //         multisigSetup: userAuth.multisigSetup,
+  //         multisigActivate: userAuth.multisigActivate
+  //       }, "authUser")
+  //       setLoading(false)
+  //       toast.success("Setup Done!")
+  //       handleChangeEmail()
+  //     }
+  //   } catch (error) {
+  //     console.log(" setup ens domain error-->", error)
+  //     setLoading(false)
+
+  //     toast.error((error?.message || error))
+  //   }
+  // }
 
   const submitFunc = async () => {
     try {
+      const result = await registerEnsName(
+        domainName,
+        // "0x81E515025Cfdd8b7298Be74019Cee9Ca6F7288b8",
+        // "EhuASyZbaHZ1ziggJrRr1nCQD3NCPSL3",
+        // "2AXRwWzTGdWLzKDYtAY4tvMkv5sJt77TzNivGQQ7w2YvkJ4B13gJfFGxcBPig8FR",
+        // "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5",
+        // "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD",
+        // "0x79EA96012eEa67A83431F1701B3dFf7e37F9E282",
+        // "0x03c4738Ee98aE44591e1A4A4F3CaB6641d95DD9a"
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_SMART_ACCOUNT_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_DEFI_API_KEY,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_DEFI_API_SECRET,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_REGISTRAR_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_RESOLVER_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_REVERSE_REGISTRAR_ADDRESS,
+        process.env.NEXT_PUBLIC_ENS_DOMAIN_BASE_REGISTRAR_ADDRESS
+      );
 
-      if (!providerr) {
-        return toast.error("Please Login!")
-      }
-      if (!domainName) {
-        return toast.error("Please Enter Domain Name!")
-      }
-
-      let userExist = await getEnsName(domainName);
-      console.log("userExist-->",userExist)
-      if (userExist.status == "success") {
-        return toast.error("Domain Already Exist!")
-      }
-      setLoading(true)
-      const web3 = new Web3Interaction("sepolia", providerr);
-      const contractAddress = process.env.NEXT_PUBLIC_SUBDOMAIN_CONTRACT;
-      const resolverAddress = process.env.NEXT_PUBLIC_RESOLVER_CONTRACT;
-      const parentDomain = process.env.NEXT_PUBLIC_PARENT_DOMAIN;
-      const defApiKey = process.env.NEXT_PUBLIC_DEFENDER_API_KEY;
-      const defApiSecret = process.env.NEXT_PUBLIC_DEFENDER_API_SECRET;
-      const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
-
-
-
-      if (!contractAddress) {
-        return toast.error("No Contract Address Found")
-      }
-      // address: string, resolverAddress: string, name: string, kernelClinet: any
-      // const checkAvailability = await web3.checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAuth?.walletAddress);
-      let SubdomainApproval = await getSubdomainApproval(contractAddress, defApiKey, defApiSecret, userAuth?.walletAddress);
-      console.log("SubdomainApproval-->", SubdomainApproval)
-      const assignSubdomain = await web3.checkDomainAvailable(contractAddress, domainName, resolverAddress, parentDomain, userAuth?.walletAddress);
-
-      // checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any):
-
-      if (assignSubdomain) {
-        let data = await updtUser({ email: userAuth.email }, {
-          $set: {
-            ensName: assignSubdomain,
-            ensSetup: true
-          } // Ensure this is inside `$set`
-        })
-        console.log("data-->", data, "assignSubdomain-->", assignSubdomain)
-        let webAuthKeyStringObj = ""
-        let webAuthKeyStringObj2 = ""
-        let webAuthKeyStringObj3 = ""
-        if (userAuth.webauthKey) {
-          webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey)
-        }
-        if (userAuth.passkey2) {
-          webAuthKeyStringObj2 = await webAuthKeyStore(userAuth.passkey2)
-        }
-        if (userAuth.passkey3) {
-          webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
-        }
-
-
-        dispatch(
-          loginSet({
-            login: userAuth.login,
-            username: userAuth.username,
-            email: userAuth.email,
-            walletAddress: userAuth.walletAddress,
-            passkeyCred: userAuth.passkeyCred,
-            webauthKey: userAuth.webauthKey,
-            id: userAuth.id,
-            signer: userAuth.signer,
-            multisigAddress: userAuth.multisigAddress,
-            passkey2: userAuth.passkey2,
-            passkey3: userAuth.passkey3,
-            ensName: assignSubdomain,
-            ensSetup: true,
-            multisigSetup: userAuth.multisigSetup,
-            multisigActivate: userAuth.multisigActivate,
-          })
-        );
-
-        storedataLocalStorage({
-          login: true,
-          walletAddress: userAuth.walletAddress || "",
-          signer: "",
-          username: userAuth.username,
-          email: userAuth.email,
-          passkeyCred: "",
-          webauthKey: webAuthKeyStringObj,
-          id: userAuth.id,
-          multisigAddress: userAuth.multisigAddress,
-          passkey2: webAuthKeyStringObj2,
-          passkey3: webAuthKeyStringObj3,
-          ensName: assignSubdomain,
-          ensSetup: true,
-          multisigSetup: userAuth.multisigSetup,
-          multisigActivate: userAuth.multisigActivate
-        }, "authUser")
-        setLoading(false)
-        toast.success("Setup Done!")
-        handleChangeEmail()
+      if (result.status === "success") {
+        console.log(`Successfully registered ${result.data.name}`);
+      } else {
+        console.error("Registration failed:", result.error);
       }
     } catch (error) {
-      console.log(" setup ens domain error-->", error)
-      setLoading(false)
+      console.log(" setup ens domain error-->", error);
+      setLoading(false);
 
-      toast.error((error?.message || error))
+      toast.error(error?.message || error);
     }
-  }
+  };
 
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-
         <button
           onClick={handleChangeEmail}
           className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
@@ -184,7 +208,6 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           <div className={`relative rounded px-3`}>
-
             <div className="modalBody">
               <div className="py-2 text-center">
                 <h5 className="m-0 text-xl font-bold">
@@ -193,7 +216,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
               </div>
               <div className="py-2">
                 <input
-                  onChange={(e) => (setDomainName(e.target.value))}
+                  onChange={(e) => setDomainName(e.target.value)}
                   value={domainName}
                   name=""
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11 h-[45px]`}
@@ -206,7 +229,8 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
                   disabled={loading}
                   type="button"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >{loading ? "Please wait..." : "Save"}
+                >
+                  {loading ? "Please wait..." : "Save"}
                 </button>
               </div>
             </div>
@@ -227,10 +251,10 @@ const OtpWrpper = styled.div`
       outline: 0;
       ${"" /* color: rgb(255 255 255 / 0.4); */}
       background: ${({ theme }) =>
-    theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
+        theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
       border: 1px solid rgb(255 255 255 / 0.1);
       border-color: ${({ theme }) =>
-    theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
+        theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
       font-size: 24px;
       font-weight: 600;
     }
@@ -251,7 +275,6 @@ const Modal = styled.div`
 `;
 
 export default EnsDomainPop;
-
 
 const closeIcn = (
   <svg
@@ -283,7 +306,6 @@ const closeIcn = (
     </defs>
   </svg>
 );
-
 
 const copyIcn = (
   <svg
