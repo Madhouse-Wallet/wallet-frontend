@@ -18,7 +18,8 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
-
+  req.socket.setTimeout(5 * 60 * 1000); // 5 minutes timeout
+  
   try {
     console.log("line-20");
     const {
