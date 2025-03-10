@@ -41,7 +41,7 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
 // import ethers from "../manualPackage/ethers";
 import { ethers } from "ethers";
 import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia, mainnet } from "viem/chains"
+import { sepolia, mainnet, arbitrum } from "viem/chains"
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { mnemonicToAccount } from 'viem/accounts'
 import { english, generateMnemonic } from 'viem/accounts'
@@ -68,7 +68,10 @@ export const BUNDLER_URL =
 export const PAYMASTER_RPC =
 `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
-const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
+// const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
+const CHAIN =  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia)  || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) 
+// const CHAIN = arbitrum;
+// console.log("CHAIN-->",CHAIN)
 const entryPoint = getEntryPoint("0.7")
 const recoveryExecutorAddress = '0x2f65dB8039fe5CAEE0a8680D2879deB800F31Ae1'
 const recoveryExecutorFunction = 'function doRecovery(address _validator, bytes calldata _data)'

@@ -203,8 +203,10 @@ console.log("test-->",openCam)
                     </label>
                     <div className="border-white/10 bg-white/50 roundded hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
                       <span className="icn">{sepoliaIcn}</span>
-                      <span className="text-white">{
-                    ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? "Sepolia" : "Ethereum Mainnet")}</span>
+                      <span className="text-white">
+                        
+                    {/* {((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? "Sepolia" : "Arbitrum Mainnet")} */}
+                    {process.env.NEXT_PUBLIC_ENV_CHAIN_NAME}</span>
                     </div>
                   </div>
                   {/* <div className="py-2">
