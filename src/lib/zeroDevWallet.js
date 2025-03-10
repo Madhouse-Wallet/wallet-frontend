@@ -6,7 +6,8 @@ import {
   createWeightedKernelAccountClient,
   createWeightedValidator,
   toWebAuthnSigner,
-  getRecoveryFallbackActionInstallModuleData
+  getRecoveryFallbackActionInstallModuleData,
+  toECDSASigner
 } from "@zerodev/weighted-validator";
 import {
   createWeightedECDSAValidator,
@@ -357,6 +358,21 @@ export const getProvider = async (kernelClient) => {
   } catch (error) {
     console.log("get provider error-->", error)
     return false;
+  }
+}
+
+export const getProviderSocial = async (web3AuthProviderC)=>{
+  try {
+    const privateKey = await web3AuthProviderC.request({
+      method: "eth_private_key",
+    });
+    console.log("privateKey-->", privateKey)
+    const eoaAccount1 = privateKeyToAccount(`0x${privateKey}`)
+    console.log("eoaAccount1-->", eoaAccount1)
+    const ecdsaSigner1 = await toECDSASigner({ signer: eoaAccount1 })
+    console.log("ecdsaSigner1-->", ecdsaSigner1)
+  } catch (error) {
+    
   }
 }
 

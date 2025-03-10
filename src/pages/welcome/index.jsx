@@ -191,7 +191,7 @@ const Welcome = () => {
       } 
     }else {
         let addressPhrase = await getMnemonic();
-        const createdWebAuthKey = await registerPasskey(userInfo?.email + "_passkey_6");
+        const createdWebAuthKey = await registerPasskey(userInfo?.email + "_passkey_1");
         if (!createdWebAuthKey.status) {
           toast.error(createdWebAuthKey.msg);
           return false;

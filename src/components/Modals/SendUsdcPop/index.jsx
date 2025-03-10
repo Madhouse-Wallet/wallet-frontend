@@ -4,7 +4,7 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useTheme } from "@/ContextApi/ThemeContext";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { getProvider, getAccount, getProviderSocial } from "@/lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
@@ -100,11 +100,13 @@ console.log("test-->",openCam)
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         try {
+          // getProviderSocial
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {
             // setUserAccount(account.address);
             let provider = await getProvider(account.kernelClient);
             if (provider) {
+              console.log("provider0-->",provider)
               setProviderr(provider?.ethersProvider);
             } else {
               throw new Error("Provider not detected");
