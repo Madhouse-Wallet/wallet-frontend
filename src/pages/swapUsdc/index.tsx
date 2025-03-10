@@ -69,7 +69,7 @@ const cowSwapParams = {
   tradeType: "swap",
   // tokenLists: [],
   tokenLists: [
-    "https://madhouse-wallet.s3.us-east-1.amazonaws.com/custom-token-list.json",
+    process.env.NEXT_PUBLIC_COWSWAP_CUSTOM_TOKEN_LIST_URI,
   ],
   sell: {
     // Sell token. Optionally add amount for sell orders
@@ -78,7 +78,7 @@ const cowSwapParams = {
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+    asset: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
     amount: "0",
   },
   partnerFee: {
@@ -109,8 +109,8 @@ const cowSwapParams = {
   sounds: {},
   customTokens: [
     {
-      chainId: 42161,
-      address: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+      chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
+      address: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
