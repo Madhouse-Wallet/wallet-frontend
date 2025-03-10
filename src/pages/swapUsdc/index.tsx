@@ -78,9 +78,8 @@ const cowSwapParams = {
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+    asset: "0x1d525fb145af5c51766a89706c09fe07e6058d1d",
     amount: "0",
-  
   },
   partnerFee: {
     // Partner fee, in Basis Points (BPS) and a receiver address
@@ -110,13 +109,12 @@ const cowSwapParams = {
   sounds: {},
   customTokens: [
     {
-      chainId: 42161,
-      address: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+      chainId: 11155111,
+      address: "0x1d525fb145af5c51766a89706c09fe07e6058d1d",
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
-      logoURI:
-        "https://media.madhousewallet.com/btc.svg",
+      logoURI: "https://media.madhousewallet.com/btc.svg",
     },
   ],
 };
@@ -136,6 +134,7 @@ const Swap = () => {
 
   const createProvider = async () => {
     if (userAuth?.passkeyCred) {
+      console.log("line-137")
       let account = false;
       console.log("account---<", account);
       if (account) {
@@ -149,18 +148,19 @@ const Swap = () => {
 
   useEffect(() => {
     const connectWallet = async () => {
+      console.log("line-150 userAuth",userAuth)
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
+          console.log("provider-->Swap", provider);
           if (provider) {
-            console.log("provider -line-114", provider);
+            console.log("provider-Swap-line-157", provider);
             const wrappedProvider = new LegacyProviderWrapper(
               provider?.kernelProvider
             );
-            console.log("wrappedProvider -line-114", wrappedProvider);
+            console.log("wrappedProvider -line-161", wrappedProvider);
 
             setProvider(wrappedProvider);
           }
@@ -174,6 +174,8 @@ const Swap = () => {
 
     connectWallet();
   }, []);
+
+  console.log("provider", provider);
 
   return (
     <>
