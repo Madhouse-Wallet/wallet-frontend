@@ -9,8 +9,8 @@
   "logoURI": "https://ipfs.cow.fi/ipfs/QmYK6v8knxT7ZfmS6FPpd9u1dKLxtZMKSrdQtur4ofShM3?pinataGatewayToken=MzQoKxPtVypjPgvG7fN47-FynJlKEStEQTyI-uG15v8jeAL5zpLuUj8pqWwhEu1T",
   "tokens": [
     {
-      "chainId": 11155111,
-      "address": "0x1d525fb145af5c51766a89706c09fe07e6058d1d",
+      "chainId": 42161,
+      "address": "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
       "name": "Bitcoin",
       "symbol": "BTC",
       "decimals": 18,

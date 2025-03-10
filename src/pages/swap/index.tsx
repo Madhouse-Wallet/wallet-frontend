@@ -69,7 +69,7 @@ const cowSwapParams = {
   tradeType: "swap",
   // tokenLists: [],
   tokenLists: [
-    "https://github.com/Madhouse-Wallet/wallet-frontend/blob/cowwSwapChanges/custom-token-list.json",
+    "https://madhouse-wallet.s3.us-east-1.amazonaws.com/custom-token-list.json",
   ],
   sell: {
     // Sell token. Optionally add amount for sell orders
