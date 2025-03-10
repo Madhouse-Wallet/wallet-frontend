@@ -59,7 +59,7 @@ const NETWORK = networks.bitcoin;
 
 // Setup CORS middleware
 const corsMiddleware = cors({
-  origin: true,
+  origin: "*",
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
