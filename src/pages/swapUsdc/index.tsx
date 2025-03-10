@@ -73,13 +73,14 @@ const cowSwapParams = {
   ],
   sell: {
     // Sell token. Optionally add amount for sell orders
-    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
-    amount: "1",
+    asset: "USDC",
+    amount: "100",
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "USDC",
+    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
     amount: "0",
+  
   },
   partnerFee: {
     // Partner fee, in Basis Points (BPS) and a receiver address
