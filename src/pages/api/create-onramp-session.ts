@@ -154,6 +154,7 @@ export default async function handler(
       sourceCurrency,
       destinationCurrency,
       destinationNetwork,
+      destinationExchangeAmount
     } = req.body;
 
     if (!wallet_address) {
@@ -204,6 +205,7 @@ export default async function handler(
     requestBody.append("source_currency", sourceCurrency);
     requestBody.append("destination_currency", destinationCurrency);
     requestBody.append("destination_network", destinationNetwork);
+    requestBody.append("destination_amount", destinationExchangeAmount);
     requestBody.append(`wallet_addresses[${destinationNetwork}]`, wallet_address);
     requestBody.append("lock_wallet_address", "true");
     requestBody.append(

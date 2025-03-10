@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { BackBtn } from "@/components/common";
+import Identity from "../identity";
+import Link from "next/link";
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
 
@@ -31,7 +33,7 @@ const BTCDebitCard: React.FC = () => {
                 </div>
               </div>
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
-                <div className="pt-4">
+                <div className="py-4">
                   <Image
                     src={process.env.NEXT_PUBLIC_IMAGE_URL + "comingSoon.png"}
                     alt="comingsoon"
@@ -46,9 +48,18 @@ const BTCDebitCard: React.FC = () => {
                     </h2>
                   </ContentWrp>
                 </div>
+                <div className="py-4 text-center">
+                  <Link
+                    href={"/identity"}
+                    className="inline-flex btn items-center justify-center commonBtn"
+                  >
+                    Register for Early Access
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
+          <div></div>
         </div>
       </section>
     </>

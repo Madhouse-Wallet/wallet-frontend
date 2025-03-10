@@ -8,13 +8,13 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { StripeElementsOptions } from "@stripe/stripe-js";
 import StripePaymentPage from "../stripePaymentPage";
-import Swap from "../swap";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import SwapKit from "./swapKit";
 import { initializetbtc } from "../../lib/thresholdReceiveFunc";
 import { useSelector } from "react-redux";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import { BackBtn } from "@/components/common";
+import Swap from "../swapUsdc";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
@@ -24,7 +24,7 @@ const BuyCoin: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState("");
   const { theme, toggleTheme } = useTheme();
   const tabData = [
-    { title: "Buy with USDC", component: <SwapKit /> },
+    { title: "Buy with USDC", component: <Swap /> },
     {
       title: "Buy with Debit/Credit Card",
       component: (

@@ -73,12 +73,12 @@ const cowSwapParams = {
   ],
   sell: {
     // Sell token. Optionally add amount for sell orders
-    asset: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-    amount: "1",
+    asset: "USDC",
+    amount: "100",
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "USDC",
+    asset: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
     amount: "0",
   },
   partnerFee: {
@@ -114,8 +114,7 @@ const cowSwapParams = {
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
-      logoURI:
-        "https://media.madhousewallet.com/btc.svg",
+      logoURI: "https://media.madhousewallet.com/btc.svg",
     },
   ],
 };
@@ -135,6 +134,7 @@ const Swap = () => {
 
   const createProvider = async () => {
     if (userAuth?.passkeyCred) {
+      console.log("line-137")
       let account = false;
       console.log("account---<", account);
       if (account) {
@@ -148,18 +148,19 @@ const Swap = () => {
 
   useEffect(() => {
     const connectWallet = async () => {
+      console.log("line-150 userAuth",)
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
+          console.log("provider-->Swap", provider);
           if (provider) {
-            console.log("provider -line-114", provider);
+            console.log("provider-Swap-line-157", provider);
             const wrappedProvider = new LegacyProviderWrapper(
               provider?.kernelProvider
             );
-            console.log("wrappedProvider -line-114", wrappedProvider);
+            console.log("wrappedProvider -line-161", wrappedProvider);
 
             setProvider(wrappedProvider);
           }
@@ -173,6 +174,8 @@ const Swap = () => {
 
     connectWallet();
   }, []);
+
+  console.log("provider", provider);
 
   return (
     <>

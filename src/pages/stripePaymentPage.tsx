@@ -146,10 +146,12 @@
 //   </svg>
 // );
 
-
 import React, { useEffect, useState, useCallback } from "react";
 import { loadStripeOnramp } from "@stripe/crypto";
-import { CryptoElements, OnrampElement } from "@/components/stripe/StripeCryptoElements";
+import {
+  CryptoElements,
+  OnrampElement,
+} from "@/components/stripe/StripeCryptoElements";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 
@@ -164,12 +166,12 @@ interface StripePaymentPageProps {
   currency?: string;
 }
 
-const StripePaymentPage: React.FC<StripePaymentPageProps> = ({ 
+const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
   walletAddress,
   amount = 10,
-  currency = 'USD' 
+  currency = "USD",
 }) => {
-  console.log("walletAddress",walletAddress)
+  console.log("walletAddress", walletAddress);
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -188,39 +190,41 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
       try {
         setIsLoading(true);
         const amountValue = amount || Number(router.query.amount) || 10;
-        const currencyValue = currency || router.query.currency as string || 'USD';
+        const currencyValue =
+          currency || (router.query.currency as string) || "USD";
         // const btcAddress = walletAddress;
 
-        const btcAddress =  process.env.NEXT_PUBLIC_QUIENCY_BTC_WALLET_ADDRESS; // Replace with your default Bitcoin address
+        const btcAddress = process.env.NEXT_PUBLIC_QUIENCY_BTC_WALLET_ADDRESS; // Replace with your default Bitcoin address
 
-        if (!btcAddress) { 
-          setMessage('Wallet address is required');
+        if (!btcAddress) {
+          setMessage("Wallet address is required");
           return;
         }
 
-        const response = await fetch('/api/create-onramp-session', {
-          method: 'POST',
+        const response = await fetch("/api/create-onramp-session", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             wallet_address: btcAddress,
-            sourceCurrency:"usd",
-            destinationCurrency:"btc",
-            destinationNetwork:"bitcoin"
-          })
+            sourceCurrency: "usd",
+            destinationCurrency: "btc",
+            destinationNetwork: "bitcoin",
+            destinationExchangeAmount: "0.01",
+          }),
         });
 
         const data = await response.json();
-        
+
         if (response.ok) {
           setClientSecret(data.clientSecret);
         } else {
           setMessage(`Error: ${data.error}`);
         }
       } catch (error) {
-        console.error('Error:', error);
-        setMessage('Failed to initialize payment session');
+        console.error("Error:", error);
+        setMessage("Failed to initialize payment session");
       } finally {
         setIsLoading(false);
       }
@@ -262,11 +266,11 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
                     appearance={{
                       theme: "dark",
                       variables: {
-                        colorPrimary: '#0055de',
-                        colorBackground: '#1a1a1a',
-                        colorText: '#ffffff',
-                        colorTextSecondary: '#999999',
-                      }
+                        colorPrimary: "#0055de",
+                        colorBackground: "#1a1a1a",
+                        colorText: "#ffffff",
+                        colorTextSecondary: "#999999",
+                      },
                     }}
                     onChange={onChange}
                   />
@@ -291,7 +295,7 @@ const PaymentSec = styled.section`
   .formMain {
     max-width: 540px;
     margin: 0 auto;
-    
+
     #onramp-element {
       iframe {
         margin: 0 auto !important;
@@ -299,7 +303,7 @@ const PaymentSec = styled.section`
         width: 100%;
       }
     }
-    
+
     #onramp-message {
       margin-top: 20px;
       color: rgb(105, 115, 134);
