@@ -78,7 +78,7 @@ const cowSwapParams = {
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "0x1d525fb145af5c51766a89706c09fe07e6058d1d",
+    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
     amount: "0",
   },
   partnerFee: {
@@ -109,8 +109,8 @@ const cowSwapParams = {
   sounds: {},
   customTokens: [
     {
-      chainId: 11155111,
-      address: "0x1d525fb145af5c51766a89706c09fe07e6058d1d",
+      chainId: 42161,
+      address: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
@@ -148,7 +148,7 @@ const Swap = () => {
 
   useEffect(() => {
     const connectWallet = async () => {
-      console.log("line-150 userAuth",userAuth)
+      console.log("line-150 userAuth",)
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
