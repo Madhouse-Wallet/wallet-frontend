@@ -8,12 +8,25 @@ export async function initializeTBTC(signer: EthereumSigner) {
     // Initialize the SDK for Mainnet
     console.log("Initialize the SDK for Mainnet");
     let sdk;
-    if (process.env.NEXT_PUBLIC_NODE_ENV == "development") {
+    // const CHAIN =  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia)  || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) 
+    if (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia") {
       console.log("dev tbtc")
       sdk = await TBTC.initializeSepolia(signer as EthereumSigner);
-    } else {
+    } else if (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet") {
       console.log("pro tbtc")
       sdk = await TBTC.initializeMainnet(signer as EthereumSigner);
+    } else {
+      // Ethereum Mainnet RPC URL
+      const ethRpcUrl = "https://eth.merkle.io"; // Replace with your own RPC provider
+
+      // Create an ethers provider for Ethereum Mainnet
+      const ethProvider = new ethers.providers.JsonRpcProvider(ethRpcUrl);
+      // Initialize it for any L2 (E.g., Arbitrum)
+      sdk = await TBTC.initializeMainnet(ethProvider);
+      // Initialize the SDK for Ethereum only.
+      // Initialize it for any L2 (E.g., Arbitrum)
+      // await sdk.initializeCrossChain("Arbitrum", signer);
+
     }
     // const sdk = await TBTC.initializeMainnet(signer);
 
