@@ -65,11 +65,11 @@ const cowSwapParams = {
   appCode: "Madhouse Wallet",
   width: "100%",
   height: "640px",
-  chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
+  chainId: Number(process.env.NEXT_PUBLIC_MAINNET_CHAIN),
   tradeType: "swap",
   // tokenLists: [],
   tokenLists: [
-    "https://madhouse-wallet.s3.us-east-1.amazonaws.com/custom-token-list.json",
+    process.env.NEXT_PUBLIC_COWSWAP_CUSTOM_TOKEN_LIST_URI,
   ],
   sell: {
     // Sell token. Optionally add amount for sell orders
@@ -78,9 +78,8 @@ const cowSwapParams = {
   },
   buy: {
     // Buy token. Optionally add amount for buy orders
-    asset: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+    asset: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
     amount: "0",
-  
   },
   partnerFee: {
     // Partner fee, in Basis Points (BPS) and a receiver address
@@ -110,13 +109,12 @@ const cowSwapParams = {
   sounds: {},
   customTokens: [
     {
-      chainId: 42161,
-      address: "0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40",
+      chainId: Number(process.env.NEXT_PUBLIC_MAINNET_CHAIN),
+      address: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
-      logoURI:
-        "https://media.madhousewallet.com/btc.svg",
+      logoURI: "https://media.madhousewallet.com/btc.svg",
     },
   ],
 };
@@ -136,6 +134,7 @@ const Swap = () => {
 
   const createProvider = async () => {
     if (userAuth?.passkeyCred) {
+      console.log("line-137")
       let account = false;
       console.log("account---<", account);
       if (account) {
@@ -149,18 +148,19 @@ const Swap = () => {
 
   useEffect(() => {
     const connectWallet = async () => {
+      console.log("line-150 userAuth",)
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
+          console.log("provider-->Swap", provider);
           if (provider) {
-            console.log("provider -line-114", provider);
+            console.log("provider-Swap-line-157", provider);
             const wrappedProvider = new LegacyProviderWrapper(
               provider?.kernelProvider
             );
-            console.log("wrappedProvider -line-114", wrappedProvider);
+            console.log("wrappedProvider -line-161", wrappedProvider);
 
             setProvider(wrappedProvider);
           }
@@ -174,6 +174,8 @@ const Swap = () => {
 
     connectWallet();
   }, []);
+
+  console.log("provider", provider);
 
   return (
     <>

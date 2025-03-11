@@ -19,7 +19,7 @@ export default function App({ Component, pageProps, ...props }: AppProps) {
   useScrollRestoration();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
+ 
   // useEffect(() => {
   //   const handleStart = () => {
   //     setLoading(true);
