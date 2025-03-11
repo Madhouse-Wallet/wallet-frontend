@@ -21,6 +21,7 @@ import {
 import { randomBytes } from 'crypto';
 import { ECPairFactory } from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
+// import * as ecc from 'secp256k1'
 import { WebSocket } from 'ws';
 import cors from 'cors';
 
