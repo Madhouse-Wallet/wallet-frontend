@@ -1,4 +1,5 @@
 // pages/api/swap.ts
+process.env.SECP256K1_JS_ONLY = 'true';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import zkpInit from '@vulpemventures/secp256k1-zkp';
 import axios from 'axios';
@@ -20,7 +21,10 @@ import {
 } from 'boltz-core';
 import { randomBytes } from 'crypto';
 import { ECPairFactory } from 'ecpair';
-import * as ecc from 'tiny-secp256k1';
+// import * as ecc from 'tiny-secp256k1';
+// import * as ecc from 'secp256k1'
+import ecc from '@bitcoinerlab/secp256k1';
+
 import { WebSocket } from 'ws';
 import cors from 'cors';
 
@@ -59,7 +63,7 @@ const NETWORK = networks.bitcoin;
 
 // Setup CORS middleware
 const corsMiddleware = cors({
-  origin: true,
+  origin: "*",
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

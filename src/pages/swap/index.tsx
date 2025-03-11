@@ -65,7 +65,7 @@ const cowSwapParams = {
   appCode: "Madhouse Wallet",
   width: "100%",
   height: "640px",
-  chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
+  chainId: Number(process.env.NEXT_PUBLIC_MAINNET_CHAIN),
   tradeType: "swap",
   // tokenLists: [],
   tokenLists: [
@@ -109,7 +109,7 @@ const cowSwapParams = {
   sounds: {},
   customTokens: [
     {
-      chainId: process.env.NEXT_PUBLIC_MAINNET_CHAIN,
+      chainId: Number(process.env.NEXT_PUBLIC_MAINNET_CHAIN),
       address: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
       name: "Bitcoin",
       decimals: 18,
