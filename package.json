@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.2.0",
     "@cowprotocol/cow-sdk": "^5.10.1-RC.0",
     "@cowprotocol/widget-react": "^0.13.0",
     "@emotion/react": "^11.14.0",
