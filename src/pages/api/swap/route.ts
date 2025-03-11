@@ -1,4 +1,5 @@
 // pages/api/swap.ts
+process.env.SECP256K1_JS_ONLY = 'true';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import zkpInit from '@vulpemventures/secp256k1-zkp';
 import axios from 'axios';
