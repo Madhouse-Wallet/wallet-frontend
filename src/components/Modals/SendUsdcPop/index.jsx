@@ -67,7 +67,7 @@ console.log("test-->",openCam)
       toast.error("Insufficient USDC balance");
       return;
     }
-
+ 
     setIsLoading(true);
     try {
       const web3 = new Web3Interaction("sepolia", providerr);
