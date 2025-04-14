@@ -40,8 +40,8 @@ const MainLayout = ({ Component, pageProps }) => {
       {/* <div className="flex items-start justify-end relative">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
       </div> */}
-      {ensDomain &&
-        createPortal(<EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />, document.body)}
+      {/* {ensDomain &&
+        createPortal(<EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />, document.body)} */}
 
 
       <Main className="ml-auto ms-auto">

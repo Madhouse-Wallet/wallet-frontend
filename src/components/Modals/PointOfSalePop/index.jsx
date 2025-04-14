@@ -18,13 +18,13 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
   const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 10000); // 10 seconds
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 10000); // 10 seconds
 
-    return () => clearTimeout(timer); // Cleanup on unmount
-  }, []);
+  //   return () => clearTimeout(timer); // Cleanup on unmount
+  // }, []);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
   return (
@@ -51,7 +51,7 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
               </h5> */}
             </div>
             <div className="modalBody text-center">
-              {isLoading && createPortal(<LoadingScreen />, document.body)}
+              {/* {isLoading && createPortal(<LoadingScreen />, document.body)} */}
               <div className="py-2">
                 <Link
                   href="/point-of-sale"

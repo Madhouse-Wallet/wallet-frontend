@@ -10,12 +10,14 @@ import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { splitAddress } from "../../utils/globals";
 import { toast } from "react-toastify";
 import { BackBtn } from "@/components/common";
+import { requestQuote, createFixedShift } from "../../pages/api/sideShiftAI";
 
 const PointOfSale = () => {
   const userAuth = useSelector((state) => state.Auth);
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
+  const [paymentQR, setPaymentQr] = useState("");
   const [isCopied, setIsCopied] = useState({
     one: false,
     two: false,
@@ -60,6 +62,17 @@ const PointOfSale = () => {
       console.error("QR Code generation failed:", err);
     }
   };
+
+  const generatePaymentQRCode = async (text) => {
+    try {
+      const qr = await QRCode.toDataURL(text);
+      console.log("qr-->", qr);
+      setPaymentQr(qr);
+    } catch (err) {
+      console.error("QR Code generation failed:", err);
+    }
+  };
+
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -169,6 +182,204 @@ const PointOfSale = () => {
     }
   };
 
+  const createSwap = async (amount, walletAddress) => {
+    try {
+      const response = await fetch("/api/swap/liquid-swap", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invoiceAmount: amount,
+          destinationAddress: walletAddress,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          status: "error",
+          error: data.error || "Failed to create swap",
+        };
+      }
+
+      return {
+        status: "success",
+        data: data.data,
+      };
+    } catch (error) {
+      return {
+        status: "error",
+        error: error.message || "Something went wrong",
+      };
+    }
+  };
+
+  const getPaymentUri = async ({
+    btc,
+    ln,
+    amt,
+    name,
+    description,
+    format = "json", // 'json', 'base64', or 'png'
+  }) => {
+    try {
+      const query = new URLSearchParams({
+        btc,
+        ln,
+        ...(amt ? { amt } : {}),
+        ...(name ? { name } : {}),
+        ...(description ? { description } : {}),
+        format,
+      }).toString();
+
+      const response = await fetch(`/api/payment-uri?${query}`, {
+        method: "GET",
+      });
+
+      if (format === "png") {
+        const blob = await response.blob();
+        if (!response.ok) {
+          return {
+            status: "error",
+            error: "Failed to fetch PNG",
+          };
+        }
+
+        return {
+          status: "success",
+          data: {
+            blob,
+            url: URL.createObjectURL(blob),
+          },
+        };
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          status: "error",
+          error: data.error || "Failed to get payment URI",
+        };
+      }
+
+      return {
+        status: "success",
+        data,
+      };
+    } catch (error) {
+      return {
+        status: "error",
+        error: error.message || "Something went wrong",
+      };
+    }
+  };
+
+  // Updated sideShiftAPI function for your PointOfSale component
+  const sideShiftAPI = async () => {
+    try {
+      setLoading(true);
+
+      // Using the exact values from your curl examples
+      const liquidQuote = await requestQuote(
+        {
+          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+          depositCoin: "BTC",
+          depositNetwork: "liquid",
+          settleCoin: "USDC",
+          settleNetwork: "arbitrum",
+          depositAmount: "0.01",
+        },
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+      );
+
+      console.log("quote for liquid network", liquidQuote);
+
+      if (!liquidQuote) {
+        setLoading(false);
+        toast.error("Failed to get quote");
+        return;
+      }
+
+      // Create a fixed shift with the quote
+      const liquidShift = await createFixedShift(
+        {
+          settleAddress: "0x6e63779b81a4293Dad86aD1A29F62A4e632FC911",
+          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+          quoteId: liquidQuote.id,
+        },
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+      );
+
+      console.log("shift created for liquid network:", liquidShift);
+
+      // Using the exact values from your curl examples
+      const bitcoinQuote = await requestQuote(
+        {
+          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+          depositCoin: "BTC",
+          depositNetwork: "bitcoin",
+          settleCoin: "USDC",
+          settleNetwork: "arbitrum",
+          depositAmount: "0.01",
+        },
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+      );
+
+      console.log("quote for bitcoin network", bitcoinQuote);
+
+      if (!bitcoinQuote) {
+        setLoading(false);
+        toast.error("Failed to get quote");
+        return;
+      }
+
+      // Create a fixed shift with the quote
+      const bitcoinShift = await createFixedShift(
+        {
+          settleAddress: "0x6e63779b81a4293Dad86aD1A29F62A4e632FC911",
+          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+          quoteId: bitcoinQuote.id,
+        },
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+      );
+
+      console.log("shift created for bitcoin network:", bitcoinShift);
+
+      const result = await createSwap(1020, liquidShift?.depositAddress);
+
+      console.log("line-283", result);
+
+      if (!result) {
+        return;
+      }
+
+      const resultQR = await getPaymentUri({
+        btc: bitcoinShift?.depositAddress,
+        ln: result?.data?.invoice,
+        amt: "0.01",
+        name: "Test Merchant",
+        description: "Payment for order #1234",
+        format: "base64", // or 'json' or 'png'
+      });
+
+      if (resultQR.status === "success") {
+        console.log(resultQR.data);
+        generatePaymentQRCode(resultQR?.data?.uri);
+        // setPaymentQr(resultQR?.data?.qrCode);
+      } else {
+        console.error(resultQR.error);
+      }
+
+      console.log("resultQR", resultQR);
+    } catch (error) {
+      console.error("SideShift API error:", error);
+      setLoading(false);
+      toast.error("Failed to create shift");
+    }
+  };
   return (
     <>
       <section className="relative dashboard pt-12">
@@ -253,9 +464,25 @@ const PointOfSale = () => {
                             Next
                           </button>
                         </div>
+                        <div className="btnWrpper mt-10">
+                          <button
+                            onClick={sideShiftAPI}
+                            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                          >
+                            Side SHift API
+                          </button>
+                        </div>
+                        {paymentQR && (
+                          <Image
+                            alt=""
+                            src={paymentQR}
+                            height={10000}
+                            width={10000}
+                            className="max-w-full w-auto h-auto object-contain"
+                          />
+                        )}
                       </div>
                     </div>
-                   
                   </>
                 ) : step == 2 ? (
                   <>
