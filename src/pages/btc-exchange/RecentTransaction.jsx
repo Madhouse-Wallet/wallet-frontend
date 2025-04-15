@@ -6,10 +6,9 @@ import { fetchWalletHistory } from "../../lib/utils";
 import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import img from "@/Assets/Images/noData.png";
-import InternalTab from "./InternalTab"
+import InternalTab from "./InternalTab";
 
 const RecentTransaction = () => {
-
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -63,8 +62,8 @@ const RecentTransaction = () => {
           tx.receipt_status === "1"
             ? "confirmed"
             : tx.receipt_status === "0"
-            ? "rejected"
-            : "pending",
+              ? "rejected"
+              : "pending",
         amount: amount ? `${amount} ${currency}` : "",
         // type: isSend ? "send" : "receive",
         type: tx?.category,
@@ -319,10 +318,10 @@ const RecentTransaction = () => {
                                   {tx.isRedemption
                                     ? "Redemption"
                                     : tx.isDeposit
-                                    ? "Deposit"
-                                    : tx.type === "token send"
-                                    ? "Send"
-                                    : "Receive"}{" "}
+                                      ? "Deposit"
+                                      : tx.type === "token send"
+                                        ? "Send"
+                                        : "Receive"}{" "}
                                   {tx.amount?.split(" ")[1] || "ETH"}
                                 </h4>
                                 <p
@@ -389,7 +388,7 @@ const RecentTransaction = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="px-4 py-2 bg-black/50 text-white rounded-md"
               >
-                Options
+                Filters
               </button>
 
               {isOpen && (
