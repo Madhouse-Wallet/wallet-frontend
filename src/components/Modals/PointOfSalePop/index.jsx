@@ -61,7 +61,7 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
                   Crypto Link
                 </Link>
               </div> */}
-              <div className="py-2">
+              <div className="py-2"> 
                 <Link
                   href="https://lnbits.madhousewallet.com/tpos/e7AVbNJKne4sgGEwyNQiKX"
                   target="_blank"
