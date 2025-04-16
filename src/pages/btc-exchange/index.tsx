@@ -65,7 +65,7 @@ const BTCEchange = () => {
       // const signer = provider.getSigner();
       // const address = await signer.getAddress();
       // console.log("signer00>",signer,address)
-      console.log("userAuth.passkeyCred-->",userAuth.passkeyCred)
+      console.log("userAuth.passkeyCred-->", userAuth.passkeyCred);
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         console.log("account---<", account);
@@ -324,14 +324,14 @@ const BTCEchange = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => startSend()}
-                          className="flex items-center justify-center bg-[#FFEC8A] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
+                          className="flex items-center justify-center bg-[#dd6c47] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Send
                         </button>
                         <button
                           onClick={() => startReceive()}
                           // onClick={() => setBtcExchange(!btcExchange)}
-                          className="flex items-center justify-center btn bg-[#CB89FF] border-0 text-white rounded-20 text-white text-xs font-bold"
+                          className="flex items-center justify-center bg-[#dd6c47] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Receive
                         </button>

@@ -7,7 +7,7 @@ import styled from "styled-components";
 import { useRouter } from "next/router";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
-import PointOfSalePop from "@/components/Modals/PointOfSalePop"
+import PointOfSalePop from "@/components/Modals/PointOfSalePop";
 
 const Footer = () => {
   const router = useRouter();
@@ -63,11 +63,11 @@ const Footer = () => {
               style={{ opacity: 1 }}
             ></div> */}
           </li>
-          <li className="relative aspect-square">
+          {/* <li className="relative aspect-square">
             <button
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Approval"
-              // href={"/point-of-sale"}
+              href={"/point-of-sale"}
               onClick={() => setPointSale(!pointSale)}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
@@ -83,7 +83,7 @@ const Footer = () => {
                 Point of Sale
               </span>
             </button>
-          </li>
+          </li> */}
           {/* <li>
                   <Link href={"/approval"} className="relative inline-block">
                     <Image
@@ -155,7 +155,8 @@ const FootNav = styled.ul`
     padding: 5px 0;
     flex-shrink: 0;
   }
-  a, button {
+  a,
+  button {
     transition: 0.4s;
     display: block;
     img {
