@@ -18,13 +18,13 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
   const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 10000); // 10 seconds
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 10000); // 10 seconds
 
-    return () => clearTimeout(timer); // Cleanup on unmount
-  }, []);
+  //   return () => clearTimeout(timer); // Cleanup on unmount
+  // }, []);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
   return (
@@ -51,8 +51,8 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
               </h5> */}
             </div>
             <div className="modalBody text-center">
-              {isLoading && createPortal(<LoadingScreen />, document.body)}
-              <div className="py-2">
+              {/* {isLoading && createPortal(<LoadingScreen />, document.body)} */}
+              {/* <div className="py-2">
                 <Link
                   href="/point-of-sale"
                   onClick={() => setPointSale(false)}
@@ -60,12 +60,34 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
                 >
                   Crypto Link
                 </Link>
-              </div>
-              {/* {userAuth?.walletAddress && ( */}
+              </div> */}
               <div className="py-2">
+                <Link
+                  href="https://lnbits.madhousewallet.com/tpos/e7AVbNJKne4sgGEwyNQiKX"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Terminal
+                </Link>
+              </div>
+
+              <div className="py-2">
+                <Link
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Refund
+                </Link>
+              </div>
+
+              {/* {userAuth?.walletAddress && ( */}
+              {/* <div className="py-2">
                 <SideShiftWidget
                   // setPointSale={setPointSale}
-                  onClick={() => setPointSale(false)}
+                  // onClick={() => setPointSale(false)}
                   // pointSale={pointSale}
                   // parentAffiliateId={
                   //   process.env.NEXT_PUBLIC_SIDE_SHIFT_PARENT_ID
@@ -73,12 +95,12 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
                   // defaultDepositMethodId="btc"
                   // defaultSettleMethodId="usdcarb"
                   // theme="light"
-                  settleAddress={userAuth?.walletAddress}
-                  buttonText="Cash App"
+                  // settleAddress={userAuth?.walletAddress}
+                  buttonText="Refund"
                   buttonColor="rgb(232, 90, 67)"
                   textColor="rgb(17, 11, 11)"
                 />
-              </div>
+              </div> */}
               {/* )} */}
             </div>
           </div>
