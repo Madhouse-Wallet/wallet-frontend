@@ -39,6 +39,8 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
       };
   
       fetchUser();
+    }else{
+      setIsLoading(false);
     }
    
   }, [userAuth.email]);
