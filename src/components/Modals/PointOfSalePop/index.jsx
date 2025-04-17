@@ -9,7 +9,9 @@ import SideShiftWidget from "@/components/SideShift/SideShiftWidget";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
 import { createPortal } from "react-dom";
-
+import {
+  getUser,
+} from "../../../lib/apiCall";
 // css
 
 // img
@@ -18,13 +20,28 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
   const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(true);
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 10000); // 10 seconds
-
-  //   return () => clearTimeout(timer); // Cleanup on unmount
-  // }, []);
+  const [lnbitLink, setLnbitLink] = useState("jbmi6jUrxkXsTGFMygaUyk");
+  useEffect(() => {
+    if(userAuth.email){
+      const fetchUser = async () => {
+        try {
+          const user = await getUser(userAuth.email);
+          if (user) {
+            console.log("user-->",user)
+            setLnbitLink(user?.userId?.lnbitLinkId)
+            setIsLoading(false); // stop loader if user found
+          }else{
+            setIsLoading(false)
+          }
+        } catch (error) {
+          console.error("Error fetching user:", error);
+          setIsLoading(false)        }
+      };
+  
+      fetchUser();
+    }
+   
+  }, [userAuth.email]);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
   return (
@@ -51,7 +68,7 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
               </h5> */}
             </div>
             <div className="modalBody text-center">
-              {/* {isLoading && createPortal(<LoadingScreen />, document.body)} */}
+              {isLoading && createPortal(<LoadingScreen />, document.body)}
               {/* <div className="py-2">
                 <Link
                   href="/point-of-sale"
@@ -61,9 +78,9 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
                   Crypto Link
                 </Link>
               </div> */}
-              <div className="py-2">  
+              <div className="py-2">
                 <Link
-                  href="https://lnbits.madhousewallet.com/tpos/e7AVbNJKne4sgGEwyNQiKX"
+                  href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
