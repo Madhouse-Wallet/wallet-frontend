@@ -1,14 +1,26 @@
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 // src/pages/sphere/page.tsx
 import SphereRampWidget from "@/components/SphereWidget/SphereRampWidget";
 import Wlogomw from "@/Assets/Images/logow1.png";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { BackBtn } from "@/components/common";
+import SpherePayAPI from "../api/spherePayApi.js";
+import Step1 from "./step1.jsx";
+import Step2 from "./step2.jsx";
+import Step3 from "./step3.jsx";
+import AddBankDetail from "./AddBankDetail.jsx";
+import TermsOfServiceStep from "./TermsOfServiceStep.jsx";
+import VerifyIdentity from "./VerifyIdentity.jsx";
 
 function Spharepay() {
   const { theme, toggleTheme } = useTheme();
+  const [step, setStep] = useState("welcome");
+  const [email, setEmail] = useState("");
+  const [customerId, setCustomerID] = useState("");
+  const [termasSRC, setTermsSRC] = useState("");
+  const [identitySRC, setIdentitySRC] = useState("");
 
   const router = useRouter();
   const themeSphere = {
@@ -19,9 +31,182 @@ function Spharepay() {
     },
   };
 
+  const createNewCustomer = async () => {
+    const customerData = {
+      type: "individual",
+      // firstName: "Perry",
+      // lastName: "Kumar",
+      email: "riteshd@test.co",
+      // phoneNumber: "+917688862985",
+      // address: {
+      //   line1: "Ganeshpura",
+      //   city: "Beawar",
+      //   postalCode: "305901",
+      //   state: "RJ",
+      //   country: "IND",
+      // },
+      // dob: {
+      //   month: 2,
+      //   day: 18,
+      //   year: 2000,
+      // },
+    };
+
+    try {
+      const response = await SpherePayAPI.createCustomer(customerData);
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error creating customer:", error);
+    }
+  };
+
+  const getCustomer = async () => {
+    try {
+      const response = await SpherePayAPI.getCustomer(
+        "customer_80e5b83cddc547ae8e5a167a71ee550b"
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error creating customer:", error);
+    }
+  };
+
+  const TermsOfServiveCustomer = async () => {
+    try {
+      const response = await SpherePayAPI.createTosLink(
+        "customer_80e5b83cddc547ae8e5a167a71ee550b"
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error creating customer:", error);
+    }
+  };
+
+  const kycCustomer = async () => {
+    try {
+      const response = await SpherePayAPI.createKycLink(
+        "customer_80e5b83cddc547ae8e5a167a71ee550b"
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error creating customer:", error);
+    }
+  };
+
+  // Call the addWallet function
+  const addCustomerWallet = async () => {
+    try {
+      const walletData = {
+        customer: "customer_80e5b83cddc547ae8e5a167a71ee550b", // Replace with actual customer ID
+        network: "arbitrum", // Blockchain network (e.g., Solana)
+        address: "0xAbb188AA605E5A0AF65d4029ACAca04Bf26ECb4d", // Replace with actual wallet address
+      };
+
+      const response = await SpherePayAPI.addWallet(walletData);
+      console.log("Wallet added successfully:", response);
+      return response;
+    } catch (error) {
+      console.error("Error adding wallet:", error);
+    }
+  };
+
+  // Call the addBankAccount function
+  const addCustomerBankAccount = async () => {
+    try {
+      const customerId = "customer_80e5b83cddc547ae8e5a167a71ee550b"; // Replace with actual customer ID
+
+      const bankAccountData = {
+        customer: customerId,
+        accountName: "Heramb Sharan Sharma",
+        bankName: "Bank of Baroda",
+        accountType: "savings",
+        accountNumber: "06620100031733",
+        routingNumber: "7688962985",
+      };
+
+      const response = await SpherePayAPI.addBankAccount(
+        customerId,
+        bankAccountData
+      );
+      console.log("Bank account added successfully:", response);
+      return response;
+    } catch (error) {
+      console.error("Error adding bank account:", error);
+    }
+  };
+
+  const initiateTransfer = async () => {
+    try {
+      const transferData = {
+        customer: "customer_80e5b83cddc547ae8e5a167a71ee550b", // Replace with actual customer ID
+        amount: "100",
+        source: {
+          id: "bankAccount_bfe977f4b212418e82723d10e8a7a6c2", // Replace with actual bank account ID
+          network: "wire",
+          currency: "usd",
+        },
+        destination: {
+          id: "wallet_a07d92af200b4500a9c8e19725009fbb", // Replace with actual wallet ID
+          network: "arbitrum",
+          currency: "usdc",
+        },
+      };
+
+      const response = await SpherePayAPI.createTransfer(transferData);
+      console.log("Transfer initiated successfully:", response);
+      return response;
+    } catch (error) {
+      console.error("Error initiating transfer:", error);
+    }
+  };
+
+  const initiateWalletToBankTransfer = async () => {
+    try {
+      const transferData = {
+        customer: "customer_80e5b83cddc547ae8e5a167a71ee550b", // Replace with actual customer ID
+        amount: "100",
+        source: {
+          id: "wallet_a07d92af200b4500a9c8e19725009fbb", // Replace with actual wallet ID
+          network: "arbitrum",
+          currency: "usdc",
+        },
+        destination: {
+          id: "bankAccount_bfe977f4b212418e82723d10e8a7a6c2", // Replace with actual bank account ID
+          network: "wire",
+          currency: "usd",
+        },
+      };
+
+      const response =
+        await SpherePayAPI.createWalletToBankTransfer(transferData);
+      console.log("Wallet to bank transfer initiated successfully:", response);
+      return response;
+    } catch (error) {
+      console.error("Error initiating wallet to bank transfer:", error);
+    }
+  };
+
+  useEffect(() => {
+    // createNewCustomer();
+    // getCustomer();
+    // TermsOfServiveCustomer();
+    // kycCustomer();
+    // addCustomerWallet();
+    // addCustomerBankAccount();
+    // initiateTransfer();
+    // initiateWalletToBankTransfer();
+  }, []);
+
+  console.log(step, "hermb don");
+
   return (
     <>
-      <SpherePaysec className="ifrmae pt-12 relative">
+      {/* <SpherePaysec className="ifrmae pt-12 relative"> */}
+      <section className="ifrmae pt-12 relative">
         <div className="container relative">
           {/* <button
             onClick={() => router.push("/dashboard")}
@@ -44,7 +229,7 @@ function Spharepay() {
                   </div>
                 </div>
               </div>
-              <div className="col-span-12">
+              {/* <div className="col-span-12">
                 <Wrpper>
                   <SphereRampWidget
                     applicationId={process.env.NEXT_PUBLIC_SPHERE_APP_ID || ""}
@@ -53,11 +238,76 @@ function Spharepay() {
                     theme={themeSphere}
                   />
                 </Wrpper>
+              </div> */}
+              <div className="col-span-12">
+                <div className="px-3">
+                  {step == "welcome" ? (
+                    <>
+                      <Step1
+                        step={step}
+                        setStep={setStep}
+                        email={email}
+                        setEmail={setEmail}
+                        setCustomerID={setCustomerID}
+                      />
+                    </>
+                  ) : step == "select-country" ? (
+                    <>
+                      <Step2
+                        step={step}
+                        setStep={setStep}
+                        userEmail={email}
+                        setCustomerID={setCustomerID}
+                      />
+                    </>
+                  ) : step == "PolicyKycStep" ? (
+                    <>
+                      <Step3
+                        step={step}
+                        setStep={setStep}
+                        setTermsSRC={setTermsSRC}
+                        setIdentitySRC={setIdentitySRC}
+                        customerId={customerId}
+                      />
+                    </>
+                  ) : step == "TermsOfService" ? (
+                    <>
+                      <TermsOfServiceStep
+                        src={"https://spherepay.co/ramp"}
+                        step={step}
+                        setStep={setStep}
+                        customerId={customerId}
+                        termasSRC={termasSRC}
+                      />
+                    </>
+                  ) : step == "VerifyIdentity" ? (
+                    <>
+                      <VerifyIdentity
+                        src={"https://spherepay.co/ramp"}
+                        step={step}
+                        setStep={setStep}
+                        customerId={customerId}
+                        identitySRC={identitySRC}
+                      />
+                    </>
+                  ) : step == "addBankDetail" ? (
+                    <>
+                      <AddBankDetail
+                        step={step}
+                        setStep={setStep}
+                        customerId={customerId}
+                      />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </SpherePaysec>
+      </section>
+      {/* </SpherePaysec> */}
     </>
   );
 }
