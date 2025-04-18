@@ -305,7 +305,7 @@ const CreateWallet = () => {
           email: data.email,
           username: data.username,
         });
-        // return true;
+        // return true; 
         let obj = {
           email: data.email,
           name: data.username,
