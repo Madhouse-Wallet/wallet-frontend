@@ -54,7 +54,7 @@ const Dashboard = () => {
     { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin Balance", value: tbtcBalance, icn: icn22 },
     { head: "USDC Balance", value: thusdBalance, icn: icn33 },
-    { head: "Loan Balance", value: collateralRatio, icn: icn11 },
+    { head: "Virtual Card", value: collateralRatio, icn: icn11 },
   ];
   const cardData = [
     {
@@ -106,7 +106,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Bitcoin Debit Card",
+      head: "Virtual Card Balance",
       icn: icn6,
       onClick: () => {
         // setBuyCoverage(!buycoverage);

@@ -64,7 +64,7 @@ export default async function handler(
       invoice,
       to: 'BTC',
       from: 'BTC',
-      refundPublicKey: keys.publicKey.toString('hex'),
+      refundPublicKey: (keys.publicKey as Buffer).toString('hex'),
     });
 
     const createdResponse = response.data;
@@ -130,9 +130,9 @@ export default async function handler(
           );
 
           // Create and configure Musig instance
-          const musig = new Musig(await zkpInit(), keys, randomBytes(32), [
+          const musig = new Musig(await zkpInit(), keys as any, randomBytes(32), [
             boltzPublicKey,
-            keys.publicKey,
+            Buffer.from(keys.publicKey)
           ]);
 
           // Apply Taproot tweaks

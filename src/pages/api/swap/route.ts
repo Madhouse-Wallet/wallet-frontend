@@ -102,7 +102,7 @@ export default async function handler(
       invoiceAmount,
       to: 'BTC',
       from: 'BTC',
-      claimPublicKey: keys.publicKey.toString('hex'),
+      claimPublicKey: (keys.publicKey as Buffer).toString('hex'),
       preimageHash: crypto.sha256(preimage).toString('hex'),
     });
 
@@ -146,9 +146,9 @@ export default async function handler(
             'hex',
           );
 
-          const musig = new Musig(await zkpInit(), keys, randomBytes(32), [
+          const musig = new Musig(await zkpInit(), keys as any, randomBytes(32), [
             boltzPublicKey,
-            keys.publicKey,
+            Buffer.from(keys.publicKey)
           ]);
           
           const tweakedKey = TaprootUtils.tweakMusig(
@@ -169,7 +169,7 @@ export default async function handler(
               [
                 {
                   ...swapOutput,
-                  keys,
+                  keys: keys as any,
                   preimage,
                   cooperative: true,
                   type: OutputType.Taproot,

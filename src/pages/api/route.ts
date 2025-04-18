@@ -1,6 +1,7 @@
 // app/api/boltz/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import zkpInit from '@vulpemventures/secp256k1-zkp';
+import type { ECPairInterface as BoltzECPairInterface } from 'boltz-core/node_modules/ecpair';
 import {
   Transaction,
   address,
@@ -65,12 +66,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function initializeSwap({ invoiceAmount, destinationAddress }: { 
+async function initializeSwap({ invoiceAmount, destinationAddress }: {
   invoiceAmount: number;
   destinationAddress: string;
 }) {
   initEccLib(ecc);
-    
+
   // Create random preimage and keys
   const preimage = randomBytes(32);
   const keys = ECPairFactory(ecc).makeRandom();
@@ -85,7 +86,7 @@ async function initializeSwap({ invoiceAmount, destinationAddress }: {
       invoiceAmount,
       to: 'BTC',
       from: 'BTC',
-      claimPublicKey: keys.publicKey.toString('hex'),
+      claimPublicKey: (keys.publicKey as Buffer).toString('hex'),
       preimageHash: crypto.sha256(preimage).toString('hex'),
     }),
   });
@@ -101,7 +102,7 @@ async function initializeSwap({ invoiceAmount, destinationAddress }: {
   });
 }
 
-async function claimSwap({ 
+async function claimSwap({
   swapId,
   preimageHex,
   keysWIF,
@@ -119,17 +120,17 @@ async function claimSwap({
   destinationAddress: string;
 }) {
   initEccLib(ecc);
-  
+
   const preimage = Buffer.from(preimageHex, 'hex');
   const keys = ECPairFactory(ecc).fromWIF(keysWIF);
   const boltzPublicKey = Buffer.from(refundPublicKey, 'hex');
 
   // Initialize Musig and create tweaked key
-  const musig = new Musig(await zkpInit(), keys, randomBytes(32), [
+  const musig = new Musig(await zkpInit(), keys as any, randomBytes(32), [
     boltzPublicKey,
-    keys.publicKey,
+    Buffer.from(keys.publicKey)
   ]);
-  
+
   const tweakedKey = TaprootUtils.tweakMusig(
     musig,
     SwapTreeSerializer.deserializeSwapTree(swapTree).tree,
@@ -138,7 +139,7 @@ async function claimSwap({
   // Parse lockup transaction and find swap output
   const lockupTx = Transaction.fromHex(transactionHex);
   const swapOutput = detectSwap(tweakedKey, lockupTx);
-  
+
   if (!swapOutput) {
     return NextResponse.json(
       { error: 'No swap output found in lockup transaction' },
@@ -151,7 +152,7 @@ async function claimSwap({
     constructClaimTransaction(
       [{
         ...swapOutput,
-        keys,
+        keys: keys as BoltzECPairInterface,
         preimage,
         cooperative: true,
         type: OutputType.Taproot,
@@ -183,7 +184,7 @@ async function claimSwap({
 
   // Aggregate nonces and initialize signing session
   musig.aggregateNonces([[boltzPublicKey, Buffer.from(boltzSig.pubNonce, 'hex')]]);
-  
+
   musig.initializeSession(
     claimTx.hashForWitnessV1(
       0,

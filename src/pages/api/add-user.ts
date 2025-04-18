@@ -78,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { email, username, passkey, publickeyId, rawId, wallet } = req.body;
+        const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "" } = req.body;
 
         // Validate email
         if (!email || typeof email !== 'string') {
@@ -99,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "",
+            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "",
             ensSetup: false, createdAt: new Date()
         });
         // console.log("result-->", result)

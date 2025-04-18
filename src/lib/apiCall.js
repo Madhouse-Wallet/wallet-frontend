@@ -26,6 +26,31 @@ export const getUser = async (email) => {
   }
 };
 
+
+export const getBitcoinAddress = async (email) => {
+  try {
+    try {
+      // console.log(email)
+      return await fetch(`/api/generate-wallet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("getBitcoinAddress-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const getEnsName = async (ensName) => {
   try {
     try {

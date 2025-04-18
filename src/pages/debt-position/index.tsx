@@ -275,7 +275,7 @@ const DebtPosition: React.FC = () => {
                       style={{ fontSize: 12 }}
                     >
                       <li className=" flex items-center justify-between">
-                        <p className="m-0 fw-sbold">Loan Balance</p>
+                        <p className="m-0 fw-sbold">Virtual Card</p>
                         <p className="m-0 fw-sbold">
                           {Number(walletBalance).toFixed(4)}
                         </p>
