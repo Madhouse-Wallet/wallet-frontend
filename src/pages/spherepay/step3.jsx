@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
+import { useSelector } from "react-redux";
 
 const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
   // Status states for KYC and ToS
+  const userAuth = useSelector((state) => state.Auth);
   const [kycStatus, setKycStatus] = useState("pending");
   const [tosStatus, setTosStatus] = useState("pending");
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +57,10 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
 
   const getCustomer = async () => {
     try {
-      const response = await SpherePayAPI.getCustomer(customerId);
+      const response = await SpherePayAPI.getCustomer(
+        // "customer_80e5b83cddc547ae8e5a167a71ee550b"
+        customerId
+      );
       console.log(response);
       return response;
     } catch (error) {
@@ -68,8 +73,8 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
     try {
       const walletData = {
         customer: customerId,
-        network: "arbitrum",
-        address: "0xAbb188AA605E5A0AF65d4029ACAca04Bf26ECb4d",
+        network: process.env.NEXT_PUBLIC_SPHEREPAY_NETWORK,
+        address: userAuth?.walletAddress,
       };
 
       const response = await SpherePayAPI.addWallet(walletData);

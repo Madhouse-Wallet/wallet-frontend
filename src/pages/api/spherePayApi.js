@@ -2,8 +2,8 @@
 import axios from "axios";
 
 // Base configuration for SphereAPI
-const BASE_URL = "https://api.spherepay.co";
-const API_KEY = "secret_c1cf4d99fd4d4ffcbc1d8a0f32895f22"; // Consider using environment variables
+const BASE_URL = process.env.NEXT_PUBLIC_SPHEREPAY_BASE_URL;
+const API_KEY = process.env.NEXT_PUBLIC_SPHEREPAY_API_SECRET; // Consider using environment variables
 
 // Create axios instance with default config
 const sphereAPIClient = axios.create({
@@ -179,6 +179,26 @@ const SpherePayAPI = {
   createWalletToBankTransfer: async (transferData) => {
     try {
       const response = await sphereAPIClient.post("/v1/transfer", transferData);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  getBankAccountDetail: async (customerId) => {
+    try {
+      const response = await sphereAPIClient.get(
+        `/v1/bankAccount/${customerId}`
+      );
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  getTransferDetail: async () => {
+    try {
+      const response = await sphereAPIClient.get(`/v1/transfer`);
       return response.data;
     } catch (error) {
       return handleError(error);
