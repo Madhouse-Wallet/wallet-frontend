@@ -10,7 +10,7 @@ import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { splitAddress } from "../../utils/globals";
 import { toast } from "react-toastify";
 import { BackBtn } from "@/components/common";
-import { requestQuote, createFixedShift } from "../../pages/api/sideShiftAI";
+import { requestQuote, createFixedShift, createUsdcToBtcShift } from "../../pages/api/sideShiftAI";
 
 const PointOfSale = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -279,101 +279,113 @@ const PointOfSale = () => {
 
   // Updated sideShiftAPI function for your PointOfSale component
   const sideShiftAPI = async () => {
+    // try {
+    //   setLoading(true);
+
+    //   // Using the exact values from your curl examples
+    //   const liquidQuote = await requestQuote(
+    //     {
+    //       affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+    //       depositCoin: "USDC",
+    //       depositNetwork: "base",
+    //       settleCoin: "BTC",
+    //       settleNetwork: "bitcoin",
+    //       depositAmount: "500",
+    //     },
+    //     process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+    //   );
+
+    //   console.log("quote for liquid network", liquidQuote);
+
+    //   if (!liquidQuote) {
+    //     setLoading(false);
+    //     toast.error("Failed to get quote");
+    //     return;
+    //   }
+
+    //   // Create a fixed shift with the quote
+    //   const liquidShift = await createFixedShift(
+    //     {
+    //       settleAddress:
+    //         "bc1phke4g5y40s42juakfww4rl9xm2gxdlsky9rc6ssg3um42k3rx6gq3ltjlx",
+    //       affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+    //       quoteId: liquidQuote.id,
+    //     },
+    //     process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+    //   );
+
+    //   console.log("shift created for liquid network:", liquidShift);
+
+    //   // Using the exact values from your curl examples
+    //   const bitcoinQuote = await requestQuote(
+    //     {
+    //       affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+    //       depositCoin: "BTC",
+    //       depositNetwork: "bitcoin",
+    //       settleCoin: "USDC",
+    //       settleNetwork: "arbitrum",
+    //       depositAmount: "0.01",
+    //     },
+    //     process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+    //   );
+
+    //   console.log("quote for bitcoin network", bitcoinQuote);
+
+    //   if (!bitcoinQuote) {
+    //     setLoading(false);
+    //     toast.error("Failed to get quote");
+    //     return;
+    //   }
+
+    //   // Create a fixed shift with the quote
+    //   const bitcoinShift = await createFixedShift(
+    //     {
+    //       settleAddress: "0x6e63779b81a4293Dad86aD1A29F62A4e632FC911",
+    //       affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+    //       quoteId: bitcoinQuote.id,
+    //     },
+    //     process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+    //   );
+
+    //   console.log("shift created for bitcoin network:", bitcoinShift);
+
+    //   // const result = await createSwap(1020, liquidShift?.depositAddress);
+
+    //   // console.log("line-283", result);
+
+    //   // if (!result) {
+    //   //   return;
+    //   // }
+
+    //   // const resultQR = await getPaymentUri({
+    //   //   btc: bitcoinShift?.depositAddress,
+    //   //   ln: result?.data?.invoice,
+    //   //   amt: "0.01",
+    //   //   name: "Test Merchant",
+    //   //   description: "Payment for order #1234",
+    //   //   format: "base64", // or 'json' or 'png'
+    //   // });
+
+    //   // if (resultQR.status === "success") {
+    //   //   console.log(resultQR.data);
+    //   //   generatePaymentQRCode(resultQR?.data?.uri);
+    //   //   // setPaymentQr(resultQR?.data?.qrCode);
+    //   // } else {
+    //   //   console.error(resultQR.error);
+    //   // }
+
+    //   // console.log("resultQR", resultQR);
+    // }
     try {
-      setLoading(true);
-
-      // Using the exact values from your curl examples
-      const liquidQuote = await requestQuote(
-        {
-          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
-          depositCoin: "BTC",
-          depositNetwork: "liquid",
-          settleCoin: "USDC",
-          settleNetwork: "arbitrum",
-          depositAmount: "0.01",
-        },
-        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
+      const liquidShift = await createUsdcToBtcShift(
+        "500", // USDC amount
+        "bc1phke4g5y40s42juakfww4rl9xm2gxdlsky9rc6ssg3um42k3rx6gq3ltjlx", // Bitcoin address
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+        process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
 
-      console.log("quote for liquid network", liquidQuote);
-
-      if (!liquidQuote) {
-        setLoading(false);
-        toast.error("Failed to get quote");
-        return;
-      }
-
-      // Create a fixed shift with the quote
-      const liquidShift = await createFixedShift(
-        {
-          settleAddress: "0x6e63779b81a4293Dad86aD1A29F62A4e632FC911",
-          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
-          quoteId: liquidQuote.id,
-        },
-        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
-      );
-
-      console.log("shift created for liquid network:", liquidShift);
-
-      // Using the exact values from your curl examples
-      const bitcoinQuote = await requestQuote(
-        {
-          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
-          depositCoin: "BTC",
-          depositNetwork: "bitcoin",
-          settleCoin: "USDC",
-          settleNetwork: "arbitrum",
-          depositAmount: "0.01",
-        },
-        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
-      );
-
-      console.log("quote for bitcoin network", bitcoinQuote);
-
-      if (!bitcoinQuote) {
-        setLoading(false);
-        toast.error("Failed to get quote");
-        return;
-      }
-
-      // Create a fixed shift with the quote
-      const bitcoinShift = await createFixedShift(
-        {
-          settleAddress: "0x6e63779b81a4293Dad86aD1A29F62A4e632FC911",
-          affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
-          quoteId: bitcoinQuote.id,
-        },
-        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY // Your secret key
-      );
-
-      console.log("shift created for bitcoin network:", bitcoinShift);
-
-      const result = await createSwap(1020, liquidShift?.depositAddress);
-
-      console.log("line-283", result);
-
-      if (!result) {
-        return;
-      }
-
-      const resultQR = await getPaymentUri({
-        btc: bitcoinShift?.depositAddress,
-        ln: result?.data?.invoice,
-        amt: "0.01",
-        name: "Test Merchant",
-        description: "Payment for order #1234",
-        format: "base64", // or 'json' or 'png'
-      });
-
-      if (resultQR.status === "success") {
-        console.log(resultQR.data);
-        generatePaymentQRCode(resultQR?.data?.uri);
-        // setPaymentQr(resultQR?.data?.qrCode);
-      } else {
-        console.error(resultQR.error);
-      }
-
-      console.log("resultQR", resultQR);
+      // liquidShift now contains all the information about the shift, including the deposit address
+      console.log("Deposit address:", liquidShift.depositAddress);
     } catch (error) {
       console.error("SideShift API error:", error);
       setLoading(false);
