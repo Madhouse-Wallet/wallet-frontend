@@ -9,40 +9,43 @@ import SideShiftWidget from "@/components/SideShift/SideShiftWidget";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
 import { createPortal } from "react-dom";
-import {
-  getUser,
-} from "../../../lib/apiCall";
+import { getUser } from "../../../lib/apiCall";
 // css
 
 // img
 
-const PointOfSalePop = ({ pointSale, setPointSale }) => {
+const PointOfSalePop = ({
+  pointSale,
+  setPointSale,
+  refundBTC,
+  setRefundBTC,
+}) => {
   const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(true);
   const [lnbitLink, setLnbitLink] = useState("jbmi6jUrxkXsTGFMygaUyk");
   useEffect(() => {
-    if(userAuth.email){
+    if (userAuth.email) {
       const fetchUser = async () => {
         try {
           const user = await getUser(userAuth.email);
           if (user) {
-            console.log("user-->",user)
-            setLnbitLink(user?.userId?.lnbitLinkId)
+            console.log("user-->", user);
+            setLnbitLink(user?.userId?.lnbitLinkId);
             setIsLoading(false); // stop loader if user found
-          }else{
-            setIsLoading(false)
+          } else {
+            setIsLoading(false);
           }
         } catch (error) {
           console.error("Error fetching user:", error);
-          setIsLoading(false)        }
+          setIsLoading(false);
+        }
       };
-  
+
       fetchUser();
-    }else{
+    } else {
       setIsLoading(false);
     }
-   
   }, [userAuth.email]);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
@@ -92,14 +95,15 @@ const PointOfSalePop = ({ pointSale, setPointSale }) => {
               </div>
 
               <div className="py-2">
-                <Link
-                  href="#"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                <button
+                  onClick={() => {
+                    setPointSale(!pointSale);
+                    setRefundBTC(!refundBTC);
+                  }}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Refund
-                </Link>
+                </button>
               </div>
 
               {/* {userAuth?.walletAddress && ( */}

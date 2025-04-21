@@ -21,6 +21,7 @@ const TransactionApprovalPop = ({
   toAddress,
   handleSend,
   handleClose,
+  showNetwork = true,
 }) => {
   const userAuth = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
@@ -57,14 +58,16 @@ const TransactionApprovalPop = ({
               <div className="py-3"></div>
               <div className="py-3">
                 <div className="py-3">
-                  <div className="p-3 bg-white/50 rounded-lg flex items-center justify-between">
-                    <span className="text-black font-medium text-base">
-                      Network
-                    </span>
-                    <div className="flex items-center gap-1 text-xs font-medium">
-                      {usdcIcn}Sepolia
+                  {showNetwork && (
+                    <div className="p-3 bg-white/50 rounded-lg flex items-center justify-between">
+                      <span className="text-black font-medium text-base">
+                        Network
+                      </span>
+                      <div className="flex items-center gap-1 text-xs font-medium">
+                        {usdcIcn}Sepolia
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="py-3">
                   <div className="flex items-center justify-between">
