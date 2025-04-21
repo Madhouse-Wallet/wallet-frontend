@@ -26,6 +26,16 @@ import {
   passkeyValidator,
 } from "../../lib/zeroDevWallet";
 
+
+const getWallet = async () => {
+  try {
+    let getWallet = await getBitcoinAddress();
+    console.log("getWallet-->", getWallet)
+  } catch (error) {
+    console.log("errr-->", error)
+  }
+}
+getWallet();
 const CreateWallet = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -305,7 +315,7 @@ const CreateWallet = () => {
           email: data.email,
           username: data.username,
         });
-        return true; 
+        return true;
         let obj = {
           email: data.email,
           name: data.username,

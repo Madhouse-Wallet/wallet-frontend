@@ -4,7 +4,8 @@ import { ECPairFactory } from 'ecpair';
 import * as crypto from 'crypto';
 import * as tinysecp from 'tiny-secp256k1';
 import { InMemoryKey, Wallet } from '@arklabs/wallet-sdk';
-
+import * as secp256k1 from '@bitcoinerlab/secp256k1'; // <-- here
+ 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -13,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
 
         // 1. Generate a random Bitcoin private key
-        const ECPair = ECPairFactory(tinysecp);
+        const ECPair = ECPairFactory(secp256k1);
         const keyPair = ECPair.makeRandom(); // Uses secure RNG
 
         // // 2. Get the raw private key as hex
