@@ -179,7 +179,7 @@ export default {
 			}),
 		},
 	},
-	plugins: [tailwindCssAnimate, tailwindContainerQueries, tailwindTypography, utilPlugin, require('daisyui')],
+	plugins: [tailwindCssAnimate, tailwindContainerQueries, tailwindTypography, utilPlugin,],
 }
 
 function utilPlugin(plugin: PluginAPI) {
