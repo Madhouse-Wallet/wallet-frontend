@@ -8,7 +8,6 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackBtn } from "@/components/common";
 
-
 const CurveDeposit = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
