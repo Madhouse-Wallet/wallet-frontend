@@ -197,7 +197,8 @@ console.log("test-->",openCam)
               <>
                 <div className="modalBody">
                   {/* <form> */}
-                  <div className="py-2">
+                    {/* {((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? "Sepolia" : "Arbitrum Mainnet")} */}
+                  {/* <div className="py-2">
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       Chain
                     </label>
@@ -205,10 +206,9 @@ console.log("test-->",openCam)
                       <span className="icn">{sepoliaIcn}</span>
                       <span className="text-white">
                         
-                    {/* {((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? "Sepolia" : "Arbitrum Mainnet")} */}
                     {process.env.NEXT_PUBLIC_ENV_CHAIN_NAME}</span>
                     </div>
-                  </div>
+                  </div> */}
                   {/* <div className="py-2">
                   <label className="form-label m-0 font-semibold text-xs ps-3">
                     To

@@ -41,6 +41,7 @@ if (typeof window !== "undefined") {
 // JSON.stringify(response.data)
 const initialState = {
   walletAddress: (data?.walletAddress || ""),
+  bitcoinWallet: (data?.bitcoinWallet || ""),
   webauthKey: (data?.webauthKey || ""),
   passkeyCred: "",
   username: (data?.username || ""),
@@ -68,6 +69,7 @@ export const authSlice = createSlice({
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
+      state.bitcoinWallet = action.payload.bitcoinWallet;
       state.passkeyCred = action.payload.passkeyCred;
       state.webauthKey = action.payload.webauthKey;
       state.id = action.payload.id;

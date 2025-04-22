@@ -324,14 +324,14 @@ const BTCEchange = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => startSend()}
-                          className="flex items-center justify-center bg-[#dd6c47] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
+                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Send
                         </button>
                         <button
                           onClick={() => startReceive()}
                           // onClick={() => setBtcExchange(!btcExchange)}
-                          className="flex items-center justify-center bg-[#dd6c47] text-dark btn border-0 rounded-20 text-black text-xs font-bold"
+                          className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Receive
                         </button>

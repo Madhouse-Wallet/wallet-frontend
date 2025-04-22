@@ -45,7 +45,7 @@ const CreateWallet = () => {
   const [loginEmail, setLoginEmail] = useState();
   const [addressPhrase, setAddressPhrase] = useState("");
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
-
+console.log("registerData->",registerData)
   // Helper function to check OTP expiration
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -214,6 +214,7 @@ const CreateWallet = () => {
               loginSet({
                 login: true,
                 walletAddress: address || "",
+                bitcoinWallet: bitcoinWallet || "",
                 signer: "",
                 username: registerData.username,
                 email: registerData.email,
@@ -241,6 +242,7 @@ const CreateWallet = () => {
             storedataLocalStorage({
               login: true,
               walletAddress: address || "",
+              bitcoinWallet: bitcoinWallet || "",
               signer: "",
               username: registerData.username,
               email: registerData.email,
@@ -310,12 +312,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP)
+        console.log("OTP-->", OTP)
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,
@@ -382,6 +384,7 @@ const CreateWallet = () => {
           <OtpStep
             registerOtpFn={registerOtpFn}
             resendOtpFunc={resendOtpFunc}
+            registerData={registerData}
             step={step}
             setStep={setStep}
           />

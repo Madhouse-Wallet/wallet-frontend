@@ -46,6 +46,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             email: userAuth.email,
             pos:(userAuth?.pos || false),
             walletAddress: userAuth.walletAddress,
+            bitcoinWallet:userAuth.bitcoinWallet, 
             passkeyCred: newPasskeyValidator,
             webauthKey: userAuth.webauthKey,
             id: userAuth.id,
@@ -79,6 +80,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
       loginSet({
         login: false,
         walletAddress: "",
+        bitcoinWallet: "", 
         provider: "",
         signer: "",
         username: "",

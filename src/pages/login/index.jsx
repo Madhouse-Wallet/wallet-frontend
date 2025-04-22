@@ -114,6 +114,7 @@ const Login = () => {
                 loginSet({
                   login: true,
                   walletAddress: address || "",
+                  bitcoinWallet: (userExist?.userId?.bitcoinWallet || ""),
                   pos:false,
                   signer: "",
                   username: (userExist.userId.username || ""),
@@ -144,6 +145,7 @@ const Login = () => {
               storedataLocalStorage({
                 login: true,
                 walletAddress: address || "",
+                bitcoinWallet: (userExist?.userId?.bitcoinWallet || ""),
                 pos:false,
                 signer: "",
                 username: (userExist.userId.username || ""),

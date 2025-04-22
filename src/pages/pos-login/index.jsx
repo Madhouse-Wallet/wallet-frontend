@@ -89,6 +89,7 @@ const POSLogin = () => {
             login: true,
             pos:true,
             walletAddress: userExist.userId.wallet || "",
+            bitcoinWallet: userExist.userId.bitcoinWallet || "",
             signer: "",
             username: (userExist.userId.username || ""),
             email: userExist.userId.email,
@@ -107,6 +108,7 @@ const POSLogin = () => {
         storedataLocalStorage({
           login: true,
           walletAddress: userExist.userId.wallet || "",
+          bitcoinWallet: userExist.userId.bitcoinWallet || "",
           signer: "",
           pos:true,
           username: (userExist.userId.username || ""),

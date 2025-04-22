@@ -97,6 +97,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             loginSet({
               login: userAuth.login,
               username: userAuth.username,
+              bitcoinWallet: userAuth.bitcoinWallet,
               email: userAuth.email,
               walletAddress: userAuth.walletAddress,
               passkeyCred: checkAccount.passkeyValidatorNew,
@@ -126,6 +127,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
           storedataLocalStorage({
             login: true,
             walletAddress: userAuth.walletAddress || "",
+            bitcoinWallet: userAuth.bitcoinWallet || "",
             signer: "",
             username: userAuth.username,
             email: userAuth.email,

@@ -72,7 +72,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
         <div className="formBody pt-4 text-xs">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <h4 className="m-0 text-xl pb-1 font-semibold">Create Walllet</h4>
+              <h4 className="m-0 text-xl pb-1 font-semibold">Create Wallet</h4>
               <p className=" text-sm font-medium opacity-50 md:text-xs">
                 Get an account and control your finances better with full
                 control of your budgets and savings.

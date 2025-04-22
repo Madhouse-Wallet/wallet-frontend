@@ -210,8 +210,10 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
           loginSet({
             login: userAuth.login,
             username: userAuth.username,
+            bitcoinWallet:userAuth.bitcoinWallet, 
             email: userAuth.email,
             walletAddress: userAuth.walletAddress,
+            bitcoinWallet: userAuth.bitcoinWallet,
             passkeyCred: userAuth.passkeyCred,
             webauthKey: userAuth.webauthKey,
             id: userAuth.id,
@@ -229,6 +231,7 @@ const EnsDomainPop = ({ ensDomain, setEnsDomain }) => {
         storedataLocalStorage({
           login: true,
           walletAddress: userAuth.walletAddress || "",
+          bitcoinWallet: userAuth.bitcoinWallet || "",
           signer: "",
           username: userAuth.username,
           email: userAuth.email,

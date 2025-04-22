@@ -105,6 +105,7 @@ const Setting: React.FC = () => {
             username: userAuth.username,
             email: userAuth.email,
             walletAddress: userAuth.walletAddress,
+            bitcoinWallet: userAuth.bitcoinWallet,
             passkeyCred: userAuth.passkeyValidatorNew,
             webauthKey: userAuth.webauthKey,
             ensName: userAuth.ensName || "",
@@ -135,6 +136,7 @@ const Setting: React.FC = () => {
           {
             login: true,
             walletAddress: userAuth.walletAddress || "",
+            bitcoinWallet:  userAuth.bitcoinWallet || "",
             signer: "",
             username: userAuth.username,
             email: userAuth.email,
@@ -374,6 +376,7 @@ const Setting: React.FC = () => {
         loginSet({
           login: false,
           walletAddress: "",
+          bitcoinWallet: "",
           signer: "",
           username: "",
           email: "",
@@ -442,7 +445,7 @@ const Setting: React.FC = () => {
                 <div className="sectionHeader p-2 ">
                   <div className="flex items-center gap-3">
                     {/* <BackBtn /> */}
-                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Setting & Support
                     </h4>
                   </div>
@@ -519,6 +522,34 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
+                      {(<> <li className="flex gap-2 py-1">
+                          <div
+                            className="block text-gray-500"
+                            style={{ width: 160 }}
+                          >
+                            Bitcoin wallet ID:
+                          </div>
+                          {/* {userAuth?.walletAddress && ( */}
+                          <span className="text-white flex items-center">
+                            {userAuth?.bitcoinWallet ? (
+                              <>
+                                {splitAddress(userAuth?.bitcoinWallet)}
+                                <button
+                                  onClick={() =>
+                                    handleCopy(userAuth?.bitcoinWallet)
+                                  }
+                                  className="border-0 p-0 bg-transparent pl-1"
+                                >
+                                  {copyIcn}
+                                </button>
+                              </>
+                            ) : (
+                              "--"
+                            )}
+                          </span>
+                          {/* )} */}
+                        </li></>)
+                      }
                       <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"

@@ -37,7 +37,7 @@ const SellPage = () => {
                 >
                   <div className="flex align-items-center gap-3 pb-3">
                     <BackBtn />
-                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Sell Bitcoin
                     </h4>
                   </div>

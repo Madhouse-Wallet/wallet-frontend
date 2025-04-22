@@ -23,7 +23,7 @@ const CashApp = () => {
                 <div className="sectionHeader pb-3 border-b border-gray-900">
                   <div className="flex align-items-center gap-2 pb-3">
                     {/* <BackBtn /> */}
-                    <h4 className="m-0 text-24 font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Point of Sale
                     </h4>
                   </div>

@@ -67,7 +67,9 @@ export default function Fonbnk() {
                 className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
               >
                 <div className="flex align-items-center gap-3 pb-3">
-                <BackBtn />
+                  <button onClick={()=> router.push("/")} className="border-0 themeClr p-0">
+                    {backIcn}
+                  </button>
                   <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                     Fonbnk
                   </h4>
@@ -76,11 +78,10 @@ export default function Fonbnk() {
                   {tabData.map((item, index) => (
                     <li key={index} className="py-1">
                       <button
-                        className={` ${
-                          activeTab === index
-                            ? "bg-[#ffad84] border-[#ffad84]"
-                            : "bg-white border-white"
-                        }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+                        className={` ${activeTab === index
+                          ? "bg-[#ffad84] border-[#ffad84]"
+                          : "bg-white border-white"
+                          }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
              // Highlight active tab
               `}
                         onClick={() => setActiveTab(index)}

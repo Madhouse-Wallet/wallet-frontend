@@ -26,6 +26,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
       loginSet({
         login: false,
         walletAddress: "",
+        bitcoinWallet: "",
         provider: "",
         signer: "",
         username: "",

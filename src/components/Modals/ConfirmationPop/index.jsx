@@ -33,6 +33,7 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
           loginSet({
             login: false,
             walletAddress: "",
+            bitcoinWallet: "", 
             signer: "",
             ensName: "",
             ensSetup: false,

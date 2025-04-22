@@ -56,7 +56,7 @@ const TransactionApprovalPop = ({
               </div>
               <div className="py-3"></div>
               <div className="py-3">
-                <div className="py-3">
+                {/* <div className="py-3">
                   <div className="p-3 bg-white/50 rounded-lg flex items-center justify-between">
                     <span className="text-black font-medium text-base">
                       Network
@@ -65,7 +65,7 @@ const TransactionApprovalPop = ({
                       {usdcIcn}Sepolia
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="py-3">
                   <div className="flex items-center justify-between">
                     <div className="left">

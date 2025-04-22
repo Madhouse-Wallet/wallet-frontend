@@ -148,6 +148,7 @@ const LoginPop = ({ login, setLogin }) => {
                 loginSet({
                   login: true,
                   walletAddress: account?.account?.address || "",
+                  bitcoinWallet:userExist.userId.bitcoinWallet|| "",
                   signer: "",
                   username: (userExist.userId.username || ""),
                   email: userExist.userId.email,
@@ -211,6 +212,7 @@ const LoginPop = ({ login, setLogin }) => {
             loginSet({
               login: true,
               walletAddress: account?.account?.address || "",
+              bitcoinWallet:data.userData.bitcoinWallet|| "",
               signer: "",
               username: registerUsername,
               email: registerEmail,

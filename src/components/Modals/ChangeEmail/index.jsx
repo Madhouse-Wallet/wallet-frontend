@@ -108,6 +108,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 username: userAuth.username,
                 email: email,
                 walletAddress: userAuth.walletAddress,
+                bitcoinWallet:userAuth.bitcoinWallet, 
                 passkeyCred: userAuth.passkeyValidatorNew,
                 webauthKey: userAuth.webauthKey,
                 id: userAuth.id,
