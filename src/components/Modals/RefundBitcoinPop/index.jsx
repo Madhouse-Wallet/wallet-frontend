@@ -153,12 +153,28 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
 
   const getDestinationAddress = async () => {
     try {
-      const liquidShift = await createUsdcToBtcShift(
-        amount, // USDC amount
-        toAddress, // Bitcoin address
-        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
-        process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+      // Call your local API endpoint instead of directly calling the SideShift API
+      const response = await fetch(
+        "http://localhost:3000/api/v1/refundBitcoinAddress",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: amount,
+            bitcoinAddress: toAddress,
+            // secretKey: process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+            // affiliateId: process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID,
+          }),
+        }
       );
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const liquidShift = await response.json();
 
       // liquidShift now contains all the information about the shift, including the deposit address
       console.log("Deposit address:", liquidShift.depositAddress);
