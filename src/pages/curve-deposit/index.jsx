@@ -7,7 +7,7 @@ import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackBtn } from "@/components/common";
-
+import LiFiWidgett from "./LiFiWidgett";
 
 const CurveDeposit = () => {
   const router = useRouter();
@@ -19,7 +19,8 @@ const CurveDeposit = () => {
     {
       title: "Deposit",
       component: (
-        <DepositTab provider={providerr} account={userAuth?.walletAddress} />
+        <LiFiWidgett />
+        // <DepositTab provider={providerr} account={userAuth?.walletAddress} />
       ),
     },
     {
