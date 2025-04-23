@@ -19,7 +19,7 @@ import {
 import { ECDSA_VALIDATOR_ADDRESS } from "@zerodev/ecdsa-validator"
 import { toFunctionSelector } from "viem"
 
-import {delay} from "../utils/globals"
+import { delay } from "../utils/globals"
 
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
@@ -41,37 +41,36 @@ import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants"
 // import ethers from "../manualPackage/ethers";
 import { ethers } from "ethers";
 import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem"
-import { sepolia, mainnet, arbitrum } from "viem/chains"
+import { sepolia, mainnet, arbitrum, base } from "viem/chains"
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { mnemonicToAccount } from 'viem/accounts'
 import { english, generateMnemonic } from 'viem/accounts'
-// const providerUrl = "https://eth-mainnet.public.blastapi.io";
-//     const etherscanApiKey = "KVWMJPYH9177M3KTVSKAHVWX9PTK6H2UHP";
-//     getWalletNetWorth("0x0ADA3111B866fF1aD0477F0C5D2e8eD35A36Eb5b", providerUrl, etherscanApiKey);
 
 
 
-// const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
+// const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 
-// ?provider=PIMLICO
-
-// const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}${process.env.NEXT_PUBLIC_NODE_ENV == "development" ? "?provider=PIMLICO" : ""}`;
-
-// console.log("PAYMASTER_RPC-->",PAYMASTER_RPC)
 const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`
 
 
 // export const PASSKEY_SERVER_URL =
 // "https://passkeys.zerodev.app/api/v3/efbc1add-1c14-476e-b3f1-206db80e673c";
-export const BUNDLER_URL =
-`https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+// export const BUNDLER_URL =
+//   `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+// export const PAYMASTER_RPC =
+//   `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+
+
+export const BUNDLER_URL = `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`
+
 export const PAYMASTER_RPC =
-`https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+  `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`;
+
 
 // const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
-const CHAIN =  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia)  || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) 
+const CHAIN = (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) || (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "base" && base)
 // const CHAIN = arbitrum;
-// console.log("CHAIN-->",CHAIN)
+// console.log("CHAIN-->", CHAIN)
 const entryPoint = getEntryPoint("0.7")
 const recoveryExecutorAddress = '0x2f65dB8039fe5CAEE0a8680D2879deB800F31Ae1'
 const recoveryExecutorFunction = 'function doRecovery(address _validator, bytes calldata _data)'
@@ -276,7 +275,7 @@ export const getProvider = async (kernelClient) => {
 const checkDeployment = async (kernelClient) => {
   try {
     let testDeployment = await kernelClient.account.isDeployed();
-    console.log("testDeployment-->",testDeployment)
+    console.log("testDeployment-->", testDeployment)
     if (testDeployment) {
       return true
     } else {
