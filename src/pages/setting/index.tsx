@@ -24,6 +24,8 @@ import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, updtUser } from "../../lib/apiCall";
 import { webAuthKeyStore, storedataLocalStorage } from "../../utils/globals";
+import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
+import { recover } from "tiny-secp256k1";
 const Setting: React.FC = () => {
   const {
     selectBg,
@@ -47,6 +49,8 @@ const Setting: React.FC = () => {
   const [sign, setSign] = useState<boolean>(false);
   const [changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
+  const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
+  const [recoverSeed, setRecoverSeed] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -75,6 +79,72 @@ const Setting: React.FC = () => {
       return false;
     }
   };
+
+  const getSecretData = async (storageKey: any, credentialId: any) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId) as any;
+      if (retrieveSecretCheck?.status) {
+        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret)
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret
+        }
+      } else {
+        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg)
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg
+        }
+      }
+    } catch (error) {
+      console.log("error-->", error)
+      return {
+        status: false,
+        msg: "Error in Getting secret!"
+      }
+    }
+  }
+
+
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth.email);
+      if (userExist?.userId?.secretCredentialId && userExist?.userId?.secretStorageKey) {
+        let callGetSecretData = await getSecretData(userExist?.userId?.secretStorageKey, userExist?.userId?.secretCredentialId) as any
+        if (callGetSecretData?.status) {
+          // return {
+          //   status: true,
+          //   secret: callGetSecretData?.secret
+          // }
+          setRecoverSeed(callGetSecretData?.secret)
+          setRecoverSeedStatus(!recoverSeedStatus)
+        } else {
+          // return {
+          //   status: false,
+          //   msg: callGetSecretData?.msg
+          // }
+          setRecoverSeed(callGetSecretData?.msg)
+          setRecoverSeedStatus(!recoverSeedStatus)
+        }
+      } else {
+        // return {
+        //   status: false,
+        //   secret: "No secret Stored!"
+        // }
+        setRecoverSeed("No secret Stored!")
+        setRecoverSeedStatus(!recoverSeedStatus)
+      }
+    } catch (error) {
+      // return {
+      //   status: false,
+      //   secret: "Error in Fetching secret!"
+      // }
+      setRecoverSeed("Error in Fetching secret!")
+      setRecoverSeedStatus(!recoverSeedStatus)
+    }
+  }
+
+
   console.log("userAuth-->", userAuth);
   const setupMultisig = async () => {
     try {
@@ -136,7 +206,7 @@ const Setting: React.FC = () => {
           {
             login: true,
             walletAddress: userAuth.walletAddress || "",
-            bitcoinWallet:  userAuth.bitcoinWallet || "",
+            bitcoinWallet: userAuth.bitcoinWallet || "",
             signer: "",
             username: userAuth.username,
             email: userAuth.email,
@@ -523,32 +593,32 @@ const Setting: React.FC = () => {
                         {/* )} */}
                       </li>
                       {(<> <li className="flex gap-2 py-1">
-                          <div
-                            className="block text-gray-500"
-                            style={{ width: 160 }}
-                          >
-                            Bitcoin wallet ID:
-                          </div>
-                          {/* {userAuth?.walletAddress && ( */}
-                          <span className="text-white flex items-center">
-                            {userAuth?.bitcoinWallet ? (
-                              <>
-                                {splitAddress(userAuth?.bitcoinWallet)}
-                                <button
-                                  onClick={() =>
-                                    handleCopy(userAuth?.bitcoinWallet)
-                                  }
-                                  className="border-0 p-0 bg-transparent pl-1"
-                                >
-                                  {copyIcn}
-                                </button>
-                              </>
-                            ) : (
-                              "--"
-                            )}
-                          </span>
-                          {/* )} */}
-                        </li></>)
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Bitcoin wallet ID:
+                        </div>
+                        {/* {userAuth?.walletAddress && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.bitcoinWallet ? (
+                            <>
+                              {splitAddress(userAuth?.bitcoinWallet)}
+                              <button
+                                onClick={() =>
+                                  handleCopy(userAuth?.bitcoinWallet)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          ) : (
+                            "--"
+                          )}
+                        </span>
+                        {/* )} */}
+                      </li></>)
                       }
                       <li className="flex gap-2 py-1">
                         <div
@@ -661,9 +731,8 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -725,9 +794,8 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -826,24 +894,49 @@ const Setting: React.FC = () => {
                   )}
 
                   {userAuth?.login && !userAuth?.pos && (
-                    <div
-                      tabIndex={-1}
-                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <h3 className="text-xs font-medium leading-none -tracking-2">
-                          Delete Account
-                        </h3>
+                    <>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Delete Account
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => setConfirm(!confirm)}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => setConfirm(!confirm)}
-                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
-                        >
-                          Delete
-                        </button>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Seed Phase Recovery
+                          </h3>
+                          {recoverSeedStatus &&
+                            <p className="text-xs leading-none -tracking-2 text-white/40">
+                              {recoverSeed}
+                            </p>
+                          }
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => recoverSeedPhrase()}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Recover
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )}
                   {userAuth?.login &&
                     !userAuth?.pos &&

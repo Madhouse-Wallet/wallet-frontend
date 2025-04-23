@@ -37,7 +37,7 @@ export const getBitcoinAddress = async (email) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("getBitcoinAddress-->", data);
+          // console.log("getBitcoinAddress-->", data);
           return data;
         });
     } catch (error) {

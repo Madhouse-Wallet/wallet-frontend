@@ -11,6 +11,8 @@ import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 import { getBitcoinAddress } from "../../lib/apiCall";
 
+import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
+
 import {
   generateOTP,
   isValidEmail,
@@ -45,7 +47,7 @@ const CreateWallet = () => {
   const [loginEmail, setLoginEmail] = useState();
   const [addressPhrase, setAddressPhrase] = useState("");
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
-console.log("registerData->",registerData)
+  console.log("registerData->", registerData)
   // Helper function to check OTP expiration
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -73,11 +75,15 @@ console.log("registerData->",registerData)
     publickeyId,
     rawId,
     wallet,
-    bitcoinWallet
+    bitcoinWallet,
+    secretEmail,
+    secretCredentialId,
+    secretStorageKey
   ) => {
     try {
       try {
-        console.log(email, username, passkey, publickeyId, rawId, bitcoinWallet);
+        console.log(email, username, passkey, publickeyId, rawId, bitcoinWallet, secretEmail,
+          secretCredentialId, secretStorageKey);
         return await fetch(`/api/add-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -88,7 +94,10 @@ console.log("registerData->",registerData)
             publickeyId,
             rawId,
             wallet,
-            bitcoinWallet
+            bitcoinWallet,
+            secretEmail,
+            secretCredentialId,
+            secretStorageKey
           }),
         })
           .then((res) => res.json())
@@ -158,6 +167,61 @@ console.log("registerData->",registerData)
     }
   };
 
+  const setSecretInPasskey = async (userName, data) => {
+    try {
+      let registerCheck = await registerCredential(userName, userName)
+      if (registerCheck?.status) {
+        let storeSecretCheck = await storeSecret(registerCheck?.data?.credentialId, data)
+        if (storeSecretCheck?.status) {
+          return {
+            status: true,
+            storageKey: storeSecretCheck?.data?.storageKey,
+            credentialId: registerCheck?.data?.credentialId
+          }
+        } else {
+          console.log(" storeSecretCheck error-->", storeSecretCheck?.msg)
+          return {
+            status: false,
+            msg: storeSecretCheck?.msg
+          }
+        }
+      } else {
+        console.log(" registerCheck error-->", registerCheck?.msg)
+        return {
+          status: false,
+          msg: registerCheck?.msg
+        }
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Facing issue in storing secret"
+      }
+    }
+  }
+  // const testingPhraseSceret = async (userName, data) => {
+  //   try {
+  //     let registerCheck = await registerCredential("testing", "testing")
+  //     if (registerCheck?.status) {
+  //       let storeSecretCheck = await storeSecret(registerCheck?.data?.credentialId, "checking")
+  //       if (storeSecretCheck?.status) {
+  //         let retrieveSecretCheck = await retrieveSecret(storeSecretCheck?.data?.storageKey, storeSecretCheck?.data?.credentialId);
+  //         if (retrieveSecretCheck?.status) {
+  //           console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret)
+  //         } else {
+  //           console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg)
+  //         }
+  //       } else {
+  //         console.log(" storeSecretCheck error-->", storeSecretCheck?.msg)
+  //       }
+  //     } else {
+  //       console.log(" registerCheck error-->", registerCheck?.msg)
+  //     }
+  //   } catch (error) {
+  //     console.log("error-->", error)
+  //   }
+  // }
+  // testingPhraseSceret();
   const registerFn = async () => {
     try {
       let userExist = await getUser(registerData.email);
@@ -194,11 +258,25 @@ console.log("registerData->",registerData)
 
             let getWallet = await getBitcoinAddress();
             let bitcoinWallet = ""
+            let privateKey = ""
             if (getWallet.status && getWallet.status == "success") {
               bitcoinWallet = (getWallet?.data?.wallet || "")
+              privateKey = (getWallet?.data?.privateKey || "")
             }
+            let secretObj = {
+              privateKey: privateKey,
+              seedPhrase: addressPhrase
+            }
+            console.log("secretObj-->", secretObj, JSON.stringify(secretObj))
 
-
+            let storageKeySecret = "";
+            let credentialIdSecret = "";
+            let storeData = await setSecretInPasskey((registerData.email + "_secret"), JSON.stringify(secretObj));
+            if (storeData.status) {
+              console.log("storeData-->", storeData)
+              storageKeySecret = storeData?.storageKey
+              credentialIdSecret = storeData?.credentialId
+            }
             let data = await addUser(
               registerData.email,
               registerData.username,
@@ -206,7 +284,10 @@ console.log("registerData->",registerData)
               "",
               "",
               address,
-              bitcoinWallet
+              bitcoinWallet,
+              (registerData.email + "_secret"),
+              credentialIdSecret,
+              storageKeySecret
             );
             toast.success("Sign Up Successfully!");
             console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
