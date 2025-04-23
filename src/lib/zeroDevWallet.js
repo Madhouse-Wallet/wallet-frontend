@@ -55,16 +55,16 @@ const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NE
 
 // export const PASSKEY_SERVER_URL =
 // "https://passkeys.zerodev.app/api/v3/efbc1add-1c14-476e-b3f1-206db80e673c";
-// export const BUNDLER_URL =
-//   `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-// export const PAYMASTER_RPC =
-//   `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-
-
-export const BUNDLER_URL = `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`
-
+export const BUNDLER_URL =
+  `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 export const PAYMASTER_RPC =
-  `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`;
+  `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+
+
+// export const BUNDLER_URL = `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`
+
+// export const PAYMASTER_RPC =
+  // `https://rpc.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}/chain/8453`;
 
 
 // const CHAIN = ((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? sepolia : mainnet)
