@@ -7,6 +7,8 @@ import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackBtn } from "@/components/common";
+import DepositSwap from "./DepositSwap";
+import WithdrawalSwap from "./WithdrawalSwap";
 
 const CurveDeposit = () => {
   const router = useRouter();
@@ -18,21 +20,23 @@ const CurveDeposit = () => {
     {
       title: "Deposit",
       component: (
-        <DepositTab provider={providerr} account={userAuth?.walletAddress} />
+        // <DepositTab provider={providerr} account={userAuth?.walletAddress} />
+        <DepositSwap />
       ),
     },
     {
       title: "Withdraw",
       component: (
-        <WithdrawTab provider={providerr} account={userAuth?.walletAddress} />
+        // <WithdrawTab provider={providerr} account={userAuth?.walletAddress} />
+        <WithdrawalSwap />
       ),
     },
-    {
-      title: "Remove Liquidity",
-      component: (
-        <UnstakeTab provider={providerr} account={userAuth?.walletAddress} />
-      ),
-    },
+    // {
+    //   title: "Remove Liquidity",
+    //   component: (
+    //     <UnstakeTab provider={providerr} account={userAuth?.walletAddress} />
+    //   ),
+    // },
   ];
 
   useEffect(() => {

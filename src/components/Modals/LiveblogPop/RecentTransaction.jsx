@@ -150,7 +150,7 @@ const RecentTransaction = ({ transactions,data }) => {
                         </div>
                       </div>
                       <div className="right">
-                        <p className="m-0 text-xs font-medium">
+                        <p className="m-0 font-medium">
                           {tx.status === "rejected"
                             ? "Insufficient Balance"
                             : `${tx.type === "send" ? "-" : "+"} ${tx.amount}`}

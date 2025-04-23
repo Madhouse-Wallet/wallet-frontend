@@ -61,7 +61,7 @@ const CounterList = ({ data }) => {
       // Check for ERC20 transfers
       if (tx.erc20_transfers && tx.erc20_transfers.length > 0) {
         const transfer = tx.erc20_transfers[0];
-        amount = parseFloat(transfer.value_decimal).toFixed(4);
+        amount = parseFloat(transfer.value_formatted);
         currency = transfer.token_symbol;
         isSend =
           transfer.from_address.toLowerCase() ===
@@ -73,13 +73,13 @@ const CounterList = ({ data }) => {
         transactionHash: tx.hash,
         from: tx.from_address,
         to: tx.to_address,
-        date: new Date(tx.block_timestamp).toLocaleString(),
+        date: new Date(tx?.block_timestamp).toLocaleString(),
         status:
           tx.receipt_status === "1"
             ? "confirmed"
             : tx.receipt_status === "0"
-            ? "rejected"
-            : "pending",
+              ? "rejected"
+              : "pending",
         amount: amount ? `${amount} ${currency}` : "",
         // type: isSend ? "send" : "receive",
         type: tx?.category,
@@ -99,8 +99,8 @@ const CounterList = ({ data }) => {
       await fetchBitcoinRecentTransactions();
     } else if (item.head === "USDC Balance") {
       await fetchUSDCRecentTransactions();
-    }else{
-      setTransactions([])
+    } else {
+      setTransactions([]);
     }
   };
 
@@ -111,14 +111,14 @@ const CounterList = ({ data }) => {
         userAuth.walletAddress
       );
       console.log("data", balance);
-  
+
       if (balance?.result?.length) {
-        const latestTransactions = balance.result.slice(0, 10).map(tx => {
+        const latestTransactions = balance.result.slice(0, 10).map((tx) => {
           // Create the new standardized transaction object
           return {
             amount: tx.value_decimal || "",
             category: tx.token_symbol || "BTC",
-            date: new Date(tx.block_timestamp).toLocaleString() || "",
+            date: new Date(tx?.block_timestamp).toLocaleString() || "",
             from: tx.from_address || "",
             id: tx.transaction_hash || "",
             rawData: tx, // Store the original transaction data
@@ -126,45 +126,10 @@ const CounterList = ({ data }) => {
             summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "BTC"} Transfer`,
             to: tx.to_address || "",
             transactionHash: tx.transaction_hash || "",
-            type: "Transfer" // Default type
+            type: "Transfer", // Default type
           };
         });
-        
-        setTransactions(latestTransactions);
-        return latestTransactions;
-      }
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    }
-  };
-  
-  const fetchUSDCRecentTransactions = async () => {
-    try {
-      const balance = await fetchTokenTransfers(
-        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
-        userAuth.walletAddress
-      );
-      console.log("data", balance);
-  
-      if (balance?.result?.length) {
-        const latestTransactions = balance.result.slice(0, 10).map(tx => {
-          // Create the new standardized transaction object
-          return {
-            amount: tx.value_decimal || "",
-            category: tx.token_symbol || "USDC",
-            date: new Date(tx.block_timestamp).toLocaleString() || "",
-            from: tx.from_address || "",
-            id: tx.transaction_hash || "",
-            rawData: tx, // Store the original transaction data
-            status: "confirmed", // Default status as it's on blockchain
-            // summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
-            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${tx.from_address === userAuth.walletAddress?.toLowerCase() ? "Transfer": "Receive"}`,
-            to: tx.to_address || "",
-            transactionHash: tx.transaction_hash || "",
-            type: tx.from_address === userAuth.walletAddress?.toLowerCase() ? "send" : 'receive' // Default type
-          };
-        });
-        
+
         setTransactions(latestTransactions);
         return latestTransactions;
       }
@@ -173,7 +138,45 @@ const CounterList = ({ data }) => {
     }
   };
 
-  console.log(data,"data")
+  const fetchUSDCRecentTransactions = async () => {
+    try {
+      const balance = await fetchTokenTransfers(
+        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
+        userAuth.walletAddress
+      );
+      console.log("data", balance);
+
+      if (balance?.result?.length) {
+        const latestTransactions = balance.result.slice(0, 10).map((tx) => {
+          // Create the new standardized transaction object
+          return {
+            amount: `${tx.value_decimal} ${tx.token_symbol} ` || "",
+            category: tx.token_symbol || "USDC",
+            date: new Date(tx?.block_timestamp).toLocaleString() || "",
+            from: tx.from_address || "",
+            id: tx.transaction_hash || "",
+            rawData: tx, // Store the original transaction data
+            status: "confirmed", // Default status as it's on blockchain
+            // summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
+            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${tx.from_address === userAuth.walletAddress?.toLowerCase() ? "Transfer" : "Receive"}`,
+            to: tx.to_address || "",
+            transactionHash: tx.transaction_hash || "",
+            type:
+              tx.from_address === userAuth.walletAddress?.toLowerCase()
+                ? "send"
+                : "receive", // Default type
+          };
+        });
+
+        setTransactions(latestTransactions);
+        return latestTransactions;
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  console.log(data, "data");
   return (
     <>
       {liveBlog &&
@@ -195,11 +198,17 @@ const CounterList = ({ data }) => {
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
                 onClick={() => {
-                  if(item.value === '' || item.value === '$0' ||  item.value === '$0.00' || item.value === 0 || !userAuth?.walletAddress){
-                    return
+                  if (
+                    item.value === "" ||
+                    item.value === "$0" ||
+                    item.value === "$0.00" ||
+                    item.value === 0 ||
+                    !userAuth?.walletAddress
+                  ) {
+                    return;
                   }
-                    handleCardClick(item);
-                    setLiveBlog(!liveBlog);    
+                  handleCardClick(item);
+                  setLiveBlog(!liveBlog);
                 }}
                 style={{ opacity: 1, transform: "none" }}
               >
