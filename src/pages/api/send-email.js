@@ -94,7 +94,7 @@ export default async function handler(req, res) {
             //         Data: htmlBody,
             //     },
             // },
-            console.log("htmlBody-->",htmlBody)
+            // console.log("htmlBody-->",htmlBody)
             const params = {
                 Destination: {
                     ToAddresses: [email],
