@@ -16,28 +16,26 @@ export async function initializeTBTC(signer: EthereumSigner) {
       console.log("pro tbtc")
       sdk = await TBTC.initializeMainnet(signer as EthereumSigner);
     } else {
-      // Ethereum Mainnet RPC URL
-      const ethRpcUrl = "https://eth.merkle.io"; // Replace with your own RPC provider
-
-      // Create an ethers provider for Ethereum Mainnet
+      // For L2 chains like Arbitrum, Base, etc.
+      const ethRpcUrl = process.env.NEXT_PUBLIC_ETH_MAINNET_RPC || "https://eth.merkle.io";
       const ethProvider = new ethers.providers.JsonRpcProvider(ethRpcUrl);
-      // Initialize it for any L2 (E.g., Arbitrum)
-      sdk = await TBTC.initializeMainnet(ethProvider);
-      // Initialize the SDK for Ethereum only.
-      // Initialize it for any L2 (E.g., Arbitrum)
-      // await sdk.initializeCrossChain("Arbitrum", signer);
 
+      console.log(`Initializing TBTC for L2 chain: ${process.env.NEXT_PUBLIC_ENV_CHAIN_NAME }`);
+      sdk = await TBTC.initializeMainnet(ethProvider);
+      console.log("sd 1 furst->",sdk)
+      await sdk.initializeCrossChain("Base", signer);
+      console.log("sd->",sdk)
     }
     // const sdk = await TBTC.initializeMainnet(signer);
 
     return {
-      deposits: sdk.deposits,         // Access deposit functionalities
-      redemptions: sdk.redemptions,   // Access redemption functionalities
-      tbtcContracts: sdk.tbtcContracts, // Direct access to tBTC smart contracts
-      bitcoinClient: sdk.bitcoinClient, // Access Bitcoin client
-    };
-  } catch (error) {
-    console.error("Failed to initialize TBTC SDK:", error);
-    throw error; // Ensure errors are caught
-  }
+    deposits: sdk.deposits,         // Access deposit functionalities
+    redemptions: sdk.redemptions,   // Access redemption functionalities
+    tbtcContracts: sdk.tbtcContracts, // Direct access to tBTC smart contracts
+    bitcoinClient: sdk.bitcoinClient, // Access Bitcoin client
+  };
+} catch (error) {
+  console.error("Failed to initialize TBTC SDK:", error);
+  throw error; // Ensure errors are caught
+}
 }
