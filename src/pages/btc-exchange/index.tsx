@@ -6,6 +6,7 @@ import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
 import BtcExchangePop from "../../components/Modals/BtcExchangePop";
 import SuccessPop from "../../components/Modals/SuccessPop";
+import SendBitcoinPop from "../../components/Modals/SendBitcoinPop";
 import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import TransactionApprovalPop from "../../components/Modals/TransactionApprovalPop";
@@ -30,6 +31,7 @@ const BTCEchange = () => {
   const [btcExchange, setBtcExchange] = useState(false);
   const [loaderStatus, setLoaderStatus] = useState(false);
   const [sendUsdc, setSendUsdc] = useState(false);
+  const [sendBitcoin, setSendBitcoin] = useState(false);
   const [success, setSuccess] = useState(false);
   const [btcExchangeSend, setBtcExchangeSend] = useState(false);
   const [qrCode, setQRCode] = useState("");
@@ -249,6 +251,16 @@ const BTCEchange = () => {
           />,
           document.body
         )}
+      {sendBitcoin &&
+        createPortal(
+          <SendBitcoinPop
+            sendBitcoin={sendBitcoin}
+            setSendBitcoin={setSendBitcoin}
+            success={success}
+            setSuccess={setSuccess}
+          />,
+          document.body
+        )}
       {success &&
         createPortal(
           <SuccessPop success={success} setSuccess={setSuccess} />,
@@ -334,6 +346,12 @@ const BTCEchange = () => {
                           className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Receive
+                        </button>
+                        <button
+                          onClick={() => setSendBitcoin(!sendBitcoin)}
+                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
+                        >
+                          Bridge
                         </button>
                       </div>
                     </div>
