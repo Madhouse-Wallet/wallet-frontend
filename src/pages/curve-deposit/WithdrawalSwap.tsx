@@ -76,8 +76,8 @@ const cowSwapParams = {
   },
   sell: {
     // Buy token. Optionally add amount for buy orders
-    asset: "SUSDS",
-    address: "0x5875eEE11Cf8398102FdAd704C9E96607675467a",
+    asset: "USD+",
+    address: "0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376",
     amount: "100",
   },
   partnerFee: {
