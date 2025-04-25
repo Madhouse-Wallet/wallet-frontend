@@ -21,6 +21,7 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import LoadingScreen from "@/components/LoadingScreen";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
+import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
 
 // interface CardMetrics {
 //   head: string;
@@ -38,6 +39,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [pointSale, setPointSale] = useState();
+  const [refundBTC, setRefundBTC] = useState();
 
   const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
@@ -258,7 +260,17 @@ const Dashboard = () => {
     <>
       {pointSale &&
         createPortal(
-          <PointOfSalePop pointSale={pointSale} setPointSale={setPointSale} />,
+          <PointOfSalePop
+            refundBTC={refundBTC}
+            setRefundBTC={setRefundBTC}
+            pointSale={pointSale}
+            setPointSale={setPointSale}
+          />,
+          document.body
+        )}
+      {refundBTC &&
+        createPortal(
+          <RefundBitcoin refundBTC={refundBTC} setRefundBTC={setRefundBTC} />,
           document.body
         )}
       {isLoading && <LoadingScreen />}

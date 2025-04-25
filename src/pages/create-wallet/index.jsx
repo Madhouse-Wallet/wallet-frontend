@@ -5,17 +5,21 @@ import OtpStep from "./OtpStep";
 import WalletBackup from "./WalletBackup";
 import KeyStep from "./keysStep";
 
-
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
-import { getBitcoinAddress } from "../../lib/apiCall";
+import {
+  createCoinosInvoice,
+  getBitcoinAddress,
+  registerCoinosUser,
+  sendBitcoinn,
+} from "../../lib/apiCall";
 
 import {
   generateOTP,
   isValidEmail,
   storedataLocalStorage,
-  webAuthKeyStore
+  webAuthKeyStore,
 } from "../../utils/globals";
 
 import {
@@ -25,7 +29,6 @@ import {
   registerPasskey,
   passkeyValidator,
 } from "../../lib/zeroDevWallet";
-
 
 // const getWallet = async () => {
 //   try {
@@ -45,12 +48,12 @@ const CreateWallet = () => {
   const [loginEmail, setLoginEmail] = useState();
   const [addressPhrase, setAddressPhrase] = useState("");
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
-console.log("registerData->",registerData)
+  console.log("registerData->", registerData);
   // Helper function to check OTP expiration
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
     const currentTime = new Date().getTime();
-    const expirationTime = otpTimestamp + (10 * 60 * 1000); // 10 minutes in milliseconds
+    const expirationTime = otpTimestamp + 10 * 60 * 1000; // 10 minutes in milliseconds
     return currentTime > expirationTime;
   };
 
@@ -77,7 +80,14 @@ console.log("registerData->",registerData)
   ) => {
     try {
       try {
-        console.log(email, username, passkey, publickeyId, rawId, bitcoinWallet);
+        console.log(
+          email,
+          username,
+          passkey,
+          publickeyId,
+          rawId,
+          bitcoinWallet
+        );
         return await fetch(`/api/add-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -88,7 +98,7 @@ console.log("registerData->",registerData)
             publickeyId,
             rawId,
             wallet,
-            bitcoinWallet
+            bitcoinWallet,
           }),
         })
           .then((res) => res.json())
@@ -133,7 +143,10 @@ console.log("registerData->",registerData)
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
-      console.log("process.env.NEXT_PUBLIC_DOMAIN", process.env.NEXT_PUBLIC_DOMAIN)
+      console.log(
+        "process.env.NEXT_PUBLIC_DOMAIN",
+        process.env.NEXT_PUBLIC_DOMAIN
+      );
       return await fetch(`/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,39 +178,74 @@ console.log("registerData->",registerData)
         toast.error("User Already Exist!");
         return false;
       }
-      const createdWebAuthKey = await registerPasskey(registerData.email + "_passkey_1");
+      const createdWebAuthKey = await registerPasskey(
+        registerData.email + "_passkey_1"
+      );
       if (!createdWebAuthKey.status) {
         toast.error(createdWebAuthKey.msg);
         return false;
       } else {
-        const { newPasskeyValidator = "", msg = "", status = "" } = await passkeyValidator(createdWebAuthKey.webAuthnKey);
+        const {
+          newPasskeyValidator = "",
+          msg = "",
+          status = "",
+        } = await passkeyValidator(createdWebAuthKey.webAuthnKey);
         //webAuthnKey
         if (!status) {
           toast.error(msg);
           return false;
         } else {
-          let { msg = "", status = true, account = "", kernelClient = "", address = "" } = await createAccount(
-            newPasskeyValidator,
-            addressPhrase
-          );
+          let {
+            msg = "",
+            status = true,
+            account = "",
+            kernelClient = "",
+            address = "",
+          } = await createAccount(newPasskeyValidator, addressPhrase);
           if (!status) {
             toast.error(msg);
             return false;
           } else {
             console.log("new account-->", account, address);
-            let webAuthKeyStringObj = await webAuthKeyStore(createdWebAuthKey.webAuthnKey);
+            let webAuthKeyStringObj = await webAuthKeyStore(
+              createdWebAuthKey.webAuthnKey
+            );
             let userExist = await getUser(registerData.email);
             if (userExist.status && userExist.status == "success") {
               toast.error("User Already Exist!");
               return false;
             }
 
-            let getWallet = await getBitcoinAddress();
-            let bitcoinWallet = ""
-            if (getWallet.status && getWallet.status == "success") {
-              bitcoinWallet = (getWallet?.data?.wallet || "")
-            }
+            const cleanEmail = registerData?.email?.replace(
+              /[^a-zA-Z0-9]/g,
+              ""
+            );
 
+            let registerCoinos = await registerCoinosUser(
+              cleanEmail,
+              "testttttttt"
+            );
+
+            console.log("registerCoinos", registerCoinos);
+            localStorage.setItem("coinosToken", registerCoinos?.token);
+            const result = await createCoinosInvoice(
+              registerCoinos?.token,
+              "1",
+              "bitcoin"
+            );
+            console.log("result-----result", result);
+
+            // let getWallet = await getBitcoinAddress();
+
+            // let bitcoinWallet = "";
+            // if (getWallet.status && getWallet.status == "success") {
+            //   bitcoinWallet = getWallet?.data?.wallet || "";
+            // }
+
+            let bitcoinWallet = "";
+            if (result) {
+              bitcoinWallet = result?.hash || "";
+            }
 
             let data = await addUser(
               registerData.email,
@@ -209,7 +257,12 @@ console.log("registerData->",registerData)
               bitcoinWallet
             );
             toast.success("Sign Up Successfully!");
-            console.log("data-->", data, createdWebAuthKey, newPasskeyValidator)
+            console.log(
+              "data-->",
+              data,
+              createdWebAuthKey,
+              newPasskeyValidator
+            );
             dispatch(
               loginSet({
                 login: true,
@@ -227,36 +280,43 @@ console.log("registerData->",registerData)
                 ensName: data.userData.ensName || "",
                 ensSetup: data.userData.ensSetup || false,
                 multisigSetup: data.userData.multisigSetup,
-                multisigActivate: data.userData.multisigActivate
+                multisigActivate: data.userData.multisigActivate,
               })
             );
-            let webAuthKeyStringObj2 = ""
-            let webAuthKeyStringObj3 = ""
+            let webAuthKeyStringObj2 = "";
+            let webAuthKeyStringObj3 = "";
             if (data.userData.passkey2) {
-              webAuthKeyStringObj2 = await webAuthKeyStore(data.userData.passkey2)
+              webAuthKeyStringObj2 = await webAuthKeyStore(
+                data.userData.passkey2
+              );
             }
             if (data.userData.passkey3) {
-              webAuthKeyStringObj3 = await webAuthKeyStore(data.userData.passkey3)
+              webAuthKeyStringObj3 = await webAuthKeyStore(
+                data.userData.passkey3
+              );
             }
 
-            storedataLocalStorage({
-              login: true,
-              walletAddress: address || "",
-              bitcoinWallet: bitcoinWallet || "",
-              signer: "",
-              username: registerData.username,
-              email: registerData.email,
-              passkeyCred: "",
-              webauthKey: webAuthKeyStringObj,
-              id: data.userData._id,
-              multisigAddress: data.userData.multisigAddress,
-              passkey2: webAuthKeyStringObj2,
-              passkey3: webAuthKeyStringObj3,
-              ensName: data.userData.ensName || "",
-              ensSetup: data.userData.ensSetup || false,
-              multisigSetup: data.userData.multisigSetup,
-              multisigActivate: data.userData.multisigActivate
-            }, "authUser")
+            storedataLocalStorage(
+              {
+                login: true,
+                walletAddress: address || "",
+                bitcoinWallet: bitcoinWallet || "",
+                signer: "",
+                username: registerData.username,
+                email: registerData.email,
+                passkeyCred: "",
+                webauthKey: webAuthKeyStringObj,
+                id: data.userData._id,
+                multisigAddress: data.userData.multisigAddress,
+                passkey2: webAuthKeyStringObj2,
+                passkey3: webAuthKeyStringObj3,
+                ensName: data.userData.ensName || "",
+                ensSetup: data.userData.ensSetup || false,
+                multisigSetup: data.userData.multisigSetup,
+                multisigActivate: data.userData.multisigActivate,
+              },
+              "authUser"
+            );
             return true;
           }
         }
@@ -268,7 +328,6 @@ console.log("registerData->",registerData)
   };
 
   const registerOtpFn = async (data) => {
-
     try {
       // Check if OTP is expired
       if (isOtpExpired()) {
@@ -312,12 +371,12 @@ console.log("registerData->",registerData)
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP)
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,
@@ -367,7 +426,7 @@ console.log("registerData->",registerData)
       console.log("resendOtpFunc error---->", error);
       return false;
     }
-  }
+  };
 
   return (
     <>

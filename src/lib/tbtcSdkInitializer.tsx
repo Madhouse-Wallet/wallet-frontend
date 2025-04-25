@@ -23,7 +23,7 @@ export async function initializeTBTC(signer: EthereumSigner) {
       console.log(`Initializing TBTC for L2 chain: ${process.env.NEXT_PUBLIC_ENV_CHAIN_NAME }`);
       sdk = await TBTC.initializeMainnet(ethProvider);
       console.log("sd 1 furst->",sdk)
-      await sdk.initializeCrossChain("Base", signer);
+      // await sdk.initializeCrossChain("Base", signer);
       console.log("sd->",sdk)
     }
     // const sdk = await TBTC.initializeMainnet(signer);

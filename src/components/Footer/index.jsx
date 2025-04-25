@@ -8,18 +8,26 @@ import { useRouter } from "next/router";
 import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
+import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
 
 const Footer = () => {
   const router = useRouter();
   const [pointSale, setPointSale] = useState();
+  const [refundBTC, setRefundBTC] = useState();
 
   return (
     <>
       {pointSale &&
         createPortal(
-          <PointOfSalePop pointSale={pointSale} setPointSale={setPointSale} />,
+          <PointOfSalePop
+            refundBTC={refundBTC}
+            setRefundBTC={setRefundBTC}
+            pointSale={pointSale}
+            setPointSale={setPointSale}
+          />,
           document.body
         )}
+
       <FooterDiv className="fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-3">
         {/* <Image
           src={bg}
