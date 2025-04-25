@@ -14,6 +14,7 @@ import {
   registerCoinosUser,
   sendBitcoinn,
 } from "../../lib/apiCall";
+import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
 
 import {
   generateOTP,
@@ -76,7 +77,10 @@ const CreateWallet = () => {
     publickeyId,
     rawId,
     wallet,
-    bitcoinWallet
+    bitcoinWallet,
+    secretEmail,
+    secretCredentialId,
+    secretStorageKey
   ) => {
     try {
       try {
@@ -86,7 +90,10 @@ const CreateWallet = () => {
           passkey,
           publickeyId,
           rawId,
-          bitcoinWallet
+          bitcoinWallet,
+          secretEmail,
+          secretCredentialId,
+          secretStorageKey
         );
         return await fetch(`/api/add-user`, {
           method: "POST",
@@ -99,6 +106,9 @@ const CreateWallet = () => {
             rawId,
             wallet,
             bitcoinWallet,
+            secretEmail,
+            secretCredentialId,
+            secretStorageKey
           }),
         })
           .then((res) => res.json())
@@ -171,6 +181,40 @@ const CreateWallet = () => {
     }
   };
 
+
+  const setSecretInPasskey = async (userName, data) => {
+    try {
+      let registerCheck = await registerCredential(userName, userName)
+      if (registerCheck?.status) {
+        let storeSecretCheck = await storeSecret(registerCheck?.data?.credentialId, data)
+        if (storeSecretCheck?.status) {
+          return {
+            status: true,
+            storageKey: storeSecretCheck?.data?.storageKey,
+            credentialId: registerCheck?.data?.credentialId
+          }
+        } else {
+          console.log(" storeSecretCheck error-->", storeSecretCheck?.msg)
+          return {
+            status: false,
+            msg: storeSecretCheck?.msg
+          }
+        }
+      } else {
+        console.log(" registerCheck error-->", registerCheck?.msg)
+        return {
+          status: false,
+          msg: registerCheck?.msg
+        }
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Facing issue in storing secret"
+      }
+    }
+  }
+
   const registerFn = async () => {
     try {
       let userExist = await getUser(registerData.email);
@@ -235,6 +279,21 @@ const CreateWallet = () => {
             );
             console.log("result-----result", result);
 
+            let secretObj = {
+              coinosToken: (registerCoinos?.token || ""),
+              seedPhrase: addressPhrase
+            }
+            console.log("secretObj-->", secretObj, JSON.stringify(secretObj))
+
+            let storageKeySecret = "";
+            let credentialIdSecret = "";
+            let storeData = await setSecretInPasskey((registerData.email + "_secret"), JSON.stringify(secretObj));
+            if (storeData.status) {
+              console.log("storeData-->", storeData)
+              storageKeySecret = storeData?.storageKey
+              credentialIdSecret = storeData?.credentialId
+            }
+
             // let getWallet = await getBitcoinAddress();
 
             // let bitcoinWallet = "";
@@ -254,7 +313,10 @@ const CreateWallet = () => {
               "",
               "",
               address,
-              bitcoinWallet
+              bitcoinWallet,
+              (registerData.email + "_secret"),
+              credentialIdSecret,
+              storageKeySecret
             );
             toast.success("Sign Up Successfully!");
             console.log(

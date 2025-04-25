@@ -5,6 +5,7 @@ import ConfirmationPop from "@/components/Modals/ConfirmationPop";
 import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import EnsDomainPop from "@/components/Modals/EnsDomainPop";
+import RecoverPopup from "@/components/Modals/RecoverPopup"
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -43,6 +44,8 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
   const [setUp, setSetUp] = useState<boolean>(false);
+  const [recover,
+    setRecover] = useState<boolean>(false);
   const [ensDomain, setEnsDomain] = useState<boolean>(false);
   const [sign, setSign] = useState<boolean>(false);
   const [changeEmail, setChangeEmail] = useState<boolean>(false);
@@ -136,7 +139,7 @@ const Setting: React.FC = () => {
           {
             login: true,
             walletAddress: userAuth.walletAddress || "",
-            bitcoinWallet:  userAuth.bitcoinWallet || "",
+            bitcoinWallet: userAuth.bitcoinWallet || "",
             signer: "",
             username: userAuth.username,
             email: userAuth.email,
@@ -404,6 +407,11 @@ const Setting: React.FC = () => {
           <MultiSignPop sign={sign} setSign={setSign} />,
           document.body
         )}
+        {recover &&
+        createPortal(
+          <RecoverPopup recover={recover} setRecover={setRecover} />,
+          document.body
+        )}
       {ensDomain &&
         createPortal(
           <EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />,
@@ -523,32 +531,32 @@ const Setting: React.FC = () => {
                         {/* )} */}
                       </li>
                       {(<> <li className="flex gap-2 py-1">
-                          <div
-                            className="block text-gray-500"
-                            style={{ width: 160 }}
-                          >
-                            Bitcoin wallet ID:
-                          </div>
-                          {/* {userAuth?.walletAddress && ( */}
-                          <span className="text-white flex items-center">
-                            {userAuth?.bitcoinWallet ? (
-                              <>
-                                {splitAddress(userAuth?.bitcoinWallet)}
-                                <button
-                                  onClick={() =>
-                                    handleCopy(userAuth?.bitcoinWallet)
-                                  }
-                                  className="border-0 p-0 bg-transparent pl-1"
-                                >
-                                  {copyIcn}
-                                </button>
-                              </>
-                            ) : (
-                              "--"
-                            )}
-                          </span>
-                          {/* )} */}
-                        </li></>)
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Bitcoin wallet ID:
+                        </div>
+                        {/* {userAuth?.walletAddress && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.bitcoinWallet ? (
+                            <>
+                              {splitAddress(userAuth?.bitcoinWallet)}
+                              <button
+                                onClick={() =>
+                                  handleCopy(userAuth?.bitcoinWallet)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          ) : (
+                            "--"
+                          )}
+                        </span>
+                        {/* )} */}
+                      </li></>)
                       }
                       <li className="flex gap-2 py-1">
                         <div
@@ -661,9 +669,8 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -725,9 +732,8 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -826,24 +832,44 @@ const Setting: React.FC = () => {
                   )}
 
                   {userAuth?.login && !userAuth?.pos && (
-                    <div
-                      tabIndex={-1}
-                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <h3 className="text-xs font-medium leading-none -tracking-2">
-                          Delete Account
-                        </h3>
+                    <>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Delete Account
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => setConfirm(!confirm)}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() => setConfirm(!confirm)}
-                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
-                        >
-                          Delete
-                        </button>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Recover
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => setRecover(!recover)}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Recover
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )}
                   {userAuth?.login &&
                     !userAuth?.pos &&
