@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
 import { zeroTrxn, getAccount, multisigSetup } from "@/lib/zeroDevWallet";
+import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -50,6 +51,8 @@ const Setting: React.FC = () => {
   const [sign, setSign] = useState<boolean>(false);
   const [changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
+   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
+    const [recoverSeed, setRecoverSeed] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -165,6 +168,73 @@ const Setting: React.FC = () => {
       console.log("error-->", error);
     }
   };
+
+  const getSecretData = async (storageKey: any, credentialId: any) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId) as any;
+      if (retrieveSecretCheck?.status) {
+        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret)
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret
+        }
+      } else {
+        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg)
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg
+        }
+      }
+    } catch (error) {
+      console.log("error-->", error)
+      return {
+        status: false,
+        msg: "Error in Getting secret!"
+      }
+    }
+  }
+
+  // settingindex.tsx
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth.email);
+      if (userExist?.userId?.secretCredentialId && userExist?.userId?.secretStorageKey) {
+        let callGetSecretData = await getSecretData(userExist?.userId?.secretStorageKey, userExist?.userId?.secretCredentialId) as any
+        if (callGetSecretData?.status) {
+          // return {
+          //   status: true,
+          //   secret: callGetSecretData?.secret
+          // }
+          setRecoverSeed(JSON.parse(callGetSecretData?.secret))
+          setRecoverSeedStatus(true)
+        } else {
+          // return {
+          //   status: false,
+          //   msg: callGetSecretData?.msg
+          // }
+          setRecoverSeed(callGetSecretData?.msg)
+          setRecoverSeedStatus(false)
+        }
+      } else {
+        // return {
+        //   status: false,
+        //   secret: "No secret Stored!"
+        // }
+        setRecoverSeed("No secret Stored!")
+        setRecoverSeedStatus(false)
+      }
+      setRecover(!recover)
+    } catch (error) {
+      // return {
+      //   status: false,
+      //   secret: "Error in Fetching secret!"
+      // }
+      setRecoverSeed("Error in Fetching secret!")
+      setRecoverSeedStatus(false)
+    }
+  }
+
+
 
   // useEffect(() => {
   //   getPreview(); // Call the function
@@ -407,9 +477,11 @@ const Setting: React.FC = () => {
           <MultiSignPop sign={sign} setSign={setSign} />,
           document.body
         )}
+           {/* const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false); */}
+           {/* const [recoverSeed, setRecoverSeed] = useState<any>(""); */}
         {recover &&
         createPortal(
-          <RecoverPopup recover={recover} setRecover={setRecover} />,
+          <RecoverPopup recover={recover} setRecover={setRecover} phrase={recoverSeed} phraseStatus={recoverSeedStatus} />,
           document.body
         )}
       {ensDomain &&
@@ -855,19 +927,20 @@ const Setting: React.FC = () => {
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
-                        <div className="flex flex-col gap-1">
+                        {userAuth?.login && (<>
+                          <div className="flex flex-col gap-1">
                           <h3 className="text-xs font-medium leading-none -tracking-2">
                             Recover
                           </h3>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <button
-                            onClick={() => setRecover(!recover)}
+                            onClick={() => recoverSeedPhrase()}
                             className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
                           >
                             Recover
                           </button>
-                        </div>
+                        </div></>)}
                       </div>
                     </>
                   )}
