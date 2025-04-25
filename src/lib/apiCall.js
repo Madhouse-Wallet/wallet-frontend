@@ -26,7 +26,6 @@ export const getUser = async (email) => {
   }
 };
 
-
 export const getBitcoinAddress = async (email) => {
   try {
     try {
@@ -49,7 +48,6 @@ export const getBitcoinAddress = async (email) => {
     return false;
   }
 };
-
 
 export const getEnsName = async (ensName) => {
   try {
@@ -162,8 +160,6 @@ export const getSubdomainApproval = async (
 //   }
 // };
 
-
-
 export const registerEnsName = async (
   name,
   smartAccount,
@@ -178,19 +174,23 @@ export const registerEnsName = async (
   try {
     console.log("details", name, smartAccount, defApiKey);
 
-    const response = await axios.post("/api/register-ens", {
-      name,
-      smartAccount,
-      defApiKey,
-      defApiSecret,
-      registrarControllerAddress,
-      resolverAddress,
-      reverseRegistrarAddress,
-      baseRegistrarAddress,
-      duration,
-    }, {
-      timeout: 90000, // 60 seconds timeout
-    });
+    const response = await axios.post(
+      "/api/register-ens",
+      {
+        name,
+        smartAccount,
+        defApiKey,
+        defApiSecret,
+        registrarControllerAddress,
+        resolverAddress,
+        reverseRegistrarAddress,
+        baseRegistrarAddress,
+        duration,
+      },
+      {
+        timeout: 90000, // 60 seconds timeout
+      }
+    );
 
     console.log("Registration response:", response.data);
     return response.data;
@@ -299,6 +299,91 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
         console.log("data-->", data);
         return data;
       });
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+export const registerCoinosUser = async (username, password) => {
+  try {
+    try {
+      return await fetch(`/api/coinos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "register",
+          username,
+          password,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("registerCoinosUser-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+export const createCoinosInvoice = async (token, amount, type = "bitcoin") => {
+  try {
+    try {
+      return await fetch(`/api/coinos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "createInvoice",
+          token,
+          amount,
+          type,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("createCoinosInvoice-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+// Add this to your utils/coinosApi.js file
+
+export const sendBitcoinn = async (token, amount, address) => {
+  try {
+    try {
+      return await fetch(`/api/coinos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "sendBitcoin",
+          token,
+          amount,
+          address,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("sendBitcoin-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   } catch (error) {
     console.log("error-->", error);
     return false;

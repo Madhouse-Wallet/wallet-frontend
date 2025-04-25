@@ -11,7 +11,9 @@ import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { fetchBitcoinBalance } from "./../../../pages/api/bitcoinBalance.js";
-import { createUsdcToBtcShift } from "../../../pages/api/sideShiftAI.ts";
+import { createBtcToTbtcShift } from "../../../pages/api/sideShiftAI.ts";
+import { sendBitcoinn } from "@/lib/apiCall.js";
+import { initializeTBTC } from "@/lib/tbtcSdkInitializer";
 
 const SendBitcoinPop = ({
   sendBitcoin,
@@ -20,32 +22,16 @@ const SendBitcoinPop = ({
   setSuccess,
 }) => {
   const userAuth = useSelector((state) => state.Auth);
-  const { theme } = useTheme();
-  const [toAddress, setToAddress] = useState("");
-  const [trxnApproval, settrxnApproval] = useState();
+  const [depositSetup, setDepositSetup] = useState("");
+  const [depositFound, setDepositFound] = useState("");
+  const [walletAddressDepo, setWalletAddressDepo] = useState("");
+
   const [amount, setAmount] = useState("");
   const [openCam, setOpenCam] = useState(false);
   const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
   const [providerr, setProviderr] = useState(null);
-  const [desinationAddress, setdesinationAddress] = useState("");
-
-  // Validate Ethereum address
-  const validateAddress = (address) => {
-    try {
-      return ethers.isAddress(address);
-    } catch (error) {
-      return false;
-    }
-  };
-  console.log("test-->", openCam);
-  // Handle address input change
-  const handleAddressChange = (e) => {
-    const address = e.target.value;
-    setToAddress(address);
-    // setIsValidAddress(validateAddress(address));
-  };
 
   // Handle amount input change
   const handleAmountChange = (e) => {
@@ -56,22 +42,126 @@ const SendBitcoinPop = ({
     }
   };
 
+  const startReceive = async () => {
+    try {
+      console.log("receice");
+
+      setDepositSetup("");
+      setDepositFound("");
+      if (userAuth.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            // kernelProvider, ethersProvider, signer
+            const sdk = await initializeTBTC(provider.signer);
+            console.log("sdk -->", sdk);
+            if (sdk) {
+              depo(sdk);
+            }
+          }
+        }
+      } else {
+      }
+    } catch (error) {
+      console.log("error rec-->", error);
+    }
+  };
+
+  const mint = async (depo) => {
+    try {
+      console.log("mint-->", depo);
+      if (depo) {
+        const fundingUTXOs = await depo.detectFunding();
+        console.log("fundingUTXOs---->", fundingUTXOs);
+        if (fundingUTXOs.length > 0) {
+          const txHash = await depo.initiateMinting(fundingUTXOs[0]);
+          console.log("txHash---->", txHash);
+          setDepositFound(txHash);
+        } else {
+          console.log("depo-->", depo);
+          toast.error("No Deposit Found!");
+        }
+      } else {
+        toast.error("No Deposit Found!");
+      }
+    } catch (error) {
+      console.log("setSdkTbtc-->", error);
+      toast.error("No Deposit Found!");
+    }
+  };
+
+  const depo = async (tbtcSdk) => {
+    const bitcoinRecoveryAddress = userAuth?.bitcoinWallet; // Replace with a valid BTC address
+    console.log("bitcoinRecoveryAddress00>", bitcoinRecoveryAddress);
+    try {
+      console.log(tbtcSdk.deposits.initiateDeposit);
+      const deposit = await tbtcSdk.deposits.initiateDeposit(
+        bitcoinRecoveryAddress
+      );
+      console.log("Deposit initiated:", deposit);
+      setDepositSetup(deposit);
+      // Step 5: Get the Bitcoin deposit address
+      const bitcoinDepositAddress = await deposit.getBitcoinAddress();
+      console.log("Bitcoin deposit address:", bitcoinDepositAddress);
+      setWalletAddressDepo(bitcoinDepositAddress);
+
+      const btcAmount = parseFloat(amount);
+
+      if (isNaN(btcAmount)) {
+        return "Invalid Bitcoin amount";
+      }
+
+      // Convert BTC to satoshi (1 BTC = 100,000,000 satoshi)
+      const satoshiAmount = btcAmount * 100000000;
+
+      const result = await sendBitcoinn(
+        localStorage.getItem("coinosToken"),
+        satoshiAmount,
+        bitcoinDepositAddress
+      );
+
+      console.log("result-----result", result);
+      mint(deposit);
+      toast.error(result.error);
+    } catch (error) {
+      console.error("Error during deposit process:", error);
+    }
+  };
+
   const handleClose = () => setSendBitcoin(false);
 
   const getDestinationAddress = async () => {
     try {
-      const liquidShift = await createUsdcToBtcShift(
+      console.log("userAuth", userAuth);
+      const liquidShift = await createBtcToTbtcShift(
         amount, // USDC amount
-        toAddress, // Bitcoin address
+        userAuth?.walletAddress,
+        // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
       // liquidShift now contains all the information about the shift, including the deposit address
       console.log("Deposit address:", liquidShift.depositAddress);
-      if (liquidShift.depositAddress) {
-        setdesinationAddress(liquidShift.depositAddress);
-        settrxnApproval(!trxnApproval);
+
+      const btcAmount = parseFloat(amount);
+
+      if (isNaN(btcAmount)) {
+        return "Invalid Bitcoin amount";
       }
+
+      // Convert BTC to satoshi (1 BTC = 100,000,000 satoshi)
+      const satoshiAmount = btcAmount * 100000000;
+
+      const result = await sendBitcoinn(
+        localStorage.getItem("coinosToken"),
+        satoshiAmount,
+        liquidShift?.depositAddress
+      );
+      console.log("result-----result", result);
+      toast.error(result.error);
     } catch (error) {
       console.error("SideShift API error:", error);
       // setLoading(false);
@@ -105,6 +195,7 @@ const SendBitcoinPop = ({
     } else {
       // Show toast and proceed with the original flow
       toast.info("Processing transaction");
+      startReceive();
     }
   };
 
@@ -186,7 +277,7 @@ const SendBitcoinPop = ({
                 Bridge Bitcoin
               </h5>
             </div>
-            {openCam ? (
+            {/* {openCam ? (
               <>
                 <QRScannerModal
                   setOpenCam={setOpenCam}
@@ -199,9 +290,9 @@ const SendBitcoinPop = ({
                 />
               </>
             ) : (
-              <>
-                <div className="modalBody">
-                  <div className="py-2">
+              <> */}
+            <div className="modalBody">
+              {/* <div className="py-2">
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       To
                     </label>
@@ -213,7 +304,6 @@ const SendBitcoinPop = ({
                         onChange={(e) => setToAddress(e.target.value)}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
-                      {/* QR Scanner Button */}
                       <button
                         onClick={() => {
                           console.log("line-242", openCam);
@@ -228,39 +318,39 @@ const SendBitcoinPop = ({
                         {scanIcn}
                       </button>
                     </div>
+                  </div> */}
+              <div className="py-2">
+                <label className="form-label m-0 font-semibold text-xs ps-3">
+                  Balance: {balance} Bitcoin
+                </label>
+                <div className="iconWithText relative">
+                  <div className="absolute icn left-2 flex items-center gap-2 text-xs">
+                    {btc}
+                    Bitcoin
                   </div>
-                  <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} Bitcoin
-                    </label>
-                    <div className="iconWithText relative">
-                      <div className="absolute icn left-2 flex items-center gap-2 text-xs">
-                        {btc}
-                        Bitcoin
-                      </div>
-                      <input
-                        placeholder="Amount"
-                        type="text"
-                        value={amount}
-                        onChange={handleAmountChange}
-                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
-                      />
-                    </div>
-                  </div>
-                  <div className="py-2 mt-4">
-                    <button
-                      type="button"
-                      onClick={handleSend}
-                      disabled={!isValidAddress || !amount || isLoading}
-                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
-                    >
-                      {isLoading ? "Sending..." : "Send"}
-                    </button>
-                  </div>
-                  {/* </form> */}
+                  <input
+                    placeholder="Amount"
+                    type="text"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                  />
                 </div>
-              </>
-            )}
+              </div>
+              <div className="py-2 mt-4">
+                <button
+                  type="button"
+                  onClick={handleSend}
+                  disabled={!isValidAddress || !amount || isLoading}
+                  className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                >
+                  {isLoading ? "Sending..." : "Send"}
+                </button>
+              </div>
+              {/* </form> */}
+            </div>
+            {/* </>
+            )} */}
           </div>
         </div>
       </Modal>
