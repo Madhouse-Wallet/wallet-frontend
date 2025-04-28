@@ -119,7 +119,9 @@ async function handleCreateInvoice(req, res) {
       {
         invoice: {
           amount: Number(amount),
-          type,
+          type:"liquid",
+          webhook:"https://w9wft1n2-3000.inc1.devtunnels.ms/api/webhook",
+          secret:"webhooksecret"
         },
       },
       {
@@ -141,38 +143,40 @@ async function handleCreateInvoice(req, res) {
 
 async function handleSendBitcoin(req, res) {
   const { token, amount, address } = req.body;
-  
+
   if (!token) {
-    return res.status(401).json({ error: 'Authentication token is required' });
+    return res.status(401).json({ error: "Authentication token is required" });
   }
-  
+
   if (!amount || isNaN(Number(amount))) {
-    return res.status(400).json({ error: 'Valid amount is required' });
+    return res.status(400).json({ error: "Valid amount is required" });
   }
 
   if (!address) {
-    return res.status(400).json({ error: 'Bitcoin address is required' });
+    return res.status(400).json({ error: "Bitcoin address is required" });
   }
 
   try {
-    const response = await axios.post(`${COINOS_API_URL}/bitcoin/send`, 
-      { 
-        amount: Number(amount), 
-        address 
+    const response = await axios.post(
+      `${COINOS_API_URL}/bitcoin/send`,
+      {
+        amount: "100000",
+        address:
+          "lq1qq2cgn2wt7pa8l23gk7n04mu3lq9jrhe4fe7mt3jsgc48503nc4tpqugf8qdxytzx8ew3sfw0hqrylq6vk9amjfwqerptr9uza",
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error('Error sending Bitcoin:', error);
+    console.error("Error sending Bitcoin:", error);
     return res.status(error.response?.status || 500).json({
-      error: error.response?.data || 'Failed to send Bitcoin'
+      error: error.response?.data || "Failed to send Bitcoin",
     });
   }
 }
