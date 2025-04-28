@@ -643,7 +643,7 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
-                      <li className="flex gap-2 py-1">
+                      {/* <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
                           style={{ width: 160 }}
@@ -654,7 +654,7 @@ const Setting: React.FC = () => {
                           {" "}
                           {userAuth?.ensName ? userAuth?.ensName : "--"}
                         </span>
-                      </li>
+                      </li> */}
                     </ul>
                   </div>
                   <div className="right">
@@ -882,7 +882,7 @@ const Setting: React.FC = () => {
                     </div>
                   )} */}
 
-                  {userAuth?.login && !userAuth?.pos && (
+                  {/* {userAuth?.login && !userAuth?.pos && (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -901,7 +901,7 @@ const Setting: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                  )}
+                  )} */}
 
                   {userAuth?.login && !userAuth?.pos && (
                     <>
