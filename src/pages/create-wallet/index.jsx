@@ -80,7 +80,8 @@ const CreateWallet = () => {
     bitcoinWallet,
     secretEmail,
     secretCredentialId,
-    secretStorageKey
+    secretStorageKey,
+    liquidBitcoinWallet
   ) => {
     try {
       try {
@@ -93,7 +94,8 @@ const CreateWallet = () => {
           bitcoinWallet,
           secretEmail,
           secretCredentialId,
-          secretStorageKey
+          secretStorageKey,
+          liquidBitcoinWallet
         );
         return await fetch(`/api/add-user`, {
           method: "POST",
@@ -108,7 +110,8 @@ const CreateWallet = () => {
             bitcoinWallet,
             secretEmail,
             secretCredentialId,
-            secretStorageKey
+            secretStorageKey,
+            liquidBitcoinWallet
           }),
         })
           .then((res) => res.json())
@@ -278,7 +281,12 @@ const CreateWallet = () => {
               "bitcoin"
             );
             console.log("result-----result", result);
-
+            const resultLiquid = await createCoinosInvoice(
+              registerCoinos?.token,
+              "1",
+              "liquid"
+            );
+            console.log("resultLiquid-->", resultLiquid)
             let secretObj = {
               coinosToken: (registerCoinos?.token || ""),
               seedPhrase: addressPhrase
@@ -302,8 +310,12 @@ const CreateWallet = () => {
             // }
 
             let bitcoinWallet = "";
+            let liquidBitcoinWallet = ""
             if (result) {
               bitcoinWallet = result?.hash || "";
+            }
+            if (resultLiquid) {
+              liquidBitcoinWallet = resultLiquid?.hash || "";
             }
 
             let data = await addUser(
@@ -316,7 +328,8 @@ const CreateWallet = () => {
               bitcoinWallet,
               (registerData.email + "_secret"),
               credentialIdSecret,
-              storageKeySecret
+              storageKeySecret,
+              liquidBitcoinWallet
             );
             toast.success("Sign Up Successfully!");
             console.log(
@@ -433,12 +446,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP);
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,
