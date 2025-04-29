@@ -30,7 +30,7 @@ export const getBitcoinAddress = async (email) => {
   try {
     try {
       // console.log(email)
-      return await fetch(`/api/generate-wallet`, {
+      return await fetch(`/api/generate-bitcoin-wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       })

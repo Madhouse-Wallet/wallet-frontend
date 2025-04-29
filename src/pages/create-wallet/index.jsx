@@ -81,7 +81,8 @@ const CreateWallet = () => {
     secretEmail,
     secretCredentialId,
     secretStorageKey,
-    liquidBitcoinWallet
+    liquidBitcoinWallet,
+    liquidBitcoinWallet_2
   ) => {
     try {
       try {
@@ -95,7 +96,8 @@ const CreateWallet = () => {
           secretEmail,
           secretCredentialId,
           secretStorageKey,
-          liquidBitcoinWallet
+          liquidBitcoinWallet,
+          liquidBitcoinWallet_2
         );
         return await fetch(`/api/add-user`, {
           method: "POST",
@@ -111,7 +113,8 @@ const CreateWallet = () => {
             secretEmail,
             secretCredentialId,
             secretStorageKey,
-            liquidBitcoinWallet
+            liquidBitcoinWallet,
+            liquidBitcoinWallet_2
           }),
         })
           .then((res) => res.json())
@@ -275,24 +278,57 @@ const CreateWallet = () => {
 
             console.log("registerCoinos", registerCoinos);
             localStorage.setItem("coinosToken", registerCoinos?.token);
-            const result = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "bitcoin"
-            );
-            console.log("result-----result", result);
+            // const result = await createCoinosInvoice(
+            //   registerCoinos?.token,
+            //   "1",
+            //   "bitcoin"
+            // );
+            // console.log("result-----result", result);
             const resultLiquid = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
               "liquid"
             );
             console.log("resultLiquid-->", resultLiquid)
+
+            const resultLiquid1 = await createCoinosInvoice(
+              registerCoinos?.token,
+              "1",
+              "liquid"
+            );
+            console.log("resultLiquid1-->", resultLiquid1)
+
+            // console.log("resultLiquid-->", resultLiquid)
+            // let secretObj = {
+            //   coinosToken: (registerCoinos?.token || ""),
+            //   seedPhrase: addressPhrase
+            // }
+            // console.log("secretObj-->", secretObj, JSON.stringify(secretObj))
+
+            // let storageKeySecret = "";
+            // let credentialIdSecret = "";
+            // let storeData = await setSecretInPasskey((registerData.email + "_secret"), JSON.stringify(secretObj));
+            // if (storeData.status) {
+            //   console.log("storeData-->", storeData)
+            //   storageKeySecret = storeData?.storageKey
+            //   credentialIdSecret = storeData?.credentialId
+            // }
+
+            let getWallet = await getBitcoinAddress();
+
+            let bitcoinWallet = "";
+            if (getWallet.status && getWallet.status == "success") {
+              bitcoinWallet = getWallet?.data?.wallet || "";
+            }
+
             let secretObj = {
               coinosToken: (registerCoinos?.token || ""),
+              privateKey: getWallet?.data?.privateKey || "",
+              publicKey: getWallet?.data?.publicKey || "",
+              wif: getWallet?.data?.wif || "",
               seedPhrase: addressPhrase
             }
             console.log("secretObj-->", secretObj, JSON.stringify(secretObj))
-
             let storageKeySecret = "";
             let credentialIdSecret = "";
             let storeData = await setSecretInPasskey((registerData.email + "_secret"), JSON.stringify(secretObj));
@@ -302,20 +338,17 @@ const CreateWallet = () => {
               credentialIdSecret = storeData?.credentialId
             }
 
-            // let getWallet = await getBitcoinAddress();
-
             // let bitcoinWallet = "";
-            // if (getWallet.status && getWallet.status == "success") {
-            //   bitcoinWallet = getWallet?.data?.wallet || "";
+            let liquidBitcoinWallet = "";
+            let liquidBitcoinWallet_2 = "";
+            // if (result) {
+            //   bitcoinWallet = result?.hash || "";
             // }
-
-            let bitcoinWallet = "";
-            let liquidBitcoinWallet = ""
-            if (result) {
-              bitcoinWallet = result?.hash || "";
-            }
             if (resultLiquid) {
               liquidBitcoinWallet = resultLiquid?.hash || "";
+            }
+            if (resultLiquid1) {
+              liquidBitcoinWallet_2 = resultLiquid1?.hash || "";
             }
 
             let data = await addUser(
@@ -329,7 +362,8 @@ const CreateWallet = () => {
               (registerData.email + "_secret"),
               credentialIdSecret,
               storageKeySecret,
-              liquidBitcoinWallet
+              liquidBitcoinWallet,
+              liquidBitcoinWallet_2
             );
             toast.success("Sign Up Successfully!");
             console.log(
@@ -446,12 +480,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP);
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,
