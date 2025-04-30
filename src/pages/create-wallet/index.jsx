@@ -229,7 +229,7 @@ const CreateWallet = () => {
         return false;
       }
       const createdWebAuthKey = await registerPasskey(
-        registerData.email + "login_passkey_1"
+        registerData.email + "passkey_1"
       );
       if (!createdWebAuthKey.status) {
         toast.error(createdWebAuthKey.msg);
