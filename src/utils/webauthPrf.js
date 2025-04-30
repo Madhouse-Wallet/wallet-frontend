@@ -31,7 +31,7 @@ function generateUserId() {
 }
 
 // Simple encryption using AES-GCM with PRF-derived key
- const encryptData = async (data, derivedKey) => {
+const encryptData = async (data, derivedKey) => {
     try {
         const encodedData = new TextEncoder().encode(data);
 
@@ -70,7 +70,7 @@ function generateUserId() {
 }
 
 // Decrypt data using AES-GCM with PRF-derived key
- const decryptData = async (encryptedObject, derivedKey) => {
+const decryptData = async (encryptedObject, derivedKey) => {
     try {
         const iv = base64ToBuffer(encryptedObject.iv);
         const encryptedData = base64ToBuffer(encryptedObject.data);
@@ -117,11 +117,17 @@ export const registerCredential = async (username, displayName) => {
                     { type: "public-key", alg: -257 } // RS256
                 ],
                 timeout: 60000,
+                // authenticatorSelection: {
+                //     userVerification: "preferred",
+                //     authenticatorAttachment: "platform", // Use platform authenticator if available
+                //     residentKey: "required",
+                //     requireResidentKey: true
+                // },
                 authenticatorSelection: {
                     userVerification: "preferred",
-                    authenticatorAttachment: "platform", // Use platform authenticator if available
-                    residentKey: "required",
-                    requireResidentKey: true
+                    residentKey: "preferred",           // Allow discoverable credentials
+                    requireResidentKey: false           // Broader device support
+                    // No authenticatorAttachment to support both platform & cross-platform
                 },
                 extensions: { prf: {} }, // Request PRF extension
                 challenge: generateChallenge()
@@ -145,6 +151,7 @@ export const registerCredential = async (username, displayName) => {
             }
         }
     } catch (error) {
+        console.error('registerCheck error-->', error?.name, error);
         return {
             status: false,
             msg: error.message
@@ -213,6 +220,7 @@ export const storeSecret = async (credentialIdBase, data) => {
             }
         }
     } catch (error) {
+        console.error('storeSecret error-->', error?.name, error);
         return {
             status: false,
             msg: error.message
@@ -288,6 +296,7 @@ export const retrieveSecret = async (storageKey, credentialIdBase) => {
         }
 
     } catch (error) {
+        console.error('retrieveSecret error-->', error?.name, error);
         return {
             status: false,
             msg: error.message
