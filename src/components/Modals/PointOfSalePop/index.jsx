@@ -25,6 +25,7 @@ const PointOfSalePop = ({
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [lnbitLink, setLnbitLink] = useState("jbmi6jUrxkXsTGFMygaUyk");
+  const [lnbitLink2, setLnbitLink2] = useState("jbmi6jUrxkXsTGFMygaUyk");
   useEffect(() => {
     if (userAuth.email) {
       const fetchUser = async () => {
@@ -33,6 +34,7 @@ const PointOfSalePop = ({
           if (user) {
             console.log("user-->", user);
             setLnbitLink(user?.userId?.lnbitLinkId);
+            setLnbitLink2(user?.userId?.lnbitLinkId_2 || "")
             setIsLoading(false); // stop loader if user found
           } else {
             setIsLoading(false);
@@ -124,12 +126,12 @@ const PointOfSalePop = ({
 
                 <div className="py-2">
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
+                    href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink2}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    USDC
+                    TBTC
                   </Link>
                 </div></> : <></>}
 

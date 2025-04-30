@@ -332,7 +332,7 @@ export const registerCoinosUser = async (username, password) => {
   }
 };
 
-export const createCoinosInvoice = async (token, amount, type = "bitcoin") => {
+export const createCoinosInvoice = async (token, amount, type = "bitcoin", secret) => {
   try {
     try {
       return await fetch(`/api/coinos`, {
@@ -343,6 +343,7 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin") => {
           token,
           amount,
           type,
+          secret
         }),
       })
         .then((res) => res.json())

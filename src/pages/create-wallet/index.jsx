@@ -229,7 +229,7 @@ const CreateWallet = () => {
         return false;
       }
       const createdWebAuthKey = await registerPasskey(
-        registerData.email + "_passkey_1"
+        registerData.email + "login_passkey_1"
       );
       if (!createdWebAuthKey.status) {
         toast.error(createdWebAuthKey.msg);
@@ -287,14 +287,16 @@ const CreateWallet = () => {
             const resultLiquid = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
-              "liquid"
+              "liquid",
+              "lbtcusdc"
             );
             console.log("resultLiquid-->", resultLiquid)
 
             const resultLiquid1 = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
-              "liquid"
+              "liquid",
+              "lbtctbtc"
             );
             console.log("resultLiquid1-->", resultLiquid1)
 

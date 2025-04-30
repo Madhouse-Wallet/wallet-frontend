@@ -103,7 +103,7 @@ async function handleLogin(req, res) {
 }
 
 async function handleCreateInvoice(req, res) {
-  const { token, amount, type = "bitcoin" } = req.body;
+  const { token, amount, type = "bitcoin", secret } = req.body;
 
   if (!token) {
     return res.status(401).json({ error: "Authentication token is required" });
@@ -119,7 +119,9 @@ async function handleCreateInvoice(req, res) {
       {
         invoice: {
           amount: Number(amount),
-          type,
+          type: type,
+          webhook: "https://basechain.d1vj9o3o44bka6.amplifyapp.com/api/webhook",
+          secret: secret
         },
       },
       {
@@ -141,11 +143,11 @@ async function handleCreateInvoice(req, res) {
 
 async function handleSendBitcoin(req, res) {
   const { token, amount, address } = req.body;
-  
+
   if (!token) {
     return res.status(401).json({ error: 'Authentication token is required' });
   }
-  
+
   if (!amount || isNaN(Number(amount))) {
     return res.status(400).json({ error: 'Valid amount is required' });
   }
@@ -155,10 +157,10 @@ async function handleSendBitcoin(req, res) {
   }
 
   try {
-    const response = await axios.post(`${COINOS_API_URL}/bitcoin/send`, 
-      { 
-        amount: Number(amount), 
-        address 
+    const response = await axios.post(`${COINOS_API_URL}/bitcoin/send`,
+      {
+        amount: Number(amount),
+        address
       },
       {
         headers: {
