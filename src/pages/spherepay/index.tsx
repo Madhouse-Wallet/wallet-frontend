@@ -15,10 +15,13 @@ import TabbedComponent from "./tabbedComponent.jsx";
 import TermsOfServiceStep from "./TermsOfServiceStep.jsx";
 import VerifyIdentity from "./VerifyIdentity.jsx";
 import Sidebar from "./Sidebar.jsx";
+import { useSelector } from "react-redux";
 
 function Spharepay() {
+  const userAuth = useSelector((state: any) => state.Auth);
+
   const { theme, toggleTheme } = useTheme();
-  const [step, setStep] = useState("welcome");
+  const [step, setStep] = useState("");
   const [email, setEmail] = useState("");
   const [tab, setTab] = useState(0);
   const [customerId, setCustomerID] = useState("");
@@ -47,35 +50,35 @@ function Spharepay() {
     },
   };
 
-  const createNewCustomer = async () => {
-    const customerData = {
-      type: "individual",
-      // firstName: "Perry",
-      // lastName: "Kumar",
-      email: "riteshd@test.co",
-      // phoneNumber: "+917688862985",
-      // address: {
-      //   line1: "Ganeshpura",
-      //   city: "Beawar",
-      //   postalCode: "305901",
-      //   state: "RJ",
-      //   country: "IND",
-      // },
-      // dob: {
-      //   month: 2,
-      //   day: 18,
-      //   year: 2000,
-      // },
-    };
+  // const createNewCustomer = async () => {
+  //   const customerData = {
+  //     type: "individual",
+  //     // firstName: "Perry",
+  //     // lastName: "Kumar",
+  //     email: "riteshd@test.co",
+  //     // phoneNumber: "+917688862985",
+  //     // address: {
+  //     //   line1: "Ganeshpura",
+  //     //   city: "Beawar",
+  //     //   postalCode: "305901",
+  //     //   state: "RJ",
+  //     //   country: "IND",
+  //     // },
+  //     // dob: {
+  //     //   month: 2,
+  //     //   day: 18,
+  //     //   year: 2000,
+  //     // },
+  //   };
 
-    try {
-      const response = await SpherePayAPI.createCustomer(customerData);
-      console.log(response);
-      return response;
-    } catch (error) {
-      console.error("Error creating customer:", error);
-    }
-  };
+  //   try {
+  //     const response = await SpherePayAPI.createCustomer(customerData);
+  //     console.log(response);
+  //     return response;
+  //   } catch (error) {
+  //     console.error("Error creating customer:", error);
+  //   }
+  // };
 
   const getCustomer = async () => {
     try {
@@ -206,17 +209,55 @@ function Spharepay() {
     }
   };
 
-  useEffect(() => {
-    // createNewCustomer();
-    // getCustomer();
-    // TermsOfServiveCustomer();
-    // kycCustomer();
-    // addCustomerWallet();
-    // addCustomerBankAccount();
-    // initiateTransfer();
-    // initiateWalletToBankTransfer();
-  }, []);
+  const createNewCustomer = async (type: any, email: any) => {
+    const customerData = {
+      type: type, // Use the dynamic type parameter
+      email: email, // Use the email from user input
+    };
 
+    try {
+      const response = await SpherePayAPI.createCustomer(customerData);
+      console.log(response);
+      return response;
+    } catch (error: any) {
+      console.error("Error creating customer:", error);
+      return { error: error.response.data };
+    }
+  };
+
+  useEffect(() => {
+    if (!userAuth?.email) {
+      router.push("/welcome");
+      // return;
+    }
+    const fetchData = async () => {
+      const response = await createNewCustomer("individual", userAuth?.email);
+      console.log(response, "responseresponse");
+      const message = response?.error?.message;
+
+      const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
+      const customerId = match ? match[1] : null;
+
+      if (response && response.error) {
+        // Check for the specific error condition
+        if (
+          response.error.error === "customer/duplicate" ||
+          (response.error.message &&
+            response.error.message.includes("duplicate"))
+        ) {
+          // If it's a duplicate customer, navigate to step 3
+          setCustomerID(customerId);
+          setStep("PolicyKycStep");
+        } else if (
+          response.error.message === "Expected country, got undefined or null"
+        ) {
+          setStep("select-country");
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -271,7 +312,7 @@ function Spharepay() {
                       <Step2
                         step={step}
                         setStep={setStep}
-                        userEmail={email}
+                        userEmail={userAuth?.email}
                         setCustomerID={setCustomerID}
                       />
                     </>

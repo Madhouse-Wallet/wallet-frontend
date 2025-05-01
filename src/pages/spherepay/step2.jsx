@@ -129,7 +129,7 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
     const stateCode = selectedState ? selectedState.isoCode : "";
 
     // Get the email from props (passed from previous step)
-    const email = userEmail || "riteshd@test.co"; // Fallback if email not provided
+    const email = userEmail; // Fallback if email not provided
 
     console.log("Submitting with:", {
       email,

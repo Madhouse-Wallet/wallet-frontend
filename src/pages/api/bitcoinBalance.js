@@ -16,7 +16,7 @@ export async function fetchBitcoinBalance(address) {
   try {
     // Using BlockCypher API which doesn't require API keys for basic usage
     const response = await fetch(
-      `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`
+      `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance?token=119e78d53a7047eb8455275fc461bd7d`
     );
 
     if (!response.ok) {
