@@ -2,8 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import client from '../../lib/mongodb'; // Import the MongoDB client
 import { logIn, getUser, createTpos, createUser, createBlotzAutoReverseSwap } from "./lnbit";
 
-const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1) => {
+const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1) => {
     try {
+        console.log("type-->",type)
         const [username, domain] = email.split("@");
         const length = 4;
         const randomAlpha = await Array.from({ length }, () =>
@@ -11,7 +12,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
         ).join("");
         const newEmail = `${username}${type}madhouse${randomAlpha}@${domain}`;
         let returnData = {}
-        let getToken = await logIn() as any;
+        let getToken = await logIn(accountType) as any;
         if (getToken && getToken?.status) {
             let token = getToken?.data?.token;
             let addUser = await createUser({
@@ -20,11 +21,11 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                     "tpos",
                     "boltz"
                 ]
-            }, token, process.env.NEXT_PUBLIC_LNBIT_API_KEY) as any;
+            }, token, accountType) as any;
 
             if (addUser && addUser?.status) {
 
-                let getUserData = await getUser(addUser?.data?.id, token, process.env.NEXT_PUBLIC_LNBIT_API_KEY) as any;
+                let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
 
                 if (getUserData && getUserData?.status) {
                     let addTpsoLink = await createTpos({
@@ -42,7 +43,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                         "withdraw_pin_disabled": false,
                         "lnaddress": false,
                         "lnaddress_cut": 0
-                    }, token, process.env.NEXT_PUBLIC_LNBIT_API_KEY) as any;
+                    }, token, accountType) as any;
 
                     if (addTpsoLink && addTpsoLink?.status) {
                         let link = addTpsoLink?.data?.id;
@@ -55,7 +56,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
 
                         const walletId = getUserData?.data?.wallets[0]?.id;
                         const userId = getUserData?.data?.id;
-
+                        console.log("type-->", type);
                         const updateFields =
                             type > 1
                                 ? {
@@ -77,36 +78,39 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                         );
                     }
 
-                    let addcreateBlotzAutoReverseSwap = await createBlotzAutoReverseSwap({
-                        "asset": "L-BTC/BTC",
-                        "direction": "send",
-                        "balance": 100,
-                        "instant_settlement": true,
-                        "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
-                        "amount": "200",
-                        "onchain_address": onchain_address
-                    }, token, process.env.NEXT_PUBLIC_LNBIT_API_KEY) as any;
+                    if (accountType == 1) {
+                        let addcreateBlotzAutoReverseSwap = await createBlotzAutoReverseSwap({
+                            "asset": "L-BTC/BTC",
+                            "direction": "send",
+                            "balance": 100,
+                            "instant_settlement": true,
+                            "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
+                            "amount": "200",
+                            "onchain_address": onchain_address
+                        }, token, accountType) as any;
 
-                    if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {
+                        if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {
 
 
-                        const updateFields =
-                            type > 1
-                                ? {
-                                    [`boltzAutoReverseSwap_${type}`]: addcreateBlotzAutoReverseSwap?.data,
-                                }
-                                : {
-                                    boltzAutoReverseSwap: addcreateBlotzAutoReverseSwap?.data
-                                };
-                        const result = await usersCollection.findOneAndUpdate(
-                            { email: email }, // filter
-                            {
-                                $set: updateFields
-                            }, // update
-                            { returnDocument: "after" } // return updated document
-                        );
-                        // console.log("result-->",result)
+                            const updateFields =
+                                type > 1
+                                    ? {
+                                        [`boltzAutoReverseSwap_${type}`]: addcreateBlotzAutoReverseSwap?.data,
+                                    }
+                                    : {
+                                        boltzAutoReverseSwap: addcreateBlotzAutoReverseSwap?.data
+                                    };
+                            const result = await usersCollection.findOneAndUpdate(
+                                { email: email }, // filter
+                                {
+                                    $set: updateFields
+                                }, // update
+                                { returnDocument: "after" } // return updated document
+                            );
+                            // console.log("result-->",result)
+                        }
                     }
+
                 }
             }
         }
@@ -114,6 +118,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
         console.log("error-->", error)
     }
 }
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -122,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "", secretEmail = "",
             secretCredentialId = "",
-            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "" } = req.body;
+            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "", liquidBitcoinWallet_3 = "" } = req.body;
 
         // Validate email
         if (!email || typeof email !== 'string') {
@@ -137,21 +142,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (existingUser) {
             //   return res.status(400).json({ error: 'Email already exists' });
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet, 1)
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_2, 2)
+            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet, 1, 1)
+            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_2, 2, 1)
+            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_3, 3, 2)
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
 
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, liquidBitcoinWallet_2, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
+            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, liquidBitcoinWallet_2, liquidBitcoinWallet_3, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
             secretCredentialId,
             secretStorageKey,
             ensSetup: false, createdAt: new Date()
         });
         // console.log("result-->", result)
-        addLnbit(email, usersCollection, liquidBitcoinWallet, 1)
-        addLnbit(email, usersCollection, liquidBitcoinWallet_2, 2)
+        addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1)
+        addLnbit(email, usersCollection, liquidBitcoinWallet_2, 2, 1)
+        addLnbit(email, usersCollection, liquidBitcoinWallet_3, 3, 2)
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
         console.error('Error adding user:', error);

@@ -82,7 +82,8 @@ const CreateWallet = () => {
     secretCredentialId,
     secretStorageKey,
     liquidBitcoinWallet,
-    liquidBitcoinWallet_2
+    liquidBitcoinWallet_2,
+    liquidBitcoinWallet_3
   ) => {
     try {
       try {
@@ -97,7 +98,8 @@ const CreateWallet = () => {
           secretCredentialId,
           secretStorageKey,
           liquidBitcoinWallet,
-          liquidBitcoinWallet_2
+          liquidBitcoinWallet_2,
+          liquidBitcoinWallet_3
         );
         return await fetch(`/api/add-user`, {
           method: "POST",
@@ -114,7 +116,8 @@ const CreateWallet = () => {
             secretCredentialId,
             secretStorageKey,
             liquidBitcoinWallet,
-            liquidBitcoinWallet_2
+            liquidBitcoinWallet_2,
+            liquidBitcoinWallet_3
           }),
         })
           .then((res) => res.json())
@@ -300,6 +303,14 @@ const CreateWallet = () => {
             );
             console.log("resultLiquid1-->", resultLiquid1)
 
+            const resultLiquid2 = await createCoinosInvoice(
+              registerCoinos?.token,
+              "1",
+              "liquid",
+              "tbtclbtc"
+            );
+            console.log("resultLiquid2-->", resultLiquid2)
+
             // console.log("resultLiquid-->", resultLiquid)
             // let secretObj = {
             //   coinosToken: (registerCoinos?.token || ""),
@@ -343,6 +354,7 @@ const CreateWallet = () => {
             // let bitcoinWallet = "";
             let liquidBitcoinWallet = "";
             let liquidBitcoinWallet_2 = "";
+            let liquidBitcoinWallet_3 = "";
             // if (result) {
             //   bitcoinWallet = result?.hash || "";
             // }
@@ -352,6 +364,10 @@ const CreateWallet = () => {
             if (resultLiquid1) {
               liquidBitcoinWallet_2 = resultLiquid1?.hash || "";
             }
+            if (resultLiquid2) {
+              liquidBitcoinWallet_3 = resultLiquid2?.hash || "";
+            }
+            
 
             let data = await addUser(
               registerData.email,
@@ -365,7 +381,8 @@ const CreateWallet = () => {
               credentialIdSecret,
               storageKeySecret,
               liquidBitcoinWallet,
-              liquidBitcoinWallet_2
+              liquidBitcoinWallet_2,
+              liquidBitcoinWallet_3
             );
             toast.success("Sign Up Successfully!");
             console.log(

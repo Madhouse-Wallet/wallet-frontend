@@ -6,11 +6,19 @@ import Image from "next/image";
 import { BackBtn } from "@/components/common";
 import Identity from "../identity";
 import Link from "next/link";
+import DepositPopup from "@/components/Modals/DepositPop"
+import { createPortal } from "react-dom";
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
+  const [depositPop, setDepositPop] = useState(false)
 
   return (
     <>
+      {depositPop &&
+            createPortal(
+              <DepositPopup depositPop={depositPop} setDepositPop={setDepositPop} />,
+              document.body
+            )}
       <section className="relative dashboard pt-12">
         <div className="container relative">
           {/* <button
@@ -33,7 +41,7 @@ const BTCDebitCard: React.FC = () => {
                 </div>
               </div>
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
-                <div className="py-4">
+                {/* <div className="py-4">
                   <Image
                     src={process.env.NEXT_PUBLIC_IMAGE_URL + "comingSoon.png"}
                     alt="comingsoon"
@@ -55,6 +63,39 @@ const BTCDebitCard: React.FC = () => {
                   >
                     Register for Early Access
                   </Link>
+                </div> */}
+                <div className="max-w-[500px] bg-black/50 mx-auto rounded-xl mt-10 p-6">
+                  <div className="grid gap-3 grid-cols-12">
+                    <div className="col-span-6">
+                      <button
+                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Withdraw
+                      </button>
+                    </div>
+                    <div className="col-span-6">
+                      <button
+                      onClick={()=> setDepositPop(!depositPop)}
+                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Deposit
+                      </button>
+                    </div>
+                    <div className="col-span-6">
+                      <button
+                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Create Card
+                      </button>
+                    </div>
+                    <div className="col-span-6">
+                      <button
+                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Delete Card
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

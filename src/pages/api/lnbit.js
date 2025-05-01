@@ -13,20 +13,33 @@ const { Module } = require("webpack");
  * @param {string} secretKey - Your SideShift API secret key
  * @returns {Promise<Object>} Quote response object
  */
-const logIn = async () => {
+const logIn = async (type = 1) => {
   try {
+    let backendUrl = "";
+    let username = "";
+    let password = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      username = "suffescom";
+      password = "suffescom";
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      username = "parvinder";
+      password = "madhousewallet120";
+    }
     // Fixed IP address as used in curl commands
-   let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}api/v1/auth`, {
+    let response = await fetch(`${backendUrl}api/v1/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "username": "suffescom",
-        "password": "suffescom"
+        username,
+        password
       }),
     });
-    response = await response.json()
+    response = await response.json() 
+    console.log("login-->",response)
     if (response?.access_token) {
       return {
         status: true,
@@ -46,21 +59,20 @@ const logIn = async () => {
     }
   }
 };
-/**
- * Create a fixed shift using a previously obtained quote
- * @param {Object} shiftParams - Parameters for the shift request
- * @param {string} shiftParams.settleAddress - Destination address
- * @param {string} shiftParams.affiliateId - Affiliate ID
- * @param {string} shiftParams.quoteId - ID of the previously obtained quote
- * @param {string} secretKey - Your SideShift API secret key
- * @returns {Promise<Object>} Shift response object
- */
-const createUser = async (data, token, apiKey) => {
+const createUser = async (data, token, type = 1) => {
   try {
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
     // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
-    let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}users/api/v1/user`, {
+    let response = await fetch(`${backendUrl}users/api/v1/user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +83,7 @@ const createUser = async (data, token, apiKey) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    // console.log("response-->", response)
+    console.log("response createUser-->", response)
     if (response?.email) {
       return {
         status: true,
@@ -93,12 +105,21 @@ const createUser = async (data, token, apiKey) => {
 };
 
 
- 
 
-const getUser = async (id, token, apiKey) => {
+
+const getUser = async (id, token, type = 1) => {
   try {
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}users/api/v1/user/${id}`, {
+    let response = await fetch(`${backendUrl}users/api/v1/user/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -108,7 +129,7 @@ const getUser = async (id, token, apiKey) => {
       }
     });
     response = await response.json()
-    // console.log("response-->", response)
+    console.log("getUser createUser-->", type, response)
     if (response?.email) {
       return {
         status: true,
@@ -131,10 +152,19 @@ const getUser = async (id, token, apiKey) => {
 
 
 
-const createTpos = async (data, token, apiKey) => {
+const createTpos = async (data, token, type = 1) => {
   try {
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/api/v1/tposs`, {
+    let response = await fetch(`${backendUrl}tpos/api/v1/tposs`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +175,7 @@ const createTpos = async (data, token, apiKey) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    // console.log("response-->", response)
+    console.log("createTpos createTpos-->", type, response)
     if (response?.id) {
       return {
         status: true,
@@ -169,8 +199,17 @@ const createTpos = async (data, token, apiKey) => {
 
 
 
-const createBlotzAutoReverseSwap = async (data, token, apiKey) => {
+const createBlotzAutoReverseSwap = async (data, token, type = 1) => {
   try {
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}boltz/api/v1/swap/reverse/auto`, {
       method: "POST",
