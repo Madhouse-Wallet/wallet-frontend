@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import TransactionDetailPop from "../TransactionDetailPop";
+import moment from "moment";
 
-const RecentTransaction = ({ transactions,data }) => {
+const RecentTransaction = ({ transactions, data }) => {
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   // Get status color
@@ -53,38 +54,72 @@ const RecentTransaction = ({ transactions,data }) => {
     const groups = {};
 
     txs.forEach((tx) => {
-      // Parse the date correctly by splitting and rearranging components
-      let dateParts;
+      console.log("line-57", tx);
+
       if (tx?.date && typeof tx.date === "string") {
-        // First, split by comma to separate date and time
-        const [dateStr, timeStr] = tx.date.split(",");
+        // Parse the date string with moment
+        // Our format from earlier was 'MMMM D, YYYY h:mm A'
+        // Example: "May 2, 2025 3:45 PM"
+        const txDate = moment(tx.date, "MMMM D, YYYY h:mm A");
 
-        // Then split the date by '/'
-        dateParts = dateStr.split("/");
+        // Check if the date is valid
+        if (txDate.isValid()) {
+          // Use moment to format a consistent date key (just the date portion without time)
+          const dateKey = txDate.format("YYYY-MM-DD");
 
-        // Create new date by rearranging to MM/DD/YYYY format
-        // OR directly create a Date object with proper parts
-        if (dateParts.length === 3) {
-          const [day, month, year] = dateParts;
-          const date = new Date(
-            `${year}-${month}-${day}${timeStr ? "," + timeStr : ""}`
-          );
-          const dateKey = date.toLocaleDateString();
-
+          // Initialize the array for this date if it doesn't exist
           if (!groups[dateKey]) {
             groups[dateKey] = [];
           }
+
+          // Add the transaction to the appropriate date group
           groups[dateKey].push(tx);
         } else {
-          console.error("Invalid date format:", tx.date);
+          // Fallback for other date formats that might still be in the system
+          try {
+            // Try to parse as a generic date
+            const fallbackDate = moment(tx.date);
+            if (fallbackDate.isValid()) {
+              const dateKey = fallbackDate.format("YYYY-MM-DD");
+
+              if (!groups[dateKey]) {
+                groups[dateKey] = [];
+              }
+              groups[dateKey].push(tx);
+            } else {
+              console.error("Invalid date format:", tx.date);
+            }
+          } catch (error) {
+            console.error("Error parsing date:", tx.date, error);
+          }
         }
+      } else if (tx?.date && moment.isMoment(tx.date)) {
+        // If the date is already a moment object
+        const dateKey = tx.date.format("YYYY-MM-DD");
+
+        if (!groups[dateKey]) {
+          groups[dateKey] = [];
+        }
+        groups[dateKey].push(tx);
       } else {
-        console.error("Missing or non-string date:", tx?.date);
+        console.error("Missing or invalid date:", tx?.date);
       }
     });
 
     console.log("Groups:", groups);
-    return groups;
+
+    // Sort the groups by date (most recent first)
+    const sortedGroups = {};
+    Object.keys(groups)
+      .sort(
+        (a, b) =>
+          moment(b, "YYYY-MM-DD").valueOf() - moment(a, "YYYY-MM-DD").valueOf()
+      )
+      .forEach((key) => {
+        sortedGroups[key] = groups[key];
+      });
+
+    return sortedGroups;
   };
 
   const handleTransactionClick = (tx) => {
@@ -134,11 +169,11 @@ const RecentTransaction = ({ transactions,data }) => {
                             {tx.isRedemption
                               ? "Redemption"
                               : tx.isDeposit
-                              ? "Deposit"
-                              : tx.type === "send"
-                              ? "Send"
-                              : "Receive"}{" "}
-                            {tx.amount?.split(" ")[1] || tx.category || 'ETH'}
+                                ? "Deposit"
+                                : tx.type === "send"
+                                  ? "Send"
+                                  : "Receive"}{" "}
+                            {tx.amount?.split(" ")[1] || tx.category || "ETH"}
                           </h4>
                           <p
                             className={`m-0 ${getStatusColor(
