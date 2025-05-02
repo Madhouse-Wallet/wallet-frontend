@@ -165,7 +165,7 @@ export const createBtcToTbtcShift = async (
 };
 
 
-export const createLBtcToTbtcShift = async (
+export const createTBtcToLbtcShift = async (
   usdcAmount: string,
   bitcoinAddress: string,
   secretKey: string,
