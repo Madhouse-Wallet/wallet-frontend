@@ -12,8 +12,11 @@ import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { fetchBitcoinBalance } from "./../../../pages/api/bitcoinBalance.js";
 import { createBtcToTbtcShift } from "../../../pages/api/sideShiftAI.ts";
-import { sendBitcoinn } from "@/lib/apiCall.js";
+import { getUser, sendBitcoinn } from "@/lib/apiCall.js";
 import { initializeTBTC } from "@/lib/tbtcSdkInitializer";
+import { sendBitcoinAPI } from "@/utils/bitcoinService.js";
+import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
+import { retrieveSecret } from "@/utils/webauthPrf.js";
 
 const SendBitcoinPop = ({
   sendBitcoin,
@@ -117,11 +120,21 @@ const SendBitcoinPop = ({
       // Convert BTC to satoshi (1 BTC = 100,000,000 satoshi)
       const satoshiAmount = btcAmount * 100000000;
 
-      const result = await sendBitcoinn(
-        localStorage.getItem("coinosToken"),
-        satoshiAmount,
-        bitcoinDepositAddress
-      );
+      // const result = await sendBitcoinn(
+      //   localStorage.getItem("coinosToken"),
+      //   satoshiAmount,
+      //   bitcoinDepositAddress
+      // );
+
+      const privateKey = await recoverSeedPhrase();
+      console.log("line-256", privateKey);
+      const result = await sendBitcoinFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: bitcoinDepositAddress,
+        amountSatoshi: satoshiAmount,
+        privateKeyHex: privateKey?.privateKey,
+        network: "main", // Use 'main' for mainnet
+      });
 
       console.log("result-----result", result);
       mint(deposit);
@@ -132,6 +145,56 @@ const SendBitcoinPop = ({
   };
 
   const handleClose = () => setSendBitcoin(false);
+
+  const getSecretData = async (storageKey, credentialId) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+      if (retrieveSecretCheck?.status) {
+        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret);
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret,
+        };
+      } else {
+        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg);
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg,
+        };
+      }
+    } catch (error) {
+      console.log("error-->", error);
+      return {
+        status: false,
+        msg: "Error in Getting secret!",
+      };
+    }
+  };
+
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth?.email);
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        );
+        if (callGetSecretData?.status) {
+          console.log(
+            "line-181",
+            callGetSecretData,
+            JSON.parse(callGetSecretData?.secret)
+          );
+          return JSON.parse(callGetSecretData?.secret);
+        }
+      }
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+    }
+  };
 
   const getDestinationAddress = async () => {
     try {
@@ -155,11 +218,32 @@ const SendBitcoinPop = ({
       // Convert BTC to satoshi (1 BTC = 100,000,000 satoshi)
       const satoshiAmount = btcAmount * 100000000;
 
-      const result = await sendBitcoinn(
-        localStorage.getItem("coinosToken"),
-        satoshiAmount,
-        liquidShift?.depositAddress
-      );
+      // const result = await sendBitcoinn(
+      //   localStorage.getItem("coinosToken"),
+      //   satoshiAmount,
+      //   liquidShift?.depositAddress
+      // );
+
+      // const result = await sendBitcoinAPI({
+      //   sourceAddress: "mtWg6ccLiZWw2Et7E5UqmHsYgrAi5wqiov",
+      //   sourcePrivateKey:
+      //     "1af97b1f428ac89b7d35323ea7a68aba8cad178a04eddbbf591f65671bae48a2",
+      //   sourcePublicKey:
+      //     "03bb318b00de944086fad67ab78a832eb1bf26916053ecd3b14a3f48f9fbe0821f",
+      //   destinationAddress: "n3GNqMveyvaPvUbH469vDRadqpJMPc84JA",
+      //   amountSatoshi: 25000,
+      //   network: "testnet",
+      // });
+      const privateKey = await recoverSeedPhrase();
+      console.log("line-256", privateKey);
+      const result = await sendBitcoinFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: liquidShift.depositAddress,
+        amountSatoshi: satoshiAmount,
+        privateKeyHex: privateKey?.privateKey,
+        network: "main", // Use 'main' for mainnet
+      });
+
       console.log("result-----result", result);
       toast.error(result.error);
     } catch (error) {
