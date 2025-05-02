@@ -39,7 +39,7 @@ const logIn = async (type = 1) => {
       }),
     });
     response = await response.json() 
-    console.log("login-->",response)
+    // console.log("login-->",response)
     if (response?.access_token) {
       return {
         status: true,
@@ -83,7 +83,7 @@ const createUser = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    console.log("response createUser-->", response)
+    // console.log("response createUser-->", response)
     if (response?.email) {
       return {
         status: true,
@@ -129,7 +129,7 @@ const getUser = async (id, token, type = 1) => {
       }
     });
     response = await response.json()
-    console.log("getUser createUser-->", type, response)
+    // console.log("getUser createUser-->", type, response)
     if (response?.email) {
       return {
         status: true,
@@ -175,7 +175,7 @@ const createTpos = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    console.log("createTpos createTpos-->", type, response)
+    // console.log("createTpos createTpos-->", type, response)
     if (response?.id) {
       return {
         status: true,
