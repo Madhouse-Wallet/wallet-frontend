@@ -319,10 +319,10 @@ const SendBitcoinPop = ({
     try {
       if (!userAuth?.bitcoinWallet) return;
 
-      // const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
-      const result = await fetchBitcoinBalance(
-        "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
-      );
+      const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
+      // const result = await fetchBitcoinBalance(
+      //   "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+      // );
 
       console.log("result", result);
 
