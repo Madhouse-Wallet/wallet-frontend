@@ -930,8 +930,9 @@ class Web3Interaction {
   ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
     return new Promise(async (resolve) => {
       try {
+        console.log("line--------")
         // Convert amount to BigNumber (assuming USDC has 6 decimals)
-        const usdcAmount = ethers.utils.parseUnits(amount.toString(), 6);
+        const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
 
         // Ensure the provider has a signer
         const signer = provider.getSigner();
@@ -941,6 +942,7 @@ class Web3Interaction {
         }
 
         // Handle approval if ownerAddress is provided
+        console.log("ownerAddress---->", ownerAddress)
         if (ownerAddress) {
           const approvalResult = await this.handleUSDCApproval(
             usdcAddress,
@@ -961,7 +963,7 @@ class Web3Interaction {
 
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, USDC_ABI, signer);
-
+        console.log("usdcContract-->", usdcContract)
         // Perform the transfer
         const tx = await usdcContract.transfer(recipientAddress, usdcAmount);
         await tx.wait(); // Wait for transaction confirmation
@@ -973,6 +975,7 @@ class Web3Interaction {
           txHash: tx.hash,
         });
       } catch (error: any) {
+        console.log("error--r>", error)
         resolve({
           success: false,
           error:

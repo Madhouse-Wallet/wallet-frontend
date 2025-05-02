@@ -220,7 +220,7 @@ export const createTBtcToLbtcShift = async (
         error.response?.data || error.message
       );
       throw new Error(
-        `SideShift operation failed: ${error.response?.data?.error?.message || error.message}`
+        `${error.response?.data?.error?.message || error.message}`
       );
     }
     throw error;

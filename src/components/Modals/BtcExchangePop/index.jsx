@@ -389,18 +389,19 @@ const BtcExchangePop = ({
                           Use this generated address to send minimum 0.01 BTC, to mint
                           as tBTC.
                         </p> */}
-              <Image
+              {userAuth?.bitcoinWallet && <Image
                 alt=""
                 src={qrCodee}
                 height={10000}
                 width={10000}
                 className="max-w-full mx-auto h-auto w-auto"
                 style={{ height: 150 }}
-              />
+              />}
+
               {/* <div className="flex items-center justify-center">{qrCodee}</div> */}
               <div className="content mt-2" style={{ fontSize: 12 }}>
                 <div className="text-center py-5">
-                  <h6 className="m-0 text-base pb-2">Your Wallet Addressss</h6>
+                  <h6 className="m-0 text-base pb-2">Your Wallet Address</h6>
                   <div className="flex max-w-full items-stretch rounded-4 border border-dashed border-white/5 bg-white/4 text-14 leading-none text-white/40 outline-none focus-visible:border-white/40">
                     <input
                       data-tooltip-id="my-tooltip"

@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { getUser, updtUser } from "../../../../src/lib/apiCall";
+import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
 
 // css
 
@@ -16,20 +17,97 @@ const DepositPopup = ({
   setDepositPop,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
   console.log("userAuth-->", userAuth)
   const handleDepositPop = async () => {
     try {
       setLoading(true)
-      let userExist = await getUser(userAuth.email);
-      console.log("userExist-->", userExist)
+      if (!userAuth?.login) {
+        toast.error("Please Login!");
+      } else {
+        let userExist = await getUser(userAuth?.email);
+        console.log("userExist-->", userExist)
+        if (userExist.status && userExist.status == "failure") {
+          toast.error("Please Login!");
+        } else {
+          if (userExist?.userId?.liquidBitcoinWallet_3) {
+            // userExist?.userId?.passkey_number
+            const liquidShift = await createTBtcToLbtcShift(
+              amount, // amount
+              userExist?.userId?.liquidBitcoinWallet_3,
+              // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
+              process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+              process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+            );
+            // liquidShift now contains all the information about the shift, including the deposit address
+            console.log("Deposit address:", liquidShift.depositAddress);
+            console.log("start send -->")
+            const web3 = new Web3Interaction("sepolia", providerr);
+            console.log(process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
+              liquidShift.depositAddress,
+              amount,
+              providerr)
+            const result = await web3.sendUSDC(
+              process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
+              liquidShift.depositAddress,
+              amount,
+              providerr
+            );
+
+            if (result.success) {
+              setSuccess(true);
+              setSendUsdc(false);
+              toast.success("USDC sent successfully!");
+              // Wait for transaction to be mined and then fetch new balance
+              setTimeout(fetchBalance, 2000);
+            } else {
+              toast.error(result.error || "Transaction failed");
+            }
+
+          } else {
+            toast.error("Please sign Up Again!");
+          }
+
+        }
+      }
+
       setDepositPop(!depositPop)
       setLoading(false)
     } catch (error) {
-      console.log("error==>", error)
+      console.log("error==>", error?.message)
+      toast.error(error?.message);
       setLoading(false)
     }
   };
+
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        try {
+          let account = await getAccount(userAuth?.passkeyCred);
+          if (account) {
+            // setUserAccount(account.address);
+            let provider = await getProvider(account.kernelClient);
+            if (provider) {
+              setProviderr(provider?.ethersProvider);
+            } else {
+              throw new Error("Provider not detected");
+            }
+          }
+        } catch (error) {
+          console.error("Wallet connection error:", error);
+          // toast.error("Failed to connect wallet. Please try again.");
+        }
+      }
+    };
+
+    connectWallet();
+  }, [userAuth?.passkeyCred]);
+
+
 
   return (
     <>
@@ -64,7 +142,8 @@ const DepositPopup = ({
                   <div className="iconWithText relative">
                     <input
                       type="text"
-
+                      onChange={(e) => setAmount(e.target.value)}
+                      value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                     />
                   </div>
