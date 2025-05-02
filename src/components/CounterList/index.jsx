@@ -8,6 +8,7 @@ import LiveBlogPopup from "@/components/Modals/LiveblogPop";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { fetchTokenTransfers, fetchWalletHistory } from "@/lib/utils";
 import { useSelector } from "react-redux";
+import moment from "moment";
 
 const CounterList = ({ data }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -20,7 +21,8 @@ const CounterList = ({ data }) => {
     try {
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
       const data = await fetchWalletHistory(
-        userAuth?.walletAddress
+        // userAuth?.walletAddress
+        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
       );
       console.log("Wallet history data:", data);
 
@@ -73,7 +75,7 @@ const CounterList = ({ data }) => {
         transactionHash: tx.hash,
         from: tx.from_address,
         to: tx.to_address,
-        date: new Date(tx?.block_timestamp).toLocaleString(),
+        date: moment(tx?.block_timestamp).format("MMMM D, YYYY h:mm A"),
         status:
           tx.receipt_status === "1"
             ? "confirmed"
@@ -81,8 +83,8 @@ const CounterList = ({ data }) => {
               ? "rejected"
               : "pending",
         amount: amount ? `${amount} ${currency}` : "",
-        // type: isSend ? "send" : "receive",
-        type: tx?.category,
+        type: isSend ? "send" : "receive",
+        // type: tx?.category,
         summary:
           tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
         category: tx.category,
@@ -118,7 +120,8 @@ const CounterList = ({ data }) => {
           return {
             amount: tx.value_decimal || "",
             category: tx.token_symbol || "BTC",
-            date: new Date(tx?.block_timestamp).toLocaleString() || "",
+            date:
+              moment(tx?.block_timestamp).format("MMMM D, YYYY h:mm A") || "",
             from: tx.from_address || "",
             id: tx.transaction_hash || "",
             rawData: tx, // Store the original transaction data
@@ -142,7 +145,8 @@ const CounterList = ({ data }) => {
     try {
       const balance = await fetchTokenTransfers(
         [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
-        userAuth.walletAddress
+        // userAuth.walletAddress
+        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
       );
       console.log("data", balance);
 
@@ -152,7 +156,8 @@ const CounterList = ({ data }) => {
           return {
             amount: `${tx.value_decimal} ${tx.token_symbol} ` || "",
             category: tx.token_symbol || "USDC",
-            date: new Date(tx?.block_timestamp).toLocaleString() || "",
+            date:
+              moment(tx?.block_timestamp).format("MMMM D, YYYY h:mm A") || "",
             from: tx.from_address || "",
             id: tx.transaction_hash || "",
             rawData: tx, // Store the original transaction data

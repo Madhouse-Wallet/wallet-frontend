@@ -7,6 +7,7 @@ import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import img from "@/Assets/Images/noData.png";
 import InternalTab from "./InternalTab";
+import moment from "moment";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -57,7 +58,7 @@ const RecentTransaction = () => {
         transactionHash: tx.hash,
         from: tx.from_address,
         to: tx.to_address,
-        date: new Date(tx.block_timestamp).toLocaleString(),
+        date: moment(tx.block_timestamp).format("MMMM D, YYYY h:mm A"),
         status:
           tx.receipt_status === "1"
             ? "confirmed"
@@ -110,7 +111,9 @@ const RecentTransaction = () => {
         transactionHash: tx.txHash,
         from: tx.from,
         to: tx.to,
-        date: new Date(parseInt(tx.timestamp) * 1000).toLocaleString(),
+        date: moment(parseInt(tx.timestamp) * 1000).format(
+          "MMMM D, YYYY h:mm A"
+        ),
         status: status,
         amount: `${amount} TBTC`,
         type: type,
@@ -154,7 +157,9 @@ const RecentTransaction = () => {
     try {
       setTransactionType("all");
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(userAuth?.walletAddress);
+      const data = await fetchWalletHistory(
+        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+      );
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
@@ -240,38 +245,56 @@ const RecentTransaction = () => {
     const groups = {};
 
     txs.forEach((tx) => {
-      // Parse the date correctly by splitting and rearranging components
-      let dateParts;
+      console.log("Processing transaction:", tx);
+
       if (tx?.date && typeof tx.date === "string") {
-        // First, split by comma to separate date and time
-        const [dateStr, timeStr] = tx.date.split(",");
+        // Parse the date string with moment
+        // Our format from earlier was 'MMMM D, YYYY h:mm A'
+        // Example: "May 2, 2025 3:45 PM"
+        const txDate = moment(tx.date, "MMMM D, YYYY h:mm A");
 
-        // Then split the date by '/'
-        dateParts = dateStr.split("/");
+        // Check if the date is valid
+        if (txDate.isValid()) {
+          // Use moment to format a consistent date key (just the date portion without time)
+          const dateKey = txDate.format("YYYY-MM-DD");
 
-        // Create new date by rearranging to MM/DD/YYYY format
-        // OR directly create a Date object with proper parts
-        if (dateParts.length === 3) {
-          const [day, month, year] = dateParts;
-          const date = new Date(
-            `${year}-${month}-${day}${timeStr ? "," + timeStr : ""}`
-          );
-          const dateKey = date.toLocaleDateString();
-
+          // Initialize the array for this date if it doesn't exist
           if (!groups[dateKey]) {
             groups[dateKey] = [];
           }
+
+          // Add the transaction to the appropriate date group
           groups[dateKey].push(tx);
         } else {
           console.error("Invalid date format:", tx.date);
         }
+      } else if (tx?.date && moment.isMoment(tx.date)) {
+        // If the date is already a moment object
+        const dateKey = tx.date.format("YYYY-MM-DD");
+
+        if (!groups[dateKey]) {
+          groups[dateKey] = [];
+        }
+        groups[dateKey].push(tx);
       } else {
-        console.error("Missing or non-string date:", tx?.date);
+        console.error("Missing or invalid date:", tx?.date);
       }
     });
 
-    console.log("Groups:", groups);
-    return groups;
+    console.log("Grouped transactions by date:", groups);
+
+    // Sort the groups by date (most recent first)
+    const sortedGroups = {};
+    Object.keys(groups)
+      .sort(
+        (a, b) =>
+          moment(b, "YYYY-MM-DD").valueOf() - moment(a, "YYYY-MM-DD").valueOf()
+      )
+      .forEach((key) => {
+        sortedGroups[key] = groups[key];
+      });
+
+    return sortedGroups;
   };
 
   useEffect(() => {

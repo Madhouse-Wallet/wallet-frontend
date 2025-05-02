@@ -209,7 +209,8 @@ const Dashboard = () => {
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
                       process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
-                    userAuth?.walletAddress
+                    // userAuth?.walletAddress
+                    "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
                   );
                   balances.forEach((token) => {
                     const formattedBalance =
@@ -229,7 +230,8 @@ const Dashboard = () => {
                   });
 
                   const walletBalance = await fetchBalance(
-                    userAuth?.walletAddress
+                    // userAuth?.walletAddress
+                    "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
                   );
                   console.log("Wallet Balance Data:", walletBalance);
 

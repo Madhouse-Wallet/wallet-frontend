@@ -69,7 +69,7 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Status</h6>
                       <a 
-                        href={`https://etherscan.io/tx/${transactionHash}`} 
+                        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${transactionHash}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-blue-500 text-xs font-medium"
