@@ -156,10 +156,10 @@ const RecentTransaction = () => {
   const fetchRecentTransactions = async () => {
     try {
       setTransactionType("all");
-      // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(
-        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
-      );
+      const data = await fetchWalletHistory(userAuth?.walletAddress);
+      // const data = await fetchWalletHistory(
+      //   "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+      // );
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {

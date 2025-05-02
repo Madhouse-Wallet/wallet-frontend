@@ -209,8 +209,7 @@ const Dashboard = () => {
                       process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
                       process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
                     ],
-                    // userAuth?.walletAddress
-                    "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+                    userAuth?.walletAddress
                   );
                   balances.forEach((token) => {
                     const formattedBalance =
@@ -230,8 +229,7 @@ const Dashboard = () => {
                   });
 
                   const walletBalance = await fetchBalance(
-                    // userAuth?.walletAddress
-                    "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+                    userAuth?.walletAddress
                   );
                   console.log("Wallet Balance Data:", walletBalance);
 
@@ -243,7 +241,7 @@ const Dashboard = () => {
                     setTotalUsdBalance(totalUsd.toFixed(2));
                   }
                   fetchTroveData(provider?.ethersProvider);
-                } catch (err) {}
+                } catch (err) { }
               }
             }
           }

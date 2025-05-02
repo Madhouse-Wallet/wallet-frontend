@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-
+import { getUser, updtUser } from "../../../../src/lib/apiCall";
 
 // css
 
@@ -15,8 +15,21 @@ const DepositPopup = ({
   depositPop,
   setDepositPop,
 }) => {
-
-  const handleDepositPop = () => setDepositPop(!depositPop);
+  const [loading, setLoading] = useState(false);
+  const userAuth = useSelector((state) => state.Auth);
+  console.log("userAuth-->", userAuth)
+  const handleDepositPop = async () => {
+    try {
+      setLoading(true)
+      let userExist = await getUser(userAuth.email);
+      console.log("userExist-->", userExist)
+      setDepositPop(!depositPop)
+      setLoading(false)
+    } catch (error) {
+      console.log("error==>", error)
+      setLoading(false)
+    }
+  };
 
   return (
     <>
@@ -51,7 +64,7 @@ const DepositPopup = ({
                   <div className="iconWithText relative">
                     <input
                       type="text"
-                   
+
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                     />
                   </div>
@@ -63,10 +76,10 @@ const DepositPopup = ({
                   <button
                     type="button"
                     className="flex items-center justify-center btn commonBtn w-full"
-
+                    disabled={loading}
                     onClick={handleDepositPop}
                   >
-                    Submit
+                    {loading ? "Loading..." : "Submit"}
                   </button>
                 </div>
               </form>

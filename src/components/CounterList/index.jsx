@@ -21,8 +21,7 @@ const CounterList = ({ data }) => {
     try {
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
       const data = await fetchWalletHistory(
-        // userAuth?.walletAddress
-        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+        userAuth?.walletAddress
       );
       console.log("Wallet history data:", data);
 
@@ -145,8 +144,7 @@ const CounterList = ({ data }) => {
     try {
       const balance = await fetchTokenTransfers(
         [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
-        // userAuth.walletAddress
-        "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+        userAuth.walletAddress
       );
       console.log("data", balance);
 
