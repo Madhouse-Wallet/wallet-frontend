@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
+  import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getUser, updtUser } from "../../../../src/lib/apiCall";
-import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
+import { getUser, updtUser } from "../../../lib/apiCall.js";
+import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 
 // css
 
 // img
 
-const DepositPopup = ({
-  depositPop,
-  setDepositPop,
+const SendTbtcWall = ({
+  btcWall,
+  setTbtcWall,
 }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
@@ -73,7 +73,7 @@ const DepositPopup = ({
         }
       }
 
-      setDepositPop(!depositPop)
+      setTbtcWall(!btcWall)
       setLoading(false)
     } catch (error) {
       console.log("error==>", error?.message)
@@ -115,7 +115,7 @@ const DepositPopup = ({
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <button
-          onClick={()=> setDepositPop(!depositPop)}
+          onClick={()=> setTbtcWall(!btcWall)}
           type="button"
           className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
@@ -198,7 +198,7 @@ const RadioList = styled.ul`
   }
 `;
 
-export default DepositPopup;
+export default SendTbtcWall;
 
 const closeIcn = (
   <svg

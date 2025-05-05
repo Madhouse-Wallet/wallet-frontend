@@ -226,3 +226,127 @@ export const createTBtcToLbtcShift = async (
     throw error;
   }
 };
+
+export const createLBtcToTbtcShift = async (
+  usdcAmount: string,
+  bitcoinAddress: string,
+  secretKey: string,
+  affiliateId: string
+): Promise<ShiftResponse> => {
+  try {
+    console.log("line-170");
+    // Step 1: Request a quote
+    const quoteResponse = await axios.post<QuoteResponse>(
+      "https://sideshift.ai/api/v2/quotes",
+      {
+        affiliateId,
+        depositCoin: "BTC",
+        depositNetwork: "liquid",
+        settleCoin: "TBTC",
+        settleNetwork: "base",
+        depositAmount: usdcAmount,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    const quoteData = quoteResponse.data;
+
+    // Step 2: Create a fixed shift using the quote
+    const shiftResponse = await axios.post<ShiftResponse>(
+      "https://sideshift.ai/api/v2/shifts/fixed",
+      {
+        settleAddress: bitcoinAddress,
+        affiliateId,
+        quoteId: quoteData.id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    return shiftResponse.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        "SideShift API Error:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        `${error.response?.data?.error?.message || error.message}`
+      );
+    }
+    throw error;
+  }
+};
+
+export const createLBtcToUSDCShift = async (
+  usdcAmount: string,
+  bitcoinAddress: string,
+  secretKey: string,
+  affiliateId: string
+): Promise<ShiftResponse> => {
+  try {
+    console.log("line-170");
+    // Step 1: Request a quote
+    const quoteResponse = await axios.post<QuoteResponse>(
+      "https://sideshift.ai/api/v2/quotes",
+      {
+        affiliateId,
+        depositCoin: "BTC",
+        depositNetwork: "liquid",
+        settleCoin: "USDC",
+        settleNetwork: "base",
+        depositAmount: usdcAmount,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    const quoteData = quoteResponse.data;
+
+    // Step 2: Create a fixed shift using the quote
+    const shiftResponse = await axios.post<ShiftResponse>(
+      "https://sideshift.ai/api/v2/shifts/fixed",
+      {
+        settleAddress: bitcoinAddress,
+        affiliateId,
+        quoteId: quoteData.id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    return shiftResponse.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        "SideShift API Error:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        `${error.response?.data?.error?.message || error.message}`
+      );
+    }
+    throw error;
+  }
+};

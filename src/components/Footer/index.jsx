@@ -2,6 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import React, { useState } from "react";
 import bg from "@/Assets/Images/bg1.png";
+import chat from "@/Assets/Images/chat.png";
+import map from "@/Assets/Images/map.png";
 import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -51,11 +53,14 @@ const Footer = () => {
             <Link
               data-tooltip-id="my-tooltip"
               data-tooltip-content="home"
-              href={"/dashboard"}
+              href={"https://maps.app.goo.gl/Rdf2CmyTtm7oRsKE9?g_st=i"}
+              target="_blank"
+              rel="noopener noreferrer"
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
+                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
+                src={map}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
@@ -63,7 +68,7 @@ const Footer = () => {
                 style={{ height: 42 }}
               />
               <span className=" font-medium block text-center text-white/50">
-                Home
+                Map
               </span>
             </Link>
             {/* <div
@@ -143,6 +148,29 @@ const Footer = () => {
               />
               <span className=" font-medium block text-center text-white/50">
                 Docs
+              </span>
+            </Link>
+          </li>
+          <li className="relative aspect-square">
+            <Link
+              data-tooltip-id="my-tooltip"
+              data-tooltip-content="home"
+              href={"https://chat.madhousewallet.com/home/"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
+            >
+              <Image
+                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
+                src={chat}
+                height={1000}
+                width={1000}
+                className="max-w-full w-auto mx-auto"
+                alt=""
+                style={{ height: 42 }}
+              />
+              <span className=" font-medium block text-center text-white/50">
+                Chat
               </span>
             </Link>
           </li>

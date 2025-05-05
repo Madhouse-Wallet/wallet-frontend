@@ -120,7 +120,7 @@ async function handleCreateInvoice(req, res) {
         invoice: {
           amount: Number(amount),
           type: type,
-          webhook: "https://basechain.d1vj9o3o44bka6.amplifyapp.com/api/webhook",
+          webhook: `${process.env.NEXT_PUBLIC_DOMAIN}api/webhook`,
           secret: secret
         },
       },

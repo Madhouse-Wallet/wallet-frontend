@@ -14,6 +14,7 @@ import {
   registerCoinosUser,
   sendBitcoinn,
 } from "../../lib/apiCall";
+
 import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
 
 import {
@@ -31,15 +32,7 @@ import {
   passkeyValidator,
 } from "../../lib/zeroDevWallet";
 
-// const getWallet = async () => {
-//   try {
-//     let getWallet = await getBitcoinAddress();
-//     console.log("getWallet-->", getWallet)
-//   } catch (error) {
-//     console.log("errr-->", error)
-//   }
-// }
-// getWallet();
+
 const CreateWallet = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);

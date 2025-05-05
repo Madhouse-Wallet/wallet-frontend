@@ -5,16 +5,16 @@ import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getUser, updtUser } from "../../../../src/lib/apiCall";
-import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
+import { getUser, sendLnbit } from "../../../lib/apiCall.js";
+import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 
 // css
 
 // img
 
-const DepositPopup = ({
-  depositPop,
-  setDepositPop,
+const WithdrawPopup = ({
+  withdrawPop,
+  setWithdrawPop,
 }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
@@ -32,40 +32,18 @@ const DepositPopup = ({
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
         } else {
-          if (userExist?.userId?.liquidBitcoinWallet_3) {
+          if (userExist?.userId?.liquidBitcoinWallet_2) {
             // userExist?.userId?.passkey_number
-            const liquidShift = await createTBtcToLbtcShift(
+            const sendLnbitWithdraw = await sendLnbit(
               amount, // amount
-              userExist?.userId?.liquidBitcoinWallet_3,
-              // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
-              process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
-              process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+              userExist?.userId?.liquidBitcoinWallet_2
             );
-            // liquidShift now contains all the information about the shift, including the deposit address
-            console.log("Deposit address:", liquidShift.depositAddress);
-            console.log("start send -->")
-            const web3 = new Web3Interaction("sepolia", providerr);
-            console.log(process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr)
-            const result = await web3.sendUSDC(
-              process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr
-            );
-
-            if (result.success) {
-              setSuccess(true);
-              setSendUsdc(false);
-              toast.success("USDC sent successfully!");
-              // Wait for transaction to be mined and then fetch new balance
-              setTimeout(fetchBalance, 2000);
+            console.log("sendLnbitWithdraw-->",sendLnbitWithdraw)
+            if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
+              toast.error(sendLnbitWithdraw.message);
             } else {
-              toast.error(result.error || "Transaction failed");
+              toast.success(sendLnbitWithdraw.message);
             }
-
           } else {
             toast.error("Please sign Up Again!");
           }
@@ -73,7 +51,7 @@ const DepositPopup = ({
         }
       }
 
-      setDepositPop(!depositPop)
+      setWithdrawPop(!withdrawPop)
       setLoading(false)
     } catch (error) {
       console.log("error==>", error?.message)
@@ -115,7 +93,7 @@ const DepositPopup = ({
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <button
-          onClick={()=> setDepositPop(!depositPop)}
+          onClick={() => setWithdrawPop(!withdrawPop)}
           type="button"
           className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
@@ -129,7 +107,7 @@ const DepositPopup = ({
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">Deposit</h5>
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">Withdraw</h5>
             </div>
             <div className="modalBody">
               <form action="">
@@ -198,7 +176,7 @@ const RadioList = styled.ul`
   }
 `;
 
-export default DepositPopup;
+export default WithdrawPopup;
 
 const closeIcn = (
   <svg

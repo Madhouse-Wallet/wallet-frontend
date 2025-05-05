@@ -26,6 +26,36 @@ export const getUser = async (email) => {
   }
 };
 
+
+
+export const sendLnbit = async (amount, onchain_address) => {
+  try {
+    try {
+      // console.log(email)
+      return await fetch(`/api/send-lnbit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          onchain_address
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const getBitcoinAddress = async (email) => {
   try {
     try {
