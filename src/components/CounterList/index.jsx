@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Slider from "react-slick";
 import styled from "styled-components";
-import bg from "@/Assets/Images/cardBg.png";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import LiveBlogPopup from "@/components/Modals/LiveblogPop";
@@ -20,9 +19,7 @@ const CounterList = ({ data }) => {
   const fetchRecentTransactions = async () => {
     try {
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(
-        userAuth?.walletAddress
-      );
+      const data = await fetchWalletHistory(userAuth?.walletAddress);
       console.log("Wallet history data:", data);
 
       if (data?.result?.length) {

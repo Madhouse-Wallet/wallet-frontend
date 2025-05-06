@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
   const dispatch = useDispatch();
 
   const reloadPasskey = async () => {
-    if (userAuth.login && (!(userAuth?.pos))) {
+    if (userAuth.login && !userAuth?.pos) {
       const {
         newPasskeyValidator = "",
         msg = "",
@@ -44,9 +44,9 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
             login: userAuth.login,
             username: userAuth.username,
             email: userAuth.email,
-            pos:(userAuth?.pos || false),
+            pos: userAuth?.pos || false,
             walletAddress: userAuth.walletAddress,
-            bitcoinWallet:userAuth.bitcoinWallet, 
+            bitcoinWallet: userAuth.bitcoinWallet,
             passkeyCred: newPasskeyValidator,
             webauthKey: userAuth.webauthKey,
             id: userAuth.id,
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
       loginSet({
         login: false,
         walletAddress: "",
-        bitcoinWallet: "", 
+        bitcoinWallet: "",
         provider: "",
         signer: "",
         username: "",
@@ -104,7 +104,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
     try {
       await navigator.clipboard.writeText(address);
       setIsCopied((prev) => ({ ...prev, [type]: true }));
-      toast.success('Wallet Address copied successfully!');
+      toast.success("Wallet Address copied successfully!");
       setTimeout(
         () =>
           setIsCopied({
@@ -147,8 +147,8 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
               </button>
             </div> */}
             <div className="flex items-center gap-2">
-              <a
-                href="#"
+              <Link
+                href="/"
                 className=" font-normal text-base whitespace-nowrap flex items-center gap-2"
               >
                 {/* {logo} */}
@@ -161,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
                   className="max-w-full object-contain w-auto smlogo"
                   // style={{ height: 28 }}
                 />
-              </a>
+              </Link>
             </div>
 
             <Image

@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import p1 from "../../Assets/Images/user.png";
 import Image from "next/image";
 import styled from "styled-components";
 import { loadStripe, Stripe } from "@stripe/stripe-js";

@@ -1,9 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import React, { useState } from "react";
-import bg from "@/Assets/Images/bg1.png";
-import chat from "@/Assets/Images/chat.png";
-import map from "@/Assets/Images/map.png";
 import Link from "next/link";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -59,15 +56,15 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
-                src={map}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "map.png"}
+                // src={map}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Map
               </span>
             </Link>
@@ -92,7 +89,7 @@ const Footer = () => {
                 alt=""
                 style={{ height: 42 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Point of Sale
               </span>
             </button>
@@ -123,9 +120,9 @@ const Footer = () => {
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Settings
               </span>
             </Link>
@@ -144,9 +141,9 @@ const Footer = () => {
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Docs
               </span>
             </Link>
@@ -161,15 +158,15 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
-                src={chat}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "chat.png"}
+                // src={chat}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Chat
               </span>
             </Link>
@@ -199,7 +196,7 @@ const FootNav = styled.ul`
       transition: 0.4s;
     }
     span {
-      font-size: 10px;
+      font-size: 13px;
     }
     ${
       "" /* svg {

@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { fetchWalletHistory } from "../../lib/utils";
 import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
-import img from "@/Assets/Images/noData.png";
 import InternalTab from "./InternalTab";
 import moment from "moment";
 

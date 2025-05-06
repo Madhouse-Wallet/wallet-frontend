@@ -6,27 +6,33 @@ import Image from "next/image";
 import { BackBtn } from "@/components/common";
 import Identity from "../identity";
 import Link from "next/link";
-import SendTbtcWall from "@/components/Modals/SendTbtcWallet"
-import DepositPopup from "@/components/Modals/DepositPop"
-import WithdrawPopup from "@/components/Modals/WithdrawPop"
+import SendTbtcWall from "@/components/Modals/SendTbtcWallet";
+import DepositPopup from "@/components/Modals/DepositPop";
+import WithdrawPopup from "@/components/Modals/WithdrawPop";
 
 import { createPortal } from "react-dom";
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
-  const [depositPop, setDepositPop] = useState(false)
-  const [withdrawPop, setWithdrawPop] = useState(false)
-  const [btcWall, setTbtcWall] = useState(false)
+  const [depositPop, setDepositPop] = useState(false);
+  const [withdrawPop, setWithdrawPop] = useState(false);
+  const [btcWall, setTbtcWall] = useState(false);
 
   return (
     <>
       {depositPop &&
         createPortal(
-          <DepositPopup depositPop={depositPop} setDepositPop={setDepositPop} />,
+          <DepositPopup
+            depositPop={depositPop}
+            setDepositPop={setDepositPop}
+          />,
           document.body
         )}
       {withdrawPop &&
         createPortal(
-          <WithdrawPopup withdrawPop={withdrawPop} setWithdrawPop={setWithdrawPop} />,
+          <WithdrawPopup
+            withdrawPop={withdrawPop}
+            setWithdrawPop={setWithdrawPop}
+          />,
           document.body
         )}
       {btcWall &&
@@ -82,7 +88,8 @@ const BTCDebitCard: React.FC = () => {
                 <div className="max-w-[500px] bg-black/50 mx-auto rounded-xl mt-10 p-6">
                   <div className="grid gap-3 grid-cols-12">
                     <div className="col-span-6">
-                      <button onClick={() => setWithdrawPop(!withdrawPop)}
+                      <button
+                        onClick={() => setWithdrawPop(!withdrawPop)}
                         className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Withdraw
@@ -110,14 +117,14 @@ const BTCDebitCard: React.FC = () => {
                         Delete Card
                       </button>
                     </div>
-                    <div className="col-span-6">
+                    {/* <div className="col-span-6">
                       <button
                         onClick={() => setTbtcWall(!btcWall)}
                         className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Send Tbtc Wallet
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

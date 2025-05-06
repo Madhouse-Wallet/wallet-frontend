@@ -8,7 +8,6 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Header/sidebar";
 import Image from "next/image";
-import bg from "@/Assets/Images/umbrel/1.jpg";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 

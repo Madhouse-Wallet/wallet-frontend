@@ -26,8 +26,8 @@ const logIn = async (type = 1) => {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
       // backendUrl = "https://spend.madhousewallet.com/"
 
-      username = "parvinder";
-      password = "madhousewallet120";
+      username = "suffescom";
+      password = "suffescom";
     }
     // Fixed IP address as used in curl commands
     let response = await fetch(`${backendUrl}api/v1/auth`, {
@@ -117,7 +117,7 @@ const createUser = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    // console.log("response createUser-->", response)
+    console.log("response createUser-->", response)
     if (response?.email) {
       return {
         status: true,
@@ -163,7 +163,7 @@ const getUser = async (id, token, type = 1) => {
       }
     });
     response = await response.json()
-    // console.log("getUser createUser-->", type, response)
+    console.log("getUser createUser-->", type, response)
     if (response?.email) {
       return {
         status: true,
@@ -197,6 +197,7 @@ const createTpos = async (data, token, type = 1) => {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
+    // console.log("type",backendUrl, apiKey )
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(`${backendUrl}tpos/api/v1/tposs`, {
       method: "POST",

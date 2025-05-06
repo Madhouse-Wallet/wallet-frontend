@@ -4,9 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import RecentApprovals from "./RecentApprovals";
 import styled from "styled-components";
 import Image from "next/image";
-import img from "@/Assets/Images/comingSoon.png";
-
-
 
 const Approvals: React.FC = () => {
   const router = useRouter();
@@ -65,7 +62,7 @@ const Approvals: React.FC = () => {
                 {/* <RecentApprovals /> */}
                 <div className="pt-4">
                   <Image
-                    src={img}
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + "comingSoon.png"}
                     alt="comingsoon"
                     height={10000}
                     width={10000}
