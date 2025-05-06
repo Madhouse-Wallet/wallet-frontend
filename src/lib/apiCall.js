@@ -56,6 +56,33 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
+export const btcSat = async (amount) => {
+  try {
+    try {
+      // console.log(email)
+      return await fetch(`/api/btc-sat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const getBitcoinAddress = async (email) => {
   try {
     try {

@@ -12,7 +12,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { fetchBitcoinBalance } from "./../../../pages/api/bitcoinBalance.js";
 import { createBtcToTbtcShift } from "../../../pages/api/sideShiftAI.ts";
-import { getUser, sendBitcoinn } from "@/lib/apiCall.js";
+import { getUser, sendBitcoinn, btcSat } from "@/lib/apiCall.js";
 import { initializeTBTC } from "@/lib/tbtcSdkInitializer";
 import { sendBitcoinAPI } from "@/utils/bitcoinService.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
@@ -26,6 +26,7 @@ const SendBitcoinPop = ({
 }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [depositSetup, setDepositSetup] = useState("");
+  const [step, setStep] = useState(1);
   const [depositFound, setDepositFound] = useState("");
   const [walletAddressDepo, setWalletAddressDepo] = useState("");
 
@@ -33,6 +34,7 @@ const SendBitcoinPop = ({
   const [openCam, setOpenCam] = useState(false);
   const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState("0");
   const [providerr, setProviderr] = useState(null);
 
@@ -183,16 +185,19 @@ const SendBitcoinPop = ({
           userExist?.userId?.secretCredentialId
         );
         if (callGetSecretData?.status) {
-          console.log(
-            "line-181",
-            callGetSecretData,
-            JSON.parse(callGetSecretData?.secret)
-          );
+          // console.log(
+          //   "line-181",
+          //   callGetSecretData,
+          //   JSON.parse(callGetSecretData?.secret)
+          // );
           return JSON.parse(callGetSecretData?.secret);
+        } else {
+          return false
         }
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
+      return false
     }
   };
 
@@ -233,7 +238,7 @@ const SendBitcoinPop = ({
       //   destinationAddress: "n3GNqMveyvaPvUbH469vDRadqpJMPc84JA",
       //   amountSatoshi: 25000,
       //   network: "testnet",
-      // });
+      // }); 
       const privateKey = await recoverSeedPhrase();
       console.log("line-256", privateKey);
       const result = await sendBitcoinFunction({
@@ -255,32 +260,53 @@ const SendBitcoinPop = ({
 
   const handleSend = async (e) => {
     e.preventDefault();
+    let userExist = await getUser(userAuth?.email);
+ 
+      setLoading(true)
+      if (!isValidAddress) {
+        toast.error("Please enter a valid address");
+        setLoading(false)
+        return;
+      }
+      if (!amount || parseFloat(amount) <= 0) {
+        toast.error("Please enter a valid amount");
+        setLoading(false)
+        return;
+      }
+      // Check if amount is less than 0.1
+      const privateKey = await recoverSeedPhrase();
+      if (!privateKey) {
+        toast.error("Please enter a valid amount");
+        setLoading(false)
+        return;
+      }
+      // console.log("line-271", privateKey);
+      const sendLnbitWithdraw = await btcSat(
+        amount
+      );
+      // console.log("sendLnbitWithdraw-->", sendLnbitWithdraw)
+      if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
+        toast.error(sendLnbitWithdraw.message);
+        setLoading(false)
+      } else {
+        // console.log("sendLnbitWithdraw.data.data.address-->",sendLnbitWithdraw.data.data.address)
+        const result = await sendBitcoinFunction({
+          fromAddress: userAuth?.bitcoinWallet,
+          toAddress: sendLnbitWithdraw.data.data.address,
+          amountSatoshi: (amount * 100000000),
+          privateKeyHex: privateKey?.privateKey,
+          network: "main", // Use 'main' for mainnet
+        });
+        console.log("result-->",result)
+        if (result.status) {
+          toast.success(result.transactionHash);
+          setLoading(false)
 
-    if (!isValidAddress) {
-      toast.error("Please enter a valid address");
-      return;
-    }
-
-    if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-
-    if (parseFloat(amount) > parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
-
-    // Check if amount is less than 0.1
-    if (parseFloat(amount) < 0.1) {
-      // Call getDestinationAddress if amount is less than 0.1
-      await getDestinationAddress();
-      return;
-    } else {
-      // Show toast and proceed with the original flow
-      toast.info("Processing transaction");
-      startReceive();
-    }
+        } else {
+          toast.error(result.error);
+          setLoading(false)
+        }
+      }
   };
 
   // Update the useEffect to handle errors
@@ -355,13 +381,38 @@ const SendBitcoinPop = ({
         </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
-          <div className="relative rounded px-3">
-            <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Bridge Bitcoin
-              </h5>
+          {step == 1 ? <>
+            <div className="grid gap-3 grid-cols-12 pt-1">
+              <div className="col-span-12">
+                <button
+                  onClick={() => setStep(2)}
+                  // onClick={() => {
+                  //   setReceiveUSDC(!receiveUsdc),
+                  //     setBtcExchange(!btcExchange);
+                  // }}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Brdge To Madhouse
+                </button>
+              </div>
+              <div className="col-span-12">
+                <button
+                  onClick={() => setStep(2)}
+                  // onClick={() => setTokenReceive(!tokenReceive)}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Bridge To Spend Wallet
+                </button>
+              </div>
             </div>
-            {/* {openCam ? (
+          </> : <>
+            <div className="relative rounded px-3">
+              <div className="top pb-3">
+                <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                  Bridge Bitcoin
+                </h5>
+              </div>
+              {/* {openCam ? (
               <>
                 <QRScannerModal
                   setOpenCam={setOpenCam}
@@ -375,8 +426,8 @@ const SendBitcoinPop = ({
               </>
             ) : (
               <> */}
-            <div className="modalBody">
-              {/* <div className="py-2">
+              <div className="modalBody">
+                {/* <div className="py-2">
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       To
                     </label>
@@ -403,39 +454,40 @@ const SendBitcoinPop = ({
                       </button>
                     </div>
                   </div> */}
-              <div className="py-2">
-                <label className="form-label m-0 font-semibold text-xs ps-3">
-                  Balance: {balance} Bitcoin
-                </label>
-                <div className="iconWithText relative">
-                  <div className="absolute icn left-2 flex items-center gap-2 text-xs">
-                    {btc}
-                    Bitcoin
+                <div className="py-2">
+                  <label className="form-label m-0 font-semibold text-xs ps-3">
+                    Balance: {balance} Bitcoin
+                  </label>
+                  <div className="iconWithText relative">
+                    <div className="absolute icn left-2 flex items-center gap-2 text-xs">
+                      {btc}
+                      Bitcoin
+                    </div>
+                    <input
+                      placeholder="Amount"
+                      type="text"
+                      value={amount}
+                      onChange={handleAmountChange}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                    />
                   </div>
-                  <input
-                    placeholder="Amount"
-                    type="text"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
-                  />
                 </div>
+                <div className="py-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={handleSend}
+                    disabled={loading}
+                    className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                  >
+                    {loading ? "Sending..." : "Send"}
+                  </button>
+                </div>
+                {/* </form> */}
               </div>
-              <div className="py-2 mt-4">
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  disabled={!isValidAddress || !amount || isLoading}
-                  className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
-                >
-                  {isLoading ? "Sending..." : "Send"}
-                </button>
-              </div>
-              {/* </form> */}
-            </div>
-            {/* </>
+              {/* </>
             )} */}
-          </div>
+            </div>
+          </>}
         </div>
       </Modal>
     </>
