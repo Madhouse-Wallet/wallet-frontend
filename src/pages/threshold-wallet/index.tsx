@@ -9,18 +9,18 @@ import CounterList from "../../components/CounterList";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Image, { StaticImageData } from "next/image";
-import ti1 from "@/Assets/Images/sendReceive.svg";
-import pi1 from "@/Assets/Images/sendReceive.png";
-import ti2 from "@/Assets/Images/BitcoinLoan.svg";
-import pi2 from "@/Assets/Images/BitcoinLoan.png";
-import ti3 from "@/Assets/Images/BuyBitcoin.svg";
-import pi3 from "@/Assets/Images/BuyBitcoin.png";
-import ti4 from "@/Assets/Images/WithdrawDeposit.svg";
-import pi4 from "@/Assets/Images/WithdrawDeposit.png";
-import ti5 from "@/Assets/Images/SellBitcoin.svg";
-import pi5 from "@/Assets/Images/SellBitcoin.png";
-import ti6 from "@/Assets/Images/BuySmartContract.svg";
-import pi6 from "@/Assets/Images/BuySmartContract.png";
+// import ti1 from "@/Assets/Images/sendReceive.svg";
+// import pi1 from "@/Assets/Images/sendReceive.png";
+// import ti2 from "@/Assets/Images/BitcoinLoan.svg";
+// import pi2 from "@/Assets/Images/BitcoinLoan.png";
+// import ti3 from "@/Assets/Images/BuyBitcoin.svg";
+// import pi3 from "@/Assets/Images/BuyBitcoin.png";
+// import ti4 from "@/Assets/Images/WithdrawDeposit.svg";
+// import pi4 from "@/Assets/Images/WithdrawDeposit.png";
+// import ti5 from "@/Assets/Images/SellBitcoin.svg";
+// import pi5 from "@/Assets/Images/SellBitcoin.png";
+// import ti6 from "@/Assets/Images/BuySmartContract.svg";
+// import pi6 from "@/Assets/Images/BuySmartContract.png";
 
 interface CardData {
   head: string;
@@ -56,54 +56,54 @@ const ThresholdWallet: React.FC = () => {
     { head: "USD Balance", value: "$234234", icn: icn33 },
     { head: "Loan Health", value: "$234234", icn: icn11 },
   ];
-  const cardData: CardData[] = [
-    {
-      head: "Send & Receive Bitcoin",
-      icn: pi1,
-      onClick: () => {
-        router.push("/btc-exhange");
-      },
-    },
-    {
-      head: "Bitcoin Loan",
-      icn: pi2,
-      onClick: () => {
-        router.push("/debt-position");
-      },
-    },
-    {
-      head: "Buy Bitcoin",
-      icn: pi3,
-      onClick: () => {
-        router.push("/stripePaymentPage");
-      },
-    },
-    {
-      head: "Withdraw/Deposit Dollars",
-      icn: pi4,
-      onClick: () => {
-        router.push("/identity");
-      },
-    },
-    {
-      head: "Sell Bitcoin",
-      icn: pi5,
-      onClick: () => {
-        if (userAuth.login) {
-          router.push("/swap");
-        } else {
-          toast.error("Please Login!");
-        }
-      },
-    },
-    {
-      head: "Buy Smart Contract Coverage",
-      icn: pi6,
-      onClick: () => {
-        setBuyCoverage(!buycoverage);
-      },
-    },
-  ];
+  // const cardData: CardData[] = [
+  //   {
+  //     head: "Send & Receive Bitcoin",
+  //     icn: pi1,
+  //     onClick: () => {
+  //       router.push("/btc-exhange");
+  //     },
+  //   },
+  //   {
+  //     head: "Bitcoin Loan",
+  //     icn: pi2,
+  //     onClick: () => {
+  //       router.push("/debt-position");
+  //     },
+  //   },
+  //   {
+  //     head: "Buy Bitcoin",
+  //     icn: pi3,
+  //     onClick: () => {
+  //       router.push("/stripePaymentPage");
+  //     },
+  //   },
+  //   {
+  //     head: "Withdraw/Deposit Dollars",
+  //     icn: pi4,
+  //     onClick: () => {
+  //       router.push("/identity");
+  //     },
+  //   },
+  //   {
+  //     head: "Sell Bitcoin",
+  //     icn: pi5,
+  //     onClick: () => {
+  //       if (userAuth.login) {
+  //         router.push("/swap");
+  //       } else {
+  //         toast.error("Please Login!");
+  //       }
+  //     },
+  //   },
+  //   {
+  //     head: "Buy Smart Contract Coverage",
+  //     icn: pi6,
+  //     onClick: () => {
+  //       setBuyCoverage(!buycoverage);
+  //     },
+  //   },
+  // ];
 
   return (
     <>
@@ -163,7 +163,7 @@ const ThresholdWallet: React.FC = () => {
                     <span className="text-white text-xs">Risk Factor</span>
                   </div>
                 </div>
-                <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 flex-wrap">
+                {/* <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 flex-wrap">
                   {cardData.map((item, key) => (
                     <li
                       onClick={item.onClick}
@@ -186,7 +186,7 @@ const ThresholdWallet: React.FC = () => {
                       </button>
                     </li>
                   ))}
-                </DashboardLink>
+                </DashboardLink> */}
               </div>
             </div>
           </div>

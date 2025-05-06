@@ -4,8 +4,6 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import umbrlIcn from "@/Assets/Images/umbrlIcn.svg";
-import downloadApp from "@/Assets/Images/downloads-app.png";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import BlogCard from "@/components/BlogCard";
 import { useSelector } from "react-redux";
@@ -43,7 +41,6 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
               </h5> */}
             </div>
             <div className="modalBody">
-            
               <div className="grid blogCard gap-3 grid-cols-12">
                 <BlogCard classN={"col-span-6 md:col-span-4"} data={data} />
                 <div className="col-span-12 mt-3">
@@ -108,7 +105,7 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
                       </span>
                     </div>
                   </div> */}
-                  <RecentTransaction transactions={transactions} data={data}/>
+                  <RecentTransaction transactions={transactions} data={data} />
                 </div>
               </div>
             </div>

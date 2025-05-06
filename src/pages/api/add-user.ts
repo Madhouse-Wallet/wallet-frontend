@@ -4,7 +4,7 @@ import { logIn, getUser, createTpos, createUser, createBlotzAutoReverseSwap } fr
 
 const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1) => {
     try {
-        console.log("type-->",type)
+        console.log("type-->", type)
         const [username, domain] = email.split("@");
         const length = 4;
         const randomAlpha = await Array.from({ length }, () =>
@@ -13,6 +13,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
         const newEmail = `${username}${type}madhouse${randomAlpha}@${domain}`;
         let returnData = {}
         let getToken = await logIn(accountType) as any;
+        console.log("getToken-->", getToken)
         if (getToken && getToken?.status) {
             let token = getToken?.data?.token;
             let addUser = await createUser({
@@ -26,7 +27,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
             if (addUser && addUser?.status) {
 
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
-
+                console.log("getUserData-->", getUserData, getUserData?.data?.wallets)
                 if (getUserData && getUserData?.status) {
                     let addTpsoLink = await createTpos({
                         "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
@@ -47,16 +48,16 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
 
                     if (addTpsoLink && addTpsoLink?.status) {
                         let link = addTpsoLink?.data?.id;
-                        // console.log("test fd",{
-                        //     lnbitEmail: newEmail,
-                        //     lnbitLinkId: link,
-                        //     lnbitWalletId: getUserData?.data?.wallets[0]?.id,
-                        //     lnbitId: getUserData?.data?.id
-                        // })
+                        console.log("test fd", {
+                            lnbitEmail: newEmail,
+                            lnbitLinkId: link,
+                            lnbitWalletId: getUserData?.data?.wallets[0]?.id,
+                            lnbitId: getUserData?.data?.id
+                        })
 
                         const walletId = getUserData?.data?.wallets[0]?.id;
                         const userId = getUserData?.data?.id;
-                        console.log("type-->", type);
+                        console.log("type- t->", type);
                         const updateFields =
                             type > 1
                                 ? {
@@ -76,6 +77,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                             { $set: updateFields },
                             { returnDocument: "after" }
                         );
+                        // console.log("result-->",result)
                     }
 
                     if (accountType == 1) {

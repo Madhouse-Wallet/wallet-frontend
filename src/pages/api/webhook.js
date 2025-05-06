@@ -51,15 +51,15 @@ export default async function handler(req, res) {
             if (getToken?.status) {
                 let token = getToken?.data?.token;
                 const satoshiAmount = 0.1 * 100000000;
-                let createInvoice = await createInvoice({
+                let createInvoice1 = await createInvoice({
                     "out": false,
                     "unit": "sat",
                     "amount": satoshiAmount,
                     "memo": "invoice",
                 }, token, 2);
-                console.log("createInvoice", createInvoice)
-                if (createInvoice?.status) {
-                    let createSwap = await createReverseSwap(createInvoice?.data?.bolt11)
+                console.log("createInvoice1", createInvoice1)
+                if (createInvoice1?.status) {
+                    let createSwap = await createReverseSwap(createInvoice1?.data?.bolt11)
                     console.log("createSwap-->", createSwap)
                     if (createSwap?.status) {
                         const result = await sendBitcoinn(

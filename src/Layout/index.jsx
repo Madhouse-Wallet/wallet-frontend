@@ -2,10 +2,6 @@ import { Inter } from "next/font/google";
 
 import { React, useEffect, useState } from "react";
 import MainLayout from "./MainLayout";
-import bg from "@/Assets/Images/umbrel/1.jpg";
-// import bg from "@/Assets/Images/landingBg.png";
-import bgw from "@/Assets/Images/bgw.png";
-import dwm from "@/Assets/Images/watermarkd.png";
 
 import { useRouter } from "next/router";
 import AuthLayout from "./AuthLayout";

@@ -4,7 +4,6 @@ import BTCEchange from "@/pages/btc-exchange";
 import ThresholdWallet from "./threshold-wallet";
 import Dashboard from "./dashboard";
 import Welcome from "./welcome";
-import logow from "@/Assets/Images/logow.png";
 import { useEffect, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
