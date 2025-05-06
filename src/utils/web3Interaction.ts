@@ -2,14 +2,12 @@
 import borrowerContractABI from "../../borrowerContract.json";
 import { Contract, ethers } from "ethers";
 import fetchPriceAbi from "../../fetchPriceContractAbi.json";
-import fetchSubdomainContractAbi from "../../subdomainContractAbi.json";
-import { getContract } from "viem";
-import curveContractAbi from "../../curveAbi.json";
 import USDC_ABI from "../../usdcAbi.json";
 
 // Namehash implementation (unchanged)
 function namehash(name: any) {
-  let node = "0x0000000000000000000000000000000000000000000000000000000000000000";
+  let node =
+    "0x0000000000000000000000000000000000000000000000000000000000000000";
 
   if (name) {
     const labels = name.split(".");
@@ -17,7 +15,7 @@ function namehash(name: any) {
       node = ethers.utils.keccak256(
         ethers.utils.concat([
           ethers.utils.arrayify(node),
-          ethers.utils.keccak256(ethers.utils.toUtf8Bytes(labels[i]))
+          ethers.utils.keccak256(ethers.utils.toUtf8Bytes(labels[i])),
         ])
       );
     }
@@ -75,57 +73,6 @@ class Web3Interaction {
       console.log("error", error);
       return null;
     }
-  };
-
-  getSubdomainContract = (address: string) => {
-    try {
-      const contract = new ethers.Contract(
-        address,
-        fetchSubdomainContractAbi,
-        this.SIGNER
-      );
-      return contract;
-    } catch (error) {
-      console.log("error", error);
-      return null;
-    }
-  };
-
-
-
-  checkDomainAvailable = async (address: string, name: string, resolverAddress: any, parentDomain: any, userAddress: any): Promise<any> => {
-    //checkDomainAvailable(contractAddress, domainName, defApiKey, defApiSecret, rpcUrl, userAddress);
-    return new Promise(async (resolve, reject) => {
-      try {
-
-        const nameWrapper = this.getSubdomainContract(address);
-        if (!nameWrapper) throw new Error("Contract initialization failed");
-
-        const namehash = (name: any) => ethers.utils.namehash(name);
-        const parentNode = namehash(parentDomain);
-        console.log("Parent Node:", parentNode);
-        console.log(`Creating subdomain: ${name}.${parentDomain}`);
-        const subdomainLabel = "test1";
-        const ttl = 0;
-        const fuses = 0;
-        const expiry = 0;
-        const tx = await nameWrapper.setSubnodeRecord(
-          parentNode,
-          name,
-          userAddress,
-          resolverAddress,
-          ttl,
-          fuses,
-          expiry
-        );
-        console.log("Transaction sent:", tx.hash);
-        await tx.wait();
-        console.log("Subdomain created successfully!");
-        resolve(name)
-      } catch (error: any) {
-        reject(error.reason || error.data?.message || error.message || error);
-      }
-    });
   };
 
   fetchPrice = async (address: string): Promise<any> => {
@@ -196,67 +143,6 @@ class Web3Interaction {
       }
     });
   };
-
-  //   openTrove = async (
-  //     address: string,
-  //     _assetAmount: number | string,
-  //     _THUSDAmount: number | string,
-  //     _maxFeePercentage: number | string,
-  //     recommendedFee: number | string,
-  //     _upperHint: string,
-  //     _lowerHint: string
-  //   ): Promise<any> => {
-  //     return new Promise(async (resolve, reject) => {
-  //       try {
-  //         console.log("line-110")
-  //         const contract = this.getContract(address);
-  //         if (!contract) throw new Error("Contract initialization failed");
-  //         console.log(
-  //           "orivalues",
-  //           _assetAmount,
-  //           _THUSDAmount,
-  //           _maxFeePercentage,
-  //           recommendedFee,
-  //           _upperHint,
-  //           _lowerHint
-  //         );
-  //         console.log(
-  //           "vasluesssssss",
-  //           BigInt(_maxFeePercentage.toString()),
-  //           BigInt(_THUSDAmount.toString()),
-  //           BigInt(_assetAmount.toString()),
-  //           BigInt(recommendedFee.toString())
-  //         );
-
-  //         const tx = await contract.openTrove(
-  //           BigInt(_maxFeePercentage.toString()),
-  //           BigInt(_THUSDAmount.toString()),
-  //           BigInt(_assetAmount.toString()),
-  //           _upperHint,
-  //           _lowerHint,
-  //           { value: BigInt(recommendedFee.toString()) }
-  //         );
-
-  //         // const tx = await contract.openTrove(
-  //         //   // BigInt(_maxFeePercentage.toString()),
-  //         //   '10000000000000000',
-  //         //   // BigInt(_THUSDAmount.toString()),
-  //         //  '1800000000000000000000',
-  //         //   // BigInt(_assetAmount.toString()),
-  //         //   "0",
-  //         //   _upperHint,
-  //         //   _lowerHint,
-  //         //   // { value: BigInt(recommendedFee.toString()) }
-  //         //   { value: '922551590000000000' }
-  //         // );
-
-  //         const receipt = await tx.wait();
-  //         resolve(receipt);
-  //       } catch (error: any) {
-  //         reject(error.reason || error.data?.message || error.message || error);
-  //       }
-  //     });
-  //   };
 
   withdrawTHUSD = async (
     address: string,
@@ -565,221 +451,6 @@ class Web3Interaction {
     });
   };
 
-  //   address: string,
-  //   _depositAddress: string,
-  //   _lpTokenAddress: string,
-  //   _gaugeAddress: string,
-  //   _nCoins: number | string,
-  //   _coinsAddress: string[],
-  //   _amounts: string[],
-  //   _minMinAmount: number | string,
-  //   _userUnderlying: boolean,
-  //   _useDynarray: boolean,
-  //   _poolAddress: string,
-  //   provider: any
-  // ): Promise<any> => {
-  //   return new Promise(async (resolve, reject) => {
-  //     try {
-  //       console.log(
-  //         "providerogggg",
-  //         address,
-  //         _depositAddress,
-  //         _lpTokenAddress,
-  //         _gaugeAddress,
-  //         BigInt(_nCoins.toString()),
-  //         _coinsAddress,
-  //         _amounts.map((amount) => BigInt(amount.toString())),
-  //         BigInt(_minMinAmount.toString()),
-  //         _userUnderlying,
-  //         _useDynarray,
-  //         _poolAddress,
-  //         provider
-  //       );
-  //       const tx = await provider.writeContract({
-  //         address,
-  //         abi: curveContractAbi,
-  //         functionName: "deposit_and_stake",
-  //         args: [
-  //           _depositAddress,
-  //           _lpTokenAddress,
-  //           _gaugeAddress,
-  //           BigInt(_nCoins.toString()),
-  //           _coinsAddress,
-  //           _amounts.map((amount) => BigInt(amount.toString())),
-  //           BigInt(_minMinAmount.toString()),
-  //           _userUnderlying,
-  //           _useDynarray,
-  //           _poolAddress,
-  //         ],
-  //         gasLimit: BigInt("3000000"),
-  //       });
-
-  //       console.log("transaction:", tx);
-  //       const receipt = tx;
-  //       resolve(receipt);
-  //     } catch (error: any) {
-  //       reject(error.reason || error.data?.message || error.message || error);
-  //     }
-  //   });
-  // };
-
-  depositAndStakeCurve = async (
-    address: string,
-    _depositAddress: string,
-    _lpTokenAddress: string,
-    _gaugeAddress: string,
-    _nCoins: number | string,
-    _coinsAddress: string[],
-    _amounts: string[],
-    _minMinAmount: number | string,
-    _userUnderlying: boolean,
-    _useDynarray: boolean,
-    _poolAddress: string,
-    provider: any
-  ): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        console.log(
-          "providerogggg",
-          address,
-          _depositAddress,
-          _lpTokenAddress,
-          _gaugeAddress,
-          BigInt(_nCoins.toString()),
-          _coinsAddress,
-          _amounts.map((amount) => BigInt(amount.toString())),
-          BigInt(_minMinAmount.toString()),
-          _userUnderlying,
-          _useDynarray,
-          _poolAddress,
-          provider
-        );
-        const contract = new ethers.Contract(
-          address,
-          curveContractAbi,
-          this.SIGNER
-        );
-
-        const tx = await contract.deposit_and_stake(
-          _depositAddress,
-          _lpTokenAddress,
-          _gaugeAddress,
-          BigInt(_nCoins.toString()),
-          _coinsAddress,
-          _amounts.map((amount) => BigInt(amount.toString())),
-          BigInt(_minMinAmount.toString()),
-          _userUnderlying,
-          _useDynarray
-          // _poolAddress
-        );
-        console.log("tx", tx);
-
-        const receipt = await tx.wait();
-        console.log("receipt", receipt);
-        resolve(receipt);
-      } catch (error: any) {
-        reject(error.reason || error.data?.message || error.message || error);
-      }
-    });
-  };
-
-  //   address: string,
-  //   _withdrawAmount: number | string,
-  //   provider: any
-  // ): Promise<any> => {
-  //   return new Promise(async (resolve, reject) => {
-  //     try {
-  //       console.log(
-  //         "providerogggg",
-  //         address,
-  //         BigInt(_withdrawAmount.toString()),
-  //         provider
-  //       );
-  //       const tx = await provider.writeContract({
-  //         address,
-  //         abi: curveContractAbi,
-  //         functionName: "withdraw",
-  //         args: [BigInt(_withdrawAmount.toString())],
-  //         gasLimit: BigInt("3000000"),
-  //       });
-
-  //       console.log("transaction:", tx);
-  //       const receipt = tx;
-  //       resolve(receipt);
-  //     } catch (error: any) {
-  //       reject(error.reason || error.data?.message || error.message || error);
-  //     }
-  //   });
-  // };
-
-  withdrawLPTokens = async (
-    address: string,
-    _withdrawAmount: number | string,
-    provider: any
-  ): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        console.log(
-          "providerogggg",
-          address,
-          BigInt(_withdrawAmount.toString()),
-          provider
-        );
-        const contract = new ethers.Contract(
-          address,
-          curveContractAbi,
-          this.SIGNER
-        );
-
-        const tx = await contract.withdraw(BigInt(_withdrawAmount.toString()));
-
-        console.log("transaction:", tx);
-        const receipt = await tx.wait();
-        resolve(receipt);
-      } catch (error: any) {
-        reject(error.reason || error.data?.message || error.message || error);
-      }
-    });
-  };
-
-  unstakeLPTokens = async (
-    address: string,
-    PoolAddress: string,
-    _burnAmount: number | string,
-    _amounts: string[],
-    provider: any
-  ): Promise<any> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        console.log(
-          "providerogggg",
-          address,
-          PoolAddress,
-          BigInt(_burnAmount.toString()),
-          _amounts.map((amount) => BigInt(amount.toString())),
-          provider
-        );
-        const contract = new ethers.Contract(
-          address,
-          curveContractAbi,
-          this.SIGNER
-        );
-
-        const tx = await contract.remove_liquidity(
-          PoolAddress,
-          BigInt(_burnAmount.toString()),
-          _amounts.map((amount) => BigInt(amount.toString()))
-        );
-
-        console.log("transaction:", tx);
-        const receipt = await tx.wait();
-        resolve(receipt);
-      } catch (error: any) {
-        reject(error.reason || error.data?.message || error.message || error);
-      }
-    });
-  };
-
   handleUSDCApproval = async (
     usdcAddress: string,
     ownerAddress: string,
@@ -860,66 +531,6 @@ class Web3Interaction {
     });
   };
 
-  // // Send USDC function
-  // sendUSDC = async (
-  //   usdcAddress: string,
-  //   recipientAddress: string,
-  //   amount: string | number,
-  //   provider: any,
-  //   ownerAddress?: string
-  // ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
-  //   return new Promise(async (resolve, reject) => {
-  //     try {
-  //       // If ownerAddress is provided, check/handle approval first
-  //       if (ownerAddress) {
-  //         const approvalResult = await this.handleUSDCApproval(
-  //           usdcAddress,
-  //           ownerAddress,
-  //           recipientAddress,
-  //           amount,
-  //           provider
-  //         );
-
-  //         if (!approvalResult.success) {
-  //           resolve({
-  //             success: false,
-  //             error: `Approval failed: ${approvalResult.error}`
-  //           });
-  //           return;
-  //         }
-  //       }
-
-  //       // Perform the transfer
-  //       try {
-  //         const tx = await provider.writeContract({
-  //           address: usdcAddress,
-  //           abi: USDC_ABI,
-  //           functionName: "transfer",
-  //           args: [recipientAddress, BigInt(amount.toString())],
-  //           gasLimit: BigInt("3000000"),
-  //         });
-
-  //         console.log("Transfer transaction:", tx);
-
-  //         resolve({
-  //           success: true,
-  //           txHash: tx
-  //         });
-  //       } catch (transferError: any) {
-  //         resolve({
-  //           success: false,
-  //           error: transferError.reason || transferError.data?.message || transferError.message || "Transfer failed"
-  //         });
-  //       }
-  //     } catch (error: any) {
-  //       resolve({
-  //         success: false,
-  //         error: error.reason || error.data?.message || error.message || "Operation failed"
-  //       });
-  //     }
-  //   });
-  // };
-
   // Send USDC function
   sendUSDC = async (
     usdcAddress: string,
@@ -930,7 +541,7 @@ class Web3Interaction {
   ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
     return new Promise(async (resolve) => {
       try {
-        console.log("line--------")
+        console.log("line--------");
         // Convert amount to BigNumber (assuming USDC has 6 decimals)
         const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
 
@@ -942,7 +553,7 @@ class Web3Interaction {
         }
 
         // Handle approval if ownerAddress is provided
-        console.log("ownerAddress---->", ownerAddress)
+        console.log("ownerAddress---->", ownerAddress);
         if (ownerAddress) {
           const approvalResult = await this.handleUSDCApproval(
             usdcAddress,
@@ -963,7 +574,7 @@ class Web3Interaction {
 
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, USDC_ABI, signer);
-        console.log("usdcContract-->", usdcContract)
+        console.log("usdcContract-->", usdcContract);
         // Perform the transfer
         const tx = await usdcContract.transfer(recipientAddress, usdcAmount);
         await tx.wait(); // Wait for transaction confirmation
@@ -975,7 +586,7 @@ class Web3Interaction {
           txHash: tx.hash,
         });
       } catch (error: any) {
-        console.log("error--r>", error)
+        console.log("error--r>", error);
         resolve({
           success: false,
           error:
@@ -1021,48 +632,6 @@ class Web3Interaction {
       }
     });
   };
-
-  // depositAndStakeCurve = async (
-
-  // withdrawLPTokens = async (
-
-  // unstakeLPTokens = async (
-  //   address: string,
-  //   PoolAddress: string,
-  //   _burnAmount: number | string,
-  //   _amounts: string[],
-  //   provider: any
-  // ): Promise<any> => {
-  //   return new Promise(async (resolve, reject) => {
-  //     try {
-  //       console.log(
-  //         "providerogggg",
-  //         address,
-  //         PoolAddress,
-  //         BigInt(_burnAmount.toString()),
-  //         _amounts.map((amount) => BigInt(amount.toString())),
-  //         provider
-  //       );
-  //       const tx = await provider.writeContract({
-  //         address,
-  //         abi: curveContractAbi,
-  //         functionName: "remove_liquidity",
-  //         args: [
-  //           PoolAddress,
-  //           BigInt(_burnAmount.toString()),
-  //           _amounts.map((amount) => BigInt(amount.toString())),
-  //         ],
-  //         gasLimit: BigInt("3000000"),
-  //       });
-
-  //       console.log("transaction:", tx);
-  //       const receipt = tx;
-  //       resolve(receipt);
-  //     } catch (error: any) {
-  //       reject(error.reason || error.data?.message || error.message || error);
-  //     }
-  //   });
-  // };
 }
 
 export default Web3Interaction;

@@ -1,23 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled, { keyframes } from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
-import { toast } from "react-toastify";
-import Link from "next/link";
-import umbrlIcn from "@/Assets/Images/umbrlIcn.svg";
-import downloadApp from "@/Assets/Images/downloads-app.png";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import BlogCard from "@/components/BlogCard";
-import { useSelector } from "react-redux";
 import RecentTransaction from "./RecentTransaction";
 // css
 
 // img
 
 const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
-  const userAuth = useSelector((state) => state.Auth);
-  const { theme, toggleTheme } = useTheme();
-  console.log("transactions", transactions);
   const handleLiveBlog = () => setLiveBlog(!liveBlog);
   return (
     <>
@@ -37,78 +27,12 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
-            </div>
+            <div className="top pb-3"></div>
             <div className="modalBody">
-            
               <div className="grid blogCard gap-3 grid-cols-12">
                 <BlogCard classN={"col-span-6 md:col-span-4"} data={data} />
                 <div className="col-span-12 mt-3">
-                  {/* <div
-                    className={` bg-white/5 divide-white/6 divide-y  rounded-12`}
-                  >
-                    <div className="flex items-center gap-2 p-3">
-                      <img
-                        src={umbrlIcn}
-                        alt=""
-                        className="aspect-square shrink-0 bg-cover bg-center rounded-5 shadow-md"
-                        style={{
-                          width: 25,
-                          height: 25,
-                          minWidth: 25,
-                          minHeight: 25,
-                        }}
-                      />
-                      <span className="flex-1 truncate text-15 font-medium -tracking-4 opacity-90">
-                        System
-                      </span>
-                      <span className="text-15 font-normal uppercase tabular-nums -tracking-3">
-                        386 GB
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 p-3">
-                      <img
-                        src="https://getumbrel.github.io/umbrel-apps-gallery/bitcoin/icon.svg"
-                        alt=""
-                        className="aspect-square shrink-0 bg-cover bg-center rounded-5 shadow-md"
-                        style={{
-                          width: 25,
-                          height: 25,
-                          minWidth: 25,
-                          minHeight: 25,
-                        }}
-                      />
-                      <span className="flex-1 truncate text-15 font-medium -tracking-4 opacity-90">
-                        Bitcoin Node
-                      </span>
-                      <span className="text-15 font-normal uppercase tabular-nums -tracking-3">
-                        95 GB
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 p-3">
-                      <img
-                        src={downloadApp}
-                        alt=""
-                        className="aspect-square shrink-0 bg-cover bg-center rounded-5 shadow-md"
-                        style={{
-                          width: 25,
-                          height: 25,
-                          minWidth: 25,
-                          minHeight: 25,
-                        }}
-                      />
-                      <span className="flex-1 truncate text-15 font-medium -tracking-4 opacity-90">
-                        Downloads
-                      </span>
-                      <span className="text-15 font-normal uppercase tabular-nums -tracking-3">
-                        0 B
-                      </span>
-                    </div>
-                  </div> */}
-                  <RecentTransaction transactions={transactions} data={data}/>
+                  <RecentTransaction transactions={transactions} data={data} />
                 </div>
               </div>
             </div>

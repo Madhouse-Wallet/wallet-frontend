@@ -5,7 +5,6 @@ import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useTheme } from "@/ContextApi/ThemeContext";
-import SideShiftWidget from "@/components/SideShift/SideShiftWidget";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
 import { createPortal } from "react-dom";
@@ -34,7 +33,7 @@ const PointOfSalePop = ({
           if (user) {
             console.log("user-->", user);
             setLnbitLink(user?.userId?.lnbitLinkId);
-            setLnbitLink2(user?.userId?.lnbitLinkId_2 || "")
+            setLnbitLink2(user?.userId?.lnbitLinkId_2 || "");
             setIsLoading(false); // stop loader if user found
           } else {
             setIsLoading(false);
@@ -86,74 +85,59 @@ const PointOfSalePop = ({
                   Crypto Link
                 </Link>
               </div> */}
-              {step == 1 ? <>
+              {step == 1 ? (
+                <>
+                  <div className="py-2">
+                    <button
+                      // href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
+                      // target="_blank"
+                      // rel="noopener noreferrer"
+                      onClick={() => setStep(2)}
+                      className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Terminal
+                    </button>
+                  </div>
 
-                <div className="py-2">
-                  <button
-                    // href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
-                    // target="_blank"
-                    // rel="noopener noreferrer"
-                    onClick={() => setStep(2)}
-                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Terminal
-                  </button>
-                </div>
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setPointSale(!pointSale);
+                        setRefundBTC(!refundBTC);
+                      }}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Refund
+                    </button>
+                  </div>
+                </>
+              ) : step == "2" ? (
+                <>
+                  <div className="py-2">
+                    <Link
+                      href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Accept in Dollars
+                    </Link>
+                  </div>
 
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      setPointSale(!pointSale);
-                      setRefundBTC(!refundBTC);
-                    }}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Refund
-                  </button>
-                </div>
-              </> : step == "2" ? <>
-
-                <div className="py-2">
-                  <Link
-                    href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Accept in Dollars
-                  </Link>
-                </div>
-
-                <div className="py-2">
-                  <Link
-                    href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink2}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Accept in Bitcoin
-                  </Link>
-                </div></> : <></>}
-
-              {/* {userAuth?.walletAddress && ( */}
-              {/* <div className="py-2">
-                <SideShiftWidget
-                  // setPointSale={setPointSale}
-                  // onClick={() => setPointSale(false)}
-                  // pointSale={pointSale}
-                  // parentAffiliateId={
-                  //   process.env.NEXT_PUBLIC_SIDE_SHIFT_PARENT_ID
-                  // }
-                  // defaultDepositMethodId="btc"
-                  // defaultSettleMethodId="usdcarb"
-                  // theme="light"
-                  // settleAddress={userAuth?.walletAddress}
-                  buttonText="Refund"
-                  buttonColor="rgb(232, 90, 67)"
-                  textColor="rgb(17, 11, 11)"
-                />
-              </div> */}
-              {/* )} */}
+                  <div className="py-2">
+                    <Link
+                      href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink2}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Accept in Bitcoin
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>

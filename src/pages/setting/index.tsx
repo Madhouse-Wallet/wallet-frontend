@@ -4,7 +4,6 @@ import ChangeEmailPop from "@/components/Modals/ChangeEmail";
 import ConfirmationPop from "@/components/Modals/ConfirmationPop";
 import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
-import EnsDomainPop from "@/components/Modals/EnsDomainPop";
 import RecoverPopup from "@/components/Modals/RecoverPopup"
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -12,7 +11,6 @@ import styled from "styled-components";
 import { AccordionItem, BackBtn } from "@/components/common/index";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
-import BlogCard from "@/components/BlogCard";
 import s1 from "@/Assets/Images/screenshot.png";
 import PreviewBox from "./preview";
 import { useDispatch, useSelector } from "react-redux";
@@ -484,11 +482,11 @@ const Setting: React.FC = () => {
           <RecoverPopup recover={recover} setRecover={setRecover} phrase={recoverSeed} phraseStatus={recoverSeedStatus} />,
           document.body
         )}
-      {ensDomain &&
+      {/* {ensDomain &&
         createPortal(
           <EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />,
           document.body
-        )}
+        )} */}
       {setUp &&
         createPortal(
           <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,

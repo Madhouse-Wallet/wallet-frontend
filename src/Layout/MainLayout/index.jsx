@@ -10,7 +10,6 @@ import Sidebar from "../../components/Header/sidebar";
 import Image from "next/image";
 import bg from "@/Assets/Images/umbrel/1.jpg";
 import { createPortal } from "react-dom";
-import EnsDomainPop from "@/components/Modals/EnsDomainPop";
 import { useSelector } from "react-redux";
 
 const MainLayout = ({ Component, pageProps }) => {
@@ -22,12 +21,10 @@ const MainLayout = ({ Component, pageProps }) => {
   const [popupOpened, setPopupOpened] = useState(false);
 
   useEffect(() => {
-
     // ensName: userAuth.ensName || "",
-    // ensSetup: 
+    // ensSetup:
 
-
-    if (userAuth?.login && (!(userAuth?.pos)) && (!(userAuth?.ensSetup)) ) {
+    if (userAuth?.login && !userAuth?.pos && !userAuth?.ensSetup) {
       const timer = setTimeout(() => {
         // Set state to prevent reopening
         // setEnsDomain(true);
@@ -41,9 +38,8 @@ const MainLayout = ({ Component, pageProps }) => {
       {/* <div className="flex items-start justify-end relative">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
       </div> */}
-      {ensDomain &&
-        createPortal(<EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />, document.body)}
-
+      {/* {ensDomain &&
+        createPortal(<EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />, document.body)} */}
 
       <Main className="ml-auto ms-auto">
         <Header sidebar={sidebar} setSidebar={setSidebar} />
@@ -68,17 +64,17 @@ const MainLayout = ({ Component, pageProps }) => {
             // exit={{ y: "-50%", opacity: 0 }}
             transition={{ duration: 0.6 }}
 
-          // blur animation
-          // initial={{ filter: "blur(10px)", opacity: 0 }}
-          // animate={{ filter: "blur(0px)", opacity: 1 }}
-          // exit={{ filter: "blur(10px)", opacity: 0 }}
-          // transition={{ duration: 0.5 }}
+            // blur animation
+            // initial={{ filter: "blur(10px)", opacity: 0 }}
+            // animate={{ filter: "blur(0px)", opacity: 1 }}
+            // exit={{ filter: "blur(10px)", opacity: 0 }}
+            // transition={{ duration: 0.5 }}
 
-          // 3d animation
-          // initial={{ perspective: 1000, rotateY: -90 }}
-          // animate={{ perspective: 1000, rotateY: 0 }}
-          // exit={{ perspective: 1000, rotateY: 90 }}
-          // transition={{ duration: 0.7 }}
+            // 3d animation
+            // initial={{ perspective: 1000, rotateY: -90 }}
+            // animate={{ perspective: 1000, rotateY: 0 }}
+            // exit={{ perspective: 1000, rotateY: 90 }}
+            // transition={{ duration: 0.7 }}
           >
             <Component {...pageProps} />
           </motion.div>
