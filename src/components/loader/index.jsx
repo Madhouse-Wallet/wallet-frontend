@@ -1,18 +1,20 @@
 import React from "react";
+import Image from "next/image";
 
 const Loader = () => {
   return (
     <>
       <div
-        className="position-fixed h-100 w-100 d-flex align-items-center justify-content-center"
-        style={{ height: "100vh", background: "#000000d6", zIndex: 9999 }}
+        className="fixed h-full w-full flex items-center justify-center top-0 left-0"
+        style={{ height: "100vh", background: "#000000a3", zIndex: 9999 }}
       >
-        {/* <img
-          src="./loading.gif"
-          alt=""
-          className="img-fluid object-contain"
-          style={{ height: 40 }}
-        /> */}
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
       </div>
     </>
   );

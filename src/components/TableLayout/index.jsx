@@ -1,87 +1,123 @@
 import React from "react";
 import styled from "styled-components";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { useTheme } from "@/ContextApi/ThemeContext";
 
 // css
 
 // image
 
 const TableLayout = ({ column, data }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <>
-      <div className="table-responsive">
-        <Table className={` table rounded border-0`}>
-          <thead>
-            <tr className="">
-              {column &&
-                column.length > 0 &&
-                column.map((item, key) => (
-                  <>
-                    <th key={key} className=" font-medium border-0">
-                      {item.head}
-                    </th>
-                  </>
-                ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data &&
-              data?.length > 0 &&
-              data.map((data, columnkey) => {
-                return (
-                  <tr key={columnkey}>
+      <TableC
+        className={`divide-white/6 bg-white/5 w-full caption-bottom text-sm divide-y  rounded-12 `}
+      >
+        <TableHeader>
+          <TableRow className="border-0">
+            {column &&
+              column.length > 0 &&
+              column.map((item, key) => (
+                <>
+                  <TableHead
+                    key={key}
+                    className={`bg-white/5  h-10 px-2 px-lg-4 text-left font-semibold border-0 align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]`}
+                  >
+                    {item.head}
+                  </TableHead>
+                </>
+              ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data &&
+            data?.length > 0 &&
+            data.map((data, columnkey) => {
+              return (
+                <>
+                  <TableRow key={columnkey} className="border-0">
                     {column &&
                       column.length > 0 &&
                       column.map((item, key) => {
                         if (item.component) {
                           return (
-                            <td
-                              key={key}
-                              className=" fw-sbold bg-transparent border-0 themeClr"
-                            >
-                              {item.component(data, columnkey, data)}
-                            </td>
+                            <>
+                              <TableCell
+                                key={key}
+                                className="h-10 p-2 px-lg-4 text-left align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                              >
+                                {item.component(data, columnkey, data)}
+                              </TableCell>
+                            </>
                           );
                         }
 
                         return (
-                          <td
+                          <TableCell
                             key={key}
-                            className=" fw-sbold bg-transparent border-0 themeClr"
+                            className="h-10 p-2 px-lg-4 text-left align-middle font-normal [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
                           >
                             {data[item?.accessor]}
-                          </td>
+                          </TableCell>
                         );
                       })}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
-      </div>
+                  </TableRow>
+                </>
+              );
+            })}
+        </TableBody>
+      </TableC>
     </>
   );
 };
 
-const Table = styled.div`
-  background-color: var(--cardBg2);
+const TableC = styled(Table)`
   th,
   td {
     padding: 10px 15px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 20px;
     max-width: 200px;
     min-width: 120px;
     vertical-align: middle;
+    border: 0;
+    box-shadow: unset !important;
   }
   thead {
+    tr > th:first-child {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+    tr > th:last-child {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+    tr {
+      border-bottom: 0 !important;
+    }
     th {
       font-weight: 400;
-      background-color: var(--cardBg);
+      ${"" /* background-color: var(--cardBg); */}
+
       white-space: nowrap;
       color: var(--textColor);
     }
   }
   tbody {
+    tr {
+      transition: 0.4s;
+    }
     td {
       padding: 20px 15px;
       font-weight: 400;

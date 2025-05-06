@@ -6,19 +6,57 @@ import { createSlice } from "@reduxjs/toolkit";
 // import {
 // } from "./actions";
 
-// let storedDataString = null;
-// let data = null;
+let storedDataString = null;
+let data = null;
 
-// if (typeof window !== "undefined") {
-//   storedDataString = localStorage.getItem("authUser");
-//   data = storedDataString ? JSON.parse(storedDataString) : null;
-// }
+if (typeof window !== "undefined") {
+  storedDataString = localStorage.getItem("authUser");
+  data = storedDataString ? JSON.parse(storedDataString) : null;
+  if (data) {
+    if (data.webauthKey) {
+      data.webauthKey = {
+        ...data.webauthKey,
+        pubX: BigInt(data.webauthKey.pubX),
+        pubY: BigInt(data.webauthKey.pubY),
+      }
+    }
 
+    if (data.passkey2) {
+      data.passkey2 = {
+        ...data.passkey2,
+        pubX: BigInt(data.passkey2.pubX),
+        pubY: BigInt(data.passkey2.pubY),
+      }
+    }
+    if (data.passkey3) {
+      data.passkey3 = {
+        ...data.passkey3,
+        pubX: BigInt(data.passkey3.pubX),
+        pubY: BigInt(data.passkey3.pubY),
+      }
+    }
+  }
+
+}
+// JSON.stringify(response.data)
 const initialState = {
-  walletAddress: "",
-  provider:"",
-  signer:"",
-  login: false
+  walletAddress: (data?.walletAddress || ""),
+  bitcoinWallet: (data?.bitcoinWallet || ""),
+  webauthKey: (data?.webauthKey || ""),
+  passkeyCred: "",
+  username: (data?.username || ""),
+  email: (data?.email || ""),
+  id: (data?.id || ""),
+  login: (data?.login || false),
+  pos: (data?.pos || false),
+  signer: "",
+  multisigAddress: (data?.multisigAddress || ""),
+  passkey2: (data?.passkey2 || ""),
+  passkey3: (data?.passkey3 || ""),
+  ensName: (data?.ensName || ""),
+  ensSetup: (data?.ensSetup || false),
+  multisigSetup: (data?.multisigSetup || false),
+  multisigActivate: (data?.multisigSetup || false)
 };
 
 export const authSlice = createSlice({
@@ -28,9 +66,22 @@ export const authSlice = createSlice({
   reducers: {
     loginSet: (state, action) => {
       state.login = action.payload.login;
+      state.username = action.payload.username;
+      state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
-      state.provider = action.payload.provider;
+      state.bitcoinWallet = action.payload.bitcoinWallet;
+      state.passkeyCred = action.payload.passkeyCred;
+      state.webauthKey = action.payload.webauthKey;
+      state.id = action.payload.id;
       state.signer = action.payload.signer;
+      state.pos = (action.payload.pos || false);
+      state.multisigAddress = action.payload.multisigAddress;
+      state.passkey2 = action.payload.passkey2;
+      state.passkey3 = action.payload.passkey3;
+      state.ensName = action.payload.ensName;
+      state.ensSetup = action.payload.ensSetup;
+      state.multisigSetup = action.payload.multisigSetup;
+      state.multisigActivate = action.payload.multisigActivate
     },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,

@@ -20,7 +20,7 @@ const BuyBitcoin = ({ buy, setBuy }) => {
         <div
           className={`modalDialog relative p-2 mx-auto w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
         >
-          <div className={`position-relative rounded`}>
+          <div className={`relative rounded`}>
             <button
               onClick={handleBuy}
               className="border-0 p-0 position-absolute"
@@ -63,10 +63,10 @@ const BuyBitcoin = ({ buy, setBuy }) => {
               <div className="py-2">
                 <form>
                   <div
-                    className="d-flex align-items-start gap-3 flex-wrap justify-content-between"
+                    className="flex align-items-start gap-3 flex-wrap justify-content-between"
                     style={{ fontSize: 12, lineHeight: "16px" }}
                   >
-                    <div className="d-flex align-items-center gap-3 flex-wrap py-2">
+                    <div className="flex align-items-center gap-3 flex-wrap py-2">
                       <div className="imgWrp flex-shrink-0">{BTC}</div>
                       <div className="content">
                         <p className="m-0 fw-bold" style={{ fontSize: 12 }}>
@@ -90,7 +90,7 @@ const BuyBitcoin = ({ buy, setBuy }) => {
             <div className="btnWRpper mt-4">
               <button
                 onClick={() => router.push("/buy")}
-                className="d-flex align-items-center justify-content-center commonBtn w-100"
+                className="flex align-items-center justify-content-center commonBtn w-100"
               >
                 Buy
               </button>

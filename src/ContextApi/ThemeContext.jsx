@@ -4,16 +4,16 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 const themeVariables = {
   light: {
     backgroundColor: "#fff",
-    backgroundColor2: "#ff1f1",
+    backgroundColor2: "#fffefe",
     textColor: "#000000",
     textColor2: "#383838",
-    cardBg: "#fff5f1",
+    cardBg: "#ffece5",
     cardBg2: "#e7e7e7",
     lightBtn: "#b8b8b8",
   },
   dark: {
-    backgroundColor: "#0d1017",
-    backgroundColor2: "#2c2c2c",
+    backgroundColor: "#0a0915",
+    backgroundColor2: "#0a0915",
     textColor: "#fff",
     textColor2: "#fff",
     cardBg: "#1e1e1e",
@@ -27,12 +27,12 @@ const ThemeContext = createContext(undefined);
 
 // ThemeProvider Component
 export const ThemeProvider = ({ children }) => {
-  // Initialize theme (use 'dark' by default or localStorage value)
+  // Initialize theme (default: dark)
   const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme");
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") || "dark"; // Ensure dark mode is default
     }
-    return "dark";
+    return "dark"; // Fallback for SSR
   });
 
   // Toggle theme
@@ -44,15 +44,21 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
-  // Apply the theme variables to the root element
+  // Apply the theme variables to the root element and update body class
   useEffect(() => {
     if (typeof document !== "undefined") {
       const root = document.documentElement;
+      const body = document.body;
       const currentTheme = themeVariables[theme];
 
+      // Set CSS variables
       Object.entries(currentTheme).forEach(([key, value]) => {
         root.style.setProperty(`--${key}`, value);
       });
+
+      // Remove existing theme class and add new one
+      body.classList.remove("light", "dark");
+      body.classList.add(theme);
     }
   }, [theme]);
 

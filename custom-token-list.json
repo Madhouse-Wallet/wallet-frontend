@@ -1,0 +1,20 @@
+{
+    "name": "CoWs Custom Token List",
+    "timestamp": "2024-03-27T16:30:00Z",
+    "version": {
+        "major": 0,
+        "minor": 0,
+        "patch": 1
+    },
+    "logoURI": "https://ipfs.cow.fi/ipfs/QmYK6v8knxT7ZfmS6FPpd9u1dKLxtZMKSrdQtur4ofShM3?pinataGatewayToken=MzQoKxPtVypjPgvG7fN47-FynJlKEStEQTyI-uG15v8jeAL5zpLuUj8pqWwhEu1T",
+    "tokens": [
+        {
+            "chainId": 1,
+            "address": "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+            "name": "Bitcoin",
+            "symbol": "BTC",
+            "decimals": 18,
+            "logoURI": "https://media.madhousewallet.com/btc.svg"
+        }
+    ]
+}

@@ -1,176 +1,121 @@
+/* :root {
+  --color-brand: 259 100% 59%;
+  --color-brand-lighter: 259 100% 67%;
+  --color-brand-lightest: 259 100% 75%;
+  --page-w: 870px;
+  --app-w: 120px;
+  --app-h: 110px;
+  --app-x-gap: 30px;
+  --app-y-gap: 12px;
+  --apps-max-w: 934px;
+  --apps-padding-x: 32px;
+  --widget-w: 270px;
+  --widget-h: 150px;
+  --widget-labeled-h: 176px;
+  overflow: hidden;
+} */
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap");
-body {
+:root body {
   font-family: "Inter", sans-serif;
-  font-size: 14px;
-  line-height: 26px;
-  font-weight: 400;
-  background-color: var(--backgroundColor2) !important;
-  color: var(--textColor) !important;
-  min-height: 100vh !important;
+  background: #0a0915;
+  color: #fff;
+  /* color: var(--textColor); */
+  /* background-image: url(../Images//umbrel/1.jpg); */
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
 }
-.text-gradient {
-  background-image: linear-gradient(171deg, #ff8029 50%, #2300ff);
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-.container {
-  max-width: 1140px !important;
-}
-.btn {
-  min-height: unset !important;
-}
-.fw-sbold {
-  font-weight: 600 !important;
-}
-a {
-  text-decoration: none !important;
-}
-.themeClr {
-  color: #ff8735 !important;
-}
-.cursor-pointer {
-  cursor: pointer;
-}
-.cursor-pointer {
-  cursor: pointer;
-}
-.dropdown .dropdown-toggle:after {
-  display: none;
-}
-input.form-check {
-  accent-color: #6c6b6b;
-}
-.form-check-input:focus {
-  box-shadow: unset;
-  border-color: #ddd;
-}
-textarea {
-  resize: none;
-}
-input.form-control {
-  height: 45px;
-}
-input.form-control:focus {
-  box-shadow: unset !important;
-}
-input.file {
-  top: 0;
-  left: 0;
-  z-index: 9;
-  cursor: pointer;
-  opacity: 0;
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
-.iconWithText .icn.position-absolute {
+html,
+body {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.modalDialog::-webkit-scrollbar {
+  display: none;
+}
+.themeClr {
+  color: #df723b;
+}
+.container {
+  max-width: 1000px !important;
+  padding: 0 10px !important;
+}
+.modalDialog {
+  width: calc(100% - 20px) !important;
+}
+.modalDialog,
+.pageCard {
+  max-height: calc(100vh - 60px);
+  max-width: 1100px !important;
+  scrollbar-width: none;
+  overflow: scroll;
+  border: 1px solid #dddddd21;
+  background: #00000099;
+}
+.pageCard {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  padding-bottom: 90px !important;
+  min-height: calc(100vh - 108px);
+  width: 100% !important;
+}
+.commonBtn {
+  background-color: #df723b !important;
+  border-color: #df723b !important;
+  transition: 0.4s;
+}
+.iconWithText .icn.absolute {
   top: 50%;
   transform: translateY(-50%);
 }
-
-.commonBtn {
-  background-color: #ff8735 !important;
-  border: 2px solid #ff8735 !important;
-  height: 40px !important;
-  font-weight: 600;
-  font-size: 13px !important;
-  min-width: 130px;
-  color: #0d1017 !important;
+.commonBtn:hover {
+  background-color: #f9bfa1 !important;
+  border-color: #df723b !important;
 }
-.commonBtn.borderedBtn {
-  background-color: transparent !important;
-  color: #ff8735 !important;
+.umbrel-divide-y > * {
+  position: relative;
 }
-.commonBtn:hover,
-.commonBtn.GreyBtn:hover {
-  background-color: #000 !important;
-  border-color: #000 !important;
-  color: #fff !important;
+.umbrel-divide-y > * + *::before {
+  content: "";
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  height: 1px;
+  width: 100%;
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  --tw-gradient-from: transparent var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from),
+    rgb(255 255 255 / 0.05) var(--tw-gradient-via-position),
+    var(--tw-gradient-to);
+  --tw-gradient-to: transparent var(--tw-gradient-to-position);
 }
-.greenStatus {
-  border-color: #00b69b;
-  color: #00b69b;
-  background-color: #d5ffeb;
-}
-.redStatus {
-  background: #ffd3d3;
-  color: #fd5454;
-  border-color: #fd5454;
-}
-button.slick-arrow.slick-prev {
-  left: -10px;
-}
-button.slick-arrow.slick-next {
-  right: -10px;
-}
-.slick-prev:before,
-.slick-next:before {
-  color: var(--textColor);
-}
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  svg {
-    fill: white;
-  }
-}
-
-h1,
-h2,
-h3 {
-  margin-top: 40px;
-  margin-bottom: 10px;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  background: #00e673;
-  color: black;
-  padding: 10px 20px;
-  border-radius: 5px;
-  margin: 10px 0;
-}
-
-input {
+.btn {
+  min-height: unset !important;
   padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  margin: 10px 0;
+  border-radius: 6px;
 }
 
-button:disabled {
-  background: #ccc;
-  color: #666;
-}
-.modal-body {
-  background-color: var(--backgroundColor);
+.Toastify__toast-container {
+  z-index: 999999 !important;
 }
 
-/* css */
-
-.modal-body {
-  background-color: var(--backgroundColor);
-}
-.cstmModal .modalDialog {
-  max-height: calc(100% - 60px);
-  overflow: auto;
-  scrollbar-width: none;
-}
-.cstmModal .modalDialog::-webkit-scrollbar {
-  display: none;
+input.form-control {
+  height: 45px;
 }
 
-.nav.navpillsTab .tab-button {
-  background: var(--cardBg2);
-  border-color: var(--cardBg2);
-  color: var(--textColor);
+.form-control {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  width: 100%;
 }
-
-.nav.navpillsTab .tab-button.active {
-  background: #fc8148;
-  border-color: #fc8148;
-}
-
-/* end */

@@ -1,30 +1,416 @@
 "use client";
 import BTCAddressPop from "@/components/Modals/BtcAddressPop";
+import ChangeEmailPop from "@/components/Modals/ChangeEmail";
+import ConfirmationPop from "@/components/Modals/ConfirmationPop";
+import MultiSignPop from "@/components/Modals/multisignPop";
+import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
+import EnsDomainPop from "@/components/Modals/EnsDomainPop";
+import RecoverPopup from "@/components/Modals/RecoverPopup"
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { AccordionItem, BackBtn } from "@/components/common/index";
+import { useBackground } from "@/ContextApi/backgroundContent";
+import Image from "next/image";
+import BlogCard from "@/components/BlogCard";
+import s1 from "@/Assets/Images/screenshot.png";
+import PreviewBox from "./preview";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../lib/redux/slices/auth/authSlice";
+import { logoutStorage } from "../../utils/globals";
+import { zeroTrxn, getAccount, multisigSetup } from "@/lib/zeroDevWallet";
+import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
 
+import { toast } from "react-toastify";
+import { createPortal } from "react-dom";
+import { splitAddress } from "../../utils/globals";
+import { getUser, updtUser } from "../../lib/apiCall";
+import { webAuthKeyStore, storedataLocalStorage } from "../../utils/globals";
 const Setting: React.FC = () => {
-  const tabs = [
+  const {
+    selectBg,
+    backgrounds,
+    bgOpacity,
+    setBgOpacity,
+    selectWm,
+    watermarks,
+    setSelectedWatermark,
+    wmOpacity,
+    setWmOpacity,
+    changeBgOpacity,
+    changeWmOpacity,
+    selectedBackground,
+    selectedWatermark,
+  } = useBackground();
+  const dispatch = useDispatch();
+  const userAuth = useSelector((state: any) => state.Auth);
+  const [setUp, setSetUp] = useState<boolean>(false);
+  const [recover,
+    setRecover] = useState<boolean>(false);
+  const [ensDomain, setEnsDomain] = useState<boolean>(false);
+  const [sign, setSign] = useState<boolean>(false);
+  const [changeEmail, setChangeEmail] = useState<boolean>(false);
+  const [confirm, setConfirm] = useState<boolean>(false);
+   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
+    const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const handleCopy = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      toast.success("Copied Successfully!");
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+    }
+  };
+  const getPreview = async () => {
+    try {
+      console.log("email");
+      return await fetch(`/api/get-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: "https://devstack.madhousewallet.com/dashboard",
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+  console.log("userAuth-->", userAuth);
+  const setupMultisig = async () => {
+    try {
+      let userExist = await getUser(userAuth.email);
+      let passkeyNo =
+        (userExist?.userId?.passkey_number &&
+          userExist?.userId?.passkey_number + 1) ||
+        2;
+      let result = await multisigSetup(
+        userAuth?.webauthKey,
+        userAuth.email,
+        passkeyNo
+      );
+      console.log("result-->", result);
+      if (result.status) {
+        let webAuthKeyStringObj2: any = "";
+        let webAuthKeyStringObj3: any = "";
+        if (result.publicKey2) {
+          webAuthKeyStringObj2 = await webAuthKeyStore(result.publicKey2);
+        }
+        if (result.publicKey3) {
+          webAuthKeyStringObj3 = await webAuthKeyStore(result.publicKey3);
+        }
+        let webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey);
+        dispatch(
+          loginSet({
+            login: userAuth.login,
+            username: userAuth.username,
+            email: userAuth.email,
+            walletAddress: userAuth.walletAddress,
+            bitcoinWallet: userAuth.bitcoinWallet,
+            passkeyCred: userAuth.passkeyValidatorNew,
+            webauthKey: userAuth.webauthKey,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
+            id: userAuth.id,
+            signer: userAuth.signer,
+            multisigAddress: result.address,
+            passkey2: result.publicKey2,
+            passkey3: result.publicKey3,
+            multisigSetup: true,
+            multisigActivate: true,
+          })
+        );
+        let data = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: {
+              multisigAddress: result.address,
+              passkey2: webAuthKeyStringObj2,
+              passkey3: webAuthKeyStringObj3,
+              multisigSetup: true,
+              multisigActivate: true,
+              passkey_number: passkeyNo + 2,
+            }, // Ensure this is inside `$set`
+          }
+        );
+        storedataLocalStorage(
+          {
+            login: true,
+            walletAddress: userAuth.walletAddress || "",
+            bitcoinWallet: userAuth.bitcoinWallet || "",
+            signer: "",
+            username: userAuth.username,
+            email: userAuth.email,
+            passkeyCred: "",
+            webauthKey: webAuthKeyStringObj,
+            id: userAuth.id,
+            multisigAddress: userAuth.multisigAddress,
+            ensName: userAuth.ensName || "",
+            ensSetup: userAuth.ensSetup || false,
+            passkey2: webAuthKeyStringObj2,
+            passkey3: webAuthKeyStringObj3,
+            multisigSetup: true,
+            multisigActivate: true,
+          },
+          "authUser"
+        );
+
+        toast.success(result.msg);
+      } else {
+        toast.error(result.msg);
+      }
+    } catch (error) {
+      console.log("error-->", error);
+    }
+  };
+
+  const getSecretData = async (storageKey: any, credentialId: any) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId) as any;
+      if (retrieveSecretCheck?.status) {
+        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret)
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret
+        }
+      } else {
+        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg)
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg
+        }
+      }
+    } catch (error) {
+      console.log("error-->", error)
+      return {
+        status: false,
+        msg: "Error in Getting secret!"
+      }
+    }
+  }
+
+  // settingindex.tsx
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth.email);
+      if (userExist?.userId?.secretCredentialId && userExist?.userId?.secretStorageKey) {
+        let callGetSecretData = await getSecretData(userExist?.userId?.secretStorageKey, userExist?.userId?.secretCredentialId) as any
+        if (callGetSecretData?.status) {
+          // return {
+          //   status: true,
+          //   secret: callGetSecretData?.secret
+          // }
+          setRecoverSeed(JSON.parse(callGetSecretData?.secret))
+          setRecoverSeedStatus(true)
+        } else {
+          // return {
+          //   status: false,
+          //   msg: callGetSecretData?.msg
+          // }
+          setRecoverSeed(callGetSecretData?.msg)
+          setRecoverSeedStatus(false)
+        }
+      } else {
+        // return {
+        //   status: false,
+        //   secret: "No secret Stored!"
+        // }
+        setRecoverSeed("No secret Stored!")
+        setRecoverSeedStatus(false)
+      }
+      setRecover(!recover)
+    } catch (error) {
+      // return {
+      //   status: false,
+      //   secret: "Error in Fetching secret!"
+      // }
+      setRecoverSeed("Error in Fetching secret!")
+      setRecoverSeedStatus(false)
+    }
+  }
+
+
+
+  // useEffect(() => {
+  //   getPreview(); // Call the function
+  // }, []);
+
+  const accordionTabs = [
     {
-      title: "Help & Support",
-      content: <>asdfasdf</>,
+      title: "Whitelisted Address Book",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Whitelisted Address
+                </label>
+                <input
+                  type="text"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
     {
-      title: "Settings",
-      content: <>asdfasdf as2213123</>,
+      title: "Configure Subdomain Name",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  ENS username
+                </label>
+                <input
+                  type="text"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
     {
-      title: "Alert Preferences",
-      content: <>asdfasf 4234234234243234</>,
+      title: "Set Login Email/Phone",
+      content: (
+        <>
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Login Email/Phone
+                </label>
+                <input
+                  type="text"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
     {
-      title: "Wallet Owner",
-      content: <>asdfasf 4234234234243234</>,
+      title: "Update Owners",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Update Owners
+                </label>
+                <input
+                  type="text"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
+    // {
+    //   title: "Autopay loan",
+    //   content: (
+    //     <>
+    //       <form action="" className="pb-3">
+    //         <div className="grid gap-3 grid-cols-12">
+    //           <div className=" sm:col-span-6 col-span-12">
+    //             <label
+    //               htmlFor=""
+    //               className="form-label m-0 text-xs font-medium"
+    //             >
+    //               Autopay loan
+    //             </label>
+    //             <input
+    //               type="text"
+    //               className="form-control text-xs border-gray-600 bg-[var(--backgroundColor2)] focus:border-gray-600 focus:bg-[var(--backgroundColor2)]"
+    //             />
+    //           </div>
+    //           <div className=" sm:col-span-6 col-span-12 self-end">
+    //             <button className="btn flex items-center justify-center commonBtn text-xs h-[45px]">
+    //               Submit
+    //             </button>
+    //           </div>
+    //         </div>
+    //       </form>
+    //     </>
+    //   ),
+    // },
     {
-      title: "Whitelist Address",
-      content: <>asdfasf 4234234234243234</>,
+      title: "Scheduled Transfer ",
+      content: (
+        <>
+          {" "}
+          <form action="" className="pb-3">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" sm:col-span-6 col-span-12">
+                <label
+                  htmlFor=""
+                  className="form-label m-0 text-xs font-medium"
+                >
+                  Transfer
+                </label>
+                <input
+                  type="text"
+                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+              </div>
+              <div className=" sm:col-span-6 col-span-12 self-end">
+                <button className="flex h-[42px] text-xs items-center rounded-full bg-white px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50">
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      ),
     },
   ];
   const [activeTab, setActiveTab] = useState(1);
@@ -50,139 +436,650 @@ const Setting: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const handleAccordionClick = (index: number) => {
+    setOpenIndex(index === openIndex ? null : index);
+  };
+
+  const LogoutFuc = async () => {
+    try {
+      logoutStorage();
+      dispatch(
+        loginSet({
+          login: false,
+          walletAddress: "",
+          bitcoinWallet: "",
+          signer: "",
+          username: "",
+          email: "",
+          passkeyCred: "",
+          webauthKey: "",
+          id: "",
+          multisigAddress: "",
+          passkey2: "",
+          passkey3: "",
+          multisigSetup: false,
+          multisigActivate: false,
+          ensName: "",
+          ensSetup: false,
+        })
+      );
+      toast.success("Logout Successfully!");
+    } catch (error) {
+      console.log("logout error --->", error);
+    }
+  };
   return (
     <>
-      <section className="position-relative dashboard py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12 my-2">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">Setting & Support</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12 my-2">
-              <div className="grid gap-3 grid-cols-12">
-                <div className=" col-span-12">
-                  <div
-                    className="flex nav navpillsTab  flex-nowrap border-b gap-2  overflow-x-auto"
-                    style={{ borderColor: "#424242" }}
-                  >
-                    {tabs &&
-                      tabs.length > 0 &&
-                      tabs.map((item, key) => (
-                        <button
-                          key={key}
-                          onClick={() => showTab(key)}
-                          className={`${
-                            activeTab === key && "active"
-                          } tab-button font-medium relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
-                        >
-                          {item.title}
-                        </button>
-                      ))}
+      {sign &&
+        createPortal(
+          <MultiSignPop sign={sign} setSign={setSign} />,
+          document.body
+        )}
+           {/* const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false); */}
+           {/* const [recoverSeed, setRecoverSeed] = useState<any>(""); */}
+        {recover &&
+        createPortal(
+          <RecoverPopup recover={recover} setRecover={setRecover} phrase={recoverSeed} phraseStatus={recoverSeedStatus} />,
+          document.body
+        )}
+      {ensDomain &&
+        createPortal(
+          <EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />,
+          document.body
+        )}
+      {setUp &&
+        createPortal(
+          <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
+          document.body
+        )}
+      {changeEmail &&
+        createPortal(
+          <ChangeEmailPop
+            changeEmail={changeEmail}
+            setChangeEmail={setChangeEmail}
+          />,
+          document.body
+        )}
+      {confirm &&
+        createPortal(
+          <ConfirmationPop confirm={confirm} setConfirm={setConfirm} />,
+          document.body
+        )}
+      <section className="relative dashboard pt-12">
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
+            <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-3">
+              <div className="col-span-12 ">
+                <div className="sectionHeader p-2 ">
+                  <div className="flex items-center gap-3">
+                    {/* <BackBtn /> */}
+                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Setting & Support
+                    </h4>
                   </div>
                 </div>
-                <div className=" col-span-12">
-                  <div className={` tabContent pt-3`}>
-                    {tabs &&
-                      tabs.length > 0 &&
-                      tabs.map((item, key) => {
-                        if (activeTab !== key) return;
-                        return (
-                          <div
-                            key={key}
-                            id="tabContent1"
-                            className={`${
-                              activeTab === key && "block"
-                            } tab-content border-0`}
-                          >
-                            {item.content}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
               </div>
-              {/* <Tab.Container id="left-tabs-example" defaultActiveKey="Help">
+              {/* <div className="sm:col-span-4 col-span-12">
                 <div className="grid gap-3 grid-cols-12">
-                  <div className="sm:col-span-3 col-span-12">
-                    <NavList
-                      variant="pills"
-                      className="flex-column p-3 rounded-3 shadow"
-                      style={{ backgroundColor: "var(--cardBg2)" }}
-                    >
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="Help"
+                  <div className="col-span-12">
+                    <div className="rounded-20 bg-white/5 px-3 py-3 relative overflow-hidden z-[99]">
+                      <div className="relative">
+                        <Image
+                          src={selectedBackground}
+                          height={100000}
+                          width={100000}
+                          quality={100}
+                          alt="Background"
+                          className="transition-opacity fill-mode-both pointer-events-none rounded-12 inset-0 w-full object-cover object-center blur-[var(--wallpaper-blur)] duration-700"
+                          style={{
+                            opacity: bgOpacity,
+                            height: 200, 
+                          }}
+                        />
+                        <Image
+                          src={selectedWatermark}
+                          height={100000}
+                          width={100000}
+                          quality={100}
+                          alt=""
+                          className=" fill-mode-both mx-auto opacity-100 pointer-events-none absolute inset-0 w-auto h-auto top-[50%] transform -translate-y-1/2 object-container object-center blur-[var(--wallpaper-blur)] duration-700  z-[-1]"
+                          style={{ opacity: wmOpacity, height: "50%" }}
+                        />
+                        <div
+                          className="absolute left-0 right-0 bottom-0 w-full h-full flex-col justify-between flex"
+                          style={{ pointerEvents: "none" }}
                         >
-                          <span className="icn ">{helpIcn}</span>
-                          Help & Support
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="CardSettings"
-                        >
-                          <span className="icn">{settingIcn}</span> Card
-                          Settings
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="Alert"
-                        >
-                          <span className="icn">{alertIcn}</span>
-                          Alert Preferences
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="WalletOwner"
-                        >
-                          <span className="icn">{walletIcn}</span>
-                          Wallet Owner
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="py-2">
-                        <Nav.Link
-                          className="d-flex align-items-center gap-3 bg-transparent fw-sbold py-2"
-                          eventKey="WhitelistAddress"
-                        >
-                          <span className="icn">{whitelistIcn}</span>
-                          Whitelist Address
-                        </Nav.Link>
-                      </Nav.Item>
-                    </NavList>
-                  </div>
-                  <div className="sm:col-span-3 col-span-12">
-                    <Tab.Content>
-                      <Tab.Pane eventKey="Help">First tab content</Tab.Pane>
-                      <Tab.Pane eventKey="CardSettings">
-                        Second tab content
-                      </Tab.Pane>
-                      <Tab.Pane eventKey="Alert">Second tab content</Tab.Pane>
-                      <Tab.Pane eventKey="WalletOwner">
-                        Second tab content
-                      </Tab.Pane>
-                      <Tab.Pane eventKey="WhitelistAddress">
-                        Second tab content
-                      </Tab.Pane>
-                    </Tab.Content>
+                          <PreviewBox />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Tab.Container> */}
+              </div> */}
+              <div className=" col-span-12">
+                <div
+                  className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
+                >
+                  <div className="left">
+                    <h4 className="m-0 font-bold text-xl">Information</h4>
+                    <ul className="list-none pl-0 mb-0 text-xs">
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          wallet ID:
+                        </div>
+                        {/* {userAuth?.walletAddress && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.walletAddress ? (
+                            <>
+                              {splitAddress(userAuth?.walletAddress)}
+                              <button
+                                onClick={() =>
+                                  handleCopy(userAuth?.walletAddress)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          ) : (
+                            "--"
+                          )}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      {(<> <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Bitcoin wallet ID:
+                        </div>
+                        {/* {userAuth?.walletAddress && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.bitcoinWallet ? (
+                            <>
+                              {splitAddress(userAuth?.bitcoinWallet)}
+                              <button
+                                onClick={() =>
+                                  handleCopy(userAuth?.bitcoinWallet)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          ) : (
+                            "--"
+                          )}
+                        </span>
+                        {/* )} */}
+                      </li></>)
+                      }
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Email Address:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {userAuth?.email ? userAuth?.email : "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      {/* <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Subdomain Name:
+                        </div>
+                        <span className="text-white flex items-center">
+                          {" "}
+                          {userAuth?.ensName ? userAuth?.ensName : "--"}
+                        </span>
+                      </li> */}
+                    </ul>
+                  </div>
+                  <div className="right">
+                    {userAuth?.login ? (
+                      <button
+                        onClick={LogoutFuc}
+                        className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
+                      >
+                        {logoutIcn} Logout
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => router.push("/welcome")}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-10 h-[40px] px-[15px] text-13 text-destructive/90 hover:text-destructive2-lightest focus:text-destructive2-lightest"
+                        >
+                          Login
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-12">
+                <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
+                  {userAuth?.login && !userAuth?.pos ? (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Account
+                        </h3>
+                        <p className="text-xs leading-none -tracking-2 text-white/40">
+                          Your email
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setChangeEmail(!changeEmail)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12"
+                        >
+                          <svg
+                            stroke="currentColor"
+                            fill="currentColor"
+                            strokeWidth={0}
+                            viewBox="0 0 24 24"
+                            className="shrink-0 opacity-80"
+                            height="1em"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{ width: 14, height: 14 }}
+                          >
+                            <path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
+                          </svg>
+                          Change email
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper and theme
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {backgrounds.map((bg: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => {
+                                  selectBg(index);
+                                  getPreview();
+                                }}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
+                              >
+                                <Image
+                                  src={bg}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-cover rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Wallpaper Opacity
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Your Madhouse wallpaper opacity
+                      </p>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={bgOpacity}
+                          onChange={(e) => {
+                            changeBgOpacity(parseFloat(e.target.value));
+                            getPreview();
+                          }}
+                          className="w-full cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <ul className="list-none pl-0 mb-0 flex items-center gap-2">
+                          {watermarks.map((wm: string, index: number) => (
+                            <li className="" key={index}>
+                              <button
+                                onClick={() => selectWm(index)}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
+                              >
+                                <Image
+                                  src={wm}
+                                  height={10000}
+                                  width={10000}
+                                  alt=""
+                                  style={{ height: 30, width: 40 }}
+                                  className="max-w-full object-contain rounded"
+                                />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Watermark Opacity
+                      </h3>
+                    </div>
+                    <div className="-mx-2 max-w-full">
+                      <div className="flex-grow-1 flex h-7 max-w-full items-center animate-in fade-in">
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={wmOpacity}
+                          onChange={(e) =>
+                            changeWmOpacity(parseFloat(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* {userAuth?.login && !userAuth?.pos && (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Test Trxn
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={async () => {
+                            let account = await getAccount(
+                              userAuth?.passkeyCred,
+                              userAuth?.walletAddress
+                            );
+
+                            let data = await zeroTrxn(account?.kernelClient);
+                            if (data) {
+                              toast.success("Trxn Success!");
+                            } else {
+                              toast.error(
+                                "Trxn Failure. Please Check console for log!"
+                              );
+                            }
+                          }}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
+                          Zero Trxn
+                        </button>
+                      </div>
+                    </div>
+                  )} */}
+
+                  {/* {userAuth?.login && !userAuth?.pos && (
+                    <div
+                      tabIndex={-1}
+                      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs font-medium leading-none -tracking-2">
+                          Setup Recovery
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setSetUp(!setUp)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
+                          Backup Wallet
+                        </button>
+                      </div>
+                    </div>
+                  )} */}
+
+                  {userAuth?.login && !userAuth?.pos && (
+                    <>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Delete Account
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => setConfirm(!confirm)}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        {userAuth?.login && (<>
+                          <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Recover
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => recoverSeedPhrase()}
+                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                          >
+                            Recover
+                          </button>
+                        </div></>)}
+                      </div>
+                    </>
+                  )}
+                  {userAuth?.login &&
+                    !userAuth?.pos &&
+                    !userAuth.multisigSetup && (
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        {/* <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Multifactor Authentication
+                          </h3>
+                          <p className="text-xs leading-none -tracking-2 text-white/40">
+                            A second layer of security for your Madhouse Wallet
+                            login
+                          </p>
+                        </div> */}
+                        {/* <button
+                        type="button"
+                        role="switch"
+                        aria-checked="false"
+                        data-state="unchecked"
+                        value="on"
+                        className="peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-[background,color,box-shadow] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-white/6 focus-visible:ring-offset-1 focus-visible:ring-offset-white/20 disabled:opacity-50 data-[state=checked]:bg-brand data-[state=unchecked]:bg-white/10"
+                      >
+                        <span
+                          data-state="unchecked"
+                          className="pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
+                        />
+                      </button> */}
+                        {/* <button
+                          onClick={setupMultisig}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
+                          Setup
+                        </button> */}
+                      </div>
+                    )}
+                  {userAuth?.login &&
+                    !userAuth?.pos &&
+                    userAuth.multisigSetup && (
+                      <div
+                        tabIndex={-1}
+                        className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <h3 className="text-xs font-medium leading-none -tracking-2">
+                            Multisign Trxn
+                          </h3>
+                          <p className="text-xs leading-none -tracking-2 text-white/40"></p>
+                        </div>
+                        <button
+                          onClick={() => setSign(!sign)}
+                          className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                        >
+                          Trxn
+                        </button>
+                      </div>
+                    )}
+                  {/* {userAuth?.login && (!(userAuth?.pos)) && (<>
+                    <div
+                    tabIndex={-1}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-xs font-medium leading-none -tracking-2">
+                        Setup ENS Domain
+                      </h3>
+                      <p className="text-xs leading-none -tracking-2 text-white/40">
+                        Eth naming service
+                      </p>
+                    </div>
+                   
+                    <button
+                    onClick={()=> setEnsDomain(!ensDomain)}
+                      className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                    >
+                      Setup
+                    </button>
+                  </div>
+                  </>)} */}
+
+                  {/* <AccordionWrpper className="grid gap-3 grid-cols-12 py-3">
+                    {accordionTabs && accordionTabs.length > 0 && (
+                      <>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(0, Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                key={key}
+                                svg={false}
+                                wrpperClass={
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() => handleAccordionClick(key)}
+                                isOpen={openIndex === key}
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                        </div>
+                        <div className="md:col-span-6 col-span-12">
+                          {accordionTabs
+                            .slice(Math.ceil(accordionTabs.length / 2))
+                            .map((item, key) => (
+                              <AccordionItem
+                                key={key + Math.ceil(accordionTabs.length / 2)}
+                                svg={false}
+                                wrpperClass={
+                                  "my-2 bg-white/5 px-lg-4 AccordionItem"
+                                }
+                                onClick={() =>
+                                  handleAccordionClick(
+                                    key + Math.ceil(accordionTabs.length / 2)
+                                  )
+                                }
+                                isOpen={
+                                  openIndex ===
+                                  key + Math.ceil(accordionTabs.length / 2)
+                                }
+                                btnClass={`accordionBtn text-white flex items-center text-xs text-left gap-2 px-3 rounded py-3 h-[50px] relative text-white font-medium`}
+                                btnIcnClass={``}
+                                title={item.title}
+                              >
+                                <div className="px-3">{item.content}</div>
+                              </AccordionItem>
+                            ))}
+                        </div>
+                      </>
+                    )}
+                  </AccordionWrpper> */}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -191,6 +1088,20 @@ const Setting: React.FC = () => {
   );
 };
 
+const AccordionWrpper = styled.div`
+  .AccordionItem {
+    border-radius: 8px;
+    border: 1px solid #5252525e;
+    .accordionBtn {
+      justify-content: start;
+      ${"" /* color: var(--textColor) !important; */}
+    }
+    input {
+      color: var(--textColor);
+      height: 45px;
+    }
+  }
+`;
 // const NavList = styled(Nav)`
 //   font-size: 12px;
 //   a {
@@ -298,5 +1209,53 @@ const backIcn = (
       stroke-width="2"
       stroke-linejoin="round"
     />
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);
+
+const copyIcn = (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
+      fill="currentColor"
+    />
+    <path
+      opacity="0.5"
+      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const logoutIcn = (
+  <svg
+    height={14}
+    width={14}
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C15.2713 2 18.1757 3.57078 20.0002 5.99923L17.2909 5.99931C15.8807 4.75499 14.0285 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C14.029 20 15.8816 19.2446 17.2919 17.9998L20.0009 17.9998C18.1765 20.4288 15.2717 22 12 22ZM19 16V13H11V11H19V8L24 12L19 16Z"></path>
   </svg>
 );

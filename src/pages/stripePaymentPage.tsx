@@ -1,65 +1,142 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { loadStripeOnramp } from "@stripe/crypto";
-import { CryptoElements, OnrampElement } from "@/components/stripe/StripeCryptoElements";
+import {
+  CryptoElements,
+  OnrampElement,
+} from "@/components/stripe/StripeCryptoElements";
 import styled from "styled-components";
+import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 
 // Load Stripe Onramp with your publishable API key
 const stripeOnrampPromise = loadStripeOnramp(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-const StripePaymentPage: React.FC = () => {
+interface StripePaymentPageProps {
+  walletAddress?: string;
+  amount?: number;
+  currency?: string;
+}
+
+const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
+  walletAddress,
+  amount = 10,
+  currency = "USD",
+}) => {
+  console.log("walletAddress", walletAddress);
+  const userAuth = useSelector((state: any) => state.Auth);
+  const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleGoBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   useEffect(() => {
-    // Fetch the onramp session and set the client secret
-    try {
-      fetch(`/api/create-onramp-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          transaction_details: {
-            destination_currency: "btc",
-            destination_exchange_amount: "10000000",
-            destination_network: "ethereum"
+    const fetchSession = async () => {
+      try {
+        setIsLoading(true);
+        const amountValue = amount || Number(router.query.amount) || 10;
+        const currencyValue =
+          currency || (router.query.currency as string) || "USD";
+        // const btcAddress = walletAddress;
+
+        const btcAddress = userAuth?.bitcoinWallet; // Replace with your default Bitcoin address
+
+        if (!btcAddress) {
+          setMessage("Wallet address is required");
+          return;
+        }
+
+        const response = await fetch("/api/create-onramp-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) =>{
-          console.log("data-->",data);
-          setClientSecret(data.clientSecret)
+          body: JSON.stringify({
+            wallet_address: btcAddress,
+            sourceCurrency: "usd",
+            destinationCurrency: "btc",
+            destinationNetwork: "bitcoin",
+            destinationExchangeAmount: "0.01",
+          }),
         });
-    } catch (error) {
-      console.log(error)
-    }
-   
-  }, []);
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setClientSecret(data.clientSecret);
+        } else {
+          setMessage(`Error: ${data.error}`);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setMessage("Failed to initialize payment session");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSession();
+  }, [walletAddress, amount, currency, router.query]);
 
   const onChange = useCallback(({ session }: { session: any }) => {
     setMessage(`OnrampSession is now in ${session.status} state.`);
   }, []);
 
   return (
-    <PaymentSec className="py-5">
+    <PaymentSec className="py-4">
       <div className="container">
         <div className="grid gap-3 grid-cols-12">
           <div className="col-span-12">
-            <div className="mx-auto">
-              {clientSecret ? (
+            <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
+              {/* <div className="flex align-items-center gap-3">
+                <button
+                  onClick={handleGoBack}
+                  className="border-0 themeClr p-0"
+                >
+                  <BackIcon />
+                </button>
+                <h4 className="m-0 text-2xl font-bold">Buy Ethereum</h4>
+              </div> */}
+            </div>
+          </div>
+          <div className="col-span-12">
+            <div className="mx-auto formMain">
+              {isLoading ? (
+                <p className="text-center">Loading payment interface...</p>
+              ) : clientSecret ? (
                 <CryptoElements stripeOnramp={stripeOnrampPromise}>
                   <OnrampElement
                     id="onramp-element"
                     clientSecret={clientSecret}
-                    appearance={{ theme: "dark" }}
+                    appearance={{
+                      theme: "dark",
+                      variables: {
+                        colorPrimary: "#0055de",
+                        colorBackground: "#1a1a1a",
+                        colorText: "#ffffff",
+                        colorTextSecondary: "#999999",
+                      },
+                    }}
                     onChange={onChange}
                   />
                 </CryptoElements>
               ) : (
-                <p className="text-center">Loading payment...</p>
+                <p className="text-center text-red-500">{message}</p>
               )}
-              {message && <div id="onramp-message">{message}</div>}
+              {/* {message && clientSecret && (
+                <div id="onramp-message" className="mt-4 text-gray-400">
+                  {message}
+                </div>
+              )} */}
             </div>
           </div>
         </div>
@@ -69,45 +146,25 @@ const StripePaymentPage: React.FC = () => {
 };
 
 const PaymentSec = styled.section`
-#onramp-element {
-  iframe {
-  margin: 0 auto !important;
-  }
-  }
+  .formMain {
+    max-width: 540px;
+    margin: 0 auto;
 
-  #onramp-message {
-    margin-top: 20px;
-    color: rgb(105, 115, 134);
-    font-size: 16px;
-    line-height: 20px;
-    text-align: center;
-  }
+    #onramp-element {
+      iframe {
+        margin: 0 auto !important;
+        min-height: 600px;
+        width: 100%;
+      }
+    }
 
-  #onramp-element {
-    margin: 20px 0;
-  }
-
-  button {
-    background: #0055de;
-    font-family: Arial, sans-serif;
-    color: #ffffff;
-    border-radius: 4px;
-    border: 0;
-    padding: 12px 16px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-  }
-
-  button:hover {
-    filter: contrast(115%);
-  }
-
-  button:disabled {
-    opacity: 0.5;
-    cursor: default;
+    #onramp-message {
+      margin-top: 20px;
+      color: rgb(105, 115, 134);
+      font-size: 16px;
+      line-height: 20px;
+      text-align: center;
+    }
   }
 `;
 

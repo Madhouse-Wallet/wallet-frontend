@@ -5,23 +5,156 @@ import React, { useEffect, useRef, useState } from "react";
 import p1 from "@/public/user.png";
 import Image from "next/image";
 import styled from "styled-components";
-import { MinimizeTwoTone } from "@mui/icons-material";
 import { createPortal } from "react-dom";
 import DebtPositionPop from "@/components/Modals/debtPositionPop";
+import LiquitdityProtectionPop from "@/components/Modals/LiquidityProtectionPop";
+import SupplyPopUp from "@/components/Modals/SupplyPop";
+import AdjustPopup from "@/components/Modals/AdjustPopup";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers, providers } from "ethers";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { BackBtn } from "@/components/common";
 
 const DebtPosition: React.FC = () => {
+  const userAuth = useSelector((state: any) => state.Auth);
   const router = useRouter();
   const [showFirstComponent, setShowFirstComponent] = useState(true);
-  const [ischecked, setIschecked] =  useState<boolean>(false);
+  const [liquidity, setLiquidity] = useState(false);
+  const [ischecked, setIschecked] = useState<boolean>(false);
+  const [withdrawButton, setWithdrawButton] = useState<boolean>(false);
   const [debtPosition, setDebtPosition] = useState<boolean>(false);
+  const [supplyPop, setSupplyPop] = useState<boolean>(false);
+  const [adjustPop, setAdjustPop] = useState<boolean>(false);
+  const [supply, setSupply] = useState<string>("0");
+  const [debtvalue, setDebtvalue] = useState<string>("0");
+  const [providerr, setProviderr] = useState<any>(null);
+  const [healthValue, setHealthtvalue] = useState<string>("0");
+  const [walletBalance, setWalletBalance] = useState<string>("0");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const calculateCollateralAndHealthFactor = async (
+    collateralAmount: string, // in ETH
+    debt: string, // in USD
+    provider:any
+  ) => {
+    try {
+      if (!provider) {
+        return { collateralValue: "0.00", healthFactor: "0.00" };
+      }
+
+      // Fetch ETH price
+      const contractAddress =
+        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
+      const web3 = new Web3Interaction("sepolia", provider);
+      const receipt = await web3.fetchPrice(contractAddress!);
+      const receiptInEther = ethers.utils.formatEther(receipt);
+      const ethPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
+
+      const collateral = parseFloat(collateralAmount);
+      const debtAmount = parseFloat(debt);
+
+      if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
+        throw new Error("Invalid collateral amount or debt provided.");
+      }
+
+      const collateralValue = ethPrice * collateral;
+      const healthFactor = (collateralValue * 1.1) / debtAmount;
+      setHealthtvalue(healthFactor.toFixed(2));
+    } catch (error) {
+      return { collateralValue: "0.00", healthFactor: "0.00" };
+    }
+  };
+
+  const fetchTroveData = async (provider: any) => {
+    try {
+      if (!provider) {
+        return;
+      }
+
+      const walletAddress = userAuth?.walletAddress;
+      console.log("walletAddress-->", walletAddress);
+      // Create web3 instance
+      const web3 = new Web3Interaction("sepolia", provider);
+      console.log("web3-->", web3);
+      // Contract address
+      const contractAddress =
+        process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS;
+      const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
+      console.log("TUSDAddress-->93", TUSDAddress, contractAddress);
+      // Fetch data from the contract
+      const troveResponse = await web3.Troves(contractAddress!, walletAddress);
+      console.log("troveResponse-->93", troveResponse);
+      const balanceResponse = await web3.balanceOf(TUSDAddress!, walletAddress);
+      console.log("balanceResponse-->93", balanceResponse);
+      const coll = troveResponse?.coll;
+      const debt = troveResponse?.debt;
+
+      const collInEther = ethers.utils.formatEther(coll);
+      const debtInEther = ethers.utils.formatEther(debt);
+      const balance = ethers.utils.formatEther(balanceResponse);
+      console.log("balance-->93", balance);
+      calculateCollateralAndHealthFactor(collInEther, debtInEther,provider);
+      setSupply(collInEther);
+      setDebtvalue(debtInEther);
+      setWalletBalance(balance);
+      setLoading(false);
+    } catch (err: any) {
+      console.log(err);
+      toast.error("Failed to fetch trove data");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log("userAuth-->", userAuth);
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        console.log("account---<", account);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          console.log("provider-->", provider);
+          if (provider) {
+            console.log("provider -line-114", provider);
+            setProviderr(provider?.ethersProvider);
+            try {
+              fetchTroveData(provider?.ethersProvider);
+            } catch (err: any) {
+              toast.error("Failed to connect wallet");
+              setLoading(false);
+            }
+            // kernelProvider, ethersProvider
+          } else {
+            toast.error(
+              "MetaMask not detected. Please install MetaMask to proceed."
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      // else{
+      //   // toast.error(
+      //   //   "Please Login"
+      //   // );
+      //   router.push("/welcome");
+      //   return
+      // }
+    };
+
+    connectWallet();
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowFirstComponent(false); // Hide the first component after 4-5 seconds
-    }, 3000); // 5000ms = 5 seconds
+    }, 3000); // 3000ms = 3 seconds
 
-    // Cleanup timer when the component unmounts
     return () => clearTimeout(timer);
   }, []);
+
   const handleGoBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
       router.back(); // Navigates to the previous page
@@ -29,6 +162,40 @@ const DebtPosition: React.FC = () => {
       router.push("/"); // Fallback: Redirects to the homepage
     }
   };
+  const Withdraw = async () => {
+    if (!providerr) {
+      toast.error("Please Login");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setWithdrawButton(true);
+      const web3 = new Web3Interaction("sepolia", providerr);
+      const spenderAddress =
+        process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS; // Replace with actual spender address
+      const troveResponse = await web3.closeTrove(spenderAddress!);
+      setLoading(false);
+      setWithdrawButton(false);
+      toast.success("Transaction Completed");
+      fetchTroveData(providerr);
+    } catch (err: any) {
+      toast.error(err || "Caller doesn't have enough THUSD to make repayment");
+      setLoading(false);
+      setWithdrawButton(false);
+    }
+  };
+
+  // if (loading) {
+  //   return (
+  //     <div className="container py-5">
+  //       <div className="text-center">
+  //         <h4>Loading trove data...</h4>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
   return (
     <>
       {debtPosition &&
@@ -36,216 +203,279 @@ const DebtPosition: React.FC = () => {
           <DebtPositionPop
             debtPosition={debtPosition}
             setDebtPosition={setDebtPosition}
+            fetchTroveData={fetchTroveData}
           />,
           document.body
         )}
-      <section className="position-relative dashboard py-3">
+      {supplyPop &&
+        createPortal(
+          <SupplyPopUp
+            supplyPop={supplyPop}
+            setSupplyPop={setSupplyPop}
+            fetchTroveData={fetchTroveData}
+          />,
+          document.body
+        )}
+      {adjustPop &&
+        createPortal(
+          <AdjustPopup
+            adjustPop={adjustPop}
+            setAdjustPop={setAdjustPop}
+            supply={supply}
+            debtvalue={debtvalue}
+            fetchTroveData={fetchTroveData}
+          />,
+          document.body
+        )}
+      <section className="relative dashboard pt-12">
         <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12 my-2">
-              <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    onClick={handleGoBack}
-                    className="border-0 themeClr p-0"
-                  >
-                    {backIcn}
-                  </button>
-                  <h4 className="m-0 text-2xl font-bold">
-                    Collateral Debt Position
-                  </h4>
+          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
+            {/* <button
+              onClick={() => router.push("/dashboard")}
+              className="border-0 p-0 absolute z-[99] top-2 right-2 opacity-40 hover:opacity-70"
+              style={{ background: "transparent" }}
+            >
+              {closeIcn}
+            </button> */}
+            <div className="grid gap-3 grid-cols-12 px-lg-4">
+              <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <div className="sectionHeader ">
+                  <div className="flex items-center gap-3">
+                    <BackBtn />
+                    <h4 className="m-0 text-24 font-bold -tracking-3 text-white/75 md:text-4xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Bitcoin Loan
+                    </h4>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="md:col-span-6 col-span-12 my-2">
-              <CardCstm
-                className="p-3 rounded position-relative"
-                style={{ maxWidth: 300 }}
-              >
-                <div className="top pb-3 d-flex align-items-center justify-content-between gap-3">
-                  <div className="content">
-                    <p className="m-0">Assets</p>
-                  </div>
-                  <span className="icn">
-                    <button
-                      className="d-flex align-items-center justify-content-center commonBtn fw-sbold"
-                      style={{ minWidth: "unset" }}
-                    >
-                      APY 4%
-                    </button>
-                  </span>
-                </div>
-                <div
-                  className="pt-3 p-3 rounded"
-                  style={{ background: "var(--cardBg2)" }}
+              <div className="md:col-span-6 col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <CardCstm
+                  className="p-3 rounded-8 relative bg-black/50"
+                  style={{ maxWidth: 300 }}
                 >
-                  <ul
-                    className="list-unstyled ps-0 mb-0"
-                    style={{ fontSize: 12 }}
+                  <div className="top pb-3 flex items-center justify-between gap-3">
+                    <div className="content">
+                      <p className="m-0">Asset</p>
+                    </div>
+                    <span className="icn">
+                      {/* <button
+                      className="flex items-center justify-content-center commonBtn fw-sbold"
+                      style={{ minWidth: "unset" }}
+                    > */}
+                      Bitcoin
+                      {/* </button> */}
+                    </span>
+                  </div>
+                  <div
+                    className="pt-3 p-3 rounded"
+                    style={{ background: "var(--cardBg2)" }}
                   >
-                    <li className=" d-flex align-items-center justify-content-between">
-                      <p className="m-0 fw-sbold">Net Balance</p>
-                      <p className="m-0 fw-sbold">$ 1,234,34</p>
-                    </li>
-                    <li
-                      className=" d-flex align-items-center justify-content-between"
-                      style={{ fontSize: 10 }}
+                    <ul
+                      className="list-unstyled ps-0 mb-0"
+                      style={{ fontSize: 12 }}
                     >
-                      <p className="m-0 fw-sbold">Health Factor</p>
-                      <p className="m-0 fw-sbold"> 1.2</p>
-                    </li>
-                  </ul>
-                </div>
-              </CardCstm>
-            </div>
-            <div className="col-span-12 my-2">
-              <div className="grid gap-3 grid-cols-12">
-                <div className="md:col-span-6 col-span-12 my-2">
-                  <div className="sectionHeader pb-3">
-                    <h4 className="m-0 font-semibold text-xl">Position</h4>
+                      <li className=" flex items-center justify-between">
+                        <p className="m-0 fw-sbold">Virtual Card</p>
+                        <p className="m-0 fw-sbold">
+                          {Number(walletBalance).toFixed(4)}
+                        </p>
+                      </li>
+                      <li
+                        className=" flex items-center justify-between"
+                        style={{ fontSize: 10 }}
+                      >
+                        <p className="m-0 fw-sbold">Loan-to-Value Ratio</p>
+                        <p className="m-0 fw-sbold">{healthValue}</p>
+                      </li>
+                    </ul>
                   </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Supply</p>
-                        <p className="m-0">APY 1%</p>
-                      </div>
-                      <div className="right">
-                        <p className="m-0 fw-sbold">$10000</p>
-                      </div>
-                    </CardCstm>
+                </CardCstm>
+              </div>
+              <div className="col-span-12 my-2 p-2 px-3 px-lg-4 py-lg-3">
+                <div className="grid gap-3 grid-cols-12">
+                  <div className="md:col-span-6 col-span-12 my-2">
+                    <div className="sectionHeader pb-3">
+                      <h4 className="m-0 font-semibold text-xl">Position</h4>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50 "
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Bitcoin Collateral</p>
+                          {/* <p className="m-0">APY 1%</p> */}
+                        </div>
+                        <div className="right">
+                          <p className="m-0 fw-sbold">{supply}</p>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">USD Debt</p>
+                          {/* <p className="m-0">APY 1%</p> */}
+                        </div>
+                        <div className="right">
+                          <p className="m-0 fw-sbold">
+                            {Number(debtvalue).toFixed(4)}
+                          </p>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 bg-black/50"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="left">
+                            <p className="m-0 fw-sbold">Auto Pay Loan</p>
+                          </div>
+                        </div>
+                        <div className="content pt-3">
+                          <form action="" className="">
+                            <div className="grid gap-3 grid-cols-12">
+                              <div className=" sm:col-span-6 col-span-12">
+                                <input
+                                  type="text"
+                                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                                />
+                              </div>
+                              <div className=" sm:col-span-6 col-span-12 self-end">
+                                <button
+                                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                                >
+                                  Submit
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </CardCstm>
+                    </div>
                   </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Borrow</p>
-                        <p className="m-0">APY 1%</p>
-                      </div>
-                      <div className="right">
-                        <p className="m-0 fw-sbold">-$40000</p>
-                      </div>
-                    </CardCstm>
-                  </div>
-                </div>
-                <div className="md:col-span-6 col-span-12 my-2">
-                  <div className="sectionHeader pb-3">
-                    <h4 className="m-0 fw-bold text-xl">Management</h4>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Liquidation Protection</p>
-                      </div>
-                      <div className="right">
-                        <GradientHandleSwitch
-                          uncheckedIcon={undefined}
-                          checkedIcon={undefined}
-                          height={16}
-                          width={48}
-                          handleDiameter={24}
-                          offColor="#4C4C57"
-                          onColor="#4C4C57"
-                          checked={ischecked}
-                          onChange={() => setIschecked(!ischecked)}
-                          boxShadow="0px 0px 0px 0px"
-                          activeBoxShadow="0px 0px 0px 0px"
-                        />
-                      </div>
-                    </CardCstm>
-                  </div>
+                  <div className="md:col-span-6 col-span-12 my-2">
+                    <div className="sectionHeader pb-3">
+                      <h4 className="m-0 fw-bold text-xl">Configurations</h4>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Liquidation Alerts</p>
+                        </div>
+                        <div className="right">
+                          <GradientHandleSwitch
+                            uncheckedIcon={undefined}
+                            checkedIcon={undefined}
+                            height={16}
+                            width={48}
+                            handleDiameter={24}
+                            offColor="#4C4C57"
+                            onColor="#4C4C57"
+                            checked={liquidity}
+                            onChange={() => setLiquidity(!liquidity)}
+                            boxShadow="0px 0px 0px 0px"
+                            activeBoxShadow="0px 0px 0px 0px"
+                          />
+                        </div>
+                      </CardCstm>
+                    </div>
 
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between flex-wrap"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Open or Close CDP</p>
-                      </div>
-                      <div className="right">
-                        <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
-                          <li className="">
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between bg-black/50 flex-wrap"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Loan Management</p>
+                        </div>
+                        <div className="right">
+                          <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
+                            <li className="">
+                              <button
+                                onClick={() => setDebtPosition(!debtPosition)}
+                                className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4 py-1"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Open a Loan
+                              </button>
+                            </li>
+                            <li className="">
+                              <button
+                                className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                                onClick={Withdraw}
+                                disabled={withdrawButton}
+                              >
+                                {withdrawButton
+                                  ? "Withdrawing.."
+                                  : "Close a Loan"}
+                              </button>
+                            </li>
+                          </ul>
+                        </div>
+                      </CardCstm>
+                    </div>
+                    <div className="py-2">
+                      <CardCstm
+                        className="relative p-3 rounded-8 flex items-center justify-between flex-wrap bg-black/50"
+                        style={{
+                          fontSize: 12,
+                        }}
+                      >
+                        <div className="left">
+                          <p className="m-0 fw-sbold">Loan Health</p>
+                        </div>
+                        <div className="right">
+                          <ul className="list-unstyled ps-0 mb-0 flex items-center gap-1">
+                            <li className="">
+                              <button
+                                onClick={() => setSupplyPop(!supplyPop)}
+                                className="flex items-center justify-center bg-[#FFEC8A] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Add Collateral
+                              </button>
+                            </li>
+                            <li className="">
+                              <button
+                                onClick={() => setAdjustPop(!adjustPop)}
+                                className="flex items-center justify-center bg-[#CB89FF] text-black font-medium btn h-auto py-2 text-xs border-0 rounded-20 px-4"
+                                style={{ minWidth: "unset" }}
+                              >
+                                Adjust Debt
+                              </button>
+                            </li>
+                            {/* <li className="">
                             <button
-                              onClick={() => setDebtPosition(!debtPosition)}
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Open CDP
-                            </button>
-                          </li>
-                          <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Withdraw
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </CardCstm>
-                  </div>
-                  <div className="py-2">
-                    <CardCstm
-                      className="position-relative p-3 rounded d-flex align-items-center justify-content-between flex-wrap"
-                      style={{
-                        fontSize: 12,
-                        background: "var(--cardBg2)",
-                      }}
-                    >
-                      <div className="left">
-                        <p className="m-0 fw-sbold">Health Management</p>
-                      </div>
-                      <div className="right">
-                        <ul className="list-unstyled ps-0 mb-0 d-flex align-items-center gap-3">
-                          <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Supply
-                            </button>
-                          </li>
-                          <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
-                              style={{ minWidth: "unset" }}
-                            >
-                              Repay
-                            </button>
-                          </li>
-                          <li className="">
-                            <button
-                              className="d-flex align-items-center justify-content-center fw-sbold commonBtn"
+                              className="flex items-center justify-content-center fw-sbold commonBtn"
                               style={{ minWidth: "unset" }}
                             >
                               Switch
                             </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </CardCstm>
+                          </li> */}
+                          </ul>
+                        </div>
+                      </CardCstm>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -263,10 +493,17 @@ const GradientHandleSwitch = styled(Switch)`
   }
 `;
 const CardCstm = styled.div`
-  background-color: var(--cardBg);
-  // border: 1px solid #ff8735;
   font-size: 14px;
   line-height: 20px;
+  border: 1px solid #282828a6;
+  transition: 0.4s;
+  &:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+  input,
+  button {
+    height: 40px;
+  }
 `;
 
 export default DebtPosition;
@@ -340,5 +577,19 @@ const btcIcn = (
         <rect width="16" height="16" fill="white" />
       </clipPath>
     </defs>
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
   </svg>
 );

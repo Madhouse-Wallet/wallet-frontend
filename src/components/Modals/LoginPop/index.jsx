@@ -1,12 +1,411 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styled from "styled-components";
-
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
+import loginVerify from "./loginVerify";
+import { send } from "process";
+import {
+  generateOTP,
+  bufferToBase64,
+  base64ToBuffer,
+} from "../../../utils/globals";
 const LoginPop = ({ login, setLogin }) => {
+  const dispatch = useDispatch();
+  const [registerEmail, setRegisterEmail] = useState();
+  const [registerUsername, setRegisterUsername] = useState();
+  const [registerOTP, setRegisterOTP] = useState();
+  const [checkOTP, setCheckOTP] = useState();
+  const [registerTab, setRegisterTab] = useState(1);
+
+  const [loginEmail, setLoginEmail] = useState();
+
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
+  async function isValidEmail(email) {
+    // Define the email regex pattern
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Test the email against the regex
+    return emailRegex.test(email);
+  }
+
+  const addUser = async (
+    email,
+    username,
+    passkey,
+    publickeyId,
+    rawId,
+    wallet
+  ) => {
+    try {
+      try {
+        console.log(email, username, passkey, publickeyId, rawId);
+        return await fetch(`/api/add-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            username,
+            passkey,
+            publickeyId,
+            rawId,
+            wallet,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            // console.log("data-->", data);
+            return data;
+          });
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    } catch (error) {
+      console.log("error-->", error);
+      return false;
+    }
+  };
+  const getUser = async (email) => {
+    try {
+      try {
+        // console.log(email)
+        return await fetch(`/api/get-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            // console.log("data-->", data);
+            return data;
+          });
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    } catch (error) {
+      console.log("error-->", error);
+      return false;
+    }
+  };
+
+  const sendOTP = async ({ email, name, otp, subject, type }) => {
+    try {
+      // console.log(email)
+      return await fetch(`/api/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          subject,
+          emailData: {
+            name: name,
+            verificationCode: otp,
+          },
+          email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log("error-->", error);
+      return false;
+    }
+  };
+  const loginFn = async () => {
+    try {
+      setLoginLoading(true);
+      if (!loginEmail) {
+        toast.error("Please Enter Email!");
+      } else {
+        let validEmail = await isValidEmail(loginEmail);
+        if (!validEmail) {
+          setLoginLoading(false);
+          return toast.error("Please Enter Valid Email!");
+        }
+        let userExist = await getUser(loginEmail);
+        if (userExist.status && userExist.status == "failure") {
+          toast.error("User Not Found!");
+        } else {
+          // console.log(base64ToBuffer(userExist.userId.rawId))
+          //base64ToBuffer(userExist.rawId)
+          const authenticated = false;
+          if (authenticated) {
+            let account = false;
+            console.log("account-->", account);
+            if (account) {
+              toast.success("Login Successfully!");
+              dispatch(
+                loginSet({
+                  login: true,
+                  walletAddress: account?.account?.address || "",
+                  bitcoinWallet:userExist.userId.bitcoinWallet|| "",
+                  signer: "",
+                  username: (userExist.userId.username || ""),
+                  email: userExist.userId.email,
+                  passkeyCred: userExist.userId.passkey || "",
+                  multisigAddress: userExist.userId.multisigAddress || "",
+                  ensName: userExist.userId.ensName || "",
+                  ensSetup: userExist.userId.ensSetup || false,
+                  passkey2: userExist.userId.passkey2 || "",
+                  passkey3: userExist.userId.passkey3 || "",
+                  multisigSetup: userExist.userId.multisigSetup || false,
+                  multisigActivate: userExist.userId.multisigActivate || false
+                })
+              );
+              setLoginEmail();
+              handleLogin();
+            } else {
+              toast.error("Login Failed!");
+            }
+          } else {
+            toast.error("Login Failed!");
+          }
+        }
+      }
+      setLoginLoading(false);
+    } catch (error) {
+      setLoginLoading(false);
+      console.log("error---->", error);
+    }
+  };
+
+  const registerFn = async () => {
+    try {
+      setRegisterLoading(true);
+      if (!registerOTP) {
+        toast.error("Please Enter OTP!");
+      } else if (registerOTP != checkOTP) {
+        toast.error("Invalid OTP!");
+      } else {
+        let userExist = await getUser(registerEmail);
+        // console.log("userExist-->", userExist)
+        if (userExist.status && userExist.status == "success") {
+          return toast.error("User Already Exist!");
+        }
+        const createdCredential = false;
+        if (createdCredential) {
+          let account = false;
+          // account, smartAccountClient
+          console.log("account-->", account?.account?.address);
+          let data = await addUser(
+            registerEmail,
+            registerUsername,
+            createdCredential,
+            createdCredential.publicKey,
+            createdCredential.id,
+            account?.account?.address
+          );
+          console.log("logged user--->", data)
+          toast.success("Sign Up Successfully!");
+          setRegisterTab(2);
+          dispatch(
+            loginSet({
+              login: true,
+              walletAddress: account?.account?.address || "",
+              bitcoinWallet:data.userData.bitcoinWallet|| "",
+              signer: "",
+              username: registerUsername,
+              email: registerEmail,
+              passkeyCred: createdCredential || "",
+              multisigAddress: data.userData.multisigAddress || "",
+              passkey2: data.userData.passkey2 || "",
+              passkey3: data.userData.passkey3 || "",
+              ensName: data.userData.ensName || "",
+              ensSetup: data.userData.ensSetup || false,
+              multisigSetup: data.userData.multisigSetup || false,
+              multisigActivate: data.userData.multisigActivate || false
+            })
+          );
+          setRegisterEmail();
+          setRegisterUsername();
+          handleLogin();
+        }
+      }
+      setRegisterLoading(false);
+    } catch (error) {
+      console.log("error---->", error);
+      setRegisterLoading(false);
+    }
+  };
+
+  const sendRegisterOtp = async () => {
+    try {
+      setRegisterOtpLoading(true);
+      if (!registerEmail) {
+        toast.error("Please Enter Email!");
+      } else if (!registerUsername) {
+        toast.error("Please Enter Username!");
+      } else {
+        let validEmail = await isValidEmail(registerEmail);
+        if (!validEmail) {
+          setRegisterOtpLoading(false);
+          return toast.error("Please Enter Valid Email!");
+        }
+        // console.log("t")
+        let userExist = await getUser(registerEmail);
+        // console.log("userExist-->", userExist)
+        if (userExist.status && userExist.status == "success") {
+          toast.error("User Already Exist!");
+        } else {
+          let OTP = generateOTP(4);
+          setCheckOTP(OTP);
+          let obj = {
+            email: registerEmail,
+            name: registerUsername,
+            otp: OTP,
+            subject: "Madhouse Account Verification OTP",
+            type: "registerOtp",
+          };
+          let sendEmailData = await sendOTP(obj);
+          if (sendEmailData.status && sendEmailData.status == "success") {
+            setRegisterTab(2);
+            toast.success(sendEmailData?.message);
+          } else {
+            toast.error(sendEmailData?.message || sendEmailData?.error);
+          }
+        }
+      }
+      setRegisterOtpLoading(false);
+    } catch (error) {
+      console.log("error---->", error);
+      setRegisterOtpLoading(false);
+    }
+  };
+  const tabs = [
+    {
+      title: "Login",
+      content: (
+        <>
+          {/* <form action="" className="px-3"> */}
+          <div className="grid gap-3 grid-cols-12">
+            <div className="col-span-12">
+              <label htmlFor="" className="form-label m-0 font-medium text-xs">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+              />
+            </div>
+            <div className="col-span-12">
+              <button
+                disabled={loginLoading}
+                onClick={loginFn}
+                className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+              >
+                {loginLoading ? "Loading" : "Submit"}
+              </button>
+            </div>
+          </div>
+          {/* </form> */}
+        </>
+      ),
+    },
+    {
+      title: "Sign Up",
+      content: (
+        <>
+          {/* <form  className="px-3"> */}
+          <div className="grid gap-3 grid-cols-12">
+            {registerTab == 1 && (
+              <>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={registerUsername}
+                    onChange={(e) => setRegisterUsername(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <button
+                    disabled={registerOtpLoading}
+                    onClick={sendRegisterOtp}
+                    className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+                  >
+                    {registerOtpLoading ? "Loading" : "Submit"}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {registerTab == 2 && (
+              <>
+                <div className="col-span-12">
+                  <label
+                    htmlFor=""
+                    className="form-label m-0 font-medium text-xs"
+                  >
+                    OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={registerOTP}
+                    onChange={(e) => setRegisterOTP(e.target.value)}
+                    required
+                    className="form-control bg-[var(--backgroundColor2)] border-gray-600 focus:bg-[var(--backgroundColor2)] focus:border-gray-600 text-xs"
+                  />
+                </div>
+                <div className="col-span-12">
+                  <button
+                    disabled={registerLoading}
+                    onClick={registerFn}
+                    className="btn text-xs commonBtn flex items-center justify-center btn w-full"
+                  >
+                    {registerLoading ? "Loading" : "Submit"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          {/* </form> */}
+        </>
+      ),
+    },
+  ];
   const router = useRouter();
   const [pass, setPass] = useState();
   const handlePass = () => {
     setPass(!pass);
+  };
+  const [activeTab, setActiveTab] = useState(0);
+  const showTab = (tab) => {
+    console.log(tab, "tab");
+    setActiveTab(tab);
   };
   const handleLogin = () => {
     setLogin(!login);
@@ -18,10 +417,79 @@ const LoginPop = ({ login, setLogin }) => {
       >
         <div className="absolute inset-0 bg-black opacity-70"></div>
         <div
-          className={`modalDialog relative p-2 mx-auto w-full w-full rounded-lg z-10 bg-[var(--backgroundColor)]`}
+          className={`modalDialog relative p-2 mx-auto w-full w-full rounded-2 z-10 bg-[var(--backgroundColor)]`}
         >
           <div className="modalBody py-2 px-2">
-            <div className="formInner position-relative px-lg-3">
+            <button
+              onClick={handleLogin}
+              className="border-0 p-0 position-absolute"
+              variant="transparent"
+              style={{ right: 0, top: 0 }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 16 15"
+                fill="none"
+              >
+                <g clip-path="url(#clip0_0_6282)">
+                  <path
+                    d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
+                    fill="var(--textColor)"
+                  />
+                  <path
+                    d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
+                    fill="var(--textColor)"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_0_6282">
+                    <rect
+                      width="15"
+                      height="15"
+                      fill="var(--textColor)"
+                      transform="translate(0.564453)"
+                    />
+                  </clipPath>
+                </defs>
+              </svg>
+            </button>
+            <div
+              className="flex nav navpillsTab border-b"
+              style={{ borderColor: "#424242" }}
+            >
+              {tabs &&
+                tabs.length > 0 &&
+                tabs.map((item, key) => (
+                  <button
+                    key={key}
+                    onClick={() => showTab(key)}
+                    className={`${activeTab === key && "active"
+                      } tab-button font-medium  w-50 relative py-2 flex-shrink-0 rounded-bl-none rounded-br-none text-xs px-3 py-2 btn`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+            </div>
+            <div className={` tabContent pt-3`}>
+              {tabs &&
+                tabs.length > 0 &&
+                tabs.map((item, key) => {
+                  if (activeTab !== key) return;
+                  return (
+                    <div
+                      key={key}
+                      id="tabContent1"
+                      className={`${activeTab === key && "block"
+                        } tab-content border-0`}
+                    >
+                      {item.content}
+                    </div>
+                  );
+                })}
+            </div>
+            {/* <div className="formInner relative px-lg-3">
               <div className="w-100 inner text-center">
                 <h2 className="m-0 fw-bold themeClr pb-3 pb-lg-4">
                   Use Safe Account via Passkeys
@@ -30,13 +498,13 @@ const LoginPop = ({ login, setLogin }) => {
                   Create a new Safe using passkeys
                 </h5>
                 <div className="py-3 py-lg-4 btnWrpper">
-                  <button className="d-flex align-items-center justify-content-center commonBtn w-100 borderedBtn">
+                  <button className="flex items-center justify-content-center commonBtn w-100 borderedBtn">
                     <span className="icn me-1">{fignerPrintIcn}</span>
                     Create a new Passkey
                   </button>
                 </div>
                 <div
-                  className={`py-3 py-lg-4 position-relative d-flex align-items-center justify-content-center`}
+                  className={`py-3 py-lg-4 relative flex items-center justify-content-center`}
                 >
                   <p className="m-0 px-2  fw-light">OR</p>
                 </div>
@@ -46,14 +514,14 @@ const LoginPop = ({ login, setLogin }) => {
                 <div className="pt-3 pt-lg-4 btnWrpper">
                   <button
                     onClick={() => router.push("/dashboard")}
-                    className="d-flex align-items-center justify-content-center commonBtn w-100"
+                    className="flex items-center justify-content-center commonBtn w-100"
                   >
                     <span className="icn me-1">{fignerPrintIcn}</span>
                     Use an Existing passkey
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </Modal>
@@ -64,6 +532,9 @@ const LoginPop = ({ login, setLogin }) => {
 const Modal = styled.div`
   .modalDialog {
     max-width: 500px;
+    input {
+      color: var(--textColor);
+    }
   }
 `;
 
