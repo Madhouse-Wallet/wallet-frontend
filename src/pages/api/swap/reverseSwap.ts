@@ -58,13 +58,19 @@ export default async function handler(
     }
 
     const keys = ECPairFactory(ecc).makeRandom();
+    const ECPair = ECPairFactory(ecc);
+    const keyPair = ECPair.makeRandom(); // compressed by default
 
+    const refundPublicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
+    
+    console.log('refundPublicKey:', refundPublicKeyHex); // should start with 02 or 03
+    
     // Create a Submarine Swap
     const response = await axios.post(`${ENDPOINT}/v2/swap/submarine`, {
       invoice,
       to: 'BTC',
       from: 'BTC',
-      refundPublicKey: (keys.publicKey as Buffer).toString('hex'),
+      refundPublicKey:refundPublicKeyHex
     });
 
     const createdResponse = response.data;
