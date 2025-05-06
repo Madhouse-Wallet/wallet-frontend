@@ -77,7 +77,6 @@ const LightningTab = (walletAddress) => {
 
     setError("");
     setLoading(true);
-    console.log("line-59", walletAddress?.walletAddress);
     const result = await createSwap(
       Number(amount),
       walletAddress?.walletAddress
@@ -88,7 +87,6 @@ const LightningTab = (walletAddress) => {
       setLoading(false);
       return;
     }
-    console.log("Swap created:", result?.data?.invoice);
     setStep(2);
     generateQRCode(result?.data?.invoice);
     setInvoice(result?.data?.invoice);

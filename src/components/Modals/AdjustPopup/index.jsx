@@ -4,8 +4,7 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { getProvider,getAccount } from "@/lib/zeroDevWallet";
-
+import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 
 // css
 
@@ -18,14 +17,15 @@ const AdjustPopup = ({
   debtvalue,
   fetchTroveData,
 }) => {
-  console.log("debtvalue",debtvalue)
   const userAuth = useSelector((state) => state.Auth);
   const [supplyAmount, setSupplyAmount] = useState(supply);
   const [totalDebtAmount, settotalDebtAmount] = useState();
   const [changeInput, setChangeInput] = useState(false);
   const [nextButton, setNextButton] = useState(false);
   const [borrowingFeee, setBorrowingFeee] = useState();
-  const [debtAmount, setDebtAmount] = useState(debtvalue === '0.0' || debtvalue === '0'? 0 : debtvalue - 200 );
+  const [debtAmount, setDebtAmount] = useState(
+    debtvalue === "0.0" || debtvalue === "0" ? 0 : debtvalue - 200
+  );
   const [error, setError] = useState("");
   const [debtError, setDebtError] = useState("");
   const [collRatio, setCollRatio] = useState();
@@ -60,15 +60,16 @@ const AdjustPopup = ({
   };
 
   const addSupply = async () => {
-  
     if (!providerr) {
       return toast.error("Please Connect to wallet");
     }
-    setNextButton(true)
+    setNextButton(true);
     const web3 = new Web3Interaction("sepolia", providerr);
 
-    const contractAddress = process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
-    const lowerHint = process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
+    const contractAddress =
+      process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
+    const lowerHint =
+      process.env.NEXT_PUBLIC_THRESHOLD_LOWERHINT_CONTRACT_ADDRESS;
     const maxFeePercentage = ethers.utils.parseEther("0.01");
 
     let updatedSupplyAmount = supplyAmount;
@@ -121,12 +122,11 @@ const AdjustPopup = ({
         account.kernelClient
       );
       toast.success(`Transaction Successfull`);
-      setAdjustPop(false)
-      fetchTroveData(providerr)
+      setAdjustPop(false);
+      fetchTroveData(providerr);
     } catch (error) {
       toast.error(error);
-      setNextButton(false)
-      console.log("Adjust trove error",error)
+      setNextButton(false);
     }
   };
 
@@ -168,7 +168,8 @@ const AdjustPopup = ({
       // }
 
       // Fetch ETH price
-      const contractAddress = process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
+      const contractAddress =
+        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
       const web3 = new Web3Interaction("sepolia", providerr);
       const receipt = await web3.fetchPrice(contractAddress);
       const receiptInEther = ethers.utils.formatEther(receipt);
@@ -207,29 +208,26 @@ const AdjustPopup = ({
     }
   }, [supplyAmount, debtAmount]);
 
-    useEffect(() => {
-      const connectWallet = async () => {
-        if (userAuth?.passkeyCred) {
-          let account = await getAccount(userAuth?.passkeyCred);
-          console.log("account---<", account);
-          if (account) {
-            let provider = await getProvider(account.kernelClient);
-            console.log("provider-->", provider);
-            if (provider) {
-              console.log("provider -line-114", provider);
-              setProviderr(provider?.ethersProvider);
-            }
+  useEffect(() => {
+    const connectWallet = async () => {
+      if (userAuth?.passkeyCred) {
+        let account = await getAccount(userAuth?.passkeyCred);
+        if (account) {
+          let provider = await getProvider(account.kernelClient);
+          if (provider) {
+            setProviderr(provider?.ethersProvider);
           }
-        } 
-        // else {
-        //   toast.error("Please Login");
-        //   return;
-        // }
-      };
-  
-      connectWallet();
-      calculateCollateralAndHealthFactor(supplyAmount, debtvalue);
-    }, []);
+        }
+      }
+      // else {
+      //   toast.error("Please Login");
+      //   return;
+      // }
+    };
+
+    connectWallet();
+    calculateCollateralAndHealthFactor(supplyAmount, debtvalue);
+  }, []);
   return (
     <>
       <Modal
@@ -248,7 +246,7 @@ const AdjustPopup = ({
         >
           {" "}
           <div className={`relative rounded px-3`}>
-          <div className="top pb-3">
+            <div className="top pb-3">
               <h5 className="m-0 text-xl fw-bold">Adjust</h5>
             </div>
             <div className="modalBody">
@@ -335,14 +333,17 @@ const AdjustPopup = ({
                     className="flex items-center justify-center btn commonBtn w-full"
                     // disabled={supplyAmount === 0 ? true : false}
                     disabled={
-                      collRatio > 110 && error === "" && changeInput === true && nextButton === false
+                      collRatio > 110 &&
+                      error === "" &&
+                      changeInput === true &&
+                      nextButton === false
                         ? false
                         : true
                     }
                     // disabled={supplyAmount !== supply && debtAmount !== debtvalue && collRatio > 110 && error === ''  ? false : true}
                     onClick={() => addSupply()}
                   >
-                    {nextButton ? "Adjusting Trove ...":"Next"}
+                    {nextButton ? "Adjusting Trove ..." : "Next"}
                   </button>
                 </div>
               </form>

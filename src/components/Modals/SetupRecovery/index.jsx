@@ -6,19 +6,10 @@ import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  webAuthKeyStore,
-  storedataLocalStorage
-} from "../../../utils/globals";
-import {
-  getRecoverAccount,
-  doRecovery,
-} from "../../../lib/zeroDevWallet";
+import { webAuthKeyStore, storedataLocalStorage } from "../../../utils/globals";
+import { getRecoverAccount, doRecovery } from "../../../lib/zeroDevWallet";
 // @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-import {
-  getUser,
-  updtUser,
-} from "../../../lib/apiCall";
+import { getUser, updtUser } from "../../../lib/apiCall";
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -26,26 +17,15 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const [step, setStep] = useState(1);
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
   const [phrase, setPhrase] = useState();
-  console.log(userAuth);
-
-
-
-
 
   const checkPhrase = async () => {
     try {
-      setLoadingNewSigner(true)
-      // console.log(
-      //   "ph",
-      //   phrase.trim().split(" ").length,
-      //   phrase.trim().split(" ")
-      // );
+      setLoadingNewSigner(true);
       if (!userAuth?.login) {
-        setLoadingNewSigner(false)
-        return toast.error("Please Login!")
+        setLoadingNewSigner(false);
+        return toast.error("Please Login!");
       }
       if (phrase && phrase.trim().split(" ").length == 12) {
-        // console.log(userAuth);
         let checkAccount = await getRecoverAccount(
           userAuth?.walletAddress,
           userAuth?.passkeyCred,
@@ -59,39 +39,44 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
       } else {
         toast.error("Invalid Phrase!");
       }
-      setLoadingNewSigner(false)
+      setLoadingNewSigner(false);
     } catch (error) {
       toast.error("Invalid Phrase!");
-      setLoadingNewSigner(false)
+      setLoadingNewSigner(false);
       console.log("error-->", error);
       setStep(1);
     }
   };
 
-
   const createNewSigner = async () => {
     try {
-      setLoadingNewSigner(true)
+      setLoadingNewSigner(true);
       // updtUser
       let userExist = await getUser(userAuth.email);
       if (userExist.status && userExist.status == "failure") {
         toast.error("User Not Found!");
       } else {
-        let passkeyNo = ((userExist?.userId?.passkey_number && (userExist?.userId?.passkey_number + 1)) || 2);
+        let passkeyNo =
+          (userExist?.userId?.passkey_number &&
+            userExist?.userId?.passkey_number + 1) ||
+          2;
         let checkAccount = await doRecovery(
           userAuth?.walletAddress,
           userAuth?.passkeyCred,
           phrase.trim(),
-          (userAuth.email + "_passkey_" + passkeyNo)
+          userAuth.email + "_passkey_" + passkeyNo
         );
         if (checkAccount.status) {
-          // console.log("checkAccount--<?>", checkAccount)
-          let webAuthKeyStringObj = await webAuthKeyStore(checkAccount.newwebAuthKey)
-          let data = await updtUser({ email: userAuth.email }, {
-            $push: { passkey: webAuthKeyStringObj },
-            $set: { passkey_number: passkeyNo } // Ensure this is inside `$set`
-          })
-          // console.log("updated data==>",data)
+          let webAuthKeyStringObj = await webAuthKeyStore(
+            checkAccount.newwebAuthKey
+          );
+          let data = await updtUser(
+            { email: userAuth.email },
+            {
+              $push: { passkey: webAuthKeyStringObj },
+              $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
+            }
+          );
           // passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
           dispatch(
             loginSet({
@@ -110,50 +95,51 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               passkey2: userAuth.passkey2,
               passkey3: userAuth.passkey3,
               multisigSetup: userAuth.multisigSetup,
-              multisigActivate: userAuth.multisigActivate
+              multisigActivate: userAuth.multisigActivate,
             })
           );
 
-
-          let webAuthKeyStringObj2 = ""
-          let webAuthKeyStringObj3 = ""
-          if(userAuth.passkey2){
-            webAuthKeyStringObj2 =  await webAuthKeyStore(userAuth.passkey2)
+          let webAuthKeyStringObj2 = "";
+          let webAuthKeyStringObj3 = "";
+          if (userAuth.passkey2) {
+            webAuthKeyStringObj2 = await webAuthKeyStore(userAuth.passkey2);
           }
-          if(userAuth.passkey3){
-            webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3)
+          if (userAuth.passkey3) {
+            webAuthKeyStringObj3 = await webAuthKeyStore(userAuth.passkey3);
           }
 
-          storedataLocalStorage({
-            login: true,
-            walletAddress: userAuth.walletAddress || "",
-            bitcoinWallet: userAuth.bitcoinWallet || "",
-            signer: "",
-            username: userAuth.username,
-            email: userAuth.email,
-            passkeyCred: "",
-            webauthKey: webAuthKeyStringObj,
-            id: userAuth.id,
-            multisigAddress:  userAuth.multisigAddress,
-            passkey2:  webAuthKeyStringObj2,
-            passkey3: webAuthKeyStringObj3,
-            ensName: userAuth.ensName || "",
-            ensSetup: userAuth.ensSetup || false,
-            multisigSetup:  userAuth.multisigSetup,
-            multisigActivate:  userAuth.multisigActivate
-          }, "authUser")
+          storedataLocalStorage(
+            {
+              login: true,
+              walletAddress: userAuth.walletAddress || "",
+              bitcoinWallet: userAuth.bitcoinWallet || "",
+              signer: "",
+              username: userAuth.username,
+              email: userAuth.email,
+              passkeyCred: "",
+              webauthKey: webAuthKeyStringObj,
+              id: userAuth.id,
+              multisigAddress: userAuth.multisigAddress,
+              passkey2: webAuthKeyStringObj2,
+              passkey3: webAuthKeyStringObj3,
+              ensName: userAuth.ensName || "",
+              ensSetup: userAuth.ensSetup || false,
+              multisigSetup: userAuth.multisigSetup,
+              multisigActivate: userAuth.multisigActivate,
+            },
+            "authUser"
+          );
           toast.success("New Key Recovered!");
-          setSetUp(!setUp)
+          setSetUp(!setUp);
         } else {
           toast.error(checkAccount.msg);
         }
       }
 
-      setLoadingNewSigner(false)
+      setLoadingNewSigner(false);
       // doRecoveryNewSigner
     } catch (error) {
-      setLoadingNewSigner(false)
-      console.log("error new sigenr -->", error);
+      setLoadingNewSigner(false);
     }
   };
 
@@ -175,7 +161,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           <div className={`relative rounded px-3`}>
-
             {/* <div className="top pb-3">
             </div> */}
             <div className="modalBody">
@@ -205,7 +190,8 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                     <div className="btnWrpper mt-3 text-center">
                       <button
                         type="button"
-                        onClick={checkPhrase} className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        onClick={checkPhrase}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Paste
                       </button>
@@ -218,7 +204,9 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                     {phrase.split(" ").map((item, key) => (
                       <div key={key} className="col-span-6">
                         <div className="iconWithText relative">
-                          <div className="flex items-center justify-center rounded-full left-1 absolute icn h-[40px] w-[40px] bg-white text-black text-xs">{key + 1}</div>
+                          <div className="flex items-center justify-center rounded-full left-1 absolute icn h-[40px] w-[40px] bg-white text-black text-xs">
+                            {key + 1}
+                          </div>
                           <input
                             readOnly={true}
                             value={item}
@@ -235,8 +223,11 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
                     >
                       <button
                         disabled={loadingNewSigner}
-                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}>
-                        {loadingNewSigner ? ("Creating...") : ("Create a new Signer")} {" "}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        {loadingNewSigner
+                          ? "Creating..."
+                          : "Create a new Signer"}{" "}
                       </button>
                     </div>
                   </div>
@@ -268,7 +259,6 @@ const Modal = styled.div`
 
 export default SetupRecoveryPop;
 
-
 const closeIcn = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -299,7 +289,6 @@ const closeIcn = (
     </defs>
   </svg>
 );
-
 
 const copyIcn = (
   <svg

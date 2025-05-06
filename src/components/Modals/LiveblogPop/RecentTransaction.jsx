@@ -54,7 +54,6 @@ const RecentTransaction = ({ transactions, data }) => {
     const groups = {};
 
     txs.forEach((tx) => {
-      console.log("line-57", tx);
 
       if (tx?.date && typeof tx.date === "string") {
         // Parse the date string with moment
@@ -106,7 +105,6 @@ const RecentTransaction = ({ transactions, data }) => {
       }
     });
 
-    console.log("Groups:", groups);
 
     // Sort the groups by date (most recent first)
     const sortedGroups = {};

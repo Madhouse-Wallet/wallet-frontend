@@ -31,7 +31,6 @@ const PointOfSalePop = ({
         try {
           const user = await getUser(userAuth.email);
           if (user) {
-            console.log("user-->", user);
             setLnbitLink(user?.userId?.lnbitLinkId);
             setLnbitLink2(user?.userId?.lnbitLinkId_2 || "");
             setIsLoading(false); // stop loader if user found

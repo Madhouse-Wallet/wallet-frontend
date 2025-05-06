@@ -3,7 +3,6 @@ import axios from "axios";
 export const getUser = async (email) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -13,7 +12,6 @@ export const getUser = async (email) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -31,7 +29,6 @@ export const getUser = async (email) => {
 export const sendLnbit = async (amount, onchain_address) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/send-lnbit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,7 +56,6 @@ export const sendLnbit = async (amount, onchain_address) => {
 export const btcSat = async (amount) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/btc-sat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +82,6 @@ export const btcSat = async (amount) => {
 export const getBitcoinAddress = async (email) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/generate-bitcoin-wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,7 +104,6 @@ export const getBitcoinAddress = async (email) => {
 export const getEnsName = async (ensName) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +114,6 @@ export const getEnsName = async (ensName) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -141,7 +134,6 @@ export const getSubdomainApproval = async (
 ) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/relayer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,7 +146,6 @@ export const getSubdomainApproval = async (
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {

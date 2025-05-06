@@ -22,9 +22,7 @@ const BlogCard = ({ classN, data }) => {
     provider
   ) => {
     try {
-      console.log("line-24", collateralAmount, debt, provider);
       if (!provider) {
-        console.log("line-26");
         return { collateralValue: "0.00", healthFactor: "0.00" };
       }
 
@@ -38,7 +36,6 @@ const BlogCard = ({ classN, data }) => {
 
       const collateral = parseFloat(collateralAmount);
       const debtAmount = parseFloat(debt);
-      console.log("line-39", collateral, debtAmount);
 
       if (isNaN(collateral) || isNaN(debtAmount) || debtAmount === 0) {
         throw new Error("Invalid collateral amount or debt provided.");
@@ -46,7 +43,6 @@ const BlogCard = ({ classN, data }) => {
 
       const collateralValue = ethPrice * collateral;
       const healthFactor = (collateralValue * 1.1) / debtAmount;
-      console.log("line-47", collateralValue, healthFactor);
 
       setHealthtvalue(healthFactor.toFixed(2));
     } catch (error) {
@@ -61,55 +57,41 @@ const BlogCard = ({ classN, data }) => {
       }
 
       const walletAddress = userAuth?.walletAddress;
-      console.log("walletAddress-->", walletAddress);
       // Create web3 instance
       const web3 = new Web3Interaction("sepolia", provider);
-      console.log("web3-->", web3);
       // Contract address
       const contractAddress =
         process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS;
       const TUSDAddress = process.env.NEXT_PUBLIC_THUSD_CONTRACT_ADDRESS;
-      console.log("TUSDAddress-->93", TUSDAddress, contractAddress);
       // Fetch data from the contract
       const troveResponse = await web3.Troves(contractAddress, walletAddress);
-      console.log("troveResponse-->93", troveResponse);
       const balanceResponse = await web3.balanceOf(TUSDAddress, walletAddress);
-      console.log("balanceResponse-->93", balanceResponse);
       const coll = troveResponse?.coll;
       const debt = troveResponse?.debt;
 
       const collInEther = ethers.utils.formatEther(coll);
       const debtInEther = ethers.utils.formatEther(debt);
       const balance = ethers.utils.formatEther(balanceResponse);
-      console.log("balance-->93", balance);
       const result = calculateCollateralAndHealthFactor(
         collInEther,
         debtInEther,
         provider
       );
-      console.log("line-84", result);
       setSupply(collInEther);
       setDebtvalue(debtInEther);
       setWalletBalance(balance);
     } catch (err) {
-      console.log(err);
       toast.error("Failed to fetch trove data");
     }
   };
-  console.log("data", data);
 
   useEffect(() => {
-    console.log("userAuth-->", userAuth);
-
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
-        console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
           if (provider) {
-            console.log("provider-107", provider);
             setProviderr(provider?.ethersProvider);
             try {
               fetchTroveData(provider?.ethersProvider);
@@ -139,7 +121,6 @@ const BlogCard = ({ classN, data }) => {
     }
   }, [data, userAuth]); // Added data to dependencies since we're using it
 
-  console.log("line-122", supply, debtvalue, walletBalance, healthValue);
   return (
     <>
       {data?.map((item, index) => (

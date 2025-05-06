@@ -12,23 +12,18 @@ import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts"
 
 // img
 
-const DepositPopup = ({
-  depositPop,
-  setDepositPop,
-}) => {
+const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
-  console.log("userAuth-->", userAuth)
   const handleDepositPop = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       if (!userAuth?.login) {
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
-        console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
         } else {
@@ -42,13 +37,7 @@ const DepositPopup = ({
               process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
             );
             // liquidShift now contains all the information about the shift, including the deposit address
-            console.log("Deposit address:", liquidShift.depositAddress);
-            console.log("start send -->")
             const web3 = new Web3Interaction("sepolia", providerr);
-            console.log(process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr)
             const result = await web3.sendUSDC(
               process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
               liquidShift.depositAddress,
@@ -65,23 +54,19 @@ const DepositPopup = ({
             } else {
               toast.error(result.error || "Transaction failed");
             }
-
           } else {
             toast.error("Please sign Up Again!");
           }
-
         }
       }
 
-      setDepositPop(!depositPop)
-      setLoading(false)
+      setDepositPop(!depositPop);
+      setLoading(false);
     } catch (error) {
-      console.log("error==>", error?.message)
       toast.error(error?.message);
-      setLoading(false)
+      setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -107,15 +92,13 @@ const DepositPopup = ({
     connectWallet();
   }, [userAuth?.passkeyCred]);
 
-
-
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <button
-          onClick={()=> setDepositPop(!depositPop)}
+          onClick={() => setDepositPop(!depositPop)}
           type="button"
           className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
@@ -129,7 +112,9 @@ const DepositPopup = ({
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">Deposit</h5>
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                Deposit
+              </h5>
             </div>
             <div className="modalBody">
               <form action="">
@@ -149,8 +134,6 @@ const DepositPopup = ({
                     />
                   </div>
                 </div>
-
-
 
                 <div className="btnWrpper mt-3">
                   <button

@@ -28,7 +28,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
-      console.log("Starting scanner...");
       await html5QrCode.start(
         { facingMode: "environment" },
         {
@@ -37,7 +36,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
           qrbox: { width: 350, height: 250 },
         },
         async (decodedText) => {
-          console.log("QR Code detected:", decodedText);
           await stopScanner();
           onScan(decodedText);
           setOpenCam(false);
@@ -50,7 +48,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       );
 
       isScanning.current = true;
-      console.log("Scanner started successfully");
     } catch (err) {
       console.error("Failed to start scanner:", err);
       await stopScanner();

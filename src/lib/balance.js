@@ -9,9 +9,7 @@ const ERC20_ABI = [
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApiKey) {
-    console.log('Starting getWalletNetWorth function...');
-    
+export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApiKey) {    
     let provider;
     try {
         provider = new ethers.providers.JsonRpcProvider(providerUrl);
@@ -30,9 +28,7 @@ export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApi
             throw error;
         }
         
-        const ethBalanceInEther = parseFloat(ethers.utils.formatEther(ethBalance));
-        console.log('ETH balance:', ethBalanceInEther);
-        
+        const ethBalanceInEther = parseFloat(ethers.utils.formatEther(ethBalance));        
         let ethPrice = 0;
         try {
             const response = await axios.get(
@@ -40,7 +36,6 @@ export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApi
                 { timeout: 5000 }
             );
             ethPrice = response.data.ethereum.usd;
-            console.log('ETH price:', ethPrice);
         } catch (error) {
             console.error('Failed to fetch ETH price:', error);
             throw error;
@@ -66,7 +61,6 @@ export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApi
         }
         
         const uniqueTokens = [...new Set(tokenTxs.map(tx => tx.contractAddress))];
-        console.log(`Found ${uniqueTokens.length} unique tokens`);
         
         let totalValue = ethValue;
         const holdings = [{
@@ -105,7 +99,6 @@ export async function getWalletNetWorth(walletAddress, providerUrl, etherscanApi
                                 usdValue
                             });
                             totalValue += usdValue;
-                            console.log(`Added ${symbol}: ${formattedBalance} ($${usdValue.toFixed(2)})`);
                         }
                     } catch (error) {
                         console.log(`Skipping price fetch for ${symbol}: ${error.message}`);

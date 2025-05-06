@@ -37,7 +37,6 @@ const Header: React.FC<HeaderProps> = ({ sidebar, setSidebar }) => {
         msg = "",
         status = "",
       } = await passkeyValidator(userAuth.webauthKey);
-      console.log("newPasskeyValidator-->", newPasskeyValidator);
       if (status) {
         dispatch(
           loginSet({

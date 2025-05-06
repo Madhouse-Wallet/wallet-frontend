@@ -8,7 +8,6 @@ import { useTheme } from "@/ContextApi/ThemeContext";
 
 const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
   const { theme, toggleTheme } = useTheme();
-  console.log('transactionDatatransactionData',transactionData)
   
   // Function to truncate address
   const truncateAddress = (address) => {
@@ -39,7 +38,6 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     return address.substring(2, 4).toUpperCase();
   };
 
-  console.log("datedate",date)
   return (
     <>
       <Modal

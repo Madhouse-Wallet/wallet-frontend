@@ -15,7 +15,6 @@ import RecentTransaction from "./RecentTransaction";
 const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
   const userAuth = useSelector((state) => state.Auth);
   const { theme, toggleTheme } = useTheme();
-  console.log("transactions", transactions);
   const handleLiveBlog = () => setLiveBlog(!liveBlog);
   return (
     <>

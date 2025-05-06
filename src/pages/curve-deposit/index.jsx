@@ -1,8 +1,5 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import DepositTab from "./DepositTab";
-import WithdrawTab from "./WithdrawTab";
-import UnstakeTab from "./UnstakeTab";
 import { getProvider, getAccount } from "../../lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import styled from "styled-components";

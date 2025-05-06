@@ -18,7 +18,6 @@ const Sidebar = ({ sidebar, setSidebar }) => {
   const [buy, setBuy] = useState(false);
   const dispatch = useDispatch();
 
-  console.log(router.pathname == "/", "asdfas");
   const isChecked = theme === "light";
   const logoutFn = async () => {
     setSidebar(!sidebar);

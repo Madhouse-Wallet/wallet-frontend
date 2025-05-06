@@ -20,7 +20,6 @@ const CounterList = ({ data }) => {
     try {
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
       const data = await fetchWalletHistory(userAuth?.walletAddress);
-      console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
@@ -108,7 +107,6 @@ const CounterList = ({ data }) => {
         [process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS],
         userAuth.walletAddress
       );
-      console.log("data", balance);
 
       if (balance?.result?.length) {
         const latestTransactions = balance.result.slice(0, 10).map((tx) => {
@@ -143,7 +141,6 @@ const CounterList = ({ data }) => {
         [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
         userAuth.walletAddress
       );
-      console.log("data", balance);
 
       if (balance?.result?.length) {
         const latestTransactions = balance.result.slice(0, 10).map((tx) => {
@@ -176,7 +173,6 @@ const CounterList = ({ data }) => {
     }
   };
 
-  console.log(data, "data");
   return (
     <>
       {liveBlog &&

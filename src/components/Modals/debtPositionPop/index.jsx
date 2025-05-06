@@ -32,7 +32,6 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
 
   const fetchCollateralData = async () => {
     try {
-      console.log("inside ttry");
       const response = await fetch("/api/get-collateralData", {
         method: "GET",
         headers: {
@@ -41,13 +40,11 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
       });
 
       const data = await response.json();
-      console.log("ddddd", data);
       if (!response.ok) {
         throw new Error(data.message || "Failed to fetch collateral data");
       }
 
       if (data.status === "success") {
-        console.log("ddddd", data?.collateralData?.currentCollateralRatio);
         setBaseCollataeralRatio(data?.collateralData?.currentCollateralRatio);
       } else {
         setBaseCollataeralRatio(null);
@@ -57,7 +54,6 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     }
   };
 
-  console.log("llllllll", baseCollateralRatio);
   const handleDebtPosition = () => setDebtPosition(!debtPosition);
 
   // const calculateRecommendedCollateral = (borrowingAmount, btcPrice, ltv) => {
@@ -106,7 +102,6 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     }
     setDepositButton(true);
     const web3 = new Web3Interaction("sepolia", providerr);
-    console.log("line-58");
     const contractAddress =
       process.env.NEXT_PUBLIC_BORROW_OPERATION_CONTRACT_ADDRESS;
     const upperHint =
@@ -129,13 +124,7 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
         contractAddress,
         MAX_UINT256
       );
-      console.log("approve", approve);
-      console.log(
-        "line-74",
-        BigInt(maxFeePercentage.toString()),
-        BigInt(collateralAmount.toString()),
-        BigInt(recommendedCollaterall.toString())
-      );
+
       const result = await web3.openTrove(
         contractAddress,
         "0",
@@ -146,7 +135,6 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
         lowerHint,
         account?.kernelClient
       );
-      console.log("resultresult", result);
       fetchTroveData(providerr);
       setDebtPosition(false);
       toast.success("Transaction Completed");
@@ -166,53 +154,14 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       if (userAuth?.passkeyCred) {
-  //         let account = await getAccount(userAuth?.passkeyCred);
-  //         console.log("account---<", account);
-  //         if (account) {
-  //           let provider = await getProvider(account.kernelClient);
-  //           console.log("provider-->", provider);
-  //           if (provider) {
-  //             console.log("provider -line-114", provider);
-  //             setProviderr(provider?.ethersProvider);
-  //             const contractAddress =
-  //               process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
-  //             const web3 = new Web3Interaction(
-  //               "sepolia",
-  //               provider?.ethersProvider
-  //             );
-  //             const receipt = await web3.fetchPrice(contractAddress);
-  //             const receiptInEther = ethers.utils.formatEther(receipt);
-  //             const adjustedPrice =
-  //               parseFloat(receiptInEther) * Math.pow(10, 10);
-  //             setCurrentBTCPrice(adjustedPrice);
-  //             fetchCollateralData()
-  //           } else {
-  //             console.log("No wallet detected. Please install Metamask.");
-  //             return;
-  //           }
-  //         }
-  //       }
-  //     } catch (error) {}
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (userAuth?.passkeyCred) {
           let account = await getAccount(userAuth?.passkeyCred);
-          console.log("account---<", account);
           if (account) {
             let provider = await getProvider(account.kernelClient);
-            console.log("provider-->", provider);
             if (provider) {
-              console.log("provider -line-114", provider);
               setProviderr(provider?.ethersProvider);
               const contractAddress =
                 process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
@@ -241,13 +190,10 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("line-244")
         const contractAddress =
           process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS;
-        const web3 = new Web3Interaction("sepolia",null);
-        console.log("web3",web3)
+        const web3 = new Web3Interaction("sepolia", null);
         const receipt = await web3.fetchPrice(contractAddress);
-        console.log("receipt",receipt)
         const receiptInEther = ethers.utils.formatEther(receipt);
         const adjustedPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
         setCurrentBTCPrice(adjustedPrice);
@@ -277,7 +223,9 @@ const DebtPositionPop = ({ debtPosition, setDebtPosition, fetchTroveData }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="m-0 text-xl fw-bold">
-                {step == 1 ? "Open a Debt Position" : "Debt Position Summary"}{" "}
+                {step == 1
+                  ? "Open a Debt Position"
+                  : "Debt Position Summary"}{" "}
               </h5>
             </div>
             <div className="modalBody">

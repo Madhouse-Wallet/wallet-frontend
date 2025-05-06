@@ -33,7 +33,6 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
       return false;
     }
   };
-  console.log("test-->", openCam);
   // Handle address input change
   const handleAddressChange = (e) => {
     const address = e.target.value;
@@ -177,7 +176,6 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
   //     const liquidShift = await response.json();
 
   //     // liquidShift now contains all the information about the shift, including the deposit address
-  //     console.log("Deposit address:", liquidShift.depositAddress);
   //     if (liquidShift.depositAddress) {
   //       setdesinationAddress(liquidShift.depositAddress);
   //       settrxnApproval(!trxnApproval);
@@ -200,7 +198,6 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
       );
 
       // liquidShift now contains all the information about the shift, including the deposit address
-      console.log("Deposit address:", liquidShift.depositAddress);
       if (liquidShift.depositAddress) {
         setdesinationAddress(liquidShift.depositAddress);
         settrxnApproval(!trxnApproval);
@@ -251,7 +248,6 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    console.log("setToAddress");
                     setToAddress(data);
                     setOpenCam(!openCam);
                   }}
@@ -287,7 +283,6 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
                       {/* QR Scanner Button */}
                       <button
                         onClick={() => {
-                          console.log("line-242", openCam);
                           if (openCam) {
                             setOpenCam(false);
                           } else {

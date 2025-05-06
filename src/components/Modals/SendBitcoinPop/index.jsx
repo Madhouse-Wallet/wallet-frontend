@@ -49,20 +49,15 @@ const SendBitcoinPop = ({
 
   const startReceive = async () => {
     try {
-      console.log("receice");
-
       setDepositSetup("");
       setDepositFound("");
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
-        console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
           if (provider) {
             // kernelProvider, ethersProvider, signer
             const sdk = await initializeTBTC(provider.signer);
-            console.log("sdk -->", sdk);
             if (sdk) {
               depo(sdk);
             }
@@ -77,16 +72,12 @@ const SendBitcoinPop = ({
 
   const mint = async (depo) => {
     try {
-      console.log("mint-->", depo);
       if (depo) {
         const fundingUTXOs = await depo.detectFunding();
-        console.log("fundingUTXOs---->", fundingUTXOs);
         if (fundingUTXOs.length > 0) {
           const txHash = await depo.initiateMinting(fundingUTXOs[0]);
-          console.log("txHash---->", txHash);
           setDepositFound(txHash);
         } else {
-          console.log("depo-->", depo);
           toast.error("No Deposit Found!");
         }
       } else {
@@ -100,17 +91,13 @@ const SendBitcoinPop = ({
 
   const depo = async (tbtcSdk) => {
     const bitcoinRecoveryAddress = userAuth?.bitcoinWallet; // Replace with a valid BTC address
-    console.log("bitcoinRecoveryAddress00>", bitcoinRecoveryAddress);
     try {
-      console.log(tbtcSdk.deposits.initiateDeposit);
       const deposit = await tbtcSdk.deposits.initiateDeposit(
         bitcoinRecoveryAddress
       );
-      console.log("Deposit initiated:", deposit);
       setDepositSetup(deposit);
       // Step 5: Get the Bitcoin deposit address
       const bitcoinDepositAddress = await deposit.getBitcoinAddress();
-      console.log("Bitcoin deposit address:", bitcoinDepositAddress);
       setWalletAddressDepo(bitcoinDepositAddress);
 
       const btcAmount = parseFloat(amount);
@@ -129,7 +116,6 @@ const SendBitcoinPop = ({
       // );
 
       const privateKey = await recoverSeedPhrase();
-      console.log("line-256", privateKey);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: bitcoinDepositAddress,
@@ -138,7 +124,6 @@ const SendBitcoinPop = ({
         network: "main", // Use 'main' for mainnet
       });
 
-      console.log("result-----result", result);
       mint(deposit);
       toast.error(result.error);
     } catch (error) {
@@ -152,20 +137,17 @@ const SendBitcoinPop = ({
     try {
       let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
       if (retrieveSecretCheck?.status) {
-        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret);
         return {
           status: true,
           secret: retrieveSecretCheck?.data?.secret,
         };
       } else {
-        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg);
         return {
           status: false,
           msg: retrieveSecretCheck?.msg,
         };
       }
     } catch (error) {
-      console.log("error-->", error);
       return {
         status: false,
         msg: "Error in Getting secret!",
@@ -185,25 +167,19 @@ const SendBitcoinPop = ({
           userExist?.userId?.secretCredentialId
         );
         if (callGetSecretData?.status) {
-          // console.log(
-          //   "line-181",
-          //   callGetSecretData,
-          //   JSON.parse(callGetSecretData?.secret)
-          // );
           return JSON.parse(callGetSecretData?.secret);
         } else {
-          return false
+          return false;
         }
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
-      return false
+      return false;
     }
   };
 
   const getDestinationAddress = async () => {
     try {
-      console.log("userAuth", userAuth);
       const liquidShift = await createBtcToTbtcShift(
         amount, // USDC amount
         userAuth?.walletAddress,
@@ -212,7 +188,6 @@ const SendBitcoinPop = ({
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
       // liquidShift now contains all the information about the shift, including the deposit address
-      console.log("Deposit address:", liquidShift.depositAddress);
 
       const btcAmount = parseFloat(amount);
 
@@ -223,24 +198,7 @@ const SendBitcoinPop = ({
       // Convert BTC to satoshi (1 BTC = 100,000,000 satoshi)
       const satoshiAmount = btcAmount * 100000000;
 
-      // const result = await sendBitcoinn(
-      //   localStorage.getItem("coinosToken"),
-      //   satoshiAmount,
-      //   liquidShift?.depositAddress
-      // );
-
-      // const result = await sendBitcoinAPI({
-      //   sourceAddress: "mtWg6ccLiZWw2Et7E5UqmHsYgrAi5wqiov",
-      //   sourcePrivateKey:
-      //     "1af97b1f428ac89b7d35323ea7a68aba8cad178a04eddbbf591f65671bae48a2",
-      //   sourcePublicKey:
-      //     "03bb318b00de944086fad67ab78a832eb1bf26916053ecd3b14a3f48f9fbe0821f",
-      //   destinationAddress: "n3GNqMveyvaPvUbH469vDRadqpJMPc84JA",
-      //   amountSatoshi: 25000,
-      //   network: "testnet",
-      // }); 
       const privateKey = await recoverSeedPhrase();
-      console.log("line-256", privateKey);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: liquidShift.depositAddress,
@@ -249,10 +207,8 @@ const SendBitcoinPop = ({
         network: "main", // Use 'main' for mainnet
       });
 
-      console.log("result-----result", result);
       toast.error(result.error);
     } catch (error) {
-      console.error("SideShift API error:", error);
       // setLoading(false);
       toast.error("Failed to create shift");
     }
@@ -261,52 +217,45 @@ const SendBitcoinPop = ({
   const handleSend = async (e) => {
     e.preventDefault();
     let userExist = await getUser(userAuth?.email);
- 
-      setLoading(true)
-      if (!isValidAddress) {
-        toast.error("Please enter a valid address");
-        setLoading(false)
-        return;
-      }
-      if (!amount || parseFloat(amount) <= 0) {
-        toast.error("Please enter a valid amount");
-        setLoading(false)
-        return;
-      }
-      // Check if amount is less than 0.1
-      const privateKey = await recoverSeedPhrase();
-      if (!privateKey) {
-        toast.error("Please enter a valid amount");
-        setLoading(false)
-        return;
-      }
-      // console.log("line-271", privateKey);
-      const sendLnbitWithdraw = await btcSat(
-        amount
-      );
-      // console.log("sendLnbitWithdraw-->", sendLnbitWithdraw)
-      if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
-        toast.error(sendLnbitWithdraw.message);
-        setLoading(false)
-      } else {
-        // console.log("sendLnbitWithdraw.data.data.address-->",sendLnbitWithdraw.data.data.address)
-        const result = await sendBitcoinFunction({
-          fromAddress: userAuth?.bitcoinWallet,
-          toAddress: sendLnbitWithdraw.data.data.address,
-          amountSatoshi: (amount * 100000000),
-          privateKeyHex: privateKey?.privateKey,
-          network: "main", // Use 'main' for mainnet
-        });
-        console.log("result-->",result)
-        if (result.status) {
-          toast.success(result.transactionHash);
-          setLoading(false)
 
-        } else {
-          toast.error(result.error);
-          setLoading(false)
-        }
+    setLoading(true);
+    if (!isValidAddress) {
+      toast.error("Please enter a valid address");
+      setLoading(false);
+      return;
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      toast.error("Please enter a valid amount");
+      setLoading(false);
+      return;
+    }
+    // Check if amount is less than 0.1
+    const privateKey = await recoverSeedPhrase();
+    if (!privateKey) {
+      toast.error("Please enter a valid amount");
+      setLoading(false);
+      return;
+    }
+    const sendLnbitWithdraw = await btcSat(amount);
+    if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
+      toast.error(sendLnbitWithdraw.message);
+      setLoading(false);
+    } else {
+      const result = await sendBitcoinFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: sendLnbitWithdraw.data.data.address,
+        amountSatoshi: amount * 100000000,
+        privateKeyHex: privateKey?.privateKey,
+        network: "main", // Use 'main' for mainnet
+      });
+      if (result.status) {
+        toast.success(result.transactionHash);
+        setLoading(false);
+      } else {
+        toast.error(result.error);
+        setLoading(false);
       }
+    }
   };
 
   // Update the useEffect to handle errors
@@ -350,8 +299,6 @@ const SendBitcoinPop = ({
       //   "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
       // );
 
-      console.log("result", result);
-
       if (result.error) {
         toast.error(result.error || "Failed to fetch balance");
       } else {
@@ -381,113 +328,76 @@ const SendBitcoinPop = ({
         </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
-          {step == 1 ? <>
-            <div className="grid gap-3 grid-cols-12 pt-1">
-              <div className="col-span-12">
-                <button
-                  onClick={() => setStep(2)}
-                  // onClick={() => {
-                  //   setReceiveUSDC(!receiveUsdc),
-                  //     setBtcExchange(!btcExchange);
-                  // }}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Brdge To Madhouse
-                </button>
-              </div>
-              <div className="col-span-12">
-                <button
-                  onClick={() => setStep(2)}
-                  // onClick={() => setTokenReceive(!tokenReceive)}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Bridge To Spend Wallet
-                </button>
-              </div>
-            </div>
-          </> : <>
-            <div className="relative rounded px-3">
-              <div className="top pb-3">
-                <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                  Bridge Bitcoin
-                </h5>
-              </div>
-              {/* {openCam ? (
-              <>
-                <QRScannerModal
-                  setOpenCam={setOpenCam}
-                  openCam={openCam}
-                  onScan={(data) => {
-                    console.log("setToAddress");
-                    setToAddress(data);
-                    setOpenCam(!openCam);
-                  }}
-                />
-              </>
-            ) : (
-              <> */}
-              <div className="modalBody">
-                {/* <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      To
-                    </label>
-                    <div className="relative">
-                      <input
-                        placeholder="Address"
-                        type="text"
-                        value={toAddress}
-                        onChange={(e) => setToAddress(e.target.value)}
-                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      />
-                      <button
-                        onClick={() => {
-                          console.log("line-242", openCam);
-                          if (openCam) {
-                            setOpenCam(false);
-                          } else {
-                            setOpenCam(true);
-                          }
-                        }}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
-                      >
-                        {scanIcn}
-                      </button>
-                    </div>
-                  </div> */}
-                <div className="py-2">
-                  <label className="form-label m-0 font-semibold text-xs ps-3">
-                    Balance: {balance} Bitcoin
-                  </label>
-                  <div className="iconWithText relative">
-                    <div className="absolute icn left-2 flex items-center gap-2 text-xs">
-                      {btc}
-                      Bitcoin
-                    </div>
-                    <input
-                      placeholder="Amount"
-                      type="text"
-                      value={amount}
-                      onChange={handleAmountChange}
-                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
-                    />
-                  </div>
-                </div>
-                <div className="py-2 mt-4">
+          {step == 1 ? (
+            <>
+              <div className="grid gap-3 grid-cols-12 pt-1">
+                <div className="col-span-12">
                   <button
-                    type="button"
-                    onClick={handleSend}
-                    disabled={loading}
-                    className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                    onClick={() => setStep(2)}
+                    // onClick={() => {
+                    //   setReceiveUSDC(!receiveUsdc),
+                    //     setBtcExchange(!btcExchange);
+                    // }}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {loading ? "Sending..." : "Send"}
+                    Brdge To Madhouse
                   </button>
                 </div>
-                {/* </form> */}
+                <div className="col-span-12">
+                  <button
+                    onClick={() => setStep(2)}
+                    // onClick={() => setTokenReceive(!tokenReceive)}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    Bridge To Spend Wallet
+                  </button>
+                </div>
               </div>
-              {/* </>
+            </>
+          ) : (
+            <>
+              <div className="relative rounded px-3">
+                <div className="top pb-3">
+                  <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                    Bridge Bitcoin
+                  </h5>
+                </div>
+                <div className="modalBody">
+                  <div className="py-2">
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance: {balance} Bitcoin
+                    </label>
+                    <div className="iconWithText relative">
+                      <div className="absolute icn left-2 flex items-center gap-2 text-xs">
+                        {btc}
+                        Bitcoin
+                      </div>
+                      <input
+                        placeholder="Amount"
+                        type="text"
+                        value={amount}
+                        onChange={handleAmountChange}
+                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                      />
+                    </div>
+                  </div>
+                  <div className="py-2 mt-4">
+                    <button
+                      type="button"
+                      onClick={handleSend}
+                      disabled={loading}
+                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                    >
+                      {loading ? "Sending..." : "Send"}
+                    </button>
+                  </div>
+                  {/* </form> */}
+                </div>
+                {/* </>
             )} */}
-            </div>
-          </>}
+              </div>
+            </>
+          )}
         </div>
       </Modal>
     </>

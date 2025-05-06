@@ -20,7 +20,6 @@ const SendTbtcWall = ({
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
-  console.log("userAuth-->", userAuth)
   const handleDepositPop = async () => {
     try {
       setLoading(true)
@@ -28,7 +27,6 @@ const SendTbtcWall = ({
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
-        console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
         } else {
@@ -42,13 +40,7 @@ const SendTbtcWall = ({
               process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
             );
             // liquidShift now contains all the information about the shift, including the deposit address
-            console.log("Deposit address:", liquidShift.depositAddress);
-            console.log("start send -->")
             const web3 = new Web3Interaction("sepolia", providerr);
-            console.log(process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr)
             const result = await web3.sendUSDC(
               process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
               liquidShift.depositAddress,
@@ -76,7 +68,6 @@ const SendTbtcWall = ({
       setTbtcWall(!btcWall)
       setLoading(false)
     } catch (error) {
-      console.log("error==>", error?.message)
       toast.error(error?.message);
       setLoading(false)
     }

@@ -20,7 +20,6 @@ const WithdrawPopup = ({
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
-  console.log("userAuth-->", userAuth)
   const handleDepositPop = async () => {
     try {
       setLoading(true)
@@ -28,7 +27,6 @@ const WithdrawPopup = ({
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
-        console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
         } else {
@@ -38,7 +36,6 @@ const WithdrawPopup = ({
               amount, // amount
               userExist?.userId?.liquidBitcoinWallet_2
             );
-            console.log("sendLnbitWithdraw-->",sendLnbitWithdraw)
             if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
               toast.error(sendLnbitWithdraw.message);
             } else {
@@ -54,7 +51,6 @@ const WithdrawPopup = ({
       setWithdrawPop(!withdrawPop)
       setLoading(false)
     } catch (error) {
-      console.log("error==>", error?.message)
       toast.error(error?.message);
       setLoading(false)
     }

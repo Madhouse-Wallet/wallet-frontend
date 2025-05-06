@@ -23,7 +23,6 @@ const RecoverPopup = ({
   phraseStatus
 }) => {
   const [step, setStep] = useState(1)
-  console.log("phrase-->", phrase?.seedPhrase)
   const handleAdjustPop = () => {
     setRecover(!recover)
   }

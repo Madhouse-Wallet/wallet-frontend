@@ -31,7 +31,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
       return false;
     }
   };
-console.log("test-->",openCam)
   // Handle address input change
   const handleAddressChange = (e) => {
     const address = e.target.value;
@@ -187,7 +186,6 @@ console.log("test-->",openCam)
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    console.log("setToAddress")
                     setToAddress(data);
                     setOpenCam(!openCam)
                   }}
@@ -243,7 +241,6 @@ console.log("test-->",openCam)
                       {/* QR Scanner Button */}
                       <button
                         onClick={() => {
-                          console.log("line-242",openCam)
                           if (openCam) {
                             setOpenCam(false);
                           } else {

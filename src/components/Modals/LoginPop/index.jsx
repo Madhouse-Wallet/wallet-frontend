@@ -42,7 +42,6 @@ const LoginPop = ({ login, setLogin }) => {
   ) => {
     try {
       try {
-        console.log(email, username, passkey, publickeyId, rawId);
         return await fetch(`/api/add-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -57,7 +56,6 @@ const LoginPop = ({ login, setLogin }) => {
         })
           .then((res) => res.json())
           .then((data) => {
-            // console.log("data-->", data);
             return data;
           });
       } catch (error) {
@@ -72,7 +70,6 @@ const LoginPop = ({ login, setLogin }) => {
   const getUser = async (email) => {
     try {
       try {
-        // console.log(email)
         return await fetch(`/api/get-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -82,7 +79,6 @@ const LoginPop = ({ login, setLogin }) => {
         })
           .then((res) => res.json())
           .then((data) => {
-            // console.log("data-->", data);
             return data;
           });
       } catch (error) {
@@ -97,7 +93,6 @@ const LoginPop = ({ login, setLogin }) => {
 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
-      // console.log(email)
       return await fetch(`/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,12 +131,10 @@ const LoginPop = ({ login, setLogin }) => {
         if (userExist.status && userExist.status == "failure") {
           toast.error("User Not Found!");
         } else {
-          // console.log(base64ToBuffer(userExist.userId.rawId))
           //base64ToBuffer(userExist.rawId)
           const authenticated = false;
           if (authenticated) {
             let account = false;
-            console.log("account-->", account);
             if (account) {
               toast.success("Login Successfully!");
               dispatch(
@@ -188,7 +181,6 @@ const LoginPop = ({ login, setLogin }) => {
         toast.error("Invalid OTP!");
       } else {
         let userExist = await getUser(registerEmail);
-        // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
           return toast.error("User Already Exist!");
         }
@@ -196,7 +188,6 @@ const LoginPop = ({ login, setLogin }) => {
         if (createdCredential) {
           let account = false;
           // account, smartAccountClient
-          console.log("account-->", account?.account?.address);
           let data = await addUser(
             registerEmail,
             registerUsername,
@@ -205,7 +196,6 @@ const LoginPop = ({ login, setLogin }) => {
             createdCredential.id,
             account?.account?.address
           );
-          console.log("logged user--->", data)
           toast.success("Sign Up Successfully!");
           setRegisterTab(2);
           dispatch(
@@ -251,9 +241,7 @@ const LoginPop = ({ login, setLogin }) => {
           setRegisterOtpLoading(false);
           return toast.error("Please Enter Valid Email!");
         }
-        // console.log("t")
         let userExist = await getUser(registerEmail);
-        // console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "success") {
           toast.error("User Already Exist!");
         } else {
@@ -404,7 +392,6 @@ const LoginPop = ({ login, setLogin }) => {
   };
   const [activeTab, setActiveTab] = useState(0);
   const showTab = (tab) => {
-    console.log(tab, "tab");
     setActiveTab(tab);
   };
   const handleLogin = () => {
