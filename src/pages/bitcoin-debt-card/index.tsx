@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Image from "next/image";
 import { BackBtn } from "@/components/common";
-import Identity from "../identity";
 import Link from "next/link";
 import SendTbtcWall from "@/components/Modals/SendTbtcWallet";
 import DepositPopup from "@/components/Modals/DepositPop";

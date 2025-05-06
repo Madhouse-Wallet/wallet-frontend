@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { SVGProps } from "react";
-import InstallFirstApp from "./InstallFirstApp";
-import Link from "next/link";
-import Image, { StaticImageData } from "next/image";
 import CounterList from "@/components/CounterList";
 import { useRouter } from "next/router";
 import { createPortal } from "react-dom";
@@ -11,29 +7,12 @@ import BuySellBitcoinPop from "@/components/Modals/BuySellBitcoinPop";
 import BuyCoveragePop from "@/components/Modals/buyCoveragePop";
 import WithdrawDepositPopup from "@/components/Modals/WithdrawDepositPop";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import styled from "styled-components";
-import { AnimatePresence, motion } from "framer-motion";
-import { splitAddress } from "../../utils/globals";
 import { fetchBalance, fetchTokenBalances } from "../../lib/utils";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import LoadingScreen from "@/components/LoadingScreen";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
 import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
-
-// interface CardMetrics {
-//   head: string;
-//   value: string;
-//   icn: React.ReactNode;
-// }
-
-// interface CardData {
-//   head: string;
-//   icn: React.FC<SVGProps<SVGSVGElement>> | StaticImageData;
-//   onClick: () => void;
-// }
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +27,6 @@ const Dashboard = () => {
   const [buycoverage, setBuyCoverage] = useState(false);
   const [tbtcBalance, setTbtcBalance] = useState(0);
   const [thusdBalance, setThusdBalance] = useState(0);
-  const [healthFactor, setHealthFactor] = useState(0);
   const [collateralRatio, setCollateralRatio] = useState(0);
   const [totalUsdBalance, setTotalUsdBalance] = useState(0);
 
@@ -66,19 +44,11 @@ const Dashboard = () => {
         router.push("/btc-exchange");
       },
     },
-    // {
-    //   head: "Bitcoin Loan",
-    //   icn: icn2,
-    //   onClick: () => {
-    //     router.push("/debt-position");
-    //   },
-    // },
     {
       head: "Point of Sale",
       icn: icn7,
       onClick: () => {
         setPointSale(!pointSale);
-        // router.push("/debt-position");
       },
     },
     {
@@ -92,7 +62,6 @@ const Dashboard = () => {
       head: "Withdraw & Deposit Dollars",
       icn: icn4,
       onClick: () => {
-        // router.push("/identity");
         setWithdrawDep(!withdrawDep);
       },
     },
@@ -100,103 +69,21 @@ const Dashboard = () => {
       head: "Earn",
       icn: icn5,
       onClick: () => {
-        // if (userAuth.login) {
         router.push("/curve-deposit");
-        // } else {
-        //   toast.error("Please Login!");
-        // }
       },
     },
     {
       head: "Virtual Card Balance",
       icn: icn6,
       onClick: () => {
-        // setBuyCoverage(!buycoverage);
         router.push("/bitcoin-debt-card");
       },
     },
   ];
-  const [isCopied, setIsCopied] = useState({
-    one: false,
-    two: false,
-    three: false,
-  });
-  const handleCopy = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Copied Successfully!");
-    } catch (error) {
-      console.error("Failed to copy text:", error);
-    }
-  };
-
-  const fetchTroveData = async (provider) => {
-    try {
-      if (!provider) return;
-
-      const walletAddress = userAuth?.walletAddress;
-
-      // Create Web3 instance
-      const web3 = new Web3Interaction("sepolia", provider);
-
-      // Fetch BTC price
-      const receipt = await web3.fetchPrice(
-        process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-      );
-      const receiptInEther = ethers.utils.formatEther(receipt);
-      const btcPrice = parseFloat(receiptInEther) * Math.pow(10, 10);
-
-      // Fetch Trove data
-      const troveResponse = await web3.Troves(
-        process.env.NEXT_PUBLIC_TROVEMANAGER_CONTRACT_ADDRESS,
-        walletAddress
-      );
-
-      const coll = troveResponse?.coll;
-      const debt = troveResponse?.debt;
-
-      const collInEther = ethers.utils.formatEther(coll);
-      const debtInEther = ethers.utils.formatEther(debt);
-      // Calculate collateral ratio
-      calculateCollateralAndHealthFactor(collInEther, debtInEther, btcPrice);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const calculateCollateralAndHealthFactor = (collateral, debt, btcPrice) => {
-    const collateralValue = parseFloat(collateral);
-    const collateralValueUSD = parseFloat(collateral) * btcPrice;
-    const debtValue = parseFloat(debt);
-    const collateralRatio =
-      debtValue > 0 ? (collateralValueUSD / debtValue) * 100 : 0;
-    const collateralValuee = btcPrice * collateralValue;
-    const healthFactor = (collateralValuee * 1.1) / debtValue;
-    setHealthFactor(healthFactor ? healthFactor : 0);
-    setCollateralRatio(collateralRatio.toFixed(2));
-  };
-
-  // useEffect(() => {
-  //   if(userAuth?.walletAddress){
-  //     const fetcData = async () => {
-  //       const balance = await fetchTokenBalances(
-  //        [process.env.NEXT_PUBLIC_TBTC_ADDRESS,process.env.NEXT_PUBLIC_THUSD_ADDRESS],
-  //         userAuth?.walletAddress
-  //       );
-  //       console.log(balance);
-  //       // fetchWalletHistory().catch(console.error);
-  //       // fetchTokenTransfers().catch(console.error);
-  //     };
-
-  //     fetcData();
-  //   }
-
-  // }, []);
 
   useEffect(() => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
-        setIsLoading(true);
         try {
           if (userAuth?.passkeyCred) {
             let account = await getAccount(userAuth?.passkeyCred);
@@ -240,15 +127,14 @@ const Dashboard = () => {
                     );
                     setTotalUsdBalance(totalUsd.toFixed(2));
                   }
-                  fetchTroveData(provider?.ethersProvider);
-                } catch (err) { }
+                } catch (err) {
+                  console.log(err);
+                }
               }
             }
           }
-          setIsLoading(false);
         } catch (error) {
           console.error("Error fetching token balances:", error);
-          setIsLoading(false);
         }
       };
 
@@ -308,22 +194,6 @@ const Dashboard = () => {
           style={{ opacity: 1, transform: "none" }}
         >
           <div className="pt-3 md:pt-8 sm:block hidden" />
-          {/* <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
-            <div className="flex flex-col items-center gap-3 px-4 md:gap-4">
-              <Image
-                src={logo}
-                alt="logo"
-                className="max-w-full mx-auto w-auto mb-3"
-                height={100000}
-                width={10000}
-                style={{ height: 45 }}
-              />
-
-              <h1 className="text-center text-19 font-bold md:text-5xl">
-                Setup your <span className="themeClr">Madhouse</span> Wallet
-              </h1>
-            </div>
-          </div> */}
           <div className="pt-1 md:pt-6  " />
           <div
             className="flex w-full  animate-in fade-in slide-in-from-bottom-8"
@@ -363,46 +233,6 @@ const Dashboard = () => {
               className="text-center py-3  px-5 sm:py-8 min-w-0 rounded-xl md:max-w-[var(--apps-max-w)] mx-auto bg-neutral-900/70 shadow-widget
                   backdrop-blur-md backdrop-saturate-250 backdrop-brightness-[1.25] contrast-more:backdrop-blur-none contrast-more:bg-neutral-900 backdrop-saturate-[300%]  ring-white/25"
             >
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                {/* {userAuth.login && (
-                  <>
-                    {" "}
-                    <div
-                      onClick={() => handleCopy(userAuth?.walletAddress)}
-                      className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5 py-4 text-14 backdrop-blur-md"
-                      style={{ border: " 1px solid #565656a3", marginTop: 0 }}
-                    >
-                      <p className="m-0 ">
-                        Wallet Address:{" "}
-                        <span className="text-[#00FF0A]">
-                          {splitAddress(userAuth?.walletAddress)}
-                        </span>
-                      </p>
-                      <div
-                        className="rounded-20 p-1 flex items-center gap-1 
-                      bg-[#5858583d]
-                    backdrop-blur-[17.5px]
-  "
-                        style={{ borderRadius: 20 }}
-                      >
-                        <span className=" text-xs">{copyIcn}</span>
-                      </div>
-                    </div>
-                  </>
-                )} */}
-
-                {/* <div
-                  className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[42px] px-5  py-4 text-14 backdrop-blur-md"
-                  style={{ border: " 1px solid #565656a3", marginTop: 0 }}
-                >
-                  <p className="m-0">
-                    Loan-to-Value Ratio:{" "}
-                    <span className="text-[#00FF0A]">
-                      {healthFactor.toFixed(2)}
-                    </span>
-                  </p>
-                </div> */}
-              </div>
               <DashboardLink className="list-none text-center pl-0 mb-0 flex items-start justify-evenly gap-3 sm:pt-6 pt-4 flex-wrap">
                 {cardData.map((item, key) => (
                   <li
@@ -412,14 +242,6 @@ const Dashboard = () => {
                     style={{ maxWidth: 135 }}
                   >
                     <button className="border-0 p-0 bg-transparent">
-                      {/* <Image
-                        src={item.icn}
-                        alt={""}
-                        className="max-w-full mx-auto object-contain rounded-15"
-                        height={60000}
-                        width={60000}
-                        style={{ height: 60, width: 60 }}
-                      /> */}
                       <span className="icn flex items-center justify-center mx-auto">
                         {item.icn}
                       </span>

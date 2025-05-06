@@ -9,7 +9,6 @@ import Footer from "../../components/Footer";
 import Sidebar from "../../components/Header/sidebar";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import EnsDomainPop from "@/components/Modals/EnsDomainPop";
 import { useSelector } from "react-redux";
 
 const MainLayout = ({ Component, pageProps }) => {
@@ -38,11 +37,11 @@ const MainLayout = ({ Component, pageProps }) => {
       {/* <div className="flex items-start justify-end relative">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
       </div> */}
-      {ensDomain &&
+      {/* {ensDomain &&
         createPortal(
           <EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />,
           document.body
-        )}
+        )} */}
 
       <Main className="ml-auto ms-auto">
         <Header sidebar={sidebar} setSidebar={setSidebar} />
