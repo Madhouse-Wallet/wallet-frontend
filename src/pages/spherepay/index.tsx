@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 // src/pages/sphere/page.tsx
 import SphereRampWidget from "@/components/SphereWidget/SphereRampWidget";
-import Wlogomw from "@/Assets/Images/logow1.png";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { BackBtn } from "@/components/common";

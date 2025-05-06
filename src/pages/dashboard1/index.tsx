@@ -11,7 +11,6 @@ import TransactionTable from "./TransactionTable";
 import MyActivity from "./myActivity";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-// import p1 from "../../Assets/Images/user.png";
 import CounterList from "../../components/CounterList";
 import BTCAddressPop from "../../components/Modals/BtcAddressPop";
 import { createPortal } from "react-dom";
