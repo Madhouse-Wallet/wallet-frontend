@@ -88,7 +88,8 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                             "instant_settlement": true,
                             "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
                             "amount": "200",
-                            "onchain_address": onchain_address
+                            "onchain_address": onchain_address,
+                            "refund_address": "a1cd9f71c5f64ac289b4d21607a8ec92",
                         }, token, accountType) as any;
 
                         if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {

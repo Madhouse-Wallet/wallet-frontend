@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "balance": 100,
             "instant_settlement": true,
             "wallet": "a1cd9f71c5f64ac289b4d21607a8ec92",
+            "refund_address": "a1cd9f71c5f64ac289b4d21607a8ec92",
             "amount": amount,
             "onchain_address": onchain_address
         }, token, 2) as any;

@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
-import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 
 // css
 

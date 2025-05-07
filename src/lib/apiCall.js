@@ -53,14 +53,15 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
-export const btcSat = async (amount) => {
+export const btcSat = async (amount, publicKey="") => {
   try {
     try {
       return await fetch(`/api/btc-sat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount
+          amount,
+          publicKey
         }),
       })
         .then((res) => res.json())
@@ -78,6 +79,35 @@ export const btcSat = async (amount) => {
   }
 };
 
+export const receiveBtc = async (amount, publicKey="") => {
+  try {
+    try {
+      return await fetch(`/api/receive-bitcoin-lnbit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          publicKey
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
+
+// receive-bitcoin-lnbit
 
 export const getBitcoinAddress = async (email) => {
   try {

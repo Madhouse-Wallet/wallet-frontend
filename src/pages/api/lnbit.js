@@ -257,7 +257,7 @@ const createBlotzAutoReverseSwap = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    // console.log("response-->", response)
+    console.log("createBlotzAutoReverseSwap response-->", response)
     if (response?.id) {
       return {
         status: true,
@@ -306,7 +306,6 @@ const createInvoice = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json()
-    console.log("createInvoice createInvoice-->", type, response)
     if (response?.bolt11) {
       return {
         status: true,

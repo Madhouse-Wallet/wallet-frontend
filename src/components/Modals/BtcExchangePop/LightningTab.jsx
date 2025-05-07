@@ -5,7 +5,7 @@ import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { receiveBtc } from "../../../lib/apiCall"
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
@@ -77,11 +77,10 @@ const LightningTab = (walletAddress) => {
 
     setError("");
     setLoading(true);
-    const result = await createSwap(
-      Number(amount),
-      walletAddress?.walletAddress
+    const result = await receiveBtc(
+      Number(amount)
     );
-
+    console.log("result--->", result)
     if (result.status === "error") {
       setError(result.error);
       setLoading(false);

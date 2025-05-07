@@ -15,11 +15,12 @@ import cors from 'cors';
 interface SwapRequest extends NextApiRequest {
   body: {
     invoice: string;  // The lightning invoice to be paid
+    publicKey: string
   };
 }
 
 // Constants
-const ENDPOINT =  process.env.NEXT_PUBLIC_BOLTZ_MAINNET_URL_ADDRESS;
+const ENDPOINT = process.env.NEXT_PUBLIC_BOLTZ_MAINNET_URL_ADDRESS;
 const WEBSOCKET_ENDPOINT = process.env.NEXT_PUBLIC_BOLTZ_MAINNET_WEBSOCKET_ADDRESS;
 
 // Setup CORS middleware
@@ -52,25 +53,31 @@ export default async function handler(
   try {
     await runMiddleware(req, res, corsMiddleware);
 
-    const { invoice } = req.body;
+    const { invoice, publicKey } = req.body;
+    console.log(" invoice, publicKey", invoice, publicKey)
     if (!invoice) {
       return res.status(400).json({ error: 'Invoice is required' });
     }
-
-    const keys = ECPairFactory(ecc).makeRandom();
+    let keys = ECPairFactory(ecc).makeRandom();
     const ECPair = ECPairFactory(ecc);
-    const keyPair = ECPair.makeRandom(); // compressed by default
+    let keyPair = ECPair.makeRandom(); // compressed by default
 
-    const refundPublicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
-    
-    console.log('refundPublicKey:', refundPublicKeyHex); // should start with 02 or 03
-    
+    let refundPublicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
+
+    console.log('refundPublicKey: 1 ', refundPublicKeyHex); // should start with 02 or 03
+    if (publicKey) {
+       keyPair = ECPair.fromWIF(publicKey);
+      // Get the compressed public key in hex format
+      refundPublicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
+    }
+    console.log('refundPublicKey: 2 ', refundPublicKeyHex); // should start with 02 or 03
+
     // Create a Submarine Swap
     const response = await axios.post(`${ENDPOINT}/v2/swap/submarine`, {
       invoice,
       to: 'BTC',
       from: 'BTC',
-      refundPublicKey:refundPublicKeyHex
+      refundPublicKey: refundPublicKeyHex
     });
 
     const createdResponse = response.data;
@@ -78,7 +85,7 @@ export default async function handler(
 
     // Create WebSocket connection
     const webSocket = new WebSocket(WEBSOCKET_ENDPOINT!);
-    
+
     webSocket.on('open', () => {
       webSocket.send(
         JSON.stringify({
@@ -196,7 +203,7 @@ export default async function handler(
 
   } catch (error: any) {
     console.error('Swap creation error:', error);
-    
+
     // Handle Axios errors
     if (error.response?.data) {
       return res.status(error.response.status).json({
@@ -204,7 +211,7 @@ export default async function handler(
         error: error.response.data.error || 'Swap creation failed'
       });
     }
-    
+
     // Generic error response
     return res.status(500).json({
       status: 'error',

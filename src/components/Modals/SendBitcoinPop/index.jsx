@@ -236,11 +236,11 @@ const SendBitcoinPop = ({
       setLoading(false);
       return;
     }
-    const sendLnbitWithdraw = await btcSat(amount);
+    const sendLnbitWithdraw = await btcSat(amount, privateKey?.wif);
     if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
       toast.error(sendLnbitWithdraw.message);
       setLoading(false);
-    } else {
+    } else { 
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: sendLnbitWithdraw.data.data.address,
