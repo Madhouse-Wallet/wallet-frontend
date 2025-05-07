@@ -20,7 +20,8 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                 "email": newEmail,
                 "extensions": [
                     "tpos",
-                    "boltz"
+                    "boltz",
+                    "lndhub"
                 ]
             }, token, accountType) as any;
 
