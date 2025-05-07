@@ -20,12 +20,17 @@ const RecoverPopup = ({
   recover,
   setRecover,
   phrase,
-  phraseStatus
+  phraseStatus,
+  adminId
 }) => {
   const [step, setStep] = useState(1)
+  const [lndHubUrl, setLndHubUrl] = useState(`lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
   const handleAdjustPop = () => {
     setRecover(!recover)
   }
+  useEffect(()=>{
+    setLndHubUrl(`lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+  },[])
   const handleCopy = async (text) => {
     try {
       if (phrase) {
@@ -74,6 +79,14 @@ const RecoverPopup = ({
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   Bitcoin wallet Wif                </button>
+              </div>
+              <div className="col-span-12">
+                <button
+                  onClick={() => setStep(4)}
+                  // onClick={() => setTokenReceive(!tokenReceive)}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  LndHub Url            </button>
               </div>
             </div>
           </> : step == 2? <>
@@ -144,7 +157,7 @@ const RecoverPopup = ({
                 </div>
               </div>
             </div>
-          </>:<>
+          </>: step == 3?<>
             <div className="mx-auto max-w-sm">
               <div className="top pb-3">
                 <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
@@ -175,6 +188,72 @@ const RecoverPopup = ({
                     <div className="text-center my-3">
                       <button
                         onClick={() => handleCopy(phrase?.wif || "")}
+                        type="submit"
+                        className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        <span className="icn">{copyIcn}</span> Copy to clipboard
+                      </button>
+                    </div>
+                  </div>
+                  {!phraseStatus &&
+                    (<>
+                      <div className="col-span-12">
+                        <div className="text-center my-3">
+                          <button
+                            // onClick={() => handleCopy(addressPhrase)}
+                            // type="submit"
+                            className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                          >
+                            {phrase}
+                          </button>
+                        </div>
+                      </div>
+                    </>)
+                  }
+                  <div className="col-span-12">
+                    {/* <div className="btnWrpper text-center mt-3">
+                <button
+                  // type="submit"
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Next
+                </button>
+              </div> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>:<>
+            <div className="mx-auto max-w-sm">
+              <div className="top pb-3">
+                <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
+                  <div className="flex flex-col items-center gap-1 px-4">
+                    <h1 className="text-center text-base font-medium  m-0">
+                      Get Your LndHub Url
+                    </h1>
+                    <p className="text-center text-sm font-medium opacity-50 md:text-xs">
+                      Save This LndHub Url
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="formBody pt-4 text-xs">
+                <div className="grid gap-3 grid-cols-12 ">
+
+                  {/* {addressPhrase &&
+              addressPhrase.split(" ").map((item, key) => ( */}
+                  {adminId  && ( <div className="col-span-12">
+                      <input
+                        readOnly={true}
+                        value={lndHubUrl}
+                        type="text"
+                        className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+                      />
+                    </div>)}
+                  <div className="col-span-12">
+                    <div className="text-center my-3">
+                      <button
+                        onClick={() => handleCopy(lndHubUrl || "")}
                         type="submit"
                         className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >

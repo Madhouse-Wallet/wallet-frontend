@@ -62,36 +62,7 @@ const logIn = async (type = 1) => {
   }
 };
 
-
-const test = async () => {
-  try {
-    const getToken = await logIn(2);
-    let token = getToken?.data?.token
-    let data = await createSwapReverse({
-      "asset": "L-BTC/BTC",
-      "direction": "send",
-      "balance": 1000000,
-      "instant_settlement": true,
-      "wallet": "a1cd9f71c5f64ac289b4d21607a8ec92",
-      "amount": "200",
-      "onchain_address": "lq1qqvym6ztwgtvvsm3ve28fzn4ukj6kuf85tqq9tpc64re5e9kecj56qz6v7ncvrf2rxqp5vmsyxdakctqvczqfcdpx5wm82gmjt"
-    }, token, 2)
-    console.log("data-->", data)
-    if (data?.status) {
-      const payInv = await payInvoice({
-        "out": true,
-        "bolt11": data?.data?.invoice // ← invoice from above
-      }, token, 2)
-      if (payInv?.status) {
-        console.log("done payment!")
-      }
-    }
-  } catch (error) {
-    console.log("error-->", error)
-  }
-}
-
-// test();
+ 
 
 const createUser = async (data, token, type = 1) => {
   try {
@@ -150,7 +121,10 @@ const getUser = async (id, token, type = 1) => {
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      // backendUrl = "https://spend.madhousewallet.com/"
+
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+      // apiKey = "b5782742bb3b4d408065256ca0a41069";
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(`${backendUrl}users/api/v1/user/${id}`, {
@@ -163,7 +137,6 @@ const getUser = async (id, token, type = 1) => {
       }
     });
     response = await response.json()
-    console.log("getUser createUser-->", type, response)
     if (response?.email) {
       return {
         status: true,

@@ -26,7 +26,7 @@ import {
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
-import { getUser, updtUser } from "../../lib/apiCall";
+import { getUser, updtUser, getLnbitId } from "../../lib/apiCall";
 import { webAuthKeyStore, storedataLocalStorage } from "../../utils/globals";
 const Setting: React.FC = () => {
   const {
@@ -54,6 +54,7 @@ const Setting: React.FC = () => {
   const [confirm, setConfirm] = useState<boolean>(false);
   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
   const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const [adminId, setAdminId] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -74,7 +75,6 @@ const Setting: React.FC = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -82,7 +82,6 @@ const Setting: React.FC = () => {
       return false;
     }
   };
-  console.log("userAuth-->", userAuth);
   const setupMultisig = async () => {
     try {
       let userExist = await getUser(userAuth.email);
@@ -95,7 +94,6 @@ const Setting: React.FC = () => {
         userAuth.email,
         passkeyNo
       );
-      console.log("result-->", result);
       if (result.status) {
         let webAuthKeyStringObj2: any = "";
         let webAuthKeyStringObj3: any = "";
@@ -166,7 +164,6 @@ const Setting: React.FC = () => {
         toast.error(result.msg);
       }
     } catch (error) {
-      console.log("error-->", error);
     }
   };
 
@@ -177,20 +174,17 @@ const Setting: React.FC = () => {
         credentialId
       )) as any;
       if (retrieveSecretCheck?.status) {
-        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret);
         return {
           status: true,
           secret: retrieveSecretCheck?.data?.secret,
         };
       } else {
-        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg);
         return {
           status: false,
           msg: retrieveSecretCheck?.msg,
         };
       }
     } catch (error) {
-      console.log("error-->", error);
       return {
         status: false,
         msg: "Error in Getting secret!",
@@ -216,6 +210,12 @@ const Setting: React.FC = () => {
           //   secret: callGetSecretData?.secret
           // }
           setRecoverSeed(JSON.parse(callGetSecretData?.secret));
+          let adminKey = await getLnbitId(userAuth.email);
+          if (
+            adminKey?.adminId
+          ) {
+            setAdminId(adminKey?.adminId)
+          }
           setRecoverSeedStatus(true);
         } else {
           // return {
@@ -423,7 +423,6 @@ const Setting: React.FC = () => {
   ];
   const [activeTab, setActiveTab] = useState(1);
   const showTab = (tab: number) => {
-    console.log(tab, "tab");
 
     setActiveTab(tab);
   };
@@ -492,6 +491,7 @@ const Setting: React.FC = () => {
           <RecoverPopup
             recover={recover}
             setRecover={setRecover}
+            adminId={adminId}
             phrase={recoverSeed}
             phraseStatus={recoverSeedStatus}
           />,
@@ -758,9 +758,8 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -822,9 +821,8 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}

@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "amount": satoshiAmount,
             "memo": "invoice",
         }, token, 2) as any;
-        console.log("createInvoice1", createInvoice1?.data?.bolt11)
+        // console.log("createInvoice1", createInvoice1?.data?.bolt11)
         if (createInvoice1?.status) {
             // return res.status(400).json({ status: "failure", message: "" });
 

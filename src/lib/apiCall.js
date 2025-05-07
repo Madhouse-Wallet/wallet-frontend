@@ -24,6 +24,30 @@ export const getUser = async (email) => {
   }
 };
 
+//
+export const getLnbitId = async (email) => {
+  try {
+    try {
+      return await fetch(`/api/get-lndb-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
 
 
 export const sendLnbit = async (amount, onchain_address) => {
