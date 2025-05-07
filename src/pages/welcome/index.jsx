@@ -1,19 +1,16 @@
 import { useRouter } from "next/router";
 import React from "react";
 import Image from "next/image";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { BackBtn } from "@/components/common";
 import Link from "next/link";
 
 const Welcome = () => {
-  const { theme, toggleTheme } = useTheme();
-
   const router = useRouter();
   return (
     <>
       {" "}
       <div className="mx-auto max-w-sm">
-      <div className="top pb-3">
+        <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <div className="flex items-center justify-center mb-2 gap-3">
@@ -54,19 +51,12 @@ const Welcome = () => {
           </button>
         </div>
         <div className="mt-2 text-center flex gap-3 justify-center">
-        {/* <Link href={"/pos-login"} 
+          <Link
+            href={"/recover-wallet"}
             className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-            >
-           POS Login</Link> */}
-           <Link href={"/recover-wallet"} 
-            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-            >
-           Recover Wallet</Link>
-       
-          {/* <div className="py-1">
-          </div>
-          <div className="py-1">
-          </div> */}
+          >
+            Recover Wallet
+          </Link>
         </div>
       </div>
     </>

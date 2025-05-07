@@ -7,7 +7,6 @@ const useScrollRestoration = () => {
 
   useEffect(() => {
     const handleRouteChangeStart = () => {
-      // Save the scroll position of the current page
       setScrollPositions((prev) => ({
         ...prev,
         [router.asPath]: window.scrollY,
@@ -15,7 +14,6 @@ const useScrollRestoration = () => {
     };
 
     const handleRouteChangeComplete = (url) => {
-      // Restore the scroll position if available
       if (scrollPositions[url]) {
         window.scrollTo(0, scrollPositions[url]);
       }

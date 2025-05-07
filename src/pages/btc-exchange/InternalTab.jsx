@@ -37,7 +37,6 @@ const InternalTab = () => {
 
   const [expandedRow, setExpandedRow] = useState(null);
   const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
 
   const [activeView, setActiveView] = useState("depositor");
 
@@ -58,8 +57,8 @@ const InternalTab = () => {
   };
 
   useEffect(() => {
-    if(!userAuth?.walletAddress){
-      return
+    if (!userAuth?.walletAddress) {
+      return;
     }
     userDatata();
   }, [userAuth?.walletAddress]);
@@ -80,7 +79,7 @@ const InternalTab = () => {
   const TxLink = ({ hash }) => {
     if (!hash) return "--";
     return (
-      <a 
+      <a
         href={`https://blockstream.info/tx/${hash}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -95,7 +94,7 @@ const InternalTab = () => {
   const EtherscanLink = ({ address }) => {
     if (!address) return "--";
     return (
-      <a 
+      <a
         href={`https://etherscan.io/address/${address}`}
         target="_blank"
         rel="noopener noreferrer"
@@ -106,7 +105,6 @@ const InternalTab = () => {
       </a>
     );
   };
-
 
   const getExpandedContent = (item) => {
     if (activeView === "redeemer") {
@@ -129,8 +127,7 @@ const InternalTab = () => {
                   </div>
                   <div>
                     <h6 className="font-bold themeClr">{tx.description}</h6>
-                    by{" "}
-                     <EtherscanLink address={tx.from} />
+                    by <EtherscanLink address={tx.from} />
                   </div>
                 </li>
               ))}
@@ -168,7 +165,6 @@ const InternalTab = () => {
       );
     }
 
-    // Original deposit expanded content
     return (
       <div className="grid gap-3 grid-cols-12">
         <div className="col-span-5">
@@ -185,15 +181,14 @@ const InternalTab = () => {
                       idx === 0
                         ? "bg-[#6050dc]"
                         : idx === 1
-                        ? "bg-[#f1c40f]"
-                        : "bg-[#3498db]"
+                          ? "bg-[#f1c40f]"
+                          : "bg-[#3498db]"
                     } flex-shrink-0`}
                   ></div>
                 </div>
                 <div>
                   <h6 className="font-bold themeClr">{tx.description}</h6>
-                  by{" "}
-                  <EtherscanLink address={tx.from} />
+                  by <EtherscanLink address={tx.from} />
                 </div>
               </li>
             ))}
@@ -233,8 +228,7 @@ const InternalTab = () => {
 
   return (
     <>
-       <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 mb-3">
-        {/* {tabData.map((item, index) => ( */}
+      <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 mb-3">
         <li className="">
           <button
             onClick={() => setActiveView("depositor")}
@@ -340,9 +334,8 @@ const InternalTab = () => {
         </TableC>
       </div>
     </>
-  )
-}
-
+  );
+};
 
 const TabNav = styled.div`
   @media (max-width: 480px) {
@@ -421,5 +414,4 @@ const TableC = styled(Table)`
   }
 `;
 
-
-export default InternalTab
+export default InternalTab;

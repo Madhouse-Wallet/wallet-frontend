@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import { delUser } from "@/lib/apiCall";
 import { logoutStorage } from "../../../utils/globals";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch } from "react-redux";
 
-// css
-
-// img
 
 const ConfirmationPop = ({ confirm, setConfirm }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -73,7 +67,6 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-            {/* <div className="top pb-3e */}
             <div className="modalBody">
               <div className="top text-center mb-3">
                 <h4 className="m-0 font-bold text-xl">Are you Sure!</h4>
@@ -109,19 +102,6 @@ const Modal = styled.div`
     input {
       color: var(--textColor);
     }
-  }
-`;
-
-const RadioList = styled.ul`
-  button {
-    font-size: 12px;
-    background: var(--cardBg);
-    border-color: var(--cardBg);
-  }
-  input:checked + button {
-    background: #ff8735;
-    border-color: #ff8735;
-    color: #000;
   }
 `;
 

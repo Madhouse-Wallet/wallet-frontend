@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getUser, updtUser } from "../../../../src/lib/apiCall";
+import { getUser } from "../../../../src/lib/apiCall";
 import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
 
-// css
-
-// img
 
 const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
@@ -28,15 +24,12 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           toast.error("Please Login!");
         } else {
           if (userExist?.userId?.liquidBitcoinWallet_3) {
-            // userExist?.userId?.passkey_number
             const liquidShift = await createTBtcToLbtcShift(
               amount, // amount
               userExist?.userId?.liquidBitcoinWallet_3,
-              // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
               process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
               process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
             );
-            // liquidShift now contains all the information about the shift, including the deposit address
             const web3 = new Web3Interaction("sepolia", providerr);
             const result = await web3.sendUSDC(
               process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
@@ -49,7 +42,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               setSuccess(true);
               setSendUsdc(false);
               toast.success("USDC sent successfully!");
-              // Wait for transaction to be mined and then fetch new balance
               setTimeout(fetchBalance, 2000);
             } else {
               toast.error(result.error || "Transaction failed");
@@ -74,7 +66,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
         try {
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {
-            // setUserAccount(account.address);
             let provider = await getProvider(account.kernelClient);
             if (provider) {
               setProviderr(provider?.ethersProvider);
@@ -84,7 +75,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           }
         } catch (error) {
           console.error("Wallet connection error:", error);
-          // toast.error("Failed to connect wallet. Please try again.");
         }
       }
     };
@@ -165,19 +155,6 @@ const Modal = styled.div`
     input {
       color: var(--textColor);
     }
-  }
-`;
-
-const RadioList = styled.ul`
-  button {
-    font-size: 12px;
-    background: var(--cardBg);
-    border-color: var(--cardBg);
-  }
-  input:checked + button {
-    background: #ff8735;
-    border-color: #ff8735;
-    color: #000;
   }
 `;
 

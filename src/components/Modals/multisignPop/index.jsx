@@ -1,20 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { useSelector } from "react-redux";
 import { createPassKeyWeightedClient } from "@/lib/zeroDevWallet";
 import { zeroAddress } from "viem";
 
-// css
-
-// img
-
 const MultiSignPop = ({ sign, setSign }) => {
-  const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [status, setStatus] = useState("Try Trxn");
   const [signatures, setSignatures] = useState([]);
@@ -105,9 +96,6 @@ const MultiSignPop = ({ sign, setSign }) => {
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
             </div>
             <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
@@ -135,12 +123,6 @@ const MultiSignPop = ({ sign, setSign }) => {
                     Send Trxn
                   </button>
                 </div>
-                {/* <div className="col-span-6">
-                  <button
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >Four
-                  </button>
-                </div> */}
               </div>
             </div>
           </div>

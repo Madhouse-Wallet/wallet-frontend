@@ -1,23 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import OtpInput from "react-otp-input";
 
 import { generateOTP, isValidEmail } from "../../../utils/globals";
-
-// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
 import { getUser, updtUser, sendOTP } from "../../../lib/apiCall";
 
 const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state) => state.Auth);
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
@@ -54,13 +49,9 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
         } else {
           toast.error(sendEmailData?.message || sendEmailData?.error);
         }
-        // setStep(2)
       }
 
       setLoading(false);
-      //email
-      // getUser()
-      // setStep(2)
     } catch (error) {
       setLoading(false);
     }
@@ -69,7 +60,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
   const handleOtpChange = (value) => {
     setOtp(value);
 
-    // Automatically submit when all 4 digits are entered
     if (value.length === 4 && !loading) {
       verifyUserFunc(value);
     }
@@ -125,8 +115,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
     }
   };
 
-  // const getUser = async(em)
-
   return (
     <>
       <Modal
@@ -144,17 +132,11 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           <div className={`relative rounded px-3`}>
-            {/* <div className="top pb-3">
-            </div> */}
             <div className="modalBody">
               {step == 1 ? (
                 <>
                   <div className="py-2 text-center">
                     <h5 className="m-0 text-xl font-bold">Enter New Email</h5>
-                    {/* <p className="m-0 text-xs ">
-                    Please select each phone in order to make sure it is
-                    correct
-                  </p> */}
                   </div>
                   <div className="py-2">
                     <input
@@ -283,20 +265,5 @@ const closeIcn = (
         />
       </clipPath>
     </defs>
-  </svg>
-);
-
-const copyIcn = (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M20 2H10C8.897 2 8 2.897 8 4V8H4C2.897 8 2 8.897 2 10V20C2 21.103 2.897 22 4 22H14C15.103 22 16 21.103 16 20V16H20C21.103 16 22 15.103 22 14V4C22 2.897 21.103 2 20 2ZM4 20V10H14L14.002 20H4ZM20 14H16V10C16 8.897 15.103 8 14 8H10V4H20V14Z"
-      fill="currentColor"
-    />
   </svg>
 );

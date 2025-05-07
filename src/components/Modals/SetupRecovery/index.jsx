@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 import { webAuthKeyStore, storedataLocalStorage } from "../../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../../lib/zeroDevWallet";
-// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
 import { getUser, updtUser } from "../../../lib/apiCall";
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {
@@ -51,7 +48,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
   const createNewSigner = async () => {
     try {
       setLoadingNewSigner(true);
-      // updtUser
       let userExist = await getUser(userAuth.email);
       if (userExist.status && userExist.status == "failure") {
         toast.error("User Not Found!");
@@ -77,7 +73,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
             }
           );
-          // passkeyValidatorNew: passkeyValidator1.newPasskeyValidator, newwebAuthKey: publicKey3.webAuthnKey
           dispatch(
             loginSet({
               login: userAuth.login,
@@ -137,7 +132,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
       }
 
       setLoadingNewSigner(false);
-      // doRecoveryNewSigner
     } catch (error) {
       setLoadingNewSigner(false);
     }
@@ -161,8 +155,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           <div className={`relative rounded px-3`}>
-            {/* <div className="top pb-3">
-            </div> */}
             <div className="modalBody">
               {step == 1 ? (
                 <>
@@ -287,20 +279,5 @@ const closeIcn = (
         />
       </clipPath>
     </defs>
-  </svg>
-);
-
-const copyIcn = (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M20 2H10C8.897 2 8 2.897 8 4V8H4C2.897 8 2 8.897 2 10V20C2 21.103 2.897 22 4 22H14C15.103 22 16 21.103 16 20V16H20C21.103 16 22 15.103 22 14V4C22 2.897 21.103 2 20 2ZM4 20V10H14L14.002 20H4ZM20 14H16V10C16 8.897 15.103 8 14 8H10V4H20V14Z"
-      fill="currentColor"
-    />
   </svg>
 );

@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
-  // Use ref to maintain scanner instance
   const scannerRef = useRef(null);
   const isScanning = useRef(false);
 
@@ -20,7 +19,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
 
   const startScanner = async () => {
     try {
-      // If scanner already exists or is scanning, return
       if (scannerRef.current || isScanning.current) {
         return;
       }
@@ -62,7 +60,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       stopScanner();
     }
 
-    // Cleanup on unmount
     return () => {
       stopScanner();
     };
@@ -76,7 +73,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
         <div
           id="qr-reader"
           className="w-full aspect-square bg-black"
-          // style={{ maxWidth: "500px" }}
           style={{
             maxWidth: "350px",
             height: "250px",

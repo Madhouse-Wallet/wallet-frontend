@@ -1,35 +1,27 @@
 import { useRouter } from "next/router";
-import IframeComponent from "./iframe";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useTheme } from "@/ContextApi/ThemeContext";
-import { BackBtn } from "@/components/common";
 
 export default function Fonbnk() {
-  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [activeTab, setActiveTab] = useState(0);
 
-  // Form state for onramp
   const [onRampForm, setOnRampForm] = useState({
     amount: "",
     currency: "USDC", // Default to USDC
   });
 
-  // Form state for offramp
   const [offRampForm, setOffRampForm] = useState({
     amount: "",
     currency: "USDC", // Offramp only uses USDC
   });
 
-  // Currency options for the dropdown
   const currencyOptions = [
     { value: "usdc", label: "USDC" },
     { value: "airtime", label: "Airtime" },
   ];
 
-  // Handle form changes for onramp
   const handleOnRampChange = (e: any) => {
     const { id, value } = e.target;
     setOnRampForm((prev) => ({
@@ -38,7 +30,6 @@ export default function Fonbnk() {
     }));
   };
 
-  // Handle form changes for offramp
   const handleOffRampChange = (e: any) => {
     const { id, value } = e.target;
     setOffRampForm((prev) => ({
@@ -47,25 +38,19 @@ export default function Fonbnk() {
     }));
   };
 
-  // Handle form submission for onramp
   const handleOnRampSubmit = (e: any) => {
     e.preventDefault();
 
-    // Construct the Fonbnk URL with parameters
     const fonbnkUrl = `${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_URL}&source=${process.env.NEXT_PUBLIC_FONBNK_ONRAMP_SOURCE}&address=${userAuth?.walletAddress}&amount=${onRampForm.amount}&currency=${onRampForm.currency}`;
 
-    // Open in new tab
     window.open(fonbnkUrl, "_blank");
   };
 
-  // Handle form submission for offramp
   const handleOffRampSubmit = (e: any) => {
     e.preventDefault();
 
-    // Construct the Fonbnk URL with parameters
     const fonbnkUrl = `${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_URL}&source=${process.env.NEXT_PUBLIC_FONBNK_OFFRAMP_SOURCE}&amount=${offRampForm.amount}&asset=${offRampForm.currency}`;
 
-    // Open in new tab
     window.open(fonbnkUrl, "_blank");
   };
 
@@ -205,13 +190,6 @@ export default function Fonbnk() {
     },
   ];
 
-  const handleGoBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back(); // Navigates to the previous page
-    } else {
-      router.push("/"); // Fallback: Redirects to the homepage
-    }
-  };
 
   return (
     <section className="ifrmae pt-12 relative">
@@ -279,19 +257,5 @@ const backIcn = (
       stroke-width="2"
       stroke-linejoin="round"
     />
-  </svg>
-);
-
-const closeIcn = (
-  <svg
-    stroke="currentColor"
-    fill="currentColor"
-    stroke-width="0"
-    viewBox="0 0 24 24"
-    height="24"
-    width="24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
   </svg>
 );

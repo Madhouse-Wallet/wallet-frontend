@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import { useTheme } from "@/ContextApi/ThemeContext";
+import React from "react";
 
 const WalletBackup = ({ step, setStep, addressPhrase, handleCopy }) => {
-  const { theme, toggleTheme } = useTheme();
-
   return (
     <>
       <div className="mx-auto max-w-sm">

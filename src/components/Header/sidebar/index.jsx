@@ -1,5 +1,4 @@
 import BuyBitcoin from "@/components/Modals/buyBitcoinPop";
-import BuyCoveragePop from "@/components/Modals/buyCoveragePop";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -13,8 +12,7 @@ import { toast } from "react-toastify";
 const Sidebar = ({ sidebar, setSidebar }) => {
   const router = useRouter();
   const userAuth = useSelector((state) => state.Auth);
-  const { theme, toggleTheme } = useTheme();
-  const [buycoverage, setBuyCoverage] = useState(false);
+  const { theme } = useTheme();
   const [buy, setBuy] = useState(false);
   const dispatch = useDispatch();
 
@@ -42,14 +40,6 @@ const Sidebar = ({ sidebar, setSidebar }) => {
   };
   return (
     <>
-      {buycoverage &&
-        createPortal(
-          <BuyCoveragePop
-            buycoverage={buycoverage}
-            setBuyCoverage={setBuyCoverage}
-          />,
-          document.body
-        )}
       {buy &&
         createPortal(<BuyBitcoin buy={buy} setBuy={setBuy} />, document.body)}
       <SidebarDiv

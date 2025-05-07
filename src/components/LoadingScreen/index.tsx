@@ -1,11 +1,8 @@
 import Image from "next/image";
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import { useTheme } from "@/ContextApi/ThemeContext";
 
 const LoadingScreen = () => {
-  const { theme, toggleTheme } = useTheme();
-  const isChecked = theme === "light";
 
   return (
     <>

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -11,9 +9,8 @@ import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 
-const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
+const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
-  const { theme } = useTheme();
   const [toAddress, setToAddress] = useState("");
   const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
@@ -23,25 +20,8 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
   const [balance, setBalance] = useState("0");
   const [providerr, setProviderr] = useState(null);
 
-  // Validate Ethereum address
-  const validateAddress = (address) => {
-    try {
-      return ethers.isAddress(address);
-    } catch (error) {
-      return false;
-    }
-  };
-  // Handle address input change
-  const handleAddressChange = (e) => {
-    const address = e.target.value;
-    setToAddress(address);
-    // setIsValidAddress(validateAddress(address));
-  };
-
-  // Handle amount input change
   const handleAmountChange = (e) => {
     const value = e.target.value;
-    // Only allow positive numbers with decimals
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
     }
@@ -66,7 +46,7 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
       toast.error("Insufficient USDC balance");
       return;
     }
- 
+
     setIsLoading(true);
     try {
       const web3 = new Web3Interaction("sepolia", providerr);
@@ -82,7 +62,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
         setSuccess(true);
         setSendUsdc(false);
         toast.success("USDC sent successfully!");
-        // Wait for transaction to be mined and then fetch new balance
         setTimeout(fetchBalance, 2000);
       } else {
         toast.error(result.error || "Transaction failed");
@@ -94,14 +73,12 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
     }
   };
 
-  // Update the useEffect to handle errors
   useEffect(() => {
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         try {
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {
-            // setUserAccount(account.address);
             let provider = await getProvider(account.kernelClient);
             if (provider) {
               setProviderr(provider?.ethersProvider);
@@ -119,7 +96,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
     connectWallet();
   }, [userAuth?.passkeyCred]);
 
-  // Fetch balance when provider and account are available
   useEffect(() => {
     if (providerr && userAuth?.walletAddress) {
       fetchBalance();
@@ -157,7 +133,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
             settrxnApproval={settrxnApproval}
             amount={amount}
             toAddress={toAddress}
-            // fromAddress={userAuth?.walletAddress}
             handleSend={handleSend}
             handleClose={handleClose}
           />,
@@ -187,45 +162,13 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
                   openCam={openCam}
                   onScan={(data) => {
                     setToAddress(data);
-                    setOpenCam(!openCam)
+                    setOpenCam(!openCam);
                   }}
                 />
               </>
             ) : (
               <>
                 <div className="modalBody">
-                  {/* <form> */}
-                    {/* {((process.env.NEXT_PUBLIC_NODE_ENV == "development") ? "Sepolia" : "Arbitrum Mainnet")} */}
-                  {/* <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Chain
-                    </label>
-                    <div className="border-white/10 bg-white/50 roundded hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full items-center gap-2">
-                      <span className="icn">{sepoliaIcn}</span>
-                      <span className="text-white">
-                        
-                    {process.env.NEXT_PUBLIC_ENV_CHAIN_NAME}</span>
-                    </div>
-                  </div> */}
-                  {/* <div className="py-2">
-                  <label className="form-label m-0 font-semibold text-xs ps-3">
-                    To
-                  </label>
-                  <input
-                    placeholder="Address"
-                    type="text"
-                    value={toAddress}
-                    onChange={handleAddressChange}
-                    className={`border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full ${
-                      !isValidAddress && toAddress ? "border-red-500" : ""
-                    }`}
-                  />
-                  {!isValidAddress && toAddress && (
-                    <p className="text-red-500 text-xs mt-1 ps-3">
-                      Invalid address
-                    </p>
-                  )}
-                </div> */}
                   <div className="py-2">
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       To
@@ -238,7 +181,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
                         onChange={(e) => setToAddress(e.target.value)}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
-                      {/* QR Scanner Button */}
                       <button
                         onClick={() => {
                           if (openCam) {
@@ -281,7 +223,6 @@ const SendUSDCPop = ({ sendUsdc, setSendUsdc, success, setSuccess }) => {
                       {isLoading ? "Sending..." : "Send"}
                     </button>
                   </div>
-                  {/* </form> */}
                 </div>
               </>
             )}
@@ -339,50 +280,6 @@ const closeIcn = (
   </svg>
 );
 
-const sepoliaIcn = (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <g clip-path="url(#clip0_1_9)">
-      <path
-        d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z"
-        fill="#627EEA"
-      />
-      <path
-        d="M8.24899 2V6.435L11.9975 8.11L8.24899 2Z"
-        fill="white"
-        fill-opacity="0.602"
-      />
-      <path d="M8.249 2L4.5 8.11L8.249 6.435V2Z" fill="white" />
-      <path
-        d="M8.24899 10.984V13.9975L12 8.808L8.24899 10.984Z"
-        fill="white"
-        fill-opacity="0.602"
-      />
-      <path d="M8.249 13.9975V10.9835L4.5 8.808L8.249 13.9975Z" fill="white" />
-      <path
-        d="M8.24899 10.2865L11.9975 8.11L8.24899 6.436V10.2865Z"
-        fill="white"
-        fill-opacity="0.2"
-      />
-      <path
-        d="M4.5 8.11L8.249 10.2865V6.436L4.5 8.11Z"
-        fill="white"
-        fill-opacity="0.602"
-      />
-    </g>
-    <defs>
-      <clipPath id="clip0_1_9">
-        <rect width="16" height="16" fill="white" />
-      </clipPath>
-    </defs>
-  </svg>
-);
-
 const usdcIcn = (
   <svg
     width="16"
@@ -413,18 +310,16 @@ const usdcIcn = (
   </svg>
 );
 
-const QRModal = styled.div`
-  .qr-box {
-    width: 100%;
-    max-width: 400px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-  }
-`;
-
 const scanIcn = (
-  <svg height={24} width={24} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-    <path d="m62 215c-8 0-15-7-15-16l0-47c0-56 45-101 100-101l48 0c9 0 16 7 16 16 0 9-7 16-16 16l-48 0c-38 0-69 31-69 69l0 47c0 9-7 16-16 16z m379 0c-9 0-16-7-16-16l0-47c0-38-31-69-69-69l-48 0c-9 0-16-7-16-16 0-9 7-16 16-16l48 0c55 0 100 45 100 101l0 47c0 9-7 16-15 16z m-85 246l-29 0c-9 0-16-7-16-16 0-9 7-16 16-16l29 0c38 0 69-31 69-69l0-28c0-9 7-16 16-16 8 0 15 7 15 16l0 28c0 56-45 101-100 101z m-161 0l-48 0c-55 0-100-45-100-101l0-47c0-9 7-16 15-16 9 0 16 7 16 16l0 47c0 38 31 69 69 69l48 0c8 0 16 7 16 16 0 9-7 16-16 16z m189-221l-265 0c-9 0-16 7-16 16 0 9 7 16 16 16l265 0c9 0 16-7 16-16 0-9-7-16-16-16z m-237 56l0 6c0 34 28 62 62 62l86 0c34 0 61-28 61-62l0-6c0-3-2-5-4-5l-201 0c-2 0-4 2-4 5z m0-80l0-6c0-34 28-62 62-62l86 0c34 0 61 28 61 62l0 6c0 3-2 5-4 5l-201 0c-2 0-4-2-4-5z" fill="white" />
+  <svg
+    height={24}
+    width={24}
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+  >
+    <path
+      d="m62 215c-8 0-15-7-15-16l0-47c0-56 45-101 100-101l48 0c9 0 16 7 16 16 0 9-7 16-16 16l-48 0c-38 0-69 31-69 69l0 47c0 9-7 16-16 16z m379 0c-9 0-16-7-16-16l0-47c0-38-31-69-69-69l-48 0c-9 0-16-7-16-16 0-9 7-16 16-16l48 0c55 0 100 45 100 101l0 47c0 9-7 16-15 16z m-85 246l-29 0c-9 0-16-7-16-16 0-9 7-16 16-16l29 0c38 0 69-31 69-69l0-28c0-9 7-16 16-16 8 0 15 7 15 16l0 28c0 56-45 101-100 101z m-161 0l-48 0c-55 0-100-45-100-101l0-47c0-9 7-16 15-16 9 0 16 7 16 16l0 47c0 38 31 69 69 69l48 0c8 0 16 7 16 16 0 9-7 16-16 16z m189-221l-265 0c-9 0-16 7-16 16 0 9 7 16 16 16l265 0c9 0 16-7 16-16 0-9-7-16-16-16z m-237 56l0 6c0 34 28 62 62 62l86 0c34 0 61-28 61-62l0-6c0-3-2-5-4-5l-201 0c-2 0-4 2-4 5z m0-80l0-6c0-34 28-62 62-62l86 0c34 0 61 28 61 62l0 6c0 3-2 5-4 5l-201 0c-2 0-4-2-4-5z"
+      fill="white"
+    />
   </svg>
 );

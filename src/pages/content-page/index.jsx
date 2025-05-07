@@ -6,20 +6,11 @@ import LegalNotice from "../legal-notice";
 import Documentation from "../documentation";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { BackBtn } from "@/components/common";
 
 
 const ContentPage = () => {
   const router = useRouter();
   const [step, setStep] = useState("all");
-
-  const handleGoBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back(); // Navigates to the previous page
-    } else {
-      router.push("/"); // Fallback: Redirects to the homepage
-    }
-  };
   return (
     <>
       <section className="relative dashboard pt-12">
@@ -37,7 +28,6 @@ const ContentPage = () => {
                 <div className="col-span-12">
                   <div className="sectionHeader p-2 ">
                     <div className="flex align-items-center gap-3">
-                      {/* <BackBtn /> */}
                       <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                         Content Page
                       </h4>

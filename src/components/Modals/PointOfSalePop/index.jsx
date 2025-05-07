@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
-import { toast } from "react-toastify";
 import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
 import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
-// css
-
-// img
 
 const PointOfSalePop = ({
   pointSale,
@@ -19,7 +12,6 @@ const PointOfSalePop = ({
   refundBTC,
   setRefundBTC,
 }) => {
-  const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState(1);
@@ -69,28 +61,13 @@ const PointOfSalePop = ({
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
             </div>
             <div className="modalBody text-center">
               {isLoading && createPortal(<LoadingScreen />, document.body)}
-              {/* <div className="py-2">
-                <Link
-                  href="/point-of-sale"
-                  onClick={() => setPointSale(false)}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Crypto Link
-                </Link>
-              </div> */}
               {step == 1 ? (
                 <>
                   <div className="py-2">
                     <button
-                      // href={`${process.env.NEXT_PUBLIC_LNBIT_URL}tpos/${lnbitLink}`}
-                      // target="_blank"
-                      // rel="noopener noreferrer"
                       onClick={() => setStep(2)}
                       className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >

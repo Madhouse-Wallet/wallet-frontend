@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
-import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
-
-// css
-
-// img
 
 const WithdrawPopup = ({
   withdrawPop,
@@ -31,7 +24,6 @@ const WithdrawPopup = ({
           toast.error("Please Login!");
         } else {
           if (userExist?.userId?.liquidBitcoinWallet_2) {
-            // userExist?.userId?.passkey_number
             const sendLnbitWithdraw = await sendLnbit(
               amount, // amount
               userExist?.userId?.liquidBitcoinWallet_2
@@ -63,7 +55,6 @@ const WithdrawPopup = ({
         try {
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {
-            // setUserAccount(account.address);
             let provider = await getProvider(account.kernelClient);
             if (provider) {
               setProviderr(provider?.ethersProvider);
@@ -73,7 +64,6 @@ const WithdrawPopup = ({
           }
         } catch (error) {
           console.error("Wallet connection error:", error);
-          // toast.error("Failed to connect wallet. Please try again.");
         }
       }
     };
@@ -156,19 +146,6 @@ const Modal = styled.div`
     input {
       color: var(--textColor);
     }
-  }
-`;
-
-const RadioList = styled.ul`
-  button {
-    font-size: 12px;
-    background: var(--cardBg);
-    border-color: var(--cardBg);
-  }
-  input:checked + button {
-    background: #ff8735;
-    border-color: #ff8735;
-    color: #000;
   }
 `;
 

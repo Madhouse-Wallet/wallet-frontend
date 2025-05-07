@@ -26,7 +26,6 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Invalid or missing action" });
     }
   } catch (error) {
-    console.error(`Error in ${action || "API"} action:`, error);
     return res.status(500).json({
       error: "An unexpected error occurred",
       details: error.message,
@@ -121,7 +120,7 @@ async function handleCreateInvoice(req, res) {
           amount: Number(amount),
           type: type,
           webhook: `${process.env.NEXT_PUBLIC_DOMAIN}api/webhook`,
-          secret: secret
+          secret: secret,
         },
       },
       {
@@ -134,7 +133,6 @@ async function handleCreateInvoice(req, res) {
 
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error("Error creating invoice:", error);
     return res.status(error.response?.status || 500).json({
       error: error.response?.data || "Failed to create invoice",
     });
@@ -145,36 +143,36 @@ async function handleSendBitcoin(req, res) {
   const { token, amount, address } = req.body;
 
   if (!token) {
-    return res.status(401).json({ error: 'Authentication token is required' });
+    return res.status(401).json({ error: "Authentication token is required" });
   }
 
   if (!amount || isNaN(Number(amount))) {
-    return res.status(400).json({ error: 'Valid amount is required' });
+    return res.status(400).json({ error: "Valid amount is required" });
   }
 
   if (!address) {
-    return res.status(400).json({ error: 'Bitcoin address is required' });
+    return res.status(400).json({ error: "Bitcoin address is required" });
   }
 
   try {
-    const response = await axios.post(`${COINOS_API_URL}/bitcoin/send`,
+    const response = await axios.post(
+      `${COINOS_API_URL}/bitcoin/send`,
       {
         amount: Number(amount),
-        address
+        address,
       },
       {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error('Error sending Bitcoin:', error);
     return res.status(error.response?.status || 500).json({
-      error: error.response?.data || 'Failed to send Bitcoin'
+      error: error.response?.data || "Failed to send Bitcoin",
     });
   }
 }

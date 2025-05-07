@@ -2,13 +2,10 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { toast } from "react-toastify";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
 
 const EmailStep = ({ step, setStep, loginFn }) => {
-  const { theme, toggleTheme } = useTheme();
   const [error, setError] = useState("");
 
   const [loginLoading, setLoginLoading] = useState(false);
@@ -19,7 +16,6 @@ const EmailStep = ({ step, setStep, loginFn }) => {
     try {
       setLoginLoading(true);
       if (!registerEmail) {
-        // toast.error("Please Enter Email!");
         setError("Please Enter Email!");
         setLoginLoading(false);
       } else {
@@ -28,7 +24,6 @@ const EmailStep = ({ step, setStep, loginFn }) => {
           setLoginLoading(false);
           setError("Please Enter Valid Email!");
           return;
-          // toast.error("Please Enter Valid Email!");
         }
         let response = await loginFn({
           email: registerEmail,
@@ -40,7 +35,6 @@ const EmailStep = ({ step, setStep, loginFn }) => {
         }
       }
     } catch (error) {
-      console.log("loginTry error --->", error);
       setLoginLoading(false);
     }
   };
@@ -92,10 +86,6 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                   </div>
                 )}
               </div>
-              {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
-                      {infoIcn}
-                      Incorrect email
-                    </div> */}
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">

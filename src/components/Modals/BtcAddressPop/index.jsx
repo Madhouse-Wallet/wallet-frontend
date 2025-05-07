@@ -1,9 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-
-// css
-
-// img
 
 const BTCAddressPop = ({ btcAddress, setBtcAddress }) => {
   const handleAddressPop = () => setBtcAddress(!btcAddress);

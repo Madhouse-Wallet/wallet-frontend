@@ -1,5 +1,4 @@
 import { CowSwapWidget } from "@cowprotocol/widget-react";
-import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -68,9 +67,7 @@ const cowSwapParams = {
   chainId: Number(process.env.NEXT_PUBLIC_MAINNET_CHAIN),
   tradeType: "swap",
   // tokenLists: [],
-  tokenLists: [
-    process.env.NEXT_PUBLIC_COWSWAP_CUSTOM_TOKEN_LIST_URI,
-  ],
+  tokenLists: [process.env.NEXT_PUBLIC_COWSWAP_CUSTOM_TOKEN_LIST_URI],
   sell: {
     // Sell token. Optionally add amount for sell orders
     asset: process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
@@ -114,29 +111,19 @@ const cowSwapParams = {
       name: "Bitcoin",
       decimals: 18,
       symbol: "BTC",
-      logoURI:
-        "https://media.madhousewallet.com/btc.svg",
+      logoURI: "https://media.madhousewallet.com/btc.svg",
     },
   ],
 };
 
 const Swap = () => {
-  const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [provider, setProvider] = useState<any | undefined>();
   // Go back handler
-  const handleGoBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back(); // Navigate to the previous page
-    } else {
-      router.push("/"); // Fallback to the homepage
-    }
-  };
 
   const createProvider = async () => {
     if (userAuth?.passkeyCred) {
       let account = false;
-      console.log("account---<", account);
       if (account) {
         // setProvider(account?.cowSwapProvider)
       }
@@ -150,16 +137,12 @@ const Swap = () => {
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
-        console.log("account---<", account);
         if (account) {
           let provider = await getProvider(account.kernelClient);
-          console.log("provider-->", provider);
           if (provider) {
-            console.log("provider -line-114", provider);
             const wrappedProvider = new LegacyProviderWrapper(
               provider?.kernelProvider
             );
-            console.log("wrappedProvider -line-114", wrappedProvider);
 
             setProvider(wrappedProvider);
           }
@@ -204,27 +187,3 @@ const CowSwapCard = styled.div`
   }
 `;
 export default Swap;
-
-// Back button icon
-const backIcn = (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M22 20.418C19.5533 17.4313 17.3807 15.7367 15.482 15.334C13.5833 14.9313 11.7757 14.8705 10.059 15.1515V20.5L2 11.7725L10.059 3.5V8.5835C13.2333 8.6085 15.932 9.74733 18.155 12C20.3777 14.2527 21.6593 17.0587 22 20.418Z"
-      fill="currentColor"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-function useSelecto(arg0: (state: any) => any) {
-  throw new Error("Function not implemented.");
-}

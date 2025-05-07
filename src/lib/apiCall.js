@@ -158,56 +158,6 @@ export const getSubdomainApproval = async (
   }
 };
 
-// export const registerEnsName = async (
-//   name,
-//   smartAccount,
-//   defApiKey,
-//   defApiSecret,
-//   registrarControllerAddress,
-//   resolverAddress,
-//   reverseRegistrarAddress,
-//   baseRegistrarAddress,
-//   duration = 31557600
-// ) => {
-//   try {
-//     console.log(
-//       "details",
-//       name,
-//       smartAccount,
-//       defApiKey,
-//       defApiSecret,
-//       registrarControllerAddress,
-//       resolverAddress,
-//       reverseRegistrarAddress,
-//       baseRegistrarAddress,
-//       duration
-//     );
-//     return await fetch(`/api/register-ens`, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         name,
-//         smartAccount,
-//         defApiKey,
-//         defApiSecret,
-//         registrarControllerAddress,
-//         resolverAddress,
-//         reverseRegistrarAddress,
-//         baseRegistrarAddress,
-//         duration,
-//       }),
-//     })
-//       .then((res) => res.json())
-//       .then((data) => {
-//         console.log("Registration response:", data);
-//         return data;
-//       });
-//   } catch (error) {
-//     console.log("Registration error:", error);
-//     return false;
-//   }
-// };
-
 export const registerEnsName = async (
   name,
   smartAccount,
@@ -251,7 +201,6 @@ export const registerEnsName = async (
 export const getUserWallet = async (wallet) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -261,7 +210,6 @@ export const getUserWallet = async (wallet) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -409,7 +357,6 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin", secre
   }
 };
 
-// Add this to your utils/coinosApi.js file
 
 export const sendBitcoinn = async (token, amount, address) => {
   try {

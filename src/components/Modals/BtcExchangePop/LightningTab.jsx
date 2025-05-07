@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
-import axios from "axios";
-import { toast } from "react-toastify";
 
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
@@ -42,7 +40,6 @@ const LightningTab = (walletAddress) => {
         },
         body: JSON.stringify({
           invoiceAmount: amount,
-          // destinationAddress: walletAddress,
           destinationAddress:
             process.env.NEXT_PUBLIC_QUIENCY_BTC_WALLET_ADDRESS,
         }),
@@ -90,12 +87,6 @@ const LightningTab = (walletAddress) => {
     setStep(2);
     generateQRCode(result?.data?.invoice);
     setInvoice(result?.data?.invoice);
-  };
-
-  const splitAddress = (address, charDisplayed = 10) => {
-    const firstPart = address.slice(0, charDisplayed);
-    const lastPart = address.slice(-charDisplayed);
-    return `${firstPart}...${lastPart}`;
   };
 
   return (
@@ -181,27 +172,6 @@ const LightningTab = (walletAddress) => {
               </svg>
             </button>
           </div>
-
-          {/* <div className="py-1">
-              <p
-                className="m-0 py-2 px-3 text-center mx-auto w-full bg-[var(--backgroundColor)] rounded text-truncate"
-                data-tooltip-id="my-tooltip"
-                data-tooltip-content={"walletAddress"}
-                style={{ maxWidth: 200 }}
-              >
-                {splitAddress(invoice)}
-              </p>
-            </div>
-            <div className="py-2">
-              <button
-                type="button"
-                onClick={() => handleCopy(invoice, "one")}
-                className="btn flex items-center justify-center w-full commonBtn p-0 bg-transparent themeClr"
-              >
-                Copy Invoice
-                {copyIcn}
-              </button>
-            </div> */}
         </div>
       ) : null}
     </>
@@ -209,23 +179,3 @@ const LightningTab = (walletAddress) => {
 };
 
 export default LightningTab;
-
-const copyIcn = (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
-      fill="currentColor"
-    />
-    <path
-      opacity="0.5"
-      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
-      fill="currentColor"
-    />
-  </svg>
-);

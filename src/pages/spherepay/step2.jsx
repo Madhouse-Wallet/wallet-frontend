@@ -4,7 +4,6 @@ import iso3166 from "iso-3166-1";
 import SpherePayAPI from "../api/spherePayApi";
 
 const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
-  // State for dropdowns
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [isStateOpen, setIsStateOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
@@ -15,11 +14,9 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Refs for handling outside clicks
   const countryDropdownRef = useRef(null);
   const stateDropdownRef = useRef(null);
 
-  // Get all countries with 3-digit codes
   const allCountries = Country.getAllCountries().map((country) => {
     const isoCountry = iso3166.whereAlpha2(country.isoCode);
     return {
@@ -30,7 +27,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
     };
   });
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -50,40 +46,34 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle country selection
   const handleCountrySelect = (country) => {
     setSelectedCountry(country);
     setIsCountryOpen(false);
     setCountrySearchTerm("");
 
-    // Get states for the selected country using 2-digit code
     const countryStates = State.getStatesOfCountry(country.code);
     setStates(countryStates);
     setSelectedState(null);
   };
 
-  // Handle state selection
   const handleStateSelect = (state) => {
     setSelectedState(state);
     setIsStateOpen(false);
     setStateSearchTerm("");
   };
 
-  // Filter countries based on search term
   const filteredCountries = allCountries.filter(
     (country) =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
       country.alpha3.toLowerCase().includes(countrySearchTerm.toLowerCase())
   );
 
-  // Filter states based on search term
   const filteredStates = states.filter(
     (state) =>
       state.name.toLowerCase().includes(stateSearchTerm.toLowerCase()) ||
       state.isoCode.toLowerCase().includes(stateSearchTerm.toLowerCase())
   );
 
-  // Create new customer API function
   const createNewCustomer = async (email, countryCode, stateCode) => {
     setIsLoading(true);
     setError("");
@@ -99,7 +89,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
 
     try {
       const response = await SpherePayAPI.createCustomer(customerData);
-      console.log("API Response:", response);
       return response;
     } catch (error) {
       console.error("Error creating customer:", error);
@@ -110,7 +99,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
     }
   };
 
-  // Handle continue button click
   const handleContinue = async (e) => {
     e.preventDefault();
 
@@ -124,26 +112,16 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
       return;
     }
 
-    // Use selected country's 3-digit code and state code
     const countryCode = selectedCountry.alpha3; // Using the 3-digit code
     const stateCode = selectedState ? selectedState.isoCode : "";
 
-    // Get the email from props (passed from previous step)
     const email = userEmail; // Fallback if email not provided
 
-    console.log("Submitting with:", {
-      email,
-      countryCode,
-      stateCode,
-    });
-
-    // Call API to create customer
     const response = await createNewCustomer(email, countryCode, stateCode);
 
     if (response && response.error) {
       setError(response.error.message || "An error occurred");
     } else {
-      // If successful, navigate to next step
       setCustomerID(response?.data?.customer?.id);
       setStep("PolicyKycStep");
     }
@@ -161,7 +139,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
           </p>
         </div>
         <form className="mt-5">
-          {/* Country Dropdown */}
           <div className="py-2">
             <label
               htmlFor="country"
@@ -234,7 +211,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
             </div>
           </div>
 
-          {/* State Dropdown - Only show if country is selected and has states */}
           {selectedCountry && states.length > 0 && (
             <div className="py-2">
               <label
@@ -301,7 +277,6 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
             </div>
           )}
 
-          {/* Error message */}
           {error && (
             <div className="py-2">
               <p className="text-red-500 text-xs">{error}</p>

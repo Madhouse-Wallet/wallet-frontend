@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-// import StockGraph from "./StockGraph";
 import { useRouter } from "next/navigation";
-
-// css
-
-// img
 
 const BuyBitcoin = ({ buy, setBuy }) => {
   const router = useRouter();
@@ -59,7 +54,6 @@ const BuyBitcoin = ({ buy, setBuy }) => {
               <h5 className="m-0 fw-bold">Buy Bitcoin</h5>
             </div>
             <div className="content p-3">
-              <div className="py-2">{/* <StockGraph /> */}</div>
               <div className="py-2">
                 <form>
                   <div
