@@ -99,7 +99,7 @@ const LoginPop = ({ login, setLogin }) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
+          // console.log("data-->", data);
           return data;
         });
     } catch (error) {

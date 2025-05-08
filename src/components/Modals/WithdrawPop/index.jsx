@@ -5,6 +5,10 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 
+// css
+
+// img
+
 const WithdrawPopup = ({
   withdrawPop,
   setWithdrawPop,

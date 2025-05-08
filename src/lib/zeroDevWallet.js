@@ -65,14 +65,26 @@ const publicClient = createPublicClient({
 
 const accountClient = async (signer1, accountAddress) => {
   try {
-    const account = await createKernelAccount(publicClient, {
-      entryPoint,
-      plugins: {
-        sudo: signer1,
-      },
-      kernelVersion: KERNEL_V3_1,
-      address: accountAddress,
-    });
+    let account;
+    if (accountAddress) {
+      account = await createKernelAccount(publicClient, {
+        entryPoint,
+        plugins: {
+          sudo: signer1,
+        },
+        kernelVersion: KERNEL_V3_1,
+        address: accountAddress,
+      });
+    } else {
+      account = await createKernelAccount(publicClient, {
+        entryPoint,
+        plugins: {
+          sudo: signer1,
+        },
+        kernelVersion: KERNEL_V3_1,
+        // address: accountAddress,
+      });
+    }
 
     const kernelClient = createKernelAccountClient({
       account,
@@ -97,6 +109,7 @@ const accountClient = async (signer1, accountAddress) => {
       kernelClient,
     };
   } catch (error) {
+    console.log("account error-->", error)
     return false;
   }
 };
@@ -252,6 +265,7 @@ export const zeroTrxn = async (kernelClient) => {
     let tr = await checkDeployment(kernelClient);
     return tr;
   } catch (error) {
+    console.log("error-->", error)
     let tr = await checkDeployment(kernelClient);
     return tr;
   }
@@ -622,7 +636,7 @@ export const multisigSetup = async (webauthKey, email, passkeyNo) => {
 
 export const createApproval = async () => {
   try {
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const createPassKeyWeightedClient = async (

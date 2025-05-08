@@ -102,11 +102,11 @@ const SendBitcoinPop = ({
       setLoading(false);
       return;
     }
-    const sendLnbitWithdraw = await btcSat(amount);
+    const sendLnbitWithdraw = await btcSat(amount, privateKey?.publicKey);
     if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
       toast.error(sendLnbitWithdraw.message);
       setLoading(false);
-    } else {
+    } else { 
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: sendLnbitWithdraw.data.data.address,
@@ -114,11 +114,12 @@ const SendBitcoinPop = ({
         privateKeyHex: privateKey?.privateKey,
         network: "main", // Use 'main' for mainnet
       });
+      console.log("result-->",result)
       if (result.status) {
         toast.success(result.transactionHash);
         setLoading(false);
       } else {
-        toast.error(result.error);
+        toast.error("Transaction Failed!");
         setLoading(false);
       }
     }

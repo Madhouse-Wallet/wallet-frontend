@@ -76,6 +76,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   useEffect(() => {
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
+        console.log("userAuth?.passkeyCred-->",userAuth?.passkeyCred)
         try {
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {

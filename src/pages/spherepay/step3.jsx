@@ -31,7 +31,7 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
     try {
       const response = await TermsOfServiceCustomer();
       setTermsSRC(response); // Store the response in state
-      window.open(response?.data?.link, "_blank");
+      window.open(response?.link, "_blank");
     } catch (error) {
       console.error("Error processing Terms of Service:", error);
     }
@@ -41,7 +41,7 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
     try {
       const response = await kycCustomer();
       setIdentitySRC(response); // Store the response in state
-      window.open(response?.data?.url, "_blank");
+      window.open(response?.url, "_blank");
     } catch (error) {
       console.error("Error processing Identity Verification:", error);
     }
@@ -119,8 +119,8 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
       case "pending":
         return {
           text: "Pending",
-          disabled: true,
-          className: "bg-yellow-600 text-white cursor-not-allowed opacity-80",
+          disabled: false,
+          className: "bg-yellow-600 text-white cursor-allowed opacity-80",
         };
       case "rejected":
         return { text: "Retry", disabled: false, className: "commonBtn" };
