@@ -53,7 +53,8 @@ const Dashboard = () => {
       head: "Buy & Sell Bitcoin",
       icn: icn3,
       onClick: () => {
-        setBuySell(!buySell);
+        // setBuySell(!buySell);
+        router.push("/buy")
       },
     },
     {
