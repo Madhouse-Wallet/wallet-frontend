@@ -170,7 +170,7 @@ const RecentTransaction = () => {
   const transactionsByDate = groupTransactionsByDate(transactions);
   const tabs = [
     {
-      title: "All",
+      title: "USDC Transactions",
       component: (
         <>
           {transactions.length > 0 ? (
@@ -246,7 +246,7 @@ const RecentTransaction = () => {
         </>
       ),
     },
-    { title: "Internal", component: <InternalTab /> },
+    { title: "BTC Bridge Transactions", component: <InternalTab /> },
   ];
 
   return (
