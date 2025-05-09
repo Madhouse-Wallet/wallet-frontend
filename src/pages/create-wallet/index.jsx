@@ -19,6 +19,7 @@ import {
   generateOTP,
   storedataLocalStorage,
   webAuthKeyStore,
+  getRandomString
 } from "../../utils/globals";
 
 import {
@@ -67,7 +68,9 @@ const CreateWallet = () => {
     secretStorageKey,
     liquidBitcoinWallet,
     liquidBitcoinWallet_2,
-    liquidBitcoinWallet_3
+    liquidBitcoinWallet_3,
+    coinosToken,
+    flowTokens
   ) => {
     try {
       try {
@@ -88,6 +91,8 @@ const CreateWallet = () => {
             liquidBitcoinWallet,
             liquidBitcoinWallet_2,
             liquidBitcoinWallet_3,
+            coinosToken,
+            flowTokens
           }),
         })
           .then((res) => res.json())
@@ -239,26 +244,34 @@ const CreateWallet = () => {
             );
 
             localStorage.setItem("coinosToken", registerCoinos?.token);
-
+            const [usernameInit, domainInit] = (registerData.email).split("@");
+            let token1 = (await getRandomString(6)) + "_" + usernameInit;
+            let token2 = (await getRandomString(6)) + "_" + usernameInit;
+            let token3 = (await getRandomString(6)) + "_" + usernameInit;
+            let flowTokens = [
+              { flow: 1, token: (token1) },
+              { flow: 2, token: (token2) },
+              { flow: 3, token: (token3) }
+            ];
             const resultLiquid = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
               "liquid",
-              "lbtcusdc"
+              token1
             );
 
             const resultLiquid1 = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
               "liquid",
-              "lbtctbtc"
+              token2
             );
 
             const resultLiquid2 = await createCoinosInvoice(
               registerCoinos?.token,
               "1",
               "liquid",
-              "tbtclbtc"
+              token3
             );
 
             let getWallet = await getBitcoinAddress();
@@ -313,7 +326,9 @@ const CreateWallet = () => {
               storageKeySecret,
               liquidBitcoinWallet,
               liquidBitcoinWallet_2,
-              liquidBitcoinWallet_3
+              liquidBitcoinWallet_3,
+              registerCoinos?.token,
+              flowTokens
             );
             toast.success("Sign Up Successfully!");
             dispatch(
@@ -421,12 +436,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP);
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,

@@ -129,7 +129,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "", secretEmail = "",
             secretCredentialId = "",
-            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "", liquidBitcoinWallet_3 = "" } = req.body;
+            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "", liquidBitcoinWallet_3 = "", coinosToken,
+            flowTokens } = req.body;
 
         // Validate email
         if (!email || typeof email !== 'string') {
@@ -155,11 +156,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, liquidBitcoinWallet_2, liquidBitcoinWallet_3, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
             secretCredentialId,
             secretStorageKey,
+            coinosToken, flowTokens,
             ensSetup: false, createdAt: new Date()
         });
         // console.log("result-->", result)
         addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1)
-        addLnbit(email, usersCollection, liquidBitcoinWallet_2, 2, 1)
+        addLnbit(email, usersCollection, bitcoinWallet, 2, 1)
         addLnbit(email, usersCollection, liquidBitcoinWallet_3, 3, 2)
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
