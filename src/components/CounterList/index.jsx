@@ -1,11 +1,7 @@
 import React, { useState } from "react";
-import Slider from "react-slick";
 import styled from "styled-components";
-import bg from "@/Assets/Images/cardBg.png";
-import Image from "next/image";
 import { createPortal } from "react-dom";
 import LiveBlogPopup from "@/components/Modals/LiveblogPop";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { fetchTokenTransfers, fetchWalletHistory } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import moment from "moment";
@@ -13,17 +9,13 @@ import moment from "moment";
 const CounterList = ({ data }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [liveBlog, setLiveBlog] = useState();
-  const { theme, toggleTheme } = useTheme();
   const [transactions, setTransactions] = useState([]); // State for transactions
   const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchRecentTransactions = async () => {
     try {
       // const data = await fetchWalletHistory(userAuth?.walletAddress);
-      const data = await fetchWalletHistory(
-        userAuth?.walletAddress
-      );
-      console.log("Wallet history data:", data);
+      const data = await fetchWalletHistory(userAuth?.walletAddress);
 
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
@@ -111,7 +103,6 @@ const CounterList = ({ data }) => {
         [process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS],
         userAuth.walletAddress
       );
-      console.log("data", balance);
 
       if (balance?.result?.length) {
         const latestTransactions = balance.result.slice(0, 10).map((tx) => {
@@ -146,7 +137,6 @@ const CounterList = ({ data }) => {
         [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
         userAuth.walletAddress
       );
-      console.log("data", balance);
 
       if (balance?.result?.length) {
         const latestTransactions = balance.result.slice(0, 10).map((tx) => {
@@ -179,7 +169,6 @@ const CounterList = ({ data }) => {
     }
   };
 
-  console.log(data, "data");
   return (
     <>
       {liveBlog &&
@@ -193,8 +182,6 @@ const CounterList = ({ data }) => {
           document.body
         )}
       <div className="grid gap-4 grid-cols-12 w-full">
-        {/* <SliderWrpper className="col-span-12">
-          <Slider {...settings}> */}
         {data &&
           data.length > 0 &&
           data.map((item, key) => (
@@ -226,40 +213,13 @@ const CounterList = ({ data }) => {
                       </div>
                       <div className="flex min-w-0 items-end gap-1 text-12 font-semibold leading-none -tracking-3 opacity-80 md:text-24 text-base">
                         <span className="min-w-0 truncate">{item.value}</span>
-                        {/* <span className="min-w-0 flex-1 truncate text-13 font-bold opacity-[45%]">
-                              / 983 GB
-                            </span> */}
                       </div>
                     </div>
-                    {/* <div className="flex-1" /> */}
-                    {/* <div className="text-11 md:text-13 leading-snug font-semibold -tracking-2 truncate opacity-50">
-                      +20.1% from last month
-                    </div> */}
-                    {/* <div
-                      aria-valuemax={100}
-                      aria-valuemin={0}
-                      role="progressbar"
-                      data-state="indeterminate"
-                      data-max={100}
-                      className={`bg-white/10 relative w-full overflow-hidden rounded-full h-1.5`}
-                    >
-                      <div
-                        data-state="indeterminate"
-                        data-max={100}
-                        className={`bg-white h-full w-full flex-1 transition-all duration-700 rounded-full `}
-                        style={{ transform: "translateX(-55%)" }}
-                      />
-                    </div> */}
                   </button>
-                  {/* <div className="desktop relative z-0 max-w-full truncate text-center text-13 leading-normal drop-shadow-desktop-label contrast-more:bg-black contrast-more:px-1">
-                        Live Usage
-                      </div> */}
                 </div>
               </CardCstm>
             </div>
           ))}
-        {/* </Slider>
-        </SliderWrpper> */}
       </div>
     </>
   );

@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import puppeteer from "puppeteer";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -14,8 +13,6 @@ export default async function handler(
 
   try {
     const { url } = req.body;
-
-    // Validate email
     if (!url || typeof url !== "string") {
       return res
         .status(400)
@@ -27,7 +24,6 @@ export default async function handler(
     await page.goto(url, { waitUntil: "load", timeout: 0 });
 
     // Take screenshot
-    console.log(process.cwd(), "process.cwd()");
 
     const screenshotDir = path.join(
       process.cwd(), // Root directory
@@ -43,16 +39,13 @@ export default async function handler(
       "../../Assets/Images",
       "screenshot.png"
     );
-    // const screenshotPath = path.join(screenshotDir, "screenshot.png");
 
-    console.log("screenshotPath", screenshotPath);
     await page.screenshot({ path: screenshotPath });
 
     await browser.close();
 
     res.status(200).json({ screenshot: "/screenshot.png" });
   } catch (error) {
-    console.error("Error adding user:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

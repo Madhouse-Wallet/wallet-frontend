@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-// import styles from "./Common.module.scss";
+import { useEffect, useRef } from "react";
 import { AccordionIcon, CstmDropdown } from "./commonStyled";
 import { useRouter } from "next/navigation";
 import { AccordionWrapper } from "./commonStyled";

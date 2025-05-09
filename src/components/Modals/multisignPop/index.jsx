@@ -1,29 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { useSelector } from "react-redux";
 import { createPassKeyWeightedClient } from "@/lib/zeroDevWallet";
-import { zeroAddress } from "viem"
-
-// css
-
-// img
+import { zeroAddress } from "viem";
 
 const MultiSignPop = ({ sign, setSign }) => {
-  const { theme, toggleTheme } = useTheme();
   const userAuth = useSelector((state) => state.Auth);
-  const [status, setStatus] = useState("Try Trxn")
+  const [status, setStatus] = useState("Try Trxn");
   const [signatures, setSignatures] = useState([]);
 
   const approveUserOperationWithActiveSigner = async (type = 2) => {
     try {
-      console.log("userAuth-->", userAuth)
-      const getClient = await createPassKeyWeightedClient((type == 2 ? userAuth.passkey2 : userAuth.passkey3), userAuth.webauthKey, userAuth.passkey2, userAuth.passkey3)
-      console.log("getClient -->", getClient)
+      const getClient = await createPassKeyWeightedClient(
+        type == 2 ? userAuth.passkey2 : userAuth.passkey3,
+        userAuth.webauthKey,
+        userAuth.passkey2,
+        userAuth.passkey3
+      );
       if (getClient.status) {
         setStatus("Approving Operation");
         const signature = await getClient.client.approveUserOperation({
@@ -35,57 +29,52 @@ const MultiSignPop = ({ sign, setSign }) => {
             },
           ]),
         });
-        console.log({ signature });
         setSignatures([...signatures, signature]);
         setStatus("Operation Approved");
-        toast.success("Approved!")
+        toast.success("Approved!");
       } else {
-        toast.error(getClient.msg)
+        toast.error(getClient.msg);
       }
     } catch (error) {
-      console.log("error-->", error)
-      toast.error(error.message)
+      console.log("error-->", error);
+      toast.error(error.message);
     }
   };
-  console.log("signatures-->", signatures)
   const sendTrxn = async () => {
     try {
       if (signatures.length <= 0) {
-        return toast.error("Plese Approve First")
+        return toast.error("Plese Approve First");
       }
-      console.log("userAuth-->", userAuth)
-      const getClient = await createPassKeyWeightedClient(userAuth.webauthKey, userAuth.webauthKey, userAuth.passkey2, userAuth.passkey3)
-      console.log("getClient-->", getClient)
+      const getClient = await createPassKeyWeightedClient(
+        userAuth.webauthKey,
+        userAuth.webauthKey,
+        userAuth.passkey2,
+        userAuth.passkey3
+      );
       setStatus("Sending Transaction");
 
-
-      const userOpHash = await getClient.client.sendUserOperationWithSignatures({
-        callData: await getClient.client.account.encodeCalls([
-          {
-            to: zeroAddress,
-            value: BigInt(0),
-            data: "0x",
-          },
-        ]),
-        signatures,
-      });
+      const userOpHash = await getClient.client.sendUserOperationWithSignatures(
+        {
+          callData: await getClient.client.account.encodeCalls([
+            {
+              to: zeroAddress,
+              value: BigInt(0),
+              data: "0x",
+            },
+          ]),
+          signatures,
+        }
+      );
       console.log("test", { userOpHash });
       setStatus("Transaction Sent");
-      // setStatus("Waiting for Transaction Receipt");
-      // const txReceipt = await getClient.client.waitForUserOperationReceipt({
-      //   hash: userOpHash,
-      // });
-      // console.log({ txReceipt });
-      // setStatus("Transaction Receipt Received");
-      toast.success("Trxn is Done!")
+      toast.success("Trxn is Done!");
       setSignatures([]);
     } catch (error) {
       setStatus("Transaction Sent");
       setSignatures([]);
-      // console.log("sendTrxn error-->", error)
-      toast.success("Trxn Done!")
+      toast.success("Trxn Done!");
     }
-  }
+  };
 
   const handleMultiSign = () => setSign(!sign);
   return (
@@ -107,39 +96,33 @@ const MultiSignPop = ({ sign, setSign }) => {
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
             </div>
             <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
                 <div className="col-span-6">
-                  <button onClick={() => (approveUserOperationWithActiveSigner(2))}
+                  <button
+                    onClick={() => approveUserOperationWithActiveSigner(2)}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Approve Trxn With Passkey 2
                   </button>
                 </div>
                 <div className="col-span-6">
-                  <button onClick={() => (approveUserOperationWithActiveSigner(3))}
+                  <button
+                    onClick={() => approveUserOperationWithActiveSigner(3)}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Approve Trxn With Passkey 3
                   </button>
                 </div>
                 <div className="col-span-6">
-                  <button onClick={sendTrxn}
+                  <button
+                    onClick={sendTrxn}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Send Trxn
                   </button>
                 </div>
-                {/* <div className="col-span-6">
-                  <button
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >Four
-                  </button>
-                </div> */}
               </div>
             </div>
           </div>

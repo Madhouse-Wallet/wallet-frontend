@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import logo from "@/Assets/Images/logow1.png";
 
 const Sidebar = ({ tab, setTab, tabData }) => {
   const handleTab = (activeTab) => {
@@ -11,7 +10,7 @@ const Sidebar = ({ tab, setTab, tabData }) => {
       <div className="sidebar border-r border-black/50 h-[calc(100vh-200px)] overflow-auto p-5 bg-black/50 rounded-xl">
         <div className="top py-3 mb-5 border-b border-white/50">
           <Image
-            src={logo}
+            src={process.env.NEXT_PUBLIC_IMAGE_URL + "logow1.png"}
             alt="logo"
             className="max-w-full h-[30px] w-auto mx-auto"
             height={10000}

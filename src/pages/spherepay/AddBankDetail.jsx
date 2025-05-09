@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 
 const AddBankDetail = ({ step, setStep, customerId }) => {
-  // Form state
   const [formData, setFormData] = useState({
     accountName: "",
     bankName: "",
@@ -11,18 +10,15 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     routingNumber: "",
   });
 
-  // Bank accounts state
   const [bankAccounts, setBankAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Validation and submission state
   const [errors, setErrors] = useState({});
   const [tab, setTab] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: "", message: "" });
 
-  // Fetch customer data and bank accounts on component mount
   useEffect(() => {
     if (tab === 1) {
       fetchCustomerData();
@@ -41,9 +37,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       ) {
         const customer = customerResponse.data.customer;
 
-        // Check if the customer has bank accounts
         if (customer.bankAccounts && customer.bankAccounts.length > 0) {
-          // Fetch details for each bank account
           const accountDetailsPromises = customer.bankAccounts.map(
             (bankAccountId) => SpherePayAPI.getBankAccountDetail(bankAccountId)
           );
@@ -156,7 +150,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
         customerId,
         bankAccountData
       );
-      console.log("Bank account added successfully:", response);
 
       setSubmitMessage({
         type: "success",

@@ -1,19 +1,11 @@
-import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import React, { useState } from "react";
-import bg from "@/Assets/Images/bg1.png";
-import chat from "@/Assets/Images/chat.png";
-import map from "@/Assets/Images/map.png";
 import Link from "next/link";
 import styled from "styled-components";
-import { useRouter } from "next/router";
-import { Tooltip } from "react-tooltip";
 import { createPortal } from "react-dom";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
-import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
 
 const Footer = () => {
-  const router = useRouter();
   const [pointSale, setPointSale] = useState();
   const [refundBTC, setRefundBTC] = useState();
 
@@ -31,23 +23,6 @@ const Footer = () => {
         )}
 
       <FooterDiv className="fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-3">
-        {/* <Image
-          src={bg}
-          alt="graphic"
-          height={1000}
-          width={1000}
-          className="max-w-full max-h-full absolute w-100  bottom-0 left-0 h-auto  opacity-30 object-cover right-0 z-[-1]"
-        /> */}
-        {/* <Tooltip
-          id="my-tooltip"
-          style={{
-            background: "var(--textColor2)",
-            backdropFilter: "blur(12.8px)",
-            borderRadius: 30,
-            fontSize: 12,
-            color: "var(--backgroundColor2)",
-          }}
-        /> */}
         <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-black/50 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
           <li className="relative aspect-square">
             <Link
@@ -59,62 +34,24 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
-                src={map}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "map.png"}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Map
               </span>
             </Link>
-            {/* <div
-              className="absolute -bottom-[7px] left-1/2 h-[2px] w-[10px] -translate-x-1/2 rounded-full bg-white"
-              style={{ opacity: 1 }}
-            ></div> */}
           </li>
-          {/* <li className="relative aspect-square">
-            <button
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content="Approval"
-              href={"/point-of-sale"}
-              onClick={() => setPointSale(!pointSale)}
-              className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
-            >
-              <Image
-                src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-app-store.png"}
-                height={1000}
-                width={1000}
-                className="max-w-full w-auto mx-auto"
-                alt=""
-                style={{ height: 42 }}
-              />
-              <span className=" font-medium block text-center text-white/50">
-                Point of Sale
-              </span>
-            </button>
-          </li> */}
-          {/* <li>
-                  <Link href={"/approval"} className="relative inline-block">
-                    <Image
-                      src={b3}
-                      height={1000}
-                      width={1000}
-                      className="max-w-full w-auto mx-auto"
-                      alt=""
-                      style={{ height: 42 }}
-                    />
-                  </Link>
-                </li> */}
+
           <li className="relative aspect-square">
             <Link
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Setting"
               href={"/setting"}
-              // onClick={() => setSettingPop(!settingPop)}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
@@ -123,9 +60,9 @@ const Footer = () => {
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Settings
               </span>
             </Link>
@@ -144,9 +81,9 @@ const Footer = () => {
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Docs
               </span>
             </Link>
@@ -161,15 +98,15 @@ const Footer = () => {
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
-                // src={process.env.NEXT_PUBLIC_IMAGE_URL + "dock-home.png"}
-                src={chat}
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "chat.png"}
+                // src={chat}
                 height={1000}
                 width={1000}
                 className="max-w-full w-auto mx-auto"
                 alt=""
-                style={{ height: 42 }}
+                style={{ height: 50 }}
               />
-              <span className=" font-medium block text-center text-white/50">
+              <span className=" font-medium block text-center text-white">
                 Chat
               </span>
             </Link>
@@ -199,7 +136,7 @@ const FootNav = styled.ul`
       transition: 0.4s;
     }
     span {
-      font-size: 10px;
+      font-size: 13px;
     }
     ${
       "" /* svg {

@@ -1,16 +1,12 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import "react-tooltip/dist/react-tooltip.css";
-import { Tooltip } from "react-tooltip";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
 import { BigNumber } from "ethers";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
-// css
-
-// img
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -18,26 +14,18 @@ const BtcExchangeSendPop = ({
   btcExchangeSend,
   setBtcExchangeSend,
   walletAddress,
+  mint,
+  userAddress,
   qrCode,
   loading,
   sendSdk,
   setLoading,
-  mint,
   startReceive,
   setDepositSetup,
   depositFound,
   setDepositFound,
-  userAddress,
 }) => {
-  const [textToCopy, setTextToCopy] = useState(walletAddress);
-  const [isCopied, setIsCopied] = useState({
-    one: false,
-    two: false,
-    three: false,
-  });
-
   const [tokenSend, setTokenSend] = useState();
-
   const [step, setStep] = useState(2);
   const [tab, setTab] = useState(0);
   const [btcAmount, setBtcAmount] = useState(0);
@@ -45,35 +33,9 @@ const BtcExchangeSendPop = ({
   const [loadingSend, setLoadingSend] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState();
   const [openCam, setOpenCam] = useState(false);
-  // if (depositFound) {
-  //   setStep(3)
-  // }
-  const handleCopy = async (address, type) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setIsCopied((prev) => ({ ...prev, [type]: true }));
-      setTimeout(
-        () =>
-          setIsCopied({
-            one: false,
-            two: false,
-            three: false,
-          }),
-        2000
-      ); // Reset the copied state after 2 seconds
-    } catch (error) {
-      console.error("Failed to copy text:", error);
-    }
-  };
-  const splitAddress = (address, charDisplayed = 6) => {
-    const firstPart = address.slice(0, charDisplayed);
-    const lastPart = address.slice(-charDisplayed);
-    return `${firstPart}...${lastPart}`;
-  };
 
   const submitAddress = async () => {
     try {
-      // () => {setStep(2); setLoading(true)}
       if (recoveryAddress) {
         startReceive(recoveryAddress);
         setStep(2);
@@ -93,7 +55,6 @@ const BtcExchangeSendPop = ({
       setBtcExchangeSend(!btcExchangeSend);
     } catch (error) {}
   };
-  console.log("sendSdk", sendSdk);
 
   const sendNative = async () => {
     try {
@@ -108,22 +69,14 @@ const BtcExchangeSendPop = ({
       }
       if (sendSdk) {
         try {
-          // const amount = BigNumber.from(btcAmount * 1e18)
           const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
-          console.log("weiAmount", weiAmount.toString());
           const { targetChainTxHash, walletPublicKey } =
             await sendSdk.redemptions.requestRedemption(
               btcAddress,
               weiAmount.toString()
             );
-          console.log(
-            "targetChainTxHash walletPublicKey",
-            targetChainTxHash,
-            walletPublicKey
-          );
           toast.success("Send BTC Success!");
         } catch (error) {
-          console.log(" sendSdk error-->", error);
           toast.error(error.message);
         }
       } else {
@@ -131,7 +84,6 @@ const BtcExchangeSendPop = ({
       }
       setLoadingSend(false);
     } catch (error) {
-      console.log("sendNative error--->", error);
       setLoadingSend(false);
       toast.error(error.message);
     }
@@ -200,7 +152,7 @@ const BtcExchangeSendPop = ({
                   openCam={openCam}
                   onScan={(data) => {
                     setBtcAddress(data);
-                    setOpenCam(!openCam)
+                    setOpenCam(!openCam);
                   }}
                 />
               </>
@@ -220,9 +172,6 @@ const BtcExchangeSendPop = ({
                       </span>
                     </div>
                     <div className="iconWithText relative">
-                      {/* <span className="absolute left-3 icn">
-                    {usdc}
-                  </span> */}
                       <input
                         type="number"
                         value={btcAmount}
@@ -252,7 +201,6 @@ const BtcExchangeSendPop = ({
                         onChange={(e) => setBtcAddress(e.target.value)}
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
-                      {/* QR Scanner Button */}
                       <button
                         onClick={() => {
                           setOpenCam(!openCam);
@@ -283,7 +231,6 @@ const BtcExchangeSendPop = ({
       title: "Lightning Network",
       component: <LightningTab walletAddress={walletAddress} />,
     },
-    // { title: "Liquid Network", component: "asfsdf1233" },
   ];
 
   return (
@@ -306,9 +253,6 @@ const BtcExchangeSendPop = ({
             <>
               <div className="top pb-3">
                 <h5 className="m-0 text-xl font-bold">Send Bitcoin</h5>
-                {/* <p className="m-0" style={{ fontSize: 12 }}>
-              Generate a QR code or wallet address to receive Bitcoin Securely
-            </p> */}
               </div>
               <div className="content p-3">
                 <RadioList className="list-none ps-0 mb-0 flex items-center justify-center gap-3">
@@ -335,11 +279,7 @@ const BtcExchangeSendPop = ({
             </>
           ) : (
             <>
-              <div className="top pb-3">
-                {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
-              </div>
+              <div className="top pb-3"></div>
               <div className="modalBody text-center">
                 <div className="grid gap-3 grid-cols-12">
                   <div className="col-span-12">
@@ -396,72 +336,6 @@ const RadioList = styled.ul`
 `;
 export default BtcExchangeSendPop;
 
-const qrCode = (
-  <svg
-    width="100"
-    height="100"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M13 14H14V15H13V14ZM14 15H15V16H14V15ZM14 16H15V17H14V16ZM16 16H17V17H16V16ZM16 17H17V18H16V17ZM13 16H14V17H13V16ZM15 16H16V17H15V16ZM15 17H16V18H15V17ZM18 16H19V17H18V16ZM18 15H19V16H18V15ZM19 14H20V15H19V14ZM17 16H18V17H17V16ZM17 17H18V18H17V17ZM16 18H17V19H16V18ZM15 18H16V19H15V18ZM17 18H18V19H17V18ZM18 18H19V19H18V18ZM16 19H17V20H16V19ZM14 19H15V20H14V19ZM15 19H16V20H15V19ZM13 19H14V20H13V19ZM13 20H14V21H13V20ZM14 21H15V22H14V21ZM15 21H16V22H15V21ZM17 21H18V22H17V21ZM18 21H19V22H18V21ZM17 19H18V20H17V19ZM18 19H19V20H18V19ZM19 18H20V19H19V18ZM19 17H20V18H19V17ZM19 20H20V21H19V20ZM19 19H20V20H19V19ZM20 18H21V19H20V18ZM20 17H21V18H20V17ZM21 20H22V21H21V20ZM21 18H22V19H21V18ZM21 19H22V20H21V19ZM19 16H20V17H19V16ZM13 17H14V18H13V17ZM12 17H13V18H12V17ZM12 18H13V19H12V18ZM14 18H15V19H14V18ZM11 18H12V19H11V18ZM13 18H14V19H13V18ZM11 19H12V20H11V19ZM11 20H12V21H11V20ZM11 1H12V2H11V1ZM12 2H13V3H12V2ZM11 4H12V5H11V4ZM12 5H13V6H12V5ZM11 6H12V7H11V6ZM12 6H13V7H12V6ZM12 7H13V8H12V7ZM12 8H13V9H12V8ZM11 9H12V10H11V9ZM12 9H13V10H12V9ZM11 10H12V11H11V10ZM1 11H2V12H1V11ZM2 12H3V13H2V12ZM4 11H5V12H4V11ZM4 12H5V13H4V12ZM5 11H6V12H5V11ZM6 12H7V13H6V12ZM7 11H8V12H7V11ZM8 12H9V13H8V12ZM8 11H9V12H8V11ZM9 11H10V12H9V11ZM10 11H11V12H10V11ZM11 12H12V13H11V12ZM13 12H14V13H13V12ZM14 11H15V12H14V11ZM15 11H16V12H15V11ZM16 11H17V12H16V11ZM15 13H16V14H15V13ZM13 22H14V23H13V22ZM12 22H13V23H12V22ZM12 13H13V14H12V13ZM11 13H12V14H11V13ZM11 14H12V15H11V14ZM11 15H12V16H11V15ZM22 14H23V15H22V14ZM21 15H22V16H21V15ZM22 17H23V18H22V17ZM17 13H18V14H17V13ZM18 12H19V13H18V12ZM22 12H23V13H22V12ZM22 13H23V14H22V13ZM21 13H22V14H21V13ZM22 21H23V22H22V21ZM21 22H22V23H21V22ZM19 22H20V23H19V22ZM22 22H23V23H22V22Z"
-      fill="currentColor"
-    />
-    <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
-      d="M15 2H22V9H15V2ZM2 2H9V9H2V2ZM2 15H9V22H2V15ZM18 5H19V6H18V5ZM5 5H6V6H5V5ZM5 18H6V19H5V18Z"
-      stroke="currentColor"
-      stroke-width="2"
-    />
-  </svg>
-);
-
-const copyIcn = (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
-      fill="currentColor"
-    />
-    <path
-      opacity="0.5"
-      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const checkIcn = (
-  <svg
-    width="80"
-    height="80"
-    viewBox="0 0 80 80"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <g clip-path="url(#clip0_1_2)">
-      <path
-        d="M40 80C29.3913 80 19.2172 75.7857 11.7157 68.2843C4.21427 60.7828 0 50.6087 0 40C0 29.3913 4.21427 19.2172 11.7157 11.7157C19.2172 4.21427 29.3913 0 40 0C50.6087 0 60.7828 4.21427 68.2843 11.7157C75.7857 19.2172 80 29.3913 80 40C80 50.6087 75.7857 60.7828 68.2843 68.2843C60.7828 75.7857 50.6087 80 40 80ZM32 60L68 26L62 20L32 48L18 34L12 40L32 60Z"
-        fill="#22C55E"
-      />
-    </g>
-    <defs>
-      <clipPath id="clip0_1_2">
-        <rect width="80" height="80" fill="white" />
-      </clipPath>
-    </defs>
-  </svg>
-);
-
 const closeIcn = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -493,44 +367,16 @@ const closeIcn = (
   </svg>
 );
 
-const usdc = (
+const scanIcn = (
   <svg
-    width="23"
-    height="24"
-    viewBox="0 0 23 24"
-    fill="none"
+    height={24}
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
   >
     <path
-      d="M11.5127 23.2266C17.713 23.2266 22.7393 18.2003 22.7393 12C22.7393 5.79974 17.713 0.773438 11.5127 0.773438C5.31244 0.773438 0.286133 5.79974 0.286133 12C0.286133 18.2003 5.31244 23.2266 11.5127 23.2266Z"
-      fill="#1D2229"
-    ></path>
-    <path
-      d="M9.65153 11.0594H7.77167V12.9393H9.65153V11.0594Z"
+      d="m62 215c-8 0-15-7-15-16l0-47c0-56 45-101 100-101l48 0c9 0 16 7 16 16 0 9-7 16-16 16l-48 0c-38 0-69 31-69 69l0 47c0 9-7 16-16 16z m379 0c-9 0-16-7-16-16l0-47c0-38-31-69-69-69l-48 0c-9 0-16-7-16-16 0-9 7-16 16-16l48 0c55 0 100 45 100 101l0 47c0 9-7 16-15 16z m-85 246l-29 0c-9 0-16-7-16-16 0-9 7-16 16-16l29 0c38 0 69-31 69-69l0-28c0-9 7-16 16-16 8 0 15 7 15 16l0 28c0 56-45 101-100 101z m-161 0l-48 0c-55 0-100-45-100-101l0-47c0-9 7-16 15-16 9 0 16 7 16 16l0 47c0 38 31 69 69 69l48 0c8 0 16 7 16 16 0 9-7 16-16 16z m189-221l-265 0c-9 0-16 7-16 16 0 9 7 16 16 16l265 0c9 0 16-7 16-16 0-9-7-16-16-16z m-237 56l0 6c0 34 28 62 62 62l86 0c34 0 61-28 61-62l0-6c0-3-2-5-4-5l-201 0c-2 0-4 2-4 5z m0-80l0-6c0-34 28-62 62-62l86 0c34 0 61 28 61 62l0 6c0 3-2 5-4 5l-201 0c-2 0-4-2-4-5z"
       fill="white"
-    ></path>
-    <path
-      d="M7.77165 9.17957H5.89178V11.0594H7.77165V9.17957Z"
-      fill="white"
-    ></path>
-    <path
-      d="M5.89146 11.0594H4.0116V12.9393H5.89146V11.0594Z"
-      fill="white"
-    ></path>
-    <path
-      d="M7.77165 12.9392H5.89178V14.8191H7.77165V12.9392Z"
-      fill="white"
-    ></path>
-    <path
-      d="M18.4577 9.58446C18.3252 8.20191 17.1319 7.73783 15.6248 7.60528V6.71969H14.4578V7.55476C14.1512 7.55476 13.8376 7.56064 13.5258 7.56652V6.71899H12.3596V7.60424C12.1069 7.60909 10.5548 7.6077 10.5548 7.6077L10.5513 8.63657L11.5252 8.64211V15.3853H10.5517L10.543 16.3996C10.8258 16.3996 12.0841 16.4052 12.3568 16.4069V17.2811H13.5231V16.4277C13.8428 16.4346 14.1529 16.4374 14.4554 16.437V17.2814H15.6227V16.4111C17.5853 16.2993 18.9595 15.8054 19.1301 13.963C19.2685 12.479 18.5709 11.8173 17.4569 11.5481C18.1338 11.202 18.557 10.596 18.4584 9.58412L18.4577 9.58446ZM16.8225 13.7314C16.8225 15.1811 14.3408 15.0154 13.549 15.0157V12.4458C14.3405 12.4458 16.8211 12.2198 16.8215 13.7314H16.8225ZM16.2809 10.1053C16.2809 11.4242 14.21 11.2695 13.5507 11.2695V8.93835C14.211 8.93869 16.2816 8.72967 16.2809 10.1053Z"
-      fill="white"
-    ></path>
-  </svg>
-);
-
-
-const scanIcn = (
-  <svg height={24} width={24} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-    <path d="m62 215c-8 0-15-7-15-16l0-47c0-56 45-101 100-101l48 0c9 0 16 7 16 16 0 9-7 16-16 16l-48 0c-38 0-69 31-69 69l0 47c0 9-7 16-16 16z m379 0c-9 0-16-7-16-16l0-47c0-38-31-69-69-69l-48 0c-9 0-16-7-16-16 0-9 7-16 16-16l48 0c55 0 100 45 100 101l0 47c0 9-7 16-15 16z m-85 246l-29 0c-9 0-16-7-16-16 0-9 7-16 16-16l29 0c38 0 69-31 69-69l0-28c0-9 7-16 16-16 8 0 15 7 15 16l0 28c0 56-45 101-100 101z m-161 0l-48 0c-55 0-100-45-100-101l0-47c0-9 7-16 15-16 9 0 16 7 16 16l0 47c0 38 31 69 69 69l48 0c8 0 16 7 16 16 0 9-7 16-16 16z m189-221l-265 0c-9 0-16 7-16 16 0 9 7 16 16 16l265 0c9 0 16-7 16-16 0-9-7-16-16-16z m-237 56l0 6c0 34 28 62 62 62l86 0c34 0 61-28 61-62l0-6c0-3-2-5-4-5l-201 0c-2 0-4 2-4 5z m0-80l0-6c0-34 28-62 62-62l86 0c34 0 61 28 61 62l0 6c0 3-2 5-4 5l-201 0c-2 0-4-2-4-5z" fill="white" />
+    />
   </svg>
 );

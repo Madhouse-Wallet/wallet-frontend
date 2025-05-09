@@ -3,18 +3,14 @@ import SpherePayAPI from "../api/spherePayApi";
 import { useSelector } from "react-redux";
 
 const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
-  // Status states for KYC and ToS
   const userAuth = useSelector((state) => state.Auth);
   const [kycStatus, setKycStatus] = useState("pending");
   const [tosStatus, setTosStatus] = useState("pending");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Terms of Service API call
   const TermsOfServiceCustomer = async () => {
     try {
-      console.log("customerId", customerId);
       const response = await SpherePayAPI.createTosLink(customerId);
-      console.log(response);
       return response;
     } catch (error) {
       console.error("Error creating ToS link:", error);
@@ -24,32 +20,28 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
   // KYC API call
   const kycCustomer = async () => {
     try {
-      console.log("customerId", customerId);
       const response = await SpherePayAPI.createKycLink(customerId);
-      console.log(response);
       return response;
     } catch (error) {
       console.error("Error creating KYC link:", error);
     }
   };
 
-  // Handle Terms of Service button click
   const handleTermsClick = async () => {
     try {
       const response = await TermsOfServiceCustomer();
       setTermsSRC(response); // Store the response in state
-      window.open(response?.data?.link, "_blank");
+      window.open(response?.link, "_blank");
     } catch (error) {
       console.error("Error processing Terms of Service:", error);
     }
   };
 
-  // Handle Verify Identity button click
   const handleIdentityClick = async () => {
     try {
       const response = await kycCustomer();
       setIdentitySRC(response); // Store the response in state
-      window.open(response?.data?.url, "_blank");
+      window.open(response?.url, "_blank");
     } catch (error) {
       console.error("Error processing Identity Verification:", error);
     }
@@ -61,7 +53,6 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
         // "customer_80e5b83cddc547ae8e5a167a71ee550b"
         customerId
       );
-      console.log(response);
       return response;
     } catch (error) {
       console.error("Error getting customer:", error);
@@ -78,7 +69,6 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
       };
 
       const response = await SpherePayAPI.addWallet(walletData);
-      console.log("Wallet added successfully:", response);
       return response;
     } catch (error) {
       console.error("Error adding wallet:", error);
@@ -99,11 +89,9 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
 
         const { kyc, tos } = customer;
 
-        // Update the status states
         setKycStatus(kyc || "pending");
         setTosStatus(tos || "pending");
 
-        // If both are approved, proceed to next step
         if (kyc === "approved" && tos === "approved") {
           await addCustomerWallet();
           setStep("addBankDetail");
@@ -120,7 +108,6 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
     }
   }, [customerId, setStep]);
 
-  // Function to get button text and disabled state based on status
   const getButtonProps = (status) => {
     switch (status) {
       case "approved":
@@ -132,8 +119,8 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
       case "pending":
         return {
           text: "Pending",
-          disabled: true,
-          className: "bg-yellow-600 text-white cursor-not-allowed opacity-80",
+          disabled: false,
+          className: "bg-yellow-600 text-white cursor-allowed opacity-80",
         };
       case "rejected":
         return { text: "Retry", disabled: false, className: "commonBtn" };

@@ -3,9 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import cors from 'cors';
 
-// Initialize Stripe with non-null assertion since we'll check it in the handler
 const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY ?? '', {
-//   apiVersion: '2023-10-16',
   appInfo: {
     name: "stripe-samples/identity/modal",
     version: "0.0.1",
@@ -49,7 +47,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<VerificationSessionResponse | ErrorResponse>
 ) {
-  // Check if Stripe key is configured
   if (!process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY) {
     return res.status(500).json({
       error: {
@@ -85,19 +82,10 @@ export default async function handler(
     });
 
   } catch (error) {
-    console.error('Error creating verification session:', error);
     res.status(400).json({
       error: {
         message: error instanceof Error ? error.message : 'An error occurred'
       }
     });
   }
-}
-
-// Shared helper function for getting allowed origins
-function getAllowedOrigins() {
-  if (process.env.NODE_ENV === 'production') {
-    return ['your-frontend-domain.com']; // Replace with your production domain
-  }
-  return ['http://localhost:3000', 'http://localhost:5173'];
 }

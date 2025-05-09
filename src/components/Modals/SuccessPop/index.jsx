@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
-import { toast } from "react-toastify";
 import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
-
-// css
-
-// img
 
 const SuccessPop = ({ success, setSuccess }) => {
-  const { theme, toggleTheme } = useTheme();
-
   const handleSuccess = () => setSuccess(!success);
   return (
     <>
@@ -33,22 +23,27 @@ const SuccessPop = ({ success, setSuccess }) => {
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                
-              </h5>
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80"></h5>
             </div>
             <div className="modalBody text-center">
               <span className="icn flex items-center justify-center pb-3">
                 {tickIcn}
               </span>
-              <h4 className="m-0 font-medium text-white text-2xl pb-2">🎉 Success!</h4>
-               <p className="m-0 py-2">You've successfully Send USDC. 
-               Thank you for using MadHouse Wallet!"</p>
-               <div className="btnWrpper mt-5">
-                <Link href={"/"} className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]">
+              <h4 className="m-0 font-medium text-white text-2xl pb-2">
+                🎉 Success!
+              </h4>
+              <p className="m-0 py-2">
+                You've successfully Send USDC. Thank you for using MadHouse
+                Wallet!"
+              </p>
+              <div className="btnWrpper mt-5">
+                <Link
+                  href={"/"}
+                  className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]"
+                >
                   Back to Home
                 </Link>
-               </div>
+              </div>
             </div>
           </div>
         </div>
@@ -104,24 +99,62 @@ const closeIcn = (
   </svg>
 );
 
-const tickIcn = <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="50" cy="50" r="48.5" fill="url(#paint0_linear_301_1302)" stroke="url(#paint1_linear_301_1302)" stroke-width="3"/>
-<g clip-path="url(#clip0_301_1302)">
-<path d="M36 50L46 60L66 40" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-<defs>
-<linearGradient id="paint0_linear_301_1302" x1="50" y1="0" x2="50" y2="100" gradientUnits="userSpaceOnUse">
-<stop stop-color="#11CF8B"/>
-<stop offset="1" stop-color="#30EEA9"/>
-</linearGradient>
-<linearGradient id="paint1_linear_301_1302" x1="50" y1="0" x2="50" y2="100" gradientUnits="userSpaceOnUse">
-<stop stop-color="#7BF4C8"/>
-<stop offset="1" stop-color="#56F1B9"/>
-</linearGradient>
-<clipPath id="clip0_301_1302">
-<rect width="48" height="48" fill="white" transform="translate(26 26)"/>
-</clipPath>
-</defs>
-</svg>
-
-
+const tickIcn = (
+  <svg
+    width="100"
+    height="100"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="50"
+      cy="50"
+      r="48.5"
+      fill="url(#paint0_linear_301_1302)"
+      stroke="url(#paint1_linear_301_1302)"
+      stroke-width="3"
+    />
+    <g clip-path="url(#clip0_301_1302)">
+      <path
+        d="M36 50L46 60L66 40"
+        stroke="white"
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </g>
+    <defs>
+      <linearGradient
+        id="paint0_linear_301_1302"
+        x1="50"
+        y1="0"
+        x2="50"
+        y2="100"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stop-color="#11CF8B" />
+        <stop offset="1" stop-color="#30EEA9" />
+      </linearGradient>
+      <linearGradient
+        id="paint1_linear_301_1302"
+        x1="50"
+        y1="0"
+        x2="50"
+        y2="100"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stop-color="#7BF4C8" />
+        <stop offset="1" stop-color="#56F1B9" />
+      </linearGradient>
+      <clipPath id="clip0_301_1302">
+        <rect
+          width="48"
+          height="48"
+          fill="white"
+          transform="translate(26 26)"
+        />
+      </clipPath>
+    </defs>
+  </svg>
+);

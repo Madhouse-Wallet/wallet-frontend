@@ -1,4 +1,3 @@
-// pages/api/lbtcTobtcSwap.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import zkpInit from "@vulpemventures/secp256k1-zkp";
 import axios from "axios";
@@ -71,7 +70,6 @@ export default async function handler(req: SwapRequest, res: NextApiResponse) {
     });
 
     const createdResponse = response.data;
-    console.log("Created swap:", createdResponse);
 
     // Create WebSocket connection
     const webSocket = new WebSocket(WEBSOCKET_ENDPOINT!);
@@ -92,7 +90,6 @@ export default async function handler(req: SwapRequest, res: NextApiResponse) {
         return;
       }
 
-      console.log("WebSocket update:", msg);
 
       switch (msg.args[0].status) {
         case "invoice.set": {

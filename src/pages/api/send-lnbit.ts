@@ -17,11 +17,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "direction": "send",
             "balance": 100,
             "instant_settlement": true,
-            "wallet": "a1cd9f71c5f64ac289b4d21607a8ec92",
+            "wallet": "ccd505c23ebf4a988b190e6aaefff7a5",
+            "refund_address": "ccd505c23ebf4a988b190e6aaefff7a5",
             "amount": amount,
             "onchain_address": onchain_address
         }, token, 2) as any;
-        console.log("data-->", data)
+        // console.log("data-->", data)
         if (data?.status) {
             const payInv = await payInvoice({
                 "out": true,

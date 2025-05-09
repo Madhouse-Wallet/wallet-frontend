@@ -3,9 +3,7 @@ import { useSelector } from "react-redux";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import { fetchWalletHistory } from "../../lib/utils";
-import { fetchTransactions } from "../../utils/fetchTransactions";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
-import img from "@/Assets/Images/noData.png";
 import InternalTab from "./InternalTab";
 import moment from "moment";
 
@@ -19,11 +17,8 @@ const RecentTransaction = () => {
 
   const [transactionType, setTransactionType] = useState("all");
 
-  // Format transactions from fetchWalletHistory
   const formatWalletHistoryData = (txs) => {
-    console.log("txstxstxs", txs);
     return txs.map((tx) => {
-      // Get the amount and currency from native transfers or value
       let amount = "";
       let currency = "ETH";
       let isSend = false;
@@ -43,7 +38,6 @@ const RecentTransaction = () => {
           userAuth?.walletAddress?.toLowerCase();
       }
 
-      // Check for ERC20 transfers
       if (tx.erc20_transfers && tx.erc20_transfers.length > 0) {
         const transfer = tx.erc20_transfers[0];
         amount = parseFloat(transfer.value_formatted).toFixed(4);
@@ -66,7 +60,6 @@ const RecentTransaction = () => {
               ? "rejected"
               : "pending",
         amount: amount ? `${amount} ${currency}` : "",
-        // type: isSend ? "send" : "receive",
         type: tx?.category,
         summary:
           tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
@@ -76,99 +69,14 @@ const RecentTransaction = () => {
     });
   };
 
-  // Format transactions from fetchWalletInternalTransactions
-  const formatInternalTransactionsData = (txs) => {
-    return txs.map((tx) => {
-      // Determine if this is a deposit or redemption transaction
-      const isDeposit = tx.deposits && tx.deposits.length > 0;
-      const isRedemption = tx.redemptions && tx.redemptions.length > 0;
-
-      // Get the transaction details based on type
-      let amount = "";
-      let status = "pending";
-      let type = "";
-      let summary = "";
-      let transactionDetails = null;
-
-      if (isDeposit) {
-        const deposit = tx.deposits[0];
-        amount = (parseFloat(tx.amount) / 1e8).toFixed(8); // Assuming amount is in satoshis
-        status = mapDepositStatus(deposit.status);
-        type = "receive";
-        summary = `Deposit ${amount} TBTC`;
-        transactionDetails = deposit;
-      } else if (isRedemption) {
-        const redemption = tx.redemptions[0];
-        amount = (parseFloat(tx.amount) / 1e8).toFixed(8); // Assuming amount is in satoshis
-        status = mapRedemptionStatus(redemption.status);
-        type = "send";
-        summary = `Redemption ${amount} TBTC`;
-        transactionDetails = redemption;
-      }
-
-      return {
-        id: tx.txHash,
-        transactionHash: tx.txHash,
-        from: tx.from,
-        to: tx.to,
-        date: moment(parseInt(tx.timestamp) * 1000).format(
-          "MMMM D, YYYY h:mm A"
-        ),
-        status: status,
-        amount: `${amount} TBTC`,
-        type: type,
-        summary: summary,
-        isDeposit: isDeposit,
-        isRedemption: isRedemption,
-        transactionDetails: transactionDetails,
-        rawData: tx,
-      };
-    });
-  };
-
-  // Map deposit status to display status
-  const mapDepositStatus = (status) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "confirmed";
-      case "REQUESTED":
-        return "pending";
-      default:
-        return "pending";
-    }
-  };
-
-  // Map redemption status to display status
-  const mapRedemptionStatus = (status) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "confirmed";
-      case "REQUESTED":
-        return "pending";
-      case "FAILED":
-        return "rejected";
-      default:
-        return "pending";
-    }
-  };
-
-  // Function to fetch and process recent transactions
   const fetchRecentTransactions = async () => {
     try {
       setTransactionType("all");
       const data = await fetchWalletHistory(userAuth?.walletAddress);
-      // const data = await fetchWalletHistory(
-      //   "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
-      // );
-      console.log("Wallet history data:", data);
 
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
           data.result.slice(0, 10)
-        );
-        console.log(
-          "formattedTransactionsformattedTransactions",
-          formattedTransactions
         );
         setTransactions(formattedTransactions);
       }
@@ -176,24 +84,6 @@ const RecentTransaction = () => {
       console.error("Error fetching transactions:", error);
     }
   };
-
-  // Function to fetch internal transactions
-  // const fetchWalletInternalTransactions = async () => {
-  //   try {
-  //     setTransactionType("internal");
-  //     const data = await fetchTransactions(userAuth?.walletAddress);
-  //     console.log("Internal transactions:", data);
-
-  //     if (data?.length) {
-  //       const formattedTransactions = formatInternalTransactionsData(
-  //         data.slice(0, 10)
-  //       );
-  //       setTransactions(formattedTransactions);
-  //     }
-  //   } catch (err) {
-  //     console.error("Error fetching internal transactions:", err);
-  //   }
-  // };
 
   // Get status color
   const getStatusColor = (status) => {
@@ -223,53 +113,25 @@ const RecentTransaction = () => {
     }
   };
 
-  // Group transactions by date
-  // const groupTransactionsByDate = (txs) => {
-  //   const groups = {};
-
-  //   txs.forEach((tx) => {
-  //     console.log("txxx", tx);
-  //     const date = new Date(tx?.date).toLocaleDateString();
-  //     console.log("513",date);
-  //     if (!groups[date]) {
-  //       groups[date] = [];
-  //       console.log("516",!groups[date]);
-  //     }
-  //     groups[date].push(tx);
-  //   });
-  //   console.log("521", groups);
-  //   return groups;
-  // };
-
   const groupTransactionsByDate = (txs) => {
     const groups = {};
 
     txs.forEach((tx) => {
-      console.log("Processing transaction:", tx);
-
       if (tx?.date && typeof tx.date === "string") {
-        // Parse the date string with moment
-        // Our format from earlier was 'MMMM D, YYYY h:mm A'
-        // Example: "May 2, 2025 3:45 PM"
         const txDate = moment(tx.date, "MMMM D, YYYY h:mm A");
 
-        // Check if the date is valid
         if (txDate.isValid()) {
-          // Use moment to format a consistent date key (just the date portion without time)
           const dateKey = txDate.format("YYYY-MM-DD");
 
-          // Initialize the array for this date if it doesn't exist
           if (!groups[dateKey]) {
             groups[dateKey] = [];
           }
 
-          // Add the transaction to the appropriate date group
           groups[dateKey].push(tx);
         } else {
           console.error("Invalid date format:", tx.date);
         }
       } else if (tx?.date && moment.isMoment(tx.date)) {
-        // If the date is already a moment object
         const dateKey = tx.date.format("YYYY-MM-DD");
 
         if (!groups[dateKey]) {
@@ -281,9 +143,6 @@ const RecentTransaction = () => {
       }
     });
 
-    console.log("Grouped transactions by date:", groups);
-
-    // Sort the groups by date (most recent first)
     const sortedGroups = {};
     Object.keys(groups)
       .sort(
@@ -317,7 +176,6 @@ const RecentTransaction = () => {
           {transactions.length > 0 ? (
             <div className="bg-black/5 lg:p-4 rounded-lg p-3">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
-                console.log("line-581", date);
                 return (
                   <div key={date} className="py-3">
                     <p className="m-0 text-white text-xs font-semibold pb-2">
@@ -422,7 +280,6 @@ const RecentTransaction = () => {
                       onClick={() => setActiveTab(key)}
                       // href="#"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
-                      // onClick={fetchRecentTransactions}
                     >
                       {item.title}
                     </button>

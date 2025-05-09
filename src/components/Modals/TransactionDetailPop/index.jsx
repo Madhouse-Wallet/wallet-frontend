@@ -1,24 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
 
 const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
-  const { theme, toggleTheme } = useTheme();
-  console.log('transactionDatatransactionData',transactionData)
-  
-  // Function to truncate address
   const truncateAddress = (address) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
   const handleTransactionDetail = () => setDetail(!detail);
-  
-  // Default values if transactionData is not provided
+
   const {
     amount = "",
     category = "",
@@ -30,16 +22,14 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     summary = "",
     to = "",
     transactionHash = "",
-    type = ""
+    type = "",
   } = transactionData || {};
 
-  // Get first letters of from address for avatar
   const getInitials = (address) => {
     if (!address) return "??";
     return address.substring(2, 4).toUpperCase();
   };
 
-  console.log("datedate",date)
   return (
     <>
       <Modal
@@ -59,7 +49,9 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                {type ? (type.charAt(0).toUpperCase() + type.slice(1)) : "Transaction Details"}
+                {type
+                  ? type.charAt(0).toUpperCase() + type.slice(1)
+                  : "Transaction Details"}
               </h5>
             </div>
             <div className="modalBody">
@@ -68,9 +60,9 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Status</h6>
-                      <a 
-                        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${transactionHash}`} 
-                        target="_blank" 
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${transactionHash}`}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 text-xs font-medium"
                       >
@@ -80,8 +72,10 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                   </li>
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
-                      <h6 className="m-0 font-semibold text-base capitalize">{status || "Pending"}</h6>
-                      <span 
+                      <h6 className="m-0 font-semibold text-base capitalize">
+                        {status || "Pending"}
+                      </h6>
+                      <span
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(transactionHash);
@@ -135,7 +129,9 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                   {rawData?.nonce && (
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Nonce</span>
-                      <span className="text-white font-medium">{rawData.nonce}</span>
+                      <span className="text-white font-medium">
+                        {rawData.nonce}
+                      </span>
                     </li>
                   )}
                   <li className="py-2 flex items-center justify-between">
@@ -146,20 +142,25 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Gas Price</span>
                       <span className="text-white font-medium">
-                        {ethers.utils.formatUnits(rawData.gas_price, 'gwei')} Gwei
+                        {ethers.utils.formatUnits(rawData.gas_price, "gwei")}{" "}
+                        Gwei
                       </span>
                     </li>
                   )}
                   {rawData?.gas_used && (
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Gas Used</span>
-                      <span className="text-white font-medium">{rawData.gas_used}</span>
+                      <span className="text-white font-medium">
+                        {rawData.gas_used}
+                      </span>
                     </li>
                   )}
                   {category && (
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Category</span>
-                      <span className="text-white font-medium capitalize">{category}</span>
+                      <span className="text-white font-medium capitalize">
+                        {category}
+                      </span>
                     </li>
                   )}
                   {summary && (

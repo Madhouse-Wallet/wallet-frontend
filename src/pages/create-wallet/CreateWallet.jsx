@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { isValidEmail } from "../../utils/globals";
-import { useTheme } from "@/ContextApi/ThemeContext";
-import { toast } from "react-toastify";
 import { BackBtn } from "@/components/common/index";
 
 const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
@@ -15,19 +13,12 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
     try {
       setRegisterOtpLoading(true);
       if (!registerEmail) {
-        // toast.error("Please Enter Email!");
         setError("Please Enter Email!");
         setRegisterOtpLoading(false);
-      }
-      //  else if (!registerUsername) {
-      //   toast.error("Please Enter Passkey Name!");
-      //   setRegisterOtpLoading(false);
-      // }
-      else {
+      } else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
-          // return toast.error("Please Enter Valid Email!");
           setError("Please Enter Valid Email!");
         } else {
           let response = await sendRegisterOtp({
@@ -83,8 +74,9 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                 <input
                   type="email"
                   value={registerEmail}
-                  onChange={(e) => {setRegisterEmail(e.target.value)
-                    setError("")
+                  onChange={(e) => {
+                    setRegisterEmail(e.target.value);
+                    setError("");
                   }}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                   placeholder="Enter your email address"
@@ -96,23 +88,7 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp }) => {
                   </div>
                 )}
               </div>
-              {/* <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-destructive2-lightest">
-                  {infoIcn}
-                  Incorrect email
-                </div> */}
             </div>
-            {/* <div className="col-span-12">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={registerUsername}
-                  onChange={(e) => setRegisterUsername(e.target.value)}
-                  className="flex text-xs w-full border-px md:border-hpx border-white/10 bg-white/4 hover:bg-white/6 px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                  placeholder="Passkey name"
-                  defaultValue=""
-                />
-              </div>
-            </div> */}
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button

@@ -19,10 +19,8 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
     try {
       setIsLoading(true);
       const response = await SpherePayAPI.createCustomer(customerData);
-      console.log(response);
       return response;
     } catch (error) {
-      console.error("Error creating customer:", error);
       return { error: error.response.data };
     } finally {
       setIsLoading(false);
@@ -32,13 +30,11 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic email validation
     if (!email || !email.includes("@")) {
       setError("Please enter a valid email address");
       return;
     }
 
-    // Create customer with "individual" type and user's email
     const response = await createNewCustomer("individual", email);
     console.log(response, "responseresponse");
     const message = response?.error?.message;
@@ -47,12 +43,10 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
     const customerId = match ? match[1] : null;
 
     if (response && response.error) {
-      // Check for the specific error condition
       if (
         response.error.error === "customer/duplicate" ||
         (response.error.message && response.error.message.includes("duplicate"))
       ) {
-        // If it's a duplicate customer, navigate to step 3
         setCustomerID(customerId);
         setStep("PolicyKycStep");
       } else if (
@@ -61,10 +55,6 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
         setStep("select-country");
       }
     }
-    // else {
-    //   // If successful (no error), navigate to step 2
-    //   setStep("select-country");
-    // }
   };
 
   return (

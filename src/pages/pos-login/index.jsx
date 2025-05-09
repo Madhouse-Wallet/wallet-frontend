@@ -1,71 +1,37 @@
 import React, { useState } from "react";
 
-import { useRouter } from "next/router";
-
-
-import {
-  getAccount,
-  passkeyValidator,
-  loginPasskey
-} from "../../lib/zeroDevWallet";
-
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 
-import {
-  isValidEmail,
-  webAuthKeyStore,
-  storedataLocalStorage
-} from "../../utils/globals";
+import { isValidEmail, storedataLocalStorage } from "../../utils/globals";
 
 import EmailStep from "./EmailStep";
 
-
 const POSLogin = () => {
-  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [registerData, setRegisterData] = useState({ email: "" });
   const dispatch = useDispatch();
 
-
-
-
-  const handleCopy = async (text) => {
-    try {
-      if (addressPhrase) {
-        await navigator.clipboard.writeText(text);
-        toast.success("Copied Successfully!");
-      } else {
-      }
-    } catch (error) {
-      console.log("error-->", error);
-    }
-  };
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {
       try {
-        // console.log(email)
         return await fetch(`/api/get-user`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
             type,
-            webAuthKey
+            webAuthKey,
           }),
         })
           .then((res) => res.json())
           .then((data) => {
-            // console.log("data-->", data);
             return data;
           });
       } catch (error) {
-        console.log(error);
         return false;
       }
     } catch (error) {
-      console.log("error-->", error);
       return false;
     }
   };
@@ -83,51 +49,52 @@ const POSLogin = () => {
         return false;
       } else {
         toast.success("Pos Login Successfully!");
-        console.log("data-->",userExist)
         dispatch(
           loginSet({
             login: true,
-            pos:true,
+            pos: true,
             walletAddress: userExist.userId.wallet || "",
             bitcoinWallet: userExist.userId.bitcoinWallet || "",
             signer: "",
-            username: (userExist.userId.username || ""),
+            username: userExist.userId.username || "",
             email: userExist.userId.email,
             passkeyCred: "",
             webauthKey: "",
             id: userExist.userId._id,
-            multisigAddress: (userExist.userId.multisigAddress || ""),
-            passkey2: (userExist.userId.passkey2 || ""),
-            passkey3: (userExist.userId.passkey3 || ""),
+            multisigAddress: userExist.userId.multisigAddress || "",
+            passkey2: userExist.userId.passkey2 || "",
+            passkey3: userExist.userId.passkey3 || "",
             ensName: userExist.userId.ensName || "",
             ensSetup: userExist.userId.ensSetup || false,
-            multisigSetup: (userExist.userId.multisigSetup || false),
-            multisigActivate: (userExist.userId.multisigActivate || false)
+            multisigSetup: userExist.userId.multisigSetup || false,
+            multisigActivate: userExist.userId.multisigActivate || false,
           })
         );
-        storedataLocalStorage({
-          login: true,
-          walletAddress: userExist.userId.wallet || "",
-          bitcoinWallet: userExist.userId.bitcoinWallet || "",
-          signer: "",
-          pos:true,
-          username: (userExist.userId.username || ""),
-          email: userExist.userId.email,
-          passkeyCred: "",
-          webauthKey: "",
-          id: userExist.userId._id,
-          multisigAddress: (userExist.userId.multisigAddress || ""),
-          passkey2: "",
-          passkey3: "",
-          ensName: userExist.userId.ensName || "",
-          ensSetup: userExist.userId.ensSetup || false,
-          multisigSetup: (userExist.userId.multisigSetup || false),
-          multisigActivate: (userExist.userId.multisigActivate || false)
-        }, "authUser")
+        storedataLocalStorage(
+          {
+            login: true,
+            walletAddress: userExist.userId.wallet || "",
+            bitcoinWallet: userExist.userId.bitcoinWallet || "",
+            signer: "",
+            pos: true,
+            username: userExist.userId.username || "",
+            email: userExist.userId.email,
+            passkeyCred: "",
+            webauthKey: "",
+            id: userExist.userId._id,
+            multisigAddress: userExist.userId.multisigAddress || "",
+            passkey2: "",
+            passkey3: "",
+            ensName: userExist.userId.ensName || "",
+            ensSetup: userExist.userId.ensSetup || false,
+            multisigSetup: userExist.userId.multisigSetup || false,
+            multisigActivate: userExist.userId.multisigActivate || false,
+          },
+          "authUser"
+        );
         return true;
       }
     } catch (error) {
-      console.log("error---->", error);
       toast.error(error.message);
       return false;
     }
@@ -135,8 +102,7 @@ const POSLogin = () => {
 
   return (
     <>
-          <EmailStep loginFn={loginFn} step={step} setStep={setStep} />
-      
+      <EmailStep loginFn={loginFn} step={step} setStep={setStep} />
     </>
   );
 };

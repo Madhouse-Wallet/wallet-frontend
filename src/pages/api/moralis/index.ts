@@ -1,10 +1,8 @@
-// pages/api/moralis/index.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import Moralis from "moralis";
 
 const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
 
-// Track initialization state
 let isInitialized = false;
 
 async function initializeMoralis() {
@@ -13,7 +11,6 @@ async function initializeMoralis() {
       await Moralis.start({ apiKey: API_KEY });
       isInitialized = true;
     } catch (error) {
-      // If the error is about modules already started, we can safely ignore it
       if (
         !(error instanceof Error) ||
         !error.message.includes("Modules are started already")
@@ -36,20 +33,14 @@ async function getTokenBalances(tokenAddresses: string[], address: string) {
 
 async function getWalletHistory(address: string) {
   try {
-    console.log("Fetching wallet history for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletHistory({
       chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
       address: address,
     });
-    console.log("response", response);
-    // if (!response || !response.raw) {
-    //   throw new Error("No data received from Moralis");
-    // }
 
     return response;
   } catch (error) {
-    console.error("Error in getWalletHistory:", error);
     throw error;
   }
 }
@@ -59,7 +50,6 @@ async function getWalletTokenTransfers(
   walletAddress: string
 ) {
   try {
-    console.log("Fetching token transfers for address:", walletAddress);
     const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
       chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       order: "DESC",
@@ -73,26 +63,19 @@ async function getWalletTokenTransfers(
 
     return response.raw;
   } catch (error) {
-    console.error("Error in getWalletTokenTransfers:", error);
     throw error;
   }
 }
 
 async function getWalletBalance(address: string) {
   try {
-    console.log("Fetching wallet balance for address:", address);
     const response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
       chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
       address,
     });
 
-    // if (!response || !response.raw) {
-    //   throw new Error("No balance data received from Moralis");
-    // }
-
     return response;
   } catch (error) {
-    console.error("Error in getWalletBalance:", error);
     throw error;
   }
 }
@@ -136,7 +119,6 @@ export default async function handler(
         return res.status(400).json({ message: "Invalid action" });
     }
   } catch (error) {
-    console.error("Error:", error);
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Operation failed",
     });

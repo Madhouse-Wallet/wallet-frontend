@@ -1,54 +1,35 @@
-  import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getUser, updtUser } from "../../../lib/apiCall.js";
+import { getUser } from "../../../lib/apiCall.js";
 import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 
-// css
-
-// img
-
-const SendTbtcWall = ({
-  btcWall,
-  setTbtcWall,
-}) => {
+const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
-  console.log("userAuth-->", userAuth)
   const handleDepositPop = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       if (!userAuth?.login) {
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
-        console.log("userExist-->", userExist)
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
         } else {
           if (userExist?.userId?.liquidBitcoinWallet_3) {
-            // userExist?.userId?.passkey_number
             const liquidShift = await createTBtcToLbtcShift(
               amount, // amount
               userExist?.userId?.liquidBitcoinWallet_3,
-              // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
               process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
               process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
             );
-            // liquidShift now contains all the information about the shift, including the deposit address
-            console.log("Deposit address:", liquidShift.depositAddress);
-            console.log("start send -->")
             const web3 = new Web3Interaction("sepolia", providerr);
-            console.log(process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr)
             const result = await web3.sendUSDC(
               process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
               liquidShift.depositAddress,
@@ -65,23 +46,19 @@ const SendTbtcWall = ({
             } else {
               toast.error(result.error || "Transaction failed");
             }
-
           } else {
             toast.error("Please sign Up Again!");
           }
-
         }
       }
 
-      setTbtcWall(!btcWall)
-      setLoading(false)
+      setTbtcWall(!btcWall);
+      setLoading(false);
     } catch (error) {
-      console.log("error==>", error?.message)
       toast.error(error?.message);
-      setLoading(false)
+      setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -89,7 +66,6 @@ const SendTbtcWall = ({
         try {
           let account = await getAccount(userAuth?.passkeyCred);
           if (account) {
-            // setUserAccount(account.address);
             let provider = await getProvider(account.kernelClient);
             if (provider) {
               setProviderr(provider?.ethersProvider);
@@ -99,7 +75,6 @@ const SendTbtcWall = ({
           }
         } catch (error) {
           console.error("Wallet connection error:", error);
-          // toast.error("Failed to connect wallet. Please try again.");
         }
       }
     };
@@ -107,15 +82,13 @@ const SendTbtcWall = ({
     connectWallet();
   }, [userAuth?.passkeyCred]);
 
-
-
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <button
-          onClick={()=> setTbtcWall(!btcWall)}
+          onClick={() => setTbtcWall(!btcWall)}
           type="button"
           className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
@@ -129,7 +102,9 @@ const SendTbtcWall = ({
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">Deposit</h5>
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                Deposit
+              </h5>
             </div>
             <div className="modalBody">
               <form action="">
@@ -149,8 +124,6 @@ const SendTbtcWall = ({
                     />
                   </div>
                 </div>
-
-
 
                 <div className="btnWrpper mt-3">
                   <button
@@ -182,19 +155,6 @@ const Modal = styled.div`
     input {
       color: var(--textColor);
     }
-  }
-`;
-
-const RadioList = styled.ul`
-  button {
-    font-size: 12px;
-    background: var(--cardBg);
-    border-color: var(--cardBg);
-  }
-  input:checked + button {
-    background: #ff8735;
-    border-color: #ff8735;
-    color: #000;
   }
 `;
 

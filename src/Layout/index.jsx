@@ -1,17 +1,9 @@
 import { Inter } from "next/font/google";
-
 import { React, useEffect, useState } from "react";
 import MainLayout from "./MainLayout";
-import bg from "@/Assets/Images/umbrel/1.jpg";
-// import bg from "@/Assets/Images/landingBg.png";
-import bgw from "@/Assets/Images/bgw.png";
-import dwm from "@/Assets/Images/watermarkd.png";
-
 import { useRouter } from "next/router";
 import AuthLayout from "./AuthLayout";
-import LoadingScreen from "@/components/LoadingScreen";
 import Image from "next/image";
-import { useTheme } from "@/ContextApi/ThemeContext";
 import { useBackground } from "@/ContextApi/backgroundContent";
 
 const inter = Inter({
@@ -22,7 +14,6 @@ const inter = Inter({
 const Layout = ({ Component, pageProps }) => {
   const { selectedBackground, selectedWatermark, bgOpacity, wmOpacity } =
     useBackground();
-  const { theme, toggleTheme } = useTheme();
 
   const router = useRouter();
   const [isAuth, setIsAuth] = useState(false);

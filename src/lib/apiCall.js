@@ -3,12 +3,62 @@ import axios from "axios";
 export const getUser = async (email) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+//
+export const getLnbitId = async (email) => {
+  try {
+    try {
+      return await fetch(`/api/get-lndb-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
+export const sendLnbit = async (amount, onchain_address) => {
+  try {
+    try {
+      return await fetch(`/api/send-lnbit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          onchain_address
         }),
       })
         .then((res) => res.json())
@@ -27,22 +77,46 @@ export const getUser = async (email) => {
 };
 
 
-
-export const sendLnbit = async (amount, onchain_address) => {
+export const btcSat = async (amount, publicKey="") => {
   try {
     try {
-      // console.log(email)
-      return await fetch(`/api/send-lnbit`, {
+      return await fetch(`/api/btc-sat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount,
-          onchain_address
+          publicKey
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
+          // console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+export const receiveBtc = async (amount, publicKey="") => {
+  try {
+    try {
+      return await fetch(`/api/receive-bitcoin-lnbit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          publicKey
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -56,17 +130,46 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
+//send-bitcoin-lnbit
+export const sendBtc = async (invoice) => {
+  try {
+    try {
+      return await fetch(`/api/send-bitcoin-lnbit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invoice
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("sendBtc error-->", error);
+    return false;
+  }
+};
+
+
+
+// receive-bitcoin-lnbit
+
 export const getBitcoinAddress = async (email) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/generate-bitcoin-wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("getBitcoinAddress-->", data);
+          // console.log("getBitcoinAddress-->", data);
           return data;
         });
     } catch (error) {
@@ -82,7 +185,6 @@ export const getBitcoinAddress = async (email) => {
 export const getEnsName = async (ensName) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -93,7 +195,6 @@ export const getEnsName = async (ensName) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -114,7 +215,6 @@ export const getSubdomainApproval = async (
 ) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/relayer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,7 +227,6 @@ export const getSubdomainApproval = async (
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -139,56 +238,6 @@ export const getSubdomainApproval = async (
     return false;
   }
 };
-
-// export const registerEnsName = async (
-//   name,
-//   smartAccount,
-//   defApiKey,
-//   defApiSecret,
-//   registrarControllerAddress,
-//   resolverAddress,
-//   reverseRegistrarAddress,
-//   baseRegistrarAddress,
-//   duration = 31557600
-// ) => {
-//   try {
-//     console.log(
-//       "details",
-//       name,
-//       smartAccount,
-//       defApiKey,
-//       defApiSecret,
-//       registrarControllerAddress,
-//       resolverAddress,
-//       reverseRegistrarAddress,
-//       baseRegistrarAddress,
-//       duration
-//     );
-//     return await fetch(`/api/register-ens`, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         name,
-//         smartAccount,
-//         defApiKey,
-//         defApiSecret,
-//         registrarControllerAddress,
-//         resolverAddress,
-//         reverseRegistrarAddress,
-//         baseRegistrarAddress,
-//         duration,
-//       }),
-//     })
-//       .then((res) => res.json())
-//       .then((data) => {
-//         console.log("Registration response:", data);
-//         return data;
-//       });
-//   } catch (error) {
-//     console.log("Registration error:", error);
-//     return false;
-//   }
-// };
 
 export const registerEnsName = async (
   name,
@@ -233,7 +282,6 @@ export const registerEnsName = async (
 export const getUserWallet = async (wallet) => {
   try {
     try {
-      // console.log(email)
       return await fetch(`/api/get-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -243,7 +291,6 @@ export const getUserWallet = async (wallet) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -326,7 +373,7 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("data-->", data);
+        // console.log("data-->", data);
         return data;
       });
   } catch (error) {
@@ -349,7 +396,7 @@ export const registerCoinosUser = async (username, password) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("registerCoinosUser-->", data);
+          // console.log("registerCoinosUser-->", data);
           return data;
         });
     } catch (error) {
@@ -378,7 +425,7 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin", secre
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("createCoinosInvoice-->", data);
+          // console.log("createCoinosInvoice-->", data);
           return data;
         });
     } catch (error) {
@@ -391,7 +438,6 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin", secre
   }
 };
 
-// Add this to your utils/coinosApi.js file
 
 export const sendBitcoinn = async (token, amount, address) => {
   try {

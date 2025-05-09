@@ -4,21 +4,24 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { BackBtn } from "@/components/common/index";
-import { useSelector } from "react-redux";
 
-const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc, registerData }) => {
+const OtpStep = ({
+  step,
+  setStep,
+  registerOtpFn,
+  resendOtpFunc,
+  registerData,
+}) => {
   const { theme, toggleTheme } = useTheme();
   const [registerOTP, setRegisterOTP] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   useEffect(() => {
-    // Start the timer when component mounts
     startResendTimer();
   }, []);
 
   useEffect(() => {
-    // Timer countdown logic
     if (timeLeft > 0) {
       const timerInterval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
@@ -112,12 +115,9 @@ const OtpStep = ({ step, setStep, registerOtpFn, resendOtpFunc, registerData }) 
                 </h4>
                 <p className=" text-sm font-medium  md:text-xs py-5">
                   <span className="opacity-50">
-                     Code has been send to {registerData?.email}{" "}
+                    Code has been send to {registerData?.email}{" "}
                   </span>
                   <br />{" "}
-                  {/* <span className="font-bold  opacity-100">
-                    and***ley@yourdomain.com
-                  </span> */}
                 </p>{" "}
               </div>
             </div>
@@ -176,10 +176,10 @@ const OtpWrpper = styled.div`
       outline: 0;
       ${"" /* color: rgb(255 255 255 / 0.4); */}
       background: ${({ theme }) =>
-    theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
+        theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
       border: 1px solid rgb(255 255 255 / 0.1);
       border-color: ${({ theme }) =>
-    theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
+        theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
       font-size: 24px;
       font-weight: 600;
     }

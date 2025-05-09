@@ -83,7 +83,6 @@ export const OnrampElement: React.FC<OnrampElementProps> = ({
   useEffect(() => {
     const containerRef = onrampElementRef.current;
     if (containerRef) {
-      // Clear the container for remounting
       containerRef.innerHTML = '';
 
       if (clientSecret && stripeOnramp) {

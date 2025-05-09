@@ -1,30 +1,26 @@
 "use client";
-import BTCAddressPop from "@/components/Modals/BtcAddressPop";
 import ChangeEmailPop from "@/components/Modals/ChangeEmail";
 import ConfirmationPop from "@/components/Modals/ConfirmationPop";
 import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
-import EnsDomainPop from "@/components/Modals/EnsDomainPop";
-import RecoverPopup from "@/components/Modals/RecoverPopup"
+import RecoverPopup from "@/components/Modals/RecoverPopup";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { AccordionItem, BackBtn } from "@/components/common/index";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
-import BlogCard from "@/components/BlogCard";
-import s1 from "@/Assets/Images/screenshot.png";
-import PreviewBox from "./preview";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import { zeroTrxn, getAccount, multisigSetup } from "@/lib/zeroDevWallet";
-import { registerCredential, storeSecret, retrieveSecret } from "../../utils/webauthPrf";
+import {  multisigSetup } from "@/lib/zeroDevWallet";
+import {
+  retrieveSecret,
+} from "../../utils/webauthPrf";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
-import { getUser, updtUser } from "../../lib/apiCall";
+import { getUser, updtUser, getLnbitId } from "../../lib/apiCall";
 import { webAuthKeyStore, storedataLocalStorage } from "../../utils/globals";
 const Setting: React.FC = () => {
   const {
@@ -45,14 +41,14 @@ const Setting: React.FC = () => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
   const [setUp, setSetUp] = useState<boolean>(false);
-  const [recover,
-    setRecover] = useState<boolean>(false);
+  const [recover, setRecover] = useState<boolean>(false);
   const [ensDomain, setEnsDomain] = useState<boolean>(false);
   const [sign, setSign] = useState<boolean>(false);
   const [changeEmail, setChangeEmail] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
-   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
-    const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
+  const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const [adminId, setAdminId] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -73,7 +69,6 @@ const Setting: React.FC = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -81,7 +76,6 @@ const Setting: React.FC = () => {
       return false;
     }
   };
-  console.log("userAuth-->", userAuth);
   const setupMultisig = async () => {
     try {
       let userExist = await getUser(userAuth.email);
@@ -94,7 +88,6 @@ const Setting: React.FC = () => {
         userAuth.email,
         passkeyNo
       );
-      console.log("result-->", result);
       if (result.status) {
         let webAuthKeyStringObj2: any = "";
         let webAuthKeyStringObj3: any = "";
@@ -165,76 +158,86 @@ const Setting: React.FC = () => {
         toast.error(result.msg);
       }
     } catch (error) {
-      console.log("error-->", error);
     }
   };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
     try {
-      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId) as any;
+      let retrieveSecretCheck = (await retrieveSecret(
+        storageKey,
+        credentialId
+      )) as any;
       if (retrieveSecretCheck?.status) {
-        console.log("retrieveSecretCheck", retrieveSecretCheck?.data?.secret)
         return {
           status: true,
-          secret: retrieveSecretCheck?.data?.secret
-        }
+          secret: retrieveSecretCheck?.data?.secret,
+        };
       } else {
-        console.log(" retrieveSecretCheck error-->", retrieveSecretCheck?.msg)
         return {
           status: false,
-          msg: retrieveSecretCheck?.msg
-        }
+          msg: retrieveSecretCheck?.msg,
+        };
       }
     } catch (error) {
-      console.log("error-->", error)
       return {
         status: false,
-        msg: "Error in Getting secret!"
-      }
+        msg: "Error in Getting secret!",
+      };
     }
-  }
+  };
 
   // settingindex.tsx
   const recoverSeedPhrase = async () => {
     try {
       let userExist = await getUser(userAuth.email);
-      if (userExist?.userId?.secretCredentialId && userExist?.userId?.secretStorageKey) {
-        let callGetSecretData = await getSecretData(userExist?.userId?.secretStorageKey, userExist?.userId?.secretCredentialId) as any
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = (await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        )) as any;
         if (callGetSecretData?.status) {
           // return {
           //   status: true,
           //   secret: callGetSecretData?.secret
           // }
-          setRecoverSeed(JSON.parse(callGetSecretData?.secret))
-          setRecoverSeedStatus(true)
+          console.log(JSON.parse(callGetSecretData?.secret))
+          setRecoverSeed(JSON.parse(callGetSecretData?.secret));
+          let adminKey = await getLnbitId(userAuth.email);
+          if (
+            adminKey?.adminId
+          ) {
+            setAdminId(adminKey?.adminId)
+          }
+          setRecoverSeedStatus(true);
         } else {
           // return {
           //   status: false,
           //   msg: callGetSecretData?.msg
           // }
-          setRecoverSeed(callGetSecretData?.msg)
-          setRecoverSeedStatus(false)
+          setRecoverSeed(callGetSecretData?.msg);
+          setRecoverSeedStatus(false);
         }
       } else {
         // return {
         //   status: false,
         //   secret: "No secret Stored!"
         // }
-        setRecoverSeed("No secret Stored!")
-        setRecoverSeedStatus(false)
+        setRecoverSeed("No secret Stored!");
+        setRecoverSeedStatus(false);
       }
-      setRecover(!recover)
+      setRecover(!recover);
     } catch (error) {
       // return {
       //   status: false,
       //   secret: "Error in Fetching secret!"
       // }
-      setRecoverSeed("Error in Fetching secret!")
-      setRecoverSeedStatus(false)
+      setRecoverSeed("Error in Fetching secret!");
+      setRecoverSeedStatus(false);
     }
-  }
-
-
+  };
 
   // useEffect(() => {
   //   getPreview(); // Call the function
@@ -415,7 +418,6 @@ const Setting: React.FC = () => {
   ];
   const [activeTab, setActiveTab] = useState(1);
   const showTab = (tab: number) => {
-    console.log(tab, "tab");
 
     setActiveTab(tab);
   };
@@ -477,18 +479,24 @@ const Setting: React.FC = () => {
           <MultiSignPop sign={sign} setSign={setSign} />,
           document.body
         )}
-           {/* const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false); */}
-           {/* const [recoverSeed, setRecoverSeed] = useState<any>(""); */}
-        {recover &&
+      {/* const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false); */}
+      {/* const [recoverSeed, setRecoverSeed] = useState<any>(""); */}
+      {recover &&
         createPortal(
-          <RecoverPopup recover={recover} setRecover={setRecover} phrase={recoverSeed} phraseStatus={recoverSeedStatus} />,
+          <RecoverPopup
+            recover={recover}
+            setRecover={setRecover}
+            adminId={adminId}
+            phrase={recoverSeed}
+            phraseStatus={recoverSeedStatus}
+          />,
           document.body
         )}
-      {ensDomain &&
+      {/* {ensDomain &&
         createPortal(
           <EnsDomainPop ensDomain={ensDomain} setEnsDomain={setEnsDomain} />,
           document.body
-        )}
+        )} */}
       {setUp &&
         createPortal(
           <SetupRecoveryPop setUp={setUp} setSetUp={setSetUp} />,
@@ -602,33 +610,37 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
-                      {(<> <li className="flex gap-2 py-1">
-                        <div
-                          className="block text-gray-500"
-                          style={{ width: 160 }}
-                        >
-                          Bitcoin wallet ID:
-                        </div>
-                        {/* {userAuth?.walletAddress && ( */}
-                        <span className="text-white flex items-center">
-                          {userAuth?.bitcoinWallet ? (
-                            <>
-                              {splitAddress(userAuth?.bitcoinWallet)}
-                              <button
-                                onClick={() =>
-                                  handleCopy(userAuth?.bitcoinWallet)
-                                }
-                                className="border-0 p-0 bg-transparent pl-1"
-                              >
-                                {copyIcn}
-                              </button>
-                            </>
-                          ) : (
-                            "--"
-                          )}
-                        </span>
-                        {/* )} */}
-                      </li></>)
+                      {
+                        <>
+                          {" "}
+                          <li className="flex gap-2 py-1">
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 160 }}
+                            >
+                              Bitcoin wallet ID:
+                            </div>
+                            {/* {userAuth?.walletAddress && ( */}
+                            <span className="text-white flex items-center">
+                              {userAuth?.bitcoinWallet ? (
+                                <>
+                                  {splitAddress(userAuth?.bitcoinWallet)}
+                                  <button
+                                    onClick={() =>
+                                      handleCopy(userAuth?.bitcoinWallet)
+                                    }
+                                    className="border-0 p-0 bg-transparent pl-1"
+                                  >
+                                    {copyIcn}
+                                  </button>
+                                </>
+                              ) : (
+                                "--"
+                              )}
+                            </span>
+                            {/* )} */}
+                          </li>
+                        </>
                       }
                       <li className="flex gap-2 py-1">
                         <div
@@ -927,20 +939,23 @@ const Setting: React.FC = () => {
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
-                        {userAuth?.login && (<>
-                          <div className="flex flex-col gap-1">
-                          <h3 className="text-xs font-medium leading-none -tracking-2">
-                            Recover
-                          </h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => recoverSeedPhrase()}
-                            className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
-                          >
-                            Recover
-                          </button>
-                        </div></>)}
+                        {userAuth?.login && (
+                          <>
+                            <div className="flex flex-col gap-1">
+                              <h3 className="text-xs font-medium leading-none -tracking-2">
+                                Recover
+                              </h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => recoverSeedPhrase()}
+                                className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
+                              >
+                                Recover
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </>
                   )}

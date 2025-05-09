@@ -37,7 +37,6 @@ const RecentApprovals = () => {
 
   const [expandedRow, setExpandedRow] = useState(null);
   const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
 
   const [activeView, setActiveView] = useState("depositor");
 

@@ -24,29 +24,16 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
   amount = 10,
   currency = "USD",
 }) => {
-  console.log("walletAddress", walletAddress);
   const userAuth = useSelector((state: any) => state.Auth);
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleGoBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  };
-
   useEffect(() => {
     const fetchSession = async () => {
       try {
         setIsLoading(true);
-        const amountValue = amount || Number(router.query.amount) || 10;
-        const currencyValue =
-          currency || (router.query.currency as string) || "USD";
-        // const btcAddress = walletAddress;
 
         const btcAddress = userAuth?.bitcoinWallet; // Replace with your default Bitcoin address
 
@@ -77,7 +64,6 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
           setMessage(`Error: ${data.error}`);
         }
       } catch (error) {
-        console.error("Error:", error);
         setMessage("Failed to initialize payment session");
       } finally {
         setIsLoading(false);
@@ -96,17 +82,7 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
       <div className="container">
         <div className="grid gap-3 grid-cols-12">
           <div className="col-span-12">
-            <div className="sectionHeader pb-2 border-bottom border-secondary mb-4">
-              {/* <div className="flex align-items-center gap-3">
-                <button
-                  onClick={handleGoBack}
-                  className="border-0 themeClr p-0"
-                >
-                  <BackIcon />
-                </button>
-                <h4 className="m-0 text-2xl font-bold">Buy Ethereum</h4>
-              </div> */}
-            </div>
+            <div className="sectionHeader pb-2 border-bottom border-secondary mb-4"></div>
           </div>
           <div className="col-span-12">
             <div className="mx-auto formMain">
@@ -132,11 +108,6 @@ const StripePaymentPage: React.FC<StripePaymentPageProps> = ({
               ) : (
                 <p className="text-center text-red-500">{message}</p>
               )}
-              {/* {message && clientSecret && (
-                <div id="onramp-message" className="mt-4 text-gray-400">
-                  {message}
-                </div>
-              )} */}
             </div>
           </div>
         </div>

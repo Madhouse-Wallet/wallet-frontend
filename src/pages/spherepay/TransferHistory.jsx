@@ -11,7 +11,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [transfers, setTransfers] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
-  // Form states for On Ramp (Bank to Wallet)
   const [onRampForm, setOnRampForm] = useState({
     currency: "",
     transferMethod: "",
@@ -19,7 +18,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     amount: "",
   });
 
-  // Form states for Off Ramp (Wallet to Bank)
   const [offRampForm, setOffRampForm] = useState({
     currency: "",
     transferMethod: "",
@@ -55,7 +53,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       if (response && response.data && response.data.customer) {
         setCustomerData(response.data.customer);
 
-        // Fetch bank account details for each bank account ID
         if (
           response.data.customer.bankAccounts &&
           response.data.customer.bankAccounts.length > 0
@@ -69,7 +66,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             accountDetailsPromises
           );
 
-          // Extract bank account details from responses
           const bankAccountDetails = accountDetailsResponses
             .map((response) => {
               if (response && response.data && response.data.bankAccount) {
@@ -95,7 +91,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const handleOnRampChange = (e) => {
     const { id, value } = e.target;
     setOnRampForm((prev) => ({ ...prev, [id]: value }));
-    // Clear any error or success messages when form is changed
     setError("");
     setSuccessMessage("");
   };
@@ -103,7 +98,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const handleOffRampChange = (e) => {
     const { id, value } = e.target;
     setOffRampForm((prev) => ({ ...prev, [id]: value }));
-    // Clear any error or success messages when form is changed
     setError("");
     setSuccessMessage("");
   };
@@ -166,7 +160,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       };
 
       const response = await SpherePayAPI.createTransfer(transferData);
-      console.log("On-ramp transfer initiated successfully:", response);
       setSuccessMessage("Transfer initiated successfully!");
 
       // Clear form after successful submission
@@ -228,7 +221,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       const response =
         await SpherePayAPI.createWalletToBankTransfer(transferData);
-      console.log("Off-ramp transfer initiated successfully:", response);
       setSuccessMessage("Transfer initiated successfully!");
 
       // Clear form after successful submission
@@ -251,7 +243,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const handleTab = (activeTab) => {
     setTab(activeTab);
-    // Clear error and success messages when switching tabs
     setError("");
     setSuccessMessage("");
   };

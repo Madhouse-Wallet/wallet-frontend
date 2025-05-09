@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import TableLayout from "@/components/TableLayout/index";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import TransactionDetailPop from "../TransactionDetailPop";
@@ -9,7 +7,6 @@ import moment from "moment";
 const RecentTransaction = ({ transactions, data }) => {
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
-  // Get status color
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
@@ -23,7 +20,6 @@ const RecentTransaction = ({ transactions, data }) => {
     }
   };
 
-  // Get status text
   const getStatusText = (status) => {
     switch (status) {
       case "confirmed":
@@ -36,48 +32,25 @@ const RecentTransaction = ({ transactions, data }) => {
         return "Unknown";
     }
   };
-  // const groupTransactionsByDate = (txs) => {
-  //   const groups = {};
-
-  //   txs.forEach((tx) => {
-  //     const date = new Date(tx.date).toLocaleDateString();
-  //     if (!groups[date]) {
-  //       groups[date] = [];
-  //     }
-  //     groups[date].push(tx);
-  //   });
-
-  //   return groups;
-  // };
 
   const groupTransactionsByDate = (txs) => {
     const groups = {};
 
     txs.forEach((tx) => {
-      console.log("line-57", tx);
 
       if (tx?.date && typeof tx.date === "string") {
-        // Parse the date string with moment
-        // Our format from earlier was 'MMMM D, YYYY h:mm A'
-        // Example: "May 2, 2025 3:45 PM"
         const txDate = moment(tx.date, "MMMM D, YYYY h:mm A");
 
-        // Check if the date is valid
         if (txDate.isValid()) {
-          // Use moment to format a consistent date key (just the date portion without time)
           const dateKey = txDate.format("YYYY-MM-DD");
 
-          // Initialize the array for this date if it doesn't exist
           if (!groups[dateKey]) {
             groups[dateKey] = [];
           }
 
-          // Add the transaction to the appropriate date group
           groups[dateKey].push(tx);
         } else {
-          // Fallback for other date formats that might still be in the system
           try {
-            // Try to parse as a generic date
             const fallbackDate = moment(tx.date);
             if (fallbackDate.isValid()) {
               const dateKey = fallbackDate.format("YYYY-MM-DD");
@@ -94,7 +67,6 @@ const RecentTransaction = ({ transactions, data }) => {
           }
         }
       } else if (tx?.date && moment.isMoment(tx.date)) {
-        // If the date is already a moment object
         const dateKey = tx.date.format("YYYY-MM-DD");
 
         if (!groups[dateKey]) {
@@ -106,9 +78,7 @@ const RecentTransaction = ({ transactions, data }) => {
       }
     });
 
-    console.log("Groups:", groups);
 
-    // Sort the groups by date (most recent first)
     const sortedGroups = {};
     Object.keys(groups)
       .sort(
@@ -130,7 +100,6 @@ const RecentTransaction = ({ transactions, data }) => {
 
   const hasLoanBalance = data.some((item) => item.head === "Loan Balance");
 
-  // If "Loan Balance" is found, do not render anything
   if (hasLoanBalance) {
     return null;
   }

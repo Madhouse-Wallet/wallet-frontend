@@ -4,7 +4,6 @@ import { logIn, getUser, createTpos, createUser, createBlotzAutoReverseSwap } fr
 
 const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1) => {
     try {
-        console.log("type-->",type)
         const [username, domain] = email.split("@");
         const length = 4;
         const randomAlpha = await Array.from({ length }, () =>
@@ -19,14 +18,15 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                 "email": newEmail,
                 "extensions": [
                     "tpos",
-                    "boltz"
+                    "boltz",
+                    "lndhub"
                 ]
             }, token, accountType) as any;
 
             if (addUser && addUser?.status) {
 
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
-
+                // console.log("getUserData-->", getUserData, getUserData?.data?.wallets)
                 if (getUserData && getUserData?.status) {
                     let addTpsoLink = await createTpos({
                         "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
@@ -47,7 +47,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
 
                     if (addTpsoLink && addTpsoLink?.status) {
                         let link = addTpsoLink?.data?.id;
-                        // console.log("test fd",{
+                        // console.log("test fd", {
                         //     lnbitEmail: newEmail,
                         //     lnbitLinkId: link,
                         //     lnbitWalletId: getUserData?.data?.wallets[0]?.id,
@@ -56,7 +56,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
 
                         const walletId = getUserData?.data?.wallets[0]?.id;
                         const userId = getUserData?.data?.id;
-                        console.log("type-->", type);
+                        // console.log("type- t->", type);
                         const updateFields =
                             type > 1
                                 ? {
@@ -76,6 +76,7 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                             { $set: updateFields },
                             { returnDocument: "after" }
                         );
+                        // console.log("result-->",result)
                     }
 
                     if (accountType == 1) {
@@ -86,7 +87,8 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                             "instant_settlement": true,
                             "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
                             "amount": "200",
-                            "onchain_address": onchain_address
+                            "onchain_address": onchain_address,
+                            "refund_address": "ccd505c23ebf4a988b190e6aaefff7a5",
                         }, token, accountType) as any;
 
                         if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {

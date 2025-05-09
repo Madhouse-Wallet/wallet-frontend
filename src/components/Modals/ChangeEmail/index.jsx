@@ -1,51 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import OtpInput from "react-otp-input";
 
-import {
-  generateOTP,
-  isValidEmail
-} from "../../../utils/globals";
-
-// @dev add your BUNDLER_URL, PAYMASTER_URL, and PASSKEY_SERVER_URL here
-import {
-  getUser,
-  updtUser,
-  sendOTP
-} from "../../../lib/apiCall";
-
+import { generateOTP, isValidEmail } from "../../../utils/globals";
+import { getUser, updtUser, sendOTP } from "../../../lib/apiCall";
 
 const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
   const dispatch = useDispatch();
   const userAuth = useSelector((state) => state.Auth);
-  const { theme, toggleTheme } = useTheme();
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [otp, setOtp] = useState("")
-  const [checkOTP, setCheckOTP] = useState("")
+  const { theme } = useTheme();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [checkOTP, setCheckOTP] = useState("");
 
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(1);
   const handleChangeEmail = () => setChangeEmail(!changeEmail);
 
   const sendOtpFunc = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       let checkUser = await getUser(email);
-      console.log("checkUser-->", checkUser)
       let OTP = generateOTP(4);
       let validEmail = await isValidEmail(email);
 
-      // console.log("otp-->",OTP)
-      setCheckOTP(OTP)
+      setCheckOTP(OTP);
       if (checkUser.status && checkUser.status == "success") {
-        toast.error("Already Exist!")
+        toast.error("Already Exist!");
       } else if (!validEmail) {
         toast.error("Please Enter Valid Email!");
       } else {
@@ -58,30 +43,23 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
         };
         let sendEmailData = await sendOTP(obj);
         if (sendEmailData.status && sendEmailData.status == "success") {
-          setLoading(false)
-          setStep(2)
+          setLoading(false);
+          setStep(2);
           toast.success(sendEmailData?.message);
         } else {
           toast.error(sendEmailData?.message || sendEmailData?.error);
         }
-        // setStep(2)
       }
 
-      setLoading(false)
-      //email
-      // getUser()
-      // setStep(2)
+      setLoading(false);
     } catch (error) {
-      console.log("change Email error ---> ", error)
-      setLoading(false)
-
+      setLoading(false);
     }
-  }
+  };
 
   const handleOtpChange = (value) => {
     setOtp(value);
 
-    // Automatically submit when all 4 digits are entered
     if (value.length === 4 && !loading) {
       verifyUserFunc(value);
     }
@@ -89,26 +67,29 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
 
   const verifyUserFunc = async (otp) => {
     try {
-      setLoading(true)
+      setLoading(true);
       if (!otp) {
-        toast.error("Invalid OTP!")
+        toast.error("Invalid OTP!");
       } else {
         let checkUser = await getUser(email);
         if (checkUser.status && checkUser.status == "success") {
-          toast.error("Already Exist!")
+          toast.error("Already Exist!");
         } else {
           if (checkOTP == otp) {
-            let data = await updtUser({ email: userAuth.email }, {
-              $set: { email: email } // Ensure this is inside `$set`
-            })
-            toast.success("Email Changed!")
+            let data = await updtUser(
+              { email: userAuth.email },
+              {
+                $set: { email: email }, // Ensure this is inside `$set`
+              }
+            );
+            toast.success("Email Changed!");
             dispatch(
               loginSet({
                 login: userAuth.login,
                 username: userAuth.username,
                 email: email,
                 walletAddress: userAuth.walletAddress,
-                bitcoinWallet:userAuth.bitcoinWallet, 
+                bitcoinWallet: userAuth.bitcoinWallet,
                 passkeyCred: userAuth.passkeyValidatorNew,
                 webauthKey: userAuth.webauthKey,
                 id: userAuth.id,
@@ -119,25 +100,20 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 passkey2: userAuth.passkey2,
                 passkey3: userAuth.passkey3,
                 multisigSetup: userAuth.multisigSetup,
-                multisigActivate: userAuth.multisigActivate
+                multisigActivate: userAuth.multisigActivate,
               })
             );
-            handleChangeEmail()
+            handleChangeEmail();
           } else {
-            toast.error("Invalid OTP!")
+            toast.error("Invalid OTP!");
           }
         }
-
       }
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
-      console.log("change Email error ---> ", error)
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-
-  // const getUser = async(em)
+  };
 
   return (
     <>
@@ -156,71 +132,68 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           <div className={`relative rounded px-3`}>
-
-            {/* <div className="top pb-3">
-            </div> */}
             <div className="modalBody">
-              {step == 1 ? <>
-                <div className="py-2 text-center">
-                  <h5 className="m-0 text-xl font-bold">
-                    Enter New Email
-                  </h5>
-                  {/* <p className="m-0 text-xs ">
-                    Please select each phone in order to make sure it is
-                    correct
-                  </p> */}
-                </div>
-                <div className="py-2">
-                  <input
-                    name=""
-                    value={email}
-                    onChange={(e) => (setEmail(e.target.value))}
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11 h-[45px]`}
-                    placeholder="Email"
-                  />
-                </div>
-                <div className="btnWrpper mt-3 text-center">
-                  <button
-                    type="button"
-                    disabled={loading || email === ''}
-                    onClick={sendOtpFunc}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    {loading ? "Please Wait..." : "Submit"}
-                  </button>
-                </div>
-              </> : step == 2 ? <>
-                <div className="py-2 text-center">
-                  <h5 className="m-0 text-xl font-bold">
-                    OTP Code Verification
-                  </h5>
-                  <p className="m-0 text-xs ">
-                    Code has been sent to Your Current Email
-                  </p>
-                </div>
-                <div className="py-2">
-                  <OtpWrpper theme={theme}>
-                    <OtpInput
-                      value={otp}
-                      onChange={handleOtpChange}
-                      numInputs={4}
-                      inputType={"number"}
-                      renderSeparator={<span></span>}
-                      renderInput={(props) => <input {...props} />}
+              {step == 1 ? (
+                <>
+                  <div className="py-2 text-center">
+                    <h5 className="m-0 text-xl font-bold">Enter New Email</h5>
+                  </div>
+                  <div className="py-2">
+                    <input
+                      name=""
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11 h-[45px]`}
+                      placeholder="Email"
                     />
-                  </OtpWrpper>
-                </div>
-                <div className="btnWrpper mt-3 text-center">
-                  <button
-                    type="button"
-                    onClick={()=>verifyUserFunc(otp)}
-                    disabled={loading || otp.length !== 4}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    {loading ? "Please Wait..." : "Submit"}
-                  </button>
-                </div>
-              </> : <></>}
+                  </div>
+                  <div className="btnWrpper mt-3 text-center">
+                    <button
+                      type="button"
+                      disabled={loading || email === ""}
+                      onClick={sendOtpFunc}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      {loading ? "Please Wait..." : "Submit"}
+                    </button>
+                  </div>
+                </>
+              ) : step == 2 ? (
+                <>
+                  <div className="py-2 text-center">
+                    <h5 className="m-0 text-xl font-bold">
+                      OTP Code Verification
+                    </h5>
+                    <p className="m-0 text-xs ">
+                      Code has been sent to Your Current Email
+                    </p>
+                  </div>
+                  <div className="py-2">
+                    <OtpWrpper theme={theme}>
+                      <OtpInput
+                        value={otp}
+                        onChange={handleOtpChange}
+                        numInputs={4}
+                        inputType={"number"}
+                        renderSeparator={<span></span>}
+                        renderInput={(props) => <input {...props} />}
+                      />
+                    </OtpWrpper>
+                  </div>
+                  <div className="btnWrpper mt-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => verifyUserFunc(otp)}
+                      disabled={loading || otp.length !== 4}
+                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      {loading ? "Please Wait..." : "Submit"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>
@@ -239,10 +212,10 @@ const OtpWrpper = styled.div`
       outline: 0;
       ${"" /* color: rgb(255 255 255 / 0.4); */}
       background: ${({ theme }) =>
-    theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
+        theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
       border: 1px solid rgb(255 255 255 / 0.1);
       border-color: ${({ theme }) =>
-    theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
+        theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
       font-size: 24px;
       font-weight: 600;
     }
@@ -263,7 +236,6 @@ const Modal = styled.div`
 `;
 
 export default ChangeEmailPop;
-
 
 const closeIcn = (
   <svg
@@ -293,21 +265,5 @@ const closeIcn = (
         />
       </clipPath>
     </defs>
-  </svg>
-);
-
-
-const copyIcn = (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M20 2H10C8.897 2 8 2.897 8 4V8H4C2.897 8 2 8.897 2 10V20C2 21.103 2.897 22 4 22H14C15.103 22 16 21.103 16 20V16H20C21.103 16 22 15.103 22 14V4C22 2.897 21.103 2 20 2ZM4 20V10H14L14.002 20H4ZM20 14H16V10C16 8.897 15.103 8 14 8H10V4H20V14Z"
-      fill="currentColor"
-    />
   </svg>
 );

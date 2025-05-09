@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
-  // Use ref to maintain scanner instance
   const scannerRef = useRef(null);
   const isScanning = useRef(false);
 
@@ -20,7 +19,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
 
   const startScanner = async () => {
     try {
-      // If scanner already exists or is scanning, return
       if (scannerRef.current || isScanning.current) {
         return;
       }
@@ -28,7 +26,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       const html5QrCode = new Html5Qrcode("qr-reader");
       scannerRef.current = html5QrCode;
 
-      console.log("Starting scanner...");
       await html5QrCode.start(
         { facingMode: "environment" },
         {
@@ -37,7 +34,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
           qrbox: { width: 350, height: 250 },
         },
         async (decodedText) => {
-          console.log("QR Code detected:", decodedText);
           await stopScanner();
           onScan(decodedText);
           setOpenCam(false);
@@ -50,7 +46,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       );
 
       isScanning.current = true;
-      console.log("Scanner started successfully");
     } catch (err) {
       console.error("Failed to start scanner:", err);
       await stopScanner();
@@ -65,7 +60,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       stopScanner();
     }
 
-    // Cleanup on unmount
     return () => {
       stopScanner();
     };
@@ -79,7 +73,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
         <div
           id="qr-reader"
           className="w-full aspect-square bg-black"
-          // style={{ maxWidth: "500px" }}
           style={{
             maxWidth: "350px",
             height: "250px",

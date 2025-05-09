@@ -50,16 +50,17 @@ export default async function handler(req, res) {
             console.log("getToken-->", getToken)
             if (getToken?.status) {
                 let token = getToken?.data?.token;
-                const satoshiAmount = 0.1 * 100000000;
-                let createInvoice = await createInvoice({
+                // const satoshiAmount = 0.1 * 100000000;
+                const satoshiAmount = amount;
+                let createInvoice1 = await createInvoice({
                     "out": false,
                     "unit": "sat",
                     "amount": satoshiAmount,
                     "memo": "invoice",
                 }, token, 2);
-                console.log("createInvoice", createInvoice)
-                if (createInvoice?.status) {
-                    let createSwap = await createReverseSwap(createInvoice?.data?.bolt11)
+                console.log("createInvoice1", createInvoice1)
+                if (createInvoice1?.status) {
+                    let createSwap = await createReverseSwap(createInvoice1?.data?.bolt11)
                     console.log("createSwap-->", createSwap)
                     if (createSwap?.status) {
                         const result = await sendBitcoinn(
@@ -80,7 +81,7 @@ export default async function handler(req, res) {
     if(req.body.secret == ("lbtctbtc")){
         try {    
             const liquidShift = await createLBtcToTbtcShift(
-                1, // amount
+                amount, // amount
                 "0x230537f1539E93743dD1a90c945E6086B9c0521a",
                 // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
                 process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
@@ -103,7 +104,7 @@ export default async function handler(req, res) {
     if(req.body.secret == ("lbtcusdc")){
         try {    
             const liquidShift = await createLBtcToUSDCShift(
-                1, // amount
+                amount, // amount
                 "0x230537f1539E93743dD1a90c945E6086B9c0521a",
                 // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
                 process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,

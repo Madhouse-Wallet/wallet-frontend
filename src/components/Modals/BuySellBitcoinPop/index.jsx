@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
-import { toast } from "react-toastify";
 import Link from "next/link";
-import { useTheme } from "@/ContextApi/ThemeContext";
 
-// css
-
-// img
 
 const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
-  const { theme, toggleTheme } = useTheme();
 
   const handleBuySell = () => setBuySell(!buySell);
   return (
@@ -33,9 +25,6 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              {/* <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Add Supply
-              </h5> */}
             </div>
             <div className="modalBody">
               <div className="py-2">

@@ -3,18 +3,12 @@ import styled from "styled-components";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "../ui/table";
 import { useTheme } from "@/ContextApi/ThemeContext";
-
-// css
-
-// image
 
 const TableLayout = ({ column, data }) => {
   const { theme, toggleTheme } = useTheme();
