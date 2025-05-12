@@ -40,16 +40,16 @@ export default async function handler(req, res) {
           `${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`
         );
         htmlTemplate = await response.text();
-        replacePlaceholders(htmlTemplate, emailData);
+        htmlBody = await replacePlaceholders(htmlTemplate, emailData);
       } else if (type == "verifyOtp") {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_DOMAIN}verifyEmail.html`
         ); // Fetching from public folder
         htmlTemplate = await response.text();
 
-        htmlBody = replacePlaceholders(htmlTemplate, emailData);
+        htmlBody = await replacePlaceholders(htmlTemplate, emailData);
       }
-
+      // console.log("htmlBody-->", htmlBody)
       const params = {
         Destination: {
           ToAddresses: [email],
@@ -76,6 +76,7 @@ export default async function handler(req, res) {
           data,
         });
       } catch (err) {
+        console.log("error->", err)
         res.status(500).json({
           status: "failure",
           message: "Failed to send email",
