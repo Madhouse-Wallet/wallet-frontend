@@ -67,8 +67,6 @@ const CreateWallet = () => {
     secretCredentialId,
     secretStorageKey,
     liquidBitcoinWallet,
-    liquidBitcoinWallet_2,
-    liquidBitcoinWallet_3,
     coinosToken,
     flowTokens
   ) => {
@@ -89,8 +87,6 @@ const CreateWallet = () => {
             secretCredentialId,
             secretStorageKey,
             liquidBitcoinWallet,
-            liquidBitcoinWallet_2,
-            liquidBitcoinWallet_3,
             coinosToken,
             flowTokens
           }),
@@ -246,12 +242,8 @@ const CreateWallet = () => {
             localStorage.setItem("coinosToken", registerCoinos?.token);
             const [usernameInit, domainInit] = (registerData.email).split("@");
             let token1 = (await getRandomString(6)) + "_" + usernameInit;
-            let token2 = (await getRandomString(6)) + "_" + usernameInit;
-            let token3 = (await getRandomString(6)) + "_" + usernameInit;
             let flowTokens = [
               { flow: 1, token: (token1) },
-              { flow: 2, token: (token2) },
-              { flow: 3, token: (token3) }
             ];
             const resultLiquid = await createCoinosInvoice(
               registerCoinos?.token,
@@ -260,19 +252,6 @@ const CreateWallet = () => {
               token1
             );
 
-            const resultLiquid1 = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "liquid",
-              token2
-            );
-
-            const resultLiquid2 = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "liquid",
-              token3
-            );
 
             let getWallet = await getBitcoinAddress();
 
@@ -300,19 +279,11 @@ const CreateWallet = () => {
             }
 
             let liquidBitcoinWallet = "";
-            let liquidBitcoinWallet_2 = "";
-            let liquidBitcoinWallet_3 = "";
+          
 
             if (resultLiquid) {
               liquidBitcoinWallet = resultLiquid?.hash || "";
             }
-            if (resultLiquid1) {
-              liquidBitcoinWallet_2 = resultLiquid1?.hash || "";
-            }
-            if (resultLiquid2) {
-              liquidBitcoinWallet_3 = resultLiquid2?.hash || "";
-            }
-
             let data = await addUser(
               registerData.email,
               registerData.username,
@@ -325,8 +296,6 @@ const CreateWallet = () => {
               credentialIdSecret,
               storageKeySecret,
               liquidBitcoinWallet,
-              liquidBitcoinWallet_2,
-              liquidBitcoinWallet_3,
               registerCoinos?.token,
               flowTokens
             );

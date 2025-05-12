@@ -77,15 +77,14 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
-export const btcSat = async (amount, publicKey="") => {
+export const btcSat = async (amount, refund_address="") => {
   try {
     try {
       return await fetch(`/api/btc-sat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount,
-          publicKey
+          amount, refund_address
         }),
       })
         .then((res) => res.json())

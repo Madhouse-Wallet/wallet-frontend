@@ -19,7 +19,9 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                 "extensions": [
                     "tpos",
                     "boltz",
-                    "lndhub"
+                    "lndhub",
+                    "lnurlp",
+                    "withdraw"
                 ]
             }, token, accountType) as any;
 
@@ -129,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "", secretEmail = "",
             secretCredentialId = "",
-            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "", liquidBitcoinWallet_3 = "", coinosToken,
+            secretStorageKey = "", liquidBitcoinWallet = "", coinosToken,
             flowTokens } = req.body;
 
         // Validate email
@@ -146,14 +148,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (existingUser) {
             //   return res.status(400).json({ error: 'Email already exists' });
             addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet, 1, 1)
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_2, 2, 1)
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_3, 3, 2)
+            addLnbit(existingUser.email, usersCollection, bitcoinWallet, 2, 1)
+            addLnbit(existingUser.email, usersCollection, bitcoinWallet, 3, 2)
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
 
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, liquidBitcoinWallet_2, liquidBitcoinWallet_3, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
+            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
             secretCredentialId,
             secretStorageKey,
             coinosToken, flowTokens,
@@ -162,7 +164,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // console.log("result-->", result)
         addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1)
         addLnbit(email, usersCollection, bitcoinWallet, 2, 1)
-        addLnbit(email, usersCollection, liquidBitcoinWallet_3, 3, 2)
+        addLnbit(email, usersCollection, bitcoinWallet, 3, 2)
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
         console.error('Error adding user:', error);

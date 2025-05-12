@@ -389,6 +389,52 @@ const createSwapReverse = async (data, token, type = 1) => {
 
 
 
+
+const createSwap = async (data, token, type = 1) => {
+  try {
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
+    //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
+    let response = await fetch(`${backendUrl}boltz/api/v1/swap`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
+        ,
+        "X-API-KEY": apiKey,
+      },
+      body: JSON.stringify(data),
+    });
+    response = await response.json()
+    if (response?.address) {
+      return {
+        status: true,
+        data: response
+      }
+    } else {
+      return {
+        status: false,
+        msg: response?.detail
+      }
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed"
+    }
+  }
+};
+
+
+
 const getStats = async (walletId, token, type = 1) => {
   try {
     let backendUrl = "";
@@ -490,6 +536,7 @@ module.exports = {
   createBlotzAutoReverseSwap,
   createInvoice,
   createSwapReverse,
+  createSwap,
   payInvoice,
   getStats,
   getPayments

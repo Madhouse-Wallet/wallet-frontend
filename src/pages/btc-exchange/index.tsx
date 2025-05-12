@@ -277,12 +277,12 @@ const BTCEchange = () => {
                         >
                           Receive
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => setSendBitcoin(!sendBitcoin)}
                           className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Bridge
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </TopHead>

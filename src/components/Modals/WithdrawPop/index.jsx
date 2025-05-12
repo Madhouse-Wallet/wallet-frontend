@@ -4,7 +4,30 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDevWallet";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
+import { retrieveSecret } from "@/utils/webauthPrf.js";
+import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 
+const getSecretData = async (storageKey, credentialId) => {
+  try {
+    let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+    if (retrieveSecretCheck?.status) {
+      return {
+        status: true,
+        secret: retrieveSecretCheck?.data?.secret,
+      };
+    } else {
+      return {
+        status: false,
+        msg: retrieveSecretCheck?.msg,
+      };
+    }
+  } catch (error) {
+    return {
+      status: false,
+      msg: "Error in Getting secret!",
+    };
+  }
+};
 // css
 
 // img
@@ -17,38 +40,66 @@ const WithdrawPopup = ({
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+    const recoverSeedPhrase = async () => {
+      try {
+        let userExist = await getUser(userAuth?.email);
+        if (
+          userExist?.userId?.secretCredentialId &&
+          userExist?.userId?.secretStorageKey
+        ) {
+          let callGetSecretData = await getSecretData(
+            userExist?.userId?.secretStorageKey,
+            userExist?.userId?.secretCredentialId
+          );
+          if (callGetSecretData?.status) {
+            return JSON.parse(callGetSecretData?.secret);
+          } else {
+            return false;
+          }
+        }
+      } catch (error) {
+        console.log("Error in Fetching secret!", error);
+        return false;
+      }
+    };
   const handleDepositPop = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       if (!userAuth?.login) {
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
+          setLoading(false);
+          return;
         } else {
-          if (userExist?.userId?.liquidBitcoinWallet_2) {
-            const sendLnbitWithdraw = await sendLnbit(
-              amount, // amount
-              userExist?.userId?.liquidBitcoinWallet_2
-            );
-            if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
-              toast.error(sendLnbitWithdraw.message);
-            } else {
-              toast.success(sendLnbitWithdraw.message);
-            }
-          } else {
-            toast.error("Please sign Up Again!");
+          if (!userExist?.userId?.bitcoinWallet) {
+            toast.error("No Bitcoin Wallet Found!");
+            setLoading(false);
+            return;
           }
-
+          const privateKey = await recoverSeedPhrase();
+          if (!privateKey) {
+            toast.error("No Bitcoin Wallet Found!");
+            setLoading(false);
+            return;
+          }
+          const getBtcSat = await sendLnbit(amount, userExist?.userId?.bitcoinWallet);
+          console.log("userExist?.userId?.bitcoinWallet->", userExist?.userId?.bitcoinWallet)
+          if (getBtcSat.status && getBtcSat.status == "failure") {
+            toast.error(getBtcSat.message);
+            setLoading(false);
+          } else {
+            toast.success(getBtcSat.message);
+            setLoading(false);
+          }
         }
       }
-
-      setWithdrawPop(!withdrawPop)
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
       toast.error(error?.message);
-      setLoading(false)
+      setLoading(false);
     }
   };
 
