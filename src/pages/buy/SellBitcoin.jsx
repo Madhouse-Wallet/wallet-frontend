@@ -2,9 +2,11 @@ import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import { getQuoteByReceivingAmount } from "../../utils/lifiSwap";
+import { createBtcToUsdcShift } from "../api/sideShiftAI";
+import { sendBitcoinFunction } from "@/utils/bitcoinSend";
+import { getUser } from "@/lib/apiCall";
+import { retrieveSecret } from "@/utils/webauthPrf";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -16,16 +18,59 @@ const SellBitcoin = () => {
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
-  // Fixed swap direction: USDC to BTC
+  const [destinationAddress, setDestinationAddress] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
     to: "USDC",
   });
 
-  // Chain constants
-  const BASE_CHAIN = process.env.NEXT_PUBLIC_MAINNET_CHAIN;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
   const TBTC_ADDRESS = process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS;
+
+  const getDestinationAddress = async (amount) => {
+    try {
+      const shift = await createBtcToUsdcShift(
+        amount,
+        userAuth?.walletAddress,
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+        process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+      );
+
+      return {
+        depositAddress: shift.depositAddress,
+        settleAmount: parseFloat(shift.settleAmount || 0),
+      };
+    } catch (error) {
+      console.error("SideShift API error:", error);
+      return null;
+    }
+  };
+
+  const getQuote = async (amount) => {
+    try {
+      const response = await fetch("/api/swap-quote-thorStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sellAsset: "BTC.BTC",
+          buyAsset: `BASE.USDC-${process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}`,
+          sellAmount: amount,
+          sourceAddress: userAuth?.bitcoinWallet,
+          destinationAddress: userAuth?.walletAddress,
+        }),
+      });
+
+      const data = await response.json();
+      return {
+        ...data,
+        estimatedDepositAddress: data?.routes[0].targetAddress,
+        estimate: data?.routes[0].expectedBuyAmount,
+      };
+    } catch (error) {
+      console.error("Quote fetch error:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -89,131 +134,144 @@ const SellBitcoin = () => {
     }
   };
 
-  // Updated quote function to work with fromAmount
-  const updateQuote = async (amount) => {
-    if (!amount || !providerr || !userAuth?.walletAddress) return;
-
-    setIsLoading(true);
-    try {
-      // Fixed tokens: from USDC to BTC
-      const fromTokenValue = "USDC";
-      const toTokenValue = "BTC";
-
-      // Call the quote API with the source amount
-      const quoteResult = await getQuoteByReceivingAmount(
-        BASE_CHAIN,
-        TBTC_ADDRESS,
-        BASE_CHAIN,
-        USDC_ADDRESS,
-        ethers.utils.parseUnits(amount, 6).toString(), // Assuming 6 decimals for USDC
-        userAuth?.walletAddress
-      );
-      setQuote(quoteResult);
-
-      // Update toAmount based on the quote result
-      if (quoteResult && quoteResult?.estimate?.toAmount) {
-        const formattedToAmount = ethers.utils.formatUnits(
-          quoteResult?.estimate?.toAmount,
-          8 // Using 8 decimals for BTC (Bitcoin standard)
-        );
-        setToAmount(formattedToAmount);
-
-        // Update USD values
-        setUsdValue({
-          from: (parseFloat(amount) * 1).toFixed(2), // USDC is pegged to USD
-          to: (parseFloat(formattedToAmount) * 30000).toFixed(2), // Example BTC price of $30,000
-        });
-      }
-    } catch (error) {
-      toast.error("Failed to get swap quote");
-
-      // Clear the second input on error
-      setToAmount("");
-      setQuote(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle input changes in the first input field
-  const handleFromAmountChange = (e) => {
+  const handleFromAmountChange = async (e) => {
     const value = e.target.value;
     setFromAmount(value);
+
     if (value && !isNaN(parseFloat(value))) {
-      updateQuote(value);
+      setIsLoading(true);
+      try {
+        // First check the amount value
+        if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
+          // For amounts <= 0.1 BTC, use SideShift
+          const shiftResult = await getDestinationAddress(value);
+          if (shiftResult) {
+            setDestinationAddress(shiftResult.depositAddress);
+            setToAmount(shiftResult.settleAmount);
+          }
+        } else {
+          // For amounts > 0.1 BTC, use ThorSwap
+          const quoteResult = await getQuote(value);
+          if (quoteResult) {
+            setDestinationAddress(quoteResult.estimatedDepositAddress);
+            setToAmount(quoteResult.estimate);
+          }
+        }
+      } catch (err) {
+        toast.error("Failed to fetch quote or destination address");
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setToAmount("");
       setQuote(null);
+      setDestinationAddress("");
       setUsdValue({ from: "0", to: "0" });
     }
   };
+  const getSecretData = async (storageKey, credentialId) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+      if (retrieveSecretCheck?.status) {
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret,
+        };
+      } else {
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Error in Getting secret!",
+      };
+    }
+  };
 
-  // Execute the swap transaction
-  const executeSwap = async () => {
-    if (!quote || !providerr || !userAuth?.walletAddress) {
-      toast.error("Quote not available or wallet not connected");
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth?.email);
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        );
+        if (callGetSecretData?.status) {
+          return JSON.parse(callGetSecretData?.secret);
+        } else {
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+      return false;
+    }
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+
+    if (!toAmount || parseFloat(toAmount) <= 0) {
+      toast.error("Please enter a valid amount");
       return;
     }
 
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
-      toast.error("Insufficient USDC balance");
+    if (parseFloat(fromAmount) > parseFloat(tbtcBalance)) {
+      toast.error("Insufficient BTC balance");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Send the transaction
-      const tx = await providerr
-        .getSigner()
-        .sendTransaction(quote.transactionRequest);
-      toast.info(`Transaction submitted: ${tx.hash}`);
+      const privateKey = await recoverSeedPhrase();
+      if (!privateKey) {
+        toast.error("Please enter a valid amount");
+        return;
+      }
 
-      // Wait for confirmation
-      const receipt = await tx.wait();
-      toast.success("Swap completed successfully!");
+      const result = await sendBitcoinFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: destinationAddress,
+        amountSatoshi: fromAmount * 100000000,
+        privateKeyHex: privateKey?.privateKey,
+        network: "main", // Use 'main' for mainnet
+      });
 
-      // Refresh balances
-      fetchBalances();
-
-      // Reset form
-      setFromAmount("");
-      setToAmount("");
-      setQuote(null);
+      if (result.success) {
+        toast.success("BTC sent successfully!");
+        setTimeout(fetchBalances, 2000);
+      } else {
+        toast.error(result.error || "Transaction failed");
+      }
     } catch (error) {
-      toast.error("Failed to execute swap");
+      toast.error(error.message || "Transaction failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Since we're fixing tokens from USDC to BTC, this function is simplified
-  const toggleSwapDirection = () => {
-    // Direction is fixed, but we'll still reset the form
-    setFromAmount("");
-    setToAmount("");
-    setQuote(null);
-    setUsdValue({ from: "0", to: "0" });
-    toast.info("Trading direction is fixed to USDC → BTC");
-  };
-
-  // Determine button text based on state
   const getButtonText = () => {
     if (isLoading) return "Loading...";
     if (!fromAmount || !toAmount) return "Enter an amount";
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance))
-      return "Insufficient USDC Balance";
+    if (parseFloat(fromAmount) > parseFloat(tbtcBalance))
+      return "Insufficient BTC Balance";
     if (!quote) return "Get Quote";
     return "Swap Tokens";
   };
 
-  // Check if button should be disabled
   const isButtonDisabled = () => {
     return (
       isLoading ||
       !fromAmount ||
       !toAmount ||
       !quote ||
-      parseFloat(fromAmount) > parseFloat(usdcBalance)
+      parseFloat(fromAmount) > parseFloat(tbtcBalance)
     );
   };
 
@@ -239,14 +297,6 @@ const SellBitcoin = () => {
                           placeholder="0.0"
                           disabled={isLoading}
                         />
-                        <h6 className="m-0 font-medium text-white/50">
-                          ≈ $
-                          {quote
-                            ? parseFloat(
-                                quote?.action?.fromToken?.priceUSD
-                              ).toFixed(2)
-                            : "0.0"}
-                        </h6>
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -268,7 +318,6 @@ const SellBitcoin = () => {
                   <div className="py-2 my-[-30px] text-center">
                     <button
                       className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
-                      // onClick={toggleSwapDirection}
                       disabled={true}
                     >
                       {swapIcn}
@@ -282,17 +331,9 @@ const SellBitcoin = () => {
                           className="bg-transparent border-0 text-xl outline-0"
                           value={toAmount}
                           placeholder="0.0"
-                          disabled={true} // This input is always disabled
+                          disabled={true}
                           readOnly
                         />
-                        <h6 className="m-0 font-medium text-white/50">
-                          ≈ $
-                          {quote
-                            ? parseFloat(
-                                quote?.action?.toToken?.priceUSD
-                              ).toFixed(2)
-                            : "0.0"}
-                        </h6>
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -316,7 +357,7 @@ const SellBitcoin = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeSwap}
+                      onClick={handleSend}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
