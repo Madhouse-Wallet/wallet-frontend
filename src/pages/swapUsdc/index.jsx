@@ -2,9 +2,8 @@ import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import Web3Interaction from "@/utils/web3Interaction";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import { getQuoteByReceivingAmount } from "../../utils/lifiSwap";
+import { createUsdcToBtcShift } from "../api/sideShiftAI";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -16,16 +15,59 @@ const Swap = () => {
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
-  // Fixed swap direction: USDC to BTC
+  const [destinationAddress, setDestinationAddress] = useState("");
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
   });
 
-  // Chain constants
-  const BASE_CHAIN = process.env.NEXT_PUBLIC_MAINNET_CHAIN;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
   const TBTC_ADDRESS = process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS;
+
+  const getDestinationAddress = async (amount) => {
+    try {
+      const shift = await createUsdcToBtcShift(
+        amount,
+        userAuth?.bitcoinWallet,
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+        process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+      );
+
+      return {
+        depositAddress: shift.depositAddress,
+        settleAmount: parseFloat(shift.settleAmount || 0),
+      };
+    } catch (error) {
+      console.error("SideShift API error:", error);
+      return null;
+    }
+  };
+
+  const getQuote = async (amount) => {
+    try {
+      const response = await fetch("/api/swap-quote-thorStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sellAsset: `BASE.USDC-${process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}`,
+          buyAsset: "BTC.BTC",
+          sellAmount: amount,
+          sourceAddress: userAuth?.walletAddress,
+          destinationAddress: userAuth?.bitcoinWallet,
+        }),
+      });
+
+      const data = await response.json();
+      return {
+        ...data,
+        estimatedDepositAddress: data?.routes[0].targetAddress,
+        estimate: data?.routes[0].expectedBuyAmount,
+      };
+    } catch (error) {
+      console.error("Quote fetch error:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -89,114 +131,90 @@ const Swap = () => {
     }
   };
 
-  // Updated quote function to work with fromAmount
-  const updateQuote = async (amount) => {
-    if (!amount || !providerr || !userAuth?.walletAddress) return;
-
-    setIsLoading(true);
-    try {
-      // Fixed tokens: from USDC to BTC
-      const fromTokenValue = "USDC";
-      const toTokenValue = "BTC";
-
-      // Call the quote API with the source amount
-      const quoteResult = await getQuoteByReceivingAmount(
-        BASE_CHAIN,
-        USDC_ADDRESS,
-        BASE_CHAIN,
-        TBTC_ADDRESS,
-        ethers.utils.parseUnits(amount, 6).toString(), // Assuming 6 decimals for USDC
-        userAuth?.walletAddress
-      );
-      setQuote(quoteResult);
-
-      // Update toAmount based on the quote result
-      if (quoteResult && quoteResult?.estimate?.toAmount) {
-        const formattedToAmount = ethers.utils.formatUnits(
-          quoteResult?.estimate?.toAmount,
-          8 // Using 8 decimals for BTC (Bitcoin standard)
-        );
-        setToAmount(formattedToAmount);
-
-        // Update USD values
-        setUsdValue({
-          from: (parseFloat(amount) * 1).toFixed(2), // USDC is pegged to USD
-          to: (parseFloat(formattedToAmount) * 30000).toFixed(2), // Example BTC price of $30,000
-        });
-      }
-    } catch (error) {
-      toast.error("Failed to get swap quote");
-
-      // Clear the second input on error
-      setToAmount("");
-      setQuote(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle input changes in the first input field
-  const handleFromAmountChange = (e) => {
+  const handleFromAmountChange = async (e) => {
     const value = e.target.value;
     setFromAmount(value);
+
     if (value && !isNaN(parseFloat(value))) {
-      updateQuote(value);
+      setIsLoading(true);
+      try {
+        const quotePromise = getQuote(value);
+        const shiftPromise = getDestinationAddress(value);
+
+        const [quoteResult, shiftResult] = await Promise.all([
+          quotePromise,
+          shiftPromise,
+        ]);
+        const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
+        const shiftSettleAmount = parseFloat(shiftResult?.settleAmount || 0);
+
+        let finalAddress = "";
+
+        if (
+          quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
+          shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+        ) {
+          finalAddress = shiftResult?.depositAddress;
+          setToAmount(shiftResult?.settleAmount);
+        } else {
+          finalAddress = quoteResult?.estimatedDepositAddress;
+          setToAmount(quoteResult?.estimate);
+        }
+
+        if (finalAddress) {
+          setDestinationAddress(finalAddress);
+        }
+      } catch (err) {
+        toast.error("Failed to fetch quote or destination address");
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setToAmount("");
       setQuote(null);
+      setDestinationAddress("");
       setUsdValue({ from: "0", to: "0" });
     }
   };
 
-  // Execute the swap transaction
-  const executeSwap = async () => {
-    if (!quote || !providerr || !userAuth?.walletAddress) {
-      toast.error("Quote not available or wallet not connected");
+  const handleSend = async (e) => {
+    e.preventDefault();
+
+    if (!toAmount || parseFloat(toAmount) <= 0) {
+      toast.error("Please enter a valid amount");
       return;
     }
 
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
+    if (parseFloat(toAmount) > parseFloat(balance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Send the transaction
-      const tx = await providerr
-        .getSigner()
-        .sendTransaction(quote.transactionRequest);
-      toast.info(`Transaction submitted: ${tx.hash}`);
+      const web3 = new Web3Interaction("sepolia", providerr);
+      const result = await web3.sendUSDC(
+        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+        destinationAddress,
+        toAmount,
+        providerr
+      );
 
-      // Wait for confirmation
-      const receipt = await tx.wait();
-      toast.success("Swap completed successfully!");
-
-      // Refresh balances
-      fetchBalances();
-
-      // Reset form
-      setFromAmount("");
-      setToAmount("");
-      setQuote(null);
+      if (result.success) {
+        setSuccess(true);
+        setRefundBTC(false);
+        toast.success("USDC sent successfully!");
+        setTimeout(fetchBalances, 2000);
+      } else {
+        toast.error(result.error || "Transaction failed");
+      }
     } catch (error) {
-      toast.error("Failed to execute swap");
+      toast.error(error.message || "Transaction failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Since we're fixing tokens from USDC to BTC, this function is simplified
-  const toggleSwapDirection = () => {
-    // Direction is fixed, but we'll still reset the form
-    setFromAmount("");
-    setToAmount("");
-    setQuote(null);
-    setUsdValue({ from: "0", to: "0" });
-    toast.info("Trading direction is fixed to USDC → BTC");
-  };
-
-  // Determine button text based on state
   const getButtonText = () => {
     if (isLoading) return "Loading...";
     if (!fromAmount || !toAmount) return "Enter an amount";
@@ -206,7 +224,6 @@ const Swap = () => {
     return "Swap Tokens";
   };
 
-  // Check if button should be disabled
   const isButtonDisabled = () => {
     return (
       isLoading ||
@@ -239,14 +256,14 @@ const Swap = () => {
                           placeholder="0.0"
                           disabled={isLoading}
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                        {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
                           {quote
                             ? parseFloat(
                                 quote?.action?.fromToken?.priceUSD
                               ).toFixed(2)
                             : "0.0"}
-                        </h6>
+                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -268,7 +285,6 @@ const Swap = () => {
                   <div className="py-2 my-[-30px] text-center">
                     <button
                       className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
-                      // onClick={toggleSwapDirection}
                       disabled={true}
                     >
                       {swapIcn}
@@ -285,14 +301,14 @@ const Swap = () => {
                           disabled={true} // This input is always disabled
                           readOnly
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                        {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
                           {quote
                             ? parseFloat(
                                 quote?.action?.toToken?.priceUSD
                               ).toFixed(2)
                             : "0.0"}
-                        </h6>
+                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -316,7 +332,7 @@ const Swap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeSwap}
+                      onClick={handleSend}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
