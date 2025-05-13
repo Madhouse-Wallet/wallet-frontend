@@ -86,11 +86,11 @@ const CounterList = ({ data }) => {
 
   const handleCardClick = async (item) => {
     setSelectedItem([item]);
-    if (item.head === "Total Balance") {
+    if (item.head === "Dollars") {
       await fetchRecentTransactions();
-    } else if (item.head === "Bitcoin Balance") {
+    } else if (item.head === "Bitcoin") {
       await fetchBitcoinRecentTransactions();
-    } else if (item.head === "USDC Balance") {
+    } else if (item.head === "Gold") {
       await fetchUSDCRecentTransactions();
     } else {
       setTransactions([]);

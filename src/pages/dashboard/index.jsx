@@ -29,14 +29,14 @@ const Dashboard = () => {
   const [totalUsdBalance, setTotalUsdBalance] = useState(0);
 
   const cardMetrics = [
-    { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
-    { head: "Bitcoin Balance", value: tbtcBalance, icn: icn22 },
-    { head: "USDC Balance", value: thusdBalance, icn: icn33 },
-    { head: "Virtual Card", value: collateralRatio, icn: icn11 },
+    { head: "Dollars", value: `$${totalUsdBalance}`, icn: icn11 },
+    { head: "Bitcoin", value: tbtcBalance, icn: icn22 },
+    { head: "Gold", value: thusdBalance, icn: icn33 },
+    { head: "Lightning", value: collateralRatio, icn: icn11 },
   ];
   const cardData = [
     {
-      head: "Send & Receive",
+      head: "Transfers",
       icn: icn1,
       onClick: () => {
         router.push("/btc-exchange");
@@ -50,29 +50,29 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Buy & Sell Bitcoin",
+      head: "Bitcoin",
       icn: icn3,
       onClick: () => {
         // setBuySell(!buySell);
-        router.push("/buy")
+        router.push("/buy");
       },
     },
     {
-      head: "Withdraw & Deposit Dollars",
+      head: "Dollars",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
       },
     },
     {
-      head: "Earn",
+      head: "Gold",
       icn: icn5,
       onClick: () => {
         router.push("/curve-deposit");
       },
     },
     {
-      head: "Virtual Card Balance",
+      head: "Lightning",
       icn: icn6,
       onClick: () => {
         router.push("/bitcoin-debt-card");
@@ -303,7 +303,6 @@ const DashboardLink = styled.ul`
 
 export default Dashboard;
 
-
 const icn11 = (
   <svg
     width="24"
@@ -363,7 +362,6 @@ const icn33 = (
     />
   </svg>
 );
-
 
 const icn1 = (
   <svg
