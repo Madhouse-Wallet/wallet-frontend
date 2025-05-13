@@ -124,9 +124,10 @@ export const registerCredential = async (username, displayName) => {
                 //     requireResidentKey: true
                 // },
                 authenticatorSelection: {
-                    userVerification: "preferred",
-                    residentKey: "preferred",           // Allow discoverable credentials
-                    requireResidentKey: false           // Broader device support
+                    userVerification: "required",
+                    residentKey: "required",           // Allow discoverable credentials
+                    authenticatorAttachment: "cross-platform", // Use platform authenticator if available
+                    requireResidentKey: true           // Broader device support
                     // No authenticatorAttachment to support both platform & cross-platform
                 },
                 extensions: { prf: {} }, // Request PRF extension
