@@ -126,7 +126,7 @@ export const registerCredential = async (username, displayName) => {
                 authenticatorSelection: {
                     userVerification: "required",
                     residentKey: "required",           // Allow discoverable credentials
-                    authenticatorAttachment: "cross-platform", // Use platform authenticator if available
+                    //authenticatorAttachment: "cross-platform", // Use platform authenticator if available
                     requireResidentKey: true           // Broader device support
                     // No authenticatorAttachment to support both platform & cross-platform
                 },
