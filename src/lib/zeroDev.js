@@ -73,7 +73,6 @@ export const zeroTrxn = async (kernelClient) => {
       value: BigInt(0), // default to 0
       data: "0x", // default to 0x
     });
-    console.log("Txn hash:", txnHash);
     return {
       status: true,
       data: txnHash
@@ -89,7 +88,6 @@ export const zeroTrxn = async (kernelClient) => {
 export const getPrivateKey = async () => {
   try {
     const PRIVATE_KEY = generatePrivateKey();
-    console.log("PRIVATE_KEY-->", PRIVATE_KEY)
     return PRIVATE_KEY;
   } catch (error) {
     return false
@@ -116,7 +114,6 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
   try {
 
     const signer = privateKeyToAccount(PRIVATE_KEY)
-    console.log("EOA Account Signer-->", signer)
     // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
@@ -133,7 +130,6 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
       kernelVersion: KERNEL_V3_1,
     })
 
-    console.log("Smart Account Address:", account.address)
 
     const kernelClient = createKernelAccountClient({
       account,
@@ -190,7 +186,6 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
       }
     }
     let signer = getAccount?.signer
-    console.log("EOA Account Signer-->", signer)
     // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
@@ -207,7 +202,6 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
       kernelVersion: KERNEL_V3_1,
     })
 
-    console.log("Smart Account Address:", account.address, address)
     if (address != account.address) {
       return {
         status: false,
