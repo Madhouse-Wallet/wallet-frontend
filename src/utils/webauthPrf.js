@@ -116,7 +116,7 @@ export const registerCredential = async (username, displayName) => {
                     { type: "public-key", alg: -7 }, // ES256
                     { type: "public-key", alg: -257 } // RS256
                 ],
-                timeout: 60000,
+                //timeout: 60000,
                 // authenticatorSelection: {
                 //     userVerification: "preferred",
                 //     authenticatorAttachment: "platform", // Use platform authenticator if available
