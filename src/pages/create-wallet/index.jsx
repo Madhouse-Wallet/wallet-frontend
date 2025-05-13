@@ -187,7 +187,7 @@ const CreateWallet = () => {
       }
       const createWallet = await setupNewAccount(addressPhrase)
       if (!createWallet?.status) {
-        toast.error(msg);
+        toast.error(createWallet?.msg);
         return false;
       } else {
         let { privatekey, address, account, trxn } = createWallet?.data
@@ -337,12 +337,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        console.log("OTP-->", OTP);
+        // console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        return true;
+        // return true;
         let obj = {
           email: data.email,
           name: data.username,

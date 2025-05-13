@@ -60,9 +60,9 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
                         {keyIcn}
                       </div>
                       <div className="content">
-                        <h4 className="m-0 font-bold text-xl">Key 1</h4>
+                        <h4 className="m-0 font-bold text-xl">Key {key + 1}</h4>
                         <p className="text-center text-sm font-medium opacity-50 md:text-xs">
-                          This device
+                          {item.name}
                         </p>
                       </div>
                     </div>

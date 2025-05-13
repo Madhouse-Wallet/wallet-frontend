@@ -79,6 +79,7 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (privateKey && wif) {
+        console.log("privateKey-->",address, privateKey, wif)
         let recoverAccount = await doAccountRecovery(privateKey, address);
         if (recoverAccount && recoverAccount.status) {
           let userExist = await getUserToken(email);
@@ -203,7 +204,7 @@ const RecoverWallet = () => {
                 <div className="py-2">
                   <input
                     type="text"
-                    name=""
+                    name="email"
                     onChange={(e) => setEmail(e.target.value)}
                     value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
@@ -224,23 +225,11 @@ const RecoverWallet = () => {
             </>
           ) : step == 2 ? (
             <>
-              <form action="">
-                {/* <div className="py-2">
-                  <textarea
-                    name=""
-                    value={phrase}
-                    onChange={(e) => setPhrase(e.target.value)}
-                    rows={5}
-                    id=""
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11`}
-                    placeholder="Enter Recovery Phrase"
-                  ></textarea>
-
-                </div> */}
+              
                 <div className="py-2">
                   <input
                     type="text"
-                    name=""
+                    name="privatekey"
                     onChange={(e) => setPrivateKey(e.target.value)}
                     value={privateKey}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
@@ -250,7 +239,7 @@ const RecoverWallet = () => {
                 <div className="py-2">
                   <input
                     type="text"
-                    name=""
+                    name="wif"
                     onChange={(e) => setWif(e.target.value)}
                     value={wif}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
@@ -268,7 +257,6 @@ const RecoverWallet = () => {
                     {loadingNewSigner ? "Please Wait ..." : "Next"}
                   </button>
                 </div>
-              </form>
             </>
           ) : step == 3 ? (
             <>

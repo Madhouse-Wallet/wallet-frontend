@@ -104,6 +104,7 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
       signer
     }
   } catch (error) {
+    console.log("error-->", error)
     return {
       status: false,
       msg: "Invalid Private Key!"
@@ -206,46 +207,17 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
       kernelVersion: KERNEL_V3_1,
     })
 
-    console.log("Smart Account Address:", account.address)
+    console.log("Smart Account Address:", account.address, address)
     if (address != account.address) {
       return {
         status: false,
         msg: "Invalid Private Key!"
       }
-    }
-
-    const kernelClient = createKernelAccountClient({
-      account,
-      chain: CHAIN,
-      bundlerTransport: http(BUNDLER_URL),
-      client: publicClient,
-      paymaster: {
-        getPaymasterData(userOperation) {
-          return paymasterClient.sponsorUserOperation({ userOperation });
-        },
-      },
-      userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient);
-        },
-      },
-    });
-
-    let trxnZero = await zeroTrxn(kernelClient)
-    if (trxnZero?.status) {
+    } else {
       return {
         status: true,
         data: {
-          privatekey: PRIVATE_KEY,
-          address: account.address,
-          account: account,
-          trxn: trxnZero.data
         }
-      }
-    } else {
-      return {
-        status: false,
-        msg: "Error In Zero Trxn!"
       }
     }
   } catch (error) {
