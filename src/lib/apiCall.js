@@ -24,6 +24,35 @@ export const getUser = async (email) => {
   }
 };
 
+
+
+
+export const getUserToken = async (email) => {
+  try {
+    try {
+      return await fetch(`/api/get-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          token: true
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 //
 export const getLnbitId = async (email) => {
   try {

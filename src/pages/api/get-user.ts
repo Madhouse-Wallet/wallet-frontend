@@ -5,9 +5,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
- 
+
     try {
-        const { email, type = "", webAuthKey = "", ensName = "" } = req.body;
+        const { email, type = "", webAuthKey = "", ensName = "", token = false } = req.body;
         // Connect to the database
         const db = (await client.connect()).db(); // Defaults to the database in the connection string
         const usersCollection = db.collection('users'); // Use 'users' collection
@@ -54,9 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const usersCollection = db.collection('users'); // Use 'users' collection
 
             // Check if the email already exists
+
             const existingUser = await usersCollection.findOne(
                 { email: { $regex: new RegExp(`^${email}$`, 'i') } },
-                { projection: { coinosToken: 0, flowTokens: 0, boltzAutoReverseSwap: 0, boltzAutoReverseSwap_2: 0 } }
+                { projection: { coinosToken: token ? 1 : 0, flowTokens: 0, boltzAutoReverseSwap: 0, boltzAutoReverseSwap_2: 0 } }
             );
             if (existingUser) {
                 //   return res.status(400).json({ error: 'Email already exists' });
