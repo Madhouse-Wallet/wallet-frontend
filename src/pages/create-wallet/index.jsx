@@ -224,7 +224,7 @@ const CreateWallet = () => {
         let storageKeySecret = "";
         let credentialIdSecret = "";
         let storeData = await setSecretInPasskey(
-          registerData.email + "_secret_1",
+          registerData.email + "_passkey_1",
           JSON.stringify(secretObj)
         );
         if (storeData.status) {
@@ -238,7 +238,7 @@ const CreateWallet = () => {
             registerData.email,
             registerData.username,
             [{
-              name: registerData.email + "_secret_1",
+              name: registerData.email + "_passkey_1",
               storageKeySecret,
               credentialIdSecret
             }],
@@ -258,7 +258,7 @@ const CreateWallet = () => {
               username: registerData.username,
               email: registerData.email,
               webauthKey: JSON.stringify({
-                name: registerData.email + "_secret_1",
+                name: registerData.email + "_passkey_1",
                 storageKeySecret,
                 credentialIdSecret
               }),
@@ -275,7 +275,7 @@ const CreateWallet = () => {
               username: registerData.username,
               email: registerData.email,
               webauthKey: {
-                name: registerData.email + "_secret_1",
+                name: registerData.email + "_passkey_1",
                 storageKeySecret,
                 credentialIdSecret
               },
