@@ -6,6 +6,8 @@ import { fetchWalletHistory } from "../../lib/utils";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import InternalTab from "./InternalTab";
 import moment from "moment";
+import BitcoinTransactionsTab from "./BitcoinTransaction";
+// import LnbitsTransaction from "./LnbitsTransaction";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -57,8 +59,8 @@ const RecentTransaction = () => {
           tx.receipt_status === "1"
             ? "confirmed"
             : tx.receipt_status === "0"
-              ? "rejected"
-              : "pending",
+            ? "rejected"
+            : "pending",
         amount: amount ? `${amount} ${currency}` : "",
         type: tx?.category,
         summary:
@@ -199,10 +201,10 @@ const RecentTransaction = () => {
                                   {tx.isRedemption
                                     ? "Redemption"
                                     : tx.isDeposit
-                                      ? "Deposit"
-                                      : tx.type === "token send"
-                                        ? "Send"
-                                        : "Receive"}{" "}
+                                    ? "Deposit"
+                                    : tx.type === "token send"
+                                    ? "Send"
+                                    : "Receive"}{" "}
                                   {tx.amount?.split(" ")[1] || "ETH"}
                                 </h4>
                                 <p
@@ -246,7 +248,9 @@ const RecentTransaction = () => {
         </>
       ),
     },
-    { title: "BTC Bridge Transactions", component: <InternalTab /> },
+    { title: "BTC Transactions", component: <BitcoinTransactionsTab /> },
+    // { title: "LNBITS Transactions", component: <LnbitsTransaction /> },
+    // { title: "BTC Bridge Transactions", component: <InternalTab /> },
   ];
 
   return (

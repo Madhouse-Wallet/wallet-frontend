@@ -49,6 +49,7 @@ const Setting: React.FC = () => {
   const [lnbitLink, setLnbitLink] = useState("");
   const [lnbitLink2, setLnbitLink2] = useState("");
   const [adminId, setAdminId] = useState<any>("");
+  
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
