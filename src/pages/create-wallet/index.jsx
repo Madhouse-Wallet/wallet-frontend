@@ -257,11 +257,11 @@ const CreateWallet = () => {
               signer: "",
               username: registerData.username,
               email: registerData.email,
-              webauthKey: [{
+              webauthKey: JSON.stringify({
                 name: registerData.email + "_secret_1",
                 storageKeySecret,
                 credentialIdSecret
-              }],
+              }),
               id: data.userData._id,
               totalPasskey: 1
             })
@@ -274,11 +274,11 @@ const CreateWallet = () => {
               signer: "",
               username: registerData.username,
               email: registerData.email,
-              webauthKey: JSON.stringify({
+              webauthKey: {
                 name: registerData.email + "_secret_1",
                 storageKeySecret,
                 credentialIdSecret
-              }),
+              },
               id: data.userData._id,
               totalPasskey: 1
             },
