@@ -1,20 +1,10 @@
 "use client";
 import { zeroAddress } from "viem";
-import {
-  createWeightedKernelAccountClient,
-  createWeightedValidator,
-  toWebAuthnSigner,
-  getRecoveryFallbackActionInstallModuleData,
-} from "@zerodev/weighted-validator";
-import {
-  createWeightedECDSAValidator,
-  getRecoveryAction
-} from "@zerodev/weighted-ecdsa-validator";
+
+
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
 
 import { toFunctionSelector } from "viem";
-
-import { delay } from "../utils/globals";
 
 import {
   createKernelAccount,
@@ -22,22 +12,13 @@ import {
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
 } from "@zerodev/sdk";
-import { getValidatorPluginInstallModuleData } from "@zerodev/sdk";
-import {
-  PasskeyValidatorContractVersion,
-  WebAuthnMode,
-  toPasskeyValidator,
-  toWebAuthnKey,
-} from "@zerodev/passkey-validator";
+
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { ethers } from "ethers";
-import { createPublicClient, http, parseAbi, encodeFunctionData } from "viem";
+import { createPublicClient, http  } from "viem";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
-import { mnemonicToAccount } from "viem/accounts";
-import { english, generateMnemonic } from "viem/accounts";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { sign } from "crypto";
 
 
 const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
@@ -53,7 +34,6 @@ const CHAIN =
 const entryPoint = getEntryPoint("0.7");
 const recoveryExecutorFunction =
   "function doRecovery(address _validator, bytes calldata _data)";
-const recoveryExecutorSelector = toFunctionSelector(recoveryExecutorFunction);
 
 const paymasterClient = createZeroDevPaymasterClient({
   chain: CHAIN,
