@@ -5,17 +5,15 @@ import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import RecoverPopup from "@/components/Modals/RecoverPopup";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import {  multisigSetup } from "@/lib/zeroDevWallet";
-import {
-  retrieveSecret,
-} from "../../utils/webauthPrf";
+import { multisigSetup } from "@/lib/zeroDevWallet";
+import { retrieveSecret } from "../../utils/webauthPrf";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -48,6 +46,8 @@ const Setting: React.FC = () => {
   const [confirm, setConfirm] = useState<boolean>(false);
   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
   const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const [lnbitLink, setLnbitLink] = useState("");
+  const [lnbitLink2, setLnbitLink2] = useState("");
   const [adminId, setAdminId] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
@@ -157,8 +157,7 @@ const Setting: React.FC = () => {
       } else {
         toast.error(result.msg);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
@@ -203,13 +202,11 @@ const Setting: React.FC = () => {
           //   status: true,
           //   secret: callGetSecretData?.secret
           // }
-          console.log(JSON.parse(callGetSecretData?.secret))
+          console.log(JSON.parse(callGetSecretData?.secret));
           setRecoverSeed(JSON.parse(callGetSecretData?.secret));
           let adminKey = await getLnbitId(userAuth.email);
-          if (
-            adminKey?.adminId
-          ) {
-            setAdminId(adminKey?.adminId)
+          if (adminKey?.adminId) {
+            setAdminId(adminKey?.adminId);
           }
           setRecoverSeedStatus(true);
         } else {
@@ -239,9 +236,14 @@ const Setting: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
-  //   getPreview(); // Call the function
-  // }, []);
+  useEffect(() => {
+    const data = async () => {
+      let userExist = await getUser(userAuth.email);
+      setLnbitLink(userExist?.userId?.lnbitLinkId || "");
+      setLnbitLink2(userExist?.userId?.lnbitLinkId_2 || "");
+    };
+    data();
+  }, []);
 
   const accordionTabs = [
     {
@@ -418,7 +420,6 @@ const Setting: React.FC = () => {
   ];
   const [activeTab, setActiveTab] = useState(1);
   const showTab = (tab: number) => {
-
     setActiveTab(tab);
   };
   const router = useRouter();
@@ -655,6 +656,28 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          TPOS ID 1:
+                        </div>
+                        <span className="text-white flex items-center">
+                          {lnbitLink ? lnbitLink : "--"}
+                        </span>
+                      </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          TPOS ID 2:
+                        </div>
+                        <span className="text-white flex items-center">
+                          {lnbitLink2 ? lnbitLink2 : "--"}
+                        </span>
+                      </li>
                       {/* <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
@@ -753,8 +776,9 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${selectedBackground === bg ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedBackground === bg ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -816,8 +840,9 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${selectedWatermark === wm ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedWatermark === wm ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
