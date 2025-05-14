@@ -7,7 +7,6 @@ import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import InternalTab from "./InternalTab";
 import moment from "moment";
 import BitcoinTransactionsTab from "./BitcoinTransaction";
-// import LnbitsTransaction from "./LnbitsTransaction";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -249,7 +248,6 @@ const RecentTransaction = () => {
       ),
     },
     { title: "BTC Transactions", component: <BitcoinTransactionsTab /> },
-    // { title: "LNBITS Transactions", component: <LnbitsTransaction /> },
     // { title: "BTC Bridge Transactions", component: <InternalTab /> },
   ];
 
