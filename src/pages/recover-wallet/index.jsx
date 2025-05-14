@@ -79,7 +79,7 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (privateKey && wif) {
-        console.log("privateKey-->",address, privateKey, wif)
+        console.log("privateKey-->", address, privateKey, wif)
         let recoverAccount = await doAccountRecovery(privateKey, address);
         if (recoverAccount && recoverAccount.status) {
           let userExist = await getUserToken(email);
@@ -96,7 +96,7 @@ const RecoverWallet = () => {
             let storageKeySecret = storeData?.storageKey;
             let credentialIdSecret = storeData?.credentialId;
             let data = await updtUser(
-              { email },
+              { email: { $regex: new RegExp(`^${email}$`, 'i') } },
               {
                 $push: {
                   passkey:
@@ -153,7 +153,7 @@ const RecoverWallet = () => {
             checkAccount.newwebAuthKey
           );
           let data = await updtUser(
-            { email: userExist?.userId?.email },
+            { email: { $regex: new RegExp(`^${userExist?.userId?.email}$`, 'i') } },
             {
               $push: { passkey: webAuthKeyStringObj },
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
@@ -225,38 +225,38 @@ const RecoverWallet = () => {
             </>
           ) : step == 2 ? (
             <>
-              
-                <div className="py-2">
-                  <input
-                    type="text"
-                    name="privatekey"
-                    onChange={(e) => setPrivateKey(e.target.value)}
-                    value={privateKey}
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
-                    placeholder="Enter Private Key"
-                  />
-                </div>
-                <div className="py-2">
-                  <input
-                    type="text"
-                    name="wif"
-                    onChange={(e) => setWif(e.target.value)}
-                    value={wif}
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
-                    placeholder="Enter wif"
-                  />
-                </div>
-                <div className="btnWrpper mt-3 text-center">
-                  <button
-                    type="button"
-                    disabled={loadingNewSigner}
-                    // onClick={checkPhrase}
-                    onClick={checkPhrase}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    {loadingNewSigner ? "Please Wait ..." : "Next"}
-                  </button>
-                </div>
+
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="privatekey"
+                  onChange={(e) => setPrivateKey(e.target.value)}
+                  value={privateKey}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter Private Key"
+                />
+              </div>
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="wif"
+                  onChange={(e) => setWif(e.target.value)}
+                  value={wif}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter wif"
+                />
+              </div>
+              <div className="btnWrpper mt-3 text-center">
+                <button
+                  type="button"
+                  disabled={loadingNewSigner}
+                  // onClick={checkPhrase}
+                  onClick={checkPhrase}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  {loadingNewSigner ? "Please Wait ..." : "Next"}
+                </button>
+              </div>
             </>
           ) : step == 3 ? (
             <>
