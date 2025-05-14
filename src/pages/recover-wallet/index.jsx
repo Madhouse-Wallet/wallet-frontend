@@ -88,7 +88,7 @@ const RecoverWallet = () => {
             seedPhrase: privateKey,
           };
           let storeData = await setSecretInPasskey(
-            email + "_secret_" + (userExist?.userId?.totalPasskey + 1),
+            email + "_passkey_" + (userExist?.userId?.totalPasskey + 1),
             JSON.stringify(secretObj)
           );
           if (storeData.status) {
@@ -101,7 +101,7 @@ const RecoverWallet = () => {
                   $push: {
                     passkey:
                     {
-                      name: (email + "_secret_" + (userExist?.userId?.totalPasskey + 1)),
+                      name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
                       storageKeySecret,
                       credentialIdSecret
                     }
