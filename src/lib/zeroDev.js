@@ -224,3 +224,78 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
 }
 
 
+
+export const getProvider = async (kernelClient) => {
+  try {
+    const kernelProvider = new KernelEIP1193Provider(kernelClient);
+    const ethersProvider = new ethers.providers.Web3Provider(kernelProvider);
+    const signer = await ethersProvider.getSigner();
+    return { kernelProvider, ethersProvider, signer };
+  } catch (error) {
+    console.log("provider error-->",error)
+    return false;
+  }
+};
+
+export const getAccount = async (PRIVATE_KEY) => {
+  try {
+    const signer = privateKeyToAccount(PRIVATE_KEY)
+    // Create ECDSA validator
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer,
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
+
+    // Create Kernel Smart Account
+    const account = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
+
+
+    const kernelClient = createKernelAccountClient({
+      account,
+      chain: CHAIN,
+      bundlerTransport: http(BUNDLER_URL),
+      client: publicClient,
+      paymaster: {
+        getPaymasterData(userOperation) {
+          return paymasterClient.sponsorUserOperation({ userOperation });
+        },
+      },
+      userOperation: {
+        estimateFeesPerGas: async ({ bundlerClient }) => {
+          return getUserOperationGasPrice(bundlerClient);
+        },
+      },
+    });
+    if (!getAccount) {
+      return {
+        status: false,
+        msg: "No Account Found!",
+      };
+    }
+    return {
+      status: true,
+      account: account,
+      kernelClient: kernelClient,
+      address: account.address,
+    };
+  } catch (error) {
+    return { status: false, msg: "Please Try again ALter!" };
+  }
+};
+
+
+export const getRpcProvider = async () => {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider("https://mainnet.base.org");
+    return provider;
+  } catch (error) {
+    return false;
+  }
+};
