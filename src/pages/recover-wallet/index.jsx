@@ -79,7 +79,6 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (privateKey && wif) {
-        console.log("privateKey-->", address, privateKey, wif)
         let recoverAccount = await doAccountRecovery(privateKey, address);
         if (recoverAccount && recoverAccount.status) {
           let userExist = await getUserToken(email);
@@ -95,20 +94,25 @@ const RecoverWallet = () => {
           if (storeData.status) {
             let storageKeySecret = storeData?.storageKey;
             let credentialIdSecret = storeData?.credentialId;
-            let data = await updtUser(
-              { email: { $regex: new RegExp(`^${email}$`, 'i') } },
-              {
-                $push: {
-                  passkey:
-                  {
-                    name: (email + "_secret_" + (userExist?.userId?.totalPasskey + 1)),
-                    storageKeySecret,
-                    credentialIdSecret
-                  }
-                },
-                $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
-              }
-            );
+            try {
+              let data = await updtUser(
+                { email: userExist?.userId?.email},
+                {
+                  $push: {
+                    passkey:
+                    {
+                      name: (email + "_secret_" + (userExist?.userId?.totalPasskey + 1)),
+                      storageKeySecret,
+                      credentialIdSecret
+                    }
+                  },
+                  $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
+                }
+              );
+            } catch (error) {
+              console.log("updtuser error-->",error)
+            }
+          
             toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
