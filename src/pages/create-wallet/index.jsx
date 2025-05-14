@@ -37,6 +37,9 @@ const CreateWallet = () => {
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
   const [addressPhrase, setAddressPhrase] = useState("");
+  const [addressWif, setAddressWif] = useState("");
+  const [bitcoinWallet, setBitcoinWallet] = useState("");
+  
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -212,15 +215,12 @@ const CreateWallet = () => {
           token1
         );
         let getWallet = await getBitcoinAddress();
-        let bitcoinWallet = "";
-        if (getWallet.status && getWallet.status == "success") {
-          bitcoinWallet = getWallet?.data?.wallet || "";
-        }
         let secretObj = {
           coinosToken: registerCoinos?.token || "",
           wif: getWallet?.data?.wif || "",
           seedPhrase: addressPhrase,
         };
+       
         let storageKeySecret = "";
         let credentialIdSecret = "";
         let storeData = await setSecretInPasskey(
@@ -313,9 +313,15 @@ const CreateWallet = () => {
           toast.error("User Already Exist!");
           return false;
         }
+        let getWallet = await getBitcoinAddress();
+        if (getWallet.status && getWallet.status == "success") {
+          setBitcoinWallet(getWallet?.data?.wallet || "")
+
+        }
         let phrase = await getPrivateKey();
         if (phrase) {
           setAddressPhrase(phrase);
+          setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
           toast.error("Try Again After some time!!");
@@ -417,6 +423,7 @@ const CreateWallet = () => {
           <WalletBackup
             handleCopy={handleCopy}
             addressPhrase={addressPhrase}
+            addressWif={addressWif}
             step={step}
             setStep={setStep}
           />

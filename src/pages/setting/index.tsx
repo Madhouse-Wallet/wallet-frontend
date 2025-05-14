@@ -49,6 +49,8 @@ const Setting: React.FC = () => {
   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
   const [recoverSeed, setRecoverSeed] = useState<any>("");
   const [adminId, setAdminId] = useState<any>("");
+  const [tposId1, setTposId1] = useState<any>("");
+  const [tposId2, setTposId2] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -57,6 +59,27 @@ const Setting: React.FC = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+useEffect(()=>{
+  const getAdminId = async()=>{
+    let adminKey = await getLnbitId(userAuth.email);
+    if (
+      adminKey?.adminId
+    ) {
+      setAdminId(adminKey?.adminId)
+    }
+  }
+  const getUserData = async()=>{
+    let userExist = await getUser(userAuth.email);
+    setTposId1(userExist?.userId?.lnbitLinkId || "")
+    setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
+  }
+  if(userAuth.email){
+    getAdminId();
+    getUserData();
+  }
+},[])
+
   const getPreview = async () => {
     try {
       console.log("email");
@@ -644,6 +667,69 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
+                      {
+                        // tposId1 tposId2
+                        <>
+                          <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Tpos ID 1:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {tposId1 ? tposId1: "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          Tpos ID 2:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {tposId2 ? tposId2: "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                        </>
+                      }
+                      {
+                        // `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`
+
+                        <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          lndhub:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {adminId ?
+                          (
+                            <>
+                              {splitAddress( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
+                              <button
+                                onClick={() =>
+                                  handleCopy( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          )
+                          
+                          : "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      }
                       {/* <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"

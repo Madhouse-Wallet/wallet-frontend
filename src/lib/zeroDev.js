@@ -1,21 +1,23 @@
 "use client";
-import { zeroAddress } from "viem";
+import { parseEther, zeroAddress } from "viem";
 
 
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
 
-import { toFunctionSelector } from "viem";
+
 
 import {
   createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
+  gasTokenAddresses,
+  getERC20PaymasterApproveCall
 } from "@zerodev/sdk";
 
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
 import { ethers } from "ethers";
-import { createPublicClient, http  } from "viem";
+import { createPublicClient, http } from "viem";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
@@ -110,7 +112,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
       kernelVersion: KERNEL_V3_1,
     })
 
-
+console.log("account-->",account)
     const kernelClient = createKernelAccountClient({
       account,
       chain: CHAIN,
@@ -212,15 +214,18 @@ export const getProvider = async (kernelClient) => {
     const signer = await ethersProvider.getSigner();
     return { kernelProvider, ethersProvider, signer };
   } catch (error) {
-    console.log("provider error-->",error)
+    console.log("provider error-->", error)
     return false;
   }
 };
+
 
 export const getAccount = async (PRIVATE_KEY) => {
   try {
     const signer = privateKeyToAccount(PRIVATE_KEY)
     // Create ECDSA validator
+
+    // Create Circle Paymaster Client
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
       entryPoint,
@@ -242,17 +247,39 @@ export const getAccount = async (PRIVATE_KEY) => {
       chain: CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
-      paymaster: {
-        getPaymasterData(userOperation) {
-          return paymasterClient.sponsorUserOperation({ userOperation });
-        },
-      },
-      userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient);
-        },
+      paymaster: paymasterClient,
+      paymasterContext: {
+        token: gasTokenAddresses[CHAIN.id]["USDC"],
       },
     });
+
+
+
+    // Approve USDC for the paymaster (ensure that the account has enough USDC)
+    const userOpHash = await kernelClient.sendUserOperation({
+      callData: await account.encodeCalls([
+        await getERC20PaymasterApproveCall(paymasterClient, {
+          gasToken: gasTokenAddresses[CHAIN.id]["USDC"],
+          approveAmount: parseEther('1'),
+          entryPoint,
+        }),
+        {
+          to: zeroAddress,
+          value: BigInt(0),
+          data: "0x",
+        },
+      ]),
+    });
+
+    console.log("UserOp hash:", userOpHash);
+
+    // Wait for the receipt of the user operation
+    const receipt = await kernelClient.waitForUserOperationReceipt({
+      hash: userOpHash,
+    });
+
+    console.log("UserOp completed", receipt.receipt.transactionHash);
+
     if (!getAccount) {
       return {
         status: false,
@@ -266,7 +293,8 @@ export const getAccount = async (PRIVATE_KEY) => {
       address: account.address,
     };
   } catch (error) {
-    return { status: false, msg: "Please Try again ALter!" };
+    console.log("error-->",error)
+    return { status: false, msg: error?.message || "Please Try again ALter!" };
   }
 };
 

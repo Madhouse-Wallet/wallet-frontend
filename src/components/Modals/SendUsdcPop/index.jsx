@@ -60,15 +60,9 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       toast.error(retrieveSecretCheck?.msg);
       return;
     }
-    //  else {
-    // return {
-    //   status: true,
-    //   secret: retrieveSecretCheck?.data?.secret,
-    // };
-    // }
+   
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
-    // console.log("retrieveSecretCheck?.data?.secret-->",retrieveSecretCheck?.data?.secret?.seedPhrase)
-    // return ;
+    
     setIsLoading(true);
     try {
       let getAccountCli = await getAccount(secretData?.seedPhrase)
@@ -100,30 +94,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       setIsLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   const connectWallet = async () => {
-  //     if (userAuth?.passkeyCred) {
-  //       console.log("userAuth?.passkeyCred-->", userAuth?.passkeyCred)
-  //       try {
-  //         let account = await getAccount(userAuth?.passkeyCred);
-  //         if (account) {
-  //           let provider = await getProvider(account.kernelClient);
-  //           if (provider) {
-  //             setProviderr(provider?.ethersProvider);
-  //           } else {
-  //             throw new Error("Provider not detected");
-  //           }
-  //         }
-  //       } catch (error) {
-  //         console.error("Wallet connection error:", error);
-  //         toast.error("Failed to connect wallet. Please try again.");
-  //       }
-  //     }
-  //   };
-
-  // connectWallet();
-  // }, [userAuth?.passkeyCred]);
+ 
 
   useEffect(() => {
     if (userAuth?.walletAddress) {
