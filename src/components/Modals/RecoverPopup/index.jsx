@@ -57,45 +57,93 @@ const RecoverPopup = ({
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
-        >
+        > 
           {step == 1 ? <>
-            <div className="grid gap-3 grid-cols-12 pt-1">
+            <div className="mx-auto max-w-sm">
+        <div className="top pb-3">
+          <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
+            <div className="flex flex-col items-center gap-1 px-4">
+              <h1 className="text-center text-base font-medium  m-0">
+                Wallet Secrets 
+              </h1>
+              <p className="text-center text-sm font-medium opacity-50 md:text-xs">
+                Save This Private Key
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="formBody pt-4 text-xs">
+          <div className="grid gap-3 grid-cols-12">
+            {phraseStatus && phrase?.seedPhrase &&
               <div className="col-span-12">
+                <input
+                  readOnly={true}
+                  value={phrase?.seedPhrase}
+                  type="text"
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+                />
+              </div>}
+            <div className="col-span-12">
+              <div className="text-center my-3">
                 <button
-                  onClick={() => setStep(2)}
-                  // onClick={() => {
-                  //   setReceiveUSDC(!receiveUsdc),
-                  //     setBtcExchange(!btcExchange);
-                  // }}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  onClick={() => handleCopy(phrase?.seedPhrase || "")}
+                  // type="submit"
+                  className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  Madhouse Wallet Seed Phrase
+                  <span className="icn">{copyIcn}</span> Copy to clipboard
                 </button>
               </div>
-              <div className="col-span-12">
-                <button
-                  onClick={() => setStep(3)}
-                  // onClick={() => setTokenReceive(!tokenReceive)}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Bitcoin wallet Wif                </button>
-              </div>
-              {/* <div className="col-span-12">
-                <button
-                  onClick={() => setStep(4)}
-                  // onClick={() => setTokenReceive(!tokenReceive)}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  LndHub Url            </button>
-              </div> */}
             </div>
+
+          </div>
+          <div>
+              <p className="text-center mb-2 text-sm font-medium opacity-50 md:text-xs">
+                Save This Bitcoin Wallet Wif
+              </p>
+            </div>
+          <div className="grid gap-3 grid-cols-12">
+           
+            {phrase?.wif  &&
+              <div className="col-span-12">
+                <input
+                  readOnly={true}
+                  value={phrase?.wif}
+                  type="text"
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+                />
+              </div>}
+            <div className="col-span-12">
+              <div className="text-center my-3">
+                <button
+                  onClick={() => handleCopy(phrase?.wif)}
+                  // type="submit"
+                  className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  <span className="icn">{copyIcn}</span> Copy to clipboard
+                </button>
+              </div>
+            </div>
+            <div className="col-span-12">
+              <div className="btnWrpper text-center mt-3">
+                <button
+                  onClick={() =>handleAdjustPop()}
+                  // type="submit"
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> 
           </> : step == 2? <>
             <div className="mx-auto max-w-sm">
               <div className="top pb-3">
                 <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
                   <div className="flex flex-col items-center gap-1 px-4">
                     <h1 className="text-center text-base font-medium  m-0">
-                      Back Up Your Wallet
+                      Wallet Secrets 
                     </h1>
                     <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                       Save This 12 Phase Key recovery
