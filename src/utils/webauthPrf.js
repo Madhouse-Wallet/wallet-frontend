@@ -106,7 +106,7 @@ export const registerCredential = async (username, displayName) => {
     try {
         const credentialCreationOptions = {
             publicKey: {
-                rp: { name: "WebAuthn PRF Demo" },
+                rp: { name: "Madhouse Wallet" },
                 user: {
                     id: generateUserId(),
                     name: username,
@@ -117,12 +117,7 @@ export const registerCredential = async (username, displayName) => {
                     { type: "public-key", alg: -257 } // RS256
                 ],
                 timeout: 60000,
-                // authenticatorSelection: {
-                //     userVerification: "preferred",
-                //     authenticatorAttachment: "platform", // Use platform authenticator if available
-                //     residentKey: "required",
-                //     requireResidentKey: true
-                // },
+  
                 authenticatorSelection: {
                     userVerification: "required",
                     residentKey: "required",           // Allow discoverable credentials
@@ -228,6 +223,62 @@ export const storeSecret = async (credentialIdBase, data) => {
         }
     }
 }
+
+export const verifyUser = async (credentialIdBase) => {
+
+    try {
+        // Get stored credential ID or use empty to try discoverable credentials
+        let credentialId;
+        const storedCredentialId = credentialIdBase;
+        if (storedCredentialId) {
+            credentialId = base64ToBuffer(storedCredentialId);
+        }
+
+        const authOptions = {
+            publicKey: {
+                timeout: 60000,
+                challenge: generateChallenge(),
+                allowCredentials: credentialId ? [
+                    {
+                        id: credentialId,
+                        type: 'public-key'
+                    }
+                ] : [],
+                userVerification: "required",
+                extensions: {
+                    prf: {
+                        eval: {
+                            first: {}
+                        }
+                    }
+                }
+            }
+        };
+
+        const assertion = await navigator.credentials.get(authOptions);
+        const extensionResults = assertion.getClientExtensionResults();
+        let res;
+        // Ensure PRF result is available
+        if (!extensionResults.prf || !extensionResults.prf.results || !extensionResults.prf.results.first) {
+            res = {
+                status: false,
+                msg: "PRF result not available"
+            }
+        } else {
+            res = {
+                status: true,
+                msg: "User verified successfully"
+            }
+        }
+    }catch (error) {
+        console.error('retrieveSecret error-->', error?.name, error);
+        return {
+            status: false,
+            msg: error.message
+        }
+    }
+}
+
 
 // Retrieve and decrypt a stored secret using WebAuthn PRF
 export const retrieveSecret = async (storageKey, credentialIdBase) => {
