@@ -1,58 +1,107 @@
-import React from "react";
-import {
-  fetchBitcoinTransactions,
-  formatBitcoinTransactions,
-} from "../../utils/bitcoinTransaction";
-import { useEffect, useState } from "react";
-import BitcoinTransactionDetail from "./BitcoinTransactionDetail";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import LnbitsTransactionDetail from "./LnbitsTransactionDetail";
 import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
 
-// Bitcoin Transactions Component
-const BitcoinTransactionsTab = ({ setTransactions }) => {
+// Bitcoin Transaction Component
+const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
+  console.log("walletIdd", walletIdd);
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // You may want to replace this with your actual BTC wallet address
-  // const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
-  const btcWalletAddress = userAuth?.bitcoinWallet;
+  const formatBitcoinTransactionData = (txs) => {
+    return txs.map((tx) => {
+      const amount = tx.amount; // Already in sats
+      const isSend = false; // Assume receive by default, adjust if your logic allows identifying send
+
+      return {
+        id: tx.checking_id,
+        transactionHash: tx.checking_id,
+        from: isSend ? userAuth?.walletAddress : "External",
+        to: isSend ? "External" : userAuth?.walletAddress,
+        date: moment(tx.time).format("MMMM D, YYYY h:mm A"),
+        status: tx.status,
+        amount: `${amount.toFixed(2)} sats`,
+        type: isSend ? "token send" : "token receive",
+        summary:
+          tx.memo ||
+          (isSend
+            ? `Sent ${amount.toFixed(2)} sats`
+            : `Received ${amount.toFixed(2)} sats`),
+        category: "payment",
+        rawData: tx,
+      };
+    });
+  };
+
+  const fetchBitcoinTransactions = async () => {
+    setLoading(true);
+    try {
+      if (usd === true) {
+        const response = await fetch("/api/lnbits-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletId: walletIdd,
+            // walletId: "47472a63d2364de2836f0f71c73bf034",
+          }),
+        });
+
+        const { status, data } = await response.json();
+        setTransactions(data);
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        }
+      } else {
+        const response = await fetch("/api/lnbits-transaction-bitcoin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletId: walletIdd,
+            // walletId: "47472a63d2364de2836f0f71c73bf034",
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching Bitcoin transactions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (userAuth?.btcWalletId && userAuth?.btcToken) {
+  //     fetchBitcoinTransactions();
+  //   }
+  // }, [userAuth?.btcWalletId, userAuth?.btcToken]);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!btcWalletAddress) return;
-
-      setLoading(true);
-      try {
-        const data = await fetchBitcoinTransactions(btcWalletAddress);
-        setTransactions(data?.txs);
-        const formattedTransactions = formatBitcoinTransactions(
-          data,
-          btcWalletAddress
-        );
-        setBtcTransactions(formattedTransactions);
-      } catch (err) {
-        console.error("Failed to fetch BTC transactions:", err);
-        setError("Failed to load transactions");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [btcWalletAddress]);
+    fetchBitcoinTransactions();
+  }, [usd]);
 
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case "confirmed":
+      case "success":
         return "text-green-500";
-      case "rejected":
+      case "failed":
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
@@ -64,10 +113,10 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
   // Get status text
   const getStatusText = (status) => {
     switch (status) {
-      case "confirmed":
+      case "success":
         return "Confirmed";
-      case "rejected":
-        return "Rejected";
+      case "failed":
+        return "Failed";
       case "pending":
         return "Pending";
       default:
@@ -127,51 +176,25 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
 
   const sendSvg = (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      id="icon-arrow-2-up-right"
+      viewBox="0 0 512 512"
+      height={20}
+      width={20}
     >
-      <path
-        d="M7 15L12 20L17 15"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 4V20"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="m137 107c0-12 10-22 22-22l225 0c12 0 21 10 21 22l0 225c0 12-9 21-21 21-12 0-21-9-21-21l0-174-241 241c-9 8-22 8-30 0-9-8-9-22 0-30l240-241-173 0c-12 0-22-10-22-21z" />
     </svg>
   );
 
   const receiveSvg = (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      id="icon-arrow-2-down-left"
+      viewBox="0 0 512 512"
+      height={20}
+      width={20}
     >
-      <path
-        d="M7 9L12 4L17 9"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 20V4"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="m375 405c0 12-10 22-22 22l-225 0c-12 0-21-10-21-22l0-225c0-12 9-21 21-21 12 0 21 9 21 21l0 174 241-241c9-8 22-8 30 0 9 8 9 22 0 30l-240 241 173 0c12 0 22 10 22 21z" />
     </svg>
   );
 
@@ -179,7 +202,7 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
     <>
       {detail &&
         createPortal(
-          <BitcoinTransactionDetail
+          <LnbitsTransactionDetail
             detail={detail}
             setDetail={setDetail}
             transactionData={transactionData}
@@ -187,14 +210,8 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
           document.body
         )}
       {loading ? (
-        <div className="flex justify-center items-center py-10">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="text-center py-10 text-red-500">
-          <p>{error}</p>
+        <div className="flex justify-center items-center p-10">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
         </div>
       ) : btcTransactions.length > 0 ? (
         <div className="bg-black/5 lg:p-4 rounded-lg p-3">
@@ -231,8 +248,8 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
                         </div>
                         <div className="right">
                           <p className="m-0 text-xs font-medium">
-                            {tx.status === "rejected"
-                              ? "Insufficient Balance"
+                            {tx.status === "failed"
+                              ? "Failed Transaction"
                               : `${tx.type === "token send" ? "-" : "+"} ${
                                   tx.amount
                                 }`}
@@ -262,4 +279,4 @@ const BitcoinTransactionsTab = ({ setTransactions }) => {
   );
 };
 
-export default BitcoinTransactionsTab;
+export default LnbitsTransaction;

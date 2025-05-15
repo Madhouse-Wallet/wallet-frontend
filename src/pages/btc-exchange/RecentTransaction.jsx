@@ -7,6 +7,9 @@ import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import InternalTab from "./InternalTab";
 import moment from "moment";
 import BitcoinTransactionsTab from "./BitcoinTransaction";
+import LnbitsTransaction from "./LnbitsTransaction";
+import { toast } from "react-toastify";
+import { getUser } from "../../lib/apiCall";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -15,6 +18,11 @@ const RecentTransaction = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
+  const [btcTransactions, setBtcTransactions] = useState([]);
+  const [lnbitsUsdTxs, setLnbitsUsdTxs] = useState([]);
+  const [lnbitsBtcTxs, setLnbitsBtcTxs] = useState([]);
+  const [lnbitWallet1, setLnbitWallet1] = useState("");
+  const [lnbitWallet2, setLnbitWallet2] = useState("");
 
   const [transactionType, setTransactionType] = useState("all");
 
@@ -74,7 +82,7 @@ const RecentTransaction = () => {
     try {
       setTransactionType("all");
       const data = await fetchWalletHistory(userAuth?.walletAddress);
-
+      setTransactions(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
           data.result.slice(0, 10)
@@ -247,9 +255,43 @@ const RecentTransaction = () => {
         </>
       ),
     },
-    { title: "BTC Transactions", component: <BitcoinTransactionsTab /> },
+    {
+      title: "BTC Transactions",
+      component: (
+        <BitcoinTransactionsTab setTransactions={setBtcTransactions} />
+      ),
+    },
+    {
+      title: "LNBITS Transactions USD",
+      component: (
+        <LnbitsTransaction
+          usd={true}
+          setTransactions={setLnbitsUsdTxs}
+          walletIdd={lnbitWallet1}
+        />
+      ),
+    },
+    {
+      title: "LNBITS Transactions Bitcoin",
+      component: (
+        <LnbitsTransaction
+          usd={false}
+          setTransactions={setLnbitsBtcTxs}
+          walletIdd={lnbitWallet2}
+        />
+      ),
+    },
     // { title: "BTC Bridge Transactions", component: <InternalTab /> },
   ];
+
+  useEffect(() => {
+    const data = async () => {
+      let userExist = await getUser(userAuth.email);
+      setLnbitWallet1(userExist?.userId?.lnbitWalletId || "");
+      setLnbitWallet2(userExist?.userId?.lnbitWalletId_2 || "");
+    };
+    data();
+  }, []);
 
   return (
     <>
@@ -266,28 +308,55 @@ const RecentTransaction = () => {
         <>
           <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
             <h4 className="m-0 text-xl">Recent Transaction</h4>
-            <div className="relative inline-block text-left">
+            <div className="flex gap-2 items-center">
               <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                  let dataToExport = [];
+
+                  if (activeTab === 0) dataToExport = transactions;
+                  else if (activeTab === 1) dataToExport = btcTransactions;
+                  else if (activeTab === 2) dataToExport = lnbitsUsdTxs;
+                  else if (activeTab === 3) dataToExport = lnbitsBtcTxs;
+
+                  if (dataToExport.length) {
+                    exportTransactionsToCSV(
+                      dataToExport,
+                      tabs[activeTab].title + ".csv"
+                    );
+                  } else {
+                    toast.error("No data available to export.");
+                  }
+                }}
                 className="px-4 py-2 bg-black/50 text-white rounded-md"
               >
-                Filters
+                Export CSV
               </button>
 
-              {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
-                  {tabs.map((item, key) => (
-                    <button
-                      key={key}
-                      onClick={() => setActiveTab(key)}
-                      // href="#"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      {item.title}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div className="relative inline-block text-left">
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="px-4 py-2 bg-black/50 text-white rounded-md"
+                >
+                  Filters
+                </button>
+
+                {isOpen && (
+                  <div className="absolute right-0 mt-2 w-[200px] bg-white border rounded-md shadow-lg">
+                    {tabs.map((item, key) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setActiveTab(key);
+                          setIsOpen(false);
+                        }}
+                        className="block px-4 text-xs py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                      >
+                        {item.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="py-2">
@@ -313,6 +382,29 @@ const RecentTransaction = () => {
 };
 
 export default RecentTransaction;
+
+const exportTransactionsToCSV = (data, fileName = "transactions.csv") => {
+  if (!data?.length) return;
+
+  const headers = Object.keys(data[0]);
+  const rows = data.map((row) =>
+    headers.map((header) =>
+      typeof row[header] === "string" ? `"${row[header]}"` : row[header]
+    )
+  );
+
+  const csvContent =
+    "data:text/csv;charset=utf-8," +
+    [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 const sendSvg = (
   <svg
