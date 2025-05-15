@@ -13,7 +13,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
 import { multisigSetup } from "@/lib/zeroDevWallet";
-import { retrieveSecret } from "../../utils/webauthPrf";
+import {
+  retrieveSecret,
+} from "../../utils/webauthPrf";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -38,7 +40,6 @@ const Setting: React.FC = () => {
   } = useBackground();
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
-  console.log("line-41", userAuth);
   const [setUp, setSetUp] = useState<boolean>(false);
   const [recover, setRecover] = useState<boolean>(false);
   const [ensDomain, setEnsDomain] = useState<boolean>(false);
@@ -50,7 +51,8 @@ const Setting: React.FC = () => {
   const [lnbitLink, setLnbitLink] = useState("");
   const [lnbitLink2, setLnbitLink2] = useState("");
   const [adminId, setAdminId] = useState<any>("");
-
+  const [tposId1, setTposId1] = useState<any>("");
+  const [tposId2, setTposId2] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -59,6 +61,27 @@ const Setting: React.FC = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+useEffect(()=>{
+  const getAdminId = async()=>{
+    let adminKey = await getLnbitId(userAuth.email);
+    if (
+      adminKey?.adminId
+    ) {
+      setAdminId(adminKey?.adminId)
+    }
+  }
+  const getUserData = async()=>{
+    let userExist = await getUser(userAuth.email);
+    setTposId1(userExist?.userId?.lnbitLinkId || "")
+    setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
+  }
+  if(userAuth.email){
+    getAdminId();
+    getUserData();
+  }
+},[])
+
   const getPreview = async () => {
     try {
       console.log("email");
@@ -190,44 +213,35 @@ const Setting: React.FC = () => {
   // settingindex.tsx
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = (await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        )) as any;
-        if (callGetSecretData?.status) {
-          // return {
-          //   status: true,
-          //   secret: callGetSecretData?.secret
-          // }
-          console.log(JSON.parse(callGetSecretData?.secret));
-          setRecoverSeed(JSON.parse(callGetSecretData?.secret));
-          let adminKey = await getLnbitId(userAuth.email);
-          if (adminKey?.adminId) {
-            setAdminId(adminKey?.adminId);
-          }
-          setRecoverSeedStatus(true);
-        } else {
-          // return {
-          //   status: false,
-          //   msg: callGetSecretData?.msg
-          // }
-          setRecoverSeed(callGetSecretData?.msg);
-          setRecoverSeedStatus(false);
+      let data = JSON.parse(userAuth?.webauthKey)
+      console.log("data-->", data)
+      let callGetSecretData = (await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      )) as any;
+      if (callGetSecretData?.status) {
+        // return {
+        //   status: true,
+        //   secret: callGetSecretData?.secret
+        // }
+        console.log(JSON.parse(callGetSecretData?.secret))
+        setRecoverSeed(JSON.parse(callGetSecretData?.secret));
+        let adminKey = await getLnbitId(userAuth.email);
+        if (
+          adminKey?.adminId
+        ) {
+          setAdminId(adminKey?.adminId)
         }
+        setRecoverSeedStatus(true);
+        setRecover(!recover);
       } else {
         // return {
         //   status: false,
-        //   secret: "No secret Stored!"
+        //   msg: callGetSecretData?.msg
         // }
-        setRecoverSeed("No secret Stored!");
+        setRecoverSeed(callGetSecretData?.msg);
         setRecoverSeedStatus(false);
       }
-      setRecover(!recover);
     } catch (error) {
       // return {
       //   status: false,
@@ -658,28 +672,69 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
-                      <li className="flex gap-2 py-1">
+                      {
+                        // tposId1 tposId2
+                        <>
+                          <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
                           style={{ width: 160 }}
                         >
-                          USD TPOS ID:
+                          USD Tpos ID:
                         </div>
+                        {/* {userAuth?.email && ( */}
                         <span className="text-white flex items-center">
-                          {lnbitLink ? lnbitLink : "--"}
+                          {tposId1 ? tposId1: "--"}
                         </span>
+                        {/* )} */}
                       </li>
                       <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
                           style={{ width: 160 }}
                         >
-                          Bitcoin TPOS ID:
+                          Bitcoin Tpos ID:
                         </div>
+                        {/* {userAuth?.email && ( */}
                         <span className="text-white flex items-center">
-                          {lnbitLink2 ? lnbitLink2 : "--"}
+                          {tposId2 ? tposId2: "--"}
                         </span>
+                        {/* )} */}
                       </li>
+                        </>
+                      }
+                      {
+                        // `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`
+
+                        <li className="flex gap-2 py-1">
+                        <div
+                          className="block text-gray-500"
+                          style={{ width: 160 }}
+                        >
+                          lndhub:
+                        </div>
+                        {/* {userAuth?.email && ( */}
+                        <span className="text-white flex items-center">
+                          {adminId ?
+                          (
+                            <>
+                              {splitAddress( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
+                              <button
+                                onClick={() =>
+                                  handleCopy( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+                                }
+                                className="border-0 p-0 bg-transparent pl-1"
+                              >
+                                {copyIcn}
+                              </button>
+                            </>
+                          )
+                          
+                          : "--"}
+                        </span>
+                        {/* )} */}
+                      </li>
+                      }
                       {/* <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
@@ -970,7 +1025,7 @@ const Setting: React.FC = () => {
                           <>
                             <div className="flex flex-col gap-1">
                               <h3 className="text-xs font-medium leading-none -tracking-2">
-                                Recover
+                                View Secrets
                               </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -978,7 +1033,7 @@ const Setting: React.FC = () => {
                                 onClick={() => recoverSeedPhrase()}
                                 className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
                               >
-                                Recover
+                                View Secrets
                               </button>
                             </div>
                           </>

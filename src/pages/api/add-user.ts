@@ -129,9 +129,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "", secretEmail = "",
-            secretCredentialId = "",
-            secretStorageKey = "", liquidBitcoinWallet = "", coinosToken,
+        const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "", liquidBitcoinWallet = "", coinosToken,
             flowTokens } = req.body;
 
         // Validate email
@@ -152,14 +150,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             addLnbit(existingUser.email, usersCollection, bitcoinWallet, 3, 2)
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
-
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
-            secretCredentialId,
-            secretStorageKey,
-            coinosToken, flowTokens,
-            ensSetup: false, createdAt: new Date()
+            email, username, passkey_number: 1, passkey_status: false, passkey, totalPasskey, wallet, bitcoinWallet, liquidBitcoinWallet,
+            coinosToken, flowTokens, createdAt: new Date()
         });
         // console.log("result-->", result)
         addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1)

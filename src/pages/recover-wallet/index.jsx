@@ -5,7 +5,9 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDevWallet";
-import { getUser, updtUser } from "../../lib/apiCall";
+import { doAccountRecovery } from "../../lib/zeroDev"
+import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
+import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 
 const RecoverWallet = () => {
   const [step, setStep] = useState(1);
@@ -13,7 +15,43 @@ const RecoverWallet = () => {
   const [phrase, setPhrase] = useState();
   const [address, setAddress] = useState();
   const [email, setEmail] = useState();
+  const [privateKey, setPrivateKey] = useState();
+  const [wif, setWif] = useState();
   const router = useRouter();
+
+  const setSecretInPasskey = async (userName, data) => {
+    try {
+      let registerCheck = await registerCredential(userName, userName);
+      if (registerCheck?.status) {
+        let storeSecretCheck = await storeSecret(
+          registerCheck?.data?.credentialId,
+          data
+        );
+        if (storeSecretCheck?.status) {
+          return {
+            status: true,
+            storageKey: storeSecretCheck?.data?.storageKey,
+            credentialId: registerCheck?.data?.credentialId,
+          };
+        } else {
+          return {
+            status: false,
+            msg: storeSecretCheck?.msg,
+          };
+        }
+      } else {
+        return {
+          status: false,
+          msg: registerCheck?.msg,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Facing issue in storing secret",
+      };
+    }
+  };
 
   const checkAddress = async () => {
     try {
@@ -40,20 +78,58 @@ const RecoverWallet = () => {
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true);
-
-      if (phrase && phrase.trim().split(" ").length == 12) {
-        let checkAccount = await getRecoverAccount(address, "", phrase.trim());
-        if (checkAccount && checkAccount.address == address) {
-          setStep(3);
+      if (privateKey && wif) {
+        let recoverAccount = await doAccountRecovery(privateKey, address);
+        if (recoverAccount && recoverAccount.status) {
+          let userExist = await getUserToken(email);
+          let secretObj = {
+            coinosToken: userExist?.userId?.coinosToken || "",
+            wif: wif || "",
+            seedPhrase: privateKey,
+          };
+          let storeData = await setSecretInPasskey(
+            email + "_passkey_" + (userExist?.userId?.totalPasskey + 1),
+            JSON.stringify(secretObj)
+          );
+          if (storeData.status) {
+            let storageKeySecret = storeData?.storageKey;
+            let credentialIdSecret = storeData?.credentialId;
+            try {
+              let data = await updtUser(
+                { email: userExist?.userId?.email},
+                {
+                  $push: {
+                    passkey:
+                    {
+                      name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
+                      storageKeySecret,
+                      credentialIdSecret
+                    }
+                  },
+                  $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
+                }
+              );
+            } catch (error) {
+              console.log("updtuser error-->",error)
+            }
+          
+            toast.success("New Key Recovered!");
+            router.push("/welcome");
+          } else {
+            toast.error(storeData.msg);
+            setLoadingNewSigner(false);
+          }
         } else {
-          toast.error("Invalid Phrase!");
+          toast.error(recoverAccount?.msg);
+          setLoadingNewSigner(false);
         }
       } else {
-        toast.error("Invalid Phrase!");
+        toast.error("Invalid Credentials!");
+        setLoadingNewSigner(false);
       }
       setLoadingNewSigner(false);
     } catch (error) {
-      toast.error("Invalid Phrase!");
+      toast.error("Invalid Key!");
       setLoadingNewSigner(false);
     }
   };
@@ -81,7 +157,7 @@ const RecoverWallet = () => {
             checkAccount.newwebAuthKey
           );
           let data = await updtUser(
-            { email: userExist?.userId?.email },
+            { email: { $regex: new RegExp(`^${userExist?.userId?.email}$`, 'i') } },
             {
               $push: { passkey: webAuthKeyStringObj },
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
@@ -132,7 +208,7 @@ const RecoverWallet = () => {
                 <div className="py-2">
                   <input
                     type="text"
-                    name=""
+                    name="email"
                     onChange={(e) => setEmail(e.target.value)}
                     value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
@@ -153,30 +229,38 @@ const RecoverWallet = () => {
             </>
           ) : step == 2 ? (
             <>
-              <form action="">
-                <div className="py-2">
-                  <textarea
-                    name=""
-                    value={phrase}
-                    onChange={(e) => setPhrase(e.target.value)}
-                    rows={5}
-                    id=""
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg pr-11`}
-                    placeholder="Enter Recovery Phrase"
-                  ></textarea>
-                </div>
-                <div className="btnWrpper mt-3 text-center">
-                  <button
-                    type="button"
-                    disabled={loadingNewSigner}
-                    // onClick={checkPhrase}
-                    onClick={checkPhrase}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    {loadingNewSigner ? "Please Wait ..." : "Next"}
-                  </button>
-                </div>
-              </form>
+
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="privatekey"
+                  onChange={(e) => setPrivateKey(e.target.value)}
+                  value={privateKey}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter Private Key"
+                />
+              </div>
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="wif"
+                  onChange={(e) => setWif(e.target.value)}
+                  value={wif}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter wif"
+                />
+              </div>
+              <div className="btnWrpper mt-3 text-center">
+                <button
+                  type="button"
+                  disabled={loadingNewSigner}
+                  // onClick={checkPhrase}
+                  onClick={checkPhrase}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                >
+                  {loadingNewSigner ? "Please Wait ..." : "Next"}
+                </button>
+              </div>
             </>
           ) : step == 3 ? (
             <>
