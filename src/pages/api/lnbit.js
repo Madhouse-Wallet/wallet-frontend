@@ -35,32 +35,30 @@ const logIn = async (type = 1) => {
       },
       body: JSON.stringify({
         username,
-        password
+        password,
       }),
     });
-    response = await response.json()
+    response = await response.json();
     // console.log("response login",response)
     if (response?.access_token) {
       return {
         status: true,
-        data: { "token": response?.access_token }
-      }
+        data: { token: response?.access_token },
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
- 
 
 const createUser = async (data, token, type = 1) => {
   try {
@@ -79,37 +77,33 @@ const createUser = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     // console.log("response create user",response)
 
     if (response?.email) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const getUser = async (id, token, type = 1) => {
   try {
@@ -128,35 +122,32 @@ const getUser = async (id, token, type = 1) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
-      }
+      },
     });
-    response = await response.json()
+    response = await response.json();
     // console.log("response get user",response)
 
     if (response?.email) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
 
 const createTpos = async (data, token, type = 1) => {
   try {
@@ -175,36 +166,32 @@ const createTpos = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     // console.log("createTpos createTpos-->", type, response)
     if (response?.id) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const createBlotzAutoReverseSwap = async (data, token, type = 1) => {
   try {
@@ -218,39 +205,38 @@ const createBlotzAutoReverseSwap = async (data, token, type = 1) => {
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(`${process.env.NEXT_PUBLIC_LNBIT_URL}boltz/api/v1/swap/reverse/auto`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
-        "X-API-KEY": apiKey,
-      },
-      body: JSON.stringify(data),
-    });
-    response = await response.json()
+    let response = await fetch(
+      `${process.env.NEXT_PUBLIC_LNBIT_URL}boltz/api/v1/swap/reverse/auto`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+          "X-API-KEY": apiKey,
+        },
+        body: JSON.stringify(data),
+      }
+    );
+    response = await response.json();
     if (response?.id) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const createInvoice = async (data, token, type = 1) => {
   try {
@@ -268,35 +254,31 @@ const createInvoice = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     if (response?.bolt11) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const payInvoice = async (data, token, type = 1) => {
   try {
@@ -314,35 +296,31 @@ const payInvoice = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     if (response?.payment_hash) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const createSwapReverse = async (data, token, type = 1) => {
   try {
@@ -360,35 +338,31 @@ const createSwapReverse = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     if (response?.invoice) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
-
 
 const createSwap = async (data, token, type = 1) => {
   try {
@@ -406,34 +380,31 @@ const createSwap = async (data, token, type = 1) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify(data),
     });
-    response = await response.json()
+    response = await response.json();
     if (response?.address) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
 
 const getStats = async (walletId, token, type = 1) => {
   try {
@@ -448,39 +419,39 @@ const getStats = async (walletId, token, type = 1) => {
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(`${backendUrl}api/v1/payments/stats/wallets?wallet_id=${walletId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
-        "X-API-KEY": apiKey,
+    let response = await fetch(
+      `${backendUrl}api/v1/payments/stats/wallets?wallet_id=${walletId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+          "X-API-KEY": apiKey,
+        },
       }
-    });
-    response = await response.json()
+    );
+    response = await response.json();
     // console.log("response get user",response)
 
     if (response?.email) {
       return {
         status: true,
-        data: response
-      }
+        data: response,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
 
 const getPayments = async (walletId, token, type = 1) => {
   try {
@@ -494,39 +465,39 @@ const getPayments = async (walletId, token, type = 1) => {
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(`${backendUrl}api/v1/payments/all/paginated?wallet_id=${walletId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": `cookie_access_token=${token}; is_lnbits_user_authorized=true`
-        ,
-        "X-API-KEY": apiKey,
+    let response = await fetch(
+      `${backendUrl}api/v1/payments/all/paginated?wallet_id=${walletId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+          "X-API-KEY": apiKey,
+        },
       }
-    });
-    response = await response.json()
+    );
+    response = await response.json();
     // console.log("response get user",response)
 
-    if (response?.email) {
+    if (response?.data) {
       return {
         status: true,
-        data: response
-      }
+        data: response?.data,
+      };
     } else {
       return {
         status: false,
-        msg: response?.detail
-      }
+        msg: response?.detail,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
     return {
       status: false,
-      msg: "fetch failed"
-    }
+      msg: "fetch failed",
+    };
   }
 };
-
-
 
 module.exports = {
   logIn,
@@ -539,5 +510,5 @@ module.exports = {
   createSwap,
   payInvoice,
   getStats,
-  getPayments
-}  
+  getPayments,
+};

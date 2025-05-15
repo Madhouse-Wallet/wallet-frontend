@@ -45,6 +45,7 @@ const PointOfSalePop = ({
   }, [userAuth.email]);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
+  console.log("userAuth.email", userAuth.email);
   return (
     <>
       <Modal
@@ -91,39 +92,67 @@ const PointOfSalePop = ({
                 </>
               ) : step == "2" ? (
                 <>
-                  <div className="py-2">
-                    {lnbitLink ? (
-                      <Link
-                        href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
-                      >
-                        Accept in Dollars
-                      </Link>
-                    ) : (
-                      <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                        Accept in Dollars
+                  {userAuth.email ? (
+                    <>
+                      {" "}
+                      <div className="py-2">
+                        {lnbitLink ? (
+                          <Link
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
+                          >
+                            Accept in Dollars
+                          </Link>
+                        ) : (
+                          <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
+                            Accept in Dollars
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                      <div className="py-2">
+                        {lnbitLink2 ? (
+                          <Link
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                          >
+                            Accept in Bitcoin
+                          </Link>
+                        ) : (
+                          <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
+                            Accept in Bitcoin
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="py-2">
+                        <Link
+                          href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
+                        >
+                          Accept in Dollars
+                        </Link>
+                      </div>
 
-                  <div className="py-2">
-                    {lnbitLink2 ? (
-                      <Link
-                        href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                      >
-                        Accept in Bitcoin
-                      </Link>
-                    ) : (
-                      <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                        Accept in Bitcoin
+                      <div className="py-2">
+                        <Link
+                          href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        >
+                          Accept in Bitcoin
+                        </Link>
                       </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </>
               ) : (
                 <></>

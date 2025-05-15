@@ -11,7 +11,7 @@ import moment from "moment";
 import { createPortal } from "react-dom";
 
 // Bitcoin Transactions Component
-const BitcoinTransactionsTab = () => {
+const BitcoinTransactionsTab = ({ setTransactions }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,8 @@ const BitcoinTransactionsTab = () => {
   const [transactionData, setTransactionData] = useState(null);
 
   // You may want to replace this with your actual BTC wallet address
-  const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD"; // Example address
+  // const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
+  const btcWalletAddress = userAuth?.bitcoinWallet;
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -29,6 +30,7 @@ const BitcoinTransactionsTab = () => {
       setLoading(true);
       try {
         const data = await fetchBitcoinTransactions(btcWalletAddress);
+        setTransactions(data?.txs);
         const formattedTransactions = formatBitcoinTransactions(
           data,
           btcWalletAddress

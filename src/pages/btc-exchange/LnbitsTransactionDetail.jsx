@@ -1,4 +1,6 @@
 import React from "react";
+import { toast } from "react-toastify";
+import styled from "styled-components";
 
 const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
   const truncateAddress = (address) => {
@@ -74,15 +76,16 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                {type
+                {/* {type
                   ? type.charAt(0).toUpperCase() + type.slice(1)
-                  : "Bitcoin Transaction Details"}
+                  : "Bitcoin Transaction Details"} */}
+                TPOS Details
               </h5>
             </div>
             <div className="modalBody">
               <div className="py-3">
                 <ul className="list-none pl-0 mb-0">
-                  <li className="py-2 border-b border-dashed border-white/50">
+                  {/* <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Status</h6>
                       <a
@@ -94,7 +97,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         View on block explorer
                       </a>
                     </div>
-                  </li>
+                  </li> */}
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base capitalize">
@@ -225,3 +228,17 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
 };
 
 export default LnbitsTransactionDetail;
+
+const Modal = styled.div`
+  padding-bottom: 100px;
+
+  .modalDialog {
+    max-height: calc(100vh - 160px);
+    max-width: 550px !important;
+    padding-bottom: 40px !important;
+
+    input {
+      color: var(--textColor);
+    }
+  }
+`;

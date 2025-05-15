@@ -38,6 +38,7 @@ const Setting: React.FC = () => {
   } = useBackground();
   const dispatch = useDispatch();
   const userAuth = useSelector((state: any) => state.Auth);
+  console.log("line-41", userAuth);
   const [setUp, setSetUp] = useState<boolean>(false);
   const [recover, setRecover] = useState<boolean>(false);
   const [ensDomain, setEnsDomain] = useState<boolean>(false);
@@ -49,7 +50,7 @@ const Setting: React.FC = () => {
   const [lnbitLink, setLnbitLink] = useState("");
   const [lnbitLink2, setLnbitLink2] = useState("");
   const [adminId, setAdminId] = useState<any>("");
-  
+
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -662,7 +663,7 @@ const Setting: React.FC = () => {
                           className="block text-gray-500"
                           style={{ width: 160 }}
                         >
-                          TPOS ID 1:
+                          USD TPOS ID:
                         </div>
                         <span className="text-white flex items-center">
                           {lnbitLink ? lnbitLink : "--"}
@@ -673,7 +674,7 @@ const Setting: React.FC = () => {
                           className="block text-gray-500"
                           style={{ width: 160 }}
                         >
-                          TPOS ID 2:
+                          Bitcoin TPOS ID:
                         </div>
                         <span className="text-white flex items-center">
                           {lnbitLink2 ? lnbitLink2 : "--"}
@@ -716,7 +717,7 @@ const Setting: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                  {userAuth?.login && !userAuth?.pos ? (
+                  {/* {userAuth?.login && !userAuth?.pos ? (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -753,7 +754,7 @@ const Setting: React.FC = () => {
                     </div>
                   ) : (
                     <></>
-                  )}
+                  )} */}
 
                   <div
                     tabIndex={-1}
@@ -943,7 +944,7 @@ const Setting: React.FC = () => {
 
                   {userAuth?.login && !userAuth?.pos && (
                     <>
-                      <div
+                      {/* <div
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
@@ -960,7 +961,7 @@ const Setting: React.FC = () => {
                             Delete
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                       <div
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"

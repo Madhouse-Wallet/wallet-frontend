@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { getPayments } from "../api/lnbit";
 import LnbitsTransactionDetail from "./LnbitsTransactionDetail";
+import Image from "next/image";
+import moment from "moment";
+import { createPortal } from "react-dom";
 
 // Bitcoin Transaction Component
-const LnbitsTransaction = () => {
+const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
+  console.log("walletIdd", walletIdd);
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [detail, setDetail] = useState(false);
@@ -13,8 +16,8 @@ const LnbitsTransaction = () => {
 
   const formatBitcoinTransactionData = (txs) => {
     return txs.map((tx) => {
-      const isSend = tx.amount < 0;
-      const amount = Math.abs(tx.amount) / 1000; // Converting from msats to sats
+      const amount = tx.amount; // Already in sats
+      const isSend = false; // Assume receive by default, adjust if your logic allows identifying send
 
       return {
         id: tx.checking_id,
@@ -22,7 +25,7 @@ const LnbitsTransaction = () => {
         from: isSend ? userAuth?.walletAddress : "External",
         to: isSend ? "External" : userAuth?.walletAddress,
         date: moment(tx.time).format("MMMM D, YYYY h:mm A"),
-        status: tx.status === "success" ? "confirmed" : "pending",
+        status: tx.status,
         amount: `${amount.toFixed(2)} sats`,
         type: isSend ? "token send" : "token receive",
         summary:
@@ -39,15 +42,42 @@ const LnbitsTransaction = () => {
   const fetchBitcoinTransactions = async () => {
     setLoading(true);
     try {
-      // You'll need to store walletId and token in userAuth or elsewhere
-      const { status, data } = await getPayments(
-        userAuth?.btcWalletId,
-        userAuth?.btcToken
-      );
+      if (usd === true) {
+        const response = await fetch("/api/lnbits-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletId: walletIdd,
+            // walletId: "47472a63d2364de2836f0f71c73bf034",
+          }),
+        });
 
-      if (status && data?.data?.length) {
-        const formattedTransactions = formatBitcoinTransactionData(data.data);
-        setBtcTransactions(formattedTransactions);
+        const { status, data } = await response.json();
+        setTransactions(data);
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        }
+      } else {
+        const response = await fetch("/api/lnbits-transaction-bitcoin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletId: walletIdd,
+            // walletId: "47472a63d2364de2836f0f71c73bf034",
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        }
       }
     } catch (error) {
       console.error("Error fetching Bitcoin transactions:", error);
@@ -56,18 +86,22 @@ const LnbitsTransaction = () => {
     }
   };
 
+  // useEffect(() => {
+  //   if (userAuth?.btcWalletId && userAuth?.btcToken) {
+  //     fetchBitcoinTransactions();
+  //   }
+  // }, [userAuth?.btcWalletId, userAuth?.btcToken]);
+
   useEffect(() => {
-    if (userAuth?.btcWalletId && userAuth?.btcToken) {
-      fetchBitcoinTransactions();
-    }
-  }, [userAuth?.btcWalletId, userAuth?.btcToken]);
+    fetchBitcoinTransactions();
+  }, [usd]);
 
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case "confirmed":
+      case "success":
         return "text-green-500";
-      case "rejected":
+      case "failed":
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
@@ -79,10 +113,10 @@ const LnbitsTransaction = () => {
   // Get status text
   const getStatusText = (status) => {
     switch (status) {
-      case "confirmed":
+      case "success":
         return "Confirmed";
-      case "rejected":
-        return "Rejected";
+      case "failed":
+        return "Failed";
       case "pending":
         return "Pending";
       default:
@@ -142,65 +176,25 @@ const LnbitsTransaction = () => {
 
   const sendSvg = (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      id="icon-arrow-2-up-right"
+      viewBox="0 0 512 512"
+      height={20}
+      width={20}
     >
-      <path
-        d="M12 4L4 8L12 12L20 8L12 4Z"
-        stroke="#FF5757"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 16L12 20L20 16"
-        stroke="#FF5757"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 12L12 16L20 12"
-        stroke="#FF5757"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="m137 107c0-12 10-22 22-22l225 0c12 0 21 10 21 22l0 225c0 12-9 21-21 21-12 0-21-9-21-21l0-174-241 241c-9 8-22 8-30 0-9-8-9-22 0-30l240-241-173 0c-12 0-22-10-22-21z" />
     </svg>
   );
 
   const receiveSvg = (
     <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      id="icon-arrow-2-down-left"
+      viewBox="0 0 512 512"
+      height={20}
+      width={20}
     >
-      <path
-        d="M12 4L4 8L12 12L20 8L12 4Z"
-        stroke="#4CAF50"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 16L12 20L20 16"
-        stroke="#4CAF50"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 12L12 16L20 12"
-        stroke="#4CAF50"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="m375 405c0 12-10 22-22 22l-225 0c-12 0-21-10-21-22l0-225c0-12 9-21 21-21 12 0 21 9 21 21l0 174 241-241c9-8 22-8 30 0 9 8 9 22 0 30l-240 241 173 0c12 0 22 10 22 21z" />
     </svg>
   );
 
@@ -254,7 +248,7 @@ const LnbitsTransaction = () => {
                         </div>
                         <div className="right">
                           <p className="m-0 text-xs font-medium">
-                            {tx.status === "rejected"
+                            {tx.status === "failed"
                               ? "Failed Transaction"
                               : `${tx.type === "token send" ? "-" : "+"} ${
                                   tx.amount
