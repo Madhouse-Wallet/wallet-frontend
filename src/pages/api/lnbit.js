@@ -39,7 +39,7 @@ const logIn = async (type = 1) => {
       }),
     });
     response = await response.json();
-    console.log("response login",response)
+    // console.log("response login",response)
     if (response?.access_token) {
       return {
         status: true,
@@ -83,7 +83,7 @@ const createUser = async (data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response create user",response)
+    // console.log("response create user",response)
 
     if (response?.email) {
       return {
