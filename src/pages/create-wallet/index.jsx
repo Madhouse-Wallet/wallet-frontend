@@ -240,7 +240,8 @@ const CreateWallet = () => {
             [{
               name: registerData.email + "_passkey_1",
               storageKeySecret,
-              credentialIdSecret
+              credentialIdSecret,
+              displayName: ""
             }],
             address,
             bitcoinWallet,
