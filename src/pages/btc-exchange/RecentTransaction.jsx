@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { fetchWalletHistory } from "../../lib/utils";
+import { fetchTokenTransfers, fetchWalletHistory } from "../../lib/utils";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import InternalTab from "./InternalTab";
 import moment from "moment";
@@ -10,70 +10,83 @@ import BitcoinTransactionsTab from "./BitcoinTransaction";
 import LnbitsTransaction from "./LnbitsTransaction";
 import { toast } from "react-toastify";
 import { getUser } from "../../lib/apiCall";
+import { DateRange } from "react-date-range";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
+  const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [lnbitsUsdTxs, setLnbitsUsdTxs] = useState([]);
+  const [spendTxs, setSpendTxs] = useState([]);
   const [lnbitsBtcTxs, setLnbitsBtcTxs] = useState([]);
   const [lnbitWallet1, setLnbitWallet1] = useState("");
   const [lnbitWallet2, setLnbitWallet2] = useState("");
+  const [spendWallet, setSpendWallet] = useState("");
+  const [applyTrue, setApplyTrue] = useState(false);
 
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: null,
+      endDate: null,
+      key: "selection",
+    },
+  ]);
   const [transactionType, setTransactionType] = useState("all");
 
+  // Function to format dates for API requests
+  const formatDateForApi = (date) => {
+    if (!date) return null;
+    return moment(date).format("YYYY-MM-DD");
+  };
+
+  // Check if date filter is active
+  const isDateFilterActive = () => {
+    return dateRange[0].startDate && dateRange[0].endDate;
+  };
+
+  // Clear date filter function
+  const clearDateFilter = () => {
+    setDateRange([
+      {
+        startDate: null,
+        endDate: null,
+        key: "selection",
+      },
+    ]);
+    // Refetch transactions without date filter
+    fetchRecentTransactions();
+    fetchRecentTransactionsPaxg();
+  };
+
   const formatWalletHistoryData = (txs) => {
+    if (!txs?.length) return [];
+
     return txs.map((tx) => {
-      let amount = "";
-      let currency = "ETH";
-      let isSend = false;
-
-      if (tx.native_transfers && tx.native_transfers.length > 0) {
-        const transfer = tx.native_transfers[0];
-        const ethValue = parseFloat(transfer.value || tx.value) / 1e18;
-        amount = ethValue.toFixed(4);
-        isSend =
-          tx.from_address.toLowerCase() ===
-          userAuth?.walletAddress?.toLowerCase();
-      } else if (tx.value) {
-        const ethValue = parseFloat(tx.value) / 1e18;
-        amount = ethValue.toFixed(4);
-        isSend =
-          tx.from_address.toLowerCase() ===
-          userAuth?.walletAddress?.toLowerCase();
-      }
-
-      if (tx.erc20_transfers && tx.erc20_transfers.length > 0) {
-        const transfer = tx.erc20_transfers[0];
-        amount = parseFloat(transfer.value_formatted).toFixed(4);
-        currency = transfer.token_symbol;
-        isSend =
-          transfer.from_address.toLowerCase() ===
-          userAuth?.walletAddress?.toLowerCase();
-      }
+      const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      const isSend =
+        tx.from_address?.toLowerCase() ===
+        userAuth?.walletAddress?.toLowerCase();
 
       return {
-        id: tx.hash,
-        transactionHash: tx.hash,
-        from: tx.from_address,
-        to: tx.to_address,
-        date: moment(tx.block_timestamp).format("MMMM D, YYYY h:mm A"),
-        status:
-          tx.receipt_status === "1"
-            ? "confirmed"
-            : tx.receipt_status === "0"
-            ? "rejected"
-            : "pending",
-        amount: amount ? `${amount} ${currency}` : "",
-        type: tx?.category,
-        summary:
-          tx.summary || `${isSend ? "Sent" : "Received"} ${amount} ${currency}`,
-        category: tx.category,
+        amount,
+        category: tx.token_symbol || "USDC",
+        date: moment(tx.block_timestamp).format("MMMM D, YYYY h:mm A") || "",
+        from: tx.from_address || "",
+        id: tx.transaction_hash || "",
         rawData: tx,
+        status: "confirmed", // You can modify this if you plan to add status checks later
+        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
+          isSend ? "Transfer" : "Receive"
+        }`,
+        to: tx.to_address || "",
+        transactionHash: tx.transaction_hash || "",
+        type: isSend ? "send" : "receive",
       };
     });
   };
@@ -81,13 +94,61 @@ const RecentTransaction = () => {
   const fetchRecentTransactions = async () => {
     try {
       setTransactionType("all");
-      const data = await fetchWalletHistory(userAuth?.walletAddress);
+
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_CHAIN,
+        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
+        // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
       setTransactions(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
           data.result.slice(0, 10)
         );
         setTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const fetchRecentTransactionsPaxg = async () => {
+    try {
+      setTransactionType("all");
+
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG,
+        [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address],
+        // "0x0d8b79e9f0EC1ad55210E45CcC137CD1506B3Aab",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
+      setTransactionsPaxg(data?.result);
+      if (data?.result?.length) {
+        const formattedTransactions = formatWalletHistoryData(
+          data.result.slice(0, 10)
+        );
+        setTransactionsPaxg(formattedTransactions);
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -165,11 +226,16 @@ const RecentTransaction = () => {
     return sortedGroups;
   };
 
+  // Apply date filter and refetch data when dateRange changes
   useEffect(() => {
     if (userAuth?.walletAddress) {
-      fetchRecentTransactions();
+      // Don't automatically fetch when date range changes - wait for "Apply" button
+      if (!isDatePickerOpen) {
+        fetchRecentTransactions();
+        fetchRecentTransactionsPaxg();
+      }
     }
-  }, [userAuth?.walletAddress]);
+  }, [userAuth?.walletAddress, dateRange]); // Only refetch when wallet address changes
 
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
@@ -177,9 +243,39 @@ const RecentTransaction = () => {
   };
 
   const transactionsByDate = groupTransactionsByDate(transactions);
+  const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
+
+  // Handle date range selection
+  const handleDateRangeChange = (item) => {
+    setDateRange([item.selection]);
+    // Don't close the date picker automatically - let user apply the filter
+  };
+
+  // Apply date filter button action
+  const applyDateFilter = () => {
+    setApplyTrue(true);
+    if (isDateFilterActive()) {
+      fetchRecentTransactions();
+      fetchRecentTransactionsPaxg();
+      setIsDatePickerOpen(false);
+    } else {
+      toast.error("Please select both start and end dates");
+    }
+  };
+
+  useEffect(() => {
+    const data = async () => {
+      let userExist = await getUser(userAuth.email);
+      setLnbitWallet1(userExist?.userId?.lnbitWalletId || "");
+      setLnbitWallet2(userExist?.userId?.lnbitWalletId_2 || "");
+      setSpendWallet(userExist?.userId?.lnbitWalletId_3 || "");
+    };
+    data();
+  }, []);
+
   const tabs = [
     {
-      title: "USDC Transactions",
+      title: "USDC",
       component: (
         <>
           {transactions.length > 0 ? (
@@ -256,42 +352,128 @@ const RecentTransaction = () => {
       ),
     },
     {
-      title: "BTC Transactions",
+      title: "BTC",
       component: (
-        <BitcoinTransactionsTab setTransactions={setBtcTransactions} />
+        <BitcoinTransactionsTab
+          setTransactions={setBtcTransactions}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+        />
       ),
     },
     {
-      title: "LNBITS Transactions USD",
+      title: "Gold",
+      component: (
+        <>
+          {transactionsPaxg.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+              {Object.entries(transactionsByDatePaxg).map(([date, txs]) => {
+                return (
+                  <div key={date} className="py-3">
+                    <p className="m-0 text-white text-xs font-semibold pb-2">
+                      {date}
+                    </p>
+                    <div className="grid gap-3 grid-cols-12">
+                      {txs.map((tx, key) => (
+                        <div key={key} className="md:col-span-6 col-span-12">
+                          <div
+                            onClick={() => handleTransactionClick(tx)}
+                            className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                          >
+                            <div className="left flex items-start gap-2">
+                              <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                {tx.type === "token send"
+                                  ? sendSvg
+                                  : receiveSvg}
+                              </div>
+                              <div className="content">
+                                <h4 className="m-0 font-bold md:text-base">
+                                  {tx.isRedemption
+                                    ? "Redemption"
+                                    : tx.isDeposit
+                                    ? "Deposit"
+                                    : tx.type === "token send"
+                                    ? "Send"
+                                    : "Receive"}{" "}
+                                  {tx.amount?.split(" ")[1] || "ETH"}
+                                </h4>
+                                <p
+                                  className={`m-0 ${getStatusColor(
+                                    tx.status
+                                  )} font-medium text-xs`}
+                                >
+                                  {getStatusText(tx.status)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="right">
+                              <p className="m-0  text-xs font-medium">
+                                {tx.status === "rejected"
+                                  ? "Insufficient Balance"
+                                  : `${tx.type === "token send" ? "-" : "+"} ${
+                                      tx.amount
+                                    }`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      title: "Lightning TPOS USDC",
       component: (
         <LnbitsTransaction
-          usd={true}
+          usd={0}
           setTransactions={setLnbitsUsdTxs}
           walletIdd={lnbitWallet1}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
         />
       ),
     },
     {
-      title: "LNBITS Transactions Bitcoin",
+      title: "Lightning TPOS Bitcoin",
       component: (
         <LnbitsTransaction
-          usd={false}
+          usd={1}
           setTransactions={setLnbitsBtcTxs}
           walletIdd={lnbitWallet2}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
         />
       ),
     },
-    // { title: "BTC Bridge Transactions", component: <InternalTab /> },
+    {
+      title: "Lightning Spend",
+      component: (
+        <LnbitsTransaction
+          usd={2}
+          setTransactions={setSpendTxs}
+          walletIdd={spendWallet}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
+        />
+      ),
+    },
   ];
-
-  useEffect(() => {
-    const data = async () => {
-      let userExist = await getUser(userAuth.email);
-      setLnbitWallet1(userExist?.userId?.lnbitWalletId || "");
-      setLnbitWallet2(userExist?.userId?.lnbitWalletId_2 || "");
-    };
-    data();
-  }, []);
 
   return (
     <>
@@ -304,19 +486,86 @@ const RecentTransaction = () => {
           />,
           document.body
         )}
+
+      {isDatePickerOpen && (
+        <div className="absolute right-0 mt-2 z-[100] bg-white shadow-lg rounded-lg">
+          <DateRange
+            editableDateInputs={true}
+            onChange={handleDateRangeChange}
+            moveRangeOnFirstSelection={false}
+            ranges={dateRange}
+            months={1}
+            direction="horizontal"
+            preventSnapRefocus={true}
+            calendarFocus="backwards"
+          />
+          <div className="flex justify-between p-3 border-t">
+            <button
+              onClick={() => {
+                clearDateFilter();
+                setIsDatePickerOpen(false);
+                setApplyTrue(false);
+              }}
+              className="px-3 py-1 bg-gray-200 text-gray-800 rounded"
+            >
+              Clear
+            </button>
+            <button
+              onClick={applyDateFilter}
+              className="px-3 py-1 bg-blue-600 text-white rounded"
+            >
+              Apply Filter
+            </button>
+          </div>
+        </div>
+      )}
+
       {userAuth?.walletAddress ? (
         <>
           <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
             <h4 className="m-0 text-xl">Recent Transaction</h4>
+
             <div className="flex gap-2 items-center">
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setIsDatePickerOpen(!isDatePickerOpen);
+                    setApplyTrue(false);
+                  }}
+                  className={`px-4 py-2 ${
+                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                  } text-white rounded-md flex items-center gap-2`}
+                >
+                  <span>{DateFilter}</span>
+                  {isDateFilterActive() && (
+                    <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
+                      ✓
+                    </span>
+                  )}
+                </button>
+                {isDateFilterActive() && !isDatePickerOpen && (
+                  <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
+                    {formatDateForApi(dateRange[0].startDate)} to{" "}
+                    {formatDateForApi(dateRange[0].endDate)}
+                    <button
+                      onClick={clearDateFilter}
+                      className="ml-2 text-xs text-red-300 hover:text-red-100"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => {
                   let dataToExport = [];
 
                   if (activeTab === 0) dataToExport = transactions;
                   else if (activeTab === 1) dataToExport = btcTransactions;
-                  else if (activeTab === 2) dataToExport = lnbitsUsdTxs;
-                  else if (activeTab === 3) dataToExport = lnbitsBtcTxs;
+                  else if (activeTab === 2) dataToExport = transactionsPaxg;
+                  else if (activeTab === 3) dataToExport = lnbitsUsdTxs;
+                  else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
+                  else if (activeTab === 5) dataToExport = spendTxs;
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
@@ -331,7 +580,6 @@ const RecentTransaction = () => {
               >
                 Export CSV
               </button>
-
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
@@ -427,5 +675,36 @@ const receiveSvg = (
     width={20}
   >
     <path d="m375 405c0 12-10 22-22 22l-225 0c-12 0-21-10-21-22l0-225c0-12 9-21 21-21 12 0 21 9 21 21l0 174 241-241c9-8 22-8 30 0 9 8 9 22 0 30l-240 241 173 0c12 0 22 10 22 21z" />
+  </svg>
+);
+
+const DateFilter = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M5 12V4M19 20V17M5 20V16M19 13V4M12 7V4M12 20V11"
+      stroke="currentColor"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 16C6.10457 16 7 15.1046 7 14C7 12.8954 6.10457 12 5 12C3.89543 12 3 12.8954 3 14C3 15.1046 3.89543 16 5 16Z"
+      stroke="currentColor"
+      strokeLinecap="round"
+    />
+    <path
+      d="M12 11C13.1046 11 14 10.1046 14 9C14 7.89543 13.1046 7 12 7C10.8954 7 10 7.89543 10 9C10 10.1046 10.8954 11 12 11Z"
+      stroke="currentColor"
+      strokeLinecap="round"
+    />
+    <path
+      d="M19 17C20.1046 17 21 16.1046 21 15C21 13.8954 20.1046 13 19 13C17.8954 13 17 13.8954 17 15C17 16.1046 17.8954 17 19 17Z"
+      stroke="currentColor"
+      strokeLinecap="round"
+    />
   </svg>
 );

@@ -6,13 +6,29 @@ import moment from "moment";
 import { createPortal } from "react-dom";
 
 // Bitcoin Transaction Component
-const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
-  console.log("walletIdd", walletIdd);
+const LnbitsTransaction = ({
+  usd,
+  setTransactions,
+  walletIdd,
+  dateRange,
+  applyTrue,
+}) => {
+  console.log("applyTrue", applyTrue);
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const formatDateForApi = (date) => {
+    if (!date) return null;
+    return moment(date).format("YYYY-MM-DD");
+  };
+
+  // Check if date filter is active
+  const isDateFilterActive = () => {
+    if (applyTrue === true) return true;
+  };
 
   const formatBitcoinTransactionData = (txs) => {
     return txs.map((tx) => {
@@ -42,15 +58,26 @@ const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
   const fetchBitcoinTransactions = async () => {
     setLoading(true);
     try {
-      if (usd === true) {
+      console.log("dateRange", dateRange);
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange?.startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange?.endDate)
+        : null;
+      console.log("line-67", startDate, endDate);
+      if (usd === 0) {
         const response = await fetch("/api/lnbits-transaction", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            walletId: walletIdd,
+            // walletId: walletIdd,
             // walletId: "47472a63d2364de2836f0f71c73bf034",
+            fromDate: startDate,
+            toDate: endDate,
+            tag: "tpos",
           }),
         });
 
@@ -60,7 +87,7 @@ const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
         }
-      } else {
+      } else if (usd === 1) {
         const response = await fetch("/api/lnbits-transaction-bitcoin", {
           method: "POST",
           headers: {
@@ -69,6 +96,29 @@ const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
           body: JSON.stringify({
             walletId: walletIdd,
             // walletId: "47472a63d2364de2836f0f71c73bf034",
+            fromDate: startDate,
+            toDate: endDate,
+            tag: "tpos",
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        }
+      } else {
+        const response = await fetch("/api/spend-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            walletId: walletIdd,
+            // walletId: "ccd505c23ebf4a988b190e6aaefff7a5",
+            fromDate: startDate,
+            toDate: endDate,
           }),
         });
 
@@ -94,7 +144,7 @@ const LnbitsTransaction = ({ usd, setTransactions, walletIdd }) => {
 
   useEffect(() => {
     fetchBitcoinTransactions();
-  }, [usd]);
+  }, [usd, applyTrue]);
 
   // Get status color
   const getStatusColor = (status) => {

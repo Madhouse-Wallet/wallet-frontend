@@ -5,6 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 export const fetchTokenBalances = async (
+  chain: string,
   tokenAddress: string[],
   walletAddress: string
 ) => {
@@ -14,6 +15,7 @@ export const fetchTokenBalances = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "getTokenBalances",
+        chainn: chain,
         tokenAddresses: tokenAddress,
         address: walletAddress,
       }),
@@ -23,8 +25,8 @@ export const fetchTokenBalances = async (
       const error = await response.json();
       throw new Error(error.error || "Failed to fetch token balances");
     }
-
-    return await response.json();
+    const result = await response.json();
+    return result;
   } catch (error) {
     throw error;
   }
@@ -54,8 +56,11 @@ export const fetchWalletHistory = async (walletAddress: string) => {
 };
 
 export const fetchTokenTransfers = async (
+  chain: string,
   contractAddress: string[],
-  walletAddress: string
+  walletAddress: string,
+  fromDate: string,
+  toDate: string
 ) => {
   try {
     const response = await fetch("/api/moralis", {
@@ -63,8 +68,11 @@ export const fetchTokenTransfers = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "getWalletTokenTransfers",
+        chain: chain,
         contractAddress: contractAddress,
         walletAddress: walletAddress,
+        fromDate: fromDate,
+        toDate: toDate,
       }),
     });
 

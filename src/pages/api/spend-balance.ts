@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { logIn } from "./lnbit"; // Reuse your existing login function
-import { getPayments } from "./lnbit";
+import { getStats } from "./lnbit";
 
 // Main handler
 export default async function handler(
@@ -12,7 +12,7 @@ export default async function handler(
   }
 
   try {
-    const { walletId, fromDate, toDate, tag } = req.body;
+    const { walletId } = req.body;
 
     if (!walletId) {
       return res
@@ -21,7 +21,7 @@ export default async function handler(
     }
 
     // Always use type = 2 as requested
-    const loginResponse = (await logIn(1)) as any;
+    const loginResponse = (await logIn(2)) as any;
     const token = loginResponse?.data?.token;
     if (!token) {
       return res
@@ -29,7 +29,9 @@ export default async function handler(
         .json({ status: "failure", message: "Token fetch failed" });
     }
 
-    const result = await getPayments(walletId, token, 1, fromDate, toDate, tag);
+    const result = await getStats(walletId, token, 2);
+
+    // console.log("result", result);
 
     if (result.status) {
       return res.status(200).json({ status: "success", data: result.data });
@@ -37,7 +39,7 @@ export default async function handler(
       return res.status(400).json({ status: "failure", message: result.msg });
     }
   } catch (error) {
-    console.error("API Error in getPayments handler:", error);
+    console.error("API Error in getStats handler:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

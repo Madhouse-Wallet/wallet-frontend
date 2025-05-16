@@ -21,7 +21,7 @@ export default async function handler(
     }
 
     // Always use type = 2 as requested
-    const loginResponse = (await logIn(1)) as any;
+    const loginResponse = (await logIn(2)) as any;
     const token = loginResponse?.data?.token;
     if (!token) {
       return res
@@ -29,7 +29,7 @@ export default async function handler(
         .json({ status: "failure", message: "Token fetch failed" });
     }
 
-    const result = await getPayments(walletId, token, 1, fromDate, toDate, tag);
+    const result = await getPayments(walletId, token, 2, fromDate, toDate, tag);
 
     if (result.status) {
       return res.status(200).json({ status: "success", data: result.data });

@@ -433,7 +433,7 @@ const getStats = async (walletId, token, type = 1) => {
     response = await response.json();
     // console.log("response get user",response)
 
-    if (response?.email) {
+    if (response) {
       return {
         status: true,
         data: response,
@@ -453,31 +453,106 @@ const getStats = async (walletId, token, type = 1) => {
   }
 };
 
-const getPayments = async (walletId, token, type = 1) => {
+// const getPayments = async (walletId, token, type = 1) => {
+//   try {
+//     let backendUrl = "";
+//     let apiKey = "";
+//     if (type == 1) {
+//       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+//       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+//     } else {
+//       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+//       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+//     }
+//     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
+//     let response = await fetch(
+//       `${backendUrl}api/v1/payments/all/paginated?wallet_id=${walletId}`,
+//       {
+//         method: "GET",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+//           "X-API-KEY": apiKey,
+//         },
+//       }
+//     );
+//     response = await response.json();
+//     // console.log("response get user",response)
+
+//     if (response?.data) {
+//       return {
+//         status: true,
+//         data: response?.data,
+//       };
+//     } else {
+//       return {
+//         status: false,
+//         msg: response?.detail,
+//       };
+//     }
+//   } catch (error) {
+//     console.error("lnbit login API Error:", error);
+//     return {
+//       status: false,
+//       msg: "fetch failed",
+//     };
+//   }
+// };
+
+const getPayments = async (
+  walletId,
+  token,
+  type = 1,
+  fromDate = null,
+  toDate = null,
+  tag = null
+) => {
+  console.log("line-510", fromDate, toDate);
   try {
     let backendUrl = "";
     let apiKey = "";
-    if (type == 1) {
+
+    if (type === 1) {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
       apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
-    //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
-    let response = await fetch(
-      `${backendUrl}api/v1/payments/all/paginated?wallet_id=${walletId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
-          "X-API-KEY": apiKey,
-        },
-      }
-    );
+
+    const params = new URLSearchParams({
+      wallet_id: walletId,
+      sortby: "time",
+      direction: "desc",
+    });
+
+    if (fromDate) {
+      const formattedFromDate = `${fromDate}T00:00:00`;
+      params.append("time[ge]", formattedFromDate);
+    }
+
+    if (toDate) {
+      const formattedToDate = `${toDate}T23:59:59`;
+      params.append("time[le]", formattedToDate);
+    }
+
+    if (tag) {
+      params.append("tag", tag); // Only added if provided
+    }
+
+    const url = `${backendUrl}api/v1/payments/paginated?${params.toString()}`;
+    console.log("line-542", url);
+
+    let response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+    });
+
     response = await response.json();
-    // console.log("response get user",response)
 
     if (response?.data) {
       return {
