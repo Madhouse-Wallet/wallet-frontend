@@ -65,7 +65,7 @@ export default async function handler(
     requestBody.append("lock_wallet_address", "true");
     requestBody.append(
       "customer_ip_address",
-      req.socket.remoteAddress || "127.0.0.1"
+      "172.56.220.139" 
     );
 
     [destinationCurrency].forEach((currency) =>
