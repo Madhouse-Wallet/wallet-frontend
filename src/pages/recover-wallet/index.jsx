@@ -96,23 +96,24 @@ const RecoverWallet = () => {
             let credentialIdSecret = storeData?.credentialId;
             try {
               let data = await updtUser(
-                { email: userExist?.userId?.email},
+                { email: userExist?.userId?.email },
                 {
                   $push: {
                     passkey:
                     {
                       name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
                       storageKeySecret,
-                      credentialIdSecret
+                      credentialIdSecret,
+                      displayName: ""
                     }
                   },
                   $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
                 }
               );
             } catch (error) {
-              console.log("updtuser error-->",error)
+              console.log("updtuser error-->", error)
             }
-          
+
             toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
@@ -195,7 +196,7 @@ const RecoverWallet = () => {
               </div>
               <div className="pb-3">
                 <h1 className="text-center text-base font-medium  m-0">
-                  Wallet Recovery
+                  Add Passkey
                 </h1>
               </div>
             </div>
@@ -211,7 +212,7 @@ const RecoverWallet = () => {
                     name="email"
                     onChange={(e) => setEmail(e.target.value)}
                     value={email}
-                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Email"
                   ></input>
                 </div>
