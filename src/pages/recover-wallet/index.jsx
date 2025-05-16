@@ -96,7 +96,7 @@ const RecoverWallet = () => {
             let credentialIdSecret = storeData?.credentialId;
             try {
               let data = await updtUser(
-                { email: userExist?.userId?.email},
+                { email: userExist?.userId?.email },
                 {
                   $push: {
                     passkey:
@@ -111,9 +111,9 @@ const RecoverWallet = () => {
                 }
               );
             } catch (error) {
-              console.log("updtuser error-->",error)
+              console.log("updtuser error-->", error)
             }
-          
+
             toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
@@ -196,7 +196,7 @@ const RecoverWallet = () => {
               </div>
               <div className="pb-3">
                 <h1 className="text-center text-base font-medium  m-0">
-                  Wallet Recovery
+                  Add Passkey
                 </h1>
               </div>
             </div>

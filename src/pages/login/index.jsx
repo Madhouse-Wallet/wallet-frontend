@@ -106,6 +106,11 @@ const Login = () => {
             );
             return false;
           }
+        } else if (userExist?.userId?.passkey?.length == 0) {
+          toast.error(
+            "Please Add Passkey!"
+          );
+          return false;
         } else {
           setStep(2)
           setEmail(data.email)
