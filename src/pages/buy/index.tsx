@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { getAccount, getProvider } from "@/lib/zeroDevWallet";
 import { BackBtn } from "@/components/common";
 import Swap from "../swapUsdc";
+import SellBitcoin from "./SellBitcoin"
 
 const BuyCoin: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState("");
@@ -16,6 +17,14 @@ const BuyCoin: React.FC = () => {
       component: (
         <>
           <StripePaymentPage walletAddress={walletAddress} />
+        </>
+      ),
+    },
+    {
+      title: "Sell Bitcoin",
+      component: (
+        <>
+          <SellBitcoin />{" "}
         </>
       ),
     },
@@ -67,7 +76,7 @@ const BuyCoin: React.FC = () => {
                   <div className="flex align-items-center gap-3 pb-3">
                     <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Buy Bitcoin
+                      Buy & Sell Bitcoin
                     </h4>
                   </div>
                   <ul className="list-none pl-0 mb-0 flex items-center gap-3 ">

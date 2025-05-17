@@ -22,13 +22,17 @@ async function initializeMoralis() {
   }
 }
 
-async function getTokenBalances(tokenAddresses: string[], address: string) {
-  const response = await Moralis.EvmApi.token.getWalletTokenBalances({
-    chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
+async function getTokenBalances(
+  chainn: string,
+  tokenAddresses: string[],
+  address: string
+) {
+  const response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
+    chain: chainn,
     tokenAddresses,
     address,
   });
-  return response.raw;
+  return response;
 }
 
 async function getWalletHistory(address: string) {
@@ -46,16 +50,27 @@ async function getWalletHistory(address: string) {
 }
 
 async function getWalletTokenTransfers(
+  chain: string,
   contractAddresses: string[],
-  walletAddress: string
+  walletAddress: string,
+  fromDate?: string,
+  toDate?: string
 ) {
   try {
-    const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
-      chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
+    const options: any = {
+      // chain: process.env.NEXT_PUBLIC_ENV_CHAIN,
+      chain: chain,
       order: "DESC",
       address: walletAddress,
-      contractAddresses: contractAddresses,
-    });
+      contractAddresses,
+    };
+
+    if (fromDate) options.fromDate = fromDate;
+    if (toDate) options.toDate = toDate;
+
+    const response = await Moralis.EvmApi.token.getWalletTokenTransfers(
+      options
+    );
 
     if (!response || !response.raw) {
       throw new Error("No transfer data received from Moralis");
@@ -95,8 +110,12 @@ export default async function handler(
 
     switch (action) {
       case "getTokenBalances":
-        const { tokenAddresses, address } = params;
-        const balances = await getTokenBalances(tokenAddresses, address);
+        const { chainn, tokenAddresses, address } = params;
+        const balances = await getTokenBalances(
+          chainn,
+          tokenAddresses,
+          address
+        );
         return res.status(200).json(balances);
 
       case "getWalletHistory":
@@ -104,10 +123,14 @@ export default async function handler(
         return res.status(200).json(history);
 
       case "getWalletTokenTransfers":
-        const { contractAddresses, walletAddress } = params;
+        const { chain, contractAddresses, walletAddress, fromDate, toDate } =
+          params;
         const transfers = await getWalletTokenTransfers(
+          chain,
           contractAddresses,
-          walletAddress
+          walletAddress,
+          fromDate,
+          toDate
         );
         return res.status(200).json({ data: transfers });
 

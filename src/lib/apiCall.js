@@ -24,6 +24,35 @@ export const getUser = async (email) => {
   }
 };
 
+
+
+
+export const getUserToken = async (email) => {
+  try {
+    try {
+      return await fetch(`/api/get-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          token: true
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 //
 export const getLnbitId = async (email) => {
   try {
@@ -77,15 +106,14 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
-export const btcSat = async (amount, publicKey="") => {
+export const btcSat = async (amount, refund_address="") => {
   try {
     try {
       return await fetch(`/api/btc-sat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount,
-          publicKey
+          amount, refund_address
         }),
       })
         .then((res) => res.json())

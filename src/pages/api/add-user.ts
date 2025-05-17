@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import client from '../../lib/mongodb'; // Import the MongoDB client
 import { logIn, getUser, createTpos, createUser, createBlotzAutoReverseSwap } from "./lnbit";
 
-const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1) => {
+const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1, attempt: any = 1) => {
     try {
         const [username, domain] = email.split("@");
         const length = 4;
@@ -19,7 +19,9 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                 "extensions": [
                     "tpos",
                     "boltz",
-                    "lndhub"
+                    "lndhub",
+                    "lnurlp",
+                    "withdraw"
                 ]
             }, token, accountType) as any;
 
@@ -110,26 +112,52 @@ const addLnbit = async (email: any, usersCollection: any, onchain_address: any, 
                                 { returnDocument: "after" } // return updated document
                             );
                             // console.log("result-->",result)
+                            return;
+                        } else {
+                            return;
                         }
+                    } else {
+                        return;
                     }
 
+                } else {
+                    return;
                 }
+            } else {
+                return;
+            }
+        } else {
+            if (attempt < 3) {
+                let dt = await addLnbit(email, usersCollection, onchain_address, type, accountType, (attempt + 1))
+                return ;
+            } else {
+                return;
             }
         }
     } catch (error) {
-        console.log("error-->", error)
+        console.log("error-->", error);
+        return;
     }
 }
 
+
+const addLnbitCall = async (email: any, usersCollection: any, liquidBitcoinWallet: any, bitcoinWallet: any) => {
+    try {
+        await addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1, 1)
+        await addLnbit(email, usersCollection, bitcoinWallet, 2, 1, 1)
+        await addLnbit(email, usersCollection, bitcoinWallet, 3, 2, 1)
+    } catch (error) {
+        console.log("addLnbitCall error-->", error)
+    }
+}
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        const { email, username, passkey, publickeyId, rawId, wallet, bitcoinWallet = "", secretEmail = "",
-            secretCredentialId = "",
-            secretStorageKey = "", liquidBitcoinWallet = "", liquidBitcoinWallet_2 = "", liquidBitcoinWallet_3 = "" } = req.body;
+        const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "", liquidBitcoinWallet = "", coinosToken,
+            flowTokens } = req.body;
 
         // Validate email
         if (!email || typeof email !== 'string') {
@@ -144,23 +172,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (existingUser) {
             //   return res.status(400).json({ error: 'Email already exists' });
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet, 1, 1)
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_2, 2, 1)
-            addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet_3, 3, 2)
+            addLnbitCall(existingUser.email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
+            // addLnbit(existingUser.email, usersCollection, liquidBitcoinWallet, 1, 1, 1)
+            // addLnbit(existingUser.email, usersCollection, bitcoinWallet, 2, 1, 1)
+            // addLnbit(existingUser.email, usersCollection, bitcoinWallet, 3, 2, 1)
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
-
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, publickeyId, rawId, wallet, bitcoinWallet, liquidBitcoinWallet, liquidBitcoinWallet_2, liquidBitcoinWallet_3, multisigAddress: "", passkey2: "", passkey3: "", multisigSetup: false, multisigActivate: false, ensName: "", secretEmail,
-            secretCredentialId,
-            secretStorageKey,
-            ensSetup: false, createdAt: new Date()
+            email, username, passkey_number: 1, passkey_status: false, passkey, totalPasskey, wallet, bitcoinWallet, liquidBitcoinWallet,
+            coinosToken, flowTokens, createdAt: new Date()
         });
         // console.log("result-->", result)
-        addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1)
-        addLnbit(email, usersCollection, liquidBitcoinWallet_2, 2, 1)
-        addLnbit(email, usersCollection, liquidBitcoinWallet_3, 3, 2)
+        addLnbitCall(email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
+
+        // addLnbit(email, usersCollection, liquidBitcoinWallet, 1, 1, 1)
+        // addLnbit(email, usersCollection, bitcoinWallet, 2, 1, 1)
+        // addLnbit(email, usersCollection, bitcoinWallet, 3, 2, 1)
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
         console.error('Error adding user:', error);

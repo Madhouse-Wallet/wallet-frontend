@@ -49,9 +49,9 @@ const InternalTab = () => {
 
   const userDatata = async () => {
     const userData = await fetchUserData(
-      "0x8c6cab694f252933c89422c336dd01eae4e5f25b"
+      // "0x8c6cab694f252933c89422c336dd01eae4e5f25b"
       // "0xc96b4e2729556b7e24bd6d1de7df8f98a3f23605"
-      // userAuth?.walletAddress
+      userAuth?.walletAddress
     );
     setData(userData);
   };
