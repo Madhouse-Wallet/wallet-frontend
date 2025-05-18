@@ -23,7 +23,7 @@ export const createSalt = () => toHex(randomBytes(8));
  * the account is not deployed.
  * @resolves to the UserOperationHash, once it has been settled on chain.
  */
-export const zeroTx = async (
+export const initAccount = async (
     paymasterClient: any,
     publicClient: any,
     bundlerClient: any,

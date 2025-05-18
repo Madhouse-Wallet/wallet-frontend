@@ -9,7 +9,7 @@ import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { createBundlerClient  } from "viem/account-abstraction"
 import { signPermit } from './utils.ts'
-import { createSalt, zeroTx } from './gator.ts'
+import { createSalt, initAccount } from './gator.ts'
 
 import {
   createKernelAccountClient,
@@ -36,7 +36,7 @@ const CHAIN =
 export const zeroTrxn = async (bundlerClient,publicClient,delegatorAccount,paymasterClient) => {
   
   try {
-    const txnHash = await zeroTx(
+    const txnHash = await initAccount(
       paymasterClient,
       publicClient,
       bundlerClient,
@@ -206,21 +206,7 @@ export const getProvider = async (kernelClient) => {
 export const getAccount = async (PRIVATE_KEY) => {
   try {
 
-        /* Approve USDC for the paymaster (ensure that the account has enough USDC)
-
-            const usdc = getContract({ client, address: usdcAddress, abi: erc20Abi })
-            const usdcBalance = await usdc.read.balanceOf([account.address])
-
-            if (usdcBalance < 1000000) {
-              console.log(
-                `Fund ${account.address} with USDC on ${client.chain.name} using https://faucet.circle.com, then run this again.`,
-              )
-              process.exit()
-            }
-         */
-
     const signer = privateKeyToAccount(PRIVATE_KEY)
-
 
     // Create Kernel Smart Account
     const account = await toMetaMaskSmartAccount({
@@ -235,7 +221,7 @@ export const getAccount = async (PRIVATE_KEY) => {
     const client = createPublicClient({ chain, transport: http() })
 
     const circlePaymaster = {
-      async getPaymasterData(parameters) {
+      async getPaymasterData() {
         const permitAmount = 10000000n
         const permitSignature = await signPermit({
           tokenAddress: usdcAddress,
@@ -266,7 +252,7 @@ export const getAccount = async (PRIVATE_KEY) => {
           client,
           circlePaymaster,
           userOperation: {
-            estimateFeesPerGas: async ({ account, bundlerClient, userOperation }) => {
+            estimateFeesPerGas: async ({ bundlerClient }) => {
               const { standard: fees } = await bundlerClient.request({
                 method: 'pimlico_getUserOperationGasPrice',
               })
