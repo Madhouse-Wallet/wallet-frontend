@@ -1,59 +1,53 @@
 "use client";
-import { parseEther, zeroAddress } from "viem";
-
-
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
-
-
+import { zeroAddress,encodePacked, hexToBigInt
+ // erc20Abi, getContract, parseEther 
+} from "viem";
+import { ethers } from "ethers";
+import { createPublicClient, http } from "viem";
+import { sepolia, mainnet, arbitrum, base } from "viem/chains";
+import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
+import { createBundlerClient  } from "viem/account-abstraction"
+import { signPermit } from './utils.ts'
 
 import {
   createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
-  gasTokenAddresses,
-  getERC20PaymasterApproveCall
 } from "@zerodev/sdk";
-
 import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
-import { ethers } from "ethers";
-import { createPublicClient, http } from "viem";
-import { sepolia, mainnet, arbitrum, base } from "viem/chains";
-import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
+import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 
+// import { 
+//   Implementation, 
+//   toMetaMaskSmartAccount,
+// } from "@metamask/delegation-toolkit";
 
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-
+export const PAYMASTER_V07_ADDRESS=0x31BE08D380A21fc740883c0BC434FcFc88740b58;
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
 const CHAIN =
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "base" && base);
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
+
 const entryPoint = getEntryPoint("0.7");
-const recoveryExecutorFunction =
-  "function doRecovery(address _validator, bytes calldata _data)";
+//const deploySalt = "0x";
 
-const paymasterClient = createZeroDevPaymasterClient({
-  chain: CHAIN,
-  transport: http(PAYMASTER_RPC),
-});
-
-const publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
-  chain: CHAIN,
-});
-
-
-export const zeroTrxn = async (kernelClient) => {
+export const zeroTrxn = async (kernelClient,account,paymasterClient) => {
+  
   try {
-    const txnHash = await kernelClient.sendTransaction({
-      to: zeroAddress, // use any address
-      value: BigInt(0), // default to 0
-      data: "0x", // default to 0x
+    const txnHash = await kernelClient.sendUserOperation({
+      account,
+      calls: [
+        {
+          to: zeroAddress, // use any address
+        },
+      ],
+       paymaster: paymasterClient
     });
     return {
       status: true,
@@ -95,7 +89,19 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 export const setupNewAccount = async (PRIVATE_KEY) => {
   try {
 
+    const paymasterClient = createZeroDevPaymasterClient({
+      chain: CHAIN,
+      transport: http(PAYMASTER_RPC),
+    });
+
+    const publicClient = createPublicClient({
+      transport: http(BUNDLER_URL),
+      chain: CHAIN,
+    });
+
     const signer = privateKeyToAccount(PRIVATE_KEY)
+
+    // Create Kernel Smart Account
     // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
@@ -105,6 +111,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
 
     // Create Kernel Smart Account
     const account = await createKernelAccount(publicClient, {
+      
       plugins: {
         sudo: ecdsaValidator,
       },
@@ -128,10 +135,10 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
         },
       },
     });
-
-    let trxnZero = await zeroTrxn(kernelClient)
+    let res;
+    const trxnZero = await zeroTrxn(kernelClient,account,paymasterClient)
     if (trxnZero?.status) {
-      return {
+      res = {
         status: true,
         data: {
           privatekey: PRIVATE_KEY,
@@ -141,11 +148,11 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
         }
       }
     } else {
-      return {
+      res = {
         status: false,
         msg: "Error In Zero Trxn!"
       }
-    }
+    } return res
   } catch (error) {
     console.log("setupnewaccount error -->", error)
     return {
@@ -155,18 +162,19 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
   }
 }
 
-
-
 export const doAccountRecovery = async (PRIVATE_KEY, address) => {
   try {
-    let getAccount = await checkPrivateKey(PRIVATE_KEY)
+    const getAccount = await checkPrivateKey(PRIVATE_KEY)
     if (!getAccount.status) {
       return {
         status: false,
         msg: "Invalid Private Key!"
       }
     }
-    let signer = getAccount?.signer
+    const signer = getAccount?.signer
+
+    // Create Kernel Smart Account
+     // Create Kernel Smart Account
     // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
@@ -176,6 +184,7 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
 
     // Create Kernel Smart Account
     const account = await createKernelAccount(publicClient, {
+      
       plugins: {
         sudo: ecdsaValidator,
       },
@@ -183,18 +192,19 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
       kernelVersion: KERNEL_V3_1,
     })
 
-    if (address != account.address) {
-      return {
+    let res;
+    if (address !== account.address) {
+      res = {
         status: false,
         msg: "Invalid Private Key!"
       }
     } else {
-      return {
+      res = {
         status: true,
         data: {
         }
       }
-    }
+    } return res
   } catch (error) {
     console.log("setupnewaccount error -->", error)
     return {
@@ -218,13 +228,26 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-
+//replaced with circle paymaster https://developers.circle.com/stablecoins/quickstart-circle-paymaster
 export const getAccount = async (PRIVATE_KEY) => {
   try {
-    const signer = privateKeyToAccount(PRIVATE_KEY)
-    // Create ECDSA validator
 
-    // Create Circle Paymaster Client
+        /* Approve USDC for the paymaster (ensure that the account has enough USDC)
+
+            const usdc = getContract({ client, address: usdcAddress, abi: erc20Abi })
+            const usdcBalance = await usdc.read.balanceOf([account.address])
+
+            if (usdcBalance < 1000000) {
+              console.log(
+                `Fund ${account.address} with USDC on ${client.chain.name} using https://faucet.circle.com, then run this again.`,
+              )
+              process.exit()
+            }
+         */
+
+    const signer = privateKeyToAccount(PRIVATE_KEY)
+
+    // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
       entryPoint,
@@ -233,6 +256,7 @@ export const getAccount = async (PRIVATE_KEY) => {
 
     // Create Kernel Smart Account
     const account = await createKernelAccount(publicClient, {
+      
       plugins: {
         sudo: ecdsaValidator,
       },
@@ -241,34 +265,61 @@ export const getAccount = async (PRIVATE_KEY) => {
     })
 
 
-    const kernelClient = createKernelAccountClient({
-      account,
-      chain: CHAIN,
-      bundlerTransport: http(BUNDLER_URL),
-      client: publicClient,
-      paymaster: paymasterClient,
-      paymasterContext: {
-        token: gasTokenAddresses[CHAIN.id]["USDC"],
+    const client = createPublicClient({ chain, transport: http() })
+
+    const circlePaymaster = {
+      async getPaymasterData(parameters) {
+        const permitAmount = 10000000n
+        const permitSignature = await signPermit({
+          tokenAddress: usdcAddress,
+          account,
+          client,
+          spenderAddress: PAYMASTER_V07_ADDRESS,
+          permitAmount: permitAmount,
+        })
+
+        const paymasterData = encodePacked(
+          ['uint8', 'address', 'uint256', 'bytes'],
+          [0, usdcAddress, permitAmount, permitSignature],
+        )
+
+        return {
+          paymaster: PAYMASTER_V07_ADDRESS,
+          paymasterData,
+          paymasterVerificationGasLimit: 200000n,
+          paymasterPostOpGasLimit: 15000n,
+          isFinal: true,
+        }
       },
-    });
+    }
 
 
+    const kernelClient = createBundlerClient({
+          account,
+          client,
+          circlePaymaster,
+          userOperation: {
+            estimateFeesPerGas: async ({ account, bundlerClient, userOperation }) => {
+              const { standard: fees } = await bundlerClient.request({
+                method: 'pimlico_getUserOperationGasPrice',
+              })
+              const maxFeePerGas = hexToBigInt(fees.maxFeePerGas)
+              const maxPriorityFeePerGas = hexToBigInt(fees.maxPriorityFeePerGas)
+              return { maxFeePerGas, maxPriorityFeePerGas }
+            },
+          },
+          transport: http(`https://public.pimlico.io/v2/${CHAIN.id}/rpc`),
+        })
 
-    // Approve USDC for the paymaster (ensure that the account has enough USDC)
+
     const userOpHash = await kernelClient.sendUserOperation({
-      callData: await account.encodeCalls([
-        await getERC20PaymasterApproveCall(paymasterClient, {
-          gasToken: gasTokenAddresses[CHAIN.id]["USDC"],
-          approveAmount: parseEther('1'),
-          entryPoint,
-        }),
+      account,
+      calls: [
         {
-          to: zeroAddress,
-          value: BigInt(0),
-          data: "0x",
+          to: zeroAddress, // use any address
         },
-      ]),
-    });
+      ],
+    })
 
     console.log("UserOp hash:", userOpHash);
 
