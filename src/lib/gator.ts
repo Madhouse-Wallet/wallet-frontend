@@ -37,8 +37,6 @@ export const initAccount = async (
 
 
   // These caveats are allowing only a transfer of 0 ether to the zero address.
-    // Not a very useful operation, but it demonstrates how caveats that can be
-    // applied to a delegation.
   const caveats = createCaveatBuilder(delegatorAccount.environment)
     .addCaveat("allowedTargets", [zeroAddress])
     .addCaveat("valueLte", 0n);
@@ -62,11 +60,12 @@ export const initAccount = async (
         await delegatorAccount.signDelegation({ delegation });
 
         const calls: Call[] = [];
-
-        // The delegate is submitting the user operation, so may be deployed via initcode. If the delegator
-        // is not yet on-chain, it must be deployed before redeeming the delegation. If factory
-        // args are provided, an additional call is inserted into the calls array that is encoded
-        // for the user operation.
+        /*
+         The delegate is submitting the user operation, so may be deployed via initcode. If the delegator
+         is not yet on-chain, it must be deployed before redeeming the delegation. If factory
+         args are provided, an additional call is inserted into the calls array that is encoded
+         for the user operation.
+        */
         if (delegatorFactoryArgs) {
             const { factory, factoryData } = delegatorFactoryArgs;
 
@@ -85,8 +84,6 @@ export const initAccount = async (
             ...fast,
         });
 
-  // This could be in a separate function, for a more responsive user experience,
-  // but we leave it here for simplicity.
   return await bundlerClient.waitForUserOperationReceipt({
     hash: userOperationHash,
   });

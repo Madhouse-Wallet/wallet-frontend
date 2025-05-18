@@ -158,7 +158,7 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     const signer = getAccount?.signer
 
 
-    // Create Kernel Smart Account
+    // Create MetaMask Smart Account
     const account = await toMetaMaskSmartAccount({
     client: publicClient,
     implementation: Implementation.Hybrid,
@@ -208,7 +208,7 @@ export const getAccount = async (PRIVATE_KEY) => {
 
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
-    // Create Kernel Smart Account
+    // Create MetaMask Smart Account
     const account = await toMetaMaskSmartAccount({
     client: publicClient,
     implementation: Implementation.Hybrid,
