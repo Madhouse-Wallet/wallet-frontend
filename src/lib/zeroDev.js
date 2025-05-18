@@ -9,20 +9,18 @@ import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { createBundlerClient  } from "viem/account-abstraction"
 import { signPermit } from './utils.ts'
+import { createSalt, zeroTx } from './gator.ts'
 
 import {
-  createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
 } from "@zerodev/sdk";
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
 
-// import { 
-//   Implementation, 
-//   toMetaMaskSmartAccount,
-// } from "@metamask/delegation-toolkit";
+import { 
+  Implementation,
+  toMetaMaskSmartAccount,
+} from "@metamask/delegation-toolkit";
 
 export const PAYMASTER_V07_ADDRESS=0x31BE08D380A21fc740883c0BC434FcFc88740b58;
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
@@ -34,21 +32,16 @@ const CHAIN =
   (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
   (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
 
-const entryPoint = getEntryPoint("0.7");
-//const deploySalt = "0x";
 
-export const zeroTrxn = async (kernelClient,account,paymasterClient) => {
+export const zeroTrxn = async (bundlerClient,publicClient,delegatorAccount,paymasterClient) => {
   
   try {
-    const txnHash = await kernelClient.sendUserOperation({
-      account,
-      calls: [
-        {
-          to: zeroAddress, // use any address
-        },
-      ],
-       paymaster: paymasterClient
-    });
+    const txnHash = await zeroTx(
+      paymasterClient,
+      publicClient,
+      bundlerClient,
+      delegatorAccount
+    );
     return {
       status: true,
       data: txnHash
@@ -102,22 +95,13 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
     // Create Kernel Smart Account
-    // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
-
-    // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
+    const account = await toMetaMaskSmartAccount({
+    client: publicClient,
+    implementation: Implementation.Hybrid,
+    deployParams: [signer.address, [], [], []],
+    deploySalt: createSalt(),
+    signatory: { account: signer },
+  });
 
     const kernelClient = createKernelAccountClient({
       account,
@@ -136,7 +120,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
       },
     });
     let res;
-    const trxnZero = await zeroTrxn(kernelClient,account,paymasterClient)
+    const trxnZero = await zeroTrxn(kernelClient,publicClient,account,paymasterClient)
     if (trxnZero?.status) {
       res = {
         status: true,
@@ -173,24 +157,15 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     }
     const signer = getAccount?.signer
 
-    // Create Kernel Smart Account
-     // Create Kernel Smart Account
-    // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
 
     // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
+    const account = await toMetaMaskSmartAccount({
+    client: publicClient,
+    implementation: Implementation.Hybrid,
+    deployParams: [signer.address, [], [], []],
+    deploySalt: createSalt(),
+    signatory: { account: signer },
+  });
 
     let res;
     if (address !== account.address) {
@@ -228,7 +203,6 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-//replaced with circle paymaster https://developers.circle.com/stablecoins/quickstart-circle-paymaster
 export const getAccount = async (PRIVATE_KEY) => {
   try {
 
@@ -247,22 +221,15 @@ export const getAccount = async (PRIVATE_KEY) => {
 
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
-    // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
 
     // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    })
+    const account = await toMetaMaskSmartAccount({
+    client: publicClient,
+    implementation: Implementation.Hybrid,
+    deployParams: [signer.address, [], [], []],
+    deploySalt: createSalt(),
+    signatory: { account: signer },
+  });
 
 
     const client = createPublicClient({ chain, transport: http() })
