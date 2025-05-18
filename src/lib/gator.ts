@@ -16,13 +16,8 @@ export const createSalt = () => toHex(randomBytes(8));
  * Redeem the delegation, executing a zero value Call to the zero address. If
  * the Delegator is not deployed, a Call will be inserted to deploy the account
  * before redeeming the delegation.
- * @param redeemerAccount - The MetaMaskSmartAccount redeeming the delegation.
- * Must be the `delegate` on the delegation.
- * @param delegation - The delegation being redeemed.
- * @param delegatorFactoryArgs - The factoryArgs for the delegator account, if
- * the account is not deployed.
- * @resolves to the UserOperationHash, once it has been settled on chain.
  */
+
 export const initAccount = async (
     paymasterClient: any,
     publicClient: any,
