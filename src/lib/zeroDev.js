@@ -22,7 +22,7 @@ import {
   toMetaMaskSmartAccount,
 } from "@metamask/delegation-toolkit";
 
-export const PAYMASTER_V07_ADDRESS=0x31BE08D380A21fc740883c0BC434FcFc88740b58;
+export const PAYMASTER_V07_ADDRESS=0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
