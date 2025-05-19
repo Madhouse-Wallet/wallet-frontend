@@ -103,9 +103,6 @@ class Web3Interaction {
 ]
   }
 
-
-
-
   handleUSDCApproval = async (
     usdcAddress: string,
     ownerAddress: string,

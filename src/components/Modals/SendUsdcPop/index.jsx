@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-// import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { erc20Abi,getContract } from 'viem'
 import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
 
 import { useSelector } from "react-redux";
@@ -47,10 +47,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    // if (parseFloat(amount) > parseFloat(balance)) {
-    //   toast.error("Insufficient USDC balance");
-    //   return;
-    // }
     let data = JSON.parse(userAuth?.webauthKey)
     let retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -65,12 +61,20 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     
     setIsLoading(true);
     try {
-      let getAccountCli = await getAccount(secretData?.seedPhrase)
+      const getAccountCli = await getAccount(secretData?.seedPhrase)
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
-      let signerProvider = await getProvider(getAccountCli?.kernelClient)
+
+      const usdc = getContract(getAccountCli?.account, process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, erc20Abi)
+      const usdcBalance = await usdc.read.balanceOf([getAccountCli?.account.address])
+      if (usdcBalance<=0) {
+        console.log("Insufficient USDC balance")
+        return;
+      }
+
+      const signerProvider = await getProvider(getAccountCli?.kernelClient)
       const web3 = new Web3Interaction("sepolia", signerProvider?.ethersProvider);
 
       const result = await web3.sendUSDC(
