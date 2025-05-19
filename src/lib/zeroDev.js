@@ -20,9 +20,8 @@ import {
   toMetaMaskSmartAccount,
 } from "@metamask/delegation-toolkit";
 
-export const PAYMASTER_V07_ADDRESS=0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
+export const PAYMASTER_V07_ADDRESS = 0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
 const CHAIN =
   (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
@@ -82,7 +81,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
 
     const paymasterClient = createZeroDevPaymasterClient({
       chain: CHAIN,
-      transport: http(PAYMASTER_RPC),
+      transport: http(BUNDLER_URL),
     });
 
     const publicClient = createPublicClient({
@@ -216,7 +215,7 @@ export const getAccount = async (PRIVATE_KEY) => {
   });
 
 
-    const client = createPublicClient({ chain, transport: http() })
+    const client = createPublicClient({ chain, transport: http(BUNDLER_URL) })
 
     const circlePaymaster = {
       async getPaymasterData() {
@@ -259,7 +258,7 @@ export const getAccount = async (PRIVATE_KEY) => {
               return { maxFeePerGas, maxPriorityFeePerGas }
             },
           },
-          transport: http(`https://public.pimlico.io/v2/${CHAIN.id}/rpc`),
+          transport: http(BUNDLER_URL),
         })
 
 
