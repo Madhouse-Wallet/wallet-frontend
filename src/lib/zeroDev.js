@@ -222,7 +222,7 @@ export const getAccount = async (PRIVATE_KEY) => {
       await constructUSDCPermitForCirclePaymaster({
         ownerAddress: account.address,
         // Allow $10 USDC maximum to be spent on gas
-        value: 1000000
+        value: 10000000
             })
       )
 
