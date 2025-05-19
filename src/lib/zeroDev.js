@@ -1,18 +1,18 @@
 "use client";
-import { zeroAddress,encodePacked, hexToBigInt} from "viem";
+import { zeroAddress} from "viem";
 import { ethers } from "ethers";
 import { createPublicClient, http } from "viem";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { createBundlerClient  } from "viem/account-abstraction"
-import { signPermit } from './utils.ts'
 import { createSalt, initAccount } from './gator.ts'
 
 import {
   createKernelAccountClient,
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
+  constructUSDCPermitForCirclePaymaster,
+  createCircleUSDCPaymasterClient
 } from "@zerodev/sdk";
 
 import { 
@@ -203,7 +203,7 @@ export const getProvider = async (kernelClient) => {
 
 export const getAccount = async (PRIVATE_KEY) => {
   try {
-
+    const publicClient = createPublicClient({ chain, transport: http(BUNDLER_URL) })
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
     // Create MetaMask Smart Account
@@ -216,51 +216,35 @@ export const getAccount = async (PRIVATE_KEY) => {
   });
 
 
-    const client = createPublicClient({ chain, transport: http(BUNDLER_URL) })
+    
 
-    const circlePaymaster = {
-      async getPaymasterData() {
-        const permitAmount = 10000000n
-        const permitSignature = await signPermit({
-          tokenAddress: usdcAddress,
-          account,
-          client,
-          spenderAddress: PAYMASTER_V07_ADDRESS,
-          permitAmount: permitAmount,
-        })
+    const { signature: permit } = await account.signTypedData(
+      await constructUSDCPermitForCirclePaymaster({
+        ownerAddress: account.address,
+        // Allow $10 USDC maximum to be spent on gas
+        value: 10000000
+            })
+      )
 
-        const paymasterData = encodePacked(
-          ['uint8', 'address', 'uint256', 'bytes'],
-          [0, usdcAddress, permitAmount, permitSignature],
-        )
+    const paymasterClient = createCircleUSDCPaymasterClient({
+      chain,
+      transport: http(PAYMASTER_RPC),
+      permit: permit,
+    })
 
-        return {
-          paymaster: PAYMASTER_V07_ADDRESS,
-          paymasterData,
-          paymasterVerificationGasLimit: 200000n,
-          paymasterPostOpGasLimit: 15000n,
-          isFinal: true,
-        }
+
+    const kernelClient = createKernelAccountClient({
+      account,
+      chain: CHAIN,
+      bundlerTransport: http(BUNDLER_URL),
+      client: publicClient,
+      paymaster: paymasterClient,
+      userOperation: {
+        estimateFeesPerGas: async ({ bundlerClient }) => {
+          return getUserOperationGasPrice(bundlerClient);
+        },
       },
-    }
-
-
-    const kernelClient = createBundlerClient({
-          account,
-          client,
-          circlePaymaster,
-          userOperation: {
-            estimateFeesPerGas: async ({ bundlerClient }) => {
-              const { standard: fees } = await bundlerClient.request({
-                method: 'pimlico_getUserOperationGasPrice',
-              })
-              const maxFeePerGas = hexToBigInt(fees.maxFeePerGas)
-              const maxPriorityFeePerGas = hexToBigInt(fees.maxPriorityFeePerGas)
-              return { maxFeePerGas, maxPriorityFeePerGas }
-            },
-          },
-          transport: http(BUNDLER_URL),
-        })
+    });
 
 
     const userOpHash = await kernelClient.sendUserOperation({
