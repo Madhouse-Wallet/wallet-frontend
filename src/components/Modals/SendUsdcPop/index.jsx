@@ -42,13 +42,13 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || Number.parseFloat(amount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    let data = JSON.parse(userAuth?.webauthKey)
-    let retrieveSecretCheck = await retrieveSecret(
+    const data = JSON.parse(userAuth?.webauthKey)
+    const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
     );
@@ -57,7 +57,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
    
-    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
     
     setIsLoading(true);
     try {
@@ -113,13 +113,12 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       const web3 = new Web3Interaction("sepolia", provider);
       const result = await web3.getUSDCBalance(
         process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
-        // userAuth?.walletAddress,
-        "0xEdc625B74537eE3a10874f53D170E9c17A906B9c",
+         userAuth?.walletAddress,
         provider
       );
 
       if (result.success && result.balance) {
-        setBalance(parseFloat(result.balance).toFixed(2));
+        setBalance(Number.parseFloat(result.balance).toFixed(2));
       } else {
         toast.error(result.error || "Failed to fetch balance");
       }
