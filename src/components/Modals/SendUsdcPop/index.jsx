@@ -47,10 +47,10 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (parseFloat(amount) > parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
+    // if (parseFloat(amount) > parseFloat(balance)) {
+    //   toast.error("Insufficient USDC balance");
+    //   return;
+    // }
     let data = JSON.parse(userAuth?.webauthKey)
     let retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,

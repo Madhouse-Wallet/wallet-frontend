@@ -5,7 +5,6 @@ import { createPublicClient, http } from "viem";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { createSalt, initAccount } from './gator.ts'
 
 import {
   createKernelAccountClient,
@@ -15,10 +14,8 @@ import {
   createCircleUSDCPaymasterClient
 } from "@zerodev/sdk";
 
-import { 
-  Implementation,
-  toMetaMaskSmartAccount,
-} from "@metamask/delegation-toolkit";
+import {Implementation,toMetaMaskSmartAccount} from "@metamask/delegation-toolkit";
+import { createSalt, initAccount } from './gator.ts'
 
 export const PAYMASTER_V07_ADDRESS = 0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
