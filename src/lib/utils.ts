@@ -122,13 +122,13 @@ export const fetchBalance = async (walletAddress: string) => {
 
 
 // Adapted from https://github.com/vacekj/wagmi-permit/blob/main/src/permit.ts
-export async function eip2612Permit({
-  token,
-  chain,
-  ownerAddress,
-  spenderAddress,
-  value,
-}) {
+export const eip2612Permit = async(
+  token: any,
+  chain: any,
+  ownerAddress: any,
+  spenderAddress: any,
+  value: any,
+) => {
   return {
     types: {
       Permit: [
@@ -188,25 +188,25 @@ export const eip2612Abi = [
   },
 ]
 
-export async function signPermit({
-  tokenAddress,
-  client,
-  account,
-  spenderAddress,
-  permitAmount,
-}) {
+export const signPermit = async (
+  tokenAddress: any,
+  client: any,
+  account: any,
+  spenderAddress: any,
+  permitAmount: any,
+) => {
   const token = getContract({
     client,
     address: tokenAddress,
     abi: eip2612Abi,
   })
-  const permitData = await eip2612Permit({
+  const permitData = await eip2612Permit(
     token,
-    chain: client.chain,
-    ownerAddress: account.address,
+    client.chain,
+    account.address,
     spenderAddress,
-    value: permitAmount,
-  })
+    permitAmount,
+  )
 
   const wrappedPermitSignature = await account.signTypedData(permitData)
 

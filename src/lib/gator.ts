@@ -34,7 +34,7 @@ export const initAccount = async (
   // These caveats are allowing only a transfer of 0 ether to the zero address.
   const caveats = createCaveatBuilder(delegatorAccount.environment)
     .addCaveat("allowedTargets", [zeroAddress])
-    .addCaveat("valueLte", 0n);
+    .addCaveat("valueLte", BigInt(0));
 
         const privateKey = generatePrivateKey(); 
         const account = privateKeyToAccount(privateKey);
