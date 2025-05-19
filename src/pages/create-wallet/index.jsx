@@ -68,7 +68,8 @@ const CreateWallet = () => {
     bitcoinWallet,
     liquidBitcoinWallet,
     coinosToken,
-    flowTokens
+    flowTokens,
+    coinosUserName
   ) => {
     try {
       try {
@@ -83,7 +84,8 @@ const CreateWallet = () => {
             bitcoinWallet,
             liquidBitcoinWallet,
             coinosToken,
-            flowTokens
+            flowTokens,
+            coinosUserName
           }),
         })
           .then((res) => res.json())
@@ -200,7 +202,7 @@ const CreateWallet = () => {
         );
         let registerCoinos = await registerCoinosUser(
           cleanEmail,
-          "testttttttt"
+          process.env.NEXT_PUBLIC_COINOSIS_PASS
         );
         localStorage.setItem("coinosToken", registerCoinos?.token);
         const [usernameInit, domainInit] = (registerData.email).split("@");
@@ -247,7 +249,8 @@ const CreateWallet = () => {
             bitcoinWallet,
             liquidBitcoinWallet,
             registerCoinos?.token,
-            flowTokens
+            flowTokens,
+            cleanEmail
           );
           toast.success("Sign Up Successfully!");
           dispatch(

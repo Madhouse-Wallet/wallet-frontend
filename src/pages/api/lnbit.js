@@ -60,6 +60,55 @@ const logIn = async (type = 1) => {
   }
 };
 
+
+
+
+const userLogIn = async (type = 1, usr) => {
+  try {
+    let backendUrl = "";
+    let username = "";
+    let password = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      username = process.env.NEXT_PUBLIC_LNBIT_USERNAME;
+      password = process.env.NEXT_PUBLIC_LNBIT_PASS;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      username = process.env.NEXT_PUBLIC_LNBIT_USERNAME_2;
+      password = process.env.NEXT_PUBLIC_LNBIT_PASS_2;
+    }
+    // Fixed IP address as used in curl commands
+    let response = await fetch(`${backendUrl}api/v1/auth/usr`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        usr
+      }),
+    });
+    response = await response.json();
+    if (response?.access_token) {
+      return {
+        status: true,
+        data: { token: response?.access_token },
+      };
+    } else {
+      return {
+        status: false,
+        msg: response?.detail,
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+
 const createUser = async (data, token, type = 1) => {
   try {
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
@@ -105,6 +154,184 @@ const createUser = async (data, token, type = 1) => {
   }
 };
 
+const addUserWallet = async (id, data, token, type = 1) => {
+  try {
+    let backendUrl = "";
+    let apiKey = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
+    //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
+    let response = await fetch(`${backendUrl}users/api/v1/user/${id}/wallet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+      body: JSON.stringify(data),
+    });
+    response = await response.json();
+    // console.log("response get user",response)
+    if (response?.adminkey) {
+      return {
+        status: true,
+        data: response,
+      };
+    } else {
+      return {
+        status: false,
+        msg: response?.detail,
+      };
+    }
+  } catch (error) {
+    console.log("add user wallet error-->", error)
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+}
+
+
+
+// splitpayments/api/v1/targets
+const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
+  try {
+    //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
+    let backendUrl = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+    }
+    // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
+    let response = await fetch(`${backendUrl}splitpayments/api/v1/targets`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+      body: JSON.stringify(data),
+    });
+    response = await response.json();
+    // console.log("response create user",response)
+
+    if (response?.detail) {
+      return {
+        status: false,
+        msg: response?.detail,
+      };
+    } else {
+      return {
+        status: true,
+        data: response,
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+
+
+// create lnurlpCreate link
+const lnurlpCreate = async (data, apiKey, token, type = 1) => {
+  try {
+    let backendUrl = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+    }
+    // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
+    let response = await fetch(`${backendUrl}lnurlp/api/v1/links`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+      body: JSON.stringify(data),
+    });
+    response = await response.json();
+    // console.log("response create user",response)
+
+    if (response?.detail) {
+      return {
+        status: false,
+        msg: response?.detail,
+      };
+    } else {
+      return {
+        status: true,
+        data: response,
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+
+
+// create lnurlpCreate link
+const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
+  try {
+    let backendUrl = "";
+    if (type == 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+    }
+    // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
+    let response = await fetch(`${backendUrl}withdraw/api/v1/links`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+      body: JSON.stringify(data),
+    });
+    response = await response.json();
+    // console.log("response create user",response)
+
+    if (response?.detail) {
+      return {
+        status: false,
+        msg: response?.detail,
+      };
+    } else {
+      return {
+        status: true,
+        data: response,
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+
+
 const getUser = async (id, token, type = 1) => {
   try {
     let backendUrl = "";
@@ -149,16 +376,13 @@ const getUser = async (id, token, type = 1) => {
   }
 };
 
-const createTpos = async (data, token, type = 1) => {
+const createTpos = async (data, apiKey, token, type = 1) => {
   try {
     let backendUrl = "";
-    let apiKey = "";
     if (type == 1) {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     // console.log("type",backendUrl, apiKey )
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
@@ -193,16 +417,13 @@ const createTpos = async (data, token, type = 1) => {
   }
 };
 
-const createBlotzAutoReverseSwap = async (data, token, type = 1) => {
+const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
   try {
     let backendUrl = "";
-    let apiKey = "";
     if (type == 1) {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(
@@ -586,4 +807,9 @@ module.exports = {
   payInvoice,
   getStats,
   getPayments,
+  addUserWallet,
+  userLogIn,
+  splitPaymentTarget,
+  lnurlpCreate,
+  withdrawLinkCreate
 };
