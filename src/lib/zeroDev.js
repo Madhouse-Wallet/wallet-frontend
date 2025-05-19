@@ -22,6 +22,7 @@ import {
 
 export const PAYMASTER_V07_ADDRESS = 0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
 const CHAIN =
   (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
@@ -81,7 +82,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
 
     const paymasterClient = createZeroDevPaymasterClient({
       chain: CHAIN,
-      transport: http(BUNDLER_URL),
+      transport: http(PAYMASTER_RPC),
     });
 
     const publicClient = createPublicClient({
