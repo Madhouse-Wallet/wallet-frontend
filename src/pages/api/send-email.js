@@ -1,11 +1,6 @@
 import AWS from "aws-sdk";
-import { readFileSync } from "fs";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 
 // Initialize the SES service
-
 const replacePlaceholders = (template, placeholders) => {
   try {
     return template.replace(/{{(\w+)}}/g, (_, key) => placeholders[key] || "");
@@ -27,11 +22,8 @@ export default async function handler(req, res) {
 
       const { type, subject, emailData, email } = req.body;
       console.log("type, subject, emailData, email", req.body);
-      let templatePath;
-      let htmlTemplate;
-      let htmlBody;
       // Path to the HTML template
-      if (type == "registerOtp") {
+  
         console.log(
           "process.env.NEXT_PUBLIC_DOMAIN-->",
           process.env.NEXT_PUBLIC_DOMAIN
@@ -39,16 +31,9 @@ export default async function handler(req, res) {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`
         );
-        htmlTemplate = await response.text();
-        htmlBody = await replacePlaceholders(htmlTemplate, emailData);
-      } else if (type == "verifyOtp") {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_DOMAIN}verifyEmail.html`
-        ); // Fetching from public folder
-        htmlTemplate = await response.text();
+       const htmlTemplate = await response.text();
+       const  htmlBody = await replacePlaceholders(htmlTemplate, emailData);
 
-        htmlBody = await replacePlaceholders(htmlTemplate, emailData);
-      }
       // console.log("htmlBody-->", htmlBody)
       const params = {
         Destination: {
