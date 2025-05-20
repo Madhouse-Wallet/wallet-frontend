@@ -81,7 +81,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       const hash = await getAccountCli?.kernelClient.sendUserOperation({
                 callData: await account.encodeCalls([
                   // The approval
-                  await getERC20PaymasterApproveCall(getAccountCli?.paymasterClient, {
+                  await getERC20PaymasterApproveCall(getAccountCli?.paymaster, {
                     gasToken: gasTokenAddresses[chain.id].USDC,
                     approveAmount: BigInt((amount+1) * 1e6),
                     entryPoint,
