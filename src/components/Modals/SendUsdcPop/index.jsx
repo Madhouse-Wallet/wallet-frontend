@@ -6,7 +6,6 @@ import { erc20Abi,getContract } from 'viem'
 import { getRpcProvider, getAccount } from "@/lib/zeroDev.js";
 
 import {  getERC20PaymasterApproveCall,gasTokenAddresses} from "@zerodev/sdk";
-import {  getEntryPoint} from "@zerodev/sdk/constants"
 
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -17,7 +16,7 @@ import {
   retrieveSecret,
 } from "../../../utils/webauthPrf";
 
-const entryPoint = getEntryPoint();
+
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -78,7 +77,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         console.log("Insufficient USDC balance")
         return;
       }
-
+      const entryPoint = '0x0000000071727De22E5E9d8BAf0edAc6f37da032';
       const hash = await getAccountCli?.kernelClient.sendUserOperation({
                 callData: await account.encodeCalls([
                   // The approval
@@ -92,7 +91,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                       to: usdc.address,
                       abi: usdc.abi,
                       functionName: 'transfer',
-                      args: [recipientAddress, BigInt(amount * 1e6)],
+                      args: [toAddress, BigInt(amount * 1e6)],
                   },
                 ]),
             });
