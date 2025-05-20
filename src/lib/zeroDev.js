@@ -260,6 +260,7 @@ export const getAccount = async (PRIVATE_KEY) => {
       account: account,
       kernelClient: kernelClient,
       address: account.address,
+      paymaster: paymasterClient,
     };
   } catch (error) {
     console.log("error-->",error)
