@@ -255,7 +255,7 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
     }
     // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
     let response = await fetch(`${backendUrl}lnurlp/api/v1/links`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
@@ -299,7 +299,7 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
     }
     // NEXT_PUBLIC_LNBIT_API_KEY  ,   process.env.NEXT_PUBLIC_LNBIT_URL
     let response = await fetch(`${backendUrl}withdraw/api/v1/links`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,

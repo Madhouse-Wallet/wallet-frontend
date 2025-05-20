@@ -178,7 +178,7 @@ class Web3Interaction {
     provider: ethers.providers.Web3Provider, // Ensure this is a valid Web3Provider
     ownerAddress?: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
-    return new Promise((resolve) => {
+    return new Promise(async(resolve) => {
       try {
         // Convert amount to BigNumber (assuming USDC has 6 decimals)
         // const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
@@ -218,11 +218,15 @@ class Web3Interaction {
         console.log("tx-->", tx);
 
         // tx.wait(); // Wait for transaction confirmation
+        // Wait for transaction to be mined
+        // const receipt = await tx.wait();
+        // console.log("Transaction confirmed:", receipt.transactionHash);
         resolve({
           success: true,
           txHash: tx.hash,
         });
       } catch (error: any) {
+        console.log("error-->",error)
         resolve({
           success: false,
           error:
