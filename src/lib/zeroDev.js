@@ -199,7 +199,7 @@ export const getProvider = async (kernelClient) => {
 
 export const getAccount = async (PRIVATE_KEY) => {
   try {
-    const publicClient = createPublicClient({ chain, transport: http(BUNDLER_URL) })
+    const publicClient = createPublicClient({ chain: CHAIN, transport: http(BUNDLER_URL) })
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
     // Create MetaMask Smart Account
