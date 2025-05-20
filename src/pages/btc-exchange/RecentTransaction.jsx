@@ -356,6 +356,7 @@ const RecentTransaction = () => {
         <BitcoinTransactionsTab
           setTransactions={setBtcTransactions}
           dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
         />
       ),
     },
