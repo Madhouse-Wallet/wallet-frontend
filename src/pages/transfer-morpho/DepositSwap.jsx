@@ -59,7 +59,7 @@ const DepositSwap = () => {
       }
 
       // Fetch Morpho balance
-      const morphoResult = await web3.getUSDCBalance(
+      const morphoResult = await web3.getMorphoBalance(
         MORPHO_ADDRESS,
         userAuth?.walletAddress,
         provider
@@ -129,7 +129,7 @@ const DepositSwap = () => {
         });
       }
     } catch (error) {
-      toast.error("Failed to get swap quote from Enso");
+      // toast.error("Failed to get swap quote from Enso");
       console.error("Enso quote error:", error);
 
       // Clear the second input on error
@@ -345,7 +345,7 @@ const DepositSwap = () => {
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
-                          disabled={isLoading}
+                          // disabled={isLoading}
                         />
                         {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
@@ -412,7 +412,7 @@ const DepositSwap = () => {
                           {swapDirection.to}
                         </button>
                         <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(morphoBalance).toFixed(2)}{" "}
+                          Balance: {parseFloat(morphoBalance).toFixed(4)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
