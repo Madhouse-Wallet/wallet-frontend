@@ -92,7 +92,7 @@ const Dashboard = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          walletId:userExist?.userId?.lnbitWalletId_3
+          walletId: userExist?.userId?.lnbitWalletId_3,
           // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
         }),
       });
@@ -140,7 +140,7 @@ const Dashboard = () => {
           const balances = await fetchTokenBalances(
             process.env.NEXT_PUBLIC_ENV_CHAIN,
             [
-              process.env.NEXT_PUBLIC_USDPLUS_CONTRACT_ADDRESS,
+              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
               process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             ],
             userAuth?.walletAddress
@@ -155,7 +155,7 @@ const Dashboard = () => {
 
             if (
               token.token_address.toLowerCase() ===
-              process.env.NEXT_PUBLIC_USDPLUS_CONTRACT_ADDRESS.toLowerCase()
+              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS.toLowerCase()
             ) {
               combinedUsdValue += token.usd_value || 0;
             }

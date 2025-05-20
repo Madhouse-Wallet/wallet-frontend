@@ -1,18 +1,17 @@
 import React from "react";
 import {
-  fetchBitcoinTransactions,
+  fetchBitcoinTransactionsByAddress,
   formatBitcoinTransactions,
-} from "../../utils/bitcoinTransaction";
+} from "../../utils/bitquery-api";
 import { useEffect, useState } from "react";
 import BitcoinTransactionDetail from "./BitcoinTransactionDetail";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
-// import { fetchBitcoinTransactionsByAddress } from "../api/bitquery-api";
 
 // Bitcoin Transactions Component
-const BitcoinTransactionsTab = ({ setTransactions, dateRange }) => {
+const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,9 +19,9 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange }) => {
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
 
-  // You may want to replace this with your actual BTC wallet address
-  // const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
+  // Get wallet address from user auth
   const btcWalletAddress = userAuth?.bitcoinWallet;
+  // const btcWalletAddress = "bc1p0fxxzxvzyr4qdpq8pw6gn0tyl0np8wn89t3zn3fdd4j8vvvf6s2qcl7a73";
 
   const formatDateForApi = (date) => {
     if (!date) return null;
@@ -31,7 +30,7 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange }) => {
 
   // Check if date filter is active
   const isDateFilterActive = () => {
-    return dateRange[0].startDate && dateRange[0].endDate;
+    if (applyTrue === true) return true;
   };
 
   useEffect(() => {
@@ -39,35 +38,51 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange }) => {
       if (!btcWalletAddress) return;
 
       setLoading(true);
+      setError(null);
+
       try {
-        const data = await fetchBitcoinTransactions(btcWalletAddress);
-        setTransactions(data?.txs);
+        // Use date filters only if active
+        const startDate = isDateFilterActive()
+          ? formatDateForApi(dateRange?.startDate)
+          : null;
+        const endDate = isDateFilterActive()
+          ? formatDateForApi(dateRange?.endDate)
+          : null;
+
+        console.log("startDate", startDate, endDate, dateRange, applyTrue);
+        // BitQuery API token
+        const accessToken = process.env.NEXT_PUBLIC_BITQUERY_ACCESS_TOKEN;
+
+        // Fetch transactions using the API
+        const data = await fetchBitcoinTransactionsByAddress(
+          btcWalletAddress,
+          accessToken,
+          startDate,
+          endDate
+        );
+
+        // Set raw transactions data for parent component
+        setTransactions(data);
+
+        // Format transactions for display
         const formattedTransactions = formatBitcoinTransactions(
           data,
           btcWalletAddress
         );
+
         setBtcTransactions(formattedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
-        setError("Failed to load transactions");
+        setError(
+          "Failed to load transactions. Please check your connection and wallet address."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, [btcWalletAddress]);
-
-  // useEffect(() => {
-  //   const result = fetchBitcoinTransactionsByAddress(
-  //     "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD",
-  //     "2025-05-24",
-  //     "2025-05-31"
-  //   ).then((transactions) => {
-  //     console.log("Fetched transactions:", transactions);
-  //   });
-  //   console.log("result", result);
-  // }, []);
+  }, [btcWalletAddress, dateRange, applyTrue]);
 
   // Get status color
   const getStatusColor = (status) => {

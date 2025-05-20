@@ -14,101 +14,101 @@ class Web3Interaction {
     }
     this.USDC_ABI = [
       {
-        "constant": false,
-        "inputs": [
+        constant: false,
+        inputs: [
           {
-            "name": "spender",
-            "type": "address"
+            name: "spender",
+            type: "address",
           },
           {
-            "name": "amount",
-            "type": "uint256"
-          }
+            name: "amount",
+            type: "uint256",
+          },
         ],
-        "name": "approve",
-        "outputs": [
+        name: "approve",
+        outputs: [
           {
-            "name": "",
-            "type": "bool"
-          }
+            name: "",
+            type: "bool",
+          },
         ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function",
       },
       {
-        "constant": false,
-        "inputs": [
+        constant: false,
+        inputs: [
           {
-            "name": "to",
-            "type": "address"
+            name: "to",
+            type: "address",
           },
           {
-            "name": "amount",
-            "type": "uint256"
-          }
+            name: "amount",
+            type: "uint256",
+          },
         ],
-        "name": "transfer",
-        "outputs": [
+        name: "transfer",
+        outputs: [
           {
-            "name": "",
-            "type": "bool"
-          }
+            name: "",
+            type: "bool",
+          },
         ],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function",
       },
       {
-        "constant": true,
-        "inputs": [
+        constant: true,
+        inputs: [
           {
-            "name": "owner",
-            "type": "address"
+            name: "owner",
+            type: "address",
           },
           {
-            "name": "spender",
-            "type": "address"
-          }
+            name: "spender",
+            type: "address",
+          },
         ],
-        "name": "allowance",
-        "outputs": [
+        name: "allowance",
+        outputs: [
           {
-            "name": "",
-            "type": "uint256"
-          }
+            name: "",
+            type: "uint256",
+          },
         ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
+        payable: false,
+        stateMutability: "view",
+        type: "function",
       },
       {
-        "constant": true,
-        "inputs": [
+        constant: true,
+        inputs: [
           {
-            "name": "account",
-            "type": "address"
-          }
+            name: "account",
+            type: "address",
+          },
         ],
-        "name": "balanceOf",
-        "outputs": [
+        name: "balanceOf",
+        outputs: [
           {
-            "name": "",
-            "type": "uint256"
-          }
+            name: "",
+            type: "uint256",
+          },
         ],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ]
+        payable: false,
+        stateMutability: "view",
+        type: "function",
+      },
+    ];
   }
 
   handleUSDCApproval = async (
     usdcAddress: string,
     ownerAddress: string,
     spenderAddress: string,
-    amount: string | number,
+    amount: string | number
   ): Promise<{ success: boolean; allowance?: string; error?: string }> => {
     return new Promise((resolve, reject) => {
       try {
@@ -140,10 +140,7 @@ class Web3Interaction {
         // If allowance is insufficient, approve
         try {
           // Check allowance again after approval
-          const newAllowance = contract.allowance(
-            ownerAddress,
-            spenderAddress
-          );
+          const newAllowance = contract.allowance(ownerAddress, spenderAddress);
 
           resolve({
             success: true,
@@ -202,7 +199,7 @@ class Web3Interaction {
             recipientAddress,
             amount
           ).then((approvalResult) => {
-            console.log("approvalResult-->", approvalResult)
+            console.log("approvalResult-->", approvalResult);
             if (!approvalResult.success) {
               resolve({
                 success: false,
@@ -216,9 +213,9 @@ class Web3Interaction {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, signer);
         // Perform the transfer
-        console.log("usdcContract-->",usdcContract)
+        console.log("usdcContract-->", usdcContract);
         const tx = usdcContract.transfer(recipientAddress, usdcAmount);
-        console.log("tx-->",tx)
+        console.log("tx-->", tx);
 
         // tx.wait(); // Wait for transaction confirmation
         resolve({
@@ -247,12 +244,9 @@ class Web3Interaction {
     return new Promise(async (resolve) => {
       try {
         // Create USDC contract instance
-        console.log("usdcAddress=-->", usdcAddress)
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
-        console.log("usdcContract=-->", usdcContract)
         // Get balance
         const balanceWei = await usdcContract.balanceOf(accountAddress);
-        console.log("balanceWei=-->", balanceWei)
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 6);
 
@@ -261,7 +255,42 @@ class Web3Interaction {
           balance,
         });
       } catch (error: any) {
-        console.log("error-->", error)
+        console.log("error-->", error);
+        resolve({
+          success: false,
+          error:
+            error.reason ||
+            error.data?.message ||
+            error.message ||
+            "Failed to fetch balance",
+        });
+      }
+    });
+  };
+
+  getMorphoBalance = async (
+    usdcAddress: string,
+    accountAddress: string,
+    provider: ethers.providers.Web3Provider
+  ): Promise<{ success: boolean; balance?: string; error?: string }> => {
+    return new Promise(async (resolve) => {
+      try {
+        // Create USDC contract instance
+        console.log("usdcAddress=-->", usdcAddress);
+        const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
+        console.log("usdcContract=-->", usdcContract);
+        // Get balance
+        const balanceWei = await usdcContract.balanceOf(accountAddress);
+        console.log("balanceWei=-->", balanceWei);
+        // Convert balance to human readable format (6 decimals for USDC)
+        const balance = ethers.utils.formatUnits(balanceWei, 18);
+        console.log("line-293", balance);
+        resolve({
+          success: true,
+          balance,
+        });
+      } catch (error: any) {
+        console.log("error-->", error);
         resolve({
           success: false,
           error:
