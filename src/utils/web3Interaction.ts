@@ -5,102 +5,102 @@ class Web3Interaction {
   private PROVIDER: any;
   private SIGNER: any;
   private USDC_ABI: any;
-  
+
   constructor(currentNetwork?: any, provider?: any) {
     if (provider) {
       this.PROVIDER = provider;
       this.SIGNER = this.PROVIDER.getSigner();
     }
-      this.USDC_ABI = [
-  {
-    "constant": false,
-    "inputs": [
+    this.USDC_ABI = [
       {
-        "name": "spender",
-        "type": "address"
+        "constant": false,
+        "inputs": [
+          {
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "approve",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "approve",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "to",
-        "type": "address"
+        "constant": false,
+        "inputs": [
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "transfer",
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "transfer",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "owner",
-        "type": "address"
+        "constant": true,
+        "inputs": [
+          {
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "name": "spender",
+            "type": "address"
+          }
+        ],
+        "name": "allowance",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        "name": "spender",
-        "type": "address"
+        "constant": true,
+        "inputs": [
+          {
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
       }
-    ],
-    "name": "allowance",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "balanceOf",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
+    ]
   }
 
   handleUSDCApproval = async (
@@ -194,13 +194,13 @@ class Web3Interaction {
 
         // Handle approval if ownerAddress is provided
         if (ownerAddress) {
-         this.handleUSDCApproval(
+          this.handleUSDCApproval(
             usdcAddress,
             ownerAddress,
             recipientAddress,
             amount
           ).then((approvalResult) => {
-
+            console.log("approvalResult-->", approvalResult)
             if (!approvalResult.success) {
               resolve({
                 success: false,
@@ -214,7 +214,10 @@ class Web3Interaction {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, signer);
         // Perform the transfer
+        console.log("usdcContract-->",usdcContract)
         const tx = usdcContract.transfer(recipientAddress, usdcAmount);
+        console.log("tx-->",tx)
+
         tx.wait(); // Wait for transaction confirmation
         resolve({
           success: true,
@@ -239,14 +242,15 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       try {
         // Create USDC contract instance
+        console.log("usdcAddress=-->", usdcAddress)
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
-
+        console.log("usdcContract=-->", usdcContract)
         // Get balance
-        const balanceWei = usdcContract.balanceOf(accountAddress);
-
+        const balanceWei = await usdcContract.balanceOf(accountAddress);
+        console.log("balanceWei=-->", balanceWei)
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 6);
 
@@ -255,6 +259,7 @@ class Web3Interaction {
           balance,
         });
       } catch (error: any) {
+        console.log("error-->", error)
         resolve({
           success: false,
           error:
