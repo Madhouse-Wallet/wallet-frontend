@@ -222,7 +222,7 @@ export const getAccount = async (PRIVATE_KEY) => {
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
       paymaster: paymasterClient,
-      paymasterContext: { token: gasTokenAddresses[chain.id].USDC },
+      paymasterContext: { token: gasTokenAddresses[CHAIN.id].USDC },
       userOperation: {
         estimateFeesPerGas: async ({ bundlerClient }) => {
           return getUserOperationGasPrice(bundlerClient);

@@ -6,6 +6,7 @@ import { erc20Abi,getContract } from 'viem'
 import { getRpcProvider, getAccount } from "@/lib/zeroDev.js";
 
 import {  getERC20PaymasterApproveCall,gasTokenAddresses} from "@zerodev/sdk";
+import { base } from "viem/chains";
 
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -16,7 +17,7 @@ import {
   retrieveSecret,
 } from "../../../utils/webauthPrf";
 
-
+const CHAIN = base;
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -82,7 +83,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                 callData: await account.encodeCalls([
                   // The approval
                   await getERC20PaymasterApproveCall(getAccountCli?.paymaster, {
-                    gasToken: gasTokenAddresses[chain.id].USDC,
+                    gasToken: gasTokenAddresses[CHAIN.id].USDC,
                     approveAmount: BigInt((amount+1) * 1e6),
                     entryPoint,
                   }),
