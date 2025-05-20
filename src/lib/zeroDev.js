@@ -230,25 +230,6 @@ export const getAccount = async (PRIVATE_KEY) => {
       },
     });
 
-
-    const userOpHash = await kernelClient.sendUserOperation({
-      account,
-      calls: [
-        {
-          to: zeroAddress, // use any address
-        },
-      ],
-    })
-
-    console.log("UserOp hash:", userOpHash);
-
-    // Wait for the receipt of the user operation
-    const receipt = await kernelClient.waitForUserOperationReceipt({
-      hash: userOpHash,
-    });
-
-    console.log("UserOp completed", receipt.receipt.transactionHash);
-
     if (!getAccount) {
       return {
         status: false,
@@ -264,7 +245,7 @@ export const getAccount = async (PRIVATE_KEY) => {
     };
   } catch (error) {
     console.log("error-->",error)
-    return { status: false, msg: error?.message || "Please Try again ALter!" };
+    return { status: false, msg: error?.message || "Error getting smart account" };
   }
 };
 
