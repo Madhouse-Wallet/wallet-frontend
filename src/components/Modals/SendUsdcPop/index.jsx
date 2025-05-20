@@ -109,8 +109,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       const web3 = new Web3Interaction("sepolia", provider);
       const result = await web3.getUSDCBalance(
         process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
-        // userAuth?.walletAddress,
-        "0xEdc625B74537eE3a10874f53D170E9c17A906B9c",
+        userAuth?.walletAddress,
+        // "0xEdc625B74537eE3a10874f53D170E9c17A906B9c",
         provider
       );
 
