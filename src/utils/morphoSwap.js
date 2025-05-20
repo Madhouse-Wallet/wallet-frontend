@@ -7,7 +7,6 @@ const LIFI_API_KEY = process.env.NEXT_PUBLIC_LIFI_API_KEY;
 const ENSO_API_KEY = process.env.NEXT_PUBLIC_ENSO_API_KEY;
 const FEE_RECEIVER = process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER;
 
-
 const ERC20_ABI = [
   {
     name: "approve",
@@ -97,8 +96,7 @@ const enso = new EnsoClient({
  */
 export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
   try {
-
-    console.log("FEE_RECEIVER", FEE_RECEIVER)
+    console.log("FEE_RECEIVER", FEE_RECEIVER);
     // Get approval data from Enso
     const approvalData = await enso.getApprovalData({
       fromAddress: fromAddress,
@@ -133,11 +131,11 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
       },
       approvalData: approvalData
         ? {
-          token: tokenIn.address,
-          spender: approvalData.spender,
-          amount: amountIn,
-          tx: approvalData.tx,
-        }
+            token: tokenIn.address,
+            spender: approvalData.spender,
+            amount: amountIn,
+            tx: approvalData.tx,
+          }
         : null,
       action: {
         fromToken: {
@@ -163,67 +161,129 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
 }
 
 /**
- * Gets a quote for swapping tokens
- * @param {Object} tokenIn - Input token details
- * @param {Object} tokenOut - Output token details
- * @param {string} amountIn - Input amount in smallest unit (e.g., wei)
- * @param {number} chainId - Chain ID for the transaction
+ * Gets a quote for swapping tokens using Li.Fi API
+ * @param {number} fromChain - Source chain ID
+ * @param {number} toChain - Destination chain ID
+ * @param {string} fromToken - Source token name or address
+ * @param {string} toToken - Destination token name or address
+ * @param {string} toAmount - Target output amount
  * @param {string} fromAddress - Address executing the swap
+ * @param {string} [fromAmountForGas] - Optional amount for gas estimation
  * @returns {Promise<Object>} Quote data
  */
-export async function getQuote(
-  tokenIn,
-  tokenOut,
-  amountIn,
-  chainId,
-  fromAddress
-) {
-  try {
-    return await swap(tokenIn, tokenOut, amountIn, chainId, fromAddress);
-  } catch (error) {
-    console.error("Error getting quote:", error);
-    throw error;
-  }
-}
+export const getQuote = async (
+  fromChain,
+  toChain,
+  fromToken,
+  toToken,
+  fromAmount,
+  fromAddress,
+  fromAmountForGas
+) => {
+  console.log(
+    "detail",
+    fromChain,
+    toChain,
+    fromToken,
+    toToken,
+    fromAmount,
+    fromAddress,
+    fromAmountForGas
+  );
+  const result = await axios.get(`${API_URL}/quote`, {
+    headers: { Authorization: `x-lifi-api-key: ${LIFI_API_KEY}` },
+    params: {
+      fromChain,
+      toChain,
+      fromToken,
+      toToken,
+      fromAmount,
+      fromAddress,
+      toAddress: "0x154975aB54a95244AD17cF56d321b7d3b010e85F",
+    },
+  });
+  return result.data;
+};
 
 /**
- * Check if a token needs approval and get approval transaction
+ * Check if a token needs approval and execute approval transaction if needed
+ * @param {Object} wallet - Ethers wallet or signer
  * @param {string} tokenAddress - Address of the token to approve
- * @param {string} spender - Address of the spender to approve
+ * @param {string} approvalAddress - Address of the spender to approve
  * @param {string} amount - Amount to approve
- * @param {string} owner - Address of the token owner
- * @param {Object} provider - Ethers provider
- * @returns {Promise<Object|null>} Approval transaction or null if not needed
+ * @returns {Promise<void>}
  */
-export async function checkAndGetApproval(
+export const checkAndSetAllowance = async (
+  wallet,
   tokenAddress,
-  spender,
-  amount,
-  owner,
-  provider
-) {
-  try {
-    const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
-    const currentAllowance = await tokenContract.allowance(owner, spender);
-
-    if (
-      ethers.BigNumber.from(currentAllowance).lt(ethers.BigNumber.from(amount))
-    ) {
-      return {
-        from: owner,
-        to: tokenAddress,
-        data: tokenContract.interface.encodeFunctionData("approve", [
-          spender,
-          amount,
-        ]),
-        value: "0",
-      };
-    }
-
-    return null; // No approval needed
-  } catch (error) {
-    console.error("Error checking approval:", error);
-    throw error;
+  approvalAddress,
+  amount
+) => {
+  // Transactions with the native token don't need approval
+  if (tokenAddress === ethers.constants.AddressZero) {
+    return;
   }
-}
 
+  const erc20 = new Contract(tokenAddress, ERC20_ABI, wallet);
+  const allowance = await erc20.allowance(
+    await wallet.getAddress(),
+    approvalAddress
+  );
+
+  if (allowance.lt(amount)) {
+    const approveTx = await erc20.approve(approvalAddress, amount);
+    await approveTx.wait();
+  }
+};
+
+/**
+ * Get a quote for a bridge transfer
+ * @param {number} fromChain - Source chain ID
+ * @param {number} toChain - Destination chain ID
+ * @param {string} fromToken - Source token name or address
+ * @param {string} toToken - Destination token name or address
+ * @param {string} fromAmount - Input amount
+ * @param {string} fromAddress - Address executing the bridge
+ * @returns {Promise<Object>} Bridge quote data
+ */
+export const getBridgeQuote = async (
+  fromChain,
+  toChain,
+  fromToken,
+  toToken,
+  fromAmount,
+  fromAddress
+) => {
+  const result = await axios.get(`${API_URL}/quote`, {
+    headers: { Authorization: `x-lifi-api-key: ${LIFI_API_KEY}` },
+    params: {
+      fromChain,
+      toChain,
+      fromToken,
+      toToken,
+      fromAmount,
+      fromAddress,
+    },
+  });
+  return result.data;
+};
+
+/**
+ * Check the status of a bridge transfer
+ * @param {string} bridge - Bridge name
+ * @param {number} fromChain - Source chain ID
+ * @param {number} toChain - Destination chain ID
+ * @param {string} txHash - Transaction hash
+ * @returns {Promise<Object>} Status data
+ */
+export const getStatus = async (bridge, fromChain, toChain, txHash) => {
+  const result = await axios.get(`${API_URL}/status`, {
+    params: {
+      bridge,
+      fromChain,
+      toChain,
+      txHash,
+    },
+  });
+  return result.data;
+};

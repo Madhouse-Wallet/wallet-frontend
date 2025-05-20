@@ -1,11 +1,12 @@
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import { getQuoteByReceivingAmount } from "../../utils/lifiSwap";
+import { getQuote, checkAndSetAllowance } from "../../utils/morphoSwap";
 import Image from "next/image";
+import { retrieveSecret } from "../../utils/webauthPrf";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -20,54 +21,33 @@ const DepositSwap = () => {
   // Fixed swap direction: USDC to USD+
   const [swapDirection] = useState({
     from: "USDC",
-    to: "USD+",
+    to: "PAXG",
   });
 
   // Chain constants
   const BASE_CHAIN = process.env.NEXT_PUBLIC_MAINNET_CHAIN;
+  const ETHEREUM_CHAIN = process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
-  const TBTC_ADDRESS = process.env.NEXT_PUBLIC_USDPLUS_CONTRACT_ADDRESS;
-  // const TBTC_ADDRESS = "0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376";
+  const TBTC_ADDRESS = process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address;
 
   useEffect(() => {
-    const connectWallet = async () => {
-      if (userAuth?.passkeyCred) {
-        try {
-          let account = await getAccount(userAuth?.passkeyCred);
-          if (account) {
-            let provider = await getProvider(account.kernelClient);
-            if (provider) {
-              setProviderr(provider?.ethersProvider);
-            } else {
-              throw new Error("Provider not detected");
-            }
-          }
-        } catch (error) {
-          toast.error("Failed to connect wallet. Please try again.");
-        }
-      }
-    };
-
-    connectWallet();
-  }, [userAuth?.passkeyCred]);
-
-  useEffect(() => {
-    if (providerr && userAuth?.walletAddress) {
+    if (userAuth?.walletAddress) {
       fetchBalances();
     }
-  }, [providerr, userAuth?.walletAddress]);
+  }, [userAuth?.walletAddress]);
 
   const fetchBalances = async () => {
     try {
-      if (!providerr || !userAuth?.walletAddress) return;
+      // if (!providerr || !userAuth?.walletAddress) return;
 
-      const web3 = new Web3Interaction("sepolia", providerr);
+      const provider = await getRpcProvider();
+      const web3 = new Web3Interaction("sepolia", provider);
 
       // Fetch USDC balance
       const usdcResult = await web3.getUSDCBalance(
         USDC_ADDRESS,
         userAuth?.walletAddress,
-        providerr
+        provider
       );
 
       if (usdcResult.success && usdcResult.balance) {
@@ -77,10 +57,10 @@ const DepositSwap = () => {
       }
 
       // Fetch USD+ balance (assuming similar method exists or create one)
-      const tbtcResult = await web3.getUSDCBalance(
+      const tbtcResult = await web3.getMorphoBalance(
         TBTC_ADDRESS,
         userAuth?.walletAddress,
-        providerr
+        provider
       );
 
       if (tbtcResult.success && tbtcResult.balance) {
@@ -93,42 +73,47 @@ const DepositSwap = () => {
 
   // Updated quote function to work with fromAmount
   const updateQuote = async (amount) => {
-    if (!amount || !providerr || !userAuth?.walletAddress) return;
+    if (!amount || !userAuth?.walletAddress) return;
 
     setIsLoading(true);
     try {
-      // Fixed tokens: from USDC to USD+
-      const fromTokenValue = "USDC";
-      const toTokenValue = "USD+";
-
-      // Call the quote API with the source amount
-      const quoteResult = await getQuoteByReceivingAmount(
-        BASE_CHAIN,
-        USDC_ADDRESS,
-        BASE_CHAIN,
-        TBTC_ADDRESS,
-        ethers.utils.parseUnits(amount, 6).toString(), // Assuming 6 decimals for USDC
-        userAuth?.walletAddress
+      // Get quote using the imported function
+      const quoteResult = await getQuote(
+        BASE_CHAIN, // fromChain
+        ETHEREUM_CHAIN, // toChain (same chain swap)
+        "USDC", // fromToken
+        "PAXG", // toToken
+        ethers.utils.parseUnits(amount, 6).toString(), // amount in smallest units
+        userAuth?.walletAddress // fromAddress
       );
-      console.log("line-125", quoteResult, quoteResult?.estimate?.toAmount);
+
       setQuote(quoteResult);
 
       // Update toAmount based on the quote result
-      if (quoteResult && quoteResult?.estimate?.toAmount) {
+      if (
+        quoteResult &&
+        quoteResult.estimate &&
+        quoteResult.estimate.toAmount
+      ) {
         const formattedToAmount = ethers.utils.formatUnits(
-          quoteResult?.estimate?.toAmount,
-          6 // Using 8 decimals for USD+ (Bitcoin standard)
+          quoteResult.estimate.toAmount,
+          18 // Using 6 decimals for USD+
         );
         setToAmount(formattedToAmount);
 
         // Update USD values
         setUsdValue({
-          from: (parseFloat(amount) * 1).toFixed(2), // USDC is pegged to USD
-          to: (parseFloat(formattedToAmount) * 30000).toFixed(2), // Example BTC price of $30,000
+          from:
+            quoteResult.estimate.fromAmountUSD ||
+            (parseFloat(amount) * 1).toFixed(2),
+          to:
+            quoteResult.estimate.toAmountUSD ||
+            (parseFloat(formattedToAmount) * 1).toFixed(2),
         });
       }
     } catch (error) {
-      toast.error("Failed to get swap quote");
+      console.error("Quote error:", error);
+      // toast.error("Failed to get swap quote");
 
       // Clear the second input on error
       setToAmount("");
@@ -153,7 +138,7 @@ const DepositSwap = () => {
 
   // Execute the swap transaction
   const executeSwap = async () => {
-    if (!quote || !providerr || !userAuth?.walletAddress) {
+    if (!quote || !userAuth?.walletAddress) {
       toast.error("Quote not available or wallet not connected");
       return;
     }
@@ -163,15 +148,32 @@ const DepositSwap = () => {
       return;
     }
 
+    let data = JSON.parse(userAuth?.webauthKey);
+    let retrieveSecretCheck = await retrieveSecret(
+      data?.storageKeySecret,
+      data?.credentialIdSecret
+    );
+    if (!retrieveSecretCheck?.status) {
+      toast.error(retrieveSecretCheck?.msg);
+      return;
+    }
+
+    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+    console.log("secretData", secretData);
     setIsLoading(true);
     try {
-      // Check if the signer has an address
-      const signer = providerr.getSigner();
+      let getAccountCli = await getAccount(secretData?.seedPhrase);
+      if (!getAccountCli.status) {
+        toast.error(getAccountCli?.msg);
+        return;
+      }
+      console.log("getAccountCli", getAccountCli);
+      const signer = await getProvider(getAccountCli?.kernelClient);
+      console.log("signer", signer);
 
-      // Try to get the signer address - this may resolve the null address issue
       let signerAddress;
       try {
-        signerAddress = await signer.getAddress();
+        signerAddress = await signer?.signer?.getAddress();
       } catch (error) {
         toast.error(
           "Wallet signer not properly initialized. Please reconnect your wallet."
@@ -189,8 +191,27 @@ const DepositSwap = () => {
         return;
       }
 
+      // Check allowance and set if needed
+      if (quote.estimate && quote.estimate.approvalAddress) {
+        console.log("line-196", quote, signer);
+        await checkAndSetAllowance(
+          signer?.signer,
+          quote.action.fromToken.address,
+          quote.estimate.approvalAddress,
+          ethers.utils.parseUnits(fromAmount, 6).toString()
+        );
+        toast.info("Token approval complete");
+      }
+      console.log("line-203", quote);
       // Send the transaction
-      const tx = await signer.sendTransaction(quote.transactionRequest);
+      // const tx = await signer?.signer?.sendTransaction(
+      //   quote.transactionRequest
+      // );
+      const tx = await signer?.signer?.sendTransaction({
+        to: quote.transactionRequest.to,
+        data: quote.transactionRequest.data,
+        value: quote.transactionRequest.value, // if non-zero
+      });
       toast.info(`Transaction submitted: ${tx.hash}`);
 
       // Wait for confirmation
@@ -205,6 +226,7 @@ const DepositSwap = () => {
       setToAmount("");
       setQuote(null);
     } catch (error) {
+      console.log("error", error);
       // More descriptive error handling
       if (error.message && error.message.includes("user rejected")) {
         toast.error("Transaction was rejected by user");
@@ -221,16 +243,6 @@ const DepositSwap = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Since we're fixing tokens from USDC to USD+, this function is simplified
-  const toggleSwapDirection = () => {
-    // Direction is fixed, but we'll still reset the form
-    setFromAmount("");
-    setToAmount("");
-    setQuote(null);
-    setUsdValue({ from: "0", to: "0" });
-    toast.info("Trading direction is fixed to USDC → USD+");
   };
 
   // Determine button text based on state
@@ -274,16 +286,16 @@ const DepositSwap = () => {
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
-                          disabled={isLoading}
+                          // disabled={isLoading}
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                        {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
-                          {quote
+                          {quote && quote.action && quote.action.fromToken
                             ? parseFloat(
-                                quote?.action?.fromToken?.priceUSD
+                                quote.action.fromToken.priceUSD
                               ).toFixed(2)
                             : "0.0"}
-                        </h6>
+                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -317,7 +329,6 @@ const DepositSwap = () => {
                   <div className="py-2 my-[-30px] text-center">
                     <button
                       className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
-                      // onClick={toggleSwapDirection}
                       disabled={true}
                     >
                       {swapIcn}
@@ -334,14 +345,14 @@ const DepositSwap = () => {
                           disabled={true} // This input is always disabled
                           readOnly
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                        {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
-                          {quote
-                            ? parseFloat(
-                                quote?.action?.toToken?.priceUSD
-                              ).toFixed(2)
+                          {quote && quote.action && quote.action.toToken
+                            ? parseFloat(quote.action.toToken.priceUSD).toFixed(
+                                2
+                              )
                             : "0.0"}
-                        </h6>
+                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -366,7 +377,7 @@ const DepositSwap = () => {
                           Balance:{" "}
                           {swapDirection.to === "USDC"
                             ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : parseFloat(tbtcBalance).toFixed(4)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
