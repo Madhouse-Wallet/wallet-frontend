@@ -111,10 +111,13 @@ const Dashboard = () => {
           console.error("BTC price not found");
           return;
         }
-
-        const btc = balanceSats / 1e8; // convert sats to BTC
-        const usdValue = (btc * btcPriceUsd).toFixed(2);
-
+        let usdValue = 0;
+        let btc = 0;
+        if (balanceSats > 0) {
+          
+          btc = balanceSats / 1e8; // convert sats to BTC
+          usdValue = (btc * btcPriceUsd).toFixed(2);
+          }
         // Optional: set to state
         setCollateralRatio(balanceSats);
         // setCollateralRatio(usdValue);

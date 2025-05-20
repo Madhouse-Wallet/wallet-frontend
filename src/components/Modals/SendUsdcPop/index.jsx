@@ -5,6 +5,10 @@ import { toast } from "react-toastify";
 import { erc20Abi,getContract } from 'viem'
 import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
 
+import {
+  getERC20PaymasterApproveCall,
+} from "@zerodev/sdk";
+
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
@@ -73,18 +77,31 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         console.log("Insufficient USDC balance")
         return;
       }
+      
+      const hash = await getAccountCli?.kernelClient.sendUserOperation({
+                callData: await account.encodeCalls([
+                  // The approval
+                  await getERC20PaymasterApproveCall(paymasterClient, {
+                    gasToken: gasTokenAddresses[chain.id].USDC,
+                    approveAmount: BigInt((amount+1) * 1e6),
+                    entryPoint,
+                  }),
+                  // The actual call
+                  {
+                      to: usdc.address,
+                      abi: usdc.abi,
+                      functionName: 'transfer',
+                      args: [recipientAddress, BigInt(amount * 1e6)],
+                  },
+                ]),
+            });
 
-      const signerProvider = await getProvider(getAccountCli?.kernelClient)
-      const web3 = new Web3Interaction("sepolia", signerProvider?.ethersProvider);
+            console.log('UserOperation hash', hash)
 
-      const result = await web3.sendUSDC(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-        toAddress,
-        amount,
-        signerProvider?.ethersProvider
-      );
+            const receipt = await getAccountCli?.kernelClient.waitForUserOperationReceipt({ hash })
+            console.log('Transaction hash', receipt.receipt.transactionHash)
 
-      if (result.success) {
+      if (receipt.receipt.transactionHash) {
         setSuccess(true);
         setSendUsdc(false);
         toast.success("USDC sent successfully!");

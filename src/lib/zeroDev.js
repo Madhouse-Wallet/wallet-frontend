@@ -212,23 +212,10 @@ export const getAccount = async (PRIVATE_KEY) => {
     signatory: { account: signer },
   });
 
-
-    
-
-    const { signature: permit } = await account.signTypedData(
-      await constructUSDCPermitForCirclePaymaster({
-        ownerAddress: account.address,
-        // Allow $10 USDC maximum to be spent on gas
-        value: 10000000
-            })
-      )
-
-    const paymasterClient = createCircleUSDCPaymasterClient({
-      chain,
-      transport: http(PAYMASTER_RPC),
-      permit: permit,
-    })
-
+    const paymasterClient = createZeroDevPaymasterClient({
+          chain: CHAIN,
+          transport: http(PAYMASTER_RPC),
+        });
 
     const kernelClient = createKernelAccountClient({
       account,
@@ -236,6 +223,7 @@ export const getAccount = async (PRIVATE_KEY) => {
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
       paymaster: paymasterClient,
+      paymasterContext: { token: gasTokenAddresses[chain.id].USDC },
       userOperation: {
         estimateFeesPerGas: async ({ bundlerClient }) => {
           return getUserOperationGasPrice(bundlerClient);
