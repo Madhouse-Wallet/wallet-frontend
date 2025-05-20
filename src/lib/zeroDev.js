@@ -11,10 +11,14 @@ import {
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
   gasTokenAddresses,
-} from "@zerodev/sdk";
+    createKernelAccount,
 
-import {Implementation,toMetaMaskSmartAccount} from "@metamask/delegation-toolkit";
-import { createSalt, initAccount } from './gator.ts'
+} from "@zerodev/sdk";
+const entryPoint = getEntryPoint("0.7")
+import {
+  getEntryPoint, KERNEL_V3_1
+} from "@zerodev/sdk/constants"
+import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
 
 export const PAYMASTER_V07_ADDRESS = 0x6C973eBe80dCD8660841D4356bf15c32460271C9; // base network circle paymaster
 export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
@@ -27,15 +31,13 @@ const CHAIN =
   (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
 
 
-export const zeroTrxn = async (bundlerClient,publicClient,delegatorAccount,paymasterClient) => {
-  
+export const zeroTrxn = async (kernelClient) => {
   try {
-    const txnHash = await initAccount(
-      paymasterClient,
-      publicClient,
-      bundlerClient,
-      delegatorAccount
-    );
+    const txnHash = await kernelClient.sendTransaction({
+      to: zeroAddress, // use any address
+      value: BigInt(0), // default to 0
+      data: "0x", // default to 0x
+    });
     return {
       status: true,
       data: txnHash
@@ -48,6 +50,7 @@ export const zeroTrxn = async (bundlerClient,publicClient,delegatorAccount,payma
     }
   }
 };
+
 export const getPrivateKey = async () => {
   try {
     const PRIVATE_KEY = generatePrivateKey();
@@ -89,14 +92,20 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
     // Create Kernel Smart Account
-    const account = await toMetaMaskSmartAccount({
-    client: publicClient,
-    implementation: Implementation.Hybrid,
-    deployParams: [signer.address, [], [], []],
-    deploySalt: createSalt(),
-    signatory: { account: signer },
-  });
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer,
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
 
+    // Create Kernel Smart Account
+    const account = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
     const kernelClient = createKernelAccountClient({
       account,
       chain: CHAIN,
@@ -152,14 +161,20 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     const signer = getAccount?.signer
 
 
-    // Create MetaMask Smart Account
-    const account = await toMetaMaskSmartAccount({
-    client: publicClient,
-    implementation: Implementation.Hybrid,
-    deployParams: [signer.address, [], [], []],
-    deploySalt: createSalt(),
-    signatory: { account: signer },
-  });
+      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer,
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
+
+    // Create Kernel Smart Account
+    const account = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
 
     let res;
     if (address !== account.address) {
@@ -203,13 +218,20 @@ export const getAccount = async (PRIVATE_KEY) => {
     const signer = privateKeyToAccount(PRIVATE_KEY)
 
     // Create MetaMask Smart Account
-    const account = await toMetaMaskSmartAccount({
-    client: publicClient,
-    implementation: Implementation.Hybrid,
-    deployParams: [signer.address, [], [], []],
-    deploySalt: createSalt(),
-    signatory: { account: signer },
-  });
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer,
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
+
+    // Create Kernel Smart Account
+    const account = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    })
 
     const paymasterClient = createZeroDevPaymasterClient({
           chain: CHAIN,
