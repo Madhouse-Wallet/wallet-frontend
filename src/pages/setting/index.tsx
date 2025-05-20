@@ -62,25 +62,18 @@ const Setting: React.FC = () => {
     }
   };
 
-useEffect(()=>{
-  const getAdminId = async()=>{
-    let adminKey = await getLnbitId(userAuth.email);
-    if (
-      adminKey?.adminId
-    ) {
-      setAdminId(adminKey?.adminId)
+  useEffect(() => {
+
+    const getUserData = async () => {
+      let userExist = await getUser(userAuth.email);
+      setTposId1(userExist?.userId?.lnbitLinkId || "")
+      setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
+      setAdminId(userExist?.userId?.lnbitAdminKey_3 || "")
     }
-  }
-  const getUserData = async()=>{
-    let userExist = await getUser(userAuth.email);
-    setTposId1(userExist?.userId?.lnbitLinkId || "")
-    setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
-  }
-  if(userAuth.email){
-    getAdminId();
-    getUserData();
-  }
-},[])
+    if (userAuth.email) {
+      getUserData();
+    }
+  }, [])
 
   const getPreview = async () => {
     try {
@@ -182,7 +175,7 @@ useEffect(()=>{
       } else {
         toast.error(result.msg);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
@@ -226,12 +219,6 @@ useEffect(()=>{
         // }
         console.log(JSON.parse(callGetSecretData?.secret))
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
-        let adminKey = await getLnbitId(userAuth.email);
-        if (
-          adminKey?.adminId
-        ) {
-          setAdminId(adminKey?.adminId)
-        }
         setRecoverSeedStatus(true);
         setRecover(!recover);
       } else {
@@ -676,64 +663,64 @@ useEffect(()=>{
                         // tposId1 tposId2
                         <>
                           <li className="flex gap-2 py-1">
-                        <div
-                          className="block text-gray-500"
-                          style={{ width: 160 }}
-                        >
-                          USD Tpos ID:
-                        </div>
-                        {/* {userAuth?.email && ( */}
-                        <span className="text-white flex items-center">
-                          {tposId1 ? tposId1: "--"}
-                        </span>
-                        {/* )} */}
-                      </li>
-                      <li className="flex gap-2 py-1">
-                        <div
-                          className="block text-gray-500"
-                          style={{ width: 160 }}
-                        >
-                          Bitcoin Tpos ID:
-                        </div>
-                        {/* {userAuth?.email && ( */}
-                        <span className="text-white flex items-center">
-                          {tposId2 ? tposId2: "--"}
-                        </span>
-                        {/* )} */}
-                      </li>
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 160 }}
+                            >
+                              USD Tpos ID:
+                            </div>
+                            {/* {userAuth?.email && ( */}
+                            <span className="text-white flex items-center">
+                              {tposId1 ? tposId1 : "--"}
+                            </span>
+                            {/* )} */}
+                          </li>
+                          <li className="flex gap-2 py-1">
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 160 }}
+                            >
+                              Bitcoin Tpos ID:
+                            </div>
+                            {/* {userAuth?.email && ( */}
+                            <span className="text-white flex items-center">
+                              {tposId2 ? tposId2 : "--"}
+                            </span>
+                            {/* )} */}
+                          </li>
                         </>
                       }
                       {
                         // `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`
 
                         <li className="flex gap-2 py-1">
-                        <div
-                          className="block text-gray-500"
-                          style={{ width: 160 }}
-                        >
-                          lndhub:
-                        </div>
-                        {/* {userAuth?.email && ( */}
-                        <span className="text-white flex items-center">
-                          {adminId ?
-                          (
-                            <>
-                              {splitAddress( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
-                              <button
-                                onClick={() =>
-                                  handleCopy( `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
-                                }
-                                className="border-0 p-0 bg-transparent pl-1"
-                              >
-                                {copyIcn}
-                              </button>
-                            </>
-                          )
-                          
-                          : "--"}
-                        </span>
-                        {/* )} */}
-                      </li>
+                          <div
+                            className="block text-gray-500"
+                            style={{ width: 160 }}
+                          >
+                            lndhub:
+                          </div>
+                          {/* {userAuth?.email && ( */}
+                          <span className="text-white flex items-center">
+                            {adminId ?
+                              (
+                                <>
+                                  {splitAddress(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
+                                  <button
+                                    onClick={() =>
+                                      handleCopy(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+                                    }
+                                    className="border-0 p-0 bg-transparent pl-1"
+                                  >
+                                    {copyIcn}
+                                  </button>
+                                </>
+                              )
+
+                              : "--"}
+                          </span>
+                          {/* )} */}
+                        </li>
                       }
                       {/* <li className="flex gap-2 py-1">
                         <div
@@ -833,9 +820,8 @@ useEffect(()=>{
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -897,9 +883,8 @@ useEffect(()=>{
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}

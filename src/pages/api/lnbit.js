@@ -176,7 +176,7 @@ const addUserWallet = async (id, data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    // console.log("response get user",response)
+    console.log("addUserWallet response 179-->",response)
     if (response?.adminkey) {
       return {
         status: true,
@@ -220,7 +220,7 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    // console.log("response create user",response)
+    console.log("response splitPaymentTarget",response)
 
     if (response?.detail) {
       return {
@@ -396,7 +396,7 @@ const createTpos = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    // console.log("createTpos createTpos-->", type, response)
+    console.log("createTpos 399-->",response)
     if (response?.id) {
       return {
         status: true,

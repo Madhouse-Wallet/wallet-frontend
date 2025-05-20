@@ -4,140 +4,7 @@ import { logIn, getUser, createTpos, addUserWallet, createUser, createBlotzAutoR
 
 
 
-export const addLnbit = async (email: any, usersCollection: any, onchain_address: any, type: any = 1, accountType: any = 1, attempt: any = 1) => {
-    try {
-        const [username, domain] = email.split("@");
-        const length = 4;
-        const randomAlpha = await Array.from({ length }, () =>
-            String.fromCharCode(97 + Math.floor(Math.random() * 26)) // a–z
-        ).join("");
-        const newEmail = `${username}${type}madhouse${randomAlpha}@${domain}`;
-        let returnData = {}
-        let getToken = await logIn(accountType) as any;
-
-        if (getToken && getToken?.status) {
-            let token = getToken?.data?.token;
-            let addUser = await createUser({
-                "email": newEmail,
-                "extensions": [
-                    "tpos",
-                    "boltz",
-                    "lndhub",
-                    "lnurlp",
-                    "withdraw"
-                ]
-            }, token, accountType) as any;
-
-            if (addUser && addUser?.status) {
-                let getUserToken = await userLogIn(accountType, addUser?.data?.id) as any;
-                getUserToken = getUserToken?.data?.token;
-                let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
-                // console.log("getUserData-->", getUserData, getUserData?.data?.wallets)
-                if (getUserData && getUserData?.status) {
-                    let addTpsoLink = await createTpos({
-                        "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
-                        "name": "",
-                        "currency": "USD",
-                        "tax_inclusive": true,
-                        "tax_default": 0,
-                        "tip_options": "[]",
-                        "tip_wallet": "",
-                        "withdraw_time": 0,
-                        "withdraw_between": 10,
-                        "withdraw_time_option": "",
-                        "withdraw_premium": 0,
-                        "withdraw_pin_disabled": false,
-                        "lnaddress": false,
-                        "lnaddress_cut": 0
-                    }, getUserToken, accountType) as any;
-
-                    if (addTpsoLink && addTpsoLink?.status) {
-                        let link = addTpsoLink?.data?.id;
-
-
-                        const walletId = getUserData?.data?.wallets[0]?.id;
-                        const userId = getUserData?.data?.id;
-
-                        const updateFields =
-                            type > 1
-                                ? {
-                                    [`lnbitEmail_${type}`]: newEmail,
-                                    [`lnbitLinkId_${type}`]: link,
-                                    [`lnbitWalletId_${type}`]: walletId,
-                                    [`lnbitId_${type}`]: userId,
-                                }
-                                : {
-                                    lnbitEmail: newEmail,
-                                    lnbitLinkId: link,
-                                    lnbitWalletId: walletId,
-                                    lnbitId: userId,
-                                };
-                        const result = await usersCollection.findOneAndUpdate(
-                            { email },
-                            { $set: updateFields },
-                            { returnDocument: "after" }
-                        );
-                        // console.log("result-->",result)
-                    }
-
-                    if (accountType == 1) {
-                        let addcreateBlotzAutoReverseSwap = await createBlotzAutoReverseSwap({
-                            "asset": "L-BTC/BTC",
-                            "direction": "send",
-                            "balance": 100,
-                            "instant_settlement": true,
-                            "wallet": getUserData?.data?.wallets[0]?.id || getUserData?.data?.id,
-                            "amount": "200",
-                            "onchain_address": onchain_address,
-                            "refund_address": "ccd505c23ebf4a988b190e6aaefff7a5",
-                        }, getUserToken, accountType) as any;
-
-                        if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {
-
-
-                            const updateFields =
-                                type > 1
-                                    ? {
-                                        [`boltzAutoReverseSwap_${type}`]: addcreateBlotzAutoReverseSwap?.data,
-                                    }
-                                    : {
-                                        boltzAutoReverseSwap: addcreateBlotzAutoReverseSwap?.data
-                                    };
-                            const result = await usersCollection.findOneAndUpdate(
-                                { email: email }, // filter
-                                {
-                                    $set: updateFields
-                                }, // update
-                                { returnDocument: "after" } // return updated document
-                            );
-                            // console.log("result-->",result)
-                            return;
-                        } else {
-                            return;
-                        }
-                    } else {
-                        return;
-                    }
-
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        } else {
-            if (attempt < 3) {
-                let dt = await addLnbit(email, usersCollection, onchain_address, type, accountType, (attempt + 1))
-                return;
-            } else {
-                return;
-            }
-        }
-    } catch (error) {
-        console.log("error-->", error);
-        return;
-    }
-}
+ 
 
 //create Tpos Links:
 const createTposLink = async (wallet1: any, wallet2: any, apiKey1: any, apikey2: any, token: any, accountType: any) => {
@@ -230,7 +97,7 @@ const createBoltzAutoReverseSwap = async (wallet1: any, wallet2: any, apiKey1: a
 
 
 //create Lnurp Pay Links:
-const createLnurlpLink = async (apiKey1: any, token: any, accountType: any) => {
+const createLnurlpLink = async (wallet: any, apiKey1: any, token: any, accountType: any) => {
     try {
         let result = {
             status: true,
@@ -239,11 +106,12 @@ const createLnurlpLink = async (apiKey1: any, token: any, accountType: any) => {
         let setting = {
             "description": "send",
             "min": 10,
-            "max": 100000000,
+            "max": 10000000,
             "currency": "sats",
+            "wallet": wallet
         }
         let createLnurlpLink1 = await lnurlpCreate(setting, apiKey1, token, accountType) as any;
-        console.log("createLnurlpLink1-->",createLnurlpLink1)
+        console.log("createLnurlpLink1-->", createLnurlpLink1)
         if (createLnurlpLink1 && createLnurlpLink1?.status) {
             result.createLnurlpLink1 = createLnurlpLink1?.data;
         }
@@ -269,9 +137,14 @@ const createWithdrawLink = async (apiKey1: any, token: any, accountType: any) =>
             "max_withdrawable": 100000000,
             "uses": 1,
             "wait_time": 1,
+            "is_unique": true,
+            "webhook_url": "",
+            "webhook_headers": "",
+            "webhook_body": "",
+            "custom_url": ""
         }
         let createWithdrawLink1 = await withdrawLinkCreate(setting, apiKey1, token, accountType) as any;
-        console.log("createWithdrawLink-->",createWithdrawLink1)
+        console.log("createWithdrawLink-->", createWithdrawLink1)
         if (createWithdrawLink1 && createWithdrawLink1?.status) {
             result.createWithdrawLink1 = createWithdrawLink1?.data;
         }
@@ -301,10 +174,12 @@ const createSplitPayment = async (apiKey1: any, apikey2: any, token: any, accoun
             ]
         }
         let splitPaymentTarget1 = await splitPaymentTarget(setting, apiKey1, token, accountType) as any;
+        console.log("splitPaymentTarget1 -->", splitPaymentTarget1)
         if (splitPaymentTarget1 && splitPaymentTarget1?.status) {
             result.splitPaymentTarget1 = splitPaymentTarget1?.data;
         }
         let splitPaymentTarget2 = await splitPaymentTarget(setting, apikey2, token, accountType) as any;
+        console.log("splitPaymentTarget2 -->", splitPaymentTarget2)
         if (splitPaymentTarget2 && splitPaymentTarget2?.status) {
             result.splitPaymentTarget2 = splitPaymentTarget2?.data;
         }
@@ -336,13 +211,12 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
                     "splitpayments"
                 ]
             }, token, accountType) as any;
-
+            console.log("addUser tpos wallet line 345-->", addUser)
             if (addUser && addUser?.status) {
-
                 //Get User Wallet Token
                 let getUserToken = await userLogIn(accountType, addUser?.data?.id) as any;
                 getUserToken = getUserToken?.data?.token;
-
+                console.log("getUserToken tpos wallet line 351-->", getUserToken)
                 let addNewWallet = await addUserWallet(addUser?.data?.id, {
                     name: "bitcoin",
                     currency: "USD"
@@ -350,14 +224,17 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
                 if (addNewWallet && !addNewWallet?.status) {
                     return;
                 }
+                console.log("addNewWallet tpos wallet line 359-->", addNewWallet)
 
                 // get User Info
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
-
+                console.log("getUserData tpos wallet line 359-->", getUserData)
                 if (getUserData && getUserData?.status) {
-
                     //create Tpos Link:
                     let addTpsoLink = await createTposLink(getUserData?.data?.wallets[0]?.id, getUserData?.data?.wallets[1]?.id, getUserData?.data?.wallets[0]?.adminkey, getUserData?.data?.wallets[1]?.adminkey, getUserToken, accountType) as any;
+
+                    console.log("addTpsoLink tpos wallet line 367-->", addTpsoLink)
+
                     // 1st wallet vars
                     let link = addTpsoLink?.tpos1?.id;
                     const walletId = getUserData?.data?.wallets[0]?.id;
@@ -392,6 +269,7 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
 
                     if (accountType == 1) {
                         let addcreateBlotzAutoReverseSwap = await createBoltzAutoReverseSwap(walletId, walletId2, adminKey, adminKey2, coinosis_address, bitcoin_address, refund_address, getUserToken, accountType);
+                        console.log("addcreateBlotzAutoReverseSwap tpos wallet line 403-->", addcreateBlotzAutoReverseSwap)
 
                         if (addcreateBlotzAutoReverseSwap && addcreateBlotzAutoReverseSwap?.status) {
 
@@ -407,14 +285,12 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
                                 }, // update
                                 { returnDocument: "after" } // return updated document
                             );
-                            return;
-                        } else {
-                            return;
                         }
                     }
 
                     let setSplitPaymentTarget = await createSplitPayment(adminKey, adminKey2, getUserToken, accountType);
-
+                    console.log("setSplitPaymentTarget-->", setSplitPaymentTarget)
+                    return;
                 } else {
                     return;
                 }
@@ -495,7 +371,7 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                         { returnDocument: "after" }
                     );
 
-                    let addLnurlpLink = await createLnurlpLink(adminKey, getUserToken, accountType);
+                    let addLnurlpLink = await createLnurlpLink(walletId, adminKey, getUserToken, accountType);
 
                     console.log("addLnurlpLink spend wallet line 498-->", addLnurlpLink)
 

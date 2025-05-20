@@ -12,18 +12,8 @@ function shortenAddress(address: any) {
 const addLnbitCall = async (madhouseWallet: any, email: any, usersCollection: any, liquidBitcoinWallet: any, bitcoinWallet: any) => {
     try {
         const shortened = await shortenAddress(madhouseWallet);
-
-        console.log("madhouseWallet-->", shortened)
-        console.log("email-->", email)
-
-        console.log("liquidBitcoinWallet-->", liquidBitcoinWallet)
-
-        console.log("bitcoinWallet-->", bitcoinWallet)
-
         let refund_address = await addLnbitSpendUser(shortened, email, usersCollection, 2, 1);
-        console.log("refund_address --> line12--->", refund_address)
-        // await addLnbitTposUser(madhouseWallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address || "ccd505c23ebf4a988b190e6aaefff7a5", 1, 1);
-
+        await addLnbitTposUser(shortened, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address, 1, 1);
     } catch (error) {
         console.log("addLnbitCall error-->", error)
     }
@@ -52,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (existingUser) {
 
             // create lnbit user on background
-            // addLnbitCall(wallet, existingUser.email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
+            addLnbitCall(wallet, existingUser.email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
 
             return res.status(200).json({ status: "success", message: 'User fetched successfully', userData: existingUser });
         }
@@ -63,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // create lnbit user on background
-        // addLnbitCall(wallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
+        addLnbitCall(wallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet)
 
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
     } catch (error) {
