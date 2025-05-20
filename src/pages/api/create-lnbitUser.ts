@@ -459,6 +459,8 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                 ]
             }, token, accountType) as any;
 
+            console.log("addUser spend wallet line 462-->", addUser)
+
             if (addUser && addUser?.status) {
 
                 //Get User Wallet Token

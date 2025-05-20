@@ -1,5 +1,6 @@
 // Import ABIs
 import { Contract, ethers } from "ethers";
+import { parseUnits } from "viem";
 
 class Web3Interaction {
   private PROVIDER: any;
@@ -183,7 +184,8 @@ class Web3Interaction {
     return new Promise((resolve) => {
       try {
         // Convert amount to BigNumber (assuming USDC has 6 decimals)
-        const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
+        // const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
+        const usdcAmount = parseUnits(amount.toString(), 6); // 0.1 USDC → 100000
 
         // Ensure the provider has a signer
         const signer = provider.getSigner();
@@ -218,7 +220,7 @@ class Web3Interaction {
         const tx = usdcContract.transfer(recipientAddress, usdcAmount);
         console.log("tx-->",tx)
 
-        tx.wait(); // Wait for transaction confirmation
+        // tx.wait(); // Wait for transaction confirmation
         resolve({
           success: true,
           txHash: tx.hash,

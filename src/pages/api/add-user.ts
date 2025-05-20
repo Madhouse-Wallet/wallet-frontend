@@ -9,7 +9,7 @@ import { addLnbitTposUser, addLnbitSpendUser } from "./create-lnbitUser";
 const addLnbitCall = async (madhouseWallet: any, email: any, usersCollection: any, liquidBitcoinWallet: any, bitcoinWallet: any) => {
     try {
         let refund_address = await addLnbitSpendUser(madhouseWallet, email, usersCollection, 2, 1);
-
+        console.log("refund_address --> line12--->", refund_address)
         await addLnbitTposUser(madhouseWallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address || "ccd505c23ebf4a988b190e6aaefff7a5", 1, 1);
 
     } catch (error) {

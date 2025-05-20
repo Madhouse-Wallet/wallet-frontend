@@ -81,9 +81,8 @@ const RecentTransaction = () => {
         id: tx.transaction_hash || "",
         rawData: tx,
         status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
-          isSend ? "Transfer" : "Receive"
-        }`,
+        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${isSend ? "Transfer" : "Receive"
+          }`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend ? "send" : "receive",
@@ -273,6 +272,7 @@ const RecentTransaction = () => {
     data();
   }, []);
 
+  console.log("line-276", transactions)
   const tabs = [
     {
       title: "USDC",
@@ -295,7 +295,7 @@ const RecentTransaction = () => {
                           >
                             <div className="left flex items-start gap-2">
                               <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "token send"
+                                {tx.type === "send"
                                   ? sendSvg
                                   : receiveSvg}
                               </div>
@@ -304,10 +304,10 @@ const RecentTransaction = () => {
                                   {tx.isRedemption
                                     ? "Redemption"
                                     : tx.isDeposit
-                                    ? "Deposit"
-                                    : tx.type === "token send"
-                                    ? "Send"
-                                    : "Receive"}{" "}
+                                      ? "Deposit"
+                                      : tx.type === "send"
+                                        ? "Send"
+                                        : "Receive"}{" "}
                                   {tx.amount?.split(" ")[1] || "ETH"}
                                 </h4>
                                 <p
@@ -323,9 +323,8 @@ const RecentTransaction = () => {
                               <p className="m-0  text-xs font-medium">
                                 {tx.status === "rejected"
                                   ? "Insufficient Balance"
-                                  : `${tx.type === "token send" ? "-" : "+"} ${
-                                      tx.amount
-                                    }`}
+                                  : `${tx.type === "send" ? "-" : "+"} ${tx.amount
+                                  }`}
                               </p>
                             </div>
                           </div>
@@ -390,10 +389,10 @@ const RecentTransaction = () => {
                                   {tx.isRedemption
                                     ? "Redemption"
                                     : tx.isDeposit
-                                    ? "Deposit"
-                                    : tx.type === "token send"
-                                    ? "Send"
-                                    : "Receive"}{" "}
+                                      ? "Deposit"
+                                      : tx.type === "token send"
+                                        ? "Send"
+                                        : "Receive"}{" "}
                                   {tx.amount?.split(" ")[1] || "ETH"}
                                 </h4>
                                 <p
@@ -409,9 +408,8 @@ const RecentTransaction = () => {
                               <p className="m-0  text-xs font-medium">
                                 {tx.status === "rejected"
                                   ? "Insufficient Balance"
-                                  : `${tx.type === "token send" ? "-" : "+"} ${
-                                      tx.amount
-                                    }`}
+                                  : `${tx.type === "token send" ? "-" : "+"} ${tx.amount
+                                  }`}
                               </p>
                             </div>
                           </div>
@@ -532,9 +530,8 @@ const RecentTransaction = () => {
                     setIsDatePickerOpen(!isDatePickerOpen);
                     setApplyTrue(false);
                   }}
-                  className={`px-4 py-2 ${
-                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
-                  } text-white rounded-md flex items-center gap-2`}
+                  className={`px-4 py-2 ${isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                    } text-white rounded-md flex items-center gap-2`}
                 >
                   <span>{DateFilter}</span>
                   {isDateFilterActive() && (

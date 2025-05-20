@@ -1,5 +1,5 @@
 "use client";
-import { parseEther, zeroAddress } from "viem";
+import { parseEther, zeroAddress, parseUnits } from "viem";
 
 
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
@@ -254,30 +254,30 @@ export const getAccount = async (PRIVATE_KEY) => {
 
 
 
-    // Approve USDC for the paymaster (ensure that the account has enough USDC)
-    const userOpHash = await kernelClient.sendUserOperation({
-      callData: await account.encodeCalls([
-        await getERC20PaymasterApproveCall(paymasterClient, {
-          gasToken: gasTokenAddresses[CHAIN.id]["USDC"],
-          approveAmount: parseEther('1'),
-          entryPoint,
-        }),
-        {
-          to: zeroAddress,
-          value: BigInt(0),
-          data: "0x",
-        },
-      ]),
-    });
+    // // Approve USDC for the paymaster (ensure that the account has enough USDC)
+    // const userOpHash = await kernelClient.sendUserOperation({
+    //   callData: await account.encodeCalls([
+    //     await getERC20PaymasterApproveCall(paymasterClient, {
+    //       gasToken: gasTokenAddresses[CHAIN.id]["USDC"],
+    //       approveAmount: parseUnits('1', 6),
+    //       entryPoint,
+    //     }),
+    //     {
+    //       to: zeroAddress,
+    //       value: BigInt(0),
+    //       data: "0x",
+    //     },
+    //   ]),
+    // });
 
-    console.log("UserOp hash:", userOpHash);
+    // console.log("UserOp hash:", userOpHash);
 
-    // Wait for the receipt of the user operation
-    const receipt = await kernelClient.waitForUserOperationReceipt({
-      hash: userOpHash,
-    });
+    // // Wait for the receipt of the user operation
+    // const receipt = await kernelClient.waitForUserOperationReceipt({
+    //   hash: userOpHash,
+    // });
 
-    console.log("UserOp completed", receipt.receipt.transactionHash);
+    // console.log("UserOp completed", receipt.receipt.transactionHash);
 
     if (!getAccount) {
       return {
