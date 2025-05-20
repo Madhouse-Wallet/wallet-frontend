@@ -222,7 +222,7 @@ const createBoltzAutoReverseSwap = async (wallet1: any, wallet2: any, apiKey1: a
         }
         return result
     } catch (error) {
-        console.log("error on create Tpos Link", error)
+        console.log("error on createBoltzAutoReverseSwap", error)
     }
 }
 
@@ -243,12 +243,13 @@ const createLnurlpLink = async (apiKey1: any, token: any, accountType: any) => {
             "currency": "sats",
         }
         let createLnurlpLink1 = await lnurlpCreate(setting, apiKey1, token, accountType) as any;
+        console.log("createLnurlpLink1-->",createLnurlpLink1)
         if (createLnurlpLink1 && createLnurlpLink1?.status) {
             result.createLnurlpLink1 = createLnurlpLink1?.data;
         }
         return result
     } catch (error) {
-        console.log("error on create Tpos Link", error)
+        console.log("error on createLnurlpLink1 Link", error)
     }
 }
 
@@ -270,12 +271,13 @@ const createWithdrawLink = async (apiKey1: any, token: any, accountType: any) =>
             "wait_time": 1,
         }
         let createWithdrawLink1 = await withdrawLinkCreate(setting, apiKey1, token, accountType) as any;
+        console.log("createWithdrawLink-->",createWithdrawLink1)
         if (createWithdrawLink1 && createWithdrawLink1?.status) {
             result.createWithdrawLink1 = createWithdrawLink1?.data;
         }
         return result
     } catch (error) {
-        console.log("error on create Tpos Link", error)
+        console.log("error on createWithdrawLink ", error)
     }
 }
 
@@ -308,7 +310,7 @@ const createSplitPayment = async (apiKey1: any, apikey2: any, token: any, accoun
         }
         return result
     } catch (error) {
-        console.log("error on create Tpos Link", error)
+        console.log("error on createSplitPayment", error)
     }
 }
 
@@ -428,7 +430,7 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
             }
         }
     } catch (error) {
-        console.log("error-->", error);
+        console.log("error addLnbitTposUser-->", error);
         return;
     }
 }
@@ -442,6 +444,8 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
         let refund_address = ""
         //admin login
         let getToken = await logIn(accountType) as any;
+        console.log("getToken spend wallet line 445-->", getToken)
+
         if (getToken && getToken?.status) {
             let token = getToken?.data?.token;
 
@@ -467,9 +471,12 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                 let getUserToken = await userLogIn(accountType, addUser?.data?.id) as any;
                 getUserToken = getUserToken?.data?.token;
 
+                console.log("getUserToken spend wallet line 470-->", getUserToken)
 
                 // get User Info
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
+
+                console.log("getUserData spend wallet line 477-->", getUserData)
 
                 if (getUserData && getUserData?.status) {
                     const walletId = getUserData?.data?.wallets[0]?.id;
@@ -490,6 +497,9 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
 
                     let addLnurlpLink = await createLnurlpLink(adminKey, getUserToken, accountType);
 
+                    console.log("addLnurlpLink spend wallet line 498-->", addLnurlpLink)
+
+
                     if (addLnurlpLink && addLnurlpLink?.status) {
 
                         const updateFields = {
@@ -505,6 +515,7 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                     }
 
                     let addWithdrawLink = await createWithdrawLink(adminKey, getUserToken, accountType);
+                    console.log("addWithdrawLink spend wallet line 498-->", addWithdrawLink)
 
                     if (addWithdrawLink && addWithdrawLink?.status) {
 

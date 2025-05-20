@@ -5,12 +5,24 @@ import { addLnbitTposUser, addLnbitSpendUser } from "./create-lnbitUser";
 
 
 // create user on lnbit
-
+function shortenAddress(address: any) {
+    if (!address || address.length < 10) return address;
+    return `${address.slice(0, 6)}${address.slice(-4)}`;
+}
 const addLnbitCall = async (madhouseWallet: any, email: any, usersCollection: any, liquidBitcoinWallet: any, bitcoinWallet: any) => {
     try {
-        let refund_address = await addLnbitSpendUser(madhouseWallet, email, usersCollection, 2, 1);
+        const shortened = await shortenAddress(madhouseWallet);
+
+        console.log("madhouseWallet-->", shortened)
+        console.log("email-->", email)
+
+        console.log("liquidBitcoinWallet-->", liquidBitcoinWallet)
+
+        console.log("bitcoinWallet-->", bitcoinWallet)
+
+        let refund_address = await addLnbitSpendUser(shortened, email, usersCollection, 2, 1);
         console.log("refund_address --> line12--->", refund_address)
-        await addLnbitTposUser(madhouseWallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address || "ccd505c23ebf4a988b190e6aaefff7a5", 1, 1);
+        // await addLnbitTposUser(madhouseWallet, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address || "ccd505c23ebf4a988b190e6aaefff7a5", 1, 1);
 
     } catch (error) {
         console.log("addLnbitCall error-->", error)

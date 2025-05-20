@@ -264,7 +264,7 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    // console.log("response create user",response)
+    console.log("response lnurlpCreate ",response)
 
     if (response?.detail) {
       return {
@@ -308,7 +308,7 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    // console.log("response create user",response)
+    console.log("response withdrawLinkCreate ",response)
 
     if (response?.detail) {
       return {
