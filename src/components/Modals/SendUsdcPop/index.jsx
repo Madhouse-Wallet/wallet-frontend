@@ -2,14 +2,8 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-import { erc20Abi,getContract } from 'viem'
-import { getRpcProvider, getAccount } from "@/lib/zeroDev.js";
-
-import {  getERC20PaymasterApproveCall,gasTokenAddresses} from "@zerodev/sdk";
-import { base } from "viem/chains";
-import {
-  getEntryPoint
-} from "@zerodev/sdk/constants"
+// import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
 
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -19,10 +13,6 @@ import QRScannerModal from "./qRScannerModal.jsx";
 import {
   retrieveSecret,
 } from "../../../utils/webauthPrf";
-
-const CHAIN = base;
-const entryPoint = getEntryPoint("0.7")
-
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -52,13 +42,17 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (!amount || Number.parseFloat(amount) <= 0) {
+    if (!amount || parseFloat(amount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    const data = JSON.parse(userAuth?.webauthKey)
-    const retrieveSecretCheck = await retrieveSecret(
+    if (parseFloat(amount) > parseFloat(balance)) {
+      toast.error("Insufficient USDC balance");
+      return;
+    }
+    let data = JSON.parse(userAuth?.webauthKey)
+    let retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
     );
@@ -67,62 +61,26 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
    
-    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
+    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
     
     setIsLoading(true);
     try {
-      const getAccountCli = await getAccount(secretData?.seedPhrase)
+      let getAccountCli = await getAccount(secretData?.seedPhrase)
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
+      let signerProvider = await getProvider(getAccountCli?.kernelClient)
+      const web3 = new Web3Interaction("sepolia", signerProvider?.ethersProvider);
 
-       const USDC_CONTRACT_ADDRESS= '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
-      const usdc = getContract({publicClient: getAccountCli?.publicClient, 
-                                address: USDC_CONTRACT_ADDRESS, 
-                                abi: erc20Abi, 
-                                walletClient: getAccountCli?.kernelClient})
+      const result = await web3.sendUSDC(
+        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+        toAddress,
+        amount,
+        signerProvider?.ethersProvider
+      );
 
-      // const usdcBalance = await usdc.read.balanceOf([getAccountCli?.account.address])
-      // if (usdcBalance<=0) {
-      //   console.log("Insufficient USDC balance")
-      //   return;
-      // }
-  
-      const hash = await getAccountCli?.kernelClient.sendUserOperation({
-                callData: await getAccountCli?.account.encodeCalls([
-                  // The approval
-                  await getERC20PaymasterApproveCall(getAccountCli?.paymaster, {
-                    gasToken: gasTokenAddresses[CHAIN.id].USDC,
-                    approveAmount: BigInt(0),
-                    entryPoint,
-                  }),
-                  // The actual call
-                  // {
-                  //     to: usdc.address,
-                  //     abi: usdc.abi,
-                  //     functionName: 'transfer',
-                  //     args: [toAddress, BigInt(0)],
-                  // },
-                ]),
-            });
-
-          // console.log('Sending transaction to', toAddress);
-          //   const hash = await getAccountCli?.kernelClient.sendTransaction({
-          //     account: getAccountCli?.account,
-          //     to: USDC_CONTRACT_ADDRESS, 
-          //     value: BigInt(amount * 1e6),
-          //     chain: CHAIN,
-          //     data:'0x'
-          //   })
-
-
-            console.log('UserOperation hash', hash)
-
-            const receipt = await getAccountCli?.kernelClient.waitForUserOperationReceipt({ hash })
-            console.log('Transaction hash', receipt.receipt.transactionHash)
-
-      if (receipt.receipt.transactionHash) {
+      if (result.success) {
         setSuccess(true);
         setSendUsdc(false);
         toast.success("USDC sent successfully!");
@@ -151,12 +109,13 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       const web3 = new Web3Interaction("sepolia", provider);
       const result = await web3.getUSDCBalance(
         process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
-         userAuth?.walletAddress,
+        // userAuth?.walletAddress,
+        "0xEdc625B74537eE3a10874f53D170E9c17A906B9c",
         provider
       );
 
       if (result.success && result.balance) {
-        setBalance(Number.parseFloat(result.balance).toFixed(2));
+        setBalance(parseFloat(result.balance).toFixed(2));
       } else {
         toast.error(result.error || "Failed to fetch balance");
       }
