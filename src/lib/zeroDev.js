@@ -10,8 +10,7 @@ import {
   createKernelAccountClient,
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
-  constructUSDCPermitForCirclePaymaster,
-  createCircleUSDCPaymasterClient
+  gasTokenAddresses,
 } from "@zerodev/sdk";
 
 import {Implementation,toMetaMaskSmartAccount} from "@metamask/delegation-toolkit";

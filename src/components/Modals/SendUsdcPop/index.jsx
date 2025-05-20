@@ -3,11 +3,10 @@ import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
 import { erc20Abi,getContract } from 'viem'
-import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
+import { getRpcProvider, getAccount } from "@/lib/zeroDev.js";
 
-import {
-  getERC20PaymasterApproveCall,
-} from "@zerodev/sdk";
+import {  getERC20PaymasterApproveCall,gasTokenAddresses} from "@zerodev/sdk";
+import {  getEntryPoint} from "@zerodev/sdk/constants"
 
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -17,6 +16,8 @@ import QRScannerModal from "./qRScannerModal.jsx";
 import {
   retrieveSecret,
 } from "../../../utils/webauthPrf";
+
+const entryPoint = getEntryPoint();
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -77,7 +78,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         console.log("Insufficient USDC balance")
         return;
       }
-      
+
       const hash = await getAccountCli?.kernelClient.sendUserOperation({
                 callData: await account.encodeCalls([
                   // The approval
