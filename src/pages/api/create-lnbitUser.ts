@@ -2,9 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import client from '../../lib/mongodb'; // Import the MongoDB client
 import { logIn, getUser, createTpos, addUserWallet, createUser, createBlotzAutoReverseSwap, userLogIn, splitPaymentTarget, lnurlpCreate, withdrawLinkCreate } from "./lnbit";
 
+import { updateWithdrawLinkByWallet } from "./updateWithdrawLink";
 
 
- 
 
 //create Tpos Links:
 const createTposLink = async (wallet1: any, wallet2: any, apiKey1: any, apikey2: any, token: any, accountType: any) => {
@@ -157,28 +157,44 @@ const createWithdrawLink = async (apiKey1: any, token: any, accountType: any) =>
 
 
 
-const createSplitPayment = async (apiKey1: any, apikey2: any, token: any, accountType: any) => {
+const createSplitPayment = async (wallet1: any, wallet2: any, apiKey1: any, apikey2: any, token: any, accountType: any) => {
     try {
         let result = {
             status: true,
             splitPaymentTarget1: {},
             splitPaymentTarget2: {}
         }
-        let setting = {
+
+        let splitPaymentTarget1 = await splitPaymentTarget({
             "targets": [
                 {
-                    "wallet": "ccd505c23ebf4a988b190e6aaefff7a5",
+                    "wallet": process.env.NEXT_PUBLIC_SPLIT_PAYMENT_ADDRESS,
                     "alias": "commision",
-                    "percent": 0.5
+                    "percent": process.env.NEXT_PUBLIC_SPLIT_PAYMENT_PERCENTAGE,
+                    "source": {
+                        "id": wallet1,
+                        "adminkey": apiKey1
+                    }
                 }
             ]
-        }
-        let splitPaymentTarget1 = await splitPaymentTarget(setting, apiKey1, token, accountType) as any;
+        }, apiKey1, token, accountType) as any;
         console.log("splitPaymentTarget1 -->", splitPaymentTarget1)
         if (splitPaymentTarget1 && splitPaymentTarget1?.status) {
             result.splitPaymentTarget1 = splitPaymentTarget1?.data;
         }
-        let splitPaymentTarget2 = await splitPaymentTarget(setting, apikey2, token, accountType) as any;
+        let splitPaymentTarget2 = await splitPaymentTarget({
+            "targets": [
+                {
+                    "wallet": process.env.NEXT_PUBLIC_SPLIT_PAYMENT_ADDRESS,
+                    "alias": "commision",
+                    "percent": process.env.NEXT_PUBLIC_SPLIT_PAYMENT_PERCENTAGE,
+                    "source": {
+                        "id": wallet2,
+                        "adminkey": apikey2
+                    }
+                }
+            ]
+        }, apikey2, token, accountType) as any;
         console.log("splitPaymentTarget2 -->", splitPaymentTarget2)
         if (splitPaymentTarget2 && splitPaymentTarget2?.status) {
             result.splitPaymentTarget2 = splitPaymentTarget2?.data;
@@ -288,7 +304,7 @@ export const addLnbitTposUser = async (madhouseWallet: any, email: any, usersCol
                         }
                     }
 
-                    let setSplitPaymentTarget = await createSplitPayment(adminKey, adminKey2, getUserToken, accountType);
+                    let setSplitPaymentTarget = await createSplitPayment(walletId, walletId2, adminKey, adminKey2, getUserToken, accountType);
                     console.log("setSplitPaymentTarget-->", setSplitPaymentTarget)
                     return;
                 } else {
@@ -406,6 +422,10 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                             { returnDocument: "after" } // return updated document
                         );
                     }
+
+                    updateWithdrawLinkByWallet(walletId, {
+                        "uses": 100000000
+                    }) as any;
 
                     return refund_address;
 

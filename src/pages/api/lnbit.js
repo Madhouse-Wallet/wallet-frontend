@@ -13,6 +13,11 @@ const { Module } = require("webpack");
  * @param {string} secretKey - Your SideShift API secret key
  * @returns {Promise<Object>} Quote response object
  */
+
+
+
+ 
+
 const logIn = async (type = 1) => {
   try {
     let backendUrl = "";
@@ -242,7 +247,7 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
   }
 };
 
-
+ 
 
 // create lnurlpCreate link
 const lnurlpCreate = async (data, apiKey, token, type = 1) => {
