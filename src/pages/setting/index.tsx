@@ -671,7 +671,7 @@ const Setting: React.FC = () => {
                             </div>
                             {/* {userAuth?.email && ( */}
                             <span className="text-white flex items-center">
-                              {tposId1 ? tposId1 : "--"}
+                              {(userAuth?.email && tposId1) ? tposId1 : "--"}
                             </span>
                             {/* )} */}
                           </li>
@@ -684,7 +684,7 @@ const Setting: React.FC = () => {
                             </div>
                             {/* {userAuth?.email && ( */}
                             <span className="text-white flex items-center">
-                              {tposId2 ? tposId2 : "--"}
+                              {(userAuth?.email && tposId2) ? tposId2 : "--"}
                             </span>
                             {/* )} */}
                           </li>
@@ -702,7 +702,7 @@ const Setting: React.FC = () => {
                           </div>
                           {/* {userAuth?.email && ( */}
                           <span className="text-white flex items-center">
-                            {adminId ?
+                            {(userAuth?.email && adminId) ?
                               (
                                 <>
                                   {splitAddress(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}

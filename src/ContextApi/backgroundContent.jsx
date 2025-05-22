@@ -1,10 +1,13 @@
 "use client";
 import { createContext, useState, useEffect, useContext } from "react";
+import { getUser, updtUser } from "../lib/apiCall";
+import { useDispatch, useSelector } from "react-redux";
 
-// Create Context
+// Create Context 
 const BackgroundContext = createContext();
 
 export const BackgroundProvider = ({ children }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const backgrounds = [
     process.env.NEXT_PUBLIC_IMAGE_URL + "6.jpg",
     process.env.NEXT_PUBLIC_IMAGE_URL + "4.jpg",
@@ -19,7 +22,22 @@ export const BackgroundProvider = ({ children }) => {
     process.env.NEXT_PUBLIC_IMAGE_URL + "w1.png",
     process.env.NEXT_PUBLIC_IMAGE_URL + "w2.png",
   ];
-
+  const settingUpdt = async (data) => {
+    try {
+      if(userAuth.email){
+        let data1
+         = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: data, // Ensure this is inside `$set`
+          }
+        );
+      }
+   
+    } catch (error) {
+console.log("setting updt-->",error)
+    }
+  }
   const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
   const [selectedWatermark, setSelectedWatermark] = useState(watermarks[0]);
 
@@ -58,6 +76,7 @@ export const BackgroundProvider = ({ children }) => {
     setSelectedBackground(backgrounds[index]);
     if (typeof window !== "undefined") {
       localStorage.setItem("backgroundIndex", index);
+      settingUpdt({"backgroundIndex":index})
     }
   };
 
@@ -66,6 +85,7 @@ export const BackgroundProvider = ({ children }) => {
     setSelectedWatermark(watermarks[index]);
     if (typeof window !== "undefined") {
       localStorage.setItem("watermarkIndex", index);
+      settingUpdt({"watermarkIndex":index})
     }
   };
 
@@ -74,6 +94,7 @@ export const BackgroundProvider = ({ children }) => {
     setBgOpacity(opacity);
     if (typeof window !== "undefined") {
       localStorage.setItem("bgOpacity", opacity);
+      settingUpdt({"bgOpacity":opacity})
     }
   };
 
@@ -82,6 +103,7 @@ export const BackgroundProvider = ({ children }) => {
     setWmOpacity(opacity);
     if (typeof window !== "undefined") {
       localStorage.setItem("wmOpacity", opacity);
+      settingUpdt({"wmOpacity":opacity})
     }
   };
 

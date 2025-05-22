@@ -1,5 +1,5 @@
 "use client";
-import { parseEther, zeroAddress, parseUnits } from "viem";
+import { zeroAddress, parseUnits } from "viem";
 
 
 import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator"
@@ -23,26 +23,27 @@ import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
 
-const PASSKEY_SERVER_URL = `https://passkeys.zerodev.app/api/v3/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-
-export const BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+export let BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
 
-const CHAIN =
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "arbitrum" && arbitrum) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "sepolia" && sepolia) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "mainnet" && mainnet) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME == "base" && base);
-const entryPoint = getEntryPoint("0.7");
-const recoveryExecutorFunction =
-  "function doRecovery(address _validator, bytes calldata _data)";
+export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
+export const MAINNET_PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
 
-const paymasterClient = createZeroDevPaymasterClient({
+
+const CHAIN =
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
+  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
+const entryPoint = getEntryPoint("0.7");
+
+
+let paymasterClient = createZeroDevPaymasterClient({
   chain: CHAIN,
   transport: http(PAYMASTER_RPC),
 });
 
-const publicClient = createPublicClient({
+let publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
   chain: CHAIN,
 });
@@ -92,8 +93,36 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
   }
 }
 
-export const setupNewAccount = async (PRIVATE_KEY) => {
+export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
+
+    if (chain === mainnet) {
+
+      paymasterClient = createZeroDevPaymasterClient({
+        chain,
+        transport: http(MAINNET_PAYMASTER_RPC),
+      });
+      BUNDLER_URL = MAINNET_BUNDLER_URL
+
+      publicClient = createPublicClient({
+        transport: http(BUNDLER_URL),
+        chain,
+      });
+
+
+    } else if (chain === base) {
+
+      paymasterClient = createZeroDevPaymasterClient({
+        chain: CHAIN,
+        transport: http(PAYMASTER_RPC),
+      });
+      BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/310cd92b-af6a-470d-9496-754b31de2c48";
+      publicClient = createPublicClient({
+        transport: http(BUNDLER_URL),
+        chain: CHAIN,
+      });
+
+    }
 
     const signer = privateKeyToAccount(PRIVATE_KEY)
     // Create ECDSA validator
@@ -114,7 +143,7 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
 
     const kernelClient = createKernelAccountClient({
       account,
-      chain: CHAIN,
+      chain: chain ?? CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
       paymaster: {
@@ -129,9 +158,10 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
       },
     });
 
-    let trxnZero = await zeroTrxn(kernelClient)
+    const trxnZero = await zeroTrxn(kernelClient)
+    let res;
     if (trxnZero?.status) {
-      return {
+      res = {
         status: true,
         data: {
           privatekey: PRIVATE_KEY,
@@ -141,11 +171,11 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
         }
       }
     } else {
-      return {
+      res = {
         status: false,
         msg: "Error In Zero Trxn!"
       }
-    }
+    } return res;
   } catch (error) {
     console.log("setupnewaccount error -->", error)
     return {
@@ -159,14 +189,14 @@ export const setupNewAccount = async (PRIVATE_KEY) => {
 
 export const doAccountRecovery = async (PRIVATE_KEY, address) => {
   try {
-    let getAccount = await checkPrivateKey(PRIVATE_KEY)
+    const getAccount = await checkPrivateKey(PRIVATE_KEY)
     if (!getAccount.status) {
       return {
         status: false,
         msg: "Invalid Private Key!"
       }
     }
-    let signer = getAccount?.signer
+    const signer = getAccount?.signer
     // Create ECDSA validator
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
@@ -182,19 +212,19 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
       entryPoint,
       kernelVersion: KERNEL_V3_1,
     })
-
-    if (address != account.address) {
-      return {
+    let res;
+    if (address !== account.address) {
+      res = {
         status: false,
         msg: "Invalid Private Key!"
       }
     } else {
-      return {
+      res = {
         status: true,
         data: {
         }
       }
-    }
+    } return res;
   } catch (error) {
     console.log("setupnewaccount error -->", error)
     return {
@@ -219,8 +249,37 @@ export const getProvider = async (kernelClient) => {
 };
 
 
-export const getAccount = async (PRIVATE_KEY) => {
+export const getAccount = async (PRIVATE_KEY, chain = base) => {
   try {
+
+    if (chain === mainnet) {
+
+      paymasterClient = createZeroDevPaymasterClient({
+        chain,
+        transport: http(MAINNET_PAYMASTER_RPC),
+      });
+      BUNDLER_URL = MAINNET_BUNDLER_URL
+
+      publicClient = createPublicClient({
+        transport: http(BUNDLER_URL),
+        chain,
+      });
+
+
+    } else if (chain === base) {
+
+      paymasterClient = createZeroDevPaymasterClient({
+        chain: CHAIN,
+        transport: http(PAYMASTER_RPC),
+      });
+      BUNDLER_URL = "https://rpc.zerodev.app/api/v2/bundler/310cd92b-af6a-470d-9496-754b31de2c48";
+      publicClient = createPublicClient({
+        transport: http(BUNDLER_URL),
+        chain: CHAIN,
+      });
+
+    }
+
     const signer = privateKeyToAccount(PRIVATE_KEY)
     // Create ECDSA validator
 
@@ -243,12 +302,12 @@ export const getAccount = async (PRIVATE_KEY) => {
 
     const kernelClient = createKernelAccountClient({
       account,
-      chain: CHAIN,
+      chain: chain ?? CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
       paymaster: paymasterClient,
       paymasterContext: {
-        token: gasTokenAddresses[CHAIN.id]["USDC"],
+        token: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
       },
     });
 
@@ -258,7 +317,7 @@ export const getAccount = async (PRIVATE_KEY) => {
     const userOpHash = await kernelClient.sendUserOperation({
       callData: await account.encodeCalls([
         await getERC20PaymasterApproveCall(paymasterClient, {
-          gasToken: gasTokenAddresses[CHAIN.id]["USDC"],
+          gasToken: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
           approveAmount: parseUnits('1', 6),
           entryPoint,
         }),
@@ -292,7 +351,7 @@ export const getAccount = async (PRIVATE_KEY) => {
       address: account.address,
     };
   } catch (error) {
-    console.log("error-->",error)
+    console.log("error-->", error)
     return { status: false, msg: error?.message || "Please Try again ALter!" };
   }
 };

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import KeyStep from "./KeyStep";
 import EmailStep from "./EmailStep";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import { useBackground } from "@/ContextApi/backgroundContent";
 
 import {
   getAccount,
@@ -20,10 +21,27 @@ import {
 } from "../../utils/globals";
 
 const Login = () => {
+  const {
+    selectBg,
+    backgrounds,
+    bgOpacity,
+    setBgOpacity,
+    selectWm,
+    watermarks,
+    setSelectedWatermark,
+    wmOpacity,
+    setWmOpacity,
+    changeBgOpacity,
+    changeWmOpacity,
+    selectedBackground,
+    selectedWatermark,
+  } = useBackground();
   const [step, setStep] = useState(1);
   const [passkeyData, setPasskeyData] = useState([]);
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
+
+  console.log(backgrounds, "riteshBG")
 
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {
@@ -84,7 +102,31 @@ const Login = () => {
                 totalPasskey: 1
               })
             );
-            //       passkeyEmail: userExist?.userId?.passkey[0].name,
+            //       passkeyEmail: userExist?.userId?.passkey[0].name,\\
+            if (userExist?.userId?.backgroundIndex != null) {
+              selectBg(userExist.userId.backgroundIndex);
+              localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+            }
+  
+            if (userExist?.userId?.watermarkIndex != null) {
+              selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+              localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+            }
+  
+  
+            if (userExist?.userId?.bgOpacity != null) {
+              changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
+              localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
+            }
+  
+  
+            if (userExist?.userId?.bgOpacity != null) {
+              changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+              localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
+            }
+
+
+
             storedataLocalStorage(
               {
                 login: true,
@@ -147,6 +189,32 @@ const Login = () => {
             })
           );
           //       passkeyEmail: userExist?.userId?.passkey[0].name,
+
+          if (userExist?.userId?.backgroundIndex != null) {
+            selectBg(userExist.userId.backgroundIndex);
+            localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+          }
+
+          if (userExist?.userId?.watermarkIndex != null) {
+            selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+            localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+          }
+
+
+          if (userExist?.userId?.bgOpacity != null) {
+            changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
+            localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
+          }
+
+
+          if (userExist?.userId?.bgOpacity != null) {
+            changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+            localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
+          }
+
+
+
+
           storedataLocalStorage(
             {
               login: true,
