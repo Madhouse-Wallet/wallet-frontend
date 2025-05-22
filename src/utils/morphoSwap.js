@@ -116,8 +116,8 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
       tokenOut: tokenOut.address,
       slippage: 10, // 10% slippage
       routingStrategy: "router",
-      fee: 50, // 0.5% fee
-      feeReceiver: process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER,
+      // fee: 50, // 0.5% fee
+      // feeReceiver: process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER,
     });
 
     console.log(`Expected ${tokenOut.name} amount:`, routeData.amountOut);
@@ -160,133 +160,6 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
   }
 }
 
-/**
- * Bridge tokens from one chain to another using Enso and Stargate protocol
- * @param {Object} tokenIn - Input token details (from source chain)
- * @param {Object} tokenOut - Output token details (on destination chain)
- * @param {string} amountIn - Input amount in smallest unit (e.g., wei)
- * @param {number} sourceChainId - Source chain ID (e.g., 8453 for Base)
- * @param {number} destinationChainId - Destination chain ID (e.g., 1 for Ethereum)
- * @param {string} fromAddress - Address executing the bridge
- * @param {string} receiver - Address receiving the bridged tokens (defaults to fromAddress if not provided)
- * @returns {Promise<Object>} Bridge transaction data
- */
-// export async function bridge(
-//   tokenIn,
-//   tokenOut,
-//   amountIn,
-//   sourceChainId,
-//   destinationChainId,
-//   fromAddress,
-//   receiver = null
-// ) {
-//   try {
-//     // If no receiver is specified, use the fromAddress
-//     const recipientAddress = receiver || fromAddress;
-
-//     console.log(
-//       `Bridging ${tokenIn.name} from chain ${sourceChainId} to ${tokenOut.name} on chain ${destinationChainId}`
-//     );
-
-//     // Get approval data from Enso if needed
-//     const approvalData = await enso.getApprovalData({
-//       fromAddress: fromAddress,
-//       tokenAddress: tokenIn.address,
-//       chainId: sourceChainId,
-//       amount: amountIn,
-//       routingStrategy: "router",
-//     });
-
-//     // Create payload for the bridge transaction
-//     const payload = [
-//       {
-//         protocol: "stargate",
-//         action: "bridge",
-//         args: {
-//           primaryAddress: "0x27a16dc786820b16e5c9028b75b99f6f604b5d26",
-//           // primaryAddress: tokenIn.address,
-//           tokenIn: tokenIn.address,
-//           amountIn: amountIn,
-//           destinationChainId: destinationChainId,
-//           receiver: recipientAddress,
-//           callback: [
-//             {
-//               protocol: "enso",
-//               action: "balance",
-//               args: {
-//                 token: process.env.NEXT_PUBLIC_USDC_ETHEREUM_CONTRACT_ADDRESS,
-//               },
-//             },
-//             {
-//               protocol: "enso",
-//               action: "route",
-//               args: {
-//                 tokenIn: process.env.NEXT_PUBLIC_USDC_ETHEREUM_CONTRACT_ADDRESS,
-//                 tokenOut: tokenOut.address,
-//                 amountIn: {
-//                   useOutputOfCallAt: 0,
-//                 },
-//               },
-//               slippage: "25",
-//             },
-//           ],
-//         },
-//       },
-//     ];
-
-//     // Call Enso API to get the bundled transaction
-//     const bundleResponse = await axios.post(
-//       `https://api.enso.finance/api/v1/shortcuts/bundle`,
-//       payload,
-//       {
-//         params: {
-//           chainId: sourceChainId,
-//           fromAddress: fromAddress,
-//           spender: fromAddress,
-//           routingStrategy: "router",
-//         },
-//         headers: {
-//           "Content-Type": "application/json",
-//           "X-API-Key": ENSO_API_KEY,
-//         },
-//       }
-//     );
-
-//     const bridgeData = bundleResponse.data;
-
-//     console.log("Bridge transaction created successfully");
-
-//     // Return data in the requested format, directly passing through the response from Enso API
-//     return {
-//       amountsOut: bridgeData.amountsOut || { [tokenOut.address]: "0" },
-//       bundle: bridgeData.bundle,
-//       createdAt: bridgeData.createdAt,
-//       gas: bridgeData.gas,
-//       route: bridgeData.route || [
-//         {
-//           action: "swap",
-//           protocol: "enso",
-//           chainId: destinationChainId,
-//           tokenIn: [tokenIn.address],
-//           tokenOut: [tokenOut.address],
-//         },
-//       ],
-//       tx: bridgeData.tx,
-//       // Include approval data separately for frontend usage
-//       approvalData: approvalData
-//         ? {
-//             token: tokenIn.address,
-//             spender: approvalData.spender,
-//             amount: amountIn,
-//             tx: approvalData.tx,
-//           }
-//         : null,
-//     };
-//   } catch (error) {
-//     console.error("Error in bridge function:", error);
-//     throw new Error(`Bridge failed: ${error.message || "Unknown error"}`);
-//   }
-// }
 
 export async function bridge(
   tokenIn,
