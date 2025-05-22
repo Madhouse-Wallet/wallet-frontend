@@ -120,7 +120,7 @@ const CreateWallet = () => {
       return false;
     }
   };
-
+ 
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
       return await fetch(`/api/send-email`, {
@@ -199,10 +199,7 @@ const CreateWallet = () => {
         return false;
       } else {
         let {  address} = baseWallet?.data
-        const cleanEmail = registerData?.email?.replace(
-          /[^a-zA-Z0-9]/g,
-          ""
-        );
+        const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
         let registerCoinos = await registerCoinosUser(
           cleanEmail,
           process.env.NEXT_PUBLIC_COINOSIS_PASS
