@@ -451,6 +451,10 @@ const Setting: React.FC = () => {
   const LogoutFuc = async () => {
     try {
       logoutStorage();
+      selectBg(0);
+      changeBgOpacity((1));
+      selectWm(0)
+      changeWmOpacity((0.5))
       dispatch(
         loginSet({
           login: false,
