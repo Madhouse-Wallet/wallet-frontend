@@ -7,7 +7,8 @@ import { toast } from "react-toastify";
 import { bridge } from "../../utils/morphoSwap"; // Updated import to use bridge function
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
-
+import { mainnet,base } from "viem/chains";
+import { parseEther } from "viem";
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [usdcBalance, setUsdcBalance] = useState("0");
@@ -49,7 +50,7 @@ const DepositSwap = () => {
       );
 
       if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(parseFloat(usdcResult.balance).toFixed(6));
+        setUsdcBalance(Number.parseFloat(usdcResult.balance).toFixed(6));
       } else {
         toast.error(usdcResult.error || "Failed to fetch USDC balance");
       }
@@ -62,7 +63,7 @@ const DepositSwap = () => {
       );
 
       if (paxgResult.success && paxgResult.balance) {
-        setPaxgBalance(parseFloat(paxgResult.balance).toFixed(6));
+        setPaxgBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
       toast.error("Failed to fetch token balances");
@@ -79,13 +80,13 @@ const DepositSwap = () => {
       const tokenIn = {
         address: USDC_ADDRESS,
         name: "USDC",
-        chainId: parseInt(BASE_CHAIN),
+        chainId: Number.parseInt(BASE_CHAIN),
       };
 
       const tokenOut = {
         address: PAXG_ADDRESS,
         name: "PAXG",
-        chainId: parseInt(ETHEREUM_CHAIN),
+        chainId: Number.parseInt(ETHEREUM_CHAIN),
       };
 
       // Convert amount to wei (USDC has 6 decimals)
@@ -96,16 +97,15 @@ const DepositSwap = () => {
         tokenIn,
         tokenOut,
         amountInWei,
-        parseInt(BASE_CHAIN),
-        parseInt(ETHEREUM_CHAIN),
-        userAuth?.walletAddress,
-        "0x154975aB54a95244AD17cF56d321b7d3b010e85F"
+        Number.parseInt(BASE_CHAIN),
+        Number.parseInt(ETHEREUM_CHAIN),
+        userAuth?.walletAddress
       );
 
       setBridgeData(bridgeResult);
 
       // Get the expected amount out from the bridge response
-      if (bridgeResult && bridgeResult.amountsOut) {
+      if (bridgeResult?.amountsOut) {
         // Get the first value from amountsOut object
         const amountOutValue = Object.values(bridgeResult.amountsOut)[0];
 
@@ -134,7 +134,7 @@ const DepositSwap = () => {
   const handleFromAmountChange = (e) => {
     const value = e.target.value;
     setFromAmount(value);
-    if (value && !isNaN(parseFloat(value))) {
+    if (value && !Number.isNaN(Number.parseFloat(value))) {
       updateBridgeQuote(value);
     } else {
       setToAmount("");
@@ -150,13 +150,13 @@ const DepositSwap = () => {
       return;
     }
 
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
+    if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
 
-    let data = JSON.parse(userAuth?.webauthKey);
-    let retrieveSecretCheck = await retrieveSecret(
+    const data = JSON.parse(userAuth?.webauthKey);
+    const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
     );
@@ -165,11 +165,12 @@ const DepositSwap = () => {
       return;
     }
 
-    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
     console.log("secretData", secretData);
     setIsLoading(true);
     try {
-      let getAccountCli = await getAccount(secretData?.seedPhrase);
+      const chain = bridgeData.chain === 1 ? mainnet : base;
+      const getAccountCli = await getAccount(secretData?.seedPhrase, chain);
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
@@ -201,17 +202,24 @@ const DepositSwap = () => {
       // Handle the approval transaction if needed
       if (bridgeData.approvalData) {
         console.log("Processing token approval");
+
         const approveTx = await signer?.signer?.sendTransaction(
-          bridgeData.approvalData.tx
+          bridgeData.approvalData.tx,
+          {
+            from: signer?.signer?.address,
+            gasLimit: bridgeData.approvalData.gas,
+          }
         );
 
         toast.info(`Approval transaction submitted: ${approveTx.hash}`);
         await approveTx.wait();
         toast.success("Token approval complete");
       }
-
+        console.log("Processing token bridge");
       // Send the bridge transaction
-      const tx = await signer?.signer?.sendTransaction(bridgeData.tx);
+      const tx = await signer?.signer?.sendTransaction(
+        bridgeData.tx
+      );
 
       toast.info(`Bridge transaction submitted: ${tx.hash}`);
 
@@ -229,11 +237,10 @@ const DepositSwap = () => {
     } catch (error) {
       console.log("error", error);
       // More descriptive error handling
-      if (error.message && error.message.includes("user rejected")) {
+      if (error.message?.includes("user rejected")) {
         toast.error("Transaction was rejected by user");
       } else if (
-        error.message &&
-        error.message.includes("insufficient funds")
+        error.message?.includes("insufficient funds")
       ) {
         toast.error("Insufficient funds for transaction");
       } else {
@@ -250,7 +257,7 @@ const DepositSwap = () => {
   const getButtonText = () => {
     if (isLoading) return "Loading...";
     if (!fromAmount || !toAmount) return "Enter an amount";
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance))
+    if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance))
       return "Insufficient USDC Balance";
     if (!bridgeData) return "Get Bridge Quote";
     return "Bridge Tokens";
@@ -263,7 +270,7 @@ const DepositSwap = () => {
       !fromAmount ||
       !toAmount ||
       !bridgeData ||
-      parseFloat(fromAmount) > parseFloat(usdcBalance)
+      Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
     );
   };
 

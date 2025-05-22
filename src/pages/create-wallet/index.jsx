@@ -14,7 +14,6 @@ import {
 } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
-
 import {
   generateOTP,
   storedataLocalStorage,
@@ -22,14 +21,9 @@ import {
   getRandomString
 } from "../../utils/globals";
 
-import {
-  createAccount,
-  getMnemonic,
-  registerPasskey,
-  passkeyValidator,
-} from "../../lib/zeroDevWallet";
 
 import { setupNewAccount, getPrivateKey } from "../../lib/zeroDev";
+import { mainnet } from "viem/chains";
 
 const CreateWallet = () => {
   const [step, setStep] = useState(1);
@@ -73,7 +67,7 @@ const CreateWallet = () => {
   ) => {
     try {
       try {
-        return await fetch(`/api/add-user`, {
+        return await fetch("/api/add-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -154,51 +148,57 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      let registerCheck = await registerCredential(userName, userName);
+      const registerCheck = await registerCredential(userName, userName);
+      let res;
       if (registerCheck?.status) {
-        let storeSecretCheck = await storeSecret(
+        const storeSecretCheck = await storeSecret(
           registerCheck?.data?.credentialId,
           data
         );
         if (storeSecretCheck?.status) {
-          return {
+          res = {
             status: true,
             storageKey: storeSecretCheck?.data?.storageKey,
             credentialId: registerCheck?.data?.credentialId,
           };
         } else {
-          return {
+          res = {
             status: false,
             msg: storeSecretCheck?.msg,
           };
         }
       } else {
-        return {
+        res = {
           status: false,
           msg: registerCheck?.msg,
         };
-      }
+      } return res;
     } catch (error) {
       return {
         status: false,
         msg: "Facing issue in storing secret",
       };
-    }
+    } 
   };
 
   const registerFn = async () => {
     try {
-      let userExist = await getUser(registerData.email);
-      if (userExist.status && userExist.status == "success") {
+      const userExist = await getUser(registerData.email);
+      if (userExist.status && userExist.status === "success") {
         toast.error("User Already Exist!");
         return false;
       }
-      const createWallet = await setupNewAccount(addressPhrase)
-      if (!createWallet?.status) {
-        toast.error(createWallet?.msg);
+      
+      const baseWallet = await setupNewAccount(addressPhrase);
+      const mainnetWallet = await setupNewAccount(addressPhrase, mainnet);
+      console.log("baseWallet-->", baseWallet.address);
+      console.log("mainnetWallet-->", mainnetWallet.address); 
+      if (!baseWallet?.status || !mainnetWallet?.status) {
+        toast.error(baseWallet?.msg);
+        toast.error(mainnetWallet?.msg);
         return false;
       } else {
-        let { privatekey, address, account, trxn } = createWallet?.data
+        let {  address} = baseWallet?.data
         const cleanEmail = registerData?.email?.replace(
           /[^a-zA-Z0-9]/g,
           ""
@@ -219,8 +219,8 @@ const CreateWallet = () => {
           "liquid",
           token1
         );
-        let getWallet = await getBitcoinAddress();
-        let secretObj = {
+        const getWallet = await getBitcoinAddress();
+        const secretObj = {
           coinosToken: registerCoinos?.token || "",
           wif: getWallet?.data?.wif || "",
           seedPhrase: addressPhrase,
@@ -228,7 +228,7 @@ const CreateWallet = () => {
        
         let storageKeySecret = "";
         let credentialIdSecret = "";
-        let storeData = await setSecretInPasskey(
+        const storeData = await setSecretInPasskey(
           registerData.email + "_passkey_1",
           JSON.stringify(secretObj)
         );
@@ -239,7 +239,7 @@ const CreateWallet = () => {
           if (resultLiquid) {
             liquidBitcoinWallet = resultLiquid?.hash || "";
           }
-          let data = await addUser(
+          const data = await addUser(
             registerData.email,
             registerData.username,
             [{

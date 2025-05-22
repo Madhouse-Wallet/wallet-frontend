@@ -377,16 +377,20 @@ export async function bridge(
           tokenOut: [tokenOut.address],
         },
       ],
+      
+      chain: sourceChainId,
+      to: "0x27a16dc786820b16e5c9028b75b99f6f604b5d26",
       tx: bundleData.tx,
       // Include approval data separately for frontend usage
       approvalData: approvalData
         ? {
-            token: tokenIn.address,
+            token: approvalData.token,
             spender: approvalData.spender,
-            amount: amountIn,
+            amount: approvalData.amount,
             tx: approvalData.tx,
+            gas: approvalData.gas,
           }
-        : null,
+        : undefined,
     };
   } catch (error) {
     console.error("Error in bridge function:", error);
