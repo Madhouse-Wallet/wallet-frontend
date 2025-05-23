@@ -1,72 +1,60 @@
 "use client";
 import { zeroAddress, parseUnits,createPublicClient, http } from "viem";
-
+import { entryPoint07Address } from "viem/account-abstraction"
 import { toSimple7702SmartAccount } from "viem/account-abstraction";
-import { signerToEcdsaValidator
-  } from "@zerodev/ecdsa-validator";
-
+import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
 import {
 
-  createZeroDevPaymasterClient,
-  getUserOperationGasPrice,
   gasTokenAddresses,
   getERC20PaymasterApproveCall,
 } from "@zerodev/sdk";
 
-import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { ethers } from "ethers";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 
-export const BUNDLER_URL = 'https://api.pimlico.io/v2/11155111/rpc?apikey=pim_gCvmGFU2NgG2xZcmjKVNsE';
-export const PAYMASTER_RPC = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
+export const BUNDLER_URL = 'https://api.pimlico.io/v2/8453/rpc?apikey=pim_gCvmGFU2NgG2xZcmjKVNsE';
 
 export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
 export const MAINNET_PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
 
-const CHAIN = sepolia
+const CHAIN = base
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
-const entryPoint = getEntryPoint("0.7");
+const entryPoint = entryPoint07Address;
 
-const paymasterClient = createZeroDevPaymasterClient({
-  chain: CHAIN,
-  transport: http(PAYMASTER_RPC),
+const paymasterClient = createPimlicoClient({
+	transport: http(BUNDLER_URL),
+	entryPoint: {
+		address: entryPoint,
+		version: "0.7",
+	},
 });
 
 const publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
+  transport: http(),
   chain: CHAIN,
 });
 
-export const zeroTrxn = async (kernelClient) => {
+export const zeroTrxn = async (kernelClient,signer) => {
   try {
-    const txnHash = await kernelClient.sendUserOperation({
-    callData: await kernelClient.account.encodeCalls([
-      {
-        to: zeroAddress,
-        value: BigInt(0),
-        data: "0x",
-      },
-      {
-        to: zeroAddress,
-        value: BigInt(0),
-        data: "0x",
-      },
-    ]),		
-    authorization: await kernelClient.account.signAuthorization({
-			address: "0xe6Cae83BdE06E4c305530e199D7217f42808555B",
+    const txnHash = await kernelClient.sendTransaction({
+		to: zeroAddress,
+		value: BigInt(0),
+		data: "0x",
+		authorization: await signer.signAuthorization({
+      address: '0xe6Cae83BdE06E4c305530e199D7217f42808555B',
 			chainId: CHAIN.id,
 			nonce: await publicClient.getTransactionCount({
-				address: kernelClient.account.address,
+				address: signer.address,
 			}),
 		}),
-  });
+	}); 
     const { receipt } = await kernelClient.waitForUserOperationReceipt({
     hash: txnHash,
   });
@@ -135,11 +123,6 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
 
     const signer = privateKeyToAccount(PRIVATE_KEY);
     // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_3,
-    });
 
     // Create Kernel Smart Account
     const account = await toSimple7702SmartAccount({
@@ -148,23 +131,18 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
     });
 
     const kernelClient = createSmartAccountClient({
-      account,
-      chain: chain ?? CHAIN,
+      account: account,
+      chain: CHAIN,
       bundlerTransport: http(BUNDLER_URL),
       client: publicClient,
-      paymaster: {
-        getPaymasterData(userOperation) {
-          return paymasterClient.sponsorUserOperation({ userOperation });
-        },
-      },
+      paymaster: paymasterClient,
       userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient);
-        },
-      },
+              estimateFeesPerGas: async () =>
+                (await paymasterClient.getUserOperationGasPrice()).fast,
+            },
     });
 
-    const trxnZero = await zeroTrxn(kernelClient);
+    const trxnZero = await zeroTrxn(kernelClient,signer,account);
     let res;
     if (trxnZero?.status) {
       res = {
@@ -203,11 +181,6 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     }
     const signer = getAccount?.signer;
     // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_3,
-    });
 
     // Create Kernel Smart Account
     const account = await toSimple7702SmartAccount({
@@ -340,13 +313,6 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
 
       const signer = privateKeyToAccount(PRIVATE_KEY);
       // Create ECDSA validator
-
-      // Create Circle Paymaster Client
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer,
-        entryPoint,
-        kernelVersion: KERNEL_V3_3,
-      });
 
       // Create Kernel Smart Account
     const account = await toSimple7702SmartAccount({
