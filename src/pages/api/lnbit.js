@@ -465,16 +465,16 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
   }
 };
 
-const createInvoice = async (data, token, type = 1) => {
+const createInvoice = async (data, token, type = 1, apiKey) => {
   try {
     let backendUrl = "";
-    let apiKey = "";
+    // let apiKey = "";
     if (type == 1) {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
     //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(`${backendUrl}api/v1/payments`, {

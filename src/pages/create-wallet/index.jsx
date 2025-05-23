@@ -34,6 +34,8 @@ const CreateWallet = () => {
   const [addressWif, setAddressWif] = useState("");
   const [bitcoinWallet, setBitcoinWallet] = useState("");
   
+  const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
+  
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -216,10 +218,9 @@ const CreateWallet = () => {
           "liquid",
           token1
         );
-        const getWallet = await getBitcoinAddress();
         const secretObj = {
           coinosToken: registerCoinos?.token || "",
-          wif: getWallet?.data?.wif || "",
+          wif: bitcoinWalletwif,
           seedPhrase: addressPhrase,
         };
        
@@ -243,7 +244,8 @@ const CreateWallet = () => {
               name: registerData.email + "_passkey_1",
               storageKeySecret,
               credentialIdSecret,
-              displayName: ""
+              displayName: "",
+              bitcoinWallet
             }],
             address,
             bitcoinWallet,
@@ -320,7 +322,7 @@ const CreateWallet = () => {
         let getWallet = await getBitcoinAddress();
         if (getWallet.status && getWallet.status == "success") {
           setBitcoinWallet(getWallet?.data?.wallet || "")
-
+          setBitcoinWalletWif(getWallet?.data?.wif || "")
         }
         let phrase = await getPrivateKey();
         if (phrase) {

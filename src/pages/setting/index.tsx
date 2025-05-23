@@ -709,7 +709,7 @@ const Setting: React.FC = () => {
                             {(userAuth?.email && adminId) ?
                               (
                                 <>
-                                  {splitAddress(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
+                                  {splitAddress(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
                                   <button
                                     onClick={() =>
                                       handleCopy(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`)

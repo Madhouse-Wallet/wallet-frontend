@@ -73,7 +73,7 @@ export default async function handler(req, res) {
                     "unit": "sat",
                     "amount": satoshiAmount,
                     "memo": "invoice",
-                }, token, 2);
+                }, token, 2, "");
                 console.log("createInvoice1", createInvoice1)
                 if (createInvoice1?.status) {
                     let createSwap = await createReverseSwap(createInvoice1?.data?.bolt11)

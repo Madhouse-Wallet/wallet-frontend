@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDevWallet";
 import { doAccountRecovery } from "../../lib/zeroDev"
-import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
+import { getUser, updtUser, getUserToken, decodeBitcoinAddress } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 
+
+
+ 
 const RecoverWallet = () => {
   const [step, setStep] = useState(1);
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
@@ -80,6 +83,12 @@ const RecoverWallet = () => {
       setLoadingNewSigner(true);
       if (privateKey && wif) {
         let recoverAccount = await doAccountRecovery(privateKey, address);
+        let recoveryBitcoin = await decodeBitcoinAddress(wif);
+        if (recoveryBitcoin?.status == "error") {
+          toast.error("Invalid Wif!");
+          setLoadingNewSigner(false);
+          return;
+        }
         if (recoverAccount && recoverAccount.status) {
           let userExist = await getUserToken(email);
           let secretObj = {
@@ -104,7 +113,8 @@ const RecoverWallet = () => {
                       name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
                       storageKeySecret,
                       credentialIdSecret,
-                      displayName: ""
+                      displayName: "",
+                      bitcoinWallet: recoveryBitcoin?.data?.address
                     }
                   },
                   $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`

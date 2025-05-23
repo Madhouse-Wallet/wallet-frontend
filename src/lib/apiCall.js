@@ -131,7 +131,7 @@ export const btcSat = async (amount, refund_address="") => {
   }
 };
 
-export const receiveBtc = async (amount, publicKey="") => {
+export const receiveBtc = async (amount, email, publicKey="") => {
   try {
     try {
       return await fetch(`/api/receive-bitcoin-lnbit`, {
@@ -139,12 +139,41 @@ export const receiveBtc = async (amount, publicKey="") => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount,
+          email,
           publicKey
         }),
       })
         .then((res) => res.json())
         .then((data) => {
           // console.log("data-->", data);
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
+
+//getBitcoinAddress
+export const decodeBitcoinAddress = async (wif) => {
+  try {
+    try {
+      return await fetch(`/api/getBitcoinAddress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wif,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("data-->", data);
           return data;
         });
     } catch (error) {
