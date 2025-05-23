@@ -11,8 +11,8 @@ const LightningTab = (walletAddress) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(""); // State for amount
   const [error, setError] = useState("");
-    const userAuth = useSelector((state) => state.Auth);
-  
+  const userAuth = useSelector((state) => state.Auth);
+
 
   const [invoice, setInvoice] = useState("");
   const handleCopy = async (address, type) => {
@@ -77,7 +77,7 @@ const LightningTab = (walletAddress) => {
 
     setError("");
     setLoading(true);
-    if(!userAuth.email){
+    if (!userAuth.email) {
       setError("Please Login!");
       setLoading(false);
       return;

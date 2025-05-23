@@ -188,14 +188,15 @@ export const decodeBitcoinAddress = async (wif) => {
 
 
 //send-bitcoin-lnbit
-export const sendBtc = async (invoice) => {
+export const sendBtc = async (invoice, email) => {
   try {
     try {
       return await fetch(`/api/send-bitcoin-lnbit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          invoice
+          invoice,
+          email
         }),
       })
         .then((res) => res.json())

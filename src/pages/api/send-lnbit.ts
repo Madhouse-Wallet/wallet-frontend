@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const payInv = await payInvoice({
                 "out": true,
                 "bolt11": data?.data?.invoice // ← invoice from above
-            }, token, 2) as any
+            }, token, 2,"") as any
             console.log("payInv data-->", payInv)
             if (payInv?.status) {
                 console.log("done payment!")
