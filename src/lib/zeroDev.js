@@ -158,33 +158,24 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
       },
     });
 
-    // const trxnZero = await zeroTrxn(kernelClient)
-    let res = {
-      status: true,
-      data: {
-        privatekey: PRIVATE_KEY,
-        address: account.address,
-        account: account,
-        trxn: ""
+    const trxnZero = await zeroTrxn(kernelClient)
+    let res;
+    if (trxnZero?.status) {
+      res = {
+        status: true,
+        data: {
+          privatekey: PRIVATE_KEY,
+          address: account.address,
+          account: account,
+          trxn: trxnZero.data
+        }
       }
-    }
-    // if (trxnZero?.status) {
-    //   res = {
-    //     status: true,
-    //     data: {
-    //       privatekey: PRIVATE_KEY,
-    //       address: account.address,
-    //       account: account,
-    //       trxn: trxnZero.data
-    //     }
-    //   }
-    // } else {
-    //   res = {
-    //     status: false,
-    //     msg: "Error In Zero Trxn!"
-    //   }
-    // }
-     return res;
+    } else {
+      res = {
+        status: false,
+        msg: "Error In Zero Trxn!"
+      }
+    } return res;
   } catch (error) {
     console.log("setupnewaccount error -->", error)
     return {
