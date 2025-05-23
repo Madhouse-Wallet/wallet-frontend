@@ -1,6 +1,11 @@
-import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  getRpcProvider,
+  getProvider,
+  getAccount,
+  getETHEREUMRpcProvider,
+} from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
-import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
@@ -11,6 +16,7 @@ import { mainnet, base } from "viem/chains";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [paxgBalance, setPaxgBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
@@ -40,8 +46,17 @@ const DepositSwap = () => {
     }
   }, [userAuth?.walletAddress]);
 
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
+
   const fetchBalances = async () => {
     try {
+      const providerETH = await getETHEREUMRpcProvider();
       const provider = await getRpcProvider();
       const web3 = new Web3Interaction("sepolia", provider);
 
@@ -62,7 +77,8 @@ const DepositSwap = () => {
       const paxgResult = await web3.getMorphoBalance(
         PAXG_ADDRESS,
         userAuth?.walletAddress,
-        provider
+        // "0xA5E256722897FCdC32a5406222175C09B4952489",
+        providerETH
       );
 
       if (paxgResult.success && paxgResult.balance) {
@@ -203,19 +219,47 @@ const DepositSwap = () => {
   };
 
   // Handle input changes in the first input field
-  const handleFromAmountChange = (e) => {
-    const value = e.target.value;
-    setFromAmount(value);
-    if (value && !Number.isNaN(Number.parseFloat(value))) {
-      updateBridgeQuote(value);
-    } else {
+  // const handleFromAmountChange = (e) => {
+  //   const value = e.target.value;
+  //   setFromAmount(value);
+  //   if (value && !Number.isNaN(Number.parseFloat(value))) {
+  //     updateBridgeQuote(value);
+  //   } else {
+  //     setToAmount("");
+  //     setBridgeData(null);
+  //     setGasSwapData(null);
+  //     setGasRequiredWei("0");
+  //     setUsdValue({ from: "0", to: "0" });
+  //   }
+  // };
+
+  const handleFromAmountChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setFromAmount(value);
+
+      // Clear existing timer
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      // Clear previous data immediately when input changes
       setToAmount("");
       setBridgeData(null);
       setGasSwapData(null);
       setGasRequiredWei("0");
       setUsdValue({ from: "0", to: "0" });
-    }
-  };
+
+      // Set new timer for 2 seconds
+      if (value && !Number.isNaN(Number.parseFloat(value))) {
+        const newTimer = setTimeout(() => {
+          updateBridgeQuote(value);
+        }, 2000);
+        setDebounceTimer(newTimer);
+      }
+    },
+    [debounceTimer]
+  );
 
   // Execute the complete bridge transaction with gas handling
   const executeBridge = async () => {
