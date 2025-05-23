@@ -712,7 +712,7 @@ const Setting: React.FC = () => {
                                   {splitAddress(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
                                   <button
                                     onClick={() =>
-                                      handleCopy(`lndhub://admin:${adminId || ""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+                                      handleCopy(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`)
                                     }
                                     className="border-0 p-0 bg-transparent pl-1"
                                   >

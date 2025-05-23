@@ -24,12 +24,12 @@ const RecoverPopup = ({
   adminId
 }) => {
   const [step, setStep] = useState(1)
-  const [lndHubUrl, setLndHubUrl] = useState(`lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+  const [lndHubUrl, setLndHubUrl] = useState(`lndhub://admin:${adminId||""}@https://spend.madhousewallet.com/lndhub/ext/`)
   const handleAdjustPop = () => {
     setRecover(!recover)
   }
   useEffect(()=>{
-    setLndHubUrl(`lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`)
+    setLndHubUrl(`lndhub://admin:${adminId||""}@https://spend.madhousewallet.com/lndhub/ext/`)
   },[])
   const handleCopy = async (text) => {
     try {
