@@ -1,35 +1,35 @@
 "use client";
 import { zeroAddress, parseUnits } from "viem";
 
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
+import { signerToEcdsaValidator ,  create7702KernelAccount,
+  create7702KernelAccountClient,} from "@zerodev/ecdsa-validator";
 
 import {
-  createKernelAccount,
-  createKernelAccountClient,
+
   createZeroDevPaymasterClient,
   getUserOperationGasPrice,
   gasTokenAddresses,
   getERC20PaymasterApproveCall,
 } from "@zerodev/sdk";
 
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+import { getEntryPoint, KERNEL_V3_3 } from "@zerodev/sdk/constants";
 import { ethers } from "ethers";
 import { createPublicClient, http } from "viem";
 import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-export let BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+export let BUNDLER_URL = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
+export const PAYMASTER_RPC = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
 
 export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
 export const MAINNET_PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
 
-const CHAIN =
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
-  (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
+const CHAIN = sepolia
+  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
+  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
+  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
+  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
 const entryPoint = getEntryPoint("0.7");
 
 let paymasterClient = createZeroDevPaymasterClient({
@@ -44,14 +44,26 @@ let publicClient = createPublicClient({
 
 export const zeroTrxn = async (kernelClient) => {
   try {
-    const txnHash = await kernelClient.sendTransaction({
-      to: zeroAddress, // use any address
-      value: BigInt(0), // default to 0
-      data: "0x", // default to 0x
-    });
+    const txnHash = await kernelClient.sendUserOperation({
+    callData: await kernelClient.account.encodeCalls([
+      {
+        to: zeroAddress,
+        value: BigInt(0),
+        data: "0x",
+      },
+      {
+        to: zeroAddress,
+        value: BigInt(0),
+        data: "0x",
+      },
+    ]),
+  });
+    const { receipt } = await kernelClient.waitForUserOperationReceipt({
+    hash: txnHash,
+  });
     return {
       status: true,
-      data: txnHash,
+      data: receipt,
     };
   } catch (error) {
     console.log(" zeroTrxn error-->", error);
@@ -105,7 +117,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
         transport: http(PAYMASTER_RPC),
       });
       BUNDLER_URL =
-        "https://rpc.zerodev.app/api/v2/bundler/310cd92b-af6a-470d-9496-754b31de2c48";
+        'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
       publicClient = createPublicClient({
         transport: http(BUNDLER_URL),
         chain: CHAIN,
@@ -117,19 +129,17 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
       entryPoint,
-      kernelVersion: KERNEL_V3_1,
+      kernelVersion: KERNEL_V3_3,
     });
 
     // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
+    const account = await create7702KernelAccount(publicClient, {
+      signer,
       entryPoint,
-      kernelVersion: KERNEL_V3_1,
+      kernelVersion: KERNEL_V3_3,
     });
 
-    const kernelClient = createKernelAccountClient({
+    const kernelClient = create7702KernelAccountClient({
       account,
       chain: chain ?? CHAIN,
       bundlerTransport: http(BUNDLER_URL),
@@ -188,16 +198,14 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer,
       entryPoint,
-      kernelVersion: KERNEL_V3_1,
+      kernelVersion: KERNEL_V3_3,
     });
 
     // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
+    const account = await create7702KernelAccount(publicClient, {
+      signer,
       entryPoint,
-      kernelVersion: KERNEL_V3_1,
+      kernelVersion: KERNEL_V3_3,
     });
     let res;
     if (address !== account.address) {
@@ -254,19 +262,17 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
         signer,
         entryPoint,
-        kernelVersion: KERNEL_V3_1,
+        kernelVersion: KERNEL_V3_3,
       });
 
       // Create Kernel Smart Account
-      const account = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
+        const account = await create7702KernelAccount(publicClient, {
+          signer,
+          entryPoint,
+          kernelVersion: KERNEL_V3_3,
+        });
 
-      const kernelClient = createKernelAccountClient({
+      const kernelClient = create7702KernelAccountClient({
         account,
         chain: chain ?? CHAIN,
         bundlerTransport: http(BUNDLER_URL),
@@ -320,7 +326,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         transport: http(PAYMASTER_RPC),
       });
       BUNDLER_URL =
-        "https://rpc.zerodev.app/api/v2/bundler/310cd92b-af6a-470d-9496-754b31de2c48";
+        'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
       publicClient = createPublicClient({
         transport: http(BUNDLER_URL),
         chain: CHAIN,
@@ -333,19 +339,17 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
         signer,
         entryPoint,
-        kernelVersion: KERNEL_V3_1,
+        kernelVersion: KERNEL_V3_3,
       });
 
       // Create Kernel Smart Account
-      const account = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
+        const account = await create7702KernelAccount(publicClient, {
+          signer,
+          entryPoint,
+          kernelVersion: KERNEL_V3_3,
+        });
 
-      const kernelClient = createKernelAccountClient({
+      const kernelClient = create7702KernelAccountClient({
         account,
         chain: chain ?? CHAIN,
         bundlerTransport: http(BUNDLER_URL),
