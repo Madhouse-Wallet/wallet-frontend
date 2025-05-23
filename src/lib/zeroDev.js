@@ -346,7 +346,7 @@ export const getRpcProvider = async () => {
 export const getETHEREUMRpcProvider = async () => {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
-      "https://rpc.mevblocker.io"
+      "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
     );
     return provider;
   } catch (error) {
