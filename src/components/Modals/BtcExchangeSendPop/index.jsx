@@ -7,6 +7,10 @@ import { BigNumber } from "ethers";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
+import { sendBitcoinFunction } from "@/utils/bitcoinSend";
+import { useSelector } from "react-redux";
+import { getUser } from "@/lib/apiCall";
+import { retrieveSecret } from "@/utils/webauthPrf";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -25,6 +29,8 @@ const BtcExchangeSendPop = ({
   depositFound,
   setDepositFound,
 }) => {
+  const userAuth = useSelector((state) => state.Auth);
+
   const [tokenSend, setTokenSend] = useState();
   const [step, setStep] = useState(2);
   const [tab, setTab] = useState(0);
@@ -56,6 +62,83 @@ const BtcExchangeSendPop = ({
     } catch (error) {}
   };
 
+  // const sendNative = async () => {
+  //   try {
+  //     setLoadingSend(true);
+  //     if (!btcAmount) {
+  //       setLoadingSend(false);
+  //       return toast.error("Please Enter Valid Amount!");
+  //     }
+  //     if (!btcAddress) {
+  //       setLoadingSend(false);
+  //       return toast.error("Please Enter Valid Address!");
+  //     }
+  //     if (sendSdk) {
+  //       try {
+  //         const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
+  //         const { targetChainTxHash, walletPublicKey } =
+  //           await sendSdk.redemptions.requestRedemption(
+  //             btcAddress,
+  //             weiAmount.toString()
+  //           );
+  //         toast.success("Send BTC Success!");
+  //       } catch (error) {
+  //         toast.error(error.message);
+  //       }
+  //     } else {
+  //       toast.error("Please Login!");
+  //     }
+  //     setLoadingSend(false);
+  //   } catch (error) {
+  //     setLoadingSend(false);
+  //     toast.error(error.message);
+  //   }
+  // };
+  const getSecretData = async (storageKey, credentialId) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+      if (retrieveSecretCheck?.status) {
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret,
+        };
+      } else {
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Error in Getting secret!",
+      };
+    }
+  };
+
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth?.email);
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        );
+        if (callGetSecretData?.status) {
+          return JSON.parse(callGetSecretData?.secret);
+        } else {
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+      return false;
+    }
+  };
+
   const sendNative = async () => {
     try {
       setLoadingSend(true);
@@ -67,20 +150,26 @@ const BtcExchangeSendPop = ({
         setLoadingSend(false);
         return toast.error("Please Enter Valid Address!");
       }
-      if (sendSdk) {
-        try {
-          const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
-          const { targetChainTxHash, walletPublicKey } =
-            await sendSdk.redemptions.requestRedemption(
-              btcAddress,
-              weiAmount.toString()
-            );
-          toast.success("Send BTC Success!");
-        } catch (error) {
-          toast.error(error.message);
-        }
+      console.log("btcAddress", btcAddress, btcAmount);
+
+      const privateKey = await recoverSeedPhrase();
+      if (!privateKey) {
+        toast.error("Please enter a valid amount");
+        return;
+      }
+
+      const result = await sendBitcoinFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: btcAddress,
+        amountSatoshi: btcAmount * 100000000,
+        privateKeyHex: privateKey?.privateKey,
+        network: "main", // Use 'main' for mainnet
+      });
+
+      if (result.success) {
+        toast.success("BTC sent successfully!");
       } else {
-        toast.error("Please Login!");
+        toast.error(result.error || "Transaction failed");
       }
       setLoadingSend(false);
     } catch (error) {
@@ -88,6 +177,7 @@ const BtcExchangeSendPop = ({
       toast.error(error.message);
     }
   };
+
   const tabData = [
     {
       title: "Native SegWit",
@@ -214,7 +304,7 @@ const BtcExchangeSendPop = ({
                   <div className="py-2 mt-4">
                     <button
                       onClick={sendNative}
-                      disabled={loadingSend}
+                      // disabled={loadingSend}
                       className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >
                       {loadingSend ? "Please Wait ..." : "Send"}

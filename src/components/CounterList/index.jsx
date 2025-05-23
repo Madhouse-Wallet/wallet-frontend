@@ -71,8 +71,8 @@ const CounterList = ({ data }) => {
           tx.receipt_status === "1"
             ? "confirmed"
             : tx.receipt_status === "0"
-              ? "rejected"
-              : "pending",
+            ? "rejected"
+            : "pending",
         amount: amount ? `${amount} ${currency}` : "",
         type: isSend ? "send" : "receive",
         // type: tx?.category,
@@ -86,11 +86,11 @@ const CounterList = ({ data }) => {
 
   const handleCardClick = async (item) => {
     setSelectedItem([item]);
-    if (item.head === "Total Balance") {
+    if (item.head === "Dollars") {
       await fetchRecentTransactions();
-    } else if (item.head === "Bitcoin Balance") {
+    } else if (item.head === "Bitcoin") {
       await fetchBitcoinRecentTransactions();
-    } else if (item.head === "USDC Balance") {
+    } else if (item.head === "Gold") {
       await fetchUSDCRecentTransactions();
     } else {
       setTransactions([]);
@@ -116,7 +116,9 @@ const CounterList = ({ data }) => {
             id: tx.transaction_hash || "",
             rawData: tx, // Store the original transaction data
             status: "confirmed", // Default status as it's on blockchain
-            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "BTC"} Transfer`,
+            summary: `${tx.value_decimal || "0"} ${
+              tx.token_symbol || "BTC"
+            } Transfer`,
             to: tx.to_address || "",
             transactionHash: tx.transaction_hash || "",
             type: "Transfer", // Default type
@@ -151,7 +153,11 @@ const CounterList = ({ data }) => {
             rawData: tx, // Store the original transaction data
             status: "confirmed", // Default status as it's on blockchain
             // summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} Transfer`,
-            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${tx.from_address === userAuth.walletAddress?.toLowerCase() ? "Transfer" : "Receive"}`,
+            summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
+              tx.from_address === userAuth.walletAddress?.toLowerCase()
+                ? "Transfer"
+                : "Receive"
+            }`,
             to: tx.to_address || "",
             transactionHash: tx.transaction_hash || "",
             type:
@@ -187,19 +193,19 @@ const CounterList = ({ data }) => {
           data.map((item, key) => (
             <div key={key} className="col-span-6 lg:col-span-3 md:col-span-4 ">
               <CardCstm
-                onClick={() => {
-                  if (
-                    item.value === "" ||
-                    item.value === "$0" ||
-                    item.value === "$0.00" ||
-                    item.value === 0 ||
-                    !userAuth?.walletAddress
-                  ) {
-                    return;
-                  }
-                  handleCardClick(item);
-                  setLiveBlog(!liveBlog);
-                }}
+                // onClick={() => {
+                //   if (
+                //     item.value === "" ||
+                //     item.value === "$0" ||
+                //     item.value === "$0.00" ||
+                //     item.value === 0 ||
+                //     !userAuth?.walletAddress
+                //   ) {
+                //     return;
+                //   }
+                //   handleCardClick(item);
+                //   setLiveBlog(!liveBlog);
+                // }}
                 style={{ opacity: 1, transform: "none" }}
               >
                 <div className="flex w-full flex-col items-center justify-between ">

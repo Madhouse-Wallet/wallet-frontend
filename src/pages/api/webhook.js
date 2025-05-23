@@ -2,7 +2,8 @@ import { logIn, getUser, createTpos, createUser, createInvoice } from "./lnbit";
 import {
     sendBitcoinn,
 } from "../../lib/apiCall";
-import { createLBtcToTbtcShift , createLBtcToUSDCShift} from "./sideShiftAI";
+import { createLBtcToTbtcShift, createLBtcToUSDCShift } from "./sideShiftAI";
+import client from '../../lib/mongodb'; // Import the MongoDB client
 
 const createReverseSwap = async (invoice) => {
     try {
@@ -39,12 +40,27 @@ export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
+
     console.log("Body 1", req.body);
     // 2. Extract the secret and data from the request
     const { secret, invoice_id, status, amount } = req.body;
 
     console.log("Body 2", req.body);
-    if (req.body.secret == ("tbtclbtc")) {
+
+
+    const db = (await client.connect()).db(); // Defaults to the database in the connection string
+    const usersCollection = db.collection('users'); // Use 'users' collection
+    const user = await usersCollection.findOne({
+        "flowTokens.token": secret
+    });
+    // Step 2: Extract the matching token object manually
+    const matchedToken = user.flowTokens.find(t => t.token == token);
+
+    console.log("Flow:", matchedToken?.flow);
+    console.log("Full user doc:", user);
+
+
+    if (matchedToken?.flow == 3) {
         try {
             let getToken = await logIn(2);
             console.log("getToken-->", getToken)
@@ -57,14 +73,14 @@ export default async function handler(req, res) {
                     "unit": "sat",
                     "amount": satoshiAmount,
                     "memo": "invoice",
-                }, token, 2);
+                }, token, 2, "");
                 console.log("createInvoice1", createInvoice1)
                 if (createInvoice1?.status) {
                     let createSwap = await createReverseSwap(createInvoice1?.data?.bolt11)
                     console.log("createSwap-->", createSwap)
                     if (createSwap?.status) {
                         const result = await sendBitcoinn(
-                            localStorage.getItem("coinosToken"),
+                            user?.coinosToken,
                             satoshiAmount,
                             createSwap?.data?.address
                         );
@@ -78,47 +94,47 @@ export default async function handler(req, res) {
         }
     }
 
-    if(req.body.secret == ("lbtctbtc")){
-        try {    
+    if (matchedToken?.flow == 2) {
+        try {
             const liquidShift = await createLBtcToTbtcShift(
                 amount, // amount
                 "0x230537f1539E93743dD1a90c945E6086B9c0521a",
                 // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
                 process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
                 process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
-              );
-              // liquidShift now contains all the information about the shift, including the deposit address
-              console.log("Deposit address:", liquidShift.depositAddress);                                                                                   
+            );
+            // liquidShift now contains all the information about the shift, including the deposit address
+            console.log("Deposit address:", liquidShift.depositAddress);
             const result = await sendBitcoinn(
-                localStorage.getItem("coinosToken"),
+                user?.coinosToken,
                 1,
                 liquidShift.depositAddress
             );
         } catch (error) {
-            console.log("error-->",error)
+            console.log("error-->", error)
         }
     }
 
 
 
-    if(req.body.secret == ("lbtcusdc")){
-        try {    
+    if (matchedToken?.flow == 1) {
+        try {
             const liquidShift = await createLBtcToUSDCShift(
                 amount, // amount
                 "0x230537f1539E93743dD1a90c945E6086B9c0521a",
                 // "0x4974896Cc6D633C7401014d60f27d9f4ac9979Bb",
                 process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
                 process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
-              );
-              // liquidShift now contains all the information about the shift, including the deposit address
-              console.log("Deposit address:", liquidShift.depositAddress);                                                                                   
+            );
+            // liquidShift now contains all the information about the shift, including the deposit address
+            console.log("Deposit address:", liquidShift.depositAddress);
             const result = await sendBitcoinn(
-                localStorage.getItem("coinosToken"),
+                user?.coinosToken,
                 1,
                 liquidShift.depositAddress
             );
         } catch (error) {
-            console.log("error-->",error)
+            console.log("error-->", error)
         }
     }
 

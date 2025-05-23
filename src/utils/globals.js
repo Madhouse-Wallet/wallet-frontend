@@ -78,3 +78,10 @@ export const isValidEmail = async (email) => {
     // Test the email against the regex
     return emailRegex.test(email);
 }
+
+export const getRandomString  = async (length=4)=>{
+    const randomAlpha = await Array.from({ length }, () =>
+        String.fromCharCode(97 + Math.floor(Math.random() * 26)) // a–z
+    ).join("");
+    return randomAlpha
+}

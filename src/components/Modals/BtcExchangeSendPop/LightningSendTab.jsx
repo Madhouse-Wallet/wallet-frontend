@@ -6,12 +6,14 @@ import QRCode from "qrcode";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 import { sendBtc } from "../../../lib/apiCall"
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 
 const LightningSendTab = () => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
   const [openCam, setOpenCam] = useState(false);
+  const userAuth = useSelector((state) => state.Auth);
 
   const [loading, setLoading] = useState(false);
   const [amount, setInvoice] = useState(""); // State for amount
@@ -70,9 +72,15 @@ const LightningSendTab = () => {
   const handleNext = async () => {
     setError("");
     setLoading(true);
+    if (!userAuth.email) {
+      setError("Please Login!");
+      setLoading(false);
+      return;
+    }
     // const result = await createReverseSwap(amount);
     const result = await sendBtc(
-      amount
+      amount,
+      userAuth.email
     );
     // console.log("result--->", result)
 

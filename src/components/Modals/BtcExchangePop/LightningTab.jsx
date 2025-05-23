@@ -4,12 +4,15 @@ import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
 import { receiveBtc } from "../../../lib/apiCall"
+import { useSelector } from "react-redux";
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(""); // State for amount
   const [error, setError] = useState("");
+  const userAuth = useSelector((state) => state.Auth);
+
 
   const [invoice, setInvoice] = useState("");
   const handleCopy = async (address, type) => {
@@ -74,8 +77,14 @@ const LightningTab = (walletAddress) => {
 
     setError("");
     setLoading(true);
+    if (!userAuth.email) {
+      setError("Please Login!");
+      setLoading(false);
+      return;
+    }
     const result = await receiveBtc(
-      Number(amount)
+      Number(amount),
+      userAuth?.email
     );
     // console.log("result--->", result)
     if (result.status === "error") {

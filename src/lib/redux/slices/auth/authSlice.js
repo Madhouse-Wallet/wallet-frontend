@@ -12,51 +12,19 @@ let data = null;
 if (typeof window !== "undefined") {
   storedDataString = localStorage.getItem("authUser");
   data = storedDataString ? JSON.parse(storedDataString) : null;
-  if (data) {
-    if (data.webauthKey) {
-      data.webauthKey = {
-        ...data.webauthKey,
-        pubX: BigInt(data.webauthKey.pubX),
-        pubY: BigInt(data.webauthKey.pubY),
-      }
-    }
-
-    if (data.passkey2) {
-      data.passkey2 = {
-        ...data.passkey2,
-        pubX: BigInt(data.passkey2.pubX),
-        pubY: BigInt(data.passkey2.pubY),
-      }
-    }
-    if (data.passkey3) {
-      data.passkey3 = {
-        ...data.passkey3,
-        pubX: BigInt(data.passkey3.pubX),
-        pubY: BigInt(data.passkey3.pubY),
-      }
-    }
-  }
-
 }
 // JSON.stringify(response.data)
 const initialState = {
   walletAddress: (data?.walletAddress || ""),
   bitcoinWallet: (data?.bitcoinWallet || ""),
-  webauthKey: (data?.webauthKey || ""),
-  passkeyCred: "",
+  webauthKey: ((data?.webauthKey && JSON.stringify(data?.webauthKey) )|| ""),
   username: (data?.username || ""),
   email: (data?.email || ""),
   id: (data?.id || ""),
   login: (data?.login || false),
   pos: (data?.pos || false),
   signer: "",
-  multisigAddress: (data?.multisigAddress || ""),
-  passkey2: (data?.passkey2 || ""),
-  passkey3: (data?.passkey3 || ""),
-  ensName: (data?.ensName || ""),
-  ensSetup: (data?.ensSetup || false),
-  multisigSetup: (data?.multisigSetup || false),
-  multisigActivate: (data?.multisigSetup || false)
+  totalPasskey: (data?.totalPasskey || ""),
 };
 
 export const authSlice = createSlice({
@@ -70,18 +38,11 @@ export const authSlice = createSlice({
       state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
       state.bitcoinWallet = action.payload.bitcoinWallet;
-      state.passkeyCred = action.payload.passkeyCred;
       state.webauthKey = action.payload.webauthKey;
       state.id = action.payload.id;
       state.signer = action.payload.signer;
       state.pos = (action.payload.pos || false);
-      state.multisigAddress = action.payload.multisigAddress;
-      state.passkey2 = action.payload.passkey2;
-      state.passkey3 = action.payload.passkey3;
-      state.ensName = action.payload.ensName;
-      state.ensSetup = action.payload.ensSetup;
-      state.multisigSetup = action.payload.multisigSetup;
-      state.multisigActivate = action.payload.multisigActivate
+      state.totalPasskey = (action.payload.totalPasskey || 1);
     },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,
