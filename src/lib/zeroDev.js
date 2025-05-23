@@ -246,6 +246,74 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         transport: http(BUNDLER_URL),
         chain,
       });
+
+      const signer = privateKeyToAccount(PRIVATE_KEY);
+      // Create ECDSA validator
+
+      // Create Circle Paymaster Client
+      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+        signer,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+      });
+
+      // Create Kernel Smart Account
+      const account = await createKernelAccount(publicClient, {
+        plugins: {
+          sudo: ecdsaValidator,
+        },
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+      });
+
+      const kernelClient = createKernelAccountClient({
+        account,
+        chain: chain ?? CHAIN,
+        bundlerTransport: http(BUNDLER_URL),
+        client: publicClient,
+        paymaster: paymasterClient,
+        paymasterContext: {
+          token: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
+        },
+      });
+
+      // Approve PAXG for the paymaster (ensure that the account has enough PAXG)
+      const userOpHash = await kernelClient.sendUserOperation({
+        callData: await account.encodeCalls([
+          await getERC20PaymasterApproveCall(paymasterClient, {
+            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
+            approveAmount: parseUnits("1", 6),
+            entryPoint,
+          }),
+          {
+            to: zeroAddress,
+            value: BigInt(0),
+            data: "0x",
+          },
+        ]),
+      });
+
+      console.log("UserOp hash:", userOpHash);
+
+      // Wait for the receipt of the user operation
+      const receipt = await kernelClient.waitForUserOperationReceipt({
+        hash: userOpHash,
+      });
+
+      console.log("UserOp completed", receipt.receipt.transactionHash);
+
+      if (!getAccount) {
+        return {
+          status: false,
+          msg: "No Account Found!",
+        };
+      }
+      return {
+        status: true,
+        account: account,
+        kernelClient: kernelClient,
+        address: account.address,
+      };
     } else if (chain === base) {
       paymasterClient = createZeroDevPaymasterClient({
         chain: CHAIN,
@@ -257,75 +325,75 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         transport: http(BUNDLER_URL),
         chain: CHAIN,
       });
-    }
 
-    const signer = privateKeyToAccount(PRIVATE_KEY);
-    // Create ECDSA validator
+      const signer = privateKeyToAccount(PRIVATE_KEY);
+      // Create ECDSA validator
 
-    // Create Circle Paymaster Client
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
+      // Create Circle Paymaster Client
+      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+        signer,
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+      });
 
-    // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
-
-    const kernelClient = createKernelAccountClient({
-      account,
-      chain: chain ?? CHAIN,
-      bundlerTransport: http(BUNDLER_URL),
-      client: publicClient,
-      paymaster: paymasterClient,
-      paymasterContext: {
-        token: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
-      },
-    });
-
-    // Approve USDC for the paymaster (ensure that the account has enough USDC)
-    const userOpHash = await kernelClient.sendUserOperation({
-      callData: await account.encodeCalls([
-        await getERC20PaymasterApproveCall(paymasterClient, {
-          gasToken: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
-          approveAmount: parseUnits("1", 6),
-          entryPoint,
-        }),
-        {
-          to: zeroAddress,
-          value: BigInt(0),
-          data: "0x",
+      // Create Kernel Smart Account
+      const account = await createKernelAccount(publicClient, {
+        plugins: {
+          sudo: ecdsaValidator,
         },
-      ]),
-    });
+        entryPoint,
+        kernelVersion: KERNEL_V3_1,
+      });
 
-    console.log("UserOp hash:", userOpHash);
+      const kernelClient = createKernelAccountClient({
+        account,
+        chain: chain ?? CHAIN,
+        bundlerTransport: http(BUNDLER_URL),
+        client: publicClient,
+        paymaster: paymasterClient,
+        paymasterContext: {
+          token: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
+        },
+      });
 
-    // Wait for the receipt of the user operation
-    const receipt = await kernelClient.waitForUserOperationReceipt({
-      hash: userOpHash,
-    });
+      // Approve USDC for the paymaster (ensure that the account has enough USDC)
+      const userOpHash = await kernelClient.sendUserOperation({
+        callData: await account.encodeCalls([
+          await getERC20PaymasterApproveCall(paymasterClient, {
+            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
+            approveAmount: parseUnits("1", 6),
+            entryPoint,
+          }),
+          {
+            to: zeroAddress,
+            value: BigInt(0),
+            data: "0x",
+          },
+        ]),
+      });
 
-    console.log("UserOp completed", receipt.receipt.transactionHash);
+      console.log("UserOp hash:", userOpHash);
 
-    if (!getAccount) {
+      // Wait for the receipt of the user operation
+      const receipt = await kernelClient.waitForUserOperationReceipt({
+        hash: userOpHash,
+      });
+
+      console.log("UserOp completed", receipt.receipt.transactionHash);
+
+      if (!getAccount) {
+        return {
+          status: false,
+          msg: "No Account Found!",
+        };
+      }
       return {
-        status: false,
-        msg: "No Account Found!",
+        status: true,
+        account: account,
+        kernelClient: kernelClient,
+        address: account.address,
       };
     }
-    return {
-      status: true,
-      account: account,
-      kernelClient: kernelClient,
-      address: account.address,
-    };
   } catch (error) {
     console.log("error-->", error);
     return { status: false, msg: error?.message || "Please Try again ALter!" };
