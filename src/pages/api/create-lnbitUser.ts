@@ -62,28 +62,27 @@ const createBoltzAutoReverseSwap = async (wallet1: any, wallet2: any, apiKey1: a
             boltzAutoReverseSwap1: {},
             boltzAutoReverseSwap2: {}
         }
-        let setting = {
+        let boltzReverseSwap1 = await createBlotzAutoReverseSwap({
+            "wallet": wallet1,
+            "onchain_address": coinosis_address,
             "asset": "L-BTC/BTC",
             "direction": "send",
             "balance": 100,
             "instant_settlement": true,
             "amount": "200",
-        }
-        let boltzReverseSwap1 = await createBlotzAutoReverseSwap({
-            "wallet": wallet1,
-            "onchain_address": coinosis_address,
-            "refund_address": refund_address,
-            ...setting
-        }, apiKey1, token, accountType) as any;
+        }, apiKey1, token, 1) as any;
         if (boltzReverseSwap1 && boltzReverseSwap1?.status) {
             result.boltzAutoReverseSwap1 = boltzReverseSwap1?.data;
         }
         let boltzReverseSwap2 = await createBlotzAutoReverseSwap({
             "wallet": wallet2,
             "onchain_address": bitcoin_address,
-            "refund_address": refund_address,
-            ...setting
-        }, apikey2, token, accountType) as any;
+            "asset": "BTC/BTC",
+            "direction": "send",
+            "balance": 100,
+            "instant_settlement": true,
+            "amount": "25000",
+        }, apikey2, token, 2) as any;
         if (boltzReverseSwap2 && boltzReverseSwap2?.status) {
             result.boltzAutoReverseSwap2 = boltzReverseSwap2?.data;
         }

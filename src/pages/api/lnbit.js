@@ -444,6 +444,7 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
       }
     );
     response = await response.json();
+    console.log("response-> createBlotzAutoReverseSwap",type,response)
     if (response?.id) {
       return {
         status: true,
