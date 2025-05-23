@@ -19,7 +19,7 @@ import { sepolia, mainnet, arbitrum, base } from "viem/chains";
 import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-export let BUNDLER_URL = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
+export const BUNDLER_URL = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
 export const PAYMASTER_RPC = 'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
 
 export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
@@ -32,12 +32,12 @@ const CHAIN = sepolia
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
 const entryPoint = getEntryPoint("0.7");
 
-let paymasterClient = createZeroDevPaymasterClient({
+const paymasterClient = createZeroDevPaymasterClient({
   chain: CHAIN,
   transport: http(PAYMASTER_RPC),
 });
 
-let publicClient = createPublicClient({
+const publicClient = createPublicClient({
   transport: http(BUNDLER_URL),
   chain: CHAIN,
 });
@@ -100,29 +100,29 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 
 export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
-    if (chain === mainnet) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain,
-        transport: http(MAINNET_PAYMASTER_RPC),
-      });
-      BUNDLER_URL = MAINNET_BUNDLER_URL;
+    // if (chain === mainnet) {
+    //   paymasterClient = createZeroDevPaymasterClient({
+    //     chain,
+    //     transport: http(MAINNET_PAYMASTER_RPC),
+    //   });
+    //   BUNDLER_URL = MAINNET_BUNDLER_URL;
 
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain,
-      });
-    } else if (chain === base) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain: CHAIN,
-        transport: http(PAYMASTER_RPC),
-      });
-      BUNDLER_URL =
-        'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain: CHAIN,
-      });
-    }
+    //   publicClient = createPublicClient({
+    //     transport: http(BUNDLER_URL),
+    //     chain,
+    //   });
+    // } else if (chain === base) {
+    //   paymasterClient = createZeroDevPaymasterClient({
+    //     chain: CHAIN,
+    //     transport: http(PAYMASTER_RPC),
+    //   });
+    //   BUNDLER_URL =
+    //     'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
+    //   publicClient = createPublicClient({
+    //     transport: http(BUNDLER_URL),
+    //     chain: CHAIN,
+    //   });
+    // }
 
     const signer = privateKeyToAccount(PRIVATE_KEY);
     // Create ECDSA validator
@@ -243,94 +243,94 @@ export const getProvider = async (kernelClient) => {
 
 export const getAccount = async (PRIVATE_KEY, chain = base) => {
   try {
-    if (chain === mainnet) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain,
-        transport: http(MAINNET_PAYMASTER_RPC),
-      });
-      BUNDLER_URL = MAINNET_BUNDLER_URL;
+    // if (chain === mainnet) {
+    //   paymasterClient = createZeroDevPaymasterClient({
+    //     chain,
+    //     transport: http(MAINNET_PAYMASTER_RPC),
+    //   });
+    //   BUNDLER_URL = MAINNET_BUNDLER_URL;
 
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain,
-      });
+    //   publicClient = createPublicClient({
+    //     transport: http(BUNDLER_URL),
+    //     chain,
+    //   });
 
-      const signer = privateKeyToAccount(PRIVATE_KEY);
-      // Create ECDSA validator
+    //   const signer = privateKeyToAccount(PRIVATE_KEY);
+    //   // Create ECDSA validator
 
-      // Create Circle Paymaster Client
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer,
-        entryPoint,
-        kernelVersion: KERNEL_V3_3,
-      });
+    //   // Create Circle Paymaster Client
+    //   const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+    //     signer,
+    //     entryPoint,
+    //     kernelVersion: KERNEL_V3_3,
+    //   });
 
-      // Create Kernel Smart Account
-        const account = await create7702KernelAccount(publicClient, {
-          signer,
-          entryPoint,
-          kernelVersion: KERNEL_V3_3,
-        });
+    //   // Create Kernel Smart Account
+    //     const account = await create7702KernelAccount(publicClient, {
+    //       signer,
+    //       entryPoint,
+    //       kernelVersion: KERNEL_V3_3,
+    //     });
 
-      const kernelClient = create7702KernelAccountClient({
-        account,
-        chain: chain ?? CHAIN,
-        bundlerTransport: http(BUNDLER_URL),
-        client: publicClient,
-        paymaster: paymasterClient,
-        paymasterContext: {
-          token: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-        },
-      });
+    //   const kernelClient = create7702KernelAccountClient({
+    //     account,
+    //     chain: chain ?? CHAIN,
+    //     bundlerTransport: http(BUNDLER_URL),
+    //     client: publicClient,
+    //     paymaster: paymasterClient,
+    //     paymasterContext: {
+    //       token: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
+    //     },
+    //   });
 
-      // Approve PAXG for the paymaster (ensure that the account has enough PAXG)
-      const userOpHash = await kernelClient.sendUserOperation({
-        callData: await account.encodeCalls([
-          await getERC20PaymasterApproveCall(paymasterClient, {
-            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-            approveAmount: parseUnits("1", 6),
-            entryPoint,
-          }),
-          {
-            to: zeroAddress,
-            value: BigInt(0),
-            data: "0x",
-          },
-        ]),
-      });
+    //   // Approve PAXG for the paymaster (ensure that the account has enough PAXG)
+    //   const userOpHash = await kernelClient.sendUserOperation({
+    //     callData: await account.encodeCalls([
+    //       await getERC20PaymasterApproveCall(paymasterClient, {
+    //         gasToken: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
+    //         approveAmount: parseUnits("1", 6),
+    //         entryPoint,
+    //       }),
+    //       {
+    //         to: zeroAddress,
+    //         value: BigInt(0),
+    //         data: "0x",
+    //       },
+    //     ]),
+    //   });
 
-      console.log("UserOp hash:", userOpHash);
+    //   console.log("UserOp hash:", userOpHash);
 
-      // Wait for the receipt of the user operation
-      const receipt = await kernelClient.waitForUserOperationReceipt({
-        hash: userOpHash,
-      });
+    //   // Wait for the receipt of the user operation
+    //   const receipt = await kernelClient.waitForUserOperationReceipt({
+    //     hash: userOpHash,
+    //   });
 
-      console.log("UserOp completed", receipt.receipt.transactionHash);
+    //   console.log("UserOp completed", receipt.receipt.transactionHash);
 
-      if (!getAccount) {
-        return {
-          status: false,
-          msg: "No Account Found!",
-        };
-      }
-      return {
-        status: true,
-        account: account,
-        kernelClient: kernelClient,
-        address: account.address,
-      };
-    } else if (chain === base) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain: CHAIN,
-        transport: http(PAYMASTER_RPC),
-      });
-      BUNDLER_URL =
-        'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain: CHAIN,
-      });
+    //   if (!getAccount) {
+    //     return {
+    //       status: false,
+    //       msg: "No Account Found!",
+    //     };
+    //   }
+    //   return {
+    //     status: true,
+    //     account: account,
+    //     kernelClient: kernelClient,
+    //     address: account.address,
+    //   };
+    // } else if (chain === base) {
+      // paymasterClient = createZeroDevPaymasterClient({
+      //   chain: CHAIN,
+      //   transport: http(PAYMASTER_RPC),
+      // });
+      // BUNDLER_URL =
+      //   'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
+      // publicClient = createPublicClient({
+      //   transport: http(BUNDLER_URL),
+      //   chain: CHAIN,
+      // });
 
       const signer = privateKeyToAccount(PRIVATE_KEY);
       // Create ECDSA validator
@@ -397,7 +397,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         kernelClient: kernelClient,
         address: account.address,
       };
-    }
+    //}
   } catch (error) {
     console.log("error-->", error);
     return { status: false, msg: error?.message || "Please Try again ALter!" };
