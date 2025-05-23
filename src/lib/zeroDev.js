@@ -18,9 +18,6 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 export const BUNDLER_URL = 'https://api.pimlico.io/v2/8453/rpc?apikey=pim_gCvmGFU2NgG2xZcmjKVNsE';
 
-export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
-export const MAINNET_PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
-
 const CHAIN = base
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
   // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
@@ -30,6 +27,7 @@ const entryPoint = entryPoint07Address;
 
 const paymasterClient = createPimlicoClient({
 	transport: http(BUNDLER_URL),
+  chain: CHAIN,
 	entryPoint: {
 		address: entryPoint,
 		version: "0.7",
@@ -48,6 +46,7 @@ export const zeroTrxn = async (kernelClient,signer) => {
 		value: BigInt(0),
 		data: "0x",
 		authorization: await signer.signAuthorization({
+      account: signer,
       address: '0xe6Cae83BdE06E4c305530e199D7217f42808555B',
 			chainId: CHAIN.id,
 			nonce: await publicClient.getTransactionCount({
@@ -97,29 +96,6 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 
 export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
-    // if (chain === mainnet) {
-    //   paymasterClient = createZeroDevPaymasterClient({
-    //     chain,
-    //     transport: http(MAINNET_PAYMASTER_RPC),
-    //   });
-    //   BUNDLER_URL = MAINNET_BUNDLER_URL;
-
-    //   publicClient = createPublicClient({
-    //     transport: http(BUNDLER_URL),
-    //     chain,
-    //   });
-    // } else if (chain === base) {
-    //   paymasterClient = createZeroDevPaymasterClient({
-    //     chain: CHAIN,
-    //     transport: http(PAYMASTER_RPC),
-    //   });
-    //   BUNDLER_URL =
-    //     'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
-    //   publicClient = createPublicClient({
-    //     transport: http(BUNDLER_URL),
-    //     chain: CHAIN,
-    //   });
-    // }
 
     const signer = privateKeyToAccount(PRIVATE_KEY);
     // Create ECDSA validator
@@ -142,7 +118,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
             },
     });
 
-    const trxnZero = await zeroTrxn(kernelClient,signer,account);
+    const trxnZero = await zeroTrxn(kernelClient,signer);
     let res;
     if (trxnZero?.status) {
       res = {
@@ -223,93 +199,6 @@ export const getProvider = async (kernelClient) => {
 
 export const getAccount = async (PRIVATE_KEY, chain = base) => {
   try {
-    // if (chain === mainnet) {
-    //   paymasterClient = createZeroDevPaymasterClient({
-    //     chain,
-    //     transport: http(MAINNET_PAYMASTER_RPC),
-    //   });
-    //   BUNDLER_URL = MAINNET_BUNDLER_URL;
-
-    //   publicClient = createPublicClient({
-    //     transport: http(BUNDLER_URL),
-    //     chain,
-    //   });
-
-    //   const signer = privateKeyToAccount(PRIVATE_KEY);
-    //   // Create ECDSA validator
-
-    //   // Create Circle Paymaster Client
-    //   const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-    //     signer,
-    //     entryPoint,
-    //     kernelVersion: KERNEL_V3_3,
-    //   });
-
-    //   // Create Kernel Smart Account
-    //   const account = await toSimple7702SmartAccount({
-    //     client: publicClient,
-    //     owner: signer,
-    //   });
-
-    //   const kernelClient = createSmartAccountClient({
-    //     account,
-    //     chain: chain ?? CHAIN,
-    //     bundlerTransport: http(BUNDLER_URL),
-    //     client: publicClient,
-    //     paymaster: paymasterClient,
-    //     paymasterContext: {
-    //       token: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-    //     },
-    //   });
-
-    //   // Approve PAXG for the paymaster (ensure that the account has enough PAXG)
-    //   const userOpHash = await kernelClient.sendUserOperation({
-    //     callData: await account.encodeCalls([
-    //       await getERC20PaymasterApproveCall(paymasterClient, {
-    //         gasToken: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-    //         approveAmount: parseUnits("1", 6),
-    //         entryPoint,
-    //       }),
-    //       {
-    //         to: zeroAddress,
-    //         value: BigInt(0),
-    //         data: "0x",
-    //       },
-    //     ]),
-    //   });
-
-    //   console.log("UserOp hash:", userOpHash);
-
-    //   // Wait for the receipt of the user operation
-    //   const receipt = await kernelClient.waitForUserOperationReceipt({
-    //     hash: userOpHash,
-    //   });
-
-    //   console.log("UserOp completed", receipt.receipt.transactionHash);
-
-    //   if (!getAccount) {
-    //     return {
-    //       status: false,
-    //       msg: "No Account Found!",
-    //     };
-    //   }
-    //   return {
-    //     status: true,
-    //     account: account,
-    //     kernelClient: kernelClient,
-    //     address: account.address,
-    //   };
-    // } else if (chain === base) {
-      // paymasterClient = createZeroDevPaymasterClient({
-      //   chain: CHAIN,
-      //   transport: http(PAYMASTER_RPC),
-      // });
-      // BUNDLER_URL =
-      //   'https://rpc.zerodev.app/api/v3/4e8bfd76-e288-465a-8127-beb9396cb537/chain/11155111';
-      // publicClient = createPublicClient({
-      //   transport: http(BUNDLER_URL),
-      //   chain: CHAIN,
-      // });
 
       const signer = privateKeyToAccount(PRIVATE_KEY);
       // Create ECDSA validator
@@ -327,7 +216,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         client: publicClient,
         paymaster: paymasterClient,
         paymasterContext: {
-          token: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
+          token: gasTokenAddresses[CHAIN.id].USDC,
         },
       });
 
@@ -335,7 +224,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       const userOpHash = await kernelClient.sendUserOperation({
         callData: await account.encodeCalls([
           await getERC20PaymasterApproveCall(paymasterClient, {
-            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
+            gasToken: gasTokenAddresses[CHAIN.id].USDC,
             approveAmount: parseUnits("1", 6),
             entryPoint,
           }),
