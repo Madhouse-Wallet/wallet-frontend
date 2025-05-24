@@ -27,20 +27,13 @@ const publicClient = createPublicClient({
   chain: CHAIN,
 });
 
-export const zeroTrxn = async (kernelClient,signer) => {
+export const zeroTrxn = async (kernelClient,auth) => {
   try {
     const txnHash = await kernelClient.sendTransaction({
 		to: zeroAddress,
 		value: BigInt(0),
 		data: "0x",
-		authorization: await signer.signAuthorization({
-      account: signer,
-      address: '0xe6Cae83BdE06E4c305530e199D7217f42808555B',
-			chainId: CHAIN.id,
-			nonce: await publicClient.getTransactionCount({
-				address: signer.address,
-			}),
-		}),
+		authorization: auth
 	}); 
     const { receipt } = await kernelClient.waitForUserOperationReceipt({
     hash: txnHash,
@@ -106,7 +99,16 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
             },
     });
 
-    const trxnZero = await zeroTrxn(kernelClient,signer);
+   const auth = await signer.signAuthorization({
+      account: signer,
+      address: '0xe6Cae83BdE06E4c305530e199D7217f42808555B',
+			chainId: CHAIN.id,
+			nonce: await publicClient.getTransactionCount({
+				address: signer.address,
+			}),
+		})
+
+    const trxnZero = await zeroTrxn(kernelClient,auth);
     let res;
     if (trxnZero?.status) {
       res = {
