@@ -1,38 +1,26 @@
 "use client";
-import { zeroAddress, parseUnits,createPublicClient, http } from "viem";
+import { zeroAddress, parseAbi,getAddress,createPublicClient, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction"
 import { toSimple7702SmartAccount } from "viem/account-abstraction";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
-import {
 
-  gasTokenAddresses,
-  getERC20PaymasterApproveCall,
-} from "@zerodev/sdk";
-
-import { ethers } from "ethers";
-import { sepolia, mainnet, arbitrum, base } from "viem/chains";
-import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
+import { ethers, maxUint256  } from "ethers";
+import { base } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-
-
+import {EIP1193Provider} from "./EIP1193Provider";
 export const BUNDLER_URL = 'https://api.pimlico.io/v2/8453/rpc?apikey=pim_gCvmGFU2NgG2xZcmjKVNsE';
-
-const CHAIN = base
-  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "arbitrum" && arbitrum) ||
-  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "sepolia" && sepolia) ||
-  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "mainnet" && mainnet) ||
-  // (process.env.NEXT_PUBLIC_ENV_CHAIN_NAME === "base" && base);
-const entryPoint = entryPoint07Address;
+export const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+const CHAIN = base;
 
 const paymasterClient = createPimlicoClient({
-	transport: http(BUNDLER_URL),
-  chain: CHAIN,
-	entryPoint: {
-		address: entryPoint,
-		version: "0.7",
-	},
-});
+    transport: http(BUNDLER_URL),
+    chain: CHAIN,
+      entryPoint: {
+      address: entryPoint07Address,
+      version: "0.7"
+    },
+  });
 
 const publicClient = createPublicClient({
   transport: http(),
@@ -187,7 +175,7 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
 
 export const getProvider = async (kernelClient) => {
   try {
-    const kernelProvider = new KernelEIP1193Provider(kernelClient);
+    const kernelProvider = new EIP1193Provider(kernelClient);
     const ethersProvider = new ethers.providers.Web3Provider(kernelProvider);
     const signer = await ethersProvider.getSigner();
     return { kernelProvider, ethersProvider, signer };
@@ -215,26 +203,36 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
         bundlerTransport: http(BUNDLER_URL),
         client: publicClient,
         paymaster: paymasterClient,
-        paymasterContext: {
-          token: gasTokenAddresses[CHAIN.id].USDC,
-        },
+        userOperation: {
+                estimateFeesPerGas: async () =>
+                  (await paymasterClient.getUserOperationGasPrice()).fast,
+              },
       });
 
+      const quotes = await paymasterClient.getTokenQuotes({
+                tokens: [usdc]
+            })
+    const paymaster = quotes[0].paymaster
+
       // Approve USDC for the paymaster (ensure that the account has enough USDC)
-      const userOpHash = await kernelClient.sendUserOperation({
-        callData: await account.encodeCalls([
-          await getERC20PaymasterApproveCall(paymasterClient, {
-            gasToken: gasTokenAddresses[CHAIN.id].USDC,
-            approveAmount: parseUnits("1", 6),
-            entryPoint,
-          }),
-          {
-            to: zeroAddress,
-            value: BigInt(0),
-            data: "0x",
-          },
-        ]),
-      });
+      const userOpHash = await kernelClient.sendTransaction({
+                    calls: [
+                      {
+                        to: getAddress(usdc),
+                        abi: parseAbi(["function approve(address,uint)"]),
+                        functionName: "approve",
+                        args: [paymaster, maxUint256],
+                      },
+                      {
+                            to: zeroAddress,
+                            value: BigInt(0),
+                            data: "0x",
+                          },
+                    ],
+                    paymasterContext: {
+                      token: usdc,
+                    },
+                  });
 
       console.log("UserOp hash:", userOpHash);
 
