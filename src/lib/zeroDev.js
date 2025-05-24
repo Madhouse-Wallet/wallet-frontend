@@ -1,11 +1,11 @@
 "use client";
-import { zeroAddress, parseAbi,getAddress,createPublicClient, http } from "viem";
+import { zeroAddress, parseAbi,getAddress,createPublicClient, http, maxUint256 } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction"
 import { toSimple7702SmartAccount } from "viem/account-abstraction";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
 
-import { ethers, maxUint256  } from "ethers";
+import { ethers  } from "ethers";
 import { base } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {EIP1193Provider} from "./EIP1193Provider";
