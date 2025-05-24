@@ -192,12 +192,9 @@ const CreateWallet = () => {
       }
       
       const baseWallet = await setupNewAccount(addressPhrase);
-      const mainnetWallet = await setupNewAccount(addressPhrase, mainnet);
       console.log("baseWallet-->", baseWallet.address);
-      console.log("mainnetWallet-->", mainnetWallet.address); 
-      if (!baseWallet?.status || !mainnetWallet?.status) {
+      if (!baseWallet?.status ) {
         toast.error(baseWallet?.msg);
-        toast.error(mainnetWallet?.msg);
         return false;
       } else {
         let {  address} = baseWallet?.data
