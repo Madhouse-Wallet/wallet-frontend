@@ -1,6 +1,6 @@
 "use client";
 import { zeroAddress, parseAbi,getAddress,createPublicClient, http, maxUint256 } from "viem";
-import { entryPoint07Address } from "viem/account-abstraction"
+import { entryPoint08Address } from "viem/account-abstraction"
 import { toSimple7702SmartAccount } from "viem/account-abstraction";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { createSmartAccountClient } from "permissionless";
@@ -17,8 +17,8 @@ const paymasterClient = createPimlicoClient({
     transport: http(BUNDLER_URL),
     chain: CHAIN,
       entryPoint: {
-      address: entryPoint07Address,
-      version: "0.7"
+      address: entryPoint08Address,
+      version: "0.8"
     },
   });
 
