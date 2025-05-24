@@ -100,7 +100,6 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
     });
 
    const auth = await signer.signAuthorization({
-      account: signer,
       address: '0xe6Cae83BdE06E4c305530e199D7217f42808555B',
 			chainId: CHAIN.id,
 			nonce: await publicClient.getTransactionCount({
