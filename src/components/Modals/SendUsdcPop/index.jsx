@@ -42,17 +42,17 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || Number.parseFloat(amount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    if (parseFloat(amount) > parseFloat(balance)) {
+    if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
-    let data = JSON.parse(userAuth?.webauthKey)
-    let retrieveSecretCheck = await retrieveSecret(
+    const data = JSON.parse(userAuth?.webauthKey)
+    const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
     );
@@ -61,16 +61,16 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
    
-    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
     
     setIsLoading(true);
     try {
-      let getAccountCli = await getAccount(secretData?.seedPhrase)
+      const getAccountCli = await getAccount(secretData?.seedPhrase)
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
-      let signerProvider = await getProvider(getAccountCli?.kernelClient)
+      const signerProvider = await getProvider(getAccountCli?.kernelClient)
       const web3 = new Web3Interaction("sepolia", signerProvider?.ethersProvider);
 
       const result = await web3.sendUSDC(

@@ -1,72 +1,42 @@
 "use client";
-import { zeroAddress, parseUnits } from "viem";
-import { signerToEcdsaValidator } from "@zerodev/ecdsa-validator";
-
-import {
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-  gasTokenAddresses,
-  getERC20PaymasterApproveCall,
-} from "@zerodev/sdk";
-
-import { getEntryPoint, KERNEL_V3_1 } from "@zerodev/sdk/constants";
+import { zeroAddress, createPublicClient, 
+         http,parseEther,createWalletClient, parseAbi } from "viem";
 import { ethers } from "ethers";
-import { createPublicClient, http,parseEther,createWalletClient } from "viem";
 import { base } from "viem/chains";
-import { KernelEIP1193Provider } from "@zerodev/sdk/providers";
-import { generatePrivateKey, privateKeyToAccount, privateKeyToAddress } from "viem/accounts";
-import { toSafeSmartAccount } from "permissionless/accounts";
-const timers = require('timers-promises')
+
+import { generatePrivateKey, privateKeyToAccount,
+        privateKeyToAddress } from "viem/accounts";
+import { toSafeSmartAccount  } from "permissionless/accounts";
+import { createPimlicoClient } from "permissionless/clients/pimlico"
+import { createSmartAccountClient } from "permissionless"
+
 import { safeAbiImplementation } from "./safeAbi";
 import { getSafeModuleSetupData } from "./getSetupData";
-import dotenv from "dotenv";
+import { KernelEIP1193Provider } from "./safeEIP1193Provider";
 
+import dotenv from "dotenv";
+import timers from 'timers-promises'
 
 dotenv.config();
 
-export let BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
-export const PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID}`;
+const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${process.env.PIMLICO_API_KEY}`;
 
-export const MAINNET_BUNDLER_URL = `https://rpc.zerodev.app/api/v2/bundler/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
-export const MAINNET_PAYMASTER_RPC = `https://rpc.zerodev.app/api/v2/paymaster/${process.env.NEXT_PUBLIC_ZERODEV_PROJECT_ID_ETH}`;
-
-const RELAY_PRIVATE_KEY = '8e96e75fd7deb4d53de994ef79bbf995ac91f134ae9e71d660775a99b2d0bd66'
+//Address: 0x714BD8F11A568fbbaF6Ff162770cF80370c52a38
+const RELAY_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY
+const SAFE_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY
 
 
-const CHAIN = base
+const publicClient = createPublicClient({
+          chain: base,
+          transport: http(),
+        });
 
-const entryPoint = getEntryPoint("0.7");
+const pimlicoClient = createPimlicoClient({
+        chain: base,
+        transport: http(pimlicoUrl),
+      });
 
-let paymasterClient = createZeroDevPaymasterClient({
-  chain: CHAIN,
-  transport: http(PAYMASTER_RPC),
-});
 
-let publicClient = createPublicClient({
-  transport: http(BUNDLER_URL),
-  chain: CHAIN,
-});
-
-export const zeroTrxn = async (kernelClient) => {
-  try {
-    const txnHash = await kernelClient.sendTransaction({
-      to: zeroAddress, // use any address
-      value: BigInt(0), // default to 0
-      data: "0x", // default to 0x
-    });
-    return {
-      status: true,
-      data: txnHash,
-    };
-  } catch (error) {
-    console.log(" zeroTrxn error-->", error);
-    return {
-      status: false,
-      msg: error?.message,
-    };
-  }
-};
 export const getPrivateKey = async () => {
   try {
     const PRIVATE_KEY = generatePrivateKey();
@@ -98,10 +68,10 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
           const eoaPrivateKey =  PRIVATE_KEY //`0x${EOA_PRIVATE_KEY}`;
           if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
-          const relayPrivateKey = `0x${RELAY_PRIVATE_KEY}`;
+          const relayPrivateKey = RELAY_PRIVATE_KEY;
           if (!relayPrivateKey) throw new Error("RELAY_PRIVATE_KEY is required");
 
-          const safePrivateKey =  generatePrivateKey(); 
+          const safePrivateKey =  SAFE_PRIVATE_KEY;
           if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
           const account = privateKeyToAccount(eoaPrivateKey);
@@ -123,10 +93,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
           })
 
           const [walletAddress] = await walletClient.getAddresses() 
-          console.log(`Wallet Address:  https://basescan.org/address/${walletAddress}`)
-          console.log(`Wallet Private Key:  ${eoaPrivateKey}`)
-          console.log(`Signer Private Key:  ${safePrivateKey}`)
-
+          console.log(`Wallet Address:  https://basescan.org/address/${walletAddress}`);
 
           const hash = await relayClient.sendTransaction({ 
             to: walletAddress,
@@ -225,23 +192,17 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
         msg: "Invalid Private Key!",
       };
     }
-    const signer = getAccount?.signer;
-    // Create ECDSA validator
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer,
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
+   const eoaPrivateKey=PRIVATE_KEY
+   const  safePrivateKey= SAFE_PRIVATE_KEY
+    //eoaPrivateKey=PRIVATE_KEY
 
-    // Create Kernel Smart Account
-    const account = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
-    let res;
+    const account = await toSafeSmartAccount({
+          address: privateKeyToAddress(eoaPrivateKey),
+          owners: [privateKeyToAccount(safePrivateKey)],
+          client: publicClient,
+          version: "1.4.1",
+        });
+let res;
     if (address !== account.address) {
       res = {
         status: false,
@@ -255,7 +216,7 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     }
     return res;
   } catch (error) {
-    console.log("setupnewaccount error -->", error);
+    console.log("error recovering account -->", error);
     return {
       status: false,
       msg: error?.message,
@@ -277,72 +238,36 @@ export const getProvider = async (kernelClient) => {
 
 export const getAccount = async (PRIVATE_KEY, chain = base) => {
   try {
-    if (chain === mainnet) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain,
-        transport: http(MAINNET_PAYMASTER_RPC),
-      });
-      BUNDLER_URL = MAINNET_BUNDLER_URL;
+    
+    const eoaPrivateKey = PRIVATE_KEY;
+    if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain,
-      });
+    const safePrivateKey = SAFE_PRIVATE_KEY;
+    if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
-      const signer = privateKeyToAccount(PRIVATE_KEY);
-      // Create ECDSA validator
+    const pimlicoApiKey = 'pim_gCvmGFU2NgG2xZcmjKVNsE';
+    if (!pimlicoApiKey) throw new Error("PIMLICO_API_KEY is required");
 
-      // Create Circle Paymaster Client
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer,
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
+        //eoaPrivateKey = PRIVATE_KEY
+        const account = await toSafeSmartAccount({
+          address: privateKeyToAddress(eoaPrivateKey),
+          owners: [privateKeyToAccount(safePrivateKey)],
+          client: publicClient,
+          version: "1.4.1",
+        });
 
-      // Create Kernel Smart Account
-      const account = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      const kernelClient = createKernelAccountClient({
-        account,
-        chain: chain ?? CHAIN,
-        bundlerTransport: http(BUNDLER_URL),
-        client: publicClient,
-        paymaster: paymasterClient,
-        paymasterContext: {
-          token: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-        },
-      });
-
-      // Approve PAXG for the paymaster (ensure that the account has enough PAXG)
-      const userOpHash = await kernelClient.sendUserOperation({
-        callData: await account.encodeCalls([
-          await getERC20PaymasterApproveCall(paymasterClient, {
-            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].PAXG,
-            approveAmount: parseUnits("1", 6),
-            entryPoint,
-          }),
-          {
-            to: zeroAddress,
-            value: BigInt(0),
-            data: "0x",
+    const smartAccountClient = createSmartAccountClient({
+          chain: base,
+          account: account,
+          paymaster: pimlicoClient,
+          bundlerTransport: http(pimlicoUrl),
+          userOperation: {
+            estimateFeesPerGas: async () =>
+              (await pimlicoClient.getUserOperationGasPrice()).fast,
           },
-        ]),
-      });
+        });
 
-      console.log("UserOp hash:", userOpHash);
 
-      // Wait for the receipt of the user operation
-      const receipt = await kernelClient.waitForUserOperationReceipt({
-        hash: userOpHash,
-      });
-
-      console.log("UserOp completed", receipt.receipt.transactionHash);
 
       if (!getAccount) {
         return {
@@ -353,94 +278,89 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       return {
         status: true,
         account: account,
-        kernelClient: kernelClient,
+        kernelClient: smartAccountClient,
         address: account.address,
       };
-    } else if (chain === base) {
-      paymasterClient = createZeroDevPaymasterClient({
-        chain: CHAIN,
-        transport: http(PAYMASTER_RPC),
-      });
-      BUNDLER_URL =
-        "https://rpc.zerodev.app/api/v2/bundler/310cd92b-af6a-470d-9496-754b31de2c48";
-      publicClient = createPublicClient({
-        transport: http(BUNDLER_URL),
-        chain: CHAIN,
-      });
 
-      const signer = privateKeyToAccount(PRIVATE_KEY);
-      // Create ECDSA validator
 
-      // Create Circle Paymaster Client
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer,
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      // Create Kernel Smart Account
-      const account = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      const kernelClient = createKernelAccountClient({
-        account,
-        chain: chain ?? CHAIN,
-        bundlerTransport: http(BUNDLER_URL),
-        client: publicClient,
-        paymaster: paymasterClient,
-        paymasterContext: {
-          token: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
-        },
-      });
-
-      // Approve USDC for the paymaster (ensure that the account has enough USDC)
-      const userOpHash = await kernelClient.sendUserOperation({
-        callData: await account.encodeCalls([
-          await getERC20PaymasterApproveCall(paymasterClient, {
-            gasToken: gasTokenAddresses[(chain ?? CHAIN).id].USDC,
-            approveAmount: parseUnits("1", 6),
-            entryPoint,
-          }),
-          {
-            to: zeroAddress,
-            value: BigInt(0),
-            data: "0x",
-          },
-        ]),
-      });
-
-      console.log("UserOp hash:", userOpHash);
-
-      // Wait for the receipt of the user operation
-      const receipt = await kernelClient.waitForUserOperationReceipt({
-        hash: userOpHash,
-      });
-
-      console.log("UserOp completed", receipt.receipt.transactionHash);
-
-      if (!getAccount) {
-        return {
-          status: false,
-          msg: "No Account Found!",
-        };
-      }
-      return {
-        status: true,
-        account: account,
-        kernelClient: kernelClient,
-        address: account.address,
-      };
-    }
-  } catch (error) {
+ 
+     } catch (error) {
     console.log("error-->", error);
     return { status: false, msg: error?.message || "Please Try again ALter!" };
   }
 };
+
+export const sendTransaction = async (smartAccountClient,params) => {
+
+        const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        const smartAccountAddress = smartAccountClient.account.address
+        
+        const senderUsdcBalance = await publicClient.readContract({
+          abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
+          address: usdc,
+          functionName: "balanceOf",
+          args: [smartAccountAddress],
+        })
+        
+        if (senderUsdcBalance < BigInt(100000)) {
+          throw new Error("insufficient USDC balance, required at least 10 center or 0.1 USDC.")
+        }
+
+
+        const quotes = await pimlicoClient.getTokenQuotes({
+          tokens: [usdc],
+        })
+        const { postOpGas, exchangeRate, paymaster } = quotes[0]
+        
+     try{
+        const userOperation = await smartAccountClient.prepareUserOperation({
+          //calls: [params]
+          calls: [
+           params
+          ],
+        })
+  
+        const userOperationMaxGas =
+          userOperation.preVerificationGas +
+          userOperation.callGasLimit +
+          userOperation.verificationGasLimit +
+          (userOperation.paymasterPostOpGasLimit || 0n) +
+          (userOperation.paymasterVerificationGasLimit || 0n)
+        
+        const userOperationMaxCost = userOperationMaxGas * userOperation.maxFeePerGas
+        
+        // using formula here https://github.com/pimlicolabs/singleton-paymaster/blob/main/src/base/BaseSingletonPaymaster.sol#L334-L341
+        const maxCostInToken =
+          ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) * exchangeRate) / BigInt(1e18)
+        
+        const hash = await smartAccountClient.sendUserOperation({
+          paymasterContext: {
+            token: usdc,
+            validForSeconds: 60, 
+          },
+          calls: [
+            {
+              abi: parseAbi(["function approve(address,uint)"]),
+              functionName: "approve",
+              args: [paymaster, maxCostInToken],
+              to: usdc,
+            },
+              params
+          ],
+        })
+        
+        const opReceipt = await smartAccountClient.waitForUserOperationReceipt({
+          hash,
+        })
+        
+        console.log(`transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`)
+
+        return opReceipt.receipt.transactionHash;
+            }catch(error){
+          console.log(`Error in transaction: ${error}`)
+      }
+}
+
 
 export const getRpcProvider = async () => {
   try {

@@ -178,7 +178,7 @@ class Web3Interaction {
     provider: ethers.providers.Web3Provider, // Ensure this is a valid Web3Provider
     ownerAddress?: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> => {
-    return new Promise(async(resolve) => {
+    return new Promise((resolve) => {
       try {
         // Convert amount to BigNumber (assuming USDC has 6 decimals)
         // const usdcAmount = ethers.utils.parseUnits(amount.toString(), 18);
@@ -245,12 +245,12 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise(async (resolve) => {
+    return new Promise( (resolve) => {
       try {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
         // Get balance
-        const balanceWei = await usdcContract.balanceOf(accountAddress);
+        const balanceWei = usdcContract.balanceOf(accountAddress);
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 6);
 
@@ -277,14 +277,14 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise(async (resolve) => {
+    return new Promise( (resolve) => {
       try {
         // Create USDC contract instance
         console.log("usdcAddress=-->", usdcAddress);
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
         console.log("usdcContract=-->", usdcContract);
         // Get balance
-        const balanceWei = await usdcContract.balanceOf(accountAddress);
+        const balanceWei = usdcContract.balanceOf(accountAddress);
         console.log("balanceWei=-->", balanceWei);
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 18);
