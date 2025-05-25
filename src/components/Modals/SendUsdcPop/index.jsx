@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-// import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
-
+import { getRpcProvider,  getAccount,
+  sendTransaction, USDC_ABI
+ } from "@/lib/zeroDev.js";
+import { parseUnits } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
@@ -13,6 +14,7 @@ import QRScannerModal from "./qRScannerModal.jsx";
 import {
   retrieveSecret,
 } from "../../../utils/webauthPrf";
+
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -47,10 +49,10 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
+    // if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
+    //   toast.error("Insufficient USDC balance");
+    //   return;
+    // }
     const data = JSON.parse(userAuth?.webauthKey)
     const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -70,26 +72,26 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         toast.error(getAccountCli?.msg);
         return;
       }
-      const signerProvider = await getProvider(getAccountCli?.kernelClient)
-      const web3 = new Web3Interaction("sepolia", signerProvider?.ethersProvider);
 
-      const result = await web3.sendUSDC(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-        toAddress,
-        amount,
-        signerProvider?.ethersProvider
-      );
+            const tx = await sendTransaction(
+              getAccountCli?.kernelClient, {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: 'transfer',
+            args: [toAddress, parseUnits(amount.toString(), 6)],
+          }
+        )
 
-      if (result.success) {
+      if (tx) {
         setSuccess(true);
         setSendUsdc(false);
         toast.success("USDC sent successfully!");
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(result.error || "Transaction failed");
+        toast.error(tx || "Transaction failed");
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      toast.error(tx || "Transaction failed");
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@ import React, {  useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { createPassKeyWeightedClient } from "@/lib/zeroDevWallet";
+import { createPassKeyWeightedClient } from "@/lib/zeroDev";
 import { zeroAddress } from "viem";
 
 const MultiSignPop = ({ sign, setSign }) => {

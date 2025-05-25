@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { getProvider, getAccount } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";

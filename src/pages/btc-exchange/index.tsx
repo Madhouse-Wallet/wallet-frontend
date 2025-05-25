@@ -10,7 +10,7 @@ import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { getProvider, getAccount } from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
 // @ts-ignore
 import QRCode from "qrcode";

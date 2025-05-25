@@ -12,7 +12,7 @@ import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import { multisigSetup } from "@/lib/zeroDevWallet";
+import { multisigSetup } from "@/lib/zeroDev";
 import {
   retrieveSecret,
 } from "../../utils/webauthPrf";

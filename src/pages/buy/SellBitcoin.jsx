@@ -1,4 +1,4 @@
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { getAccount, getProvider } from "@/lib/zeroDev";
 import Web3Interaction from "@/utils/web3Interaction";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";

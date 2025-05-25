@@ -4,7 +4,7 @@ import { BackBtn } from "@/components/common";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
-import { getRecoverAccount, doRecovery } from "../../lib/zeroDevWallet";
+import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
 import { doAccountRecovery } from "../../lib/zeroDev"
 import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";

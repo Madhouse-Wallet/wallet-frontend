@@ -4,12 +4,6 @@ import EmailStep from "./EmailStep";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useBackground } from "@/ContextApi/backgroundContent";
 
-import {
-  getAccount,
-  passkeyValidator,
-  loginPasskey,
-} from "../../lib/zeroDevWallet";
-
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";

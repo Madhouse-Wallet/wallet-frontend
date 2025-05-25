@@ -3,7 +3,7 @@ import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, btcSat } from "../../../../src/lib/apiCall";
 import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
 import { retrieveSecret } from "@/utils/webauthPrf.js";

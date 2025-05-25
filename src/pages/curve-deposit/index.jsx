@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { getProvider, getAccount } from "../../lib/zeroDev";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackBtn } from "@/components/common";

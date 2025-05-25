@@ -1,5 +1,5 @@
 "use client";
-import { zeroAddress, createPublicClient, 
+import { zeroAddress, createPublicClient,
          http,parseEther,createWalletClient, parseAbi } from "viem";
 import { ethers } from "ethers";
 import { base } from "viem/chains";
@@ -9,22 +9,22 @@ import { generatePrivateKey, privateKeyToAccount,
 import { toSafeSmartAccount  } from "permissionless/accounts";
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { createSmartAccountClient } from "permissionless"
-
+import { eip7702Actions } from "viem/experimental";
 import { safeAbiImplementation } from "./safeAbi";
 import { getSafeModuleSetupData } from "./getSetupData";
 import { KernelEIP1193Provider } from "./safeEIP1193Provider";
-
 import dotenv from "dotenv";
 import timers from 'timers-promises'
 
 dotenv.config();
 
-const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${process.env.PIMLICO_API_KEY}`;
+const PIMLICO_API_KEY='pim_gCvmGFU2NgG2xZcmjKVNsE'
 
 //Address: 0x714BD8F11A568fbbaF6Ff162770cF80370c52a38
-const RELAY_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY
-const SAFE_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY
-
+//const RELAY_PRIVATE_KEY = process.env.RELAY_PRIVATE_KEY
+const RELAY_PRIVATE_KEY='0x8e96e75fd7deb4d53de994ef79bbf995ac91f134ae9e71d660775a99b2d0bd66'
+const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY
+const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
 const publicClient = createPublicClient({
           chain: base,
@@ -81,7 +81,8 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
             account,
             chain: base,
             transport: http(),
-          });
+          }).extend(eip7702Actions());
+
 
 
           const relayAccount = privateKeyToAccount(relayPrivateKey);
@@ -142,10 +143,6 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
 
           console.log(`Created Smart Account: https://basescan.org/tx/${txHash}`);
 
-          const publicClient = createPublicClient({
-                chain: base,
-                transport: http(),
-              });
 
             const safeAccount = await toSafeSmartAccount({
               address: privateKeyToAddress(eoaPrivateKey),
@@ -160,7 +157,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
       res = {
         status: true,
         data: {
-          privatekey: PRIVATE_KEY,
+          privatekey: eoaPrivateKey, //PRIVATE_KEY,
           signerkey: safePrivateKey,
           address: safeAccount.address,
           account: safeAccount,
@@ -293,18 +290,18 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
 export const sendTransaction = async (smartAccountClient,params) => {
 
         const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-        const smartAccountAddress = smartAccountClient.account.address
+        // const smartAccountAddress = smartAccountClient.account.address
         
-        const senderUsdcBalance = await publicClient.readContract({
-          abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
-          address: usdc,
-          functionName: "balanceOf",
-          args: [smartAccountAddress],
-        })
+        // const senderUsdcBalance = await publicClient.readContract({
+        //   abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
+        //   address: usdc,
+        //   functionName: "balanceOf",
+        //   args: [smartAccountAddress],
+        // })
         
-        if (senderUsdcBalance < BigInt(100000)) {
-          throw new Error("insufficient USDC balance, required at least 10 center or 0.1 USDC.")
-        }
+        // if (senderUsdcBalance < BigInt(100000)) {
+        //   throw new Error("insufficient USDC balance, required at least 10 center or 0.1 USDC.")
+        // }
 
 
         const quotes = await pimlicoClient.getTokenQuotes({
@@ -314,7 +311,6 @@ export const sendTransaction = async (smartAccountClient,params) => {
         
      try{
         const userOperation = await smartAccountClient.prepareUserOperation({
-          //calls: [params]
           calls: [
            params
           ],
@@ -355,9 +351,11 @@ export const sendTransaction = async (smartAccountClient,params) => {
         
         console.log(`transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`)
 
-        return opReceipt.receipt.transactionHash;
+       return opReceipt.receipt.transactionHash;
+       //return true;
             }catch(error){
           console.log(`Error in transaction: ${error}`)
+          return error;
       }
 }
 
@@ -383,3 +381,99 @@ export const getETHEREUMRpcProvider = async () => {
     return false;
   }
 };
+
+
+export const USDC_ABI = [
+      {
+        constant: false,
+        inputs: [
+          {
+            name: "spender",
+            type: "address",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+          },
+        ],
+        name: "approve",
+        outputs: [
+          {
+            name: "",
+            type: "bool",
+          },
+        ],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        constant: false,
+        inputs: [
+          {
+            name: "to",
+            type: "address",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+          },
+        ],
+        name: "transfer",
+        outputs: [
+          {
+            name: "",
+            type: "bool",
+          },
+        ],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        constant: true,
+        inputs: [
+          {
+            name: "owner",
+            type: "address",
+          },
+          {
+            name: "spender",
+            type: "address",
+          },
+        ],
+        name: "allowance",
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+          },
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        constant: true,
+        inputs: [
+          {
+            name: "account",
+            type: "address",
+          },
+        ],
+        name: "balanceOf",
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+          },
+        ],
+        payable: false,
+        stateMutability: "view",
+        type: "function",
+      },
+    ];
+
+    export const passkeyValidator = async()=>{
+      return true;
+    }

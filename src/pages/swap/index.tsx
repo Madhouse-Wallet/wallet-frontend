@@ -2,7 +2,7 @@ import { CowSwapWidget } from "@cowprotocol/widget-react";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { getAccount, getProvider } from "@/lib/zeroDev";
 
 class LegacyProviderWrapper {
   private provider: any;

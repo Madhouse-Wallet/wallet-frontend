@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { getProvider, getAccount } from "../../lib/zeroDev";
 import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { splitAddress } from "../../utils/globals";
 import { toast } from "react-toastify";
