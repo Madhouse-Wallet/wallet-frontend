@@ -24,7 +24,7 @@ const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_AP
 const SAFE_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
 
 
-const publicClient = createPublicClient({
+export const publicClient = createPublicClient({
           chain: base,
           transport: http(),
         });
@@ -156,7 +156,6 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
         status: true,
         data: {
           privatekey: eoaPrivateKey, //PRIVATE_KEY,
-          signerkey: safePrivateKey,
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
@@ -285,23 +284,10 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
   }
 };
 
+export const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+
 export const sendTransaction = async (smartAccountClient,params) => {
-
-        const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
-        // const smartAccountAddress = smartAccountClient.account.address
         
-        // const senderUsdcBalance = await publicClient.readContract({
-        //   abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
-        //   address: usdc,
-        //   functionName: "balanceOf",
-        //   args: [smartAccountAddress],
-        // })
-        
-        // if (senderUsdcBalance < BigInt(100000)) {
-        //   throw new Error("insufficient USDC balance, required at least 10 center or 0.1 USDC.")
-        // }
-
-
         const quotes = await pimlicoClient.getTokenQuotes({
           tokens: [usdc],
         })

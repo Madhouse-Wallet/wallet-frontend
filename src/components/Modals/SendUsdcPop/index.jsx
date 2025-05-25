@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-import { getRpcProvider,  getAccount,
-  sendTransaction, USDC_ABI
+import { getAccount,
+  sendTransaction, USDC_ABI, publicClient, usdc
  } from "@/lib/zeroDev.js";
-import { parseUnits } from "viem";
+import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
@@ -49,10 +48,10 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    // if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
-    //   toast.error("Insufficient USDC balance");
-    //   return;
-    // }
+    if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
+      toast.error("Insufficient USDC balance");
+      return;
+    }
     const data = JSON.parse(userAuth?.webauthKey)
     const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -106,21 +105,16 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
   const fetchBalance = async () => {
     try {
-      // if (!providerr || !userAuth?.walletAddress) return;
-      const provider = await getRpcProvider();
-      const web3 = new Web3Interaction("sepolia", provider);
-      const result = await web3.getUSDCBalance(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
-        userAuth?.walletAddress,
-        // "0x4033029D0f7DB58192f9C9B32bD4Dfd5819AfE13",
-        provider
-      );
-console.log("result--->",result)
-      if (result.success && result.balance) {
-        setBalance(result.balance);
-      } else {
-        toast.error(result.error || "Failed to fetch balance");
-      }
+        
+        const senderUsdcBalance = await publicClient.readContract({
+          abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
+          address: usdc,
+          functionName: "balanceOf",
+          args: [userAuth?.walletAddress],
+        })
+        const balance =String(Number(BigInt(senderUsdcBalance))/Number(BigInt(1e6)))
+        console.log("result--->",balance)
+        setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);
       toast.error("Failed to fetch USDC balance");
