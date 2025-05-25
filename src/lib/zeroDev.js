@@ -3,7 +3,6 @@ import { zeroAddress, createPublicClient,
          http,parseEther,createWalletClient, parseAbi } from "viem";
 import { ethers } from "ethers";
 import { base } from "viem/chains";
-
 import { generatePrivateKey, privateKeyToAccount,
         privateKeyToAddress } from "viem/accounts";
 import { toSafeSmartAccount  } from "permissionless/accounts";
@@ -15,16 +14,15 @@ import { getSafeModuleSetupData } from "./getSetupData";
 import { KernelEIP1193Provider } from "./safeEIP1193Provider";
 import dotenv from "dotenv";
 import timers from 'timers-promises'
-
 dotenv.config();
 
-const PIMLICO_API_KEY='pim_gCvmGFU2NgG2xZcmjKVNsE'
-
-//Address: 0x714BD8F11A568fbbaF6Ff162770cF80370c52a38
-//const RELAY_PRIVATE_KEY = process.env.RELAY_PRIVATE_KEY
-const RELAY_PRIVATE_KEY='0x8e96e75fd7deb4d53de994ef79bbf995ac91f134ae9e71d660775a99b2d0bd66'
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY
+const PIMLICO_API_KEY= process.env.NEXT_PUBLIC_PIMLICO_API_KEY
+const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
+
+
+const SAFE_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
+
 
 const publicClient = createPublicClient({
           chain: base,
