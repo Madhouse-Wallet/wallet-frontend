@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import {
+  getAccount,
+  sendTransaction,
+  USDC_ABI,
+  publicClient,
+  usdc,
+} from "@/lib/zeroDev.js";
+import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
+import { retrieveSecret } from "../../../utils/webauthPrf";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -37,88 +44,85 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (!amount || parseFloat(amount) <= 0) {
+    if (!amount || Number.parseFloat(amount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    if (parseFloat(amount) > parseFloat(balance)) {
+    if (
+      Number.parseFloat(amount) > Number.parseFloat(balance) ||
+      Number.parseFloat(balance) < Number("0.05") //If wallet has less than $0.05
+    ) {
       toast.error("Insufficient USDC balance");
       return;
     }
+    const data = JSON.parse(userAuth?.webauthKey);
+    const retrieveSecretCheck = await retrieveSecret(
+      data?.storageKeySecret,
+      data?.credentialIdSecret
+    );
+    if (!retrieveSecretCheck?.status) {
+      toast.error(retrieveSecretCheck?.msg);
+      return;
+    }
+
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
     setIsLoading(true);
     try {
-      const web3 = new Web3Interaction("sepolia", providerr);
-
-      const result = await web3.sendUSDC(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-        toAddress,
-        amount,
-        providerr
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
       );
+      if (!getAccountCli.status) {
+        toast.error(getAccountCli?.msg);
+        return;
+      }
 
-      if (result.success) {
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+      ]);
+
+      if (tx) {
         setSuccess(true);
         setSendUsdc(false);
         toast.success("USDC sent successfully!");
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(result.error || "Transaction failed");
+        toast.error(tx || "Transaction failed");
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      toast.error(tx || "Transaction failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const connectWallet = async () => {
-      if (userAuth?.passkeyCred) {
-        console.log("userAuth?.passkeyCred-->",userAuth?.passkeyCred)
-        try {
-          let account = await getAccount(userAuth?.passkeyCred);
-          if (account) {
-            let provider = await getProvider(account.kernelClient);
-            if (provider) {
-              setProviderr(provider?.ethersProvider);
-            } else {
-              throw new Error("Provider not detected");
-            }
-          }
-        } catch (error) {
-          console.error("Wallet connection error:", error);
-          toast.error("Failed to connect wallet. Please try again.");
-        }
-      }
-    };
-
-    connectWallet();
-  }, [userAuth?.passkeyCred]);
-
-  useEffect(() => {
-    if (providerr && userAuth?.walletAddress) {
+    if (userAuth?.walletAddress) {
       fetchBalance();
     }
-  }, [providerr, userAuth?.walletAddress]);
+  }, [userAuth?.walletAddress]);
 
   const fetchBalance = async () => {
     try {
-      if (!providerr || !userAuth?.walletAddress) return;
-
-      const web3 = new Web3Interaction("sepolia", providerr);
-      const result = await web3.getUSDCBalance(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS, // USDC contract address
-        userAuth?.walletAddress,
-        providerr
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
-
-      if (result.success && result.balance) {
-        setBalance(parseFloat(result.balance).toFixed(2));
-      } else {
-        toast.error(result.error || "Failed to fetch balance");
-      }
+      setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);
       toast.error("Failed to fetch USDC balance");

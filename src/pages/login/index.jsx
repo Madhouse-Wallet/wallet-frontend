@@ -1,12 +1,8 @@
 import React, { useState } from "react";
 import KeyStep from "./KeyStep";
 import EmailStep from "./EmailStep";
-
-import {
-  getAccount,
-  passkeyValidator,
-  loginPasskey,
-} from "../../lib/zeroDevWallet";
+import { retrieveSecret } from "@/utils/webauthPrf";
+import { useBackground } from "@/ContextApi/backgroundContent";
 
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
@@ -19,8 +15,27 @@ import {
 } from "../../utils/globals";
 
 const Login = () => {
+  const {
+    selectBg,
+    backgrounds,
+    bgOpacity,
+    setBgOpacity,
+    selectWm,
+    watermarks,
+    setSelectedWatermark,
+    wmOpacity,
+    setWmOpacity,
+    changeBgOpacity,
+    changeWmOpacity,
+    selectedBackground,
+    selectedWatermark,
+  } = useBackground();
   const [step, setStep] = useState(1);
+  const [passkeyData, setPasskeyData] = useState([]);
+  const [email, setEmail] = useState("");
   const dispatch = useDispatch();
+
+  console.log(backgrounds, "riteshBG")
 
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {
@@ -48,6 +63,9 @@ const Login = () => {
     }
   };
 
+
+
+
   const loginFn = async (data) => {
     try {
       let validEmail = await isValidEmail(data.email);
@@ -60,113 +78,79 @@ const Login = () => {
         toast.error("User Not Found!");
         return false;
       } else {
-        const createdWebAuthKey = await loginPasskey(data.email);
-        if (!createdWebAuthKey.status) {
-          toast.error(createdWebAuthKey.msg);
+        // userExist?.userId?
+        if (userExist?.userId?.passkey?.length == 1) {
+          let retrieveSecretCheck = await retrieveSecret(userExist?.userId?.passkey[0].storageKeySecret, userExist?.userId?.passkey[0].credentialIdSecret);
+          if (retrieveSecretCheck?.status) {
+            toast.success("Login Successfully!");
+            dispatch(
+              loginSet({
+                login: true,
+                walletAddress: userExist?.userId?.wallet || "",
+                bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
+                signer: "",
+                username: userExist?.userId?.username,
+                email: userExist?.userId?.email,
+                webauthKey: JSON.stringify(userExist?.userId?.passkey[0]),
+                id: userExist?.userId?._id,
+                totalPasskey: 1
+              })
+            );
+            //       passkeyEmail: userExist?.userId?.passkey[0].name,\\
+            if (userExist?.userId?.backgroundIndex != null) {
+              selectBg(userExist.userId.backgroundIndex);
+              localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+            }
+  
+            if (userExist?.userId?.watermarkIndex != null) {
+              selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+              localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+            }
+  
+  
+            if (userExist?.userId?.bgOpacity != null) {
+              changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
+              localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
+            }
+  
+  
+            if (userExist?.userId?.bgOpacity != null) {
+              changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+              localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
+            }
+
+
+
+            storedataLocalStorage(
+              {
+                login: true,
+                walletAddress: userExist?.userId?.wallet || "",
+                bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
+                signer: "",
+                username: userExist?.userId?.username,
+                email: userExist?.userId?.email,
+                webauthKey: userExist?.userId?.passkey[0],
+                id: userExist?.userId?._id,
+                totalPasskey: 1
+              },
+              "authUser"
+            );
+            return true;
+          } else {
+            toast.error(
+              "Login failed! Please use the correct email and passkey. Account not found."
+            );
+            return false;
+          }
+        } else if (userExist?.userId?.passkey?.length == 0) {
+          toast.error(
+            "Please Add Passkey!"
+          );
           return false;
         } else {
-          const {
-            newPasskeyValidator = "",
-            msg = "",
-            status = "",
-          } = await passkeyValidator(createdWebAuthKey.webAuthnKey);
-          if (!status) {
-            toast.error(msg);
-            return false;
-          } else {
-            let {
-              msg = "",
-              status = true,
-              account = "",
-              kernelClient = "",
-              address = "",
-            } = await getAccount(newPasskeyValidator);
-            if (!status) {
-              toast.error(msg);
-              return false;
-            } else {
-              let webAuthKeyStringObj = await webAuthKeyStore(
-                createdWebAuthKey.webAuthnKey
-              );
-              userExist = await getUser(
-                data.email,
-                "passkeyCheck",
-                webAuthKeyStringObj
-              );
-              if (userExist.status && userExist.status == "failure") {
-                toast.error(
-                  "Login failed! Please use the correct email and passkey. Account not found."
-                );
-                return false;
-              }
-              toast.success("Login Successfully!");
-              // console.log(
-              //   "data-->",
-              //   data,
-              //   userExist,
-              //   createdWebAuthKey,
-              //   newPasskeyValidator
-              // );
-              dispatch(
-                loginSet({
-                  login: true,
-                  walletAddress: address || "",
-                  bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-                  pos: false,
-                  signer: "",
-                  username: userExist.userId.username || "",
-                  email: userExist.userId.email,
-                  passkeyCred: newPasskeyValidator,
-                  webauthKey: createdWebAuthKey.webAuthnKey,
-                  id: userExist.userId._id,
-                  multisigAddress: userExist.userId.multisigAddress || "",
-                  passkey2: userExist.userId.passkey2 || "",
-                  passkey3: userExist.userId.passkey3 || "",
-                  ensName: userExist.userId.ensName || "",
-                  ensSetup: userExist.userId.ensSetup || false,
-                  multisigSetup: userExist.userId.multisigSetup || false,
-                  multisigActivate: userExist.userId.multisigActivate || false,
-                })
-              );
-
-              let webAuthKeyStringObj2 = "";
-              let webAuthKeyStringObj3 = "";
-              if (userExist.userId.passkey2) {
-                webAuthKeyStringObj2 = await webAuthKeyStore(
-                  userExist.userId.passkey2
-                );
-              }
-              if (userExist.userId.passkey3) {
-                webAuthKeyStringObj3 = await webAuthKeyStore(
-                  userExist.userId.passkey3
-                );
-              }
-
-              storedataLocalStorage(
-                {
-                  login: true,
-                  walletAddress: address || "",
-                  bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-                  pos: false,
-                  signer: "",
-                  username: userExist.userId.username || "",
-                  email: userExist.userId.email,
-                  passkeyCred: "",
-                  webauthKey: webAuthKeyStringObj,
-                  id: userExist.userId._id,
-                  multisigAddress: userExist.userId.multisigAddress || "",
-                  passkey2: webAuthKeyStringObj2,
-                  passkey3: webAuthKeyStringObj3,
-                  ensName: userExist.userId.ensName || "",
-                  ensSetup: userExist.userId.ensSetup || false,
-                  multisigSetup: userExist.userId.multisigSetup || false,
-                  multisigActivate: userExist.userId.multisigActivate || false,
-                },
-                "authUser"
-              );
-              return true;
-            }
-          }
+          setStep(2)
+          setEmail(data.email)
+          setPasskeyData(userExist?.userId?.passkey)
         }
       }
     } catch (error) {
@@ -174,6 +158,84 @@ const Login = () => {
       return false;
     }
   };
+
+  const loginFn2nd = async (email, passkey) => {
+    try {
+      let userExist = await getUser(email);
+      if (userExist.status && userExist.status == "failure") {
+        toast.error("User Not Found!");
+        return false;
+      } else {
+        let retrieveSecretCheck = await retrieveSecret(passkey.storageKeySecret, passkey.credentialIdSecret);
+        if (retrieveSecretCheck?.status) {
+          toast.success("Login Successfully!");
+          dispatch(
+            loginSet({
+              login: true,
+              walletAddress: userExist?.userId?.wallet || "",
+              bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
+              signer: "",
+              username: userExist?.userId?.username,
+              email: userExist?.userId?.email,
+              webauthKey: JSON.stringify(passkey),
+              id: userExist?.userId?._id,
+              totalPasskey: 1
+            })
+          );
+          //       passkeyEmail: userExist?.userId?.passkey[0].name,
+
+          if (userExist?.userId?.backgroundIndex != null) {
+            selectBg(userExist.userId.backgroundIndex);
+            localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+          }
+
+          if (userExist?.userId?.watermarkIndex != null) {
+            selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+            localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+          }
+
+
+          if (userExist?.userId?.bgOpacity != null) {
+            changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
+            localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
+          }
+
+
+          if (userExist?.userId?.bgOpacity != null) {
+            changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+            localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
+          }
+
+
+
+
+          storedataLocalStorage(
+            {
+              login: true,
+              walletAddress: userExist?.userId?.wallet || "",
+              bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
+              signer: "",
+              username: userExist?.userId?.username,
+              email: userExist?.userId?.email,
+              webauthKey: passkey,
+              id: userExist?.userId?._id,
+              totalPasskey: 1
+            },
+            "authUser"
+          );
+          return true;
+        } else {
+          toast.error(
+            "Login failed! Please use the correct email and passkey. Account not found."
+          );
+          return false;
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
+      return false;
+    }
+  }
 
   return (
     <>
@@ -183,7 +245,7 @@ const Login = () => {
         </>
       ) : step == 2 ? (
         <>
-          <KeyStep step={step} setStep={setStep} />
+          <KeyStep step={step} loginFn2nd={loginFn2nd} email={email} passkeyData={passkeyData} loginFn={loginFn} setStep={setStep} />
         </>
       ) : (
         <></>

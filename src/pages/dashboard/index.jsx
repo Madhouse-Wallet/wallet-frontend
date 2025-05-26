@@ -7,11 +7,12 @@ import BuySellBitcoinPop from "@/components/Modals/BuySellBitcoinPop";
 import WithdrawDepositPopup from "@/components/Modals/WithdrawDepositPop";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { fetchBalance, fetchTokenBalances } from "../../lib/utils";
-import { getAccount, getProvider } from "@/lib/zeroDevWallet";
+import { fetchTokenBalances } from "../../lib/utils";
 import LoadingScreen from "@/components/LoadingScreen";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
 import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
+import { fetchBitcoinBalance } from "../api/bitcoinBalance";
+import { getUser } from "../../lib/apiCall";
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,14 +30,14 @@ const Dashboard = () => {
   const [totalUsdBalance, setTotalUsdBalance] = useState(0);
 
   const cardMetrics = [
-    { head: "Total Balance", value: `$${totalUsdBalance}`, icn: icn11 },
-    { head: "Bitcoin Balance", value: tbtcBalance, icn: icn22 },
-    { head: "USDC Balance", value: thusdBalance, icn: icn33 },
-    { head: "Virtual Card", value: collateralRatio, icn: icn11 },
+    { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
+    { head: "Bitcoin", value: `$ ${tbtcBalance}`, icn: icn22 },
+    { head: "Gold", value: `$ ${thusdBalance}`, icn: icn33 },
+    { head: "Lightning (sats)", value: `${collateralRatio}`, icn: icn11 },
   ];
   const cardData = [
     {
-      head: "Send & Receive",
+      head: "Transfers",
       icn: icn1,
       onClick: () => {
         router.push("/btc-exchange");
@@ -50,28 +51,29 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Buy & Sell Bitcoin",
+      head: "Bitcoin",
       icn: icn3,
       onClick: () => {
-        setBuySell(!buySell);
+        // setBuySell(!buySell);
+        router.push("/buy");
       },
     },
     {
-      head: "Withdraw & Deposit Dollars",
+      head: "Dollars",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
       },
     },
     {
-      head: "Earn",
+      head: "Gold",
       icn: icn5,
       onClick: () => {
         router.push("/curve-deposit");
       },
     },
     {
-      head: "Virtual Card Balance",
+      head: "Lightning",
       icn: icn6,
       onClick: () => {
         router.push("/bitcoin-debt-card");
@@ -79,63 +81,154 @@ const Dashboard = () => {
     },
   ];
 
+  const fetchLighteningBalance = async () => {
+    try {
+      const userExist = await getUser(userAuth.email);
+
+      const response = await fetch("/api/spend-balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletId: userExist?.userId?.lnbitWalletId_3,
+          // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+        }),
+      });
+
+      const { status, data } = await response.json();
+
+      if (status === "success" && data?.[0]?.balance != null) {
+        const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+
+        // Get BTC price in USD
+        const priceRes = await fetch(process.env.NEXT_PUBLIC_BITCOIN_PRICE_URL);
+        const priceData = await priceRes.json();
+        const btcPriceUsd = priceData?.bitcoin?.usd;
+
+        if (!btcPriceUsd) {
+          console.error("BTC price not found");
+          return;
+        }
+        let usdValue = 0;
+        let btc = 0;
+        if (balanceSats > 0) {
+          
+          btc = balanceSats / 1e8; // convert sats to BTC
+          usdValue = (btc * btcPriceUsd).toFixed(2);
+          }
+        // Optional: set to state
+        setCollateralRatio(balanceSats);
+        // setCollateralRatio(usdValue);
+
+        console.log(`⚡ Lightning BTC: ${btc.toFixed(8)} | USD: $${usdValue}`);
+      } else {
+        console.error("Failed to fetch lightning balance or empty balance.");
+      }
+    } catch (error) {
+      console.error("Error fetching lightning balance:", error);
+    }
+  };
+
   useEffect(() => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
         try {
-          if (userAuth?.passkeyCred) {
-            let account = await getAccount(userAuth?.passkeyCred);
-            if (account) {
-              let provider = await getProvider(account.kernelClient);
-              if (provider) {
-                try {
-                  const balances = await fetchTokenBalances(
-                    [
-                      process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS,
-                      process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-                    ],
-                    userAuth?.walletAddress
-                  );
-                  balances.forEach((token) => {
-                    const formattedBalance =
-                      Number(token.balance) / 10 ** token.decimals;
-                    if (
-                      token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_THRESHOLD_TBTC_CONTRACT_ADDRESS.toLowerCase()
-                    ) {
-                      setTbtcBalance(formattedBalance.toFixed(2));
-                    }
-                    if (
-                      token.token_address.toLowerCase() ===
-                      process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS.toLowerCase()
-                    ) {
-                      setThusdBalance(formattedBalance.toFixed(2));
-                    }
-                  });
+          const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
+          console.log("result", result);
+          const balances = await fetchTokenBalances(
+            process.env.NEXT_PUBLIC_ENV_CHAIN,
+            [
+              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
+              process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            ],
+            userAuth?.walletAddress
+            // "0x0c1A09d5D0445047DA3Ab4994262b22404288A3B"
+          );
 
-                  const walletBalance = await fetchBalance(
-                    userAuth?.walletAddress
-                  );
+          let combinedUsdValue = 0;
 
-                  if (walletBalance?.result?.length) {
-                    const totalUsd = walletBalance.result.reduce(
-                      (sum, token) => sum + (token.usd_value || 0),
-                      0
-                    );
-                    setTotalUsdBalance(totalUsd.toFixed(2));
-                  }
-                } catch (err) {
-                  console.log(err);
-                }
-              }
+          balances.result?.forEach((token) => {
+            const formattedBalance =
+              Number(token.balance) / 10 ** token.decimals;
+
+            if (
+              token.token_address.toLowerCase() ===
+              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS.toLowerCase()
+            ) {
+              combinedUsdValue += token.usd_value || 0;
             }
-          }
+
+            if (
+              token.token_address.toLowerCase() ===
+              process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS.toLowerCase()
+            ) {
+              combinedUsdValue += token.usd_value || 0;
+            }
+          });
+
+          setTotalUsdBalance(combinedUsdValue.toFixed(2)); // <-- sets combined USD+ and USDC value
+
+          const paxgBalances = await fetchTokenBalances(
+            process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG, // <== chain for PAXG (e.g., 'eth' or '0x1')
+            [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address],
+            userAuth.walletAddress
+            // "0xa892F6D57Cb3a06b99eF3E8F85268aCfAb1488fe"
+          );
+
+          paxgBalances.result?.forEach((token) => {
+            if (
+              token.token_address.toLowerCase() ===
+              process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address.toLowerCase()
+            ) {
+              const formattedPaxg =
+                Number(token.balance) / 10 ** token.decimals;
+              setThusdBalance((token.usd_value || 0).toFixed(4)); // set PAXG's USD value
+            }
+          });
         } catch (error) {
           console.error("Error fetching token balances:", error);
         }
       };
 
+      const fetchBtcBalanceInUsd = async () => {
+        try {
+          // 1. Get BTC price in USD
+          const res = await fetch(process.env.NEXT_PUBLIC_BITCOIN_PRICE_URL);
+          const data = await res.json();
+          const btcPriceUsd = data?.bitcoin?.usd;
+          console.log("line-151", res, data, btcPriceUsd);
+
+          if (!btcPriceUsd) {
+            console.error("BTC price not found");
+            return;
+          }
+
+          // 2. Get BTC balance
+          const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
+
+          if (result?.error) {
+            console.error("Error fetching BTC balance:", result.error);
+            return;
+          }
+
+          const btcBalance = result?.balance || 0; // Already in BTC, not sats
+          const btcBalanceUsd = (btcBalance * btcPriceUsd).toFixed(2);
+
+          // 3. Save to state (define this state in your component)
+          setThusdBalance(btcBalanceUsd); // <-- e.g., "$3250.47"
+        } catch (error) {
+          console.error("Failed to fetch BTC balance in USD:", error);
+        }
+      };
+
+      if (userAuth?.bitcoinWallet) {
+        console.log("line-177");
+        fetchBtcBalanceInUsd();
+      }
+
       fetchData();
+      fetchLighteningBalance();
     }
   }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
 
@@ -302,7 +395,6 @@ const DashboardLink = styled.ul`
 
 export default Dashboard;
 
-
 const icn11 = (
   <svg
     width="24"
@@ -362,7 +454,6 @@ const icn33 = (
     />
   </svg>
 );
-
 
 const icn1 = (
   <svg

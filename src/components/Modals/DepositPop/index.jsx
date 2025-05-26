@@ -3,16 +3,61 @@ import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
-import { getUser } from "../../../../src/lib/apiCall";
+import { getProvider, getAccount } from "@/lib/zeroDev";
+import { getUser, btcSat } from "../../../../src/lib/apiCall";
 import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
+import { retrieveSecret } from "@/utils/webauthPrf.js";
+import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 
+ const getSecretData = async (storageKey, credentialId) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+      if (retrieveSecretCheck?.status) {
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret,
+        };
+      } else {
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Error in Getting secret!",
+      };
+    }
+  };
 
 const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth?.email);
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        );
+        if (callGetSecretData?.status) {
+          return JSON.parse(callGetSecretData?.secret);
+        } else {
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+      return false;
+    }
+  };
   const handleDepositPop = async () => {
     try {
       setLoading(true);
@@ -22,32 +67,41 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
         let userExist = await getUser(userAuth?.email);
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
+          setLoading(false);
+          return;
         } else {
-          if (userExist?.userId?.liquidBitcoinWallet_3) {
-            const liquidShift = await createTBtcToLbtcShift(
-              amount, // amount
-              userExist?.userId?.liquidBitcoinWallet_3,
-              process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
-              process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
-            );
-            const web3 = new Web3Interaction("sepolia", providerr);
-            const result = await web3.sendUSDC(
-              process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS,
-              liquidShift.depositAddress,
-              amount,
-              providerr
-            );
-
-            if (result.success) {
-              setSuccess(true);
-              setSendUsdc(false);
-              toast.success("USDC sent successfully!");
-              setTimeout(fetchBalance, 2000);
-            } else {
-              toast.error(result.error || "Transaction failed");
-            }
+          if (!userExist?.userId?.bitcoinWallet) {
+            toast.error("No Bitcoin Wallet Found!");
+            setLoading(false);
+            return;
+          }
+          const privateKey = await recoverSeedPhrase();
+          if (!privateKey) {
+            toast.error("No Bitcoin Wallet Found!");
+            setLoading(false);
+            return;
+          }
+          const getBtcSat = await btcSat(amount, userExist?.userId?.bitcoinWallet);
+          console.log("userExist?.userId?.bitcoinWallet->",userExist?.userId?.bitcoinWallet)
+          if (getBtcSat.status && getBtcSat.status == "failure") {
+            toast.error(getBtcSat.message);
+            setLoading(false);
           } else {
-            toast.error("Please sign Up Again!");
+            const result = await sendBitcoinFunction({
+              fromAddress: userExist?.userId?.bitcoinWallet,
+              toAddress: getBtcSat?.data?.address,
+              amountSatoshi: amount * 100000000,
+              privateKeyHex: privateKey?.privateKey,
+              network: "main", // Use 'main' for mainnet
+            });
+            console.log("result-->", result)
+            if (result.status) {
+              toast.success(result.transactionHash);
+              setLoading(false);
+            } else {
+              toast.error("Transaction Failed!");
+              setLoading(false);
+            }
           }
         }
       }

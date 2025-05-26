@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { getProvider, getAccount } from "@/lib/zeroDevWallet";
+import { getProvider, getAccount } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
 import { fetchBitcoinBalance } from "./../../../pages/api/bitcoinBalance.js";

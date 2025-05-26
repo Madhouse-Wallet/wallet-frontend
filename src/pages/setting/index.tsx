@@ -5,14 +5,13 @@ import MultiSignPop from "@/components/Modals/multisignPop";
 import SetupRecoveryPop from "@/components/Modals/SetupRecovery";
 import RecoverPopup from "@/components/Modals/RecoverPopup";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useBackground } from "@/ContextApi/backgroundContent";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import {  multisigSetup } from "@/lib/zeroDevWallet";
 import {
   retrieveSecret,
 } from "../../utils/webauthPrf";
@@ -48,7 +47,11 @@ const Setting: React.FC = () => {
   const [confirm, setConfirm] = useState<boolean>(false);
   const [recoverSeedStatus, setRecoverSeedStatus] = useState<any>(false);
   const [recoverSeed, setRecoverSeed] = useState<any>("");
+  const [lnbitLink, setLnbitLink] = useState("");
+  const [lnbitLink2, setLnbitLink2] = useState("");
   const [adminId, setAdminId] = useState<any>("");
+  const [tposId1, setTposId1] = useState<any>("");
+  const [tposId2, setTposId2] = useState<any>("");
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -57,9 +60,22 @@ const Setting: React.FC = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+  useEffect(() => {
+
+    const getUserData = async () => {
+      let userExist = await getUser(userAuth.email);
+      setTposId1(userExist?.userId?.lnbitLinkId || "")
+      setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
+      setAdminId(userExist?.userId?.lnbitAdminKey_3 || "")
+    }
+    if (userAuth.email) {
+      getUserData();
+    }
+  }, [])
+
   const getPreview = async () => {
     try {
-      console.log("email");
       return await fetch(`/api/get-preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -74,90 +90,6 @@ const Setting: React.FC = () => {
     } catch (error) {
       console.log(error);
       return false;
-    }
-  };
-  const setupMultisig = async () => {
-    try {
-      let userExist = await getUser(userAuth.email);
-      let passkeyNo =
-        (userExist?.userId?.passkey_number &&
-          userExist?.userId?.passkey_number + 1) ||
-        2;
-      let result = await multisigSetup(
-        userAuth?.webauthKey,
-        userAuth.email,
-        passkeyNo
-      );
-      if (result.status) {
-        let webAuthKeyStringObj2: any = "";
-        let webAuthKeyStringObj3: any = "";
-        if (result.publicKey2) {
-          webAuthKeyStringObj2 = await webAuthKeyStore(result.publicKey2);
-        }
-        if (result.publicKey3) {
-          webAuthKeyStringObj3 = await webAuthKeyStore(result.publicKey3);
-        }
-        let webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey);
-        dispatch(
-          loginSet({
-            login: userAuth.login,
-            username: userAuth.username,
-            email: userAuth.email,
-            walletAddress: userAuth.walletAddress,
-            bitcoinWallet: userAuth.bitcoinWallet,
-            passkeyCred: userAuth.passkeyValidatorNew,
-            webauthKey: userAuth.webauthKey,
-            ensName: userAuth.ensName || "",
-            ensSetup: userAuth.ensSetup || false,
-            id: userAuth.id,
-            signer: userAuth.signer,
-            multisigAddress: result.address,
-            passkey2: result.publicKey2,
-            passkey3: result.publicKey3,
-            multisigSetup: true,
-            multisigActivate: true,
-          })
-        );
-        let data = await updtUser(
-          { email: userAuth.email },
-          {
-            $set: {
-              multisigAddress: result.address,
-              passkey2: webAuthKeyStringObj2,
-              passkey3: webAuthKeyStringObj3,
-              multisigSetup: true,
-              multisigActivate: true,
-              passkey_number: passkeyNo + 2,
-            }, // Ensure this is inside `$set`
-          }
-        );
-        storedataLocalStorage(
-          {
-            login: true,
-            walletAddress: userAuth.walletAddress || "",
-            bitcoinWallet: userAuth.bitcoinWallet || "",
-            signer: "",
-            username: userAuth.username,
-            email: userAuth.email,
-            passkeyCred: "",
-            webauthKey: webAuthKeyStringObj,
-            id: userAuth.id,
-            multisigAddress: userAuth.multisigAddress,
-            ensName: userAuth.ensName || "",
-            ensSetup: userAuth.ensSetup || false,
-            passkey2: webAuthKeyStringObj2,
-            passkey3: webAuthKeyStringObj3,
-            multisigSetup: true,
-            multisigActivate: true,
-          },
-          "authUser"
-        );
-
-        toast.success(result.msg);
-      } else {
-        toast.error(result.msg);
-      }
-    } catch (error) {
     }
   };
 
@@ -189,46 +121,27 @@ const Setting: React.FC = () => {
   // settingindex.tsx
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = (await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        )) as any;
-        if (callGetSecretData?.status) {
-          // return {
-          //   status: true,
-          //   secret: callGetSecretData?.secret
-          // }
-          console.log(JSON.parse(callGetSecretData?.secret))
-          setRecoverSeed(JSON.parse(callGetSecretData?.secret));
-          let adminKey = await getLnbitId(userAuth.email);
-          if (
-            adminKey?.adminId
-          ) {
-            setAdminId(adminKey?.adminId)
-          }
-          setRecoverSeedStatus(true);
-        } else {
-          // return {
-          //   status: false,
-          //   msg: callGetSecretData?.msg
-          // }
-          setRecoverSeed(callGetSecretData?.msg);
-          setRecoverSeedStatus(false);
-        }
+      let data = JSON.parse(userAuth?.webauthKey)
+      let callGetSecretData = (await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      )) as any;
+      if (callGetSecretData?.status) {
+        // return {
+        //   status: true,
+        //   secret: callGetSecretData?.secret
+        // }
+        setRecoverSeed(JSON.parse(callGetSecretData?.secret));
+        setRecoverSeedStatus(true);
+        setRecover(!recover);
       } else {
         // return {
         //   status: false,
-        //   secret: "No secret Stored!"
+        //   msg: callGetSecretData?.msg
         // }
-        setRecoverSeed("No secret Stored!");
+        setRecoverSeed(callGetSecretData?.msg);
         setRecoverSeedStatus(false);
       }
-      setRecover(!recover);
     } catch (error) {
       // return {
       //   status: false,
@@ -239,9 +152,14 @@ const Setting: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
-  //   getPreview(); // Call the function
-  // }, []);
+  useEffect(() => {
+    const data = async () => {
+      let userExist = await getUser(userAuth.email);
+      setLnbitLink(userExist?.userId?.lnbitLinkId || "");
+      setLnbitLink2(userExist?.userId?.lnbitLinkId_2 || "");
+    };
+    data();
+  }, []);
 
   const accordionTabs = [
     {
@@ -418,7 +336,6 @@ const Setting: React.FC = () => {
   ];
   const [activeTab, setActiveTab] = useState(1);
   const showTab = (tab: number) => {
-
     setActiveTab(tab);
   };
   const router = useRouter();
@@ -447,6 +364,10 @@ const Setting: React.FC = () => {
   const LogoutFuc = async () => {
     try {
       logoutStorage();
+      selectBg(0);
+      changeBgOpacity((1));
+      selectWm(0)
+      changeWmOpacity((0.5))
       dispatch(
         loginSet({
           login: false,
@@ -655,6 +576,69 @@ const Setting: React.FC = () => {
                         </span>
                         {/* )} */}
                       </li>
+                      {
+                        // tposId1 tposId2
+                        <>
+                          <li className="flex gap-2 py-1">
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 160 }}
+                            >
+                              USD Tpos ID:
+                            </div>
+                            {/* {userAuth?.email && ( */}
+                            <span className="text-white flex items-center">
+                              {(userAuth?.email && tposId1) ? tposId1 : "--"}
+                            </span>
+                            {/* )} */}
+                          </li>
+                          <li className="flex gap-2 py-1">
+                            <div
+                              className="block text-gray-500"
+                              style={{ width: 160 }}
+                            >
+                              Bitcoin Tpos ID:
+                            </div>
+                            {/* {userAuth?.email && ( */}
+                            <span className="text-white flex items-center">
+                              {(userAuth?.email && tposId2) ? tposId2 : "--"}
+                            </span>
+                            {/* )} */}
+                          </li>
+                        </>
+                      }
+                      {
+                        // `lndhub://admin:${adminId||""}d@https://spend.madhousewallet.com/lndhub/ext/`
+
+                        <li className="flex gap-2 py-1">
+                          <div
+                            className="block text-gray-500"
+                            style={{ width: 160 }}
+                          >
+                            lndhub:
+                          </div>
+                          {/* {userAuth?.email && ( */}
+                          <span className="text-white flex items-center">
+                            {(userAuth?.email && adminId) ?
+                              (
+                                <>
+                                  {splitAddress(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
+                                  <button
+                                    onClick={() =>
+                                      handleCopy(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`)
+                                    }
+                                    className="border-0 p-0 bg-transparent pl-1"
+                                  >
+                                    {copyIcn}
+                                  </button>
+                                </>
+                              )
+
+                              : "--"}
+                          </span>
+                          {/* )} */}
+                        </li>
+                      }
                       {/* <li className="flex gap-2 py-1">
                         <div
                           className="block text-gray-500"
@@ -692,7 +676,7 @@ const Setting: React.FC = () => {
               </div>
               <div className="col-span-12">
                 <div className="rounded-12 bg-white/5 px-3 py-4 max-lg:min-h-[95px] lg:p-6 umbrel-divide-y overflow-hidden !py-0">
-                  {userAuth?.login && !userAuth?.pos ? (
+                  {/* {userAuth?.login && !userAuth?.pos ? (
                     <div
                       tabIndex={-1}
                       className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -729,7 +713,7 @@ const Setting: React.FC = () => {
                     </div>
                   ) : (
                     <></>
-                  )}
+                  )} */}
 
                   <div
                     tabIndex={-1}
@@ -917,7 +901,7 @@ const Setting: React.FC = () => {
 
                   {userAuth?.login && !userAuth?.pos && (
                     <>
-                      <div
+                      {/* <div
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
@@ -934,7 +918,7 @@ const Setting: React.FC = () => {
                             Delete
                           </button>
                         </div>
-                      </div>
+                      </div> */}
                       <div
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
@@ -943,7 +927,7 @@ const Setting: React.FC = () => {
                           <>
                             <div className="flex flex-col gap-1">
                               <h3 className="text-xs font-medium leading-none -tracking-2">
-                                Recover
+                                View Secrets
                               </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -951,7 +935,7 @@ const Setting: React.FC = () => {
                                 onClick={() => recoverSeedPhrase()}
                                 className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
                               >
-                                Recover
+                                View Secrets
                               </button>
                             </div>
                           </>

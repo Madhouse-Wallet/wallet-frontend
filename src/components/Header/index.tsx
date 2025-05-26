@@ -8,7 +8,6 @@ import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
-import { passkeyValidator } from "../../lib/zeroDevWallet";
 import { toast } from "react-toastify";
 interface HeaderProps {
   sidebar: boolean;
@@ -22,11 +21,10 @@ const Header: React.FC<HeaderProps> = () => {
 
   const reloadPasskey = async () => {
     if (userAuth.login && !userAuth?.pos) {
-      const {
-        newPasskeyValidator = "",
-        msg = "",
-        status = "",
-      } = await passkeyValidator(userAuth.webauthKey);
+      const newPasskeyValidator = ""
+        const msg = ""
+       const status = ""
+   
       if (status) {
         dispatch(
           loginSet({

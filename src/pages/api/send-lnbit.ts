@@ -12,30 +12,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { amount, onchain_address } = req.body;
         const getToken = await logIn(2) as any;
         let token = getToken?.data?.token;
+        const satoshiAmount = amount * 100000000;
         let data = await createSwapReverse({
-            "asset": "L-BTC/BTC",
-            "direction": "send",
-            "balance": 100,
-            "instant_settlement": true,
             "wallet": "ccd505c23ebf4a988b190e6aaefff7a5",
-            "refund_address": "ccd505c23ebf4a988b190e6aaefff7a5",
-            "amount": amount,
-            "onchain_address": onchain_address
+            "asset": "BTC/BTC",
+            "amount": satoshiAmount,
+            "direction": "send",
+            "instant_settlement": true,
+            "onchain_address": onchain_address,
+            "feerate": true,
+            "feerate_value": 0
         }, token, 2) as any;
-        // console.log("data-->", data)
+        console.log("createSwapReverse data-->", data)
         if (data?.status) {
             const payInv = await payInvoice({
                 "out": true,
                 "bolt11": data?.data?.invoice // ← invoice from above
-            }, token, 2) as any
+            }, token, 2,"") as any
+            console.log("payInv data-->", payInv)
             if (payInv?.status) {
                 console.log("done payment!")
-                return res.status(200).json({ status: "success", message: 'Done Payment!', userData: {} });
+                return res.status(200).json({ status: "success", message: 'Withdraw Done!', data: payInv?.data });
             } else {
-                return res.status(400).json({ status: "failure", message: data.msg  });
+                return res.status(400).json({ status: "failure", message: data.msg });
             }
         } else {
-            return res.status(400).json({ status: "failure", message: data.msg  });
+            return res.status(400).json({ status: "failure", message: data.msg });
         }
     } catch (error) {
         console.error('Error adding user:', error);

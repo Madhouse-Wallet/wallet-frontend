@@ -8,9 +8,8 @@ import SendBitcoinPop from "../../components/Modals/SendBitcoinPop";
 import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
-import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "../../lib/zeroDevWallet";
+import { getProvider, getAccount } from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
 // @ts-ignore
 import QRCode from "qrcode";
@@ -46,11 +45,11 @@ const BTCEchange = () => {
         if (account) {
           let provider = await getProvider(account.kernelClient);
           if (provider) {
-            const sdk = await initializeTBTC(provider.signer);
-            if (sdk) {
-              depo(sdk);
-              setBtcExchange(!btcExchange);
-            }
+            // const sdk = await initializeTBTC(provider.signer);
+            // if (sdk) {
+            //   depo(sdk);
+            //   setBtcExchange(!btcExchange);
+            // }
           }
         }
       } else {
@@ -68,10 +67,10 @@ const BTCEchange = () => {
         if (account) {
           let provider = await getProvider(account.kernelClient);
           if (provider) {
-            const sdk = await initializeTBTC(provider.signer);
-            if (sdk) {
-              setSendSdk(sdk);
-            }
+            // const sdk = await initializeTBTC(provider.signer);
+            // if (sdk) {
+            //   setSendSdk(sdk);
+            // }
             setBtcExchangeSend(!btcExchangeSend);
           }
         }
@@ -138,27 +137,23 @@ const BTCEchange = () => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
         try {
-          if (userAuth?.passkeyCred) {
-            let account = await getAccount(userAuth?.passkeyCred);
-            if (account) {
-              let provider = await getProvider(account.kernelClient);
-              if (provider) {
-                try {
-                  const walletBalance = await fetchBalance(
-                    userAuth?.walletAddress
-                  );
+          console.log("line-141");
+          console.log("line-144");
+          try {
+            console.log("line-151");
+            const walletBalance = await fetchBalance(
+              userAuth?.walletAddress
+              // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+            );
 
-                  if (walletBalance?.result?.length) {
-                    const totalUsd = walletBalance.result.reduce(
-                      (sum: any, token: any) => sum + (token.usd_value || 0),
-                      0
-                    );
-                    setTotalUsdBalance(totalUsd.toFixed(2));
-                  }
-                } catch (err) {}
-              }
+            if (walletBalance?.result?.length) {
+              const totalUsd = walletBalance.result.reduce(
+                (sum: any, token: any) => sum + (token.usd_value || 0),
+                0
+              );
+              setTotalUsdBalance(totalUsd.toFixed(2));
             }
-          }
+          } catch (err) {}
         } catch (error) {
           console.error("Error fetching token balances:", error);
         }
@@ -257,7 +252,7 @@ const BTCEchange = () => {
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
-                        Total Balance
+                        Dollars
                         <span className="font-bold ms-2 text-2xl">
                           $ {totalUsdBalance}
                         </span>
@@ -277,12 +272,12 @@ const BTCEchange = () => {
                         >
                           Receive
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => setSendBitcoin(!sendBitcoin)}
                           className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
                         >
                           Bridge
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   </TopHead>

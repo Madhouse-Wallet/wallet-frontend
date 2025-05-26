@@ -5,7 +5,7 @@ import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 import { webAuthKeyStore, storedataLocalStorage } from "../../../utils/globals";
-import { getRecoverAccount, doRecovery } from "../../../lib/zeroDevWallet";
+import { getRecoverAccount, doRecovery } from "../../../lib/zeroDev";
 import { getUser, updtUser } from "../../../lib/apiCall";
 
 const SetupRecoveryPop = ({ setUp, setSetUp }) => {

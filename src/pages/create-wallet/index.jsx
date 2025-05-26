@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CreateWalletStep from "./CreateWallet";
 import OtpStep from "./OtpStep";
 import WalletBackup from "./WalletBackup";
@@ -14,26 +14,30 @@ import {
 } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
-
 import {
   generateOTP,
   storedataLocalStorage,
   webAuthKeyStore,
+  getRandomString
 } from "../../utils/globals";
 
-import {
-  createAccount,
-  getMnemonic,
-  registerPasskey,
-  passkeyValidator,
-} from "../../lib/zeroDevWallet";
+
+import { setupNewAccount, getPrivateKey, getMenmonic } from "../../lib/zeroDev";
+import { mainnet } from "viem/chains";
 
 const CreateWallet = () => {
   const [step, setStep] = useState(1);
   const dispatch = useDispatch();
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
-  const [addressPhrase, setAddressPhrase] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
+  const [seedPhrase, setSeedPhrase] = useState("");
+  const [safeKey, setSafeKey] = useState("");
+  const [addressWif, setAddressWif] = useState("");
+  const [bitcoinWallet, setBitcoinWallet] = useState("");
+
+  const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
+
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -41,10 +45,9 @@ const CreateWallet = () => {
     const expirationTime = otpTimestamp + 10 * 60 * 1000; // 10 minutes in milliseconds
     return currentTime > expirationTime;
   };
-
   const handleCopy = async (text) => {
     try {
-      if (addressPhrase) {
+      if (privateKey) {
         await navigator.clipboard.writeText(text);
         toast.success("Copied Successfully!");
       } else {
@@ -58,36 +61,28 @@ const CreateWallet = () => {
     email,
     username,
     passkey,
-    publickeyId,
-    rawId,
     wallet,
     bitcoinWallet,
-    secretEmail,
-    secretCredentialId,
-    secretStorageKey,
     liquidBitcoinWallet,
-    liquidBitcoinWallet_2,
-    liquidBitcoinWallet_3
+    coinosToken,
+    flowTokens,
+    coinosUserName
   ) => {
     try {
       try {
-        return await fetch(`/api/add-user`, {
+        return await fetch("/api/add-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
             username,
             passkey,
-            publickeyId,
-            rawId,
             wallet,
             bitcoinWallet,
-            secretEmail,
-            secretCredentialId,
-            secretStorageKey,
             liquidBitcoinWallet,
-            liquidBitcoinWallet_2,
-            liquidBitcoinWallet_3,
+            coinosToken,
+            flowTokens,
+            coinosUserName
           }),
         })
           .then((res) => res.json())
@@ -102,6 +97,9 @@ const CreateWallet = () => {
       return false;
     }
   };
+
+
+
   const getUser = async (email) => {
     try {
       try {
@@ -153,30 +151,31 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      let registerCheck = await registerCredential(userName, userName);
+      const registerCheck = await registerCredential(userName, userName);
+      let res;
       if (registerCheck?.status) {
-        let storeSecretCheck = await storeSecret(
+        const storeSecretCheck = await storeSecret(
           registerCheck?.data?.credentialId,
           data
         );
         if (storeSecretCheck?.status) {
-          return {
+          res = {
             status: true,
             storageKey: storeSecretCheck?.data?.storageKey,
             credentialId: registerCheck?.data?.credentialId,
           };
         } else {
-          return {
+          res = {
             status: false,
             msg: storeSecretCheck?.msg,
           };
         }
       } else {
-        return {
+        res = {
           status: false,
           msg: registerCheck?.msg,
         };
-      }
+      } return res;
     } catch (error) {
       return {
         status: false,
@@ -187,191 +186,111 @@ const CreateWallet = () => {
 
   const registerFn = async () => {
     try {
-      let userExist = await getUser(registerData.email);
-      if (userExist.status && userExist.status == "success") {
+      const userExist = await getUser(registerData.email);
+      if (userExist.status && userExist.status === "success") {
         toast.error("User Already Exist!");
         return false;
       }
-      const createdWebAuthKey = await registerPasskey(
-        registerData.email + "_passkey_1"
-      );
-      if (!createdWebAuthKey.status) {
-        toast.error(createdWebAuthKey.msg);
+      const baseWallet = await setupNewAccount(privateKey, safeKey);
+      if (!baseWallet?.status) {
+        toast.error(baseWallet?.msg);
         return false;
       } else {
-        const {
-          newPasskeyValidator = "",
-          msg = "",
-          status = "",
-        } = await passkeyValidator(createdWebAuthKey.webAuthnKey);
-        if (!status) {
-          toast.error(msg);
-          return false;
-        } else {
-          let {
-            msg = "",
-            status = true,
-            account = "",
-            kernelClient = "",
-            address = "",
-          } = await createAccount(newPasskeyValidator, addressPhrase);
-          if (!status) {
-            toast.error(msg);
-            return false;
-          } else {
-            let webAuthKeyStringObj = await webAuthKeyStore(
-              createdWebAuthKey.webAuthnKey
-            );
-            let userExist = await getUser(registerData.email);
-            if (userExist.status && userExist.status == "success") {
-              toast.error("User Already Exist!");
-              return false;
-            }
-
-            const cleanEmail = registerData?.email?.replace(
-              /[^a-zA-Z0-9]/g,
-              ""
-            );
-
-            let registerCoinos = await registerCoinosUser(
-              cleanEmail,
-              "testttttttt"
-            );
-
-            localStorage.setItem("coinosToken", registerCoinos?.token);
-
-            const resultLiquid = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "liquid",
-              "lbtcusdc"
-            );
-
-            const resultLiquid1 = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "liquid",
-              "lbtctbtc"
-            );
-
-            const resultLiquid2 = await createCoinosInvoice(
-              registerCoinos?.token,
-              "1",
-              "liquid",
-              "tbtclbtc"
-            );
-
-            let getWallet = await getBitcoinAddress();
-
-            let bitcoinWallet = "";
-            if (getWallet.status && getWallet.status == "success") {
-              bitcoinWallet = getWallet?.data?.wallet || "";
-            }
-
-            let secretObj = {
-              coinosToken: registerCoinos?.token || "",
-              privateKey: getWallet?.data?.privateKey || "",
-              publicKey: getWallet?.data?.publicKey || "",
-              wif: getWallet?.data?.wif || "",
-              seedPhrase: addressPhrase,
-            };
-            let storageKeySecret = "";
-            let credentialIdSecret = "";
-            let storeData = await setSecretInPasskey(
-              registerData.email + "_secret",
-              JSON.stringify(secretObj)
-            );
-            if (storeData.status) {
-              storageKeySecret = storeData?.storageKey;
-              credentialIdSecret = storeData?.credentialId;
-            }
-
-            let liquidBitcoinWallet = "";
-            let liquidBitcoinWallet_2 = "";
-            let liquidBitcoinWallet_3 = "";
-
-            if (resultLiquid) {
-              liquidBitcoinWallet = resultLiquid?.hash || "";
-            }
-            if (resultLiquid1) {
-              liquidBitcoinWallet_2 = resultLiquid1?.hash || "";
-            }
-            if (resultLiquid2) {
-              liquidBitcoinWallet_3 = resultLiquid2?.hash || "";
-            }
-
-            let data = await addUser(
-              registerData.email,
-              registerData.username,
-              [webAuthKeyStringObj],
-              "",
-              "",
-              address,
-              bitcoinWallet,
-              registerData.email + "_secret",
-              credentialIdSecret,
-              storageKeySecret,
-              liquidBitcoinWallet,
-              liquidBitcoinWallet_2,
-              liquidBitcoinWallet_3
-            );
-            toast.success("Sign Up Successfully!");
-            dispatch(
-              loginSet({
-                login: true,
-                walletAddress: address || "",
-                bitcoinWallet: bitcoinWallet || "",
-                signer: "",
-                username: registerData.username,
-                email: registerData.email,
-                passkeyCred: newPasskeyValidator,
-                webauthKey: createdWebAuthKey.webAuthnKey,
-                id: data.userData._id,
-                multisigAddress: data.userData.multisigAddress,
-                passkey2: data.userData.passkey2,
-                passkey3: data.userData.passkey3,
-                ensName: data.userData.ensName || "",
-                ensSetup: data.userData.ensSetup || false,
-                multisigSetup: data.userData.multisigSetup,
-                multisigActivate: data.userData.multisigActivate,
-              })
-            );
-            let webAuthKeyStringObj2 = "";
-            let webAuthKeyStringObj3 = "";
-            if (data.userData.passkey2) {
-              webAuthKeyStringObj2 = await webAuthKeyStore(
-                data.userData.passkey2
-              );
-            }
-            if (data.userData.passkey3) {
-              webAuthKeyStringObj3 = await webAuthKeyStore(
-                data.userData.passkey3
-              );
-            }
-
-            storedataLocalStorage(
-              {
-                login: true,
-                walletAddress: address || "",
-                bitcoinWallet: bitcoinWallet || "",
-                signer: "",
-                username: registerData.username,
-                email: registerData.email,
-                passkeyCred: "",
-                webauthKey: webAuthKeyStringObj,
-                id: data.userData._id,
-                multisigAddress: data.userData.multisigAddress,
-                passkey2: webAuthKeyStringObj2,
-                passkey3: webAuthKeyStringObj3,
-                ensName: data.userData.ensName || "",
-                ensSetup: data.userData.ensSetup || false,
-                multisigSetup: data.userData.multisigSetup,
-                multisigActivate: data.userData.multisigActivate,
-              },
-              "authUser"
-            );
-            return true;
+        let { address } = baseWallet?.data
+        const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
+        let registerCoinos = await registerCoinosUser(
+          cleanEmail,
+          process.env.NEXT_PUBLIC_COINOSIS_PASS
+        );
+        localStorage.setItem("coinosToken", registerCoinos?.token);
+        const [usernameInit, domainInit] = (registerData.email).split("@");
+        let token1 = (await getRandomString(6)) + "_" + usernameInit;
+        let flowTokens = [
+          { flow: 1, token: (token1) },
+        ];
+        const resultLiquid = await createCoinosInvoice(
+          registerCoinos?.token,
+          "1",
+          "liquid",
+          token1
+        );
+        const secretObj = {
+          coinosToken: registerCoinos?.token || "",
+          wif: bitcoinWalletwif,
+          privateKey: privateKey,
+          safePrivateKey: safeKey,
+          seedPhrase: seedPhrase
+        };
+        let storageKeySecret = "";
+        let credentialIdSecret = "";
+        const storeData = await setSecretInPasskey(
+          registerData.email + "_passkey_1",
+          JSON.stringify(secretObj)
+        );
+        if (storeData.status) {
+          storageKeySecret = storeData?.storageKey;
+          credentialIdSecret = storeData?.credentialId;
+          let liquidBitcoinWallet = "";
+          if (resultLiquid) {
+            liquidBitcoinWallet = resultLiquid?.hash || "";
           }
+          const data = await addUser(
+            registerData.email,
+            registerData.username,
+            [{
+              name: registerData.email + "_passkey_1",
+              storageKeySecret,
+              credentialIdSecret,
+              displayName: "",
+              bitcoinWallet
+            }],
+            address,
+            bitcoinWallet,
+            liquidBitcoinWallet,
+            registerCoinos?.token,
+            flowTokens,
+            cleanEmail
+          );
+          toast.success("Sign Up Successfully!");
+          dispatch(
+            loginSet({
+              login: true,
+              walletAddress: address || "",
+              bitcoinWallet: bitcoinWallet || "",
+              signer: "",
+              username: registerData.username,
+              email: registerData.email,
+              webauthKey: JSON.stringify({
+                name: registerData.email + "_passkey_1",
+                storageKeySecret,
+                credentialIdSecret
+              }),
+              id: data.userData._id,
+              totalPasskey: 1
+            })
+          );
+          storedataLocalStorage(
+            {
+              login: true,
+              walletAddress: address || "",
+              bitcoinWallet: bitcoinWallet || "",
+              signer: "",
+              username: registerData.username,
+              email: registerData.email,
+              webauthKey: {
+                name: registerData.email + "_passkey_1",
+                storageKeySecret,
+                credentialIdSecret
+              },
+              id: data.userData._id,
+              totalPasskey: 1
+            },
+            "authUser"
+          );
+          return true;
+        } else {
+          toast.error(storeData.msg);
+          return false;
         }
       }
     } catch (error) {
@@ -397,9 +316,19 @@ const CreateWallet = () => {
           toast.error("User Already Exist!");
           return false;
         }
-        let phrase = await getMnemonic();
-        if (phrase) {
-          setAddressPhrase(phrase);
+        let getWallet = await getBitcoinAddress();
+        if (getWallet.status && getWallet.status == "success") {
+          setBitcoinWallet(getWallet?.data?.wallet || "")
+          setBitcoinWalletWif(getWallet?.data?.wif || "")
+        }
+
+        let generatePrivateKey = await getMenmonic();
+        let getSafeKey = await getPrivateKey();
+        if (generatePrivateKey) {
+          setPrivateKey(generatePrivateKey.privateKey);
+          setSafeKey(getSafeKey)
+          setSeedPhrase(generatePrivateKey.phrase)
+          setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
           toast.error("Try Again After some time!!");
@@ -407,6 +336,7 @@ const CreateWallet = () => {
         }
       }
     } catch (error) {
+      console.log("error-->", error)
       return false;
     }
   };
@@ -500,7 +430,10 @@ const CreateWallet = () => {
         <>
           <WalletBackup
             handleCopy={handleCopy}
-            addressPhrase={addressPhrase}
+            privateKey={privateKey}
+            safeKey={safeKey}
+            seedPhrase={seedPhrase}
+            addressWif={addressWif}
             step={step}
             setStep={setStep}
           />

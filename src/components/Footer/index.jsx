@@ -71,7 +71,9 @@ const Footer = () => {
             <Link
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Content Pages"
-              href={"/content-page"}
+              href={"https://madhouse-wallet.gitbook.io/docs"}
+              target="_blank"
+              // href={"/content-page"}
               // onClick={() => setContentPop(!contentPop)}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
