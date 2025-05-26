@@ -269,15 +269,31 @@ const DepositSwap = () => {
             value: tx.value ? BigInt(tx.value) : 0n,
           });
 
+          const normalizeTxApprove = (tx) => ({
+            to: tx.approvalData.tx.to,
+            data: tx.approvalData.tx.data,
+            value: tx.approvalData.amount ? BigInt(tx.approvalData.amount) : 0n,
+          });
 
-
-          console.log("line-265", quote)
+          console.log("line-265", quote);
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
             // quote.approvalData.tx,
             // quote.routeData.tx,
-            normalizeTx(quote.approvalData.tx),
+            // normalizeTx(quote.approvalData.tx),
             normalizeTx(quote.routeData.tx),
           ]);
+
+          // const approvalTx = await sendTransaction(
+          //   getAccountCli?.kernelClient,
+          //   [normalizeTx(quote.approvalData.tx)]
+          // );
+          // console.log("Approval successful:", approvalTx);
+
+          // // Then try the route
+          // const routeTx = await sendTransaction(getAccountCli?.kernelClient, [
+          //   normalizeTx(quote.routeData.tx),
+          // ]);
+          // console.log("Route successful:", routeTx);
 
           if (tx) {
             toast.info(`Approval transaction submitted: ${tx.hash}`);
@@ -406,7 +422,7 @@ const DepositSwap = () => {
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
-                        // disabled={isLoading}
+                          // disabled={isLoading}
                         />
                         {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
@@ -481,10 +497,11 @@ const DepositSwap = () => {
                   </div>
                   <div className="mt-3 py-2">
                     <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${isButtonDisabled() ? "opacity-70" : ""
-                        }`}
+                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                        isButtonDisabled() ? "opacity-70" : ""
+                      }`}
                       onClick={executeSwap}
-                    // disabled={isButtonDisabled()}
+                      // disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
                     </button>
