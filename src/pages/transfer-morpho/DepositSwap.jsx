@@ -16,6 +16,7 @@ import Image from "next/image";
 import { parseAbi } from "viem";
 
 const DepositSwap = () => {
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [morphoBalance, setMorphoBalance] = useState("0");
@@ -44,6 +45,13 @@ const DepositSwap = () => {
       fetchBalances();
     }
   }, [userAuth?.walletAddress]);
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   const fetchBalances = async () => {
     try {
@@ -160,13 +168,22 @@ const DepositSwap = () => {
   const handleFromAmountChange = (e) => {
     const value = e.target.value;
     setFromAmount(value);
-    if (value && !isNaN(parseFloat(value))) {
-      console.log("line-169");
-      updateQuote(value);
-    } else {
-      setToAmount("");
-      setQuote(null);
-      setUsdValue({ from: "0", to: "0" });
+
+    // Clear existing timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    setToAmount("");
+    setQuote(null);
+    setUsdValue({ from: "0", to: "0" });
+
+    // Set new timer for 2 seconds
+    if (value && !Number.isNaN(Number.parseFloat(value))) {
+      const newTimer = setTimeout(() => {
+        updateQuote(value);
+      }, 2000);
+      setDebounceTimer(newTimer);
     }
   };
 
@@ -178,10 +195,10 @@ const DepositSwap = () => {
       return;
     }
 
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
+    // if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
+    //   toast.error("Insufficient USDC balance");
+    //   return;
+    // }
     let data = JSON.parse(userAuth?.webauthKey);
     let retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -196,14 +213,17 @@ const DepositSwap = () => {
     console.log("secretData", secretData);
     setIsLoading(true);
     try {
-      let getAccountCli = await getAccount(secretData?.seedPhrase);
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
       console.log("getAccountCli", getAccountCli);
-      const signer = await getProvider(getAccountCli?.kernelClient);
-      console.log("signer", signer);
+      // const signer = await getProvider(getAccountCli?.kernelClient);
+      // console.log("signer", signer);
 
       // Get the signer
       // const signer = providerr.getSigner();
@@ -247,11 +267,14 @@ const DepositSwap = () => {
             quote.approvalData.tx,
             quote.routeData.tx,
           ]);
-          toast.info(`Approval transaction submitted: ${tx.hash}`);
 
-          // Wait for approval confirmation
-          const approvalReceipt = await tx.wait();
-          toast.success("Swap completed successfully!");
+          if (tx) {
+            toast.info(`Approval transaction submitted: ${tx.hash}`);
+
+            // Wait for approval confirmation
+            // const approvalReceipt = await tx.wait();
+            toast.success("Swap completed successfully!");
+          }
         } catch (error) {
           if (error.message && error.message.includes("user rejected")) {
             toast.error("Approval transaction was rejected");
@@ -451,7 +474,7 @@ const DepositSwap = () => {
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={executeSwap}
-                      disabled={isButtonDisabled()}
+                      // disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
                     </button>

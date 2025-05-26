@@ -1,33 +1,36 @@
 "use client";
 import {
-  zeroAddress, createPublicClient,
-  http, parseEther, createWalletClient, parseAbi
+  zeroAddress,
+  createPublicClient,
+  http,
+  parseEther,
+  createWalletClient,
+  parseAbi,
 } from "viem";
 import { ethers, utils, Wallet } from "ethers";
 import { base } from "viem/chains";
 import {
-  generatePrivateKey, privateKeyToAccount,
-  privateKeyToAddress
+  generatePrivateKey,
+  privateKeyToAccount,
+  privateKeyToAddress,
 } from "viem/accounts";
 
 import { toSafeSmartAccount } from "permissionless/accounts";
-import { createPimlicoClient } from "permissionless/clients/pimlico"
-import { createSmartAccountClient } from "permissionless"
+import { createPimlicoClient } from "permissionless/clients/pimlico";
+import { createSmartAccountClient } from "permissionless";
 import { eip7702Actions } from "viem/experimental";
 import { safeAbiImplementation } from "./safeAbi";
 import { getSafeModuleSetupData } from "./getSetupData";
 import { KernelEIP1193Provider } from "./safeEIP1193Provider";
 import dotenv from "dotenv";
-import timers from 'timers-promises'
+import timers from "timers-promises";
 dotenv.config();
 
-const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY
-const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
+const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
+const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
-
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY // we need to remove this 
-
+const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY; // we need to remove this
 
 export const publicClient = createPublicClient({
   chain: base,
@@ -38,7 +41,6 @@ export const pimlicoClient = createPimlicoClient({
   chain: base,
   transport: http(pimlicoUrl),
 });
-
 
 export const getPrivateKey = async () => {
   try {
@@ -53,17 +55,17 @@ export const getMenmonic = async () => {
   try {
     const wallet = Wallet.fromMnemonic(
       utils.entropyToMnemonic(utils.randomBytes(32))
-    )
-    const eoaPrivateKey = wallet.privateKey
+    );
+    const eoaPrivateKey = wallet.privateKey;
     return {
       privateKey: eoaPrivateKey,
-      phrase: wallet.mnemonic.phrase
-    }
+      phrase: wallet.mnemonic.phrase,
+    };
   } catch (error) {
-    console.log("mnemonic error-->", error)
+    console.log("mnemonic error-->", error);
     return false;
   }
-}
+};
 
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
@@ -81,12 +83,15 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
   }
 };
 
-export const setupNewAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) => {
+export const setupNewAccount = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  chain = base
+) => {
   try {
-
-    console.log('Private Key: ', PRIVATE_KEY)
-    console.log('safe Private Key: ', SAFE_PRIVATE_KEY)
-    const eoaPrivateKey = PRIVATE_KEY //this is an issue //generatePrivateKey() // PRIVATE_KEY
+    console.log("Private Key: ", PRIVATE_KEY);
+    console.log("safe Private Key: ", SAFE_PRIVATE_KEY);
+    const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
     const relayPrivateKey = RELAY_PRIVATE_KEY;
@@ -109,28 +114,35 @@ export const setupNewAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = bas
       account: relayAccount,
       chain: base,
       transport: http(),
-    })
+    });
 
-    const [walletAddress] = await walletClient.getAddresses()
-    console.log(`Wallet Address:  https://basescan.org/address/${walletAddress}`);
+    const [walletAddress] = await walletClient.getAddresses();
+    console.log(
+      `Wallet Address:  https://basescan.org/address/${walletAddress}`
+    );
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: parseEther('0.000001')
-    })
+      value: parseEther("0.000001"),
+    });
 
-    console.log(`Sent eth for account creation: https://basescan.org/tx/${hash}`)
+    console.log(
+      `Sent eth for account creation: https://basescan.org/tx/${hash}`
+    );
     await timers.setTimeout(5000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
-    const SAFE_SINGLETON_ADDRESS = process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;
+    const SAFE_SINGLETON_ADDRESS =
+      process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
 
-    const SAFE_MULTISEND_ADDRESS = process.env.NEXT_PUBLIC_SAFE_MULTISEND_ADDRESS;
-    
-    const SAFE_4337_MODULE_ADDRESS = process.env.NEXT_PUBLIC_SAFE_4337_MODULE_ADDRESS;
+    const SAFE_MULTISEND_ADDRESS =
+      process.env.NEXT_PUBLIC_SAFE_MULTISEND_ADDRESS;
+
+    const SAFE_4337_MODULE_ADDRESS =
+      process.env.NEXT_PUBLIC_SAFE_4337_MODULE_ADDRESS;
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -160,14 +172,12 @@ export const setupNewAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = bas
 
     console.log(`Created Smart Account: https://basescan.org/tx/${txHash}`);
 
-
     const safeAccount = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
       owners: [privateKeyToAccount(safePrivateKey)],
       client: publicClient,
       version: "1.4.1",
     });
-
 
     let res;
     if (safeAccount.address) {
@@ -205,8 +215,8 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
         msg: "Invalid Private Key!",
       };
     }
-    const eoaPrivateKey = PRIVATE_KEY
-    const safePrivateKey = SAFE_PRIVATE_KEY
+    const eoaPrivateKey = PRIVATE_KEY;
+    const safePrivateKey = SAFE_PRIVATE_KEY;
     //eoaPrivateKey=PRIVATE_KEY
 
     const account = await toSafeSmartAccount({
@@ -249,9 +259,13 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-export const getAccount = async (PRIVATE_KEY, chain = base) => {
+export const getAccount = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  chain = base
+) => {
   try {
-
+    console.log("line-268", PRIVATE_KEY, SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY;
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
@@ -280,8 +294,6 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       },
     });
 
-
-
     if (!getAccount) {
       return {
         status: false,
@@ -294,9 +306,6 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
       kernelClient: smartAccountClient,
       address: account.address,
     };
-
-
-
   } catch (error) {
     console.log("error-->", error);
     return { status: false, msg: error?.message || "Please Try again ALter!" };
@@ -306,60 +315,61 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
 export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
-
   const quotes = await pimlicoClient.getTokenQuotes({
     tokens: [usdc],
-  })
-  const { postOpGas, exchangeRate, paymaster } = quotes[0]
+  });
+  const { postOpGas, exchangeRate, paymaster } = quotes[0];
 
   try {
     const userOperation = await smartAccountClient.prepareUserOperation({
       calls: params,
-    })
+    });
 
     const userOperationMaxGas =
       userOperation.preVerificationGas +
       userOperation.callGasLimit +
       userOperation.verificationGasLimit +
       (userOperation.paymasterPostOpGasLimit || 0n) +
-      (userOperation.paymasterVerificationGasLimit || 0n)
+      (userOperation.paymasterVerificationGasLimit || 0n);
 
-    const userOperationMaxCost = userOperationMaxGas * userOperation.maxFeePerGas
+    const userOperationMaxCost =
+      userOperationMaxGas * userOperation.maxFeePerGas;
 
     // using formula here https://github.com/pimlicolabs/singleton-paymaster/blob/main/src/base/BaseSingletonPaymaster.sol#L334-L341
     const maxCostInToken =
-      ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) * exchangeRate) / BigInt(1e18)
-
-
+      ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) *
+        exchangeRate) /
+      BigInt(1e18);
 
     params.unshift({
       abi: parseAbi(["function approve(address,uint)"]),
       functionName: "approve",
       args: [paymaster, maxCostInToken],
       to: usdc,
-    })
+    });
     const hash = await smartAccountClient.sendUserOperation({
       paymasterContext: {
         token: usdc,
         validForSeconds: 60,
       },
       calls: params,
-    })
+    });
 
     const opReceipt = await smartAccountClient.waitForUserOperationReceipt({
       hash,
-    })
+    });
 
-    console.log(`transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`)
+    console.log(
+      `transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`
+    );
 
     return opReceipt.receipt.transactionHash;
     //return true;
   } catch (error) {
-    console.log(`Error in transaction: ${error}`)
+    console.log(`Error in transaction: ${error}`);
     return error;
   }
-}
-
+};
 
 export const getRpcProvider = async () => {
   try {
@@ -382,7 +392,6 @@ export const getETHEREUMRpcProvider = async () => {
     return false;
   }
 };
-
 
 export const USDC_ABI = [
   {

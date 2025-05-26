@@ -205,10 +205,13 @@ const Swap = () => {
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-
+    console.log("secretData", secretData);
     setIsLoading(true);
     try {
-      const getAccountCli = await getAccount(secretData?.seedPhrase);
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
