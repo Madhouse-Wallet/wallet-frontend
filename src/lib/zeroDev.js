@@ -49,7 +49,6 @@ export const getPrivateKey = async () => {
   }
 };
 
-
 export const getMenmonic = async () => {
   try {
     const wallet = Wallet.fromMnemonic(
@@ -62,6 +61,7 @@ export const getMenmonic = async () => {
     }
   } catch (error) {
     console.log("mnemonic error-->", error)
+    return false;
   }
 }
 
@@ -97,14 +97,11 @@ export const setupNewAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = bas
 
     const account = privateKeyToAccount(eoaPrivateKey);
 
-
     const walletClient = createWalletClient({
       account,
       chain: base,
       transport: http(),
     }).extend(eip7702Actions());
-
-
 
     const relayAccount = privateKeyToAccount(relayPrivateKey);
 
@@ -122,19 +119,18 @@ export const setupNewAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = bas
       value: parseEther('0.000001')
     })
 
-
-
     console.log(`Sent eth for account creation: https://basescan.org/tx/${hash}`)
     await timers.setTimeout(5000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
-    const SAFE_SINGLETON_ADDRESS = "0x41675C099F32341bf84BFc5382aF534df5C7461a";
+    const SAFE_SINGLETON_ADDRESS = process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
 
-    const SAFE_MULTISEND_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
-    const SAFE_4337_MODULE_ADDRESS = "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
+    const SAFE_MULTISEND_ADDRESS = process.env.NEXT_PUBLIC_SAFE_MULTISEND_ADDRESS;
+    
+    const SAFE_4337_MODULE_ADDRESS = process.env.NEXT_PUBLIC_SAFE_4337_MODULE_ADDRESS;
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -262,7 +258,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
     const safePrivateKey = SAFE_PRIVATE_KEY;
     if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
-    const pimlicoApiKey = 'pim_gCvmGFU2NgG2xZcmjKVNsE';
+    const pimlicoApiKey = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
     if (!pimlicoApiKey) throw new Error("PIMLICO_API_KEY is required");
 
     //eoaPrivateKey = PRIVATE_KEY
@@ -307,7 +303,7 @@ export const getAccount = async (PRIVATE_KEY, chain = base) => {
   }
 };
 
-export const usdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
 
