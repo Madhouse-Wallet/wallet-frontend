@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             {
                 email: email,
             }
-        );
+        ); 
         let getUserToken = await userLogIn(2, existingUser?.lnbitId_3) as any;
         let token = getUserToken?.data?.token;
         let createInvoice1 = await createInvoice({
