@@ -76,7 +76,6 @@ const Setting: React.FC = () => {
 
   const getPreview = async () => {
     try {
-      console.log("email");
       return await fetch(`/api/get-preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,7 +122,6 @@ const Setting: React.FC = () => {
   const recoverSeedPhrase = async () => {
     try {
       let data = JSON.parse(userAuth?.webauthKey)
-      console.log("data-->", data)
       let callGetSecretData = (await getSecretData(
         data?.storageKeySecret,
         data?.credentialIdSecret
@@ -133,7 +131,6 @@ const Setting: React.FC = () => {
         //   status: true,
         //   secret: callGetSecretData?.secret
         // }
-        console.log(JSON.parse(callGetSecretData?.secret))
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
         setRecoverSeedStatus(true);
         setRecover(!recover);

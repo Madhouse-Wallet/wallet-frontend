@@ -191,10 +191,7 @@ const CreateWallet = () => {
         toast.error("User Already Exist!");
         return false;
       }
-      console.log('wallet private key: ', privateKey)
-      console.log('wallet safe Phrase: ', safeKey)
       const baseWallet = await setupNewAccount(privateKey, safeKey);
-      console.log("baseWallet-->", baseWallet);
       if (!baseWallet?.status) {
         toast.error(baseWallet?.msg);
         return false;
@@ -354,12 +351,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        console.log("OTP-->", OTP);
+        // console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        return true;
+        // return true;
         let obj = {
           email: data.email,
           name: data.username,
