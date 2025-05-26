@@ -249,7 +249,7 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-export const getAccount = async (PRIVATE_KEY, chain = base) => {
+export const getAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) => {
   try {
 
     const eoaPrivateKey = PRIVATE_KEY;

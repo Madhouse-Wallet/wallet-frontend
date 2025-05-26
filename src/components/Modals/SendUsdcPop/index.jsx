@@ -70,7 +70,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
     setIsLoading(true);
     try {
-      const getAccountCli = await getAccount(secretData?.seedPhrase);
+      const getAccountCli = await getAccount(secretData?.privateKey, secretData?.safePrivateKey);
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
