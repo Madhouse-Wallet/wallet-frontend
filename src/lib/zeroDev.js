@@ -21,15 +21,14 @@ const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
 
-const SAFE_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
-
+const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY 
 
 export const publicClient = createPublicClient({
           chain: base,
           transport: http(),
         });
 
-const pimlicoClient = createPimlicoClient({
+export const pimlicoClient = createPimlicoClient({
         chain: base,
         transport: http(pimlicoUrl),
       });
@@ -63,7 +62,7 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
 
-          const eoaPrivateKey =  PRIVATE_KEY //`0x${EOA_PRIVATE_KEY}`;
+          const eoaPrivateKey = PRIVATE_KEY //generatePrivateKey() // 
           if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
           const relayPrivateKey = RELAY_PRIVATE_KEY;
@@ -119,7 +118,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
           const setupData = getSafeModuleSetupData();
           const fallbackHandler = SAFE_4337_MODULE_ADDRESS;
           const paymentToken = zeroAddress;
-          const paymentValue = BigInt(0);
+          const paymentValue = 0n;
           const paymentReceiver = zeroAddress;
 
           const txHash = await walletClient.writeContract({
@@ -457,7 +456,3 @@ export const USDC_ABI = [
         type: "function",
       },
     ];
-
-    export const passkeyValidator = async()=>{
-      return true;
-    }

@@ -1,4 +1,3 @@
-import { CowSwapWidget } from "@cowprotocol/widget-react";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -164,10 +163,6 @@ const Swap = () => {
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <CowSwapCard>
-                <CowSwapWidget
-                  params={cowSwapParams}
-                  provider={provider} // Use the adapted provider
-                />
               </CowSwapCard>
             </div>
           </div>

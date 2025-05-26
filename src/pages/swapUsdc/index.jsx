@@ -1,10 +1,11 @@
-import { getAccount, getProvider } from "@/lib/zeroDev";
-import Web3Interaction from "@/utils/web3Interaction";
+import { getAccount, getProvider ,
+  sendTransaction, USDC_ABI, publicClient, usdc
+} from "@/lib/zeroDev";
+import { parseUnits, parseAbi } from "viem";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createUsdcToBtcShift } from "../api/sideShiftAI";
-
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [usdcBalance, setUsdcBalance] = useState("0");
@@ -35,7 +36,7 @@ const Swap = () => {
 
       return {
         depositAddress: shift.depositAddress,
-        settleAmount: parseFloat(shift.settleAmount || 0),
+        settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
       console.error("SideShift API error:", error);
@@ -73,9 +74,9 @@ const Swap = () => {
     const connectWallet = async () => {
       if (userAuth?.passkeyCred) {
         try {
-          let account = await getAccount(userAuth?.passkeyCred);
+          const account = await getAccount(userAuth?.passkeyCred);
           if (account) {
-            let provider = await getProvider(account.kernelClient);
+            const provider = await getProvider(account.kernelClient);
             if (provider) {
               setProviderr(provider?.ethersProvider);
             } else {
@@ -99,22 +100,18 @@ const Swap = () => {
 
   const fetchBalances = async () => {
     try {
-      if (!providerr || !userAuth?.walletAddress) return;
-
-      const web3 = new Web3Interaction("sepolia", providerr);
+      if (!userAuth?.walletAddress) return;
 
       // Fetch USDC balance
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        providerr
-      );
+         const senderUsdcBalance = await publicClient.readContract({
+           abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
+           address: usdc,
+           functionName: "balanceOf",
+           args: [userAuth?.walletAddress],
+         })
+         const balance =String(Number(BigInt(senderUsdcBalance))/Number(BigInt(1e6)))
+         setUsdcBalance(balance);
 
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(parseFloat(usdcResult.balance).toFixed(6));
-      } else {
-        toast.error(usdcResult.error || "Failed to fetch USDC balance");
-      }
 
       // Fetch BTC balance (assuming similar method exists or create one)
       const tbtcResult = await web3.getUSDCBalance(
@@ -124,7 +121,7 @@ const Swap = () => {
       );
 
       if (tbtcResult.success && tbtcResult.balance) {
-        setTbtcBalance(parseFloat(tbtcResult.balance).toFixed(6));
+        setTbtcBalance(Number.parseFloat(tbtcResult.balance).toFixed(6));
       }
     } catch (error) {
       toast.error("Failed to fetch token balances");
@@ -135,7 +132,7 @@ const Swap = () => {
     const value = e.target.value;
     setFromAmount(value);
 
-    if (value && !isNaN(parseFloat(value))) {
+    if (value && !Number.isNaN(Number.parseFloat(value))) {
       setIsLoading(true);
       try {
         const quotePromise = getQuote(value);
@@ -145,8 +142,8 @@ const Swap = () => {
           quotePromise,
           shiftPromise,
         ]);
-        const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
-        const shiftSettleAmount = parseFloat(shiftResult?.settleAmount || 0);
+        const quoteSettleAmount = Number.parseFloat(quoteResult?.estimate || 0);
+        const shiftSettleAmount = Number.parseFloat(shiftResult?.settleAmount || 0);
 
         let finalAddress = "";
 
@@ -180,27 +177,31 @@ const Swap = () => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!toAmount || parseFloat(toAmount) <= 0) {
+    if (!toAmount || Number.parseFloat(toAmount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
 
-    if (parseFloat(toAmount) > parseFloat(balance)) {
+    if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
 
     setIsLoading(true);
     try {
-      const web3 = new Web3Interaction("sepolia", providerr);
-      const result = await web3.sendUSDC(
-        process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-        destinationAddress,
-        toAmount,
-        providerr
-      );
 
-      if (result.success) {
+      const account = await getAccount(userAuth?.passkeyCred);
+
+        const tx = await sendTransaction(
+                    account?.kernelClient, {
+                  to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+                  abi: USDC_ABI,
+                  functionName: 'transfer',
+                  args: [toAddress, parseUnits(amount.toString(), 6)],
+                }
+              )
+
+      if (tx) {
         setSuccess(true);
         setRefundBTC(false);
         toast.success("USDC sent successfully!");
@@ -218,7 +219,7 @@ const Swap = () => {
   const getButtonText = () => {
     if (isLoading) return "Loading...";
     if (!fromAmount || !toAmount) return "Enter an amount";
-    if (parseFloat(fromAmount) > parseFloat(usdcBalance))
+    if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance))
       return "Insufficient USDC Balance";
     if (!quote) return "Get Quote";
     return "Swap Tokens";
@@ -230,7 +231,7 @@ const Swap = () => {
       !fromAmount ||
       !toAmount ||
       !quote ||
-      parseFloat(fromAmount) > parseFloat(usdcBalance)
+      Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
     );
   };
 
@@ -259,7 +260,7 @@ const Swap = () => {
                         {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
                           {quote
-                            ? parseFloat(
+                            ? Number.parseFloat(
                                 quote?.action?.fromToken?.priceUSD
                               ).toFixed(2)
                             : "0.0"}
@@ -275,8 +276,8 @@ const Swap = () => {
                         <h6 className="m-0 font-medium text-white/50">
                           Balance:{" "}
                           {swapDirection.from === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            ? Number.parseFloat(usdcBalance).toFixed(2)
+                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -304,7 +305,7 @@ const Swap = () => {
                         {/* <h6 className="m-0 font-medium text-white/50">
                           ≈ $
                           {quote
-                            ? parseFloat(
+                            ? Number.parseFloat(
                                 quote?.action?.toToken?.priceUSD
                               ).toFixed(2)
                             : "0.0"}
@@ -320,8 +321,8 @@ const Swap = () => {
                         <h6 className="m-0 font-medium text-white/50">
                           Balance:{" "}
                           {swapDirection.to === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            ? Number.parseFloat(usdcBalance).toFixed(2)
+                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>

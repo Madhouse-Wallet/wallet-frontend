@@ -48,7 +48,9 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (Number.parseFloat(amount) > Number.parseFloat(balance)) {
+    if (Number.parseFloat(amount) > Number.parseFloat(balance) 
+      || Number.parseFloat(balance) < Number('0.05') //If wallet has less than $0.05
+    ) {
       toast.error("Insufficient USDC balance");
       return;
     }
@@ -113,7 +115,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           args: [userAuth?.walletAddress],
         })
         const balance =String(Number(BigInt(senderUsdcBalance))/Number(BigInt(1e6)))
-        console.log("result--->",balance)
         setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);

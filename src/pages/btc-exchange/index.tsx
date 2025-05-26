@@ -8,7 +8,6 @@ import SendBitcoinPop from "../../components/Modals/SendBitcoinPop";
 import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
-import { initializeTBTC } from "../../lib/tbtcSdkInitializer";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -46,11 +45,11 @@ const BTCEchange = () => {
         if (account) {
           let provider = await getProvider(account.kernelClient);
           if (provider) {
-            const sdk = await initializeTBTC(provider.signer);
-            if (sdk) {
-              depo(sdk);
-              setBtcExchange(!btcExchange);
-            }
+            // const sdk = await initializeTBTC(provider.signer);
+            // if (sdk) {
+            //   depo(sdk);
+            //   setBtcExchange(!btcExchange);
+            // }
           }
         }
       } else {
@@ -68,10 +67,10 @@ const BTCEchange = () => {
         if (account) {
           let provider = await getProvider(account.kernelClient);
           if (provider) {
-            const sdk = await initializeTBTC(provider.signer);
-            if (sdk) {
-              setSendSdk(sdk);
-            }
+            // const sdk = await initializeTBTC(provider.signer);
+            // if (sdk) {
+            //   setSendSdk(sdk);
+            // }
             setBtcExchangeSend(!btcExchangeSend);
           }
         }

@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import StripePaymentPage from "../stripePaymentPage";
-import { initializetbtc } from "../../lib/thresholdReceiveFunc";
 import { useSelector } from "react-redux";
 import { getAccount, getProvider } from "@/lib/zeroDev";
 import { BackBtn } from "@/components/common";
@@ -50,13 +49,8 @@ const BuyCoin: React.FC = () => {
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         if (account) {
-          let provider = await getProvider(account.kernelClient);
-          if (provider) {
-            const sdk = await initializetbtc(provider);
-            if (sdk) {
-              setWalletAddress(sdk.address!);
-            }
-          }
+              setWalletAddress(account.address!);
+    
         }
       }
     } catch (error) {

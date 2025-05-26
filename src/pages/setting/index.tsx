@@ -12,7 +12,6 @@ import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
-import { multisigSetup } from "@/lib/zeroDev";
 import {
   retrieveSecret,
 } from "../../utils/webauthPrf";
@@ -93,89 +92,6 @@ const Setting: React.FC = () => {
       console.log(error);
       return false;
     }
-  };
-  const setupMultisig = async () => {
-    try {
-      let userExist = await getUser(userAuth.email);
-      let passkeyNo =
-        (userExist?.userId?.passkey_number &&
-          userExist?.userId?.passkey_number + 1) ||
-        2;
-      let result = await multisigSetup(
-        userAuth?.webauthKey,
-        userAuth.email,
-        passkeyNo
-      );
-      if (result.status) {
-        let webAuthKeyStringObj2: any = "";
-        let webAuthKeyStringObj3: any = "";
-        if (result.publicKey2) {
-          webAuthKeyStringObj2 = await webAuthKeyStore(result.publicKey2);
-        }
-        if (result.publicKey3) {
-          webAuthKeyStringObj3 = await webAuthKeyStore(result.publicKey3);
-        }
-        let webAuthKeyStringObj = await webAuthKeyStore(userAuth.webauthKey);
-        dispatch(
-          loginSet({
-            login: userAuth.login,
-            username: userAuth.username,
-            email: userAuth.email,
-            walletAddress: userAuth.walletAddress,
-            bitcoinWallet: userAuth.bitcoinWallet,
-            passkeyCred: userAuth.passkeyValidatorNew,
-            webauthKey: userAuth.webauthKey,
-            ensName: userAuth.ensName || "",
-            ensSetup: userAuth.ensSetup || false,
-            id: userAuth.id,
-            signer: userAuth.signer,
-            multisigAddress: result.address,
-            passkey2: result.publicKey2,
-            passkey3: result.publicKey3,
-            multisigSetup: true,
-            multisigActivate: true,
-          })
-        );
-        let data = await updtUser(
-          { email: userAuth.email },
-          {
-            $set: {
-              multisigAddress: result.address,
-              passkey2: webAuthKeyStringObj2,
-              passkey3: webAuthKeyStringObj3,
-              multisigSetup: true,
-              multisigActivate: true,
-              passkey_number: passkeyNo + 2,
-            }, // Ensure this is inside `$set`
-          }
-        );
-        storedataLocalStorage(
-          {
-            login: true,
-            walletAddress: userAuth.walletAddress || "",
-            bitcoinWallet: userAuth.bitcoinWallet || "",
-            signer: "",
-            username: userAuth.username,
-            email: userAuth.email,
-            passkeyCred: "",
-            webauthKey: webAuthKeyStringObj,
-            id: userAuth.id,
-            multisigAddress: userAuth.multisigAddress,
-            ensName: userAuth.ensName || "",
-            ensSetup: userAuth.ensSetup || false,
-            passkey2: webAuthKeyStringObj2,
-            passkey3: webAuthKeyStringObj3,
-            multisigSetup: true,
-            multisigActivate: true,
-          },
-          "authUser"
-        );
-
-        toast.success(result.msg);
-      } else {
-        toast.error(result.msg);
-      }
-    } catch (error) { }
   };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
