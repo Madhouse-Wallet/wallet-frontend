@@ -30,12 +30,13 @@ const CreateWallet = () => {
   const dispatch = useDispatch();
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
-  const [addressPhrase, setAddressPhrase] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
+  const [safeKey, setSafeKey] = useState("");
   const [addressWif, setAddressWif] = useState("");
   const [bitcoinWallet, setBitcoinWallet] = useState("");
-  
+
   const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
-  
+
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
     if (!otpTimestamp) return true;
@@ -46,7 +47,7 @@ const CreateWallet = () => {
 
   const handleCopy = async (text) => {
     try {
-      if (addressPhrase) {
+      if (privateKey) {
         await navigator.clipboard.writeText(text);
         toast.success("Copied Successfully!");
       } else {
@@ -98,7 +99,7 @@ const CreateWallet = () => {
   };
 
 
- 
+
   const getUser = async (email) => {
     try {
       try {
@@ -122,7 +123,7 @@ const CreateWallet = () => {
       return false;
     }
   };
- 
+
   const sendOTP = async ({ email, name, otp, subject, type }) => {
     try {
       return await fetch(`/api/send-email`, {
@@ -180,7 +181,7 @@ const CreateWallet = () => {
         status: false,
         msg: "Facing issue in storing secret",
       };
-    } 
+    }
   };
 
   const registerFn = async () => {
@@ -190,15 +191,15 @@ const CreateWallet = () => {
         toast.error("User Already Exist!");
         return false;
       }
-       console.log('Address Phrase: ',addressPhrase)
-      const baseWallet = await setupNewAccount(addressPhrase);
-      //setAddressPhrase(baseWallet.privatekey)
-      console.log("baseWallet-->", baseWallet.address);
-      if (!baseWallet?.status ) {
+      console.log('wallet private key: ', privateKey)
+      console.log('wallet safe Phrase: ', safeKey)
+      const baseWallet = await setupNewAccount(privateKey, safeKey);
+      console.log("baseWallet-->", baseWallet);
+      if (!baseWallet?.status) {
         toast.error(baseWallet?.msg);
         return false;
       } else {
-        let {  address} = baseWallet?.data
+        let { address } = baseWallet?.data
         const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
         let registerCoinos = await registerCoinosUser(
           cleanEmail,
@@ -219,9 +220,10 @@ const CreateWallet = () => {
         const secretObj = {
           coinosToken: registerCoinos?.token || "",
           wif: bitcoinWalletwif,
-          seedPhrase: addressPhrase,
+          seedPhrase: privateKey,
+          safePrivateKey: safeKey
         };
-       
+
         let storageKeySecret = "";
         let credentialIdSecret = "";
         const storeData = await setSecretInPasskey(
@@ -322,10 +324,11 @@ const CreateWallet = () => {
           setBitcoinWallet(getWallet?.data?.wallet || "")
           setBitcoinWalletWif(getWallet?.data?.wif || "")
         }
-        let phrase = await getPrivateKey();
-        if (phrase) {
-          console.log('Phrase: ',phrase)
-          setAddressPhrase(phrase);
+        let generatePrivateKey = await getPrivateKey();
+        let getSafeKey = await getPrivateKey();
+        if (generatePrivateKey) {
+          setPrivateKey(generatePrivateKey);
+          setSafeKey(getSafeKey)
           setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
@@ -334,6 +337,7 @@ const CreateWallet = () => {
         }
       }
     } catch (error) {
+      console.log("error-->",error)
       return false;
     }
   };
@@ -348,12 +352,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP);
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,
@@ -427,7 +431,7 @@ const CreateWallet = () => {
         <>
           <WalletBackup
             handleCopy={handleCopy}
-            addressPhrase={addressPhrase}
+            privateKey={privateKey}
             addressWif={addressWif}
             step={step}
             setStep={setStep}
