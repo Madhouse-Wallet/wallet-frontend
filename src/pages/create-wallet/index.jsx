@@ -22,7 +22,7 @@ import {
 } from "../../utils/globals";
 
 
-import { setupNewAccount, getPrivateKey } from "../../lib/zeroDev";
+import { setupNewAccount, getPrivateKey, getMenmonic } from "../../lib/zeroDev";
 import { mainnet } from "viem/chains";
 
 const CreateWallet = () => {
@@ -31,6 +31,7 @@ const CreateWallet = () => {
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
   const [privateKey, setPrivateKey] = useState("");
+  const [seedPhrase, setSeedPhrase] = useState("");
   const [safeKey, setSafeKey] = useState("");
   const [addressWif, setAddressWif] = useState("");
   const [bitcoinWallet, setBitcoinWallet] = useState("");
@@ -44,7 +45,6 @@ const CreateWallet = () => {
     const expirationTime = otpTimestamp + 10 * 60 * 1000; // 10 minutes in milliseconds
     return currentTime > expirationTime;
   };
-
   const handleCopy = async (text) => {
     try {
       if (privateKey) {
@@ -220,10 +220,10 @@ const CreateWallet = () => {
         const secretObj = {
           coinosToken: registerCoinos?.token || "",
           wif: bitcoinWalletwif,
-          seedPhrase: privateKey,
-          safePrivateKey: safeKey
+          privateKey: privateKey,
+          safePrivateKey: safeKey,
+          seedPhrase: seedPhrase
         };
-
         let storageKeySecret = "";
         let credentialIdSecret = "";
         const storeData = await setSecretInPasskey(
@@ -324,11 +324,13 @@ const CreateWallet = () => {
           setBitcoinWallet(getWallet?.data?.wallet || "")
           setBitcoinWalletWif(getWallet?.data?.wif || "")
         }
-        let generatePrivateKey = await getPrivateKey();
+
+        let generatePrivateKey = await getMenmonic();
         let getSafeKey = await getPrivateKey();
         if (generatePrivateKey) {
-          setPrivateKey(generatePrivateKey);
+          setPrivateKey(generatePrivateKey.privateKey);
           setSafeKey(getSafeKey)
+          setSeedPhrase(generatePrivateKey.phrase)
           setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
@@ -337,7 +339,7 @@ const CreateWallet = () => {
         }
       }
     } catch (error) {
-      console.log("error-->",error)
+      console.log("error-->", error)
       return false;
     }
   };
@@ -432,6 +434,8 @@ const CreateWallet = () => {
           <WalletBackup
             handleCopy={handleCopy}
             privateKey={privateKey}
+            safeKey={safeKey}
+            seedPhrase={seedPhrase}
             addressWif={addressWif}
             step={step}
             setStep={setStep}

@@ -3,12 +3,13 @@ import {
   zeroAddress, createPublicClient,
   http, parseEther, createWalletClient, parseAbi
 } from "viem";
-import { ethers } from "ethers";
+import { ethers, utils, Wallet } from "ethers";
 import { base } from "viem/chains";
 import {
   generatePrivateKey, privateKeyToAccount,
   privateKeyToAddress
 } from "viem/accounts";
+
 import { toSafeSmartAccount } from "permissionless/accounts";
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { createSmartAccountClient } from "permissionless"
@@ -26,6 +27,7 @@ const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_AP
 
 
 const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY // we need to remove this 
+
 
 export const publicClient = createPublicClient({
   chain: base,
@@ -46,6 +48,22 @@ export const getPrivateKey = async () => {
     return false;
   }
 };
+
+
+export const getMenmonic = async () => {
+  try {
+    const wallet = Wallet.fromMnemonic(
+      utils.entropyToMnemonic(utils.randomBytes(32))
+    )
+    const eoaPrivateKey = wallet.privateKey
+    return {
+      privateKey: eoaPrivateKey,
+      phrase: wallet.mnemonic.phrase
+    }
+  } catch (error) {
+    console.log("mnemonic error-->", error)
+  }
+}
 
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
