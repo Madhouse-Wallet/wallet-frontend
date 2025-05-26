@@ -21,7 +21,7 @@ const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
 
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY 
+const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY // we need to remove this 
 
 export const publicClient = createPublicClient({
           chain: base,
@@ -63,7 +63,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
 
          console.log('Private Key: ', PRIVATE_KEY)
-          const eoaPrivateKey = '0x124e8c3726212f8c23943fbec25d9c92aaa6e7d4e81630fe12f45949324c74aa' //generatePrivateKey() // PRIVATE_KEY
+          const eoaPrivateKey = '0x124e8c3726212f8c23943fbec25d9c92aaa6e7d4e81630fe12f45949324c74aa' //this is an issue //generatePrivateKey() // PRIVATE_KEY
           if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
           const relayPrivateKey = RELAY_PRIVATE_KEY;
