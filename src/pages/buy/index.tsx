@@ -4,7 +4,7 @@ import StripePaymentPage from "../stripePaymentPage";
 import { useSelector } from "react-redux";
 import { getAccount, getProvider } from "@/lib/zeroDev";
 import { BackBtn } from "@/components/common";
-import Swap from "../swapUsdc";
+import Swap from "../../pages/swapUsdc";
 import SellBitcoin from "./SellBitcoin"
 
 const BuyCoin: React.FC = () => {

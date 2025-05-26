@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { getAccount,
-  sendTransaction, USDC_ABI, publicClient, usdc
- } from "@/lib/zeroDev.js";
+import {
+  getAccount,
+  sendTransaction,
+  USDC_ABI,
+  publicClient,
+  usdc,
+} from "@/lib/zeroDev.js";
 import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
-import {
-  retrieveSecret,
-} from "../../../utils/webauthPrf";
-
+import { retrieveSecret } from "../../../utils/webauthPrf";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -48,13 +49,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       return;
     }
 
-    if (Number.parseFloat(amount) > Number.parseFloat(balance) 
-      || Number.parseFloat(balance) < Number('0.05') //If wallet has less than $0.05
+    if (
+      Number.parseFloat(amount) > Number.parseFloat(balance) ||
+      Number.parseFloat(balance) < Number("0.05") //If wallet has less than $0.05
     ) {
       toast.error("Insufficient USDC balance");
       return;
     }
-    const data = JSON.parse(userAuth?.webauthKey)
+    const data = JSON.parse(userAuth?.webauthKey);
     const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
@@ -63,25 +65,25 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       toast.error(retrieveSecretCheck?.msg);
       return;
     }
-   
-    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret)
-    
+
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+
     setIsLoading(true);
     try {
-      const getAccountCli = await getAccount(secretData?.seedPhrase)
+      const getAccountCli = await getAccount(secretData?.seedPhrase);
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
 
-            const tx = await sendTransaction(
-              getAccountCli?.kernelClient, [{
-            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-            abi: USDC_ABI,
-            functionName: 'transfer',
-            args: [toAddress, parseUnits(amount.toString(), 6)],
-          }]
-        )
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+      ]);
 
       if (tx) {
         setSuccess(true);
@@ -97,7 +99,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       setIsLoading(false);
     }
   };
- 
 
   useEffect(() => {
     if (userAuth?.walletAddress) {
@@ -107,15 +108,18 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
   const fetchBalance = async () => {
     try {
-        
-        const senderUsdcBalance = await publicClient.readContract({
-          abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
-          address: usdc,
-          functionName: "balanceOf",
-          args: [userAuth?.walletAddress],
-        })
-        const balance =String(Number(BigInt(senderUsdcBalance))/Number(BigInt(1e6)))
-        setBalance(balance);
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+      );
+      setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);
       toast.error("Failed to fetch USDC balance");

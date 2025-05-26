@@ -1,5 +1,4 @@
-import { getAccount, getProvider } from "@/lib/zeroDev";
-import Web3Interaction from "@/utils/web3Interaction";
+import { publicClient, usdc } from "@/lib/zeroDev";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -7,12 +6,14 @@ import { createBtcToUsdcShift } from "../api/sideShiftAI";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend";
 import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import { fetchBitcoinBalance } from "../api/bitcoinBalance";
+import { parseAbi } from "viem";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [tbtcBalance, setTbtcBalance] = useState("0");
-  const [providerr, setProviderr] = useState(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
@@ -23,9 +24,6 @@ const SellBitcoin = () => {
     from: "BTC",
     to: "USDC",
   });
-
-  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
-  const TBTC_ADDRESS = process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS;
 
   const getDestinationAddress = async (amount) => {
     try {
@@ -73,61 +71,51 @@ const SellBitcoin = () => {
   };
 
   useEffect(() => {
-    const connectWallet = async () => {
-      if (userAuth?.passkeyCred) {
-        try {
-          let account = await getAccount(userAuth?.passkeyCred);
-          if (account) {
-            let provider = await getProvider(account.kernelClient);
-            if (provider) {
-              setProviderr(provider?.ethersProvider);
-            } else {
-              throw new Error("Provider not detected");
-            }
-          }
-        } catch (error) {
-          toast.error("Failed to connect wallet. Please try again.");
-        }
-      }
-    };
-
-    connectWallet();
-  }, [userAuth?.passkeyCred]);
-
-  useEffect(() => {
-    if (providerr && userAuth?.walletAddress) {
+    if (userAuth?.walletAddress) {
       fetchBalances();
     }
-  }, [providerr, userAuth?.walletAddress]);
+  }, [userAuth?.walletAddress]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   const fetchBalances = async () => {
     try {
-      if (!providerr || !userAuth?.walletAddress) return;
-
-      const web3 = new Web3Interaction("sepolia", providerr);
+      if (!userAuth?.walletAddress) return;
 
       // Fetch USDC balance
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        providerr
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
-
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(parseFloat(usdcResult.balance).toFixed(6));
-      } else {
-        toast.error(usdcResult.error || "Failed to fetch USDC balance");
-      }
+      setUsdcBalance(balance);
 
       // Fetch BTC balance (assuming similar method exists or create one)
-      const tbtcResult = await web3.getUSDCBalance(
-        TBTC_ADDRESS,
-        userAuth?.walletAddress,
-        providerr
+      // const tbtcResult = await web3.getUSDCBalance(
+      //   TBTC_ADDRESS,
+      //   userAuth?.walletAddress,
+      //   providerr
+      // );
+
+      const result = await fetchBitcoinBalance(
+        userAuth?.bitcoinWallet
+        // "1LtaUUB1QrPNmBAZ9qkCYeNw56GJu5NhG2"
       );
 
-      if (tbtcResult.success && tbtcResult.balance) {
-        setTbtcBalance(parseFloat(tbtcResult.balance).toFixed(6));
+      if (result.balance) {
+        setTbtcBalance(result?.balance);
       }
     } catch (error) {
       toast.error("Failed to fetch token balances");
@@ -139,30 +127,35 @@ const SellBitcoin = () => {
     setFromAmount(value);
 
     if (value && !isNaN(parseFloat(value))) {
-      setIsLoading(true);
-      try {
-        // First check the amount value
-        if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
-          // For amounts <= 0.1 BTC, use SideShift
-          const shiftResult = await getDestinationAddress(value);
-          if (shiftResult) {
-            setDestinationAddress(shiftResult.depositAddress);
-            setToAmount(shiftResult.settleAmount);
+      const timer = setTimeout(async () => {
+        console.log("line-121");
+        setIsLoading(true);
+        try {
+          // First check the amount value
+          if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
+            // For amounts <= 0.1 BTC, use SideShift
+            const shiftResult = await getDestinationAddress(value);
+            if (shiftResult) {
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
+            }
+          } else {
+            // For amounts > 0.1 BTC, use ThorSwap
+            const quoteResult = await getQuote(value);
+            if (quoteResult) {
+              setDestinationAddress(quoteResult.estimatedDepositAddress);
+              setToAmount(quoteResult.estimate);
+            }
           }
-        } else {
-          // For amounts > 0.1 BTC, use ThorSwap
-          const quoteResult = await getQuote(value);
-          if (quoteResult) {
-            setDestinationAddress(quoteResult.estimatedDepositAddress);
-            setToAmount(quoteResult.estimate);
-          }
+        } catch (err) {
+          toast.error("Failed to fetch quote or destination address");
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err) {
-        toast.error("Failed to fetch quote or destination address");
-      } finally {
-        setIsLoading(false);
-      }
+      }, 2000); // 500ms debounce
+      setDebounceTimer(timer);
     } else {
+      console.log("line-146");
       setToAmount("");
       setQuote(null);
       setDestinationAddress("");
@@ -193,20 +186,15 @@ const SellBitcoin = () => {
 
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth?.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        );
-        if (callGetSecretData?.status) {
-          return JSON.parse(callGetSecretData?.secret);
-        } else {
-          return false;
-        }
+      let data = JSON.parse(userAuth?.webauthKey);
+      let callGetSecretData = await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      );
+      if (callGetSecretData?.status) {
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
@@ -217,7 +205,7 @@ const SellBitcoin = () => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!toAmount || parseFloat(toAmount) <= 0) {
+    if (!fromAmount || parseFloat(fromAmount) <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
@@ -231,7 +219,7 @@ const SellBitcoin = () => {
     try {
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        toast.error("Please enter a valid amount");
+        // toast.error("Key is not correct");
         return;
       }
 
@@ -261,7 +249,7 @@ const SellBitcoin = () => {
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (parseFloat(fromAmount) > parseFloat(tbtcBalance))
       return "Insufficient BTC Balance";
-    if (!quote) return "Get Quote";
+    if (!destinationAddress) return "Get Quote";
     return "Swap Tokens";
   };
 
@@ -270,7 +258,7 @@ const SellBitcoin = () => {
       isLoading ||
       !fromAmount ||
       !toAmount ||
-      !quote ||
+      !destinationAddress ||
       parseFloat(fromAmount) > parseFloat(tbtcBalance)
     );
   };
