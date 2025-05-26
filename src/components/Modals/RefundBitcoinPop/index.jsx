@@ -161,7 +161,10 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
 
     setIsLoading(true);
     try {
-      const getAccountCli = await getAccount(secretData?.seedPhrase);
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
