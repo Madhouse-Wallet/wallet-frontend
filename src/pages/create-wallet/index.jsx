@@ -190,8 +190,9 @@ const CreateWallet = () => {
         toast.error("User Already Exist!");
         return false;
       }
-      
+       console.log('Address Phrase: ',addressPhrase)
       const baseWallet = await setupNewAccount(addressPhrase);
+      //setAddressPhrase(baseWallet.privatekey)
       console.log("baseWallet-->", baseWallet.address);
       if (!baseWallet?.status ) {
         toast.error(baseWallet?.msg);
@@ -323,6 +324,7 @@ const CreateWallet = () => {
         }
         let phrase = await getPrivateKey();
         if (phrase) {
+          console.log('Phrase: ',phrase)
           setAddressPhrase(phrase);
           setAddressWif(getWallet?.data?.wif || "");
           return true;

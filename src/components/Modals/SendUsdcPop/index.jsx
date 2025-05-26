@@ -75,12 +75,12 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       }
 
             const tx = await sendTransaction(
-              getAccountCli?.kernelClient, {
+              getAccountCli?.kernelClient, [{
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: 'transfer',
             args: [toAddress, parseUnits(amount.toString(), 6)],
-          }
+          }]
         )
 
       if (tx) {

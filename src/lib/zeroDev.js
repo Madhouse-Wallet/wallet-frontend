@@ -62,7 +62,8 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
   try {
 
-          const eoaPrivateKey = PRIVATE_KEY //generatePrivateKey() // 
+         console.log('Private Key: ', PRIVATE_KEY)
+          const eoaPrivateKey = '0x124e8c3726212f8c23943fbec25d9c92aaa6e7d4e81630fe12f45949324c74aa' //generatePrivateKey() // PRIVATE_KEY
           if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
           const relayPrivateKey = RELAY_PRIVATE_KEY;
@@ -150,7 +151,7 @@ export const setupNewAccount = async (PRIVATE_KEY, chain = base) => {
 
 
     let res;
-    if (txHash) {
+    if (safeAccount.address) {
       res = {
         status: true,
         data: {
@@ -294,9 +295,7 @@ export const sendTransaction = async (smartAccountClient,params) => {
         
      try{
         const userOperation = await smartAccountClient.prepareUserOperation({
-          calls: [
-           params
-          ],
+          calls:params,
         })
   
         const userOperationMaxGas =
@@ -312,20 +311,20 @@ export const sendTransaction = async (smartAccountClient,params) => {
         const maxCostInToken =
           ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) * exchangeRate) / BigInt(1e18)
         
+
+      
+        params.unshift( {
+              abi: parseAbi(["function approve(address,uint)"]),
+              functionName: "approve",
+              args: [paymaster, maxCostInToken],
+              to: usdc,
+            })
         const hash = await smartAccountClient.sendUserOperation({
           paymasterContext: {
             token: usdc,
             validForSeconds: 60, 
           },
-          calls: [
-            {
-              abi: parseAbi(["function approve(address,uint)"]),
-              functionName: "approve",
-              args: [paymaster, maxCostInToken],
-              to: usdc,
-            },
-              params
-          ],
+          calls: params,
         })
         
         const opReceipt = await smartAccountClient.waitForUserOperationReceipt({
