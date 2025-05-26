@@ -1,16 +1,24 @@
-import { getAccount, getProvider ,
-  sendTransaction, USDC_ABI, publicClient, usdc
+import {
+  getAccount,
+  getProvider,
+  sendTransaction,
+  USDC_ABI,
+  publicClient,
+  usdc,
 } from "@/lib/zeroDev";
 import { parseUnits, parseAbi } from "viem";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createUsdcToBtcShift } from "../api/sideShiftAI";
+import { fetchBitcoinBalance } from "../../pages/api/bitcoinBalance";
+import { retrieveSecret } from "@/utils/webauthPrf";
+
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [tbtcBalance, setTbtcBalance] = useState("0");
-  const [providerr, setProviderr] = useState(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
@@ -21,9 +29,6 @@ const Swap = () => {
     from: "USDC",
     to: "BTC",
   });
-
-  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
-  const TBTC_ADDRESS = process.env.NEXT_PUBLIC_TBTC_CONTRACT_ADDRESS;
 
   const getDestinationAddress = async (amount) => {
     try {
@@ -71,57 +76,51 @@ const Swap = () => {
   };
 
   useEffect(() => {
-    const connectWallet = async () => {
-      if (userAuth?.passkeyCred) {
-        try {
-          const account = await getAccount(userAuth?.passkeyCred);
-          if (account) {
-            const provider = await getProvider(account.kernelClient);
-            if (provider) {
-              setProviderr(provider?.ethersProvider);
-            } else {
-              throw new Error("Provider not detected");
-            }
-          }
-        } catch (error) {
-          toast.error("Failed to connect wallet. Please try again.");
-        }
-      }
-    };
-
-    connectWallet();
-  }, [userAuth?.passkeyCred]);
-
-  useEffect(() => {
-    if (providerr && userAuth?.walletAddress) {
+    if (userAuth?.walletAddress) {
       fetchBalances();
     }
-  }, [providerr, userAuth?.walletAddress]);
+  }, [userAuth?.walletAddress]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
 
   const fetchBalances = async () => {
     try {
       if (!userAuth?.walletAddress) return;
 
       // Fetch USDC balance
-         const senderUsdcBalance = await publicClient.readContract({
-           abi: parseAbi(["function balanceOf(address account) returns (uint256)"]),
-           address: usdc,
-           functionName: "balanceOf",
-           args: [userAuth?.walletAddress],
-         })
-         const balance =String(Number(BigInt(senderUsdcBalance))/Number(BigInt(1e6)))
-         setUsdcBalance(balance);
-
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+      );
+      setUsdcBalance(balance);
 
       // Fetch BTC balance (assuming similar method exists or create one)
-      const tbtcResult = await web3.getUSDCBalance(
-        TBTC_ADDRESS,
-        userAuth?.walletAddress,
-        providerr
+      // const tbtcResult = await web3.getUSDCBalance(
+      //   TBTC_ADDRESS,
+      //   userAuth?.walletAddress,
+      //   providerr
+      // );
+
+      const result = await fetchBitcoinBalance(
+        userAuth?.bitcoinWallet
+        // "1LtaUUB1QrPNmBAZ9qkCYeNw56GJu5NhG2"
       );
 
-      if (tbtcResult.success && tbtcResult.balance) {
-        setTbtcBalance(Number.parseFloat(tbtcResult.balance).toFixed(6));
+      if (result.balance) {
+        setTbtcBalance(result?.balance);
       }
     } catch (error) {
       toast.error("Failed to fetch token balances");
@@ -133,39 +132,47 @@ const Swap = () => {
     setFromAmount(value);
 
     if (value && !Number.isNaN(Number.parseFloat(value))) {
-      setIsLoading(true);
-      try {
-        const quotePromise = getQuote(value);
-        const shiftPromise = getDestinationAddress(value);
+      const timer = setTimeout(async () => {
+        setIsLoading(true);
+        try {
+          const quotePromise = getQuote(value);
+          const shiftPromise = getDestinationAddress(value);
 
-        const [quoteResult, shiftResult] = await Promise.all([
-          quotePromise,
-          shiftPromise,
-        ]);
-        const quoteSettleAmount = Number.parseFloat(quoteResult?.estimate || 0);
-        const shiftSettleAmount = Number.parseFloat(shiftResult?.settleAmount || 0);
+          const [quoteResult, shiftResult] = await Promise.all([
+            quotePromise,
+            shiftPromise,
+          ]);
+          const quoteSettleAmount = Number.parseFloat(
+            quoteResult?.estimate || 0
+          );
+          const shiftSettleAmount = Number.parseFloat(
+            shiftResult?.settleAmount || 0
+          );
 
-        let finalAddress = "";
+          let finalAddress = "";
 
-        if (
-          quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-          shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-        ) {
-          finalAddress = shiftResult?.depositAddress;
-          setToAmount(shiftResult?.settleAmount);
-        } else {
-          finalAddress = quoteResult?.estimatedDepositAddress;
-          setToAmount(quoteResult?.estimate);
+          if (
+            quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
+            shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+          ) {
+            finalAddress = shiftResult?.depositAddress;
+            setToAmount(shiftResult?.settleAmount);
+          } else {
+            finalAddress = quoteResult?.estimatedDepositAddress;
+            setToAmount(quoteResult?.estimate);
+          }
+
+          if (finalAddress) {
+            setDestinationAddress(finalAddress);
+          }
+        } catch (err) {
+          toast.error("Failed to fetch quote or destination address");
+        } finally {
+          setIsLoading(false);
         }
+      }, 2000); // 500ms debounce
 
-        if (finalAddress) {
-          setDestinationAddress(finalAddress);
-        }
-      } catch (err) {
-        toast.error("Failed to fetch quote or destination address");
-      } finally {
-        setIsLoading(false);
-      }
+      setDebounceTimer(timer);
     } else {
       setToAmount("");
       setQuote(null);
@@ -182,28 +189,43 @@ const Swap = () => {
       return;
     }
 
-    if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
+    // if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
+    //   toast.error("Insufficient USDC balance");
+    //   return;
+    // }
+
+    const data = JSON.parse(userAuth?.webauthKey);
+    const retrieveSecretCheck = await retrieveSecret(
+      data?.storageKeySecret,
+      data?.credentialIdSecret
+    );
+    if (!retrieveSecretCheck?.status) {
+      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+
     setIsLoading(true);
     try {
+      const getAccountCli = await getAccount(secretData?.seedPhrase);
+      if (!getAccountCli.status) {
+        toast.error(getAccountCli?.msg);
+        return;
+      }
 
-      const account = await getAccount(userAuth?.passkeyCred);
-
-        const tx = await sendTransaction(
-                    account?.kernelClient, {
-                  to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-                  abi: USDC_ABI,
-                  functionName: 'transfer',
-                  args: [toAddress, parseUnits(amount.toString(), 6)],
-                }
-              )
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [destinationAddress, parseUnits(fromAmount.toString(), 6)],
+        },
+      ]);
 
       if (tx) {
-        setSuccess(true);
-        setRefundBTC(false);
+        // setSuccess(true);
+        // setRefundBTC(false);
         toast.success("USDC sent successfully!");
         setTimeout(fetchBalances, 2000);
       } else {
@@ -334,7 +356,7 @@ const Swap = () => {
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={handleSend}
-                      disabled={isButtonDisabled()}
+                      // disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
                     </button>
