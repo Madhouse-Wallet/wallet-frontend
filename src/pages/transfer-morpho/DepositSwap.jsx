@@ -1,4 +1,10 @@
-import { getRpcProvider, getProvider, getAccount } from "@/lib/zeroDev.js";
+import {
+  getRpcProvider,
+  getProvider,
+  getAccount,
+  sendTransaction,
+  publicClient,
+} from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -7,6 +13,7 @@ import { toast } from "react-toastify";
 import { swap, TOKENS } from "@/utils/morphoSwap";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import Image from "next/image";
+import { parseAbi } from "viem";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -40,33 +47,42 @@ const DepositSwap = () => {
 
   const fetchBalances = async () => {
     try {
-      // if (!providerr || !userAuth?.walletAddress) return;
+      if (!userAuth?.walletAddress) return;
 
-      const provider = await getRpcProvider();
-      const web3 = new Web3Interaction("sepolia", provider);
-
-      // Fetch USDC balance
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        provider
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: USDC_ADDRESS,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
 
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(parseFloat(usdcResult.balance).toFixed(6));
+      if (balance) {
+        setUsdcBalance(balance);
       } else {
         toast.error(usdcResult.error || "Failed to fetch USDC balance");
       }
 
       // Fetch Morpho balance
-      const morphoResult = await web3.getMorphoBalance(
-        MORPHO_ADDRESS,
-        userAuth?.walletAddress,
-        provider
+
+      const senderMPRPHOBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: MORPHO_ADDRESS,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const morphoResult = String(
+        Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
       );
 
-      if (morphoResult.success && morphoResult.balance) {
-        setMorphoBalance(parseFloat(morphoResult.balance).toFixed(6));
+      if (morphoResult) {
+        setMorphoBalance(morphoResult);
       }
     } catch (error) {
       toast.error("Failed to fetch token balances");
@@ -156,6 +172,7 @@ const DepositSwap = () => {
 
   // Execute the swap transaction using Enso
   const executeSwap = async () => {
+    console.log("quote", quote);
     if (!quote || !userAuth?.walletAddress) {
       toast.error("Quote not available or wallet not connected");
       return;
@@ -192,39 +209,49 @@ const DepositSwap = () => {
       // const signer = providerr.getSigner();
 
       // Try to get the signer address
-      let signerAddress;
-      try {
-        signerAddress = await signer.signer.getAddress();
-        console.log("line-198", signerAddress);
-      } catch (error) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
-        );
-        setIsLoading(false);
-        return;
-      }
+      // let signerAddress;
+      // try {
+      //   signerAddress = await signer.signer.getAddress();
+      //   console.log("line-198", signerAddress);
+      // } catch (error) {
+      //   toast.error(
+      //     "Wallet signer not properly initialized. Please reconnect your wallet."
+      //   );
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       // If we have a valid signer address, proceed with the transaction
-      if (!signerAddress) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
-        );
-        setIsLoading(false);
+      // if (!signerAddress) {
+      //   toast.error(
+      //     "Wallet signer not properly initialized. Please reconnect your wallet."
+      //   );
+      //   setIsLoading(false);
+      //   return;
+      // }
+
+      if (!getAccountCli.status) {
+        toast.error(getAccountCli?.msg);
         return;
       }
 
       // Step 1: Check if approval is needed and execute approval transaction
-      if (quote.approvalData) {
-        toast.info("Approving USDC for Enso router...");
+      if (quote.approvalData && quote.routeData) {
+        toast.info("Approving USDC for Enso router...", quote);
         try {
-          const approvalTx = await signer?.signer?.sendTransaction(
-            quote.approvalData.tx
-          );
-          toast.info(`Approval transaction submitted: ${approvalTx.hash}`);
+          // const approvalTx = await signer?.signer?.sendTransaction(
+          //   quote.approvalData.tx
+          // );
+
+          const tx = await sendTransaction(getAccountCli?.kernelClient, [
+            quote.approvalData.tx,
+            quote.routeData.tx,
+          ]);
+          toast.info(`Approval transaction submitted: ${tx.hash}`);
 
           // Wait for approval confirmation
-          const approvalReceipt = await approvalTx.wait();
-          toast.success("Token approval confirmed!");
+          const approvalReceipt = await tx.wait();
+          toast.success("Swap completed successfully!");
         } catch (error) {
           if (error.message && error.message.includes("user rejected")) {
             toast.error("Approval transaction was rejected");
@@ -237,13 +264,13 @@ const DepositSwap = () => {
       }
 
       // Step 2: Execute the swap transaction
-      toast.info("Executing swap through Enso router...");
-      const swapTx = await signer?.signer?.sendTransaction(quote.routeData.tx);
-      toast.info(`Swap transaction submitted: ${swapTx.hash}`);
+      // toast.info("Executing swap through Enso router...");
+      // const swapTx = await signer?.signer?.sendTransaction(quote.routeData.tx);
+      // toast.info(`Swap transaction submitted: ${swapTx.hash}`);
 
       // Wait for swap confirmation
-      const swapReceipt = await swapTx.wait();
-      toast.success("Swap completed successfully!");
+      // const swapReceipt = await swapTx.wait();
+      // toast.success("Swap completed successfully!");
 
       // Refresh balances
       fetchBalances();

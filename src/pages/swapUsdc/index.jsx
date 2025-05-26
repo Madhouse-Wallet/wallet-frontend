@@ -189,10 +189,10 @@ const Swap = () => {
       return;
     }
 
-    // if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
-    //   toast.error("Insufficient USDC balance");
-    //   return;
-    // }
+    if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
+      toast.error("Insufficient USDC balance");
+      return;
+    }
 
     const data = JSON.parse(userAuth?.webauthKey);
     const retrieveSecretCheck = await retrieveSecret(
@@ -356,7 +356,7 @@ const Swap = () => {
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={handleSend}
-                      // disabled={isButtonDisabled()}
+                      disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
                     </button>

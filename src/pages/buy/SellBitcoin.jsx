@@ -11,6 +11,7 @@ import { parseAbi } from "viem";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [tbtcBalance, setTbtcBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
@@ -75,6 +76,14 @@ const SellBitcoin = () => {
     }
   }, [userAuth?.walletAddress]);
 
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
+
   const fetchBalances = async () => {
     try {
       if (!userAuth?.walletAddress) return;
@@ -118,30 +127,33 @@ const SellBitcoin = () => {
     setFromAmount(value);
 
     if (value && !isNaN(parseFloat(value))) {
-      console.log("line-121");
-      setIsLoading(true);
-      try {
-        // First check the amount value
-        if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
-          // For amounts <= 0.1 BTC, use SideShift
-          const shiftResult = await getDestinationAddress(value);
-          if (shiftResult) {
-            setDestinationAddress(shiftResult.depositAddress);
-            setToAmount(shiftResult.settleAmount);
+      const timer = setTimeout(async () => {
+        console.log("line-121");
+        setIsLoading(true);
+        try {
+          // First check the amount value
+          if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
+            // For amounts <= 0.1 BTC, use SideShift
+            const shiftResult = await getDestinationAddress(value);
+            if (shiftResult) {
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
+            }
+          } else {
+            // For amounts > 0.1 BTC, use ThorSwap
+            const quoteResult = await getQuote(value);
+            if (quoteResult) {
+              setDestinationAddress(quoteResult.estimatedDepositAddress);
+              setToAmount(quoteResult.estimate);
+            }
           }
-        } else {
-          // For amounts > 0.1 BTC, use ThorSwap
-          const quoteResult = await getQuote(value);
-          if (quoteResult) {
-            setDestinationAddress(quoteResult.estimatedDepositAddress);
-            setToAmount(quoteResult.estimate);
-          }
+        } catch (err) {
+          toast.error("Failed to fetch quote or destination address");
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err) {
-        toast.error("Failed to fetch quote or destination address");
-      } finally {
-        setIsLoading(false);
-      }
+      }, 2000); // 500ms debounce
+      setDebounceTimer(timer);
     } else {
       console.log("line-146");
       setToAmount("");
