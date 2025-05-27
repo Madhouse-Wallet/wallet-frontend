@@ -30,7 +30,6 @@ const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY; // we need to remove this
 
 export const publicClient = createPublicClient({
   chain: base,
@@ -312,6 +311,7 @@ export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
   const quotes = await pimlicoClient.getTokenQuotes({
+    chain: base,
     tokens: [usdc],
   });
   const { postOpGas, exchangeRate, paymaster } = quotes[0];
