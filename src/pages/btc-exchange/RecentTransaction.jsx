@@ -17,7 +17,7 @@ const RecentTransaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(5);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   const [btcTransactions, setBtcTransactions] = useState([]);
@@ -81,8 +81,9 @@ const RecentTransaction = () => {
         id: tx.transaction_hash || "",
         rawData: tx,
         status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${isSend ? "Transfer" : "Receive"
-          }`,
+        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
+          isSend ? "Transfer" : "Receive"
+        }`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend ? "send" : "receive",
@@ -226,15 +227,15 @@ const RecentTransaction = () => {
   };
 
   // Apply date filter and refetch data when dateRange changes
-  useEffect(() => {
-    if (userAuth?.walletAddress) {
-      // Don't automatically fetch when date range changes - wait for "Apply" button
-      if (!isDatePickerOpen) {
-        fetchRecentTransactions();
-        fetchRecentTransactionsPaxg();
-      }
-    }
-  }, [userAuth?.walletAddress, dateRange]); // Only refetch when wallet address changes
+  // useEffect(() => {
+  //   if (userAuth?.walletAddress) {
+  //     // Don't automatically fetch when date range changes - wait for "Apply" button
+  //     if (!isDatePickerOpen) {
+  //       fetchRecentTransactions();
+  //       fetchRecentTransactionsPaxg();
+  //     }
+  //   }
+  // }, [userAuth?.walletAddress, dateRange]); // Only refetch when wallet address changes
 
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
@@ -254,8 +255,13 @@ const RecentTransaction = () => {
   const applyDateFilter = () => {
     setApplyTrue(true);
     if (isDateFilterActive()) {
-      fetchRecentTransactions();
-      fetchRecentTransactionsPaxg();
+      // Only fetch if on USDC or Gold tabs
+      if (activeTab === 0) {
+        fetchRecentTransactions();
+      }
+      if (activeTab === 2) {
+        fetchRecentTransactionsPaxg();
+      }
       setIsDatePickerOpen(false);
     } else {
       toast.error("Please select both start and end dates");
@@ -272,7 +278,7 @@ const RecentTransaction = () => {
     data();
   }, []);
 
-  console.log("line-276", transactions)
+  console.log("line-276", transactions);
   const tabs = [
     {
       title: "USDC",
@@ -287,49 +293,56 @@ const RecentTransaction = () => {
                       {date}
                     </p>
                     <div className="grid gap-3 grid-cols-12">
-                      {txs.map((tx, key) => (
-                        <div key={key} className="md:col-span-6 col-span-12">
-                          <div
-                            onClick={() => handleTransactionClick(tx)}
-                            className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                          >
-                            <div className="left flex items-start gap-2">
-                              <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "send"
-                                  ? sendSvg
-                                  : receiveSvg}
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.01;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="content">
-                                <h4 className="m-0 font-bold md:text-base">
-                                  {tx.isRedemption
-                                    ? "Redemption"
-                                    : tx.isDeposit
-                                      ? "Deposit"
-                                      : tx.type === "send"
-                                        ? "Send"
-                                        : "Receive"}{" "}
-                                  {tx.amount?.split(" ")[1] || "ETH"}
-                                </h4>
-                                <p
-                                  className={`m-0 ${getStatusColor(
-                                    tx.status
-                                  )} font-medium text-xs`}
-                                >
-                                  {getStatusText(tx.status)}
+                              <div className="right">
+                                <p className="m-0  text-xs font-medium">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx.type === "send" ? "-" : "+"} ${
+                                        tx.amount
+                                      }`}
                                 </p>
                               </div>
                             </div>
-                            <div className="right">
-                              <p className="m-0  text-xs font-medium">
-                                {tx.status === "rejected"
-                                  ? "Insufficient Balance"
-                                  : `${tx.type === "send" ? "-" : "+"} ${tx.amount
-                                  }`}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 );
@@ -409,8 +422,9 @@ const RecentTransaction = () => {
                               <p className="m-0  text-xs font-medium">
                                 {tx.status === "rejected"
                                   ? "Insufficient Balance"
-                                  : `${tx.type === "token send" ? "-" : "+"} ${tx.amount
-                                  }`}
+                                  : `${tx.type === "token send" ? "-" : "+"} ${
+                                      tx.amount
+                                    }`}
                               </p>
                             </div>
                           </div>
@@ -462,7 +476,7 @@ const RecentTransaction = () => {
     },
     {
       title: "Lightning Spend",
-      component: (
+      component: spendWallet ? (
         <LnbitsTransaction
           usd={2}
           setTransactions={setSpendTxs}
@@ -470,6 +484,10 @@ const RecentTransaction = () => {
           dateRange={isDateFilterActive() ? dateRange[0] : null}
           applyTrue={applyTrue}
         />
+      ) : (
+        <div className="text-center py-4">
+          <p>Loading wallet information...</p>
+        </div>
       ),
     },
   ];
@@ -531,8 +549,9 @@ const RecentTransaction = () => {
                     setIsDatePickerOpen(!isDatePickerOpen);
                     setApplyTrue(false);
                   }}
-                  className={`px-4 py-2 ${isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
-                    } text-white rounded-md flex items-center gap-2`}
+                  className={`px-4 py-2 ${
+                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                  } text-white rounded-md flex items-center gap-2`}
                 >
                   <span>{DateFilter}</span>
                   {isDateFilterActive() && (
@@ -592,6 +611,13 @@ const RecentTransaction = () => {
                       <button
                         key={key}
                         onClick={() => {
+                          if (key === 0) {
+                            // USDC tab
+                            fetchRecentTransactions();
+                          } else if (key === 2) {
+                            // Gold tab
+                            fetchRecentTransactionsPaxg();
+                          }
                           setActiveTab(key);
                           setIsOpen(false);
                         }}

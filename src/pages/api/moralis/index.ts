@@ -68,9 +68,8 @@ async function getWalletTokenTransfers(
     if (fromDate) options.fromDate = fromDate;
     if (toDate) options.toDate = toDate;
 
-    const response = await Moralis.EvmApi.token.getWalletTokenTransfers(
-      options
-    );
+    const response =
+      await Moralis.EvmApi.token.getWalletTokenTransfers(options);
 
     if (!response || !response.raw) {
       throw new Error("No transfer data received from Moralis");

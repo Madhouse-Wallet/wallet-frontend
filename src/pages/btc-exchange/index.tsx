@@ -1,4 +1,5 @@
 "use client";
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
@@ -9,13 +10,12 @@ import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "../../lib/zeroDev";
+import { getProvider, getAccount, publicClient } from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
-// @ts-ignore
-import QRCode from "qrcode";
+
 import styled from "styled-components";
-import { fetchBalance } from "@/lib/utils";
 import { BackBtn } from "@/components/common";
+import { parseAbi } from "viem";
 const BTCEchange = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [btcExchange, setBtcExchange] = useState(false);
@@ -32,7 +32,8 @@ const BTCEchange = () => {
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
   const [sendSdk, setSendSdk] = useState<any>("");
-  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+  const [totalUsdBalance, setTotalUsdBalance] = useState("0.0");
+  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
   const startReceive = async () => {
     try {
@@ -82,35 +83,11 @@ const BTCEchange = () => {
     }
   };
 
-  const generateQRCode = async (text: any) => {
-    try {
-      const qr = await QRCode.toDataURL(text);
-      setQRCode(qr);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
     if (depositSetup) {
       mint(depositSetup);
     }
   }, [depositSetup, depositSetupCheck]);
-
-  const depo = async (tbtcSdk: any) => {
-    const bitcoinRecoveryAddress = process.env.NEXT_PUBLIC_RECOVERY_ADDRESS; // Replace with a valid BTC address
-    try {
-      const deposit = await tbtcSdk.deposits.initiateDeposit(
-        bitcoinRecoveryAddress
-      );
-      setDepositSetup(deposit);
-      const bitcoinDepositAddress = await deposit.getBitcoinAddress();
-      setWalletAddressDepo(bitcoinDepositAddress);
-      await generateQRCode(bitcoinDepositAddress);
-    } catch (error) {
-      console.error("Error during deposit process:", error);
-    }
-  };
 
   const mint = async (depo: any) => {
     try {
@@ -137,22 +114,20 @@ const BTCEchange = () => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
         try {
-          console.log("line-141");
-          console.log("line-144");
           try {
-            console.log("line-151");
-            const walletBalance = await fetchBalance(
-              userAuth?.walletAddress
-              // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
+            const senderUsdcBalance = await publicClient.readContract({
+              abi: parseAbi([
+                "function balanceOf(address account) returns (uint256)",
+              ]),
+              address: USDC_ADDRESS,
+              functionName: "balanceOf",
+              args: [userAuth?.walletAddress],
+            });
+            const usdcBalance = String(
+              Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
             );
 
-            if (walletBalance?.result?.length) {
-              const totalUsd = walletBalance.result.reduce(
-                (sum: any, token: any) => sum + (token.usd_value || 0),
-                0
-              );
-              setTotalUsdBalance(totalUsd.toFixed(2));
-            }
+            setTotalUsdBalance(parseFloat(usdcBalance).toFixed(2));
           } catch (err) {}
         } catch (error) {
           console.error("Error fetching token balances:", error);
