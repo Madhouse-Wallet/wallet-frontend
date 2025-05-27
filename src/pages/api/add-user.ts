@@ -13,7 +13,9 @@ const addLnbitCall = async (madhouseWallet: any, email: any, usersCollection: an
     try {
         const shortened = await shortenAddress(madhouseWallet);
         let refund_address = await addLnbitSpendUser(shortened, email, usersCollection, 2, 1);
-        await addLnbitTposUser(shortened, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address, 1, 1);
+        if(refund_address){
+            await addLnbitTposUser(shortened, email, usersCollection, liquidBitcoinWallet, bitcoinWallet, refund_address, 1, 1);
+        }
     } catch (error) {
         console.log("addLnbitCall error-->", error)
     }

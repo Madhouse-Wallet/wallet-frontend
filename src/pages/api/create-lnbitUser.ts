@@ -3,8 +3,7 @@ import client from '../../lib/mongodb'; // Import the MongoDB client
 import { logIn, getUser, createTpos, addUserWallet, createUser, createBlotzAutoReverseSwap, userLogIn, splitPaymentTarget, lnurlpCreate, withdrawLinkCreate } from "./lnbit";
 
 import { updateWithdrawLinkByWallet } from "./updateWithdrawLink";
-
-
+import { delay } from "../../utils/globals";
 
 //create Tpos Links:
 const createTposLink = async (wallet1: any, wallet2: any, apiKey1: any, apikey2: any, token: any, accountType: any) => {
@@ -74,13 +73,15 @@ const createBoltzAutoReverseSwap = async (wallet1: any, wallet2: any, apiKey1: a
         if (boltzReverseSwap1 && boltzReverseSwap1?.status) {
             result.boltzAutoReverseSwap1 = boltzReverseSwap1?.data;
         }
-        console.log({"wallet": wallet2,
+        console.log({
+            "wallet": wallet2,
             "onchain_address": bitcoin_address,
             "asset": "BTC/BTC",
             "direction": "send",
             "balance": 100,
             "instant_settlement": true,
-            "amount": "25000",})
+            "amount": "25000",
+        })
         let boltzReverseSwap2 = await createBlotzAutoReverseSwap({
             "wallet": wallet2,
             "onchain_address": bitcoin_address,
@@ -370,7 +371,7 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                 getUserToken = getUserToken?.data?.token;
 
                 console.log("getUserToken spend wallet line 470-->", getUserToken)
-
+                await delay(4000)
                 // get User Info
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
 
