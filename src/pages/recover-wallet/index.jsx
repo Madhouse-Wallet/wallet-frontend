@@ -4,14 +4,14 @@ import { BackBtn } from "@/components/common";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
-import {  doRecovery } from "../../lib/zeroDev";
-import { doAccountRecovery } from "../../lib/zeroDev"
+import { doRecovery } from "../../lib/zeroDev";
+import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev"
 import { getUser, updtUser, getUserToken, decodeBitcoinAddress } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 
 
 
- 
+
 const RecoverWallet = () => {
   const [step, setStep] = useState(1);
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
@@ -19,6 +19,8 @@ const RecoverWallet = () => {
   const [address, setAddress] = useState();
   const [email, setEmail] = useState();
   const [privateKey, setPrivateKey] = useState();
+  const [safeprivateKey, setSafePrivateKey] = useState();
+  const [seedPhrase, setSeedPhrase] = useState();
   const [wif, setWif] = useState();
   const router = useRouter();
 
@@ -60,6 +62,7 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (email) {
+        console.log("email-->", email)
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
           toast.error("User Not Found!");
@@ -81,8 +84,14 @@ const RecoverWallet = () => {
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true);
-      if (privateKey && wif) {
-        let recoverAccount = await doAccountRecovery(privateKey, address);
+      if (privateKey && wif && safeprivateKey && seedPhrase) {
+        let testMenmonic = await checkMenmonic(seedPhrase, privateKey)
+        if (!testMenmonic.status) {
+          toast.error(testMenmonic.msg);
+          setLoadingNewSigner(false);
+          return;
+        }
+        let recoverAccount = await doAccountRecovery(privateKey, safeprivateKey, address);
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
         if (recoveryBitcoin?.status == "error") {
           toast.error("Invalid Wif!");
@@ -94,7 +103,9 @@ const RecoverWallet = () => {
           let secretObj = {
             coinosToken: userExist?.userId?.coinosToken || "",
             wif: wif || "",
-            seedPhrase: privateKey,
+            privateKey: privateKey,
+            safePrivateKey: safeprivateKey,
+            seedPhrase
           };
           let storeData = await setSecretInPasskey(
             email + "_passkey_" + (userExist?.userId?.totalPasskey + 1),
@@ -249,6 +260,26 @@ const RecoverWallet = () => {
                   value={privateKey}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
                   placeholder="Enter Private Key"
+                />
+              </div>
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="safeprivatekey"
+                  onChange={(e) => setSafePrivateKey(e.target.value)}
+                  value={safeprivateKey}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter Safe Private Key"
+                />
+              </div>
+              <div className="py-2">
+                <input
+                  type="text"
+                  name="seedphrasewallet"
+                  onChange={(e) => setSeedPhrase(e.target.value)}
+                  value={seedPhrase}
+                  className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
+                  placeholder="Enter SeedPhrase"
                 />
               </div>
               <div className="py-2">
