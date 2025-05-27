@@ -8,7 +8,7 @@ import {
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { ethers } from "ethers";
+import { ethers, Wallet } from "ethers";
 import { toast } from "react-toastify";
 import { bridge, swap } from "../../utils/morphoSwap"; // Updated import to use bridge and swap functions
 import Image from "next/image";
@@ -257,6 +257,12 @@ const DepositSwap = () => {
     setIsLoading(true);
 
     try {
+      const walletBase = new Wallet(
+        secretData?.privateKey,
+        ethers.getDefaultProvider("https://mainnet.base.org")
+      );
+      console.log("wallet", walletBase);
+
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey
@@ -296,30 +302,48 @@ const DepositSwap = () => {
       }
 
       // Step 2: Execute bridge transaction approval if needed
+      // if (bridgeData.approvalData) {
+      //   console.log("Step 2: Processing bridge approval");
+
+      //   const bridgeApprovalTx = await sendTransaction(
+      //     getAccountCli?.kernelClient,
+      //     [
+      //       {
+      //         from: bridgeData?.approvalData?.tx?.from,
+      //         to: bridgeData?.approvalData?.tx?.to,
+      //         data: bridgeData?.approvalData?.tx?.data,
+      //       },
+      //       {
+      //         from: bridgeData?.tx?.from,
+      //         to: bridgeData?.tx?.to,
+      //         data: bridgeData?.tx?.data,
+      //         value: bridgeData?.tx?.value,
+      //       },
+      //     ]
+      //   );
+
+      //   if (bridgeApprovalTx) {
+      //     toast.success("Swap completed successfully!");
+      //   }
+      // }
+
       if (bridgeData.approvalData) {
         console.log("Step 2: Processing bridge approval");
-
-        const bridgeApprovalTx = await sendTransaction(
-          getAccountCli?.kernelClient,
-          [
-            {
-              from: bridgeData?.approvalData?.tx?.from,
-              to: bridgeData?.approvalData?.tx?.to,
-              data: bridgeData?.approvalData?.tx?.data,
-            },
-            {
-              from: bridgeData?.tx?.from,
-              to: bridgeData?.tx?.to,
-              data: bridgeData?.tx?.data,
-              value: bridgeData?.tx?.value,
-            },
-          ]
+        const bridgeApprovalTx = await walletBase.sendTransaction(
+          bridgeData.approvalData.tx
         );
-
-        if (bridgeApprovalTx) {
-          toast.success("Swap completed successfully!");
-        }
+        toast.info(`Bridge approval submitted: ${bridgeApprovalTx.hash}`);
+        await bridgeApprovalTx.wait();
+        toast.success("Bridge approval complete");
       }
+
+      // Step 3: Execute bridge transaction
+      console.log("Step 2: Processing bridge transaction");
+      const bridgeTx = await walletBase.sendTransaction(bridgeData.tx);
+
+      toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
+      const receipt = await bridgeTx.wait();
+      toast.success("Bridge transaction completed successfully!");
 
       fetchBalances();
 
