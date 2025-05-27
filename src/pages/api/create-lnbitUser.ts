@@ -371,7 +371,6 @@ export const addLnbitSpendUser = async (madhouseWallet: any, email: any, usersCo
                 getUserToken = getUserToken?.data?.token;
 
                 console.log("getUserToken spend wallet line 470-->", getUserToken)
-                await delay(4000)
                 // get User Info
                 let getUserData = await getUser(addUser?.data?.id, token, accountType) as any;
 
