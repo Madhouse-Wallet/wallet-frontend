@@ -13,6 +13,8 @@ import PointOfSalePop from "@/components/Modals/PointOfSalePop";
 import RefundBitcoin from "@/components/Modals/RefundBitcoinPop";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import { getUser } from "../../lib/apiCall";
+import { publicClient } from "@/lib/zeroDev";
+import { parseAbi } from "viem";
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,14 +27,17 @@ const Dashboard = () => {
   const [withdrawDep, setWithdrawDep] = useState(false);
   const [buySell, setBuySell] = useState(false);
   const [tbtcBalance, setTbtcBalance] = useState(0);
-  const [thusdBalance, setThusdBalance] = useState(0);
+  const [goldBalance, setGoldBalance] = useState(0);
   const [collateralRatio, setCollateralRatio] = useState(0);
   const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+
+  const MORPHO_ADDRESS = process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS;
+  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
   const cardMetrics = [
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `$ ${tbtcBalance}`, icn: icn22 },
-    { head: "Gold", value: `$ ${thusdBalance}`, icn: icn33 },
+    { head: "Gold", value: `$ ${goldBalance}`, icn: icn33 },
     { head: "Lightning (sats)", value: `${collateralRatio}`, icn: icn11 },
   ];
   const cardData = [
@@ -113,10 +118,9 @@ const Dashboard = () => {
         let usdValue = 0;
         let btc = 0;
         if (balanceSats > 0) {
-          
           btc = balanceSats / 1e8; // convert sats to BTC
           usdValue = (btc * btcPriceUsd).toFixed(2);
-          }
+        }
         // Optional: set to state
         setCollateralRatio(balanceSats);
         // setCollateralRatio(usdValue);
@@ -134,40 +138,35 @@ const Dashboard = () => {
     if (userAuth?.walletAddress) {
       const fetchData = async () => {
         try {
-          const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
-          console.log("result", result);
-          const balances = await fetchTokenBalances(
-            process.env.NEXT_PUBLIC_ENV_CHAIN,
-            [
-              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
-              process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-            ],
-            userAuth?.walletAddress
-            // "0x0c1A09d5D0445047DA3Ab4994262b22404288A3B"
+          if (!userAuth?.walletAddress) return;
+
+          const senderUsdcBalance = await publicClient.readContract({
+            abi: parseAbi([
+              "function balanceOf(address account) returns (uint256)",
+            ]),
+            address: USDC_ADDRESS,
+            functionName: "balanceOf",
+            args: [userAuth?.walletAddress],
+          });
+          const usdcBalance = String(
+            Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
           );
 
-          let combinedUsdValue = 0;
-
-          balances.result?.forEach((token) => {
-            const formattedBalance =
-              Number(token.balance) / 10 ** token.decimals;
-
-            if (
-              token.token_address.toLowerCase() ===
-              process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS.toLowerCase()
-            ) {
-              combinedUsdValue += token.usd_value || 0;
-            }
-
-            if (
-              token.token_address.toLowerCase() ===
-              process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS.toLowerCase()
-            ) {
-              combinedUsdValue += token.usd_value || 0;
-            }
+          const senderMPRPHOBalance = await publicClient.readContract({
+            abi: parseAbi([
+              "function balanceOf(address account) returns (uint256)",
+            ]),
+            address: MORPHO_ADDRESS,
+            functionName: "balanceOf",
+            args: [userAuth?.walletAddress],
           });
+          const morphoBalance = String(
+            Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
+          );
 
-          setTotalUsdBalance(combinedUsdValue.toFixed(2)); // <-- sets combined USD+ and USDC value
+          let combinedUsdValue = usdcBalance + morphoBalance;
+
+          setTotalUsdBalance(parseFloat(combinedUsdValue).toFixed(2)); // <-- sets combined USD+ and USDC value
 
           const paxgBalances = await fetchTokenBalances(
             process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG, // <== chain for PAXG (e.g., 'eth' or '0x1')
@@ -183,7 +182,7 @@ const Dashboard = () => {
             ) {
               const formattedPaxg =
                 Number(token.balance) / 10 ** token.decimals;
-              setThusdBalance((token.usd_value || 0).toFixed(4)); // set PAXG's USD value
+              setGoldBalance((token.usd_value || 0).toFixed(4)); // set PAXG's USD value
             }
           });
         } catch (error) {
@@ -216,7 +215,7 @@ const Dashboard = () => {
           const btcBalanceUsd = (btcBalance * btcPriceUsd).toFixed(2);
 
           // 3. Save to state (define this state in your component)
-          setThusdBalance(btcBalanceUsd); // <-- e.g., "$3250.47"
+          setGoldBalance(btcBalanceUsd); // <-- e.g., "$3250.47"
         } catch (error) {
           console.error("Failed to fetch BTC balance in USD:", error);
         }

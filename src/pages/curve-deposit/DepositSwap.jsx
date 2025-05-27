@@ -4,6 +4,8 @@ import {
   getProvider,
   getAccount,
   getETHEREUMRpcProvider,
+  publicClient,
+  sendTransaction,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -13,6 +15,7 @@ import { bridge, swap } from "../../utils/morphoSwap"; // Updated import to use 
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { mainnet, base } from "viem/chains";
+import { parseAbi } from "viem";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -60,15 +63,20 @@ const DepositSwap = () => {
       const provider = await getRpcProvider();
       const web3 = new Web3Interaction("sepolia", provider);
 
-      // Fetch USDC balance on Base
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        provider
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: USDC_ADDRESS,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
 
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(Number.parseFloat(usdcResult.balance).toFixed(6));
+      if (balance) {
+        setUsdcBalance(balance);
       } else {
         toast.error(usdcResult.error || "Failed to fetch USDC balance");
       }
@@ -85,6 +93,7 @@ const DepositSwap = () => {
         setPaxgBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
+      console.log("error", error);
       toast.error("Failed to fetch token balances");
     }
   };
@@ -263,6 +272,8 @@ const DepositSwap = () => {
 
   // Execute the complete bridge transaction with gas handling
   const executeBridge = async () => {
+    console.log("bridgeData", bridgeData);
+    console.log("gasSwapData", gasSwapData);
     if (!bridgeData || !userAuth?.walletAddress) {
       toast.error("Bridge data not available or wallet not connected");
       return;
@@ -284,79 +295,122 @@ const DepositSwap = () => {
 
     try {
       const chain = base; // We're working on Base chain for gas swap
-      const getAccountCli = await getAccount(secretData?.seedPhrase, chain);
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
 
-      console.log("getAccountCli", getAccountCli);
-      const signer = await getProvider(getAccountCli?.kernelClient);
-      console.log("signer", signer);
+      // console.log("getAccountCli", getAccountCli);
+      // const signer = await getProvider(getAccountCli?.kernelClient);
+      // console.log("signer", signer);
 
-      let signerAddress;
-      try {
-        signerAddress = await signer?.signer?.getAddress();
-      } catch (error) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
-        );
-        setIsLoading(false);
-        return;
-      }
+      // let signerAddress;
+      // try {
+      //   signerAddress = await signer?.signer?.getAddress();
+      // } catch (error) {
+      //   toast.error(
+      //     "Wallet signer not properly initialized. Please reconnect your wallet."
+      //   );
+      //   setIsLoading(false);
+      //   return;
+      // }
 
-      if (!signerAddress) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
-        );
-        setIsLoading(false);
-        return;
-      }
+      // if (!signerAddress) {
+      //   toast.error(
+      //     "Wallet signer not properly initialized. Please reconnect your wallet."
+      //   );
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       // Step 1: Execute gas swap (USDC to ETH) if we have gas swap data
       if (gasSwapData && gasRequiredWei !== "0") {
         console.log("Step 1: Executing gas swap (USDC to ETH)");
 
         // Handle approval for gas swap if needed
-        if (gasSwapData.approvalData) {
+        if (gasSwapData.approvalData && gasSwapData.routeData) {
           console.log("Processing gas swap approval");
-          const gasApprovalTx = await signer?.signer?.sendTransaction(
-            gasSwapData.approvalData.tx
+          // const gasApprovalTx = await signer?.signer?.sendTransaction(
+          //   gasSwapData.approvalData.tx
+          // );
+
+          const gasApprovalTx = await sendTransaction(
+            getAccountCli?.kernelClient,
+            [
+              {
+                from: gasSwapData?.approvalData?.tx?.from,
+                to: gasSwapData?.approvalData?.tx?.to,
+                data: gasSwapData?.approvalData?.tx?.data,
+              },
+              {
+                from: gasSwapData?.routeData?.tx?.from,
+                to: gasSwapData?.routeData?.tx?.to,
+                data: gasSwapData?.routeData?.tx?.data,
+                value: gasSwapData?.routeData?.tx?.value,
+              },
+            ]
           );
-          toast.info(`Gas swap approval submitted: ${gasApprovalTx.hash}`);
-          await gasApprovalTx.wait();
-          toast.success("Gas swap approval complete");
+
+          if (gasApprovalTx) {
+            // Wait for approval confirmation
+            // const approvalReceipt = await tx.wait();
+            toast.success("Swap completed successfully!");
+          }
         }
 
         // Execute gas swap transaction
-        const gasSwapTx = await signer?.signer?.sendTransaction(
-          gasSwapData.routeData.tx
-        );
-        toast.info(`Gas swap transaction submitted: ${gasSwapTx.hash}`);
-        await gasSwapTx.wait();
-        toast.success(
-          "Gas swap completed - ETH acquired for bridge transaction"
-        );
+        // const gasSwapTx = await signer?.signer?.sendTransaction(
+        //   gasSwapData.routeData.tx
+        // );
+        // toast.info(`Gas swap transaction submitted: ${gasSwapTx.hash}`);
+        // await gasSwapTx.wait();
+        // toast.success(
+        //   "Gas swap completed - ETH acquired for bridge transaction"
+        // );
       }
 
       // Step 2: Execute bridge transaction approval if needed
       if (bridgeData.approvalData) {
         console.log("Step 2: Processing bridge approval");
-        const bridgeApprovalTx = await signer?.signer?.sendTransaction(
-          bridgeData.approvalData.tx
+        // const bridgeApprovalTx = await signer?.signer?.sendTransaction(
+        //   bridgeData.approvalData.tx
+        // );
+
+        const bridgeApprovalTx = await sendTransaction(
+          getAccountCli?.kernelClient,
+          [
+            {
+              from: bridgeData?.approvalData?.tx?.from,
+              to: bridgeData?.approvalData?.tx?.to,
+              data: bridgeData?.approvalData?.tx?.data,
+            },
+            {
+              from: bridgeData?.tx?.from,
+              to: bridgeData?.tx?.to,
+              data: bridgeData?.tx?.data,
+              value: bridgeData?.tx?.value,
+            },
+          ]
         );
-        toast.info(`Bridge approval submitted: ${bridgeApprovalTx.hash}`);
-        await bridgeApprovalTx.wait();
-        toast.success("Bridge approval complete");
+
+        if (bridgeApprovalTx) {
+          // Wait for approval confirmation
+          // const approvalReceipt = await tx.wait();
+          toast.success("Swap completed successfully!");
+        }
       }
 
       // Step 3: Execute bridge transaction
-      console.log("Step 3: Processing bridge transaction");
-      const bridgeTx = await signer?.signer?.sendTransaction(bridgeData.tx);
+      // console.log("Step 3: Processing bridge transaction");
+      // const bridgeTx = await signer?.signer?.sendTransaction(bridgeData.tx);
 
-      toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
-      const receipt = await bridgeTx.wait();
-      toast.success("Bridge transaction completed successfully!");
+      // toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
+      // const receipt = await bridgeTx.wait();
+      // toast.success("Bridge transaction completed successfully!");
 
       // Refresh balances
       fetchBalances();

@@ -1,11 +1,4 @@
-import {
-  getRpcProvider,
-  getProvider,
-  getAccount,
-  sendTransaction,
-  publicClient,
-} from "@/lib/zeroDev.js";
-import Web3Interaction from "@/utils/web3Interaction";
+import { getAccount, sendTransaction, publicClient } from "@/lib/zeroDev.js";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
@@ -20,12 +13,10 @@ const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [morphoBalance, setMorphoBalance] = useState("0");
-  const [providerr, setProviderr] = useState(null);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
 
   // Fixed swap direction: USDC to Morpho
   const [swapDirection] = useState({
@@ -75,8 +66,6 @@ const DepositSwap = () => {
         toast.error(usdcResult.error || "Failed to fetch USDC balance");
       }
 
-      // Fetch Morpho balance
-
       const senderMPRPHOBalance = await publicClient.readContract({
         abi: parseAbi([
           "function balanceOf(address account) returns (uint256)",
@@ -104,10 +93,7 @@ const DepositSwap = () => {
 
     setIsLoading(true);
     try {
-      // Convert amount to base units (USDC has 6 decimals)
       const amountInBaseUnits = ethers.utils.parseUnits(amount, 6).toString();
-
-      // Prepare token objects
       const fromToken = {
         ...TOKENS.USDC[BASE_CHAIN],
         address: USDC_ADDRESS,
@@ -118,7 +104,6 @@ const DepositSwap = () => {
         address: MORPHO_ADDRESS,
       };
 
-      // Get swap quote from Enso
       const quoteResult = await swap(
         fromToken,
         toToken,
@@ -130,33 +115,16 @@ const DepositSwap = () => {
       console.log("Enso swap quote received:", quoteResult);
       setQuote(quoteResult);
 
-      // Update toAmount based on the quote result
       if (quoteResult && quoteResult.estimate?.toAmount) {
-        // Assuming Morpho has 18 decimals
         const formattedToAmount = ethers.utils.formatUnits(
           quoteResult.estimate.toAmount,
           18
         );
         setToAmount(formattedToAmount);
-
-        // Since Enso might not provide price data, we'll use estimated values
-        // Calculate USD value based on current market rates (example values)
-        const usdcPrice = 1.0; // USDC is pegged to USD
-        const morphoPrice = 2.5; // Example price for Morpho token
-
-        const fromUsdValue = parseFloat(amount) * usdcPrice;
-        const toUsdValue = parseFloat(formattedToAmount) * morphoPrice;
-
-        setUsdValue({
-          from: fromUsdValue.toFixed(2),
-          to: toUsdValue.toFixed(2),
-        });
       }
     } catch (error) {
-      // toast.error("Failed to get swap quote from Enso");
       console.error("Enso quote error:", error);
 
-      // Clear the second input on error
       setToAmount("");
       setQuote(null);
     } finally {
@@ -164,21 +132,17 @@ const DepositSwap = () => {
     }
   };
 
-  // Handle input changes in the first input field
   const handleFromAmountChange = (e) => {
     const value = e.target.value;
     setFromAmount(value);
 
-    // Clear existing timer
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
 
     setToAmount("");
     setQuote(null);
-    setUsdValue({ from: "0", to: "0" });
 
-    // Set new timer for 2 seconds
     if (value && !Number.isNaN(Number.parseFloat(value))) {
       const newTimer = setTimeout(() => {
         updateQuote(value);
@@ -187,18 +151,16 @@ const DepositSwap = () => {
     }
   };
 
-  // Execute the swap transaction using Enso
   const executeSwap = async () => {
     console.log("quote", quote);
     if (!quote || !userAuth?.walletAddress) {
       toast.error("Quote not available or wallet not connected");
       return;
     }
-
-    // if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
-    //   toast.error("Insufficient USDC balance");
-    //   return;
-    // }
+    if (parseFloat(fromAmount) > parseFloat(usdcBalance)) {
+      toast.error("Insufficient USDC balance");
+      return;
+    }
     let data = JSON.parse(userAuth?.webauthKey);
     let retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -222,34 +184,6 @@ const DepositSwap = () => {
         return;
       }
       console.log("getAccountCli", getAccountCli);
-      // const signer = await getProvider(getAccountCli?.kernelClient);
-      // console.log("signer", signer);
-
-      // Get the signer
-      // const signer = providerr.getSigner();
-
-      // Try to get the signer address
-      // let signerAddress;
-      // try {
-      //   signerAddress = await signer.signer.getAddress();
-      //   console.log("line-198", signerAddress);
-      // } catch (error) {
-      //   toast.error(
-      //     "Wallet signer not properly initialized. Please reconnect your wallet."
-      //   );
-      //   setIsLoading(false);
-      //   return;
-      // }
-
-      // If we have a valid signer address, proceed with the transaction
-      // if (!signerAddress) {
-      //   toast.error(
-      //     "Wallet signer not properly initialized. Please reconnect your wallet."
-      //   );
-      //   setIsLoading(false);
-      //   return;
-      // }
-
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
@@ -259,47 +193,22 @@ const DepositSwap = () => {
       if (quote.approvalData && quote.routeData) {
         toast.info("Approving USDC for Enso router...", quote);
         try {
-          // const approvalTx = await signer?.signer?.sendTransaction(
-          //   quote.approvalData.tx
-          // );
-
-          const normalizeTx = (tx) => ({
-            to: tx.to,
-            data: tx.data,
-            value: tx.value ? BigInt(tx.value) : 0n,
-          });
-
-          const normalizeTxApprove = (tx) => ({
-            to: tx.approvalData.tx.to,
-            data: tx.approvalData.tx.data,
-            value: tx.approvalData.amount ? BigInt(tx.approvalData.amount) : 0n,
-          });
-
-          console.log("line-265", quote);
+          console.log("line-265", quote, quote?.approvalData, quote?.routeData);
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
-            // quote.approvalData.tx,
-            // quote.routeData.tx,
-            // normalizeTx(quote.approvalData.tx),
-            normalizeTx(quote.routeData.tx),
+            {
+              from: quote?.approvalData?.tx?.from,
+              to: quote?.approvalData?.tx?.to,
+              data: quote?.approvalData?.tx?.data,
+            },
+            {
+              from: quote?.routeData?.tx?.from,
+              to: quote?.routeData?.tx?.to,
+              data: quote?.routeData?.tx?.data,
+              value: quote?.routeData?.tx?.value,
+            },
           ]);
 
-          // const approvalTx = await sendTransaction(
-          //   getAccountCli?.kernelClient,
-          //   [normalizeTx(quote.approvalData.tx)]
-          // );
-          // console.log("Approval successful:", approvalTx);
-
-          // // Then try the route
-          // const routeTx = await sendTransaction(getAccountCli?.kernelClient, [
-          //   normalizeTx(quote.routeData.tx),
-          // ]);
-          // console.log("Route successful:", routeTx);
-
           if (tx) {
-            toast.info(`Approval transaction submitted: ${tx.hash}`);
-
-            // Wait for approval confirmation
-            // const approvalReceipt = await tx.wait();
             toast.success("Swap completed successfully!");
           }
         } catch (error) {
@@ -313,25 +222,12 @@ const DepositSwap = () => {
         }
       }
 
-      // Step 2: Execute the swap transaction
-      // toast.info("Executing swap through Enso router...");
-      // const swapTx = await signer?.signer?.sendTransaction(quote.routeData.tx);
-      // toast.info(`Swap transaction submitted: ${swapTx.hash}`);
-
-      // Wait for swap confirmation
-      // const swapReceipt = await swapTx.wait();
-      // toast.success("Swap completed successfully!");
-
-      // Refresh balances
       fetchBalances();
 
-      // Reset form
       setFromAmount("");
       setToAmount("");
       setQuote(null);
-      setUsdValue({ from: "0", to: "0" });
     } catch (error) {
-      // Error handling
       if (error.message && error.message.includes("user rejected")) {
         toast.error("Transaction was rejected by user");
       } else if (
@@ -424,14 +320,6 @@ const DepositSwap = () => {
                           placeholder="0.0"
                           // disabled={isLoading}
                         />
-                        {/* <h6 className="m-0 font-medium text-white/50">
-                          ≈ $
-                          {quote
-                            ? parseFloat(
-                                quote?.action?.fromToken?.priceUSD || 1
-                              ).toFixed(2)
-                            : "0.0"}
-                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -464,14 +352,6 @@ const DepositSwap = () => {
                           disabled={true} // This input is always disabled
                           readOnly
                         />
-                        {/* <h6 className="m-0 font-medium text-white/50">
-                          ≈ $
-                          {quote
-                            ? parseFloat(
-                                quote?.action?.toToken?.priceUSD || 1
-                              ).toFixed(2)
-                            : "0.0"}
-                        </h6> */}
                       </div>
                       <div className="right text-right">
                         <button className="px-2 py-1 flex items-center gap-2 text-base">
@@ -501,7 +381,7 @@ const DepositSwap = () => {
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={executeSwap}
-                      // disabled={isButtonDisabled()}
+                      disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
                     </button>

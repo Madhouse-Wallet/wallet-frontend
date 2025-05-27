@@ -4,6 +4,7 @@ import {
   getProvider,
   getAccount,
   getETHEREUMRpcProvider,
+  publicClient,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -13,6 +14,7 @@ import { reverseBridge, swap } from "../../utils/morphoSwap"; // Updated import 
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { mainnet, base } from "viem/chains";
+import { parseAbi } from "viem";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -60,15 +62,20 @@ const WithdrawalSwap = () => {
       const provider = await getRpcProvider();
       const web3 = new Web3Interaction("sepolia", provider);
 
-      // Fetch USDC balance on Base
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        provider
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: USDC_ADDRESS,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
 
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(Number.parseFloat(usdcResult.balance).toFixed(6));
+      if (balance) {
+        setUsdcBalance(balance);
       } else {
         toast.error(usdcResult.error || "Failed to fetch USDC balance");
       }
@@ -85,6 +92,7 @@ const WithdrawalSwap = () => {
         setPaxgBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
+      console.log("error", error);
       toast.error("Failed to fetch token balances");
     }
   };
@@ -175,16 +183,16 @@ const WithdrawalSwap = () => {
         chainId: Number.parseInt(ETHEREUM_CHAIN),
       };
 
-      const paxgToken = {
-        address: PAXG_ADDRESS,
-        name: "PAXG",
-        chainId: Number.parseInt(ETHEREUM_CHAIN),
+      const usdcToken = {
+        address: USDC_ADDRESS,
+        name: "USDC",
+        chainId: Number.parseInt(BASE_CHAIN),
       };
 
       // Get swap quote from ETH to PAXG to know how much PAXG we need
       const ethToPaxgSwap = await swap(
         ethToken,
-        paxgToken,
+        usdcToken,
         gasRequiredWei, // ETH amount in wei
         Number.parseInt(ETHEREUM_CHAIN),
         userAuth?.walletAddress
@@ -195,7 +203,7 @@ const WithdrawalSwap = () => {
       // Now get the reverse swap (PAXG to ETH) using the PAXG amount we just calculated
       if (ethToPaxgSwap?.estimate?.toAmount) {
         const paxgToEthSwap = await swap(
-          paxgToken,
+          usdcToken,
           ethToken,
           ethToPaxgSwap.estimate.toAmount, // PAXG amount needed
           Number.parseInt(ETHEREUM_CHAIN),

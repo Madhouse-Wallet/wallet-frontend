@@ -129,14 +129,18 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
         tx: routeData.tx,
         amountOut: routeData.amountOut,
       },
-      approvalData: approvalData
-        ? {
-            token: tokenIn.address,
-            spender: approvalData.spender,
-            amount: amountIn,
-            tx: approvalData.tx,
-          }
-        : null,
+      // approvalData: approvalData
+      //   ? {
+      //       token: tokenIn.address,
+      //       spender: approvalData.spender,
+      //       amount: amountIn,
+      //       tx: approvalData.tx,
+      //     }
+      //   : null,
+      approvalData: {
+        tx: approvalData.tx,
+        // amountOut: routeData.amountOut,
+      },
       action: {
         fromToken: {
           address: tokenIn.address,
