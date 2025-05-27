@@ -73,7 +73,7 @@ const LnbitsTransaction = ({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            // walletId: walletIdd,
+            walletId: walletIdd,
             // walletId: "47472a63d2364de2836f0f71c73bf034",
             fromDate: startDate,
             toDate: endDate,

@@ -66,6 +66,29 @@ export const getMenmonic = async () => {
   }
 };
 
+export const checkMenmonic = async (seedPhrase, privateKey) => {
+  try {
+    // seedPhrase
+    const wallet = Wallet.fromMnemonic(seedPhrase);
+    const eoaPrivateKey = wallet.privateKey;
+    if (privateKey == eoaPrivateKey) {
+      return {
+        status: true,
+      };
+    } else {
+      return {
+        status: false,
+        msg: "The seed phrase and private key do not match."
+      };
+    }
+  } catch (error) {
+    return {
+      status: false,
+      msg: "The seed phrase and private key do not match."
+    };
+  }
+}
+
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
     const signer = privateKeyToAccount(PRIVATE_KEY);
@@ -205,10 +228,11 @@ export const setupNewAccount = async (
   }
 };
 
-export const doAccountRecovery = async (PRIVATE_KEY, address) => {
+export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) => {
   try {
     const getAccount = await checkPrivateKey(PRIVATE_KEY);
-    if (!getAccount.status) {
+    const getOwnerAccount = await checkPrivateKey(SAFE_PRIVATE_KEY);
+    if (!getAccount.status || !getOwnerAccount.status) {
       return {
         status: false,
         msg: "Invalid Private Key!",
@@ -258,7 +282,11 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-export const getAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) => {
+export const getAccount = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  chain = base
+) => {
   try {
     console.log("line-268", PRIVATE_KEY, SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY;
@@ -310,13 +338,15 @@ export const getAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) =>
 export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
+  console.log("line-318", params)
   const quotes = await pimlicoClient.getTokenQuotes({
     chain: base,
     tokens: [usdc],
   });
   const { postOpGas, exchangeRate, paymaster } = quotes[0];
-
+  console.log("line-324")
   try {
+    console.log("line-326")
     const userOperation = await smartAccountClient.prepareUserOperation({
       calls: params,
     });

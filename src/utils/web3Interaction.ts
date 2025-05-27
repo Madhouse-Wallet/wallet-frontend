@@ -226,7 +226,7 @@ class Web3Interaction {
           txHash: tx.hash,
         });
       } catch (error: any) {
-        console.log("error-->",error)
+        console.log("error-->", error);
         resolve({
           success: false,
           error:
@@ -245,7 +245,7 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise( (resolve) => {
+    return new Promise((resolve) => {
       try {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
@@ -277,14 +277,14 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise( (resolve) => {
+    return new Promise(async (resolve) => {
       try {
         // Create USDC contract instance
         console.log("usdcAddress=-->", usdcAddress);
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
         console.log("usdcContract=-->", usdcContract);
         // Get balance
-        const balanceWei = usdcContract.balanceOf(accountAddress);
+        const balanceWei = await usdcContract.balanceOf(accountAddress);
         console.log("balanceWei=-->", balanceWei);
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 18);
