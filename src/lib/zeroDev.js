@@ -145,7 +145,7 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: parseEther("0.000001"),
+      value: parseEther("0.00001"),
     });
 
     console.log(
