@@ -151,7 +151,7 @@ const WithdrawalSwap = () => {
       if (bridgeResult?.tx?.value) {
         // If gas is in tx.value field, use that with buffer
         const gasWithBuffer = ethers.BigNumber.from(bridgeResult.tx.value).add(
-          "1000"
+          "100000000000000"
         );
         gasRequired = gasWithBuffer.toString();
       }
@@ -249,12 +249,26 @@ const WithdrawalSwap = () => {
           setGasSwapData(usdcToEthBridgeResult);
 
           // Step 3: Now call prepareGasSwap with the ETH amount we got
+          // if (usdcToEthBridgeResult?.amountsOut) {
+          //   const ethAmountOut = Object.values(
+          //     usdcToEthBridgeResult.amountsOut
+          //   )[0];
+          //   if (ethAmountOut) {
+          //     await prepareGasSwap(ethAmountOut);
+          //   }
+          // }
+
           if (usdcToEthBridgeResult?.amountsOut) {
-            const ethAmountOut = Object.values(
+            const rawEthAmountOut = Object.values(
               usdcToEthBridgeResult.amountsOut
             )[0];
-            if (ethAmountOut) {
-              await prepareGasSwap(ethAmountOut);
+
+            if (rawEthAmountOut) {
+              const ethAmountOut = ethers.BigNumber.from(rawEthAmountOut);
+              const extraWei = ethers.BigNumber.from("100000000000000"); // 0.0001 ETH
+              const totalAmount = ethAmountOut.add(extraWei);
+
+              await prepareGasSwap(totalAmount.toString());
             }
           }
         }
@@ -461,7 +475,10 @@ const WithdrawalSwap = () => {
           await bridgeApprovalTx.wait();
 
           console.log("Step 2: Processing Gas bridge transaction");
-          const bridgeTx = await walletBase.sendTransaction(gasSwapData.tx);
+          const bridgeTx = await walletBase.sendTransaction({
+            ...gasSwapData.tx,
+            gasLimit: ethers.BigNumber.from("600000"),
+          });
 
           const receipt = await bridgeTx.wait();
           toast.success("Bridge transaction completed successfully!");
@@ -482,7 +499,10 @@ const WithdrawalSwap = () => {
 
       // Step 3: Execute bridge transaction
       console.log("Step 3: Processing bridge transaction");
-      const bridgeTx = await wallet.sendTransaction(bridgeData.tx);
+      const bridgeTx = await wallet.sendTransaction({
+        ...bridgeData.tx,
+        gasLimit: ethers.BigNumber.from("600000"),
+      });
 
       toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
       const receipt = await bridgeTx.wait();
