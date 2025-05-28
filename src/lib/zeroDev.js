@@ -151,7 +151,7 @@ export const setupNewAccount = async (
     console.log(
       `Sent eth for account creation: https://basescan.org/tx/${hash}`
     );
-    await timers.setTimeout(5000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
+    await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
     const SAFE_SINGLETON_ADDRESS =
       process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;

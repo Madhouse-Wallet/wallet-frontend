@@ -1,62 +1,6 @@
-import { Contract, ethers } from "ethers";
-import axios from "axios";
 import { EnsoClient } from "@ensofinance/sdk";
 
-const API_URL = process.env.NEXT_PUBLIC_LIFI_API_URL;
-const LIFI_API_KEY = process.env.NEXT_PUBLIC_LIFI_API_KEY;
-const ENSO_API_KEY = process.env.NEXT_PUBLIC_ENSO_API_KEY;
 const FEE_RECEIVER = process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER;
-
-const ERC20_ABI = [
-  {
-    name: "approve",
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    name: "allowance",
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
 
 export const TOKENS = {
   USDC: {
