@@ -4,8 +4,6 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackBtn } from "@/components/common";
 import DepositSwap from "./DepositSwap";
-import DepositSwap1 from "./DepositSwap1";
-import DepositSwap2 from "./DepositSwap2";
 import WithdrawalSwap from "./WithdrawalSwap";
 
 const CurveDeposit = () => {
@@ -18,14 +16,6 @@ const CurveDeposit = () => {
       title: "Deposit",
       component: <DepositSwap />,
     },
-    // {
-    //   title: "Deposit",
-    //   component: <DepositSwap1 />,
-    // },
-    // {
-    //   title: "Deposit",
-    //   component: <DepositSwap2 />,
-    // },
     {
       title: "Withdraw",
       component: <WithdrawalSwap />,
