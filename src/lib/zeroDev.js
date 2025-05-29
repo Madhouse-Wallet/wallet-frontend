@@ -30,7 +30,6 @@ const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY; // we need to remove this
 
 export const publicClient = createPublicClient({
   chain: base,
@@ -146,13 +145,13 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: parseEther("0.000001"),
+      value: parseEther("0.00001"),
     });
 
     console.log(
       `Sent eth for account creation: https://basescan.org/tx/${hash}`
     );
-    await timers.setTimeout(5000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
+    await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
     const SAFE_SINGLETON_ADDRESS =
       process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;

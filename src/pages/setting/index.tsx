@@ -12,6 +12,7 @@ import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
+ 
 import {
   retrieveSecret,
 } from "../../utils/webauthPrf";
@@ -19,7 +20,7 @@ import {
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
-import { getUser, updtUser, getLnbitId } from "../../lib/apiCall";
+import { getUser, addProvisionData } from "../../lib/apiCall";
 import { webAuthKeyStore, storedataLocalStorage } from "../../utils/globals";
 const Setting: React.FC = () => {
   const {
@@ -363,6 +364,7 @@ const Setting: React.FC = () => {
 
   const LogoutFuc = async () => {
     try {
+      addProvisionData(userAuth.email);
       logoutStorage();
       selectBg(0);
       changeBgOpacity((1));

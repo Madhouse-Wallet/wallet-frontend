@@ -119,7 +119,7 @@ const BTCEchange = () => {
               abi: parseAbi([
                 "function balanceOf(address account) returns (uint256)",
               ]),
-              address: USDC_ADDRESS,
+              address: USDC_ADDRESS as `0x${string}`,
               functionName: "balanceOf",
               args: [userAuth?.walletAddress],
             });
