@@ -30,10 +30,10 @@ const Dashboard = () => {
   const [buy, setBuy] = useState(false);
   const [withdrawDep, setWithdrawDep] = useState(false);
   const [buySell, setBuySell] = useState(false);
-  const [bitcoinBalance, setBitcoinBalance] = useState(0);
-  const [goldBalance, setGoldBalance] = useState(0.00);
+  const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
+  const [goldBalance, setGoldBalance] = useState(0.0);
   const [lightningBalance, setLightningBalance] = useState(0);
-  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+  const [totalUsdBalance, setTotalUsdBalance] = useState(0.0);
 
   const MORPHO_ADDRESS = process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
@@ -44,6 +44,8 @@ const Dashboard = () => {
     { head: "Gold", value: `$ ${goldBalance}`, icn: icn33 },
     { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
   ];
+
+  console.log("cardMetrics", cardMetrics);
   const cardData = [
     {
       head: "Transfers",
@@ -185,7 +187,7 @@ const Dashboard = () => {
           );
 
           if (paxgResult.success && paxgResult.balance) {
-            setGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(2));
+            setGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
           }
         } catch (error) {
           console.error("Error fetching token balances:", error);
@@ -203,7 +205,7 @@ const Dashboard = () => {
             console.error("Error fetching BTC balance:", result.error);
             return;
           }
-          setBitcoinBalance((result?.balance).toFixed(2)); // <-- e.g., "$3250.47"
+          setBitcoinBalance((result?.balance).toFixed(8)); // <-- e.g., "$3250.47"
         } catch (error) {
           console.error("Failed to fetch BTC balance in USD:", error);
         }

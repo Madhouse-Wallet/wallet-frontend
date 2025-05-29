@@ -106,7 +106,7 @@ const LightningTab = (walletAddress) => {
               htmlFor="btcAmount"
               className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
             >
-              Enter BTC Amount
+              Enter Sats Amount
             </label>
             <input
               id="btcAmount"
