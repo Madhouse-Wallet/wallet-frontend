@@ -59,23 +59,37 @@ const WithdrawalSwap = () => {
   }, [debounceTimer]);
 
   const checkAndEnsureGasBalance = async (requiredGasWei) => {
-    const provider = ethers.getDefaultProvider(
-      "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
-    );
-    const currentEthBalance = await provider.getBalance(
-      userAuth?.walletAddress
-    );
+    try {
+      const provider = ethers.getDefaultProvider(
+        "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
+      );
+      const currentEthBalance = await provider.getBalance(
+        userAuth?.walletAddress
+      );
 
-    if (currentEthBalance.lt(ethers.BigNumber.from(requiredGasWei))) {
-      const shortfall =
-        ethers.BigNumber.from(requiredGasWei).sub(currentEthBalance);
-      const shortfallWithBuffer = shortfall.add(shortfall.mul(10).div(100)); // 25% buffer
+      console.log(
+        "Current ETH balance:",
+        ethers.utils.formatEther(currentEthBalance)
+      );
+      console.log(
+        "Required ETH amount:",
+        ethers.utils.formatEther(requiredGasWei)
+      );
 
-      // Prepare swap for the shortfall amount only
-      await bridgeQuote(shortfallWithBuffer.toString());
-      return true; // Indicates swap is needed
+      if (currentEthBalance.lt(ethers.BigNumber.from(requiredGasWei))) {
+        const shortfall =
+          ethers.BigNumber.from(requiredGasWei).sub(currentEthBalance);
+        console.log("ETH shortfall:", ethers.utils.formatEther(shortfall));
+
+        // Prepare swap for the shortfall amount
+        await bridgeQuote(requiredGasWei);
+        return true; // Indicates swap is needed
+      }
+      return false; // No swap needed
+    } catch (error) {
+      console.error("Error checking gas balance:", error);
+      return false;
     }
-    return false; // No swap needed
   };
 
   const fetchBalances = async () => {
@@ -168,26 +182,33 @@ const WithdrawalSwap = () => {
       // Extract gas requirement from bridge data and add buffer
       let gasRequired = "0";
       console.log("Bridge result with gas info:", bridgeResult);
-      // if (bridgeResult?.tx?.value) {
-      //   // If gas is in tx.value field, use that with buffer
-      //   const gasWithBuffer = ethers.BigNumber.from(bridgeResult.tx.value).add(
-      //     "100000000000000"
-      //   );
-      //   gasRequired = gasWithBuffer.toString();
-      // }
 
+      // Use the gas value from bridge quote (this is the ETH amount needed)
       if (bridgeResult?.tx?.value) {
-        const bridgeGas = ethers.BigNumber.from(bridgeResult.tx.value);
+        const bridgeGasValue = ethers.BigNumber.from(bridgeResult.tx.value);
+        console.log(
+          "Bridge gas value (ETH):",
+          ethers.utils.formatEther(bridgeGasValue)
+        );
 
-        let totalGas = bridgeGas;
+        // Calculate total ETH needed
+        let totalEthNeeded = bridgeGasValue;
 
+        // Add ETH for approval transaction if needed
         if (bridgeResult.approvalData) {
-          totalGas = totalGas.add(ethers.utils.parseEther("0.0015"));
+          totalEthNeeded = totalEthNeeded.add(ethers.utils.parseEther("0.002"));
         }
 
-        // Add 25% buffer on total
-        const gasWithBuffer = totalGas.add(totalGas.mul(10).div(100));
-        gasRequired = gasWithBuffer.toString();
+        // Add 15% buffer on total ETH amount
+        const ethWithBuffer = totalEthNeeded.add(
+          totalEthNeeded.mul(15).div(100)
+        );
+        gasRequired = ethWithBuffer.toString();
+
+        console.log(
+          "Total ETH needed with buffer:",
+          ethers.utils.formatEther(gasRequired)
+        );
       }
 
       setGasRequiredWei(gasRequired);
@@ -208,93 +229,6 @@ const WithdrawalSwap = () => {
       setIsLoading(false);
     }
   };
-
-  // const bridgeQuote = async (gasAmountWei) => {
-  //   if (!gasAmountWei || !userAuth?.walletAddress) return;
-
-  //   try {
-  //     console.log(
-  //       "Step 1: Getting ETH(ETH) to USDC(BASE) quote for gas:",
-  //       gasAmountWei
-  //     );
-
-  //     // Step 1: ETH(ETH) to USDC(BASE) to know how much USDC we need
-  //     const tokenEthOnEth = {
-  //       address: ETH_ADDRESS,
-  //       name: "ETH",
-  //       chainId: Number.parseInt(ETHEREUM_CHAIN),
-  //     };
-
-  //     const tokenUsdcOnBase = {
-  //       address: USDC_ADDRESS,
-  //       name: "USDC",
-  //       chainId: Number.parseInt(BASE_CHAIN),
-  //     };
-
-  //     // Get quote for ETH(ETH) to USDC(BASE)
-  //     const ethToUsdcBridgeResult = await reverseBridge(
-  //       tokenEthOnEth,
-  //       tokenUsdcOnBase,
-  //       gasAmountWei, // ETH amount in wei
-  //       Number.parseInt(ETHEREUM_CHAIN),
-  //       Number.parseInt(BASE_CHAIN),
-  //       userAuth?.walletAddress
-  //     );
-
-  //     console.log(
-  //       "ETH(ETH) to USDC(BASE) bridge result:",
-  //       ethToUsdcBridgeResult
-  //     );
-
-  //     // Step 2: Get the USDC amount and convert back to ETH(ETH)
-  //     if (ethToUsdcBridgeResult?.amountsOut) {
-  //       const usdcAmountOut = Object.values(
-  //         ethToUsdcBridgeResult.amountsOut
-  //       )[0];
-
-  //       if (usdcAmountOut) {
-  //         console.log(
-  //           "Step 2: Getting USDC(ETH) to ETH(ETH) quote with USDC amount:",
-  //           usdcAmountOut
-  //         );
-
-  //         const usdcToEthBridgeResult = await bridge(
-  //           tokenUsdcOnBase,
-  //           tokenEthOnEth,
-  //           usdcAmountOut, // USDC amount from previous step
-  //           Number.parseInt(BASE_CHAIN),
-  //           Number.parseInt(ETHEREUM_CHAIN), // Both on Ethereum for this swap
-  //           userAuth?.walletAddress
-  //         );
-
-  //         console.log(
-  //           "USDC(ETH) to ETH(ETH) bridge result:",
-  //           usdcToEthBridgeResult
-  //         );
-
-  //         // Save this quote for gas swap execution
-  //         setGasSwapData(usdcToEthBridgeResult);
-
-  //         if (usdcToEthBridgeResult?.amountsOut) {
-  //           const rawEthAmountOut = Object.values(
-  //             usdcToEthBridgeResult.amountsOut
-  //           )[0];
-
-  //           if (rawEthAmountOut) {
-  //             const ethAmountOut = ethers.BigNumber.from(rawEthAmountOut);
-  //             const extraWei = ethers.BigNumber.from("100000000000000"); // 0.0001 ETH
-  //             const totalAmount = ethAmountOut.add(extraWei);
-
-  //             await prepareGasSwap(totalAmount.toString());
-  //           }
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Bridge quote error:", error);
-  //     toast.error("Failed to prepare gas bridge quotes");
-  //   }
-  // };
 
   const bridgeQuote = async (gasAmountWei) => {
     if (!gasAmountWei || !userAuth?.walletAddress) return;
@@ -362,20 +296,24 @@ const WithdrawalSwap = () => {
           // Calculate gas required for gasSwapData transactions with buffer
           let gasSwapGasRequired = "0";
           if (usdcToEthBridgeResult?.tx?.value) {
-            const bridgeGas = ethers.BigNumber.from(
+            const bridgeGasValue = ethers.BigNumber.from(
               usdcToEthBridgeResult.tx.value
             );
 
-            let totalGas = bridgeGas;
+            let totalEthNeeded = bridgeGasValue;
 
-            // Add approval gas if approval is needed
+            // Add ETH for approval transaction if needed
             if (usdcToEthBridgeResult.approvalData) {
-              totalGas = totalGas.add(ethers.utils.parseEther("0.0015")); // Approval gas estimate
+              totalEthNeeded = totalEthNeeded.add(
+                ethers.utils.parseEther("0.002")
+              );
             }
 
-            // Add 25% buffer on total
-            const gasWithBuffer = totalGas.add(totalGas.mul(10).div(100));
-            gasSwapGasRequired = gasWithBuffer.toString();
+            // Add 15% buffer on total ETH amount
+            const ethWithBuffer = totalEthNeeded.add(
+              totalEthNeeded.mul(15).div(100)
+            );
+            gasSwapGasRequired = ethWithBuffer.toString();
           }
 
           // Store gas requirement for gasSwapData
@@ -569,7 +507,7 @@ const WithdrawalSwap = () => {
             toast.success("Swap completed successfully!");
 
             toast.info("Waiting for balance update...");
-            await new Promise((resolve) => setTimeout(resolve, 8000));
+            await new Promise((resolve) => setTimeout(resolve, 30000));
 
             // Optional: Refresh balance to confirm ETH is available
             const provider = ethers.getDefaultProvider(
@@ -597,18 +535,35 @@ const WithdrawalSwap = () => {
           await bridgeApprovalTx.wait();
 
           console.log("Step 2: Processing Gas bridge transaction");
-          const bridgeTx = await walletBase.sendTransaction({
+          // For gas swap transaction:
+          const gasSwapTransaction = {
             ...gasSwapData.tx,
-            gasLimit:
-              gasSwapData.gasRequiredWei !== "0" && gasSwapData.gasRequiredWei
-                ? ethers.BigNumber.from(gasSwapData.gasRequiredWei)
-                    .div(await walletBase.getGasPrice())
-                    .add(ethers.BigNumber.from("50000")) // Convert ETH value to gas units + buffer
-                : ethers.BigNumber.from("800000"),
-          });
+          };
+
+          if (gasSwapData.gas) {
+            const providedGasLimit = ethers.BigNumber.from(gasSwapData.gas);
+            const gasLimitWithBuffer = providedGasLimit.mul(120).div(100);
+            gasSwapTransaction.gasLimit = gasLimitWithBuffer;
+          } else {
+            try {
+              const estimatedGasLimit =
+                await walletBase.estimateGas(gasSwapTransaction);
+              const gasLimitWithBuffer = estimatedGasLimit.mul(120).div(100);
+              gasSwapTransaction.gasLimit = gasLimitWithBuffer;
+            } catch (estimationError) {
+              gasSwapTransaction.gasLimit = ethers.BigNumber.from("500000");
+            }
+          }
+
+          const bridgeTx = await walletBase.sendTransaction(gasSwapTransaction);
 
           const receipt = await bridgeTx.wait();
           toast.success("Bridge transaction completed successfully!");
+
+          // ADD THIS: Wait for gas swap to settle completely
+          console.log("receipt", receipt);
+          toast.info("Waiting for gas swap to settle on blockchain...");
+          await new Promise((resolve) => setTimeout(resolve, 180000));
         }
       }
 
@@ -622,20 +577,44 @@ const WithdrawalSwap = () => {
         toast.info(`Bridge approval submitted: ${bridgeApprovalTx.hash}`);
         await bridgeApprovalTx.wait();
         toast.success("Bridge approval complete");
+
+        // ADD THIS: Wait for approval to propagate
+        toast.info("Waiting for approval to propagate...");
+        await new Promise((resolve) => setTimeout(resolve, 60000));
       }
 
       // Step 3: Execute bridge transaction
       console.log("Step 3: Processing bridge transaction");
-      const bridgeTx = await wallet.sendTransaction({
+      const bridgeTransaction = {
         ...bridgeData.tx,
-        gasLimit:
-          gasRequiredWei !== "0"
-            ? ethers.BigNumber.from(gasRequiredWei)
-                .div(await walletBase.getGasPrice())
-                .add(ethers.BigNumber.from("50000")) // Convert ETH value to gas units + buffer
-            : ethers.BigNumber.from("800000"),
-      });
+      };
 
+      // Use gas limit from bridge quote if available, otherwise estimate
+      if (bridgeData.gas) {
+        console.log("line-594");
+        const providedGasLimit = ethers.BigNumber.from(bridgeData.gas);
+        console.log("line-596");
+        const gasLimitWithBuffer = providedGasLimit.mul(120).div(100); // 20% buffer
+        console.log("line-598");
+        bridgeTransaction.gasLimit = gasLimitWithBuffer;
+        console.log("line-600");
+      } else {
+        try {
+          console.log("line-603");
+          const estimatedGasLimit = await wallet.estimateGas(bridgeTransaction);
+          console.log("line-605");
+          const gasLimitWithBuffer = estimatedGasLimit.mul(120).div(100);
+          console.log("line-607");
+          bridgeTransaction.gasLimit = gasLimitWithBuffer;
+          console.log("line-609");
+        } catch (estimationError) {
+          console.log("line-611", estimationError);
+          bridgeTransaction.gasLimit = ethers.BigNumber.from("800000"); // Fallback
+        }
+      }
+      console.log("line-615", bridgeTransaction);
+      const bridgeTx = await wallet.sendTransaction(bridgeTransaction);
+      console.log("line-617", bridgeTx);
       toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
       const receipt = await bridgeTx.wait();
       toast.success("Bridge transaction completed successfully!");
