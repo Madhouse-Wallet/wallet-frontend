@@ -40,8 +40,8 @@ const Dashboard = () => {
 
   const cardMetrics = [
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
-    { head: "Bitcoin", value: `$ ${bitcoinBalance}`, icn: icn22 },
-    { head: "Gold", value: `$ ${goldBalance}`, icn: icn33 },
+    { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
+    { head: "Gold", value: `${goldBalance}`, icn: icn33 },
     { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
   ];
 
@@ -121,17 +121,9 @@ const Dashboard = () => {
           console.error("BTC price not found");
           return;
         }
-        let usdValue = 0;
-        let btc = 0;
-        if (balanceSats > 0) {
-          btc = balanceSats / 1e8; // convert sats to BTC
-          usdValue = (btc * btcPriceUsd).toFixed(2);
-        }
-        // Optional: set to state
-        setLightningBalance(balanceSats);
-        // setLightningBalance(usdValue);
 
-        console.log(`⚡ Lightning BTC: ${btc.toFixed(8)} | USD: $${usdValue}`);
+        const balanceSatss = Math.floor(balanceSats / 1000);
+        setLightningBalance(balanceSatss);
       } else {
         console.error("Failed to fetch lightning balance or empty balance.");
       }
@@ -187,7 +179,11 @@ const Dashboard = () => {
           );
 
           if (paxgResult.success && paxgResult.balance) {
-            setGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
+            setGoldBalance(
+              paxgResult.balance !== "0.0"
+                ? Number.parseFloat(paxgResult.balance).toFixed(6)
+                : 0
+            );
           }
         } catch (error) {
           console.error("Error fetching token balances:", error);
@@ -205,7 +201,9 @@ const Dashboard = () => {
             console.error("Error fetching BTC balance:", result.error);
             return;
           }
-          setBitcoinBalance((result?.balance).toFixed(8)); // <-- e.g., "$3250.47"
+          setBitcoinBalance(
+            result?.balance !== 0 ? (result?.balance).toFixed(8) : "0"
+          ); // <-- e.g., "$3250.47"
         } catch (error) {
           console.error("Failed to fetch BTC balance in USD:", error);
         }
