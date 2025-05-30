@@ -49,6 +49,48 @@ export const addProvisionData = async (email) => {
   }
 };
 
+export const addProvisionLambda = async (data) => {
+
+  try {
+
+    try {
+
+      return await fetch(`https://u1ff5crae4.execute-api.us-east-1.amazonaws.com/api/v1/addlnbitUser`, {
+
+        method: "POST",
+
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify(data),
+
+      })
+
+        .then((res) => res.json())
+
+        .then((data) => {
+
+          return data;
+
+        });
+
+    } catch (error) {
+
+      console.log(error);
+
+      return false;
+
+    }
+
+  } catch (error) {
+
+    console.log("error-->", error);
+
+    return false;
+
+  }
+
+};
+
 
 export const getUserToken = async (email) => {
   try {
@@ -129,7 +171,7 @@ export const sendLnbit = async (amount, onchain_address) => {
 };
 
 
-export const btcSat = async (amount, refund_address="") => {
+export const btcSat = async (amount, refund_address = "") => {
   try {
     try {
       return await fetch(`/api/btc-sat`, {
@@ -154,7 +196,7 @@ export const btcSat = async (amount, refund_address="") => {
   }
 };
 
-export const receiveBtc = async (amount, email, publicKey="") => {
+export const receiveBtc = async (amount, email, publicKey = "") => {
   try {
     try {
       return await fetch(`/api/receive-bitcoin-lnbit`, {
