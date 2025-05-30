@@ -27,7 +27,7 @@ export default async function handler(
         unit: "sat",
         amount: satoshiAmount,
         memo: "invoice",
-        webhook: `https://app.madhousewallet.com/api/webhookinvoice?email=${email}`,
+        webhook: `https://k6k6ht9t-3000.inc1.devtunnels.ms/api/webhookInvoice?email=${email}`,
       },
       token,
       2,

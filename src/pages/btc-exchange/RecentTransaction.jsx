@@ -15,6 +15,8 @@ import { DateRange } from "react-date-range";
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
+  const [morphotransactions, setMorphoTransactions] = useState([]);
+
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(5);
@@ -117,6 +119,36 @@ const RecentTransaction = () => {
           data.result.slice(0, 10)
         );
         setTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const fetchRecentMorphoTransactions = async () => {
+    try {
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_CHAIN,
+        [process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS],
+        // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
+      setMorphoTransactions(data?.result);
+      if (data?.result?.length) {
+        const formattedTransactions = formatWalletHistoryData(
+          data.result.slice(0, 10)
+        );
+        setMorphoTransactions(formattedTransactions);
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -245,6 +277,8 @@ const RecentTransaction = () => {
   const transactionsByDate = groupTransactionsByDate(transactions);
   const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
 
+  const transactionsByDateMorpho = groupTransactionsByDate(morphotransactions);
+
   // Handle date range selection
   const handleDateRangeChange = (item) => {
     setDateRange([item.selection]);
@@ -261,6 +295,9 @@ const RecentTransaction = () => {
       }
       if (activeTab === 2) {
         fetchRecentTransactionsPaxg();
+      }
+      if (activeTab === 6) {
+        fetchRecentMorphoTransactions();
       }
       setIsDatePickerOpen(false);
     } else {
@@ -386,50 +423,58 @@ const RecentTransaction = () => {
                       {date}
                     </p>
                     <div className="grid gap-3 grid-cols-12">
-                      {txs.map((tx, key) => (
-                        <div key={key} className="md:col-span-6 col-span-12">
-                          <div
-                            onClick={() => handleTransactionClick(tx)}
-                            className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                          >
-                            <div className="left flex items-start gap-2">
-                              <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "token send"
-                                  ? sendSvg
-                                  : receiveSvg}
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.000001;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "token send"
+                                    ? sendSvg
+                                    : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx.type === "token send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="content">
-                                <h4 className="m-0 font-bold md:text-base">
-                                  {tx.isRedemption
-                                    ? "Redemption"
-                                    : tx.isDeposit
-                                      ? "Deposit"
-                                      : tx.type === "token send"
-                                        ? "Send"
-                                        : "Receive"}{" "}
-                                  {tx.amount?.split(" ")[1] || "ETH"}
-                                </h4>
-                                <p
-                                  className={`m-0 ${getStatusColor(
-                                    tx.status
-                                  )} font-medium text-xs`}
-                                >
-                                  {getStatusText(tx.status)}
+                              <div className="right">
+                                <p className="m-0  text-xs font-medium">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx.type === "token send" ? "-" : "+"} ${
+                                        tx.amount
+                                      }`}
                                 </p>
                               </div>
                             </div>
-                            <div className="right">
-                              <p className="m-0  text-xs font-medium">
-                                {tx.status === "rejected"
-                                  ? "Insufficient Balance"
-                                  : `${tx.type === "token send" ? "-" : "+"} ${
-                                      tx.amount
-                                    }`}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 );
@@ -490,6 +535,89 @@ const RecentTransaction = () => {
         </div>
       ),
     },
+    // {
+    //   title: "MORPHO",
+    //   component: (
+    //     <>
+    //       {morphotransactions.length > 0 ? (
+    //         <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+    //           {Object.entries(transactionsByDateMorpho).map(([date, txs]) => {
+    //             return (
+    //               <div key={date} className="py-3">
+    //                 <p className="m-0 text-white text-xs font-semibold pb-2">
+    //                   {date}
+    //                 </p>
+    //                 <div className="grid gap-3 grid-cols-12">
+    //                   {/* {txs.map((tx, key) => ( */}
+    //                   {txs
+    //                     .filter((tx) => {
+    //                       const amount = parseFloat(
+    //                         tx.amount?.split(" ")[0] || 0
+    //                       );
+    //                       return amount >= 0.01;
+    //                     })
+    //                     .map((tx, key) => (
+    //                       <div key={key} className="md:col-span-6 col-span-12">
+    //                         <div
+    //                           onClick={() => handleTransactionClick(tx)}
+    //                           className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+    //                         >
+    //                           <div className="left flex items-start gap-2">
+    //                             <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+    //                               {tx.type === "send" ? sendSvg : receiveSvg}
+    //                             </div>
+    //                             <div className="content">
+    //                               <h4 className="m-0 font-bold md:text-base">
+    //                                 {tx.isRedemption
+    //                                   ? "Redemption"
+    //                                   : tx.isDeposit
+    //                                     ? "Deposit"
+    //                                     : tx.type === "send"
+    //                                       ? "Send"
+    //                                       : "Receive"}{" "}
+    //                                 {tx.amount?.split(" ")[1] || "ETH"}
+    //                               </h4>
+    //                               <p
+    //                                 className={`m-0 ${getStatusColor(
+    //                                   tx.status
+    //                                 )} font-medium text-xs`}
+    //                               >
+    //                                 {getStatusText(tx.status)}
+    //                               </p>
+    //                             </div>
+    //                           </div>
+    //                           <div className="right">
+    //                             <p className="m-0  text-xs font-medium">
+    //                               {tx.status === "rejected"
+    //                                 ? "Insufficient Balance"
+    //                                 : `${tx.type === "send" ? "-" : "+"} ${
+    //                                     tx.amount
+    //                                   }`}
+    //                             </p>
+    //                           </div>
+    //                         </div>
+    //                       </div>
+    //                     ))}
+    //                 </div>
+    //               </div>
+    //             );
+    //           })}
+    //         </div>
+    //       ) : (
+    //         <>
+    //           <Image
+    //             src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+    //             alt=""
+    //             height={10000}
+    //             width={10000}
+    //             style={{ maxHeight: 400 }}
+    //             className="max-w-full h-auto w-auto mx-auto"
+    //           />
+    //         </>
+    //       )}
+    //     </>
+    //   ),
+    // },
   ];
 
   return (
@@ -583,6 +711,7 @@ const RecentTransaction = () => {
                   else if (activeTab === 3) dataToExport = lnbitsUsdTxs;
                   else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
                   else if (activeTab === 5) dataToExport = spendTxs;
+                  else if (activeTab === 6) dataToExport = morphotransactions;
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
@@ -611,12 +740,15 @@ const RecentTransaction = () => {
                       <button
                         key={key}
                         onClick={() => {
+                          console.log("key", key);
                           if (key === 0) {
                             // USDC tab
                             fetchRecentTransactions();
                           } else if (key === 2) {
                             // Gold tab
                             fetchRecentTransactionsPaxg();
+                          } else if (key === 6) {
+                            fetchRecentMorphoTransactions();
                           }
                           setActiveTab(key);
                           setIsOpen(false);

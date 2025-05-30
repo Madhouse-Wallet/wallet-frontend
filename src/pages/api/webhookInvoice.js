@@ -1,7 +1,8 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  console.log("line-3", req);
+  // if (req.method !== "POST") {
+  //   return res.status(405).json({ error: "Method not allowed" });
+  // }
 
   const { email } = req.query;
   const eventData = req.body;

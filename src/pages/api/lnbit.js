@@ -14,10 +14,6 @@ const { Module } = require("webpack");
  * @returns {Promise<Object>} Quote response object
  */
 
-
-
- 
-
 const logIn = async (type = 1) => {
   try {
     let backendUrl = "";
@@ -65,9 +61,6 @@ const logIn = async (type = 1) => {
   }
 };
 
-
-
-
 const userLogIn = async (type = 1, usr) => {
   try {
     let backendUrl = "";
@@ -89,7 +82,7 @@ const userLogIn = async (type = 1, usr) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        usr
+        usr,
       }),
     });
     response = await response.json();
@@ -112,7 +105,6 @@ const userLogIn = async (type = 1, usr) => {
     };
   }
 };
-
 
 const createUser = async (data, token, type = 1) => {
   try {
@@ -181,7 +173,7 @@ const addUserWallet = async (id, data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("addUserWallet response 179-->",response)
+    console.log("addUserWallet response 179-->", response);
     if (response?.adminkey) {
       return {
         status: true,
@@ -194,15 +186,13 @@ const addUserWallet = async (id, data, token, type = 1) => {
       };
     }
   } catch (error) {
-    console.log("add user wallet error-->", error)
+    console.log("add user wallet error-->", error);
     return {
       status: false,
       msg: "fetch failed",
     };
   }
-}
-
-
+};
 
 // splitpayments/api/v1/targets
 const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
@@ -225,7 +215,7 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response splitPaymentTarget",response)
+    console.log("response splitPaymentTarget", response);
 
     if (response?.detail) {
       return {
@@ -246,8 +236,6 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
     };
   }
 };
-
- 
 
 // create lnurlpCreate link
 const lnurlpCreate = async (data, apiKey, token, type = 1) => {
@@ -269,7 +257,7 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response lnurlpCreate ",response)
+    console.log("response lnurlpCreate ", response);
 
     if (response?.detail) {
       return {
@@ -290,8 +278,6 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
     };
   }
 };
-
-
 
 // create lnurlpCreate link
 const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
@@ -313,7 +299,7 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response withdrawLinkCreate ",response)
+    console.log("response withdrawLinkCreate ", response);
 
     if (response?.detail) {
       return {
@@ -334,8 +320,6 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
     };
   }
 };
-
-
 
 const getUser = async (id, token, type = 1) => {
   try {
@@ -401,7 +385,7 @@ const createTpos = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("createTpos 399-->",response)
+    console.log("createTpos 399-->", response);
     if (response?.id) {
       return {
         status: true,
@@ -444,7 +428,7 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
       }
     );
     response = await response.json();
-    console.log("response-> createBlotzAutoReverseSwap",type,response)
+    console.log("response-> createBlotzAutoReverseSwap", type, response);
     if (response?.id) {
       return {
         status: true,
@@ -467,6 +451,7 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
 
 const createInvoice = async (data, token, type = 1, apiKey) => {
   try {
+    console.log("data", data);
     let backendUrl = "";
     // let apiKey = "";
     if (type == 1) {
@@ -817,5 +802,5 @@ module.exports = {
   userLogIn,
   splitPaymentTarget,
   lnurlpCreate,
-  withdrawLinkCreate
+  withdrawLinkCreate,
 };
