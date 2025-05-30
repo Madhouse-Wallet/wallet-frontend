@@ -25,6 +25,31 @@ export const getUser = async (email) => {
 };
 
 
+
+
+export const addProvisionLambda = async (data) => {
+  try {
+    try {
+      return await fetch(`https://u1ff5crae4.execute-api.us-east-1.amazonaws.com/api/v1/addlnbitUser`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const addProvisionData = async (email) => {
   try {
     try {
