@@ -62,9 +62,8 @@ async function getWalletTokenTransfers(
       chain: chain,
       order: "DESC",
       address: walletAddress,
-      contractAddresses,
+      contractAddresses: contractAddresses,
     };
-
     if (fromDate) options.fromDate = fromDate;
     if (toDate) options.toDate = toDate;
 

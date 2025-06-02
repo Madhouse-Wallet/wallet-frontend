@@ -174,8 +174,8 @@ const Dashboard = () => {
           const web3 = new Web3Interaction("sepolia", provider);
 
           // Fetch PAXG balance on Ethereum
-          const paxgResult = await web3.getMorphoBalance(
-            process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address,
+          const paxgResult = await web3.getGOLDBalance(
+            process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS,
             userAuth?.walletAddress,
             // "0xA5E256722897FCdC32a5406222175C09B4952489",
             providerETH

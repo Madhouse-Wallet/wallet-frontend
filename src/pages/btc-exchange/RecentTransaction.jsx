@@ -71,10 +71,20 @@ const RecentTransaction = () => {
 
     return txs.map((tx) => {
       const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      console.log(
+        "line-74",
+        tx.from_address?.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase()
+      );
+      console.log(
+        "line-79",
+        tx.from_address?.toLowerCase(),
+        userAuth?.walletAddress?.toLowerCase()
+      );
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
-
+      console.log("line-87", isSend === true ? "send" : "receive");
       return {
         amount,
         category: tx.token_symbol || "USDC",
@@ -88,7 +98,7 @@ const RecentTransaction = () => {
         }`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
-        type: isSend ? "send" : "receive",
+        type: isSend === true ? "send" : "receive",
       };
     });
   };
@@ -168,7 +178,7 @@ const RecentTransaction = () => {
 
       const data = await fetchTokenTransfers(
         process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG,
-        [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address],
+        [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS],
         // "0x0d8b79e9f0EC1ad55210E45CcC137CD1506B3Aab",
         userAuth?.walletAddress,
         startDate,
@@ -354,7 +364,7 @@ const RecentTransaction = () => {
                                       ? "Redemption"
                                       : tx.isDeposit
                                         ? "Deposit"
-                                        : tx.type === "send"
+                                        : tx?.type === "send"
                                           ? "Send"
                                           : "Receive"}{" "}
                                     {tx.amount?.split(" ")[1] || "ETH"}
@@ -372,7 +382,7 @@ const RecentTransaction = () => {
                                 <p className="m-0  text-xs font-medium">
                                   {tx.status === "rejected"
                                     ? "Insufficient Balance"
-                                    : `${tx.type === "send" ? "-" : "+"} ${
+                                    : `${tx?.type === "send" ? "-" : "+"} ${
                                         tx.amount
                                       }`}
                                 </p>
@@ -439,9 +449,7 @@ const RecentTransaction = () => {
                             >
                               <div className="left flex items-start gap-2">
                                 <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                  {tx.type === "token send"
-                                    ? sendSvg
-                                    : receiveSvg}
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
                                 </div>
                                 <div className="content">
                                   <h4 className="m-0 font-bold md:text-base">
@@ -449,7 +457,7 @@ const RecentTransaction = () => {
                                       ? "Redemption"
                                       : tx.isDeposit
                                         ? "Deposit"
-                                        : tx.type === "token send"
+                                        : tx.type === "send"
                                           ? "Send"
                                           : "Receive"}{" "}
                                     {tx.amount?.split(" ")[1] || "ETH"}
@@ -467,7 +475,7 @@ const RecentTransaction = () => {
                                 <p className="m-0  text-xs font-medium">
                                   {tx.status === "rejected"
                                     ? "Insufficient Balance"
-                                    : `${tx.type === "token send" ? "-" : "+"} ${
+                                    : `${tx.type === "send" ? "-" : "+"} ${
                                         tx.amount
                                       }`}
                                 </p>
@@ -535,89 +543,89 @@ const RecentTransaction = () => {
         </div>
       ),
     },
-    // {
-    //   title: "MORPHO",
-    //   component: (
-    //     <>
-    //       {morphotransactions.length > 0 ? (
-    //         <div className="bg-black/5 lg:p-4 rounded-lg p-3">
-    //           {Object.entries(transactionsByDateMorpho).map(([date, txs]) => {
-    //             return (
-    //               <div key={date} className="py-3">
-    //                 <p className="m-0 text-white text-xs font-semibold pb-2">
-    //                   {date}
-    //                 </p>
-    //                 <div className="grid gap-3 grid-cols-12">
-    //                   {/* {txs.map((tx, key) => ( */}
-    //                   {txs
-    //                     .filter((tx) => {
-    //                       const amount = parseFloat(
-    //                         tx.amount?.split(" ")[0] || 0
-    //                       );
-    //                       return amount >= 0.01;
-    //                     })
-    //                     .map((tx, key) => (
-    //                       <div key={key} className="md:col-span-6 col-span-12">
-    //                         <div
-    //                           onClick={() => handleTransactionClick(tx)}
-    //                           className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-    //                         >
-    //                           <div className="left flex items-start gap-2">
-    //                             <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-    //                               {tx.type === "send" ? sendSvg : receiveSvg}
-    //                             </div>
-    //                             <div className="content">
-    //                               <h4 className="m-0 font-bold md:text-base">
-    //                                 {tx.isRedemption
-    //                                   ? "Redemption"
-    //                                   : tx.isDeposit
-    //                                     ? "Deposit"
-    //                                     : tx.type === "send"
-    //                                       ? "Send"
-    //                                       : "Receive"}{" "}
-    //                                 {tx.amount?.split(" ")[1] || "ETH"}
-    //                               </h4>
-    //                               <p
-    //                                 className={`m-0 ${getStatusColor(
-    //                                   tx.status
-    //                                 )} font-medium text-xs`}
-    //                               >
-    //                                 {getStatusText(tx.status)}
-    //                               </p>
-    //                             </div>
-    //                           </div>
-    //                           <div className="right">
-    //                             <p className="m-0  text-xs font-medium">
-    //                               {tx.status === "rejected"
-    //                                 ? "Insufficient Balance"
-    //                                 : `${tx.type === "send" ? "-" : "+"} ${
-    //                                     tx.amount
-    //                                   }`}
-    //                             </p>
-    //                           </div>
-    //                         </div>
-    //                       </div>
-    //                     ))}
-    //                 </div>
-    //               </div>
-    //             );
-    //           })}
-    //         </div>
-    //       ) : (
-    //         <>
-    //           <Image
-    //             src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
-    //             alt=""
-    //             height={10000}
-    //             width={10000}
-    //             style={{ maxHeight: 400 }}
-    //             className="max-w-full h-auto w-auto mx-auto"
-    //           />
-    //         </>
-    //       )}
-    //     </>
-    //   ),
-    // },
+    {
+      title: "MORPHO",
+      component: (
+        <>
+          {morphotransactions.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+              {Object.entries(transactionsByDateMorpho).map(([date, txs]) => {
+                return (
+                  <div key={date} className="py-3">
+                    <p className="m-0 text-white text-xs font-semibold pb-2">
+                      {date}
+                    </p>
+                    <div className="grid gap-3 grid-cols-12">
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.01;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="right">
+                                <p className="m-0  text-xs font-medium">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx.type === "send" ? "-" : "+"} ${
+                                        tx.amount
+                                      }`}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
   ];
 
   return (
