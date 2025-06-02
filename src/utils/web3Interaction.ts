@@ -307,6 +307,7 @@ class Web3Interaction {
     });
   };
 
+  
   getGOLDBalance = async (
     usdcAddress: string,
     accountAddress: string,
