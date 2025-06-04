@@ -11,6 +11,8 @@ import { sendBitcoinFunction } from "@/utils/bitcoinSend";
 import { useSelector } from "react-redux";
 import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
+import { useEffect } from "react";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -39,6 +41,7 @@ const BtcExchangeSendPop = ({
   const [loadingSend, setLoadingSend] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState();
   const [openCam, setOpenCam] = useState(false);
+  const [btcBalance, setBtcBalance] = useState("0");
 
   const submitAddress = async () => {
     try {
@@ -118,20 +121,17 @@ const BtcExchangeSendPop = ({
 
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth?.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        );
-        if (callGetSecretData?.status) {
-          return JSON.parse(callGetSecretData?.secret);
-        } else {
-          return false;
-        }
+      let data = JSON.parse(userAuth?.webauthKey);
+      let callGetSecretData = await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      );
+      console.log("data - 194", data, callGetSecretData);
+      if (callGetSecretData?.status) {
+        console.log("line-196", JSON.parse(callGetSecretData?.secret));
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
@@ -153,8 +153,9 @@ const BtcExchangeSendPop = ({
       console.log("btcAddress", btcAddress, btcAmount);
 
       const privateKey = await recoverSeedPhrase();
+      console.log("Line-159", privateKey);
       if (!privateKey) {
-        toast.error("Please enter a valid amount");
+        toast.error("Private Key not Found");
         return;
       }
 
@@ -162,12 +163,15 @@ const BtcExchangeSendPop = ({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: btcAddress,
         amountSatoshi: btcAmount * 100000000,
-        privateKeyHex: privateKey?.privateKey,
+        privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
 
       if (result.success) {
         toast.success("BTC sent successfully!");
+        setBtcAmount(0);
+        setBtcAddress();
+        setLoadingSend(false);
       } else {
         toast.error(result.error || "Transaction failed");
       }
@@ -177,6 +181,29 @@ const BtcExchangeSendPop = ({
       toast.error(error.message);
     }
   };
+
+  const fetchBalances = async () => {
+    try {
+      if (!userAuth?.walletAddress) return;
+
+      const result = await fetchBitcoinBalance(
+        userAuth?.bitcoinWallet
+        // "1LtaUUB1QrPNmBAZ9qkCYeNw56GJu5NhG2"
+      );
+
+      if (result.balance) {
+        setBtcBalance(result?.balance);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch token balances");
+    }
+  };
+
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      fetchBalances();
+    }
+  }, [userAuth?.walletAddress]);
 
   const tabData = [
     {
@@ -226,8 +253,8 @@ const BtcExchangeSendPop = ({
                 ) : (
                   <>
                     <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
-                      Unminting requires one Ethereum transaction and it takes
-                      around 3-5 hours.
+                      Bitcoin transaction confirmation typically takes 15 to 20
+                      minutes to be processed on the blockchain.
                     </p>
                   </>
                 )}
@@ -258,7 +285,7 @@ const BtcExchangeSendPop = ({
                         Amount
                       </label>
                       <span className="text-white opacity-60 text-xs">
-                        Balance: 0 tBTC
+                        Balance: {parseFloat(btcBalance).toFixed(8)} BTC
                       </span>
                     </div>
                     <div className="iconWithText relative">
@@ -268,11 +295,11 @@ const BtcExchangeSendPop = ({
                         onChange={(e) => setBtcAmount(e.target.value)}
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
-                      <button
+                      {/* <button
                         className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Max
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                   <div className="py-2">
