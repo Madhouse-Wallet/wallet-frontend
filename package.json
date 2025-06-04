@@ -12,6 +12,7 @@
     "@bitcoinerlab/secp256k1": "1.2.0",
     "@ensofinance/sdk": "1.0.18",
     "@ethersproject/hash": "5.8.0",
+    "@passninja/passninja-js": "^0.6.0",
     "@radix-ui/react-tooltip": "1.1.7",
     "@reduxjs/toolkit": "2.5.0",
     "@stripe/crypto": "0.0.4",
