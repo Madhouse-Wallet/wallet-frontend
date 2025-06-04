@@ -11,11 +11,13 @@ import LnbitsTransaction from "./LnbitsTransaction";
 import { toast } from "react-toastify";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
+import SideShiftTransaction from "./SideShiftTransaction";
 
 const RecentTransaction = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
   const [morphotransactions, setMorphoTransactions] = useState([]);
+  const [useData, setUserData] = useState();
 
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -30,6 +32,7 @@ const RecentTransaction = () => {
   const [lnbitWallet2, setLnbitWallet2] = useState("");
   const [spendWallet, setSpendWallet] = useState("");
   const [applyTrue, setApplyTrue] = useState(false);
+  const [sideshiftTxs, setSideshiftTxs] = useState([]);
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [dateRange, setDateRange] = useState([
@@ -318,6 +321,7 @@ const RecentTransaction = () => {
   useEffect(() => {
     const data = async () => {
       let userExist = await getUser(userAuth.email);
+      setUserData(userExist);
       setLnbitWallet1(userExist?.userId?.lnbitWalletId || "");
       setLnbitWallet2(userExist?.userId?.lnbitWalletId_2 || "");
       setSpendWallet(userExist?.userId?.lnbitWalletId_3 || "");
@@ -626,6 +630,17 @@ const RecentTransaction = () => {
         </>
       ),
     },
+    {
+      title: "SideShift",
+      component: (
+        <SideShiftTransaction
+          userData={useData} // Make sure this contains sideshiftIds
+          setTransactions={setSideshiftTxs}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
+        />
+      ),
+    },
   ];
 
   return (
@@ -720,6 +735,7 @@ const RecentTransaction = () => {
                   else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
                   else if (activeTab === 5) dataToExport = spendTxs;
                   else if (activeTab === 6) dataToExport = morphotransactions;
+                  else if (activeTab === 7) dataToExport = sideshiftTxs; // Add this line
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
