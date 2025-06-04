@@ -50,47 +50,68 @@ export const addProvisionData = async (email) => {
 };
 
 export const addProvisionLambda = async (data) => {
-
   try {
 
-    try {
+    return await fetch(`https://u1ff5crae4.execute-api.us-east-1.amazonaws.com/api/v1/addlnbitUser`, {
 
-      return await fetch(`https://u1ff5crae4.execute-api.us-east-1.amazonaws.com/api/v1/addlnbitUser`, {
+      method: "POST",
 
-        method: "POST",
+      headers: { "Content-Type": "application/json" },
 
-        headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
 
-        body: JSON.stringify(data),
+    })
 
-      })
+      .then((res) => res.json())
 
-        .then((res) => res.json())
+      .then((data) => {
 
-        .then((data) => {
+        return data;
 
-          return data;
-
-        });
-
-    } catch (error) {
-
-      console.log(error);
-
-      return false;
-
-    }
+      });
 
   } catch (error) {
-
-    console.log("error-->", error);
-
+    console.log(error);
     return false;
-
   }
-
 };
 
+
+export const addCreditCard = async (data) => {
+  try {
+    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/createCard`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("addCreditCard-->",data)
+        return data;
+      });
+  } catch (error) {
+    console.log("addCreditCard error-->",error);
+    return false;
+  }
+};
+
+export const delCreditCard = async (data) => {
+  try {
+    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/deleteCard`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("delCreditCard-->",data)
+        return data;
+      });
+  } catch (error) {
+    console.log("delCreditCard error-->",error);
+    return false;
+  }
+};
 
 export const getUserToken = async (email) => {
   try {

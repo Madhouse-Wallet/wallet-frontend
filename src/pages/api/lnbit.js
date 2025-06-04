@@ -472,6 +472,7 @@ const createInvoice = async (data, token, type = 1, apiKey) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
+    console.log("response-->",response)
     if (response?.bolt11) {
       return {
         status: true,
