@@ -191,7 +191,9 @@ const SellBitcoin = () => {
         data?.storageKeySecret,
         data?.credentialIdSecret
       );
+      console.log("data - 194", data, callGetSecretData);
       if (callGetSecretData?.status) {
+        console.log("line-196", JSON.parse(callGetSecretData?.secret));
         return JSON.parse(callGetSecretData?.secret);
       } else {
         return false;
@@ -227,13 +229,15 @@ const SellBitcoin = () => {
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: destinationAddress,
         amountSatoshi: fromAmount * 100000000,
-        privateKeyHex: privateKey?.privateKey,
+        privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
 
       if (result.success) {
-        toast.success("BTC sent successfully!");
+        toast.success("Transaction Successfully!");
         setTimeout(fetchBalances, 2000);
+        setFromAmount("");
+        setToAmount("");
       } else {
         toast.error(result.error || "Transaction failed");
       }
@@ -297,7 +301,7 @@ const SellBitcoin = () => {
                           Balance:{" "}
                           {swapDirection.from === "USDC"
                             ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>

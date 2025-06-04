@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import client from "../../lib/mongodb"; // Import the MongoDB client
 import axios from "axios";
 
 // Define response type for the BlockCypher API

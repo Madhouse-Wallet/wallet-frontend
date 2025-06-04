@@ -38,7 +38,7 @@ const Swap = () => {
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
-
+      setQuote(shift);
       return {
         depositAddress: shift.depositAddress,
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
@@ -64,6 +64,7 @@ const Swap = () => {
       });
 
       const data = await response.json();
+      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
@@ -138,6 +139,9 @@ const Swap = () => {
           const quotePromise = getQuote(value);
           const shiftPromise = getDestinationAddress(value);
 
+          console.log("line-141", quotePromise);
+          console.log("line-142", shiftPromise);
+
           const [quoteResult, shiftResult] = await Promise.all([
             quotePromise,
             shiftPromise,
@@ -175,6 +179,7 @@ const Swap = () => {
       setDebounceTimer(timer);
     } else {
       setToAmount("");
+      console.log("line-182");
       setQuote(null);
       setDestinationAddress("");
       setUsdValue({ from: "0", to: "0" });
@@ -189,7 +194,7 @@ const Swap = () => {
       return;
     }
 
-    if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
+    if (Number.parseFloat(toAmount) > Number.parseFloat(usdcBalance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
@@ -229,8 +234,11 @@ const Swap = () => {
       if (tx) {
         // setSuccess(true);
         // setRefundBTC(false);
-        toast.success("USDC sent successfully!");
+        toast.success("Transaction Successfully!");
         setTimeout(fetchBalances, 2000);
+        setFromAmount("");
+        setToAmount("");
+        setQuote(null);
       } else {
         toast.error(result.error || "Transaction failed");
       }
@@ -347,7 +355,7 @@ const Swap = () => {
                           Balance:{" "}
                           {swapDirection.to === "USDC"
                             ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
