@@ -39,8 +39,9 @@ const BTCDebitCard: React.FC = () => {
           walletId: userExist?.userId?.lnbitWalletId_3,
         }),
       });
+      console.log("creditCardDetails-->", creditCardDetails)
       const { status, data } = await response.json();
-      if (status === "success" && data?.[0]?.balance != null) {
+      if (status == "success" && data?.[0]?.balance != null) {
         const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
         const balanceSatss = Math.floor(balanceSats / 1000);
         setLightningBalance(balanceSatss);
@@ -57,7 +58,6 @@ const BTCDebitCard: React.FC = () => {
     try {
       let userExist = await getUser(email);
       if (userExist?.userId?.creditCardPass) {
-        fetchLighteningBalance();
         setCreditCardDetail(userExist?.userId?.creditCardPass)
       }
       if (userExist?.userId?.lnaddress) {
@@ -97,6 +97,7 @@ const BTCDebitCard: React.FC = () => {
   useEffect(() => {
     if (userAuth.email) {
       getUSerData(userAuth.email)
+      fetchLighteningBalance();
     }
   }, [])
 
@@ -208,7 +209,7 @@ const BTCDebitCard: React.FC = () => {
                       </div>
                       <div className="col-span-6">
                         <button
-                          disabled={(creditCardDetails) && (lightningBalance>0)}
+                          disabled={(creditCardDetails) || (lightningBalance <= 0)}
                           onClick={() => setCreateCard(!createCard)}
                           className={`  bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
