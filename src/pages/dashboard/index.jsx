@@ -150,23 +150,21 @@ const Dashboard = () => {
             Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
           );
 
-          const senderMPRPHOBalance = await publicClient.readContract({
-            abi: parseAbi([
-              "function balanceOf(address account) returns (uint256)",
-            ]),
-            address: MORPHO_ADDRESS,
-            functionName: "balanceOf",
-            args: [userAuth?.walletAddress],
-          });
-          const morphoBalance = String(
-            Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
-          );
+          // const senderMPRPHOBalance = await publicClient.readContract({
+          //   abi: parseAbi([
+          //     "function balanceOf(address account) returns (uint256)",
+          //   ]),
+          //   address: MORPHO_ADDRESS,
+          //   functionName: "balanceOf",
+          //   args: [userAuth?.walletAddress],
+          // });
+          // const morphoBalance = String(
+          //   Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
+          // );
 
-          let combinedUsdValue = usdcBalance + morphoBalance;
+          // let combinedUsdValue = usdcBalance + morphoBalance;
           setTotalUsdBalance(
-            combinedUsdValue !== "00"
-              ? parseFloat(combinedUsdValue).toFixed(2)
-              : "0"
+            usdcBalance !== "00" ? parseFloat(usdcBalance).toFixed(2) : "0"
           ); // <-- sets combined USD+ and USDC value
 
           const providerETH = await getETHEREUMRpcProvider();

@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@bitcoinerlab/secp256k1": "1.2.0",
+    "@bitcoinerlab/secp256k1": "^1.2.0",
     "@ensofinance/sdk": "1.0.18",
     "@ethersproject/hash": "5.8.0",
     "@passninja/passninja-js": "^0.6.0",
