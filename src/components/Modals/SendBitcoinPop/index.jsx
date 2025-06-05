@@ -111,7 +111,7 @@ const SendBitcoinPop = ({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: sendLnbitWithdraw.data.data.address,
         amountSatoshi: amount * 100000000,
-        privateKeyHex: privateKey?.privateKey,
+        privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
       console.log("result-->",result)

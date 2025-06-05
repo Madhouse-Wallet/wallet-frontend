@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
-import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {

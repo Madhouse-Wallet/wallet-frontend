@@ -4,7 +4,8 @@ import axios from "axios";
 
 // Import bitcoin signing dependencies
 const bitcoin = require("bitcoinjs-lib");
-const secp = require("tiny-secp256k1");
+// const secp = require("tiny-secp256k1");
+const secp = require("@bitcoinerlab/secp256k1");
 const ecfactory = require("ecpair");
 const ECPair = ecfactory.ECPairFactory(secp);
 
