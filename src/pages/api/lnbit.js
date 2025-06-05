@@ -472,7 +472,7 @@ const createInvoice = async (data, token, type = 1, apiKey) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response-->",response)
+    console.log("response-->", response);
     if (response?.bolt11) {
       return {
         status: true,
@@ -718,23 +718,24 @@ const getPayments = async (
   type = 1,
   fromDate = null,
   toDate = null,
-  tag = null
+  tag = null,
+  apiKey = null
 ) => {
-  console.log("line-510", fromDate, toDate);
+  console.log("line-510", fromDate, toDate, apiKey);
   try {
     let backendUrl = "";
-    let apiKey = "";
+    // let apiKey = "";
 
     if (type === 1) {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
-      apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
     }
 
     const params = new URLSearchParams({
-      wallet_id: walletId,
+      // wallet_id: walletId,
       sortby: "time",
       direction: "desc",
     });
@@ -767,6 +768,7 @@ const getPayments = async (
 
     response = await response.json();
 
+    console.log("line-771", response);
     if (response?.data) {
       return {
         status: true,

@@ -3,6 +3,8 @@ import Image from "next/image";
 import moment from "moment";
 import { toast } from "react-toastify";
 import styled from "styled-components";
+import { createPortal } from "react-dom";
+import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
 
 const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
   const [sideshiftTransactions, setSideshiftTransactions] = useState([]);
@@ -37,7 +39,8 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
 
       // Determine transaction type and details
       const isDeposit = shift.depositCoin && shift.depositAmount;
-      const isGold = shift.settleCoin === "XAUT" || shift.depositCoin === "XAUT";
+      const isGold =
+        shift.settleCoin === "XAUT" || shift.depositCoin === "XAUT";
 
       return {
         id: shift.id || `sideshift_${index}`,
@@ -89,7 +92,10 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
   useEffect(() => {
     console.log("line-83", userData);
     const fetchTransactions = async () => {
-      if (!userData?.userId?.sideshiftIds || userData?.userId?.sideshiftIds.length === 0) {
+      if (
+        !userData?.userId?.sideshiftIds ||
+        userData?.userId?.sideshiftIds.length === 0
+      ) {
         setSideshiftTransactions([]);
         return;
       }
@@ -211,283 +217,19 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
     setShowDetail(true);
   };
 
-  const handleCloseDetail = () => {
-    setShowDetail(false);
-    setSelectedTransaction(null);
-  };
-
-  const truncateAddress = (address) => {
-    if (!address) return "";
-    return `${address.substring(0, 6)}...${address.substring(
-      address.length - 4
-    )}`;
-  };
-
-  const getInitials = (address) => {
-    if (!address) return "??";
-    return address.substring(2, 4).toUpperCase();
-  };
-
   const transactionsByDate = groupTransactionsByDate(sideshiftTransactions);
-
-  const sendSvg = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7 15L12 20L17 15"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 4V20"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const receiveSvg = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7 9L12 4L17 9"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 20V4"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const closeIcn = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M18 6L6 18"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6 6L18 18"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const Modal = styled.div`
-    padding-bottom: 100px;
-
-    .modalDialog {
-      max-height: calc(100vh - 160px);
-      max-width: 550px !important;
-      padding-bottom: 40px !important;
-
-      input {
-        color: var(--textColor);
-      }
-    }
-  `;
-
-  // SideShift Transaction Detail Modal
-  const SideShiftTransactionDetail = () => {
-    if (!selectedTransaction) return null;
-
-    const tx = selectedTransaction;
-    const explorerUrl = tx.depositNetwork === "ethereum" || tx.settleNetwork === "ethereum"
-      ? `https://etherscan.io/tx/${tx.transactionHash}`
-      : tx.depositNetwork === "base" || tx.settleNetwork === "base"
-      ? `https://basescan.org/tx/${tx.transactionHash}`
-      : `https://sideshift.ai/orders/${tx.id}`;
-
-    return (
-      <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <button
-          onClick={handleCloseDetail}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
-        <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full">
-          <div className="relative rounded px-3">
-            <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                SideShift Transaction Details
-              </h5>
-            </div>
-            <div className="modalBody">
-              <div className="py-3">
-                <ul className="list-none pl-0 mb-0">
-                  <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <h6 className="m-0 font-semibold text-base">Status</h6>
-                      <a
-                        href={explorerUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 text-xs font-medium"
-                      >
-                        View on SideShift
-                      </a>
-                    </div>
-                  </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <h6 className={`m-0 font-semibold text-base capitalize ${getStatusColor(tx.status)}`}>
-                        {getStatusText(tx.status)}
-                      </h6>
-                      <span
-                        className="text-blue-500 text-xs font-medium cursor-pointer"
-                        onClick={() => {
-                          navigator.clipboard.writeText(tx.id);
-                          toast.success("Transaction ID copied to clipboard!");
-                        }}
-                      >
-                        Copy transaction ID
-                      </span>
-                    </div>
-                  </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <div className="left">
-                        <h6 className="m-0 font-semibold text-base pb-1">
-                          From ({tx.depositCoin})
-                        </h6>
-                        <div className="flex items-center gap-1">
-                          <div className="flex-shrink-0 h-[30px] w-[30px] rounded-full text-xs font-medium bg-white/50 flex items-center justify-center">
-                            {getInitials(tx.from)}
-                          </div>
-                          <span className="text-blue-500 text-xs font-medium">
-                            {truncateAddress(tx.from)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="right text-right">
-                        <h6 className="m-0 font-semibold text-base pb-1">
-                          To ({tx.settleCoin})
-                        </h6>
-                        <div className="rounded-20 px-2 py-1 bg-white/50">
-                          <span className="text-xs font-medium">
-                            {truncateAddress(tx.to)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <h6 className="m-0 font-semibold text-base">Date</h6>
-                      <span className="text-white text-xs font-medium">
-                        {tx.date}
-                      </span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <div className="py-3">
-                <h6 className="m-0 font-medium text-xl pb-5">
-                  Transaction Details
-                </h6>
-                <ul className="list-unstyled ps-0 mb-0 text-xs">
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opacity-80">Deposit Amount</span>
-                    <span className="text-white font-medium">
-                      {tx.depositAmount} {tx.depositCoin}
-                    </span>
-                  </li>
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opacity-80">Settle Amount</span>
-                    <span className="text-white font-medium">
-                      {tx.settleAmount} {tx.settleCoin}
-                    </span>
-                  </li>
-                  {tx.rate && (
-                    <li className="py-2 flex items-center justify-between">
-                      <span className="text-white opacity-80">Exchange Rate</span>
-                      <span className="text-white font-medium">
-                        {tx.rate}
-                      </span>
-                    </li>
-                  )}
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opacity-80">Deposit Network</span>
-                    <span className="text-white font-medium capitalize">
-                      {tx.depositNetwork}
-                    </span>
-                  </li>
-                  <li className="py-2 flex items-center justify-between">
-                    <span className="text-white opacity-80">Settle Network</span>
-                    <span className="text-white font-medium capitalize">
-                      {tx.settleNetwork}
-                    </span>
-                  </li>
-                  {tx.rawData?.type && (
-                    <li className="py-2 flex items-center justify-between">
-                      <span className="text-white opacity-80">Type</span>
-                      <span className="text-white font-medium capitalize">
-                        {tx.rawData.type}
-                      </span>
-                    </li>
-                  )}
-                  {tx.expiresAt && (
-                    <li className="py-2 flex items-center justify-between">
-                      <span className="text-white opacity-80">Expires At</span>
-                      <span className="text-white font-medium">
-                        {moment(tx.expiresAt).format("MMMM D, YYYY h:mm A")}
-                      </span>
-                    </li>
-                  )}
-                  {tx.quoteId && (
-                    <li className="py-2 flex items-center justify-between">
-                      <span className="text-white opacity-80">Quote ID</span>
-                      <span className="text-white font-medium">
-                        {tx.quoteId}
-                      </span>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal>
-    );
-  };
 
   return (
     <>
+      {showDetail &&
+        createPortal(
+          <SideShiftTransactionDetail
+            showDetail={showDetail}
+            setShowDetail={setShowDetail}
+            selectedTransaction={selectedTransaction}
+          />,
+          document.body
+        )}
       {loading ? (
         <div className="flex justify-center items-center py-10">
           <div className="spinner-border text-primary" role="status">
@@ -561,11 +303,73 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
           />
         </>
       )}
-
-      {/* Transaction Detail Modal */}
-      {showDetail && <SideShiftTransactionDetail />}
     </>
   );
 };
 
 export default SideShiftTransaction;
+
+const sendSvg = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7 15L12 20L17 15"
+      stroke="black"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 4V20"
+      stroke="black"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const receiveSvg = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7 9L12 4L17 9"
+      stroke="black"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M12 20V4"
+      stroke="black"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+
+const Modal = styled.div`
+  padding-bottom: 100px;
+
+  .modalDialog {
+    max-height: calc(100vh - 160px);
+    max-width: 550px !important;
+    padding-bottom: 40px !important;
+
+    input {
+      color: var(--textColor);
+    }
+  }
+`;
