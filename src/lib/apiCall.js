@@ -52,7 +52,7 @@ export const addProvisionData = async (email) => {
 export const addProvisionLambda = async (data) => {
   try {
 
-    return await fetch(`https://u1ff5crae4.execute-api.us-east-1.amazonaws.com/api/v1/addlnbitUser`, {
+    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/addlnbitUser`, {
 
       method: "POST",
 
@@ -61,15 +61,10 @@ export const addProvisionLambda = async (data) => {
       body: JSON.stringify(data),
 
     })
-
       .then((res) => res.json())
-
       .then((data) => {
-
         return data;
-
       });
-
   } catch (error) {
     console.log(error);
     return false;
