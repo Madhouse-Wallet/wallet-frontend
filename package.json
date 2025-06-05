@@ -69,6 +69,7 @@
     "tailwind-merge": "2.6.0",
     "tailwindcss-animate": "1.0.7",
     "timers-promises": "1.0.1",
+    "tiny-secp256k1": "2.2.3",
     "viem": "2.21.33",
     "webpack": "5.97.1",
     "ws": "8.18.0"
