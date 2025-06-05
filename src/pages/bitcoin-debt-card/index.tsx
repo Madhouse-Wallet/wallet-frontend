@@ -13,6 +13,7 @@ import { getUser, delCreditCard } from "@/lib/apiCall";
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import QRCode from "qrcode";
 const BTCDebitCard: React.FC = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
@@ -22,12 +23,47 @@ const BTCDebitCard: React.FC = () => {
   const [btcWall, setTbtcWall] = useState(false);
   const [creditCardDetails, setCreditCardDetail] = useState<any>(false);
   const [loader, setLoader] = useState(false);
+  const [lnaddress, setLnaddress] = useState<any>("");
+  const [lnQrCode, setLnQrCode] = useState<any>("");
+  const [lightningBalance, setLightningBalance] = useState<any>(0);
+
+  const fetchLighteningBalance = async () => {
+    try {
+      const userExist = await getUser(userAuth.email);
+      const response = await fetch("/api/spend-balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletId: userExist?.userId?.lnbitWalletId_3,
+        }),
+      });
+      const { status, data } = await response.json();
+      if (status === "success" && data?.[0]?.balance != null) {
+        const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+        const balanceSatss = Math.floor(balanceSats / 1000);
+        setLightningBalance(balanceSatss);
+      } else {
+        console.error("Failed to fetch lightning balance or empty balance.");
+      }
+    } catch (error) {
+      console.error("Error fetching lightning balance:", error);
+    }
+  };
+
 
   const getUSerData = async (email: any) => {
     try {
       let userExist = await getUser(email);
       if (userExist?.userId?.creditCardPass) {
+        fetchLighteningBalance();
         setCreditCardDetail(userExist?.userId?.creditCardPass)
+      }
+      if (userExist?.userId?.lnaddress) {
+        const qr = await QRCode.toDataURL(userExist?.userId?.lnaddress);
+        setLnQrCode(qr)
+        setLnaddress(userExist?.userId?.lnaddress)
       }
     } catch (error) {
       console.log("error -->", error)
@@ -172,7 +208,7 @@ const BTCDebitCard: React.FC = () => {
                       </div>
                       <div className="col-span-6">
                         <button
-                          disabled={creditCardDetails}
+                          disabled={(creditCardDetails) && (lightningBalance>0)}
                           onClick={() => setCreateCard(!createCard)}
                           className={`  bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
@@ -190,33 +226,36 @@ const BTCDebitCard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 text-center">
-                    <p className="m-0 py-2 text-white/80"><span className="font-bold">LN Address:</span>
-                      Quincy@spend.madhousewallet.com
-                    </p>
-                    <Image
-                      alt=""
-                      src={"data:image/png;base64,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"}
-                      height={10000}
-                      width={10000}
-                      className="max-w-full mx-auto h-auto w-auto"
-                      style={{ height: 150 }}
-                    />
-                    <div className="flex items-center justify-center gap-3 mt-4">
-                      <button
-                        // onClick={() => setWithdrawPop(!withdrawPop)}
-                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                      >
-                        Modify LN Address
-                      </button>
-                      <button
-                        // onClick={() => setWithdrawPop(!withdrawPop)}
-                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                      >
-                        Buy with mpesa https://bitika.xyz
-                      </button>
-                    </div>
-                  </div>
+                  {
+                    lnaddress && lnQrCode && (<div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 text-center">
+                      <p className="m-0 py-2 text-white/80"><span className="font-bold">LN Address:</span>
+                        {lnaddress}
+                      </p>
+                      <Image
+                        alt=""
+                        src={lnQrCode}
+                        height={10000}
+                        width={10000}
+                        className="max-w-full mx-auto h-auto w-auto"
+                        style={{ height: 150 }}
+                      />
+                      <div className="flex items-center justify-center gap-3 mt-4">
+                        <button
+                          // onClick={() => setWithdrawPop(!withdrawPop)}
+                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        >
+                          Modify LN Address
+                        </button>
+                        <button
+                          onClick={() => window.open(`https://bitika-sandbox.netlify.app/?lnaddress=${lnaddress}`, '_blank')}
+                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        >
+                          Buy with mpesa https://bitika.xyz
+                        </button>
+                      </div>
+                    </div>)
+                  }
+
                 </div>
               </div>
             </div>
