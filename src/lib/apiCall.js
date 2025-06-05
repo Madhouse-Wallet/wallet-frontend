@@ -79,36 +79,36 @@ export const addProvisionLambda = async (data) => {
 
 export const addCreditCard = async (data) => {
   try {
-    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/createCard`, {
+    return await fetch(`/api/create-card`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("addCreditCard-->",data)
+        console.log("addCreditCard-->", data)
         return data;
       });
   } catch (error) {
-    console.log("addCreditCard error-->",error);
+    console.log("addCreditCard error-->", error);
     return false;
   }
 };
 
 export const delCreditCard = async (data) => {
   try {
-    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/deleteCard`, {
+    return await fetch(`/api/delete-card`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("delCreditCard-->",data)
+        console.log("delCreditCard-->", data)
         return data;
       });
   } catch (error) {
-    console.log("delCreditCard error-->",error);
+    console.log("delCreditCard error-->", error);
     return false;
   }
 };
