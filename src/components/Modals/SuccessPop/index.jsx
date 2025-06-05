@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import Link from "next/link";
+import { useRouter } from "next/router";
 
 const SuccessPop = ({ success, setSuccess }) => {
   const handleSuccess = () => setSuccess(!success);
+  const router = useRouter();
   return (
     <>
       <Modal
@@ -36,13 +37,24 @@ const SuccessPop = ({ success, setSuccess }) => {
                 You've successfully Send USDC. Thank you for using MadHouse
                 Wallet!"
               </p>
-              <div className="btnWrpper mt-5">
+              {/* <div className="btnWrpper mt-5">
                 <Link
                   href={"/"}
                   className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]"
                 >
                   Back to Home
                 </Link>
+              </div> */}
+              <div className="btnWrpper mt-5">
+                <button
+                  onClick={() => {
+                    router.push("/");
+                    handleSuccess();
+                  }}
+                  className="flex items-center justify-center commonBtn btn w-full rounded-full h-[50px]"
+                >
+                  Back to Home
+                </button>
               </div>
             </div>
           </div>

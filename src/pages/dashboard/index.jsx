@@ -19,6 +19,7 @@ import {
 } from "@/lib/zeroDev";
 import { parseAbi } from "viem";
 import Web3Interaction from "@/utils/web3Interaction";
+import SuccessPop from "@/components/Modals/SuccessPop";
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,7 @@ const Dashboard = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
   const [withdrawDep, setWithdrawDep] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [buySell, setBuySell] = useState(false);
   const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
   const [goldBalance, setGoldBalance] = useState(0.0);
@@ -234,7 +236,12 @@ const Dashboard = () => {
         )}
       {refundBTC &&
         createPortal(
-          <RefundBitcoin refundBTC={refundBTC} setRefundBTC={setRefundBTC} />,
+          <RefundBitcoin
+            refundBTC={refundBTC}
+            setRefundBTC={setRefundBTC}
+            success={success}
+            setSuccess={setSuccess}
+          />,
           document.body
         )}
       {isLoading && <LoadingScreen />}
@@ -254,6 +261,12 @@ const Dashboard = () => {
       {buySell &&
         createPortal(
           <BuySellBitcoinPop buySell={buySell} setBuySell={setBuySell} />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <SuccessPop success={success} setSuccess={setSuccess} />,
           document.body
         )}
 

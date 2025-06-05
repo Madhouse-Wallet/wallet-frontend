@@ -29,6 +29,7 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
   const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
+  const [debounceTimer, setDebounceTimer] = useState(null);
   const [providerr, setProviderr] = useState(null);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
@@ -41,39 +42,44 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
       setAmount(value);
 
       if (value && !isNaN(parseFloat(value))) {
-        setIsLoading(true);
-        try {
-          const quotePromise = getQuote(value);
-          const shiftPromise = getDestinationAddress(value, toAddress);
+        const timer = setTimeout(async () => {
+          setIsLoading(true);
+          try {
+            const quotePromise = getQuote(value);
+            const shiftPromise = getDestinationAddress(value, toAddress);
 
-          const [quoteResult, shiftResult] = await Promise.all([
-            quotePromise,
-            shiftPromise,
-          ]);
-          const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
-          const shiftSettleAmount = parseFloat(shiftResult?.settleAmount || 0);
+            const [quoteResult, shiftResult] = await Promise.all([
+              quotePromise,
+              shiftPromise,
+            ]);
+            const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
+            const shiftSettleAmount = parseFloat(
+              shiftResult?.settleAmount || 0
+            );
 
-          let finalAddress = "";
+            let finalAddress = "";
 
-          if (
-            quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-            shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-          ) {
-            finalAddress = shiftResult?.depositAddress;
-            setToAmount(shiftResult?.settleAmount);
-          } else {
-            finalAddress = quoteResult?.estimatedDepositAddress;
-            setToAmount(quoteResult?.estimate);
+            if (
+              quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
+              shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+            ) {
+              finalAddress = shiftResult?.depositAddress;
+              setToAmount(shiftResult?.settleAmount);
+            } else {
+              finalAddress = quoteResult?.estimatedDepositAddress;
+              setToAmount(quoteResult?.estimate);
+            }
+
+            if (finalAddress) {
+              setDestinationAddress(finalAddress);
+            }
+          } catch (err) {
+            console.error("Error fetching quote:", err);
+          } finally {
+            setIsLoading(false);
           }
-
-          if (finalAddress) {
-            setDestinationAddress(finalAddress);
-          }
-        } catch (err) {
-          console.error("Error fetching quote:", err);
-        } finally {
-          setIsLoading(false);
-        }
+        }, 2000); // 500ms debounce
+        setDebounceTimer(timer);
       } else {
         setToAmount("");
         setQuote(null);
@@ -204,6 +210,14 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
     }
   }, [userAuth?.walletAddress]);
 
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
+
   const fetchBalance = async () => {
     try {
       if (!userAuth?.walletAddress) return;
@@ -258,6 +272,26 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const isButtonDisabled = () => {
+    return (
+      !toAddress ||
+      !amount ||
+      isLoading ||
+      parseFloat(amount) <= 0 ||
+      parseFloat(amount) > parseFloat(balance) ||
+      !destinationAddress
+    );
+  };
+
+  const getButtonText = () => {
+    if (isLoading) return "Loading...";
+    if (!toAddress || !amount) return "Enter an amount";
+    if (parseFloat(amount) > parseFloat(balance))
+      return "Insufficient USDC Balance";
+    if (!destinationAddress) return "Get Quote";
+    return "Refund Bitcoin";
   };
 
   return (
@@ -384,16 +418,12 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
                     <button
                       type="button"
                       onClick={() => initiateSwap()}
-                      disabled={
-                        !toAddress ||
-                        !amount ||
-                        isLoading ||
-                        parseFloat(amount) <= 0 ||
-                        parseFloat(amount) > parseFloat(balance)
-                      }
-                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                      disabled={isButtonDisabled()}
+                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                        isButtonDisabled() ? "opacity-70" : ""
+                      }`}
                     >
-                      {isLoading ? "Processing..." : "Refund Bitcoin"}
+                      {getButtonText()}
                     </button>
                   </div>
                 </div>
