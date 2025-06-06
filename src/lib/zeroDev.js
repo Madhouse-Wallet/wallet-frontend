@@ -111,8 +111,6 @@ export const setupNewAccount = async (
   chain = base
 ) => {
   try {
-    console.log("Private Key: ", PRIVATE_KEY);
-    console.log("safe Private Key: ", SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
@@ -139,18 +137,11 @@ export const setupNewAccount = async (
     });
 
     const [walletAddress] = await walletClient.getAddresses();
-    console.log(
-      `Wallet Address:  https://basescan.org/address/${walletAddress}`
-    );
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
       value: BigInt(1000000)*(await publicClient.getGasPrice()) 
     });
-
-    console.log(
-      `Sent eth for account creation: https://basescan.org/tx/${hash}`
-    );
     await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
     const SAFE_SINGLETON_ADDRESS =
@@ -192,7 +183,6 @@ export const setupNewAccount = async (
       authorizationList: [authorization],
     });
 
-    console.log(`Created Smart Account: https://basescan.org/tx/${txHash}`);
 
     const safeAccount = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
@@ -288,7 +278,6 @@ export const getAccount = async (
   chain = base
 ) => {
   try {
-    console.log("line-268", PRIVATE_KEY, SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY;
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
@@ -338,15 +327,12 @@ export const getAccount = async (
 export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
-  console.log("line-318", params)
   const quotes = await pimlicoClient.getTokenQuotes({
     chain: base,
     tokens: [usdc],
   });
   const { postOpGas, exchangeRate, paymaster } = quotes[0];
-  console.log("line-324")
   try {
-    console.log("line-326")
     const userOperation = await smartAccountClient.prepareUserOperation({
       calls: params,
     });
@@ -384,10 +370,6 @@ export const sendTransaction = async (smartAccountClient, params) => {
     const opReceipt = await smartAccountClient.waitForUserOperationReceipt({
       hash,
     });
-
-    console.log(
-      `transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`
-    );
 
     return opReceipt.receipt.transactionHash;
     //return true;

@@ -65,6 +65,7 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         rate: shift.rate,
         expiresAt: shift.expiresAt,
         quoteId: shift.quoteId,
+        day: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
       };
     });
   };
@@ -270,14 +271,17 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
                             </p>
                           </div>
                         </div>
-                        <div className="right">
-                          <p className="m-0 text-xs font-medium">
+                        <div className="right text-right">
+                          <p className="m-0 text-xs font-medium py-1">
                             {tx.status === "failed"
                               ? "Transaction Failed"
                               : `${tx.depositAmount} ${tx.depositCoin}`}
                           </p>
                           <p className="m-0 text-xs font-medium opacity-70">
                             → {tx.settleAmount} {tx.settleCoin}
+                          </p>
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.day}
                           </p>
                         </div>
                       </div>

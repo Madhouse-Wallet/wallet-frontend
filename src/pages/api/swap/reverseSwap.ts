@@ -77,7 +77,6 @@ export default async function handler(
     });
 
     const createdResponse = response.data;
-    console.log('Created swap:', createdResponse);
 
     // Create WebSocket connection
     const webSocket = new WebSocket(WEBSOCKET_ENDPOINT!);
@@ -98,16 +97,13 @@ export default async function handler(
         return;
       }
 
-      console.log('WebSocket update:', msg);
 
       switch (msg.args[0].status) {
         case 'invoice.set': {
-          console.log('Waiting for onchain transaction');
           break;
         }
 
         case 'transaction.claim.pending': {
-          console.log('Creating cooperative claim transaction');
 
           // Get claim transaction details
           const claimTxDetails = (

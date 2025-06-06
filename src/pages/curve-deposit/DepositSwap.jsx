@@ -196,7 +196,6 @@ const DepositSwap = () => {
       if (tx?.message?.includes("transfer amount exceeds balance")) {
         toast.error("Insufficient token balance.");
       } else if (tx) {
-        console.log("line-199", tx);
         setSuccess(true);
         setHash(tx);
         // toast.success("Deposit completed successfully!");

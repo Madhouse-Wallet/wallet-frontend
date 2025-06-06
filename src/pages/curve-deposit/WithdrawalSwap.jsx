@@ -409,7 +409,6 @@ const WithdrawalSwap = () => {
       setUsdcToEthShift(null);
       setGasRequiredWei("0");
     } catch (error) {
-      console.log("error", error);
       if (error.message?.includes("user rejected")) {
         toast.error("Transaction was rejected by user");
       } else if (error.message?.includes("insufficient funds")) {

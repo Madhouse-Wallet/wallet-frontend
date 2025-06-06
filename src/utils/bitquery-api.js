@@ -186,6 +186,7 @@ export const formatBitcoinTransactions = (transactions, walletAddress) => {
       summary: `${isSend ? "Sent" : "Received"} ${amount} BTC`,
       category: "bitcoin",
       rawData: tx,
+      day: date,
     };
   });
 };

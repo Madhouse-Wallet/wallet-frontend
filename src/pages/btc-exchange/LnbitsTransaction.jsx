@@ -51,6 +51,7 @@ const LnbitsTransaction = ({
             : `Received ${amount.toFixed(2)} sats`),
         category: "payment",
         rawData: tx,
+        day: moment(tx.time).format("MMMM D, YYYY h:mm A"),
       };
     });
   };
@@ -274,14 +275,17 @@ const LnbitsTransaction = ({
                             </p>
                           </div>
                         </div>
-                        <div className="right">
-                          <p className="m-0 text-xs font-medium">
+                        <div className="right text-right">
+                          <p className="m-0 text-xs font-medium py-1">
                             {/* {tx.status === "failed"
                               ? "Failed Transaction"
                               : `${tx.type === "send" ? "-" : "+"} ${
                                   tx.amount
                                 }`} */}
-                            {tx.amount}
+                            {parseFloat(tx.amount) / 1000}
+                          </p>
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.day}
                           </p>
                         </div>
                       </div>

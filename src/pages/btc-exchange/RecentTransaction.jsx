@@ -91,6 +91,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend === true ? "send" : "receive",
+        day: moment(tx.block_timestamp).format("MMMM D, YYYY h:mm A") || "",
       };
     });
   };
@@ -359,13 +360,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="right">
-                                <p className="m-0  text-xs font-medium">
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
                                   {tx.status === "rejected"
                                     ? "Insufficient Balance"
-                                    : `${tx?.type === "send" ? "-" : "+"} ${
+                                    : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
                                         tx.amount
-                                      }`}
+                                      ).toFixed(2)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
                                 </p>
                               </div>
                             </div>
@@ -452,13 +456,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="right">
-                                <p className="m-0  text-xs font-medium">
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
                                   {tx.status === "rejected"
                                     ? "Insufficient Balance"
-                                    : `${tx.type === "send" ? "-" : "+"} ${
+                                    : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
                                         tx.amount
-                                      }`}
+                                      ).toFixed(6)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
                                 </p>
                               </div>
                             </div>
@@ -575,13 +582,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="right">
-                                <p className="m-0  text-xs font-medium">
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
                                   {tx.status === "rejected"
                                     ? "Insufficient Balance"
-                                    : `${tx.type === "send" ? "-" : "+"} ${
+                                    : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
                                         tx.amount
-                                      }`}
+                                      ).toFixed(4)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
                                 </p>
                               </div>
                             </div>

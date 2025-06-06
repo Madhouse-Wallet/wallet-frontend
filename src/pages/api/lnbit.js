@@ -171,7 +171,6 @@ const addUserWallet = async (id, data, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("addUserWallet response 179-->", response);
     if (response?.adminkey) {
       return {
         status: true,
@@ -213,7 +212,6 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response splitPaymentTarget", response);
 
     if (response?.detail) {
       return {
@@ -255,7 +253,6 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response lnurlpCreate ", response);
 
     if (response?.detail) {
       return {
@@ -297,7 +294,6 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response withdrawLinkCreate ", response);
 
     if (response?.detail) {
       return {
@@ -341,7 +337,6 @@ const getUser = async (id, token, type = 1) => {
       },
     });
     response = await response.json();
-    // console.log("response get user",response)
 
     if (response?.email) {
       return {
@@ -371,8 +366,6 @@ const createTpos = async (data, apiKey, token, type = 1) => {
     } else {
       backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
     }
-    // console.log("type",backendUrl, apiKey )
-    //process.env.NEXT_PUBLIC_TBTC_PRICE_CONTRACT_ADDRESS
     let response = await fetch(`${backendUrl}tpos/api/v1/tposs`, {
       method: "POST",
       headers: {
@@ -383,7 +376,6 @@ const createTpos = async (data, apiKey, token, type = 1) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("createTpos 399-->", response);
     if (response?.id) {
       return {
         status: true,
@@ -426,7 +418,6 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
       }
     );
     response = await response.json();
-    console.log("response-> createBlotzAutoReverseSwap", type, response);
     if (response?.id) {
       return {
         status: true,
@@ -449,7 +440,6 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
 
 const createInvoice = async (data, token, type = 1, apiKey) => {
   try {
-    console.log("data", data);
     let backendUrl = "";
     // let apiKey = "";
     if (type == 1) {
@@ -470,7 +460,6 @@ const createInvoice = async (data, token, type = 1, apiKey) => {
       body: JSON.stringify(data),
     });
     response = await response.json();
-    console.log("response-->", response);
     if (response?.bolt11) {
       return {
         status: true,
@@ -642,7 +631,6 @@ const getStats = async (walletId, token, type = 1) => {
       }
     );
     response = await response.json();
-    // console.log("response get user",response)
 
     if (response) {
       return {
@@ -719,7 +707,6 @@ const getPayments = async (
   tag = null,
   apiKey = null
 ) => {
-  console.log("line-510", fromDate, toDate, apiKey);
   try {
     let backendUrl = "";
     // let apiKey = "";
@@ -753,7 +740,6 @@ const getPayments = async (
     }
 
     const url = `${backendUrl}api/v1/payments/paginated?${params.toString()}`;
-    console.log("line-542", url);
 
     let response = await fetch(url, {
       method: "GET",
@@ -765,8 +751,6 @@ const getPayments = async (
     });
 
     response = await response.json();
-
-    console.log("line-771", response);
     if (response?.data) {
       return {
         status: true,

@@ -20,11 +20,10 @@ const done = async (baseRegistrar, nftId, smartAccount, signerAddress) => {
       "safeTransferFrom(address,address,uint256)"
     ](signerAddress, smartAccount, nftId);
     await transferTx.wait();
-    console.log("6 step, transferTx-->", transferTx)
   } catch (error) {
-    console.log("error done", error)
+    console.log("error done", error);
   }
-}
+};
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -32,7 +31,6 @@ export default async function handler(req, res) {
   req.socket.setTimeout(5 * 60 * 1000); // 5 minutes timeout
 
   try {
-    console.log("line-20");
     const {
       defApiKey,
       defApiSecret,
@@ -44,7 +42,6 @@ export default async function handler(req, res) {
       reverseRegistrarAddress,
       baseRegistrarAddress,
     } = req.body;
-    console.log("line-31", req.body);
     // Validate required fields
     if (
       !defApiKey ||
@@ -100,7 +97,6 @@ export default async function handler(req, res) {
     const totalRentPrice = rentPrice.base.add(rentPrice.premium);
     const ensfee = rentPrice.base;
 
-
     // Step 2: Register name
     const setAddrSelector = "0xd5fa2b00";
     const setNameSelector = "0x77372213";
@@ -131,7 +127,6 @@ export default async function handler(req, res) {
       nameHex;
 
     const encodedData = [setAddrData, setNameData].map(ethers.utils.arrayify);
-    console.log("line-86", encodedData);
     const registerTx = await Registrar.register(
       {
         name,
@@ -145,7 +140,6 @@ export default async function handler(req, res) {
     );
 
     const receipt = await registerTx.wait();
-    console.log("line-receipt", receipt);
     // Extract NFT ID from logs
     let nftId;
     if (receipt.logs.length > 1 && receipt.logs[1].topics.length > 3) {
@@ -155,22 +149,18 @@ export default async function handler(req, res) {
     } else {
       throw new Error("Transaction logs do not contain enough data");
     }
-    console.log("line-nftId", nftId);
     // Step 3: Set Address in Resolver
     const setAddrTx = await resolver.setAddr(node, smartAccount);
     await setAddrTx.wait();
-    console.log("4 setAddrTx, transferTx-->", setAddrTx)
 
     // Step 4: Set Reverse Record
     const setNameTx = await reverseRegistrar.setName("");
     await setNameTx.wait();
-    console.log("4 Reclaim, transferTx-->", setNameTx)
 
     // Step 5: Reclaim Ownership
     const reclaimTx = await baseRegistrar.reclaim(nftId, smartAccount);
     await reclaimTx.wait();
-    console.log("5 Reclaim, transferTx-->", reclaimTx)
-    done(baseRegistrar, nftId, smartAccount, signerAddress)
+    done(baseRegistrar, nftId, smartAccount, signerAddress);
     return res.status(201).json({
       status: "success",
       message: "ENS name registered successfully",

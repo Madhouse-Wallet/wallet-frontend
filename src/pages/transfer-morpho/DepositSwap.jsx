@@ -210,7 +210,6 @@ const DepositSwap = () => {
           ]);
 
           if (tx) {
-            console.log("tx", tx);
             // toast.success("Swap completed successfully!");
             setSuccess(true);
             setHash(tx);
