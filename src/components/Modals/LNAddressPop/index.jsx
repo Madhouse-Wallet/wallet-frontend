@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
-import { updateLNAddress } from "../../../lib/apiCall";
+import { updateLNAddressCall } from "../../../lib/apiCall";
 import { useSelector } from "react-redux";
 
 const LNAdressPopup = ({
@@ -55,10 +55,7 @@ const LNAdressPopup = ({
 
       // Construct the full LN address
       const fullLnAddress = `${username}@spend.madhousewallet.com`;
-      const resposne = await updateLNAddress({
-        email: userAuth?.email,
-        newAddress: username,
-      });
+      const resposne = await updateLNAddressCall(userAuth?.email,username);
       console.log("repsonse", resposne);
       if (resposne?.status === "success") {
         setLnaddress(fullLnAddress);
