@@ -20,8 +20,8 @@ export default async function handler(
         .json({ status: "failure", message: "walletId is required" });
     }
 
-    // Always use type = 2 as requested
-    const loginResponse = (await logIn(2)) as any;
+    // Always use type = 1 as requested
+    const loginResponse = (await logIn(1)) as any;
     const token = loginResponse?.data?.token;
     if (!token) {
       return res
@@ -29,7 +29,7 @@ export default async function handler(
         .json({ status: "failure", message: "Token fetch failed" });
     }
 
-    const result = await getStats(walletId, token, 2);
+    const result = await getStats(walletId, token, 1);
 
 
     if (result.status) {

@@ -90,7 +90,6 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
   };
 
   useEffect(() => {
-    console.log("line-83", userData);
     const fetchTransactions = async () => {
       if (
         !userData?.userId?.sideshiftIds ||
@@ -106,8 +105,6 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
       try {
         // Extract IDs from userData
         const ids = userData?.userId?.sideshiftIds.map((item) => item.id);
-
-        console.log("Fetching SideShift data for IDs:", ids);
 
         // Fetch data from SideShift API
         const apiData = await fetchSideShiftData(ids);
@@ -358,7 +355,6 @@ const receiveSvg = (
     />
   </svg>
 );
-
 
 const Modal = styled.div`
   padding-bottom: 100px;

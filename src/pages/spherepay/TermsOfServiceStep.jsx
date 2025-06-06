@@ -1,7 +1,6 @@
 import React from "react";
 
 const TermsOfServiceStep = ({ step, setStep, src, customerId, termasSRC }) => {
-  console.log("termasSRC", termasSRC);
   return (
     <>
       <div className="h-[500px] w-full mx-auto">

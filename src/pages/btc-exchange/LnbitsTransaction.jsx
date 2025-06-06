@@ -14,7 +14,6 @@ const LnbitsTransaction = ({
   dateRange,
   applyTrue,
 }) => {
-  console.log("applyTrue", applyTrue);
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [detail, setDetail] = useState(false);
@@ -59,16 +58,13 @@ const LnbitsTransaction = ({
   const fetchBitcoinTransactions = async () => {
     setLoading(true);
     try {
-      console.log("dateRange", dateRange);
       const startDate = isDateFilterActive()
         ? formatDateForApi(dateRange?.startDate)
         : null;
       const endDate = isDateFilterActive()
         ? formatDateForApi(dateRange?.endDate)
         : null;
-      console.log("line-67", startDate, endDate);
       const checkUser = await getUser(userAuth?.email);
-      console.log("line-70", checkUser);
 
       if (usd === 0) {
         const response = await fetch("/api/lnbits-transaction", {

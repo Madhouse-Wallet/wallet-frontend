@@ -13,6 +13,9 @@ import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
 import { useEffect } from "react";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -42,6 +45,9 @@ const BtcExchangeSendPop = ({
   const [recoveryAddress, setRecoveryAddress] = useState();
   const [openCam, setOpenCam] = useState(false);
   const [btcBalance, setBtcBalance] = useState("0");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const submitAddress = async () => {
     try {
@@ -65,38 +71,6 @@ const BtcExchangeSendPop = ({
     } catch (error) {}
   };
 
-  // const sendNative = async () => {
-  //   try {
-  //     setLoadingSend(true);
-  //     if (!btcAmount) {
-  //       setLoadingSend(false);
-  //       return toast.error("Please Enter Valid Amount!");
-  //     }
-  //     if (!btcAddress) {
-  //       setLoadingSend(false);
-  //       return toast.error("Please Enter Valid Address!");
-  //     }
-  //     if (sendSdk) {
-  //       try {
-  //         const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
-  //         const { targetChainTxHash, walletPublicKey } =
-  //           await sendSdk.redemptions.requestRedemption(
-  //             btcAddress,
-  //             weiAmount.toString()
-  //           );
-  //         toast.success("Send BTC Success!");
-  //       } catch (error) {
-  //         toast.error(error.message);
-  //       }
-  //     } else {
-  //       toast.error("Please Login!");
-  //     }
-  //     setLoadingSend(false);
-  //   } catch (error) {
-  //     setLoadingSend(false);
-  //     toast.error(error.message);
-  //   }
-  // };
   const getSecretData = async (storageKey, credentialId) => {
     try {
       let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
@@ -126,9 +100,7 @@ const BtcExchangeSendPop = ({
         data?.storageKeySecret,
         data?.credentialIdSecret
       );
-      console.log("data - 194", data, callGetSecretData);
       if (callGetSecretData?.status) {
-        console.log("line-196", JSON.parse(callGetSecretData?.secret));
         return JSON.parse(callGetSecretData?.secret);
       } else {
         return false;
@@ -150,10 +122,8 @@ const BtcExchangeSendPop = ({
         setLoadingSend(false);
         return toast.error("Please Enter Valid Address!");
       }
-      console.log("btcAddress", btcAddress, btcAmount);
 
       const privateKey = await recoverSeedPhrase();
-      console.log("Line-159", privateKey);
       if (!privateKey) {
         toast.error("Private Key not Found");
         return;
@@ -168,7 +138,9 @@ const BtcExchangeSendPop = ({
       });
 
       if (result.success) {
-        toast.success("BTC sent successfully!");
+        setSuccess(true);
+        setHash(result.transactionHash);
+        // toast.success("BTC sent successfully!");
         setBtcAmount(0);
         setBtcAddress();
         setLoadingSend(false);
@@ -330,7 +302,7 @@ const BtcExchangeSendPop = ({
                   </div>
                   <div className="py-2 mt-4">
                     <button
-                      onClick={sendNative}
+                      onClick={() => setTrxnApproval(true)}
                       // disabled={loadingSend}
                       className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >
@@ -352,6 +324,30 @@ const BtcExchangeSendPop = ({
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={btcAmount}
+            symbol={"BTC"}
+            toAddress={btcAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={sendNative}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Bitcoin"}
+            hash={`${process.env.NEXT_PUBLIC_BITCOIN_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999] `}
       >

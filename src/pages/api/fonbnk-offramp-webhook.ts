@@ -89,22 +89,18 @@ export default async function handler(
     // Process the webhook based on different statuses
     switch (webhookData.data.status) {
       case OfframpStatus.INITIATED:
-        console.log(`Off-ramp order ${webhookData.data.orderId} initiated`);
         // Handle order initiation
         break;
       
       case OfframpStatus.OFFRAMP_SUCCESS:
-        console.log(`Off-ramp order ${webhookData.data.orderId} successful`);
         // Handle successful off-ramp
         break;
       
       case OfframpStatus.OFFRAMP_FAILED:
-        console.log(`Off-ramp order ${webhookData.data.orderId} failed`);
         // Handle off-ramp failure
         break;
       
       case OfframpStatus.REFUNDED:
-        console.log(`Off-ramp order ${webhookData.data.orderId} refunded`);
         // Handle refund
         break;
       

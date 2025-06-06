@@ -35,7 +35,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
 
-  console.log(backgrounds, "riteshBG")
 
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {

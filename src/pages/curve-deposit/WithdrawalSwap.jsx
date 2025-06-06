@@ -19,6 +19,9 @@ import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi } from "viem";
 import { updtUser } from "@/lib/apiCall";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -26,6 +29,9 @@ const WithdrawalSwap = () => {
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [goldBalance, setGoldBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
 
   // SideShift states
@@ -162,8 +168,6 @@ const WithdrawalSwap = () => {
 
     setIsLoading(true);
     try {
-      console.log("Step 1: Getting Tether Gold to USDC Base quote");
-
       // Step 1: Get Tether Gold to USDC Base shift
       const goldShift = await createGoldToUsdcBaseShift(
         amount, // Tether Gold amount
@@ -172,7 +176,6 @@ const WithdrawalSwap = () => {
         SIDESHIFT_AFFILIATE_ID
       );
 
-      console.log("Gold to USDC shift result:", goldShift);
       setGoldToUsdcShift(goldShift);
 
       if (goldShift?.settleAmount) {
@@ -193,11 +196,6 @@ const WithdrawalSwap = () => {
 
   const prepareGasShift = async (requiredGasWei) => {
     try {
-      console.log(
-        "Step 4: Preparing gas shift for ETH amount:",
-        requiredGasWei
-      );
-
       // Step 1: Get USDC Base to ETH Mainnet shift
       const ethAmountFormatted = ethers.utils.formatEther(requiredGasWei);
       const ethToUsdcShift = await createEthMainnetToUsdcbaseShift(
@@ -207,7 +205,6 @@ const WithdrawalSwap = () => {
         SIDESHIFT_AFFILIATE_ID
       );
 
-      console.log("USDC Base to ETH Mainnet shift:", usdcToEthShift);
       setUsdcToEthShift(ethToUsdcShift);
 
       // Step 2: Get ETH Mainnet to USDC Base shift for the deposit amount
@@ -219,7 +216,6 @@ const WithdrawalSwap = () => {
           SIDESHIFT_AFFILIATE_ID
         );
 
-        console.log("ETH Mainnet to USDC Base shift:", usdcToEthShift);
         setEthGasShift(usdcToEthShift);
       }
     } catch (error) {
@@ -308,12 +304,6 @@ const WithdrawalSwap = () => {
       const currentEthBalance = await checkEthBalance();
       const requiredGas = ethers.BigNumber.from(gasEstimate.totalGasCost);
 
-      console.log(
-        "Current ETH balance:",
-        ethers.utils.formatEther(currentEthBalance)
-      );
-      console.log("Required gas:", ethers.utils.formatEther(requiredGas));
-
       if (currentEthBalance.lt(requiredGas)) {
         const shortfall = requiredGas.sub(currentEthBalance);
         const minimumAmount = ethers.utils.parseEther("0.0013");
@@ -321,13 +311,6 @@ const WithdrawalSwap = () => {
         const amountToShift = shortfall.lt(minimumAmount)
           ? minimumAmount
           : shortfall;
-
-        console.log(
-          "ETH shortfall detected:",
-          ethers.utils.formatEther(shortfall),
-          "| Sending:",
-          ethers.utils.formatEther(amountToShift)
-        );
 
         await prepareGasShift(amountToShift.toString());
       }
@@ -385,9 +368,6 @@ const WithdrawalSwap = () => {
         }
       }
 
-      // Step 2: Execute main Tether Gold transaction
-      console.log("Step 2: Executing Tether Gold to USDC transaction");
-
       // Send Tether Gold to SideShift deposit address
       const goldTx = await goldContract.transfer(
         goldToUsdcShift.depositAddress,
@@ -396,9 +376,12 @@ const WithdrawalSwap = () => {
 
       toast.info(`Tether Gold transaction submitted: ${goldTx.hash}`);
       const receipt = await goldTx.wait();
-      toast.success(
-        "Tether Gold to USDC bridge transaction completed successfully!"
-      );
+      // toast.success(
+      //   "Tether Gold to USDC bridge transaction completed successfully!"
+      // );
+
+      setSuccess(true);
+      setHash(goldTx.hash);
 
       let dataa = await updtUser(
         { email: userAuth?.email },
@@ -467,6 +450,30 @@ const WithdrawalSwap = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"XAUT"}
+            toAddress={goldToUsdcShift.depositAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={executeBridge}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"TETHER GOLD"}
+            hash={`${process.env.NEXT_PUBLIC_ETHEREUM_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -600,7 +607,7 @@ const WithdrawalSwap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeBridge}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

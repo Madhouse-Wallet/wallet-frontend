@@ -62,7 +62,6 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (email) {
-        console.log("email-->", email)
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
           toast.error("User Not Found!");

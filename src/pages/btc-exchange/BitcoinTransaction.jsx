@@ -49,7 +49,6 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
           ? formatDateForApi(dateRange?.endDate)
           : null;
 
-        console.log("startDate", startDate, endDate, dateRange, applyTrue);
         // BitQuery API token
         const accessToken = process.env.NEXT_PUBLIC_BITQUERY_ACCESS_TOKEN;
 

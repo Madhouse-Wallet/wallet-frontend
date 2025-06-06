@@ -25,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "feerate": true,
             "feerate_value": 0
         }, token, 2) as any;
-        // console.log("data-->", data)
         if (data?.status) {
             return res.status(200).json({ status: "success", message: 'Swap Address Generated!', data: data?.data });
         } else {
@@ -37,44 +36,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
-
-// try {
-
-
-
-
-
-//     const { amount, publicKey } = req.body;
-//     const getToken = await logIn(2) as any;
-//     let token = getToken?.data?.token;
-//     console.log("token-->", token)
-//     const satoshiAmount = amount * 100000000;
-//     let createInvoice1 = await createInvoice({
-//         "out": false,
-//         "unit": "sat",
-//         "amount": satoshiAmount,
-//         "memo": "invoice",
-//     }, token, 2) as any;
-//     // console.log("createInvoice1", createInvoice1?.data?.bolt11)
-//     if (createInvoice1?.status) {
-//         // return res.status(400).json({ status: "failure", message: "" });
-
-//         let data = await createReverseSwap(createInvoice1?.data?.bolt11, publicKey)
-//         console.log("data", data)
-//         if (data?.status == "success") {
-//             return res.status(200).json({ status: "success", message: 'Done Payment!', data });
-//         } else {
-//             return res.status(400).json({ status: "failure", message: data.error });
-//         }
-//     } else {
-//         return res.status(400).json({ status: "failure", message: createInvoice1.msg });
-//     }
-
-// } catch (error) {
-//     console.error('Error adding user:', error);
-//     return res.status(500).json({ error: 'Internal server error' });
-// }
-// }
 
 export const config = {
     api: {

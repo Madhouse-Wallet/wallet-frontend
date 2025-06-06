@@ -40,7 +40,6 @@ const enso = new EnsoClient({
  */
 export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
   try {
-    console.log("FEE_RECEIVER", FEE_RECEIVER);
     // Get approval data from Enso
     const approvalData = await enso.getApprovalData({
       fromAddress: fromAddress,
@@ -63,9 +62,6 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
       // fee: 50, // 0.5% fee
       // feeReceiver: process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER,
     });
-
-    console.log(`Expected ${tokenOut.name} amount:`, routeData.amountOut);
-    console.log("Approval data available:", !!approvalData);
 
     // Construct our response in the expected format
     return {
@@ -120,10 +116,6 @@ export async function bridge(
   try {
     // If no receiver is specified, use the fromAddress
     const recipientAddress = receiver || fromAddress;
-
-    console.log(
-      `Bridging ${tokenIn.name} from chain ${sourceChainId} to ${tokenOut.name} on chain ${destinationChainId}`
-    );
 
     // Get approval data from Enso if needed
     const approvalData = await enso.getApprovalData({
@@ -180,8 +172,6 @@ export async function bridge(
       bundlePayload
     );
 
-    console.log("Bridge transaction created successfully");
-
     // Return data in the requested format
     return {
       amountsOut: bundleData.amountsOut || { [tokenOut.address]: "0" },
@@ -231,10 +221,6 @@ export async function reverseBridge(
     // If no receiver is specified, use the fromAddress
     const recipientAddress = receiver || fromAddress;
 
-    console.log(
-      `Bridging ${tokenIn.name} from chain ${sourceChainId} to ${tokenOut.name} on chain ${destinationChainId}`
-    );
-
     // Get approval data from Enso if needed
     const approvalData = await enso.getApprovalData({
       fromAddress: fromAddress,
@@ -281,8 +267,6 @@ export async function reverseBridge(
       },
       bundlePayload
     );
-
-    console.log("Reverse bridge transaction created successfully");
 
     // Return data in the exact format as the JSON response
     return {

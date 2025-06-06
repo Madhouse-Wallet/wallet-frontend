@@ -18,7 +18,6 @@ export const fetchBitcoinTransactionsByAddress = async (
   endDate = null
 ) => {
   // Build date filter if dates are provided
-  console.log("line-21", walletAddress, accessToken, startDate, endDate);
   let dateFilter = "";
   if (startDate || endDate) {
     const dateConditions = [];
@@ -28,7 +27,6 @@ export const fetchBitcoinTransactionsByAddress = async (
   }
 
   // GraphQL query using the Bitcoin API description
-  console.log("line-30", dateFilter, startDate, endDate);
   const query = `
     query($network: BitcoinNetwork!, $address: String!, $limit: Int!) {
       bitcoin(network: $network) {

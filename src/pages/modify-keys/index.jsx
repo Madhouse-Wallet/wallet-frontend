@@ -62,7 +62,6 @@ const ModifyKeys = () => {
   const checkAddress = async () => {
     try {
       setLoadingNewSigner(true);
-      console.log("email", email, "privateKey", privateKey)
       if (email && privateKey && safePrivateKey) {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {

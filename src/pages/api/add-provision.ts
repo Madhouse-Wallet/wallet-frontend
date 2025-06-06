@@ -25,9 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Check if the email already exists
         const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
         if (existingUser) {
-            console.log("existingUser-->", existingUser)
             if (!existingUser?.lnbitWalletId_3) {
-                console.log("3", existingUser?.lnbitWalletId_3)
                 addProvisionLambda({
                     "madhouseWallet": existingUser?.wallet,
                     "email": email,
@@ -37,7 +35,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 })
 
             } else if (!existingUser?.lnbitId) {
-                console.log("2", existingUser?.lnbitId)
                 addProvisionLambda({
                     "madhouseWallet": existingUser?.wallet,
                     "email": email,
@@ -47,7 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     "refund_address1": existingUser?.lnbitWalletId_3
                 })
             } else if (!existingUser?.lnbitId_2) {
-                console.log("1", existingUser?.lnbitId_2)
                 addProvisionLambda({
                     "madhouseWallet": existingUser?.wallet,
                     "email": email,

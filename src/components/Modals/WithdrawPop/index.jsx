@@ -85,7 +85,6 @@ const WithdrawPopup = ({
             return;
           }
           const getBtcSat = await sendLnbit(amount, userExist?.userId?.bitcoinWallet);
-          console.log("userExist?.userId?.bitcoinWallet->", userExist?.userId?.bitcoinWallet)
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
             setLoading(false);

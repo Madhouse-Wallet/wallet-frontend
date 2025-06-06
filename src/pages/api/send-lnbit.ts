@@ -23,15 +23,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "feerate": true,
             "feerate_value": 0
         }, token, 2) as any;
-        console.log("createSwapReverse data-->", data)
         if (data?.status) {
             const payInv = await payInvoice({
                 "out": true,
                 "bolt11": data?.data?.invoice // ← invoice from above
             }, token, 2,"") as any
-            console.log("payInv data-->", payInv)
             if (payInv?.status) {
-                console.log("done payment!")
                 return res.status(200).json({ status: "success", message: 'Withdraw Done!', data: payInv?.data });
             } else {
                 return res.status(400).json({ status: "failure", message: data.msg });

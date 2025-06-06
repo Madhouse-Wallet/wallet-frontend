@@ -13,15 +13,6 @@ export async function getQuoteByReceivingAmount(
     // Since we're swapping on the same chain (Base), fromChain and toChain are the same
     // const fromChain = "BASE";
     // const toChain = "BASE";
-    console.log(
-      "line-16",
-      fromChain,
-      fromToken,
-      toChain,
-      toToken,
-      toAmount,
-      fromAddress
-    );
     const result = await axios.get("https://li.quest/v1/quote/toAmount", {
       params: {
         fromChain,
@@ -33,7 +24,6 @@ export async function getQuoteByReceivingAmount(
       },
     });
 
-    console.log(`Quote received: ${JSON.stringify(result.data, null, 2)}`);
     return result.data;
   } catch (error) {
     console.error("Error getting quote:", error);

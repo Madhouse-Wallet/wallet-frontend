@@ -8,6 +8,9 @@ import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import { parseAbi } from "viem";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -16,6 +19,9 @@ const SellBitcoin = () => {
   const [tbtcBalance, setTbtcBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
@@ -128,7 +134,6 @@ const SellBitcoin = () => {
 
     if (value && !isNaN(parseFloat(value))) {
       const timer = setTimeout(async () => {
-        console.log("line-121");
         setIsLoading(true);
         try {
           // First check the amount value
@@ -155,7 +160,6 @@ const SellBitcoin = () => {
       }, 2000); // 500ms debounce
       setDebounceTimer(timer);
     } else {
-      console.log("line-146");
       setToAmount("");
       setQuote(null);
       setDestinationAddress("");
@@ -191,9 +195,7 @@ const SellBitcoin = () => {
         data?.storageKeySecret,
         data?.credentialIdSecret
       );
-      console.log("data - 194", data, callGetSecretData);
       if (callGetSecretData?.status) {
-        console.log("line-196", JSON.parse(callGetSecretData?.secret));
         return JSON.parse(callGetSecretData?.secret);
       } else {
         return false;
@@ -234,7 +236,9 @@ const SellBitcoin = () => {
       });
 
       if (result.success) {
-        toast.success("Transaction Successfully!");
+        // toast.success("Transaction Successfully!");
+        setHash(result.transactionHash);
+        setSuccess(true);
         setTimeout(fetchBalances, 2000);
         setFromAmount("");
         setToAmount("");
@@ -269,6 +273,30 @@ const SellBitcoin = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"BTC"}
+            toAddress={destinationAddress}
+            fromAddress={userAuth?.bitcoinWallet}
+            handleSend={handleSend}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Bitcoin"}
+            hash={`${process.env.NEXT_PUBLIC_BITCOIN_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -349,7 +377,7 @@ const SellBitcoin = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={handleSend}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

@@ -39,7 +39,6 @@ const BTCDebitCard: React.FC = () => {
           walletId: userExist?.userId?.lnbitWalletId_3,
         }),
       });
-      console.log("creditCardDetails-->", creditCardDetails)
       const { status, data } = await response.json();
       if (status == "success" && data?.[0]?.balance != null) {
         const balanceSats = Number(data[0].balance); // e.g., 1997000 sats

@@ -13,7 +13,7 @@ import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
 
-const RecentTransaction = () => {
+const RecentTransaction = ({ setSetFilterType }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
   const [morphotransactions, setMorphoTransactions] = useState([]);
@@ -74,20 +74,9 @@ const RecentTransaction = () => {
 
     return txs.map((tx) => {
       const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
-      console.log(
-        "line-74",
-        tx.from_address?.toLowerCase() ===
-          userAuth?.walletAddress?.toLowerCase()
-      );
-      console.log(
-        "line-79",
-        tx.from_address?.toLowerCase(),
-        userAuth?.walletAddress?.toLowerCase()
-      );
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
-      console.log("line-87", isSend === true ? "send" : "receive");
       return {
         amount,
         category: tx.token_symbol || "USDC",
@@ -271,17 +260,6 @@ const RecentTransaction = () => {
     return sortedGroups;
   };
 
-  // Apply date filter and refetch data when dateRange changes
-  // useEffect(() => {
-  //   if (userAuth?.walletAddress) {
-  //     // Don't automatically fetch when date range changes - wait for "Apply" button
-  //     if (!isDatePickerOpen) {
-  //       fetchRecentTransactions();
-  //       fetchRecentTransactionsPaxg();
-  //     }
-  //   }
-  // }, [userAuth?.walletAddress, dateRange]); // Only refetch when wallet address changes
-
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
     setTransactionData(tx);
@@ -329,7 +307,6 @@ const RecentTransaction = () => {
     data();
   }, []);
 
-  console.log("line-276", transactions);
   const tabs = [
     {
       title: "USDC",
@@ -566,7 +543,7 @@ const RecentTransaction = () => {
                           const amount = parseFloat(
                             tx.amount?.split(" ")[0] || 0
                           );
-                          return amount >= 0.01;
+                          return amount >= 0.001;
                         })
                         .map((tx, key) => (
                           <div key={key} className="md:col-span-6 col-span-12">
@@ -764,7 +741,7 @@ const RecentTransaction = () => {
                       <button
                         key={key}
                         onClick={() => {
-                          console.log("key", key);
+                          setSetFilterType(key);
                           if (key === 0) {
                             // USDC tab
                             fetchRecentTransactions();

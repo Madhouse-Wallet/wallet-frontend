@@ -1,5 +1,4 @@
 export async function fetchTransactions(walletAddress) {
-    console.log("line-2")
 
   // Validate wallet address
   if (!walletAddress) {
@@ -80,7 +79,6 @@ export async function fetchTransactions(walletAddress) {
     }
 
     const data = await response.json();
-    console.log("line-48",data)
     return data.data.transactions;
   } catch (error) {
     console.error("Error fetching transactions:", error);

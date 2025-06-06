@@ -26,6 +26,7 @@ const Dashboard = () => {
   const router = useRouter();
   const [pointSale, setPointSale] = useState();
   const [refundBTC, setRefundBTC] = useState();
+  const [hash, setHash] = useState("");
 
   const userAuth = useSelector((state) => state.Auth);
   const [buy, setBuy] = useState(false);
@@ -37,7 +38,6 @@ const Dashboard = () => {
   const [lightningBalance, setLightningBalance] = useState(0);
   const [totalUsdBalance, setTotalUsdBalance] = useState(0.0);
 
-  const MORPHO_ADDRESS = process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
   const cardMetrics = [
@@ -47,7 +47,6 @@ const Dashboard = () => {
     { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
   ];
 
-  console.log("cardMetrics", cardMetrics);
   const cardData = [
     {
       head: "Transfers",
@@ -213,7 +212,6 @@ const Dashboard = () => {
       };
 
       if (userAuth?.bitcoinWallet) {
-        console.log("line-177");
         fetchBtcBalanceInUsd();
       }
 
@@ -241,6 +239,7 @@ const Dashboard = () => {
             setRefundBTC={setRefundBTC}
             success={success}
             setSuccess={setSuccess}
+            setHash={setHash}
           />,
           document.body
         )}
@@ -264,9 +263,19 @@ const Dashboard = () => {
           document.body
         )}
 
-      {success &&
+      {/* {success &&
         createPortal(
           <SuccessPop success={success} setSuccess={setSuccess} />,
+          document.body
+        )} */}
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
           document.body
         )}
 

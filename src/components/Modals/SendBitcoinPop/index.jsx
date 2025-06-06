@@ -114,7 +114,6 @@ const SendBitcoinPop = ({
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
-      console.log("result-->",result)
       if (result.status) {
         toast.success(result.transactionHash);
         setLoading(false);

@@ -29,7 +29,6 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     if (!address) return "??";
     return address.substring(2, 4).toUpperCase();
   };
-  console.log("category", category);
   return (
     <>
       <Modal

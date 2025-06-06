@@ -54,7 +54,7 @@ export default async function handler(
     await runMiddleware(req, res, corsMiddleware);
 
     const { invoice, publicKey } = req.body;
-    console.log(" invoice, publicKey", invoice, publicKey)
+
     if (!invoice) {
       return res.status(400).json({ error: 'Invoice is required' });
     }

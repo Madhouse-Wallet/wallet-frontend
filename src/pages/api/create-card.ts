@@ -9,7 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        console.log("test")
         const { email, type = "apple" } = req.body;
         // Validate email
         // Validate email

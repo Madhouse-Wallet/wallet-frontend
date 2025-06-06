@@ -86,7 +86,6 @@ const LightningTab = (walletAddress) => {
       Number(amount),
       userAuth?.email
     );
-    // console.log("result--->", result)
     if (result.status === "error") {
       setError(result.error);
       setLoading(false);

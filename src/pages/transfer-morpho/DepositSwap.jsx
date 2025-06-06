@@ -7,6 +7,9 @@ import { swap, TOKENS } from "@/utils/morphoSwap";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import Image from "next/image";
 import { parseAbi } from "viem";
+import TransactionConfirmationPop from "../../components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "../../components/Modals/TransactionSuccessPop";
 
 const DepositSwap = () => {
   const [debounceTimer, setDebounceTimer] = useState(null);
@@ -14,6 +17,9 @@ const DepositSwap = () => {
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [morphoBalance, setMorphoBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -112,7 +118,6 @@ const DepositSwap = () => {
         userAuth?.walletAddress
       );
 
-      console.log("Enso swap quote received:", quoteResult);
       setQuote(quoteResult);
 
       if (quoteResult && quoteResult.estimate?.toAmount) {
@@ -152,7 +157,6 @@ const DepositSwap = () => {
   };
 
   const executeSwap = async () => {
-    console.log("quote", quote);
     if (!quote || !userAuth?.walletAddress) {
       toast.error("Quote not available or wallet not connected");
       return;
@@ -172,7 +176,6 @@ const DepositSwap = () => {
     }
 
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-    console.log("secretData", secretData);
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -183,7 +186,6 @@ const DepositSwap = () => {
         toast.error(getAccountCli?.msg);
         return;
       }
-      console.log("getAccountCli", getAccountCli);
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
@@ -193,7 +195,6 @@ const DepositSwap = () => {
       if (quote.approvalData && quote.routeData) {
         toast.info("Approving USDC for Enso router...", quote);
         try {
-          console.log("line-265", quote, quote?.approvalData, quote?.routeData);
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
             {
               from: quote?.approvalData?.tx?.from,
@@ -209,7 +210,10 @@ const DepositSwap = () => {
           ]);
 
           if (tx) {
-            toast.success("Swap completed successfully!");
+            console.log("tx", tx);
+            // toast.success("Swap completed successfully!");
+            setSuccess(true);
+            setHash(tx);
           }
         } catch (error) {
           if (error.message && error.message.includes("user rejected")) {
@@ -295,15 +299,37 @@ const DepositSwap = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"USDC"}
+            toAddress={quote?.routeData?.tx?.to}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={executeSwap}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">
-                    Swap USDC to Morpho via Enso
-                  </p>
+                  <p className="m-0 font-medium">Swap USDC to Morpho</p>
                   <div className="text-xs text-white/70">
                     Powered by Enso Finance
                   </div>
@@ -380,7 +406,7 @@ const DepositSwap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeSwap}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}
