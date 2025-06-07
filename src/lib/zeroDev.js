@@ -297,9 +297,10 @@ export const getAccount = async (
       account: account,
       paymaster: pimlicoClient,
       bundlerTransport: http(pimlicoUrl),
-      userOperation: {
-        estimateFeesPerGas: async () =>
-          (await pimlicoClient.getUserOperationGasPrice()).fast,
+ 	    userOperation: {
+		      estimateFeesPerGas: async () => {
+            return (await pimlicoClient.getUserOperationGasPrice()).fast
+        },
       },
     });
 
