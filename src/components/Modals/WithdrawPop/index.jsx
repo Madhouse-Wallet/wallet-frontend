@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
-import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -86,7 +85,6 @@ const WithdrawPopup = ({
             return;
           }
           const getBtcSat = await sendLnbit(amount, userExist?.userId?.bitcoinWallet);
-          console.log("userExist?.userId?.bitcoinWallet->", userExist?.userId?.bitcoinWallet)
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
             setLoading(false);

@@ -107,8 +107,6 @@ export default async function handler(
     });
 
     const createdResponse = response.data;
-    console.log('Created swap');
-    console.log(createdResponse);
 
     // Create a WebSocket connection
     const webSocket = new WebSocket(WEBSOCKET_ENDPOINT!);
@@ -129,17 +127,13 @@ export default async function handler(
         return;
       }
 
-      console.log('Got WebSocket update');
-      console.log(msg);
 
       switch (msg.args[0].status) {
         case 'swap.created': {
-          console.log('Waiting for invoice to be paid');
           break;
         }
 
         case 'transaction.mempool': {
-          console.log('Creating claim transaction');
 
           const boltzPublicKey = Buffer.from(
             createdResponse.refundPublicKey,
@@ -169,6 +163,7 @@ export default async function handler(
               [
                 {
                   ...swapOutput,
+                  value: typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length),
                   keys: keys as any,
                   preimage,
                   cooperative: true,
@@ -199,7 +194,7 @@ export default async function handler(
             claimTx.hashForWitnessV1(
               0,
               [swapOutput.script],
-              [swapOutput.value],
+              [typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length)],
               Transaction.SIGHASH_DEFAULT,
             ),
           );

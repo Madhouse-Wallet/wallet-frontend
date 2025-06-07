@@ -24,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 const getToken = await logIn(2) as any;
                 let token = getToken?.data?.token
                 let data = await getUser(existingUser?.lnbitId_3, token, 2) as any;
-                // console.log("data-->",data)
             return res.status(200).json({ status: "success", message: 'User fetched successfully', adminId: data?.data?.wallets[0]?.adminkey });
         } else {
             return res.status(400).json({ status: "failure", message: 'No User Found!' });

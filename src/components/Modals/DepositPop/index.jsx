@@ -82,7 +82,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             return;
           }
           const getBtcSat = await btcSat(amount, userExist?.userId?.bitcoinWallet);
-          console.log("userExist?.userId?.bitcoinWallet->",userExist?.userId?.bitcoinWallet)
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
             setLoading(false);
@@ -91,10 +90,9 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               fromAddress: userExist?.userId?.bitcoinWallet,
               toAddress: getBtcSat?.data?.address,
               amountSatoshi: amount * 100000000,
-              privateKeyHex: privateKey?.privateKey,
+              privateKeyHex: privateKey?.wif,
               network: "main", // Use 'main' for mainnet
             });
-            console.log("result-->", result)
             if (result.status) {
               toast.success(result.transactionHash);
               setLoading(false);

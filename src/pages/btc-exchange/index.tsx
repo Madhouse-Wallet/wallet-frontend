@@ -1,4 +1,5 @@
 "use client";
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import RecentTransaction from "./RecentTransaction";
 import { createPortal } from "react-dom";
@@ -9,13 +10,22 @@ import ReceiveUSDCPop from "../../components/Modals/ReceiveUsdcPop";
 import SendUSDCPop from "../../components/Modals/SendUsdcPop";
 import BtcExchangeSendPop from "../../components/Modals/BtcExchangeSendPop";
 import { useSelector } from "react-redux";
-import { getProvider, getAccount } from "../../lib/zeroDev";
+import {
+  getProvider,
+  getAccount,
+  publicClient,
+  getETHEREUMRpcProvider,
+  getRpcProvider,
+} from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
-// @ts-ignore
-import QRCode from "qrcode";
+
 import styled from "styled-components";
-import { fetchBalance } from "@/lib/utils";
 import { BackBtn } from "@/components/common";
+import { parseAbi } from "viem";
+import { getUser } from "@/lib/apiCall";
+import { fetchBitcoinBalance } from "../api/bitcoinBalance";
+import Web3Interaction from "@/utils/web3Interaction";
+import { ethers } from "ethers";
 const BTCEchange = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [btcExchange, setBtcExchange] = useState(false);
@@ -32,7 +42,11 @@ const BTCEchange = () => {
   const [depositSetupCheck, setDepositSetupCheck] = useState<any>(false);
   const [depositFound, setDepositFound] = useState<any>("");
   const [sendSdk, setSendSdk] = useState<any>("");
-  const [totalUsdBalance, setTotalUsdBalance] = useState(0);
+  const [totalUsdBalance, setTotalUsdBalance] = useState("0.0");
+  const [filterType, setSetFilterType] = useState(5);
+
+  const MORPHO_ADDRESS = process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS;
+  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
   const startReceive = async () => {
     try {
@@ -78,39 +92,15 @@ const BTCEchange = () => {
         setBtcExchangeSend(!btcExchangeSend);
       }
     } catch (error) {
-      console.log("startSend error-->");
+      console.log("error-->", error);
     }
   };
 
-  const generateQRCode = async (text: any) => {
-    try {
-      const qr = await QRCode.toDataURL(text);
-      setQRCode(qr);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
     if (depositSetup) {
       mint(depositSetup);
     }
   }, [depositSetup, depositSetupCheck]);
-
-  const depo = async (tbtcSdk: any) => {
-    const bitcoinRecoveryAddress = process.env.NEXT_PUBLIC_RECOVERY_ADDRESS; // Replace with a valid BTC address
-    try {
-      const deposit = await tbtcSdk.deposits.initiateDeposit(
-        bitcoinRecoveryAddress
-      );
-      setDepositSetup(deposit);
-      const bitcoinDepositAddress = await deposit.getBitcoinAddress();
-      setWalletAddressDepo(bitcoinDepositAddress);
-      await generateQRCode(bitcoinDepositAddress);
-    } catch (error) {
-      console.error("Error during deposit process:", error);
-    }
-  };
 
   const mint = async (depo: any) => {
     try {
@@ -134,34 +124,190 @@ const BTCEchange = () => {
   };
 
   useEffect(() => {
-    if (userAuth?.walletAddress) {
-      const fetchData = async () => {
-        try {
-          console.log("line-141");
-          console.log("line-144");
-          try {
-            console.log("line-151");
-            const walletBalance = await fetchBalance(
-              userAuth?.walletAddress
-              // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed"
-            );
+    fetchBalance(filterType);
+  }, [filterType]);
 
-            if (walletBalance?.result?.length) {
-              const totalUsd = walletBalance.result.reduce(
-                (sum: any, token: any) => sum + (token.usd_value || 0),
-                0
+  const fetchBalance = async (filterType: any) => {
+    if (userAuth?.walletAddress) {
+      if (filterType === 0) {
+        try {
+          const senderUsdcBalance = await publicClient.readContract({
+            abi: parseAbi([
+              "function balanceOf(address account) returns (uint256)",
+            ]),
+            address: USDC_ADDRESS as `0x${string}`,
+            functionName: "balanceOf",
+            args: [userAuth?.walletAddress],
+          });
+          const usdcBalance = String(
+            Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+          );
+
+          setTotalUsdBalance(
+            `Dollars: $ ${parseFloat(usdcBalance).toFixed(2)}`
+          );
+        } catch (err) {
+          console.error("Error fetching token balances:", err);
+        }
+      } else if (filterType === 1) {
+        try {
+          const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
+
+          if (result?.error) {
+            console.error("Error fetching BTC balance:", result.error);
+            return;
+          }
+          setTotalUsdBalance(
+            `Bitcoin: ${result?.balance !== 0 ? (result?.balance).toFixed(8) : "0"}`
+          );
+        } catch (error) {
+          console.error("Failed to fetch BTC balance in USD:", error);
+        }
+      } else if (filterType === 2) {
+        const providerETH = await getETHEREUMRpcProvider();
+        const provider = await getRpcProvider();
+        const web3 = new Web3Interaction("sepolia", provider);
+
+        // Fetch PAXG balance on Ethereum
+        const paxgResult = await web3.getGOLDBalance(
+          process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS!,
+          userAuth?.walletAddress,
+          providerETH as ethers.providers.Web3Provider
+        );
+
+        if (paxgResult.success && paxgResult.balance) {
+          setTotalUsdBalance(
+            `Gold: ${
+              paxgResult.balance !== "0.0"
+                ? Number.parseFloat(paxgResult.balance).toFixed(6).toString()
+                : "0"
+            }`
+          );
+        }
+      } else if (filterType === 3) {
+        try {
+          const userExist = await getUser(userAuth.email);
+
+          const response = await fetch("/api/lnbit-balance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              walletId: userExist?.userId?.lnbitWalletId,
+              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+            }),
+          });
+
+          const { status, data } = await response.json();
+
+          if (status === "success") {
+            if (data?.[0]?.balance != null) {
+              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+              const balanceSatss = Math.floor(balanceSats / 1000);
+              setTotalUsdBalance(
+                `Lightning TPOS USDC: ${balanceSatss.toString()}`
               );
-              setTotalUsdBalance(totalUsd.toFixed(2));
+            } else {
+              setTotalUsdBalance(`Lightning TPOS USDC: 0`);
             }
-          } catch (err) {}
+          } else {
+            console.error(
+              "Failed to fetch lightning balance or empty balance."
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching lightning balance:", error);
+        }
+      } else if (filterType === 4) {
+        try {
+          const userExist = await getUser(userAuth.email);
+
+          const response = await fetch("/api/lnbit-balance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              walletId: userExist?.userId?.lnbitWalletId_2,
+              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+            }),
+          });
+
+          const { status, data } = await response.json();
+
+          if (status === "success") {
+            if (data?.[0]?.balance != null) {
+              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+              const balanceSatss = Math.floor(balanceSats / 1000);
+              setTotalUsdBalance(
+                `Lightning TPOS Bitcoin: ${balanceSatss.toString()}`
+              );
+            } else {
+              setTotalUsdBalance(`Lightning TPOS Bitcoin: 0`);
+            }
+          } else {
+            console.error(
+              "Failed to fetch lightning balance or empty balance."
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching lightning balance:", error);
+        }
+      } else if (filterType === 5 || filterType === 7) {
+        try {
+          const userExist = await getUser(userAuth.email);
+
+          const response = await fetch("/api/spend-balance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              walletId: userExist?.userId?.lnbitWalletId_3,
+              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+            }),
+          });
+
+          const { status, data } = await response.json();
+
+          if (status === "success") {
+            if (data?.[0]?.balance != null) {
+              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+              const balanceSatss = Math.floor(balanceSats / 1000);
+              setTotalUsdBalance(`Lightning Spend: ${balanceSatss.toString()}`);
+            } else {
+              setTotalUsdBalance(`Lightning Spend: 0`);
+            }
+          } else {
+            console.error(
+              "Failed to fetch lightning balance or empty balance."
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching lightning balance:", error);
+        }
+      } else if (filterType === 6) {
+        try {
+          const senderMPRPHOBalance = await publicClient.readContract({
+            abi: parseAbi([
+              "function balanceOf(address account) returns (uint256)",
+            ]),
+            address: MORPHO_ADDRESS as `0x${string}`,
+            functionName: "balanceOf",
+            args: [userAuth?.walletAddress],
+          });
+          const morphoBalance = String(
+            Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
+          );
+
+          setTotalUsdBalance(`Morpho: ${parseFloat(morphoBalance).toFixed(4)}`);
         } catch (error) {
           console.error("Error fetching token balances:", error);
         }
-      };
-
-      fetchData();
+      }
     }
-  }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
+  };
 
   return (
     <>
@@ -252,9 +398,8 @@ const BTCEchange = () => {
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
                     <div className="left ">
                       <h4 className="m-0 font-normal text-base flex items-center">
-                        Dollars
                         <span className="font-bold ms-2 text-2xl">
-                          $ {totalUsdBalance}
+                          {totalUsdBalance}
                         </span>
                       </h4>
                     </div>
@@ -286,7 +431,7 @@ const BTCEchange = () => {
               <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
-                    <RecentTransaction />
+                    <RecentTransaction setSetFilterType={setSetFilterType} />
                   </div>
                 </div>
               </div>

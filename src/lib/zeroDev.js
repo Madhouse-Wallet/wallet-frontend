@@ -3,7 +3,6 @@ import {
   zeroAddress,
   createPublicClient,
   http,
-  parseEther,
   createWalletClient,
   parseAbi,
 } from "viem";
@@ -26,15 +25,21 @@ import dotenv from "dotenv";
 import timers from "timers-promises";
 dotenv.config();
 
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL
+export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_MAINNET_RPC_URL;
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
 
-const SAFE_PRIVATE_KEY = RELAY_PRIVATE_KEY; // we need to remove this
+// Audit: https://github.com/safe-global/safe-smart-account/blob/v1.4.0/docs/Safe_Audit_Report_1_4_0.pdf
+//do not replace addresses with env vars
+const SAFE_MULTISEND_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
+const SAFE_4337_MODULE_ADDRESS = "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
+const SAFE_SINGLETON_ADDRESS = "0x41675C099F32341bf84BFc5382aF534df5C7461a";
 
 export const publicClient = createPublicClient({
   chain: base,
-  transport: http(),
+  transport: http(BASE_RPC_URL),
 });
 
 export const pimlicoClient = createPimlicoClient({
@@ -67,6 +72,29 @@ export const getMenmonic = async () => {
   }
 };
 
+export const checkMenmonic = async (seedPhrase, privateKey) => {
+  try {
+    // seedPhrase
+    const wallet = Wallet.fromMnemonic(seedPhrase);
+    const eoaPrivateKey = wallet.privateKey;
+    if (privateKey == eoaPrivateKey) {
+      return {
+        status: true,
+      };
+    } else {
+      return {
+        status: false,
+        msg: "The seed phrase and private key do not match."
+      };
+    }
+  } catch (error) {
+    return {
+      status: false,
+      msg: "The seed phrase and private key do not match."
+    };
+  }
+}
+
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
     const signer = privateKeyToAccount(PRIVATE_KEY);
@@ -89,8 +117,6 @@ export const setupNewAccount = async (
   chain = base
 ) => {
   try {
-    console.log("Private Key: ", PRIVATE_KEY);
-    console.log("safe Private Key: ", SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
@@ -105,7 +131,7 @@ export const setupNewAccount = async (
     const walletClient = createWalletClient({
       account,
       chain: base,
-      transport: http(),
+      transport: http(BASE_RPC_URL),
     }).extend(eip7702Actions());
 
     const relayAccount = privateKeyToAccount(relayPrivateKey);
@@ -113,36 +139,22 @@ export const setupNewAccount = async (
     const relayClient = createWalletClient({
       account: relayAccount,
       chain: base,
-      transport: http(),
+      transport: http(BASE_RPC_URL),
     });
 
     const [walletAddress] = await walletClient.getAddresses();
-    console.log(
-      `Wallet Address:  https://basescan.org/address/${walletAddress}`
-    );
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: parseEther("0.000001"),
+      value: BigInt(1000000)*(await publicClient.getGasPrice()) 
     });
+    await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
-    console.log(
-      `Sent eth for account creation: https://basescan.org/tx/${hash}`
-    );
-    await timers.setTimeout(5000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
-
-    const SAFE_SINGLETON_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
 
-    const SAFE_MULTISEND_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_MULTISEND_ADDRESS;
-
-    const SAFE_4337_MODULE_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_4337_MODULE_ADDRESS;
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -170,7 +182,6 @@ export const setupNewAccount = async (
       authorizationList: [authorization],
     });
 
-    console.log(`Created Smart Account: https://basescan.org/tx/${txHash}`);
 
     const safeAccount = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
@@ -184,7 +195,7 @@ export const setupNewAccount = async (
       res = {
         status: true,
         data: {
-          privatekey: eoaPrivateKey, //PRIVATE_KEY,
+          privatekey: eoaPrivateKey, 
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
@@ -206,10 +217,11 @@ export const setupNewAccount = async (
   }
 };
 
-export const doAccountRecovery = async (PRIVATE_KEY, address) => {
+export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) => {
   try {
     const getAccount = await checkPrivateKey(PRIVATE_KEY);
-    if (!getAccount.status) {
+    const getOwnerAccount = await checkPrivateKey(SAFE_PRIVATE_KEY);
+    if (!getAccount.status || !getOwnerAccount.status) {
       return {
         status: false,
         msg: "Invalid Private Key!",
@@ -217,7 +229,6 @@ export const doAccountRecovery = async (PRIVATE_KEY, address) => {
     }
     const eoaPrivateKey = PRIVATE_KEY;
     const safePrivateKey = SAFE_PRIVATE_KEY;
-    //eoaPrivateKey=PRIVATE_KEY
 
     const account = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
@@ -259,9 +270,12 @@ export const getProvider = async (kernelClient) => {
   }
 };
 
-export const getAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) => {
+export const getAccount = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  chain = base
+) => {
   try {
-    console.log("line-268", PRIVATE_KEY, SAFE_PRIVATE_KEY);
     const eoaPrivateKey = PRIVATE_KEY;
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
@@ -271,7 +285,6 @@ export const getAccount = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, chain = base) =>
     const pimlicoApiKey = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
     if (!pimlicoApiKey) throw new Error("PIMLICO_API_KEY is required");
 
-    //eoaPrivateKey = PRIVATE_KEY
     const account = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
       owners: [privateKeyToAccount(safePrivateKey)],
@@ -312,10 +325,10 @@ export const usdc = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
 
 export const sendTransaction = async (smartAccountClient, params) => {
   const quotes = await pimlicoClient.getTokenQuotes({
+    chain: base,
     tokens: [usdc],
   });
   const { postOpGas, exchangeRate, paymaster } = quotes[0];
-
   try {
     const userOperation = await smartAccountClient.prepareUserOperation({
       calls: params,
@@ -355,10 +368,6 @@ export const sendTransaction = async (smartAccountClient, params) => {
       hash,
     });
 
-    console.log(
-      `transactionHash: https://basescan.org/tx/${opReceipt.receipt.transactionHash}`
-    );
-
     return opReceipt.receipt.transactionHash;
     //return true;
   } catch (error) {
@@ -369,9 +378,7 @@ export const sendTransaction = async (smartAccountClient, params) => {
 
 export const getRpcProvider = async () => {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://mainnet.base.org"
-    );
+    const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URL);
     return provider;
   } catch (error) {
     return false;
@@ -380,9 +387,7 @@ export const getRpcProvider = async () => {
 
 export const getETHEREUMRpcProvider = async () => {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
-    );
+    const provider = new ethers.providers.JsonRpcProvider(MAINNET_RPC_URL);
     return provider;
   } catch (error) {
     return false;

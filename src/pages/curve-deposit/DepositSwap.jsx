@@ -1,44 +1,48 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   getRpcProvider,
-  getProvider,
   getAccount,
   getETHEREUMRpcProvider,
+  publicClient,
+  sendTransaction,
+  USDC_ABI,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
-import { bridge, swap } from "../../utils/morphoSwap"; // Updated import to use bridge and swap functions
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
-import { mainnet, base } from "viem/chains";
+import { parseAbi, parseUnits } from "viem";
+import { createUsdcBaseToGoldShift } from "../api/sideShiftAI";
+import { updtUser } from "@/lib/apiCall";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
-  const [paxgBalance, setPaxgBalance] = useState("0");
+  const [tethergolgBalance, setTetherGoldBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
-  const [bridgeData, setBridgeData] = useState(null);
-  const [gasSwapData, setGasSwapData] = useState(null); // Store swap route for gas
-  const [gasRequiredWei, setGasRequiredWei] = useState("0"); // Store gas required in wei
+  const [shiftData, setShiftData] = useState(null);
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [depositAddress, setDepositAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
 
-  // Fixed bridge direction: USDC on Base to PAXG on Ethereum
+  // Fixed direction: USDC on Base to PAXG on Ethereum
   const [bridgeDirection] = useState({
     from: "USDC",
-    to: "PAXG",
+    to: "TETHER GOLD",
   });
 
   // Chain constants
-  const BASE_CHAIN = process.env.NEXT_PUBLIC_MAINNET_CHAIN; // 8453 for Base
-  const ETHEREUM_CHAIN = process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG; // 1 for Ethereum
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
-  const PAXG_ADDRESS = process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address;
-  const ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"; // Native ETH address
+  const TETHER_GOLD_ADDRESS =
+    process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS;
 
   useEffect(() => {
     if (userAuth?.walletAddress) {
@@ -61,199 +65,82 @@ const DepositSwap = () => {
       const web3 = new Web3Interaction("sepolia", provider);
 
       // Fetch USDC balance on Base
-      const usdcResult = await web3.getUSDCBalance(
-        USDC_ADDRESS,
-        userAuth?.walletAddress,
-        provider
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: USDC_ADDRESS,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
 
-      if (usdcResult.success && usdcResult.balance) {
-        setUsdcBalance(Number.parseFloat(usdcResult.balance).toFixed(6));
+      if (balance) {
+        setUsdcBalance(balance);
       } else {
-        toast.error(usdcResult.error || "Failed to fetch USDC balance");
+        toast.error("Failed to fetch USDC balance");
       }
 
       // Fetch PAXG balance on Ethereum
-      const paxgResult = await web3.getMorphoBalance(
-        PAXG_ADDRESS,
+      const paxgResult = await web3.getGOLDBalance(
+        TETHER_GOLD_ADDRESS,
         userAuth?.walletAddress,
-        // "0xA5E256722897FCdC32a5406222175C09B4952489",
         providerETH
       );
 
       if (paxgResult.success && paxgResult.balance) {
-        setPaxgBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
+        setTetherGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
+      console.log("error", error);
       toast.error("Failed to fetch token balances");
     }
   };
 
-  // Updated to use bridge function and prepare gas swap
-  const updateBridgeQuote = async (amount) => {
+  const updateShiftQuote = async (amount) => {
     if (!amount || !userAuth?.walletAddress) return;
 
     setIsLoading(true);
     try {
-      // Define token objects for the bridge function
-      const tokenIn = {
-        address: USDC_ADDRESS,
-        name: "USDC",
-        chainId: Number.parseInt(BASE_CHAIN),
-      };
-
-      const tokenOut = {
-        address: PAXG_ADDRESS,
-        name: "PAXG",
-        chainId: Number.parseInt(ETHEREUM_CHAIN),
-      };
-
-      // Convert amount to wei (USDC has 6 decimals)
-      const amountInWei = ethers.utils.parseUnits(amount, 6).toString();
-
-      // Call the bridge function
-      const bridgeResult = await bridge(
-        tokenIn,
-        tokenOut,
-        amountInWei,
-        Number.parseInt(BASE_CHAIN),
-        Number.parseInt(ETHEREUM_CHAIN),
-        userAuth?.walletAddress
+      const shift = await createUsdcBaseToGoldShift(
+        amount,
+        userAuth?.walletAddress,
+        process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+        process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
 
-      setBridgeData(bridgeResult);
-
-      // Get the expected amount out from the bridge response
-      if (bridgeResult?.amountsOut) {
-        const amountOutValue = Object.values(bridgeResult.amountsOut)[0];
-        if (amountOutValue) {
-          const formattedToAmount = ethers.utils.formatUnits(
-            amountOutValue,
-            18
-          );
-          setToAmount(formattedToAmount);
-        }
-      }
-
-      // Extract gas requirement from bridge data and add buffer
-      let gasRequired = "0";
-      // if (bridgeResult?.gas) {
-      //   // Add buffer to gas (10000 wei buffer)
-      //   const gasWithBuffer = ethers.BigNumber.from(bridgeResult.gas).add(
-      //     "10000"
-      //   );
-      //   gasRequired = gasWithBuffer.toString();
-      // } else
-      console.log("line-131", bridgeResult);
-      if (bridgeResult?.tx?.value) {
-        // If gas is in tx.value field, use that with buffer
-        const gasWithBuffer = ethers.BigNumber.from(bridgeResult.tx.value).add(
-          "1000"
-        );
-        gasRequired = gasWithBuffer.toString();
-      }
-
-      setGasRequiredWei(gasRequired);
-
-      // Now prepare gas swap: ETH to USDC to get required USDC amount for gas
-      if (gasRequired !== "0") {
-        await prepareGasSwap(gasRequired);
-      }
+      setShiftData(shift);
+      setDepositAddress(shift.depositAddress);
+      setToAmount(shift.settleAmount.toString());
     } catch (error) {
-      console.error("Bridge quote error:", error);
-      toast.error("Failed to get bridge quote");
+      console.error("Shift quote error:", error);
+      toast.error(error ? error.message : "Failed to get shift quote");
       setToAmount("");
-      setBridgeData(null);
-      setGasSwapData(null);
-      setGasRequiredWei("0");
+      setShiftData(null);
+      setDepositAddress("");
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Prepare gas swap: ETH to USDC on Base to determine required USDC
-  const prepareGasSwap = async (gasRequiredWei) => {
-    try {
-      console.log("Preparing gas swap for gas amount:", gasRequiredWei);
-
-      const ethToken = {
-        address: ETH_ADDRESS,
-        name: "ETH",
-        chainId: Number.parseInt(BASE_CHAIN),
-      };
-
-      const usdcToken = {
-        address: USDC_ADDRESS,
-        name: "USDC",
-        chainId: Number.parseInt(BASE_CHAIN),
-      };
-
-      // Get swap quote from ETH to USDC to know how much USDC we need
-      const ethToUsdcSwap = await swap(
-        ethToken,
-        usdcToken,
-        gasRequiredWei, // ETH amount in wei
-        Number.parseInt(BASE_CHAIN),
-        userAuth?.walletAddress
-      );
-
-      console.log("ETH to USDC swap quote:", ethToUsdcSwap);
-
-      // Now get the reverse swap (USDC to ETH) using the USDC amount we just calculated
-      if (ethToUsdcSwap?.estimate?.toAmount) {
-        const usdcToEthSwap = await swap(
-          usdcToken,
-          ethToken,
-          ethToUsdcSwap.estimate.toAmount, // USDC amount needed
-          Number.parseInt(BASE_CHAIN),
-          userAuth?.walletAddress
-        );
-
-        console.log("USDC to ETH swap route prepared:", usdcToEthSwap);
-        setGasSwapData(usdcToEthSwap);
-      }
-    } catch (error) {
-      console.error("Gas swap preparation error:", error);
-      toast.error("Failed to prepare gas swap");
-    }
-  };
-
-  // Handle input changes in the first input field
-  // const handleFromAmountChange = (e) => {
-  //   const value = e.target.value;
-  //   setFromAmount(value);
-  //   if (value && !Number.isNaN(Number.parseFloat(value))) {
-  //     updateBridgeQuote(value);
-  //   } else {
-  //     setToAmount("");
-  //     setBridgeData(null);
-  //     setGasSwapData(null);
-  //     setGasRequiredWei("0");
-  //     setUsdValue({ from: "0", to: "0" });
-  //   }
-  // };
 
   const handleFromAmountChange = useCallback(
     (e) => {
       const value = e.target.value;
       setFromAmount(value);
 
-      // Clear existing timer
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
 
-      // Clear previous data immediately when input changes
       setToAmount("");
-      setBridgeData(null);
-      setGasSwapData(null);
-      setGasRequiredWei("0");
-      setUsdValue({ from: "0", to: "0" });
+      setShiftData(null);
+      setDepositAddress("");
 
-      // Set new timer for 2 seconds
       if (value && !Number.isNaN(Number.parseFloat(value))) {
         const newTimer = setTimeout(() => {
-          updateBridgeQuote(value);
+          updateShiftQuote(value);
         }, 2000);
         setDebounceTimer(newTimer);
       }
@@ -261,10 +148,9 @@ const DepositSwap = () => {
     [debounceTimer]
   );
 
-  // Execute the complete bridge transaction with gas handling
-  const executeBridge = async () => {
-    if (!bridgeData || !userAuth?.walletAddress) {
-      toast.error("Bridge data not available or wallet not connected");
+  const executeDeposit = async () => {
+    if (!shiftData || !depositAddress || !userAuth?.walletAddress) {
+      toast.error("Shift data not available or wallet not connected");
       return;
     }
 
@@ -279,103 +165,63 @@ const DepositSwap = () => {
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-    console.log("secretData", secretData);
     setIsLoading(true);
 
     try {
-      const chain = base; // We're working on Base chain for gas swap
-      const getAccountCli = await getAccount(secretData?.seedPhrase, chain);
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
         return;
       }
 
-      console.log("getAccountCli", getAccountCli);
-      const signer = await getProvider(getAccountCli?.kernelClient);
-      console.log("signer", signer);
+      // Send USDC to the deposit address
 
-      let signerAddress;
-      try {
-        signerAddress = await signer?.signer?.getAddress();
-      } catch (error) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
+        },
+      ]);
+      if (tx?.message?.includes("transfer amount exceeds balance")) {
+        toast.error("Insufficient token balance.");
+      } else if (tx) {
+        setSuccess(true);
+        setHash(tx);
+        // toast.success("Deposit completed successfully!");
+        fetchBalances();
+        setFromAmount("");
+        setToAmount("");
+        setShiftData(null);
+        setDepositAddress("");
+        let data = await updtUser(
+          { email: userAuth?.email },
+          {
+            $push: {
+              sideshiftIds: {
+                id: shiftData.id,
+                date: new Date(), // stores the current date/time
+                type: "goldDeposit", // or whatever type value you want to store
+              },
+            },
+          }
         );
-        setIsLoading(false);
-        return;
+      } else {
+        toast.error(tx || "Transaction failed");
       }
-
-      if (!signerAddress) {
-        toast.error(
-          "Wallet signer not properly initialized. Please reconnect your wallet."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // Step 1: Execute gas swap (USDC to ETH) if we have gas swap data
-      if (gasSwapData && gasRequiredWei !== "0") {
-        console.log("Step 1: Executing gas swap (USDC to ETH)");
-
-        // Handle approval for gas swap if needed
-        if (gasSwapData.approvalData) {
-          console.log("Processing gas swap approval");
-          const gasApprovalTx = await signer?.signer?.sendTransaction(
-            gasSwapData.approvalData.tx
-          );
-          toast.info(`Gas swap approval submitted: ${gasApprovalTx.hash}`);
-          await gasApprovalTx.wait();
-          toast.success("Gas swap approval complete");
-        }
-
-        // Execute gas swap transaction
-        const gasSwapTx = await signer?.signer?.sendTransaction(
-          gasSwapData.routeData.tx
-        );
-        toast.info(`Gas swap transaction submitted: ${gasSwapTx.hash}`);
-        await gasSwapTx.wait();
-        toast.success(
-          "Gas swap completed - ETH acquired for bridge transaction"
-        );
-      }
-
-      // Step 2: Execute bridge transaction approval if needed
-      if (bridgeData.approvalData) {
-        console.log("Step 2: Processing bridge approval");
-        const bridgeApprovalTx = await signer?.signer?.sendTransaction(
-          bridgeData.approvalData.tx
-        );
-        toast.info(`Bridge approval submitted: ${bridgeApprovalTx.hash}`);
-        await bridgeApprovalTx.wait();
-        toast.success("Bridge approval complete");
-      }
-
-      // Step 3: Execute bridge transaction
-      console.log("Step 3: Processing bridge transaction");
-      const bridgeTx = await signer?.signer?.sendTransaction(bridgeData.tx);
-
-      toast.info(`Bridge transaction submitted: ${bridgeTx.hash}`);
-      const receipt = await bridgeTx.wait();
-      toast.success("Bridge transaction completed successfully!");
-
-      // Refresh balances
-      fetchBalances();
-
-      // Reset form
-      setFromAmount("");
-      setToAmount("");
-      setBridgeData(null);
-      setGasSwapData(null);
-      setGasRequiredWei("0");
     } catch (error) {
-      console.log("error", error);
+      console.error("Deposit execution error:", error);
       if (error.message?.includes("user rejected")) {
         toast.error("Transaction was rejected by user");
       } else if (error.message?.includes("insufficient funds")) {
         toast.error("Insufficient funds for transaction");
       } else {
         toast.error(
-          `Failed to execute bridge: ${error.message || "Unknown error"}`
+          `Failed to execute deposit: ${error.message || "Unknown error"}`
         );
       }
     } finally {
@@ -383,38 +229,59 @@ const DepositSwap = () => {
     }
   };
 
-  // Determine button text based on state
   const getButtonText = () => {
     if (isLoading) return "Loading...";
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance))
       return "Insufficient USDC Balance";
-    if (!bridgeData) return "Get Bridge Quote";
-    if (gasRequiredWei !== "0" && !gasSwapData) return "Preparing gas swap...";
-    return "Bridge Tokens";
+    if (!shiftData || !depositAddress) return "Get Shift Quote";
+    return "Deposit Tokens";
   };
 
-  // Check if button should be disabled
   const isButtonDisabled = () => {
     return (
       isLoading ||
       !fromAmount ||
       !toAmount ||
-      !bridgeData ||
-      Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance) ||
-      (gasRequiredWei !== "0" && !gasSwapData)
+      !shiftData ||
+      !depositAddress ||
+      Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
     );
   };
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"USDC"}
+            toAddress={depositAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={executeDeposit}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Bridge</p>
+                  <p className="m-0 font-medium">Deposit</p>
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
@@ -481,11 +348,12 @@ const DepositSwap = () => {
                         </h6>
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
                           <span className="icn">
                             <Image
                               src={
-                                process.env.NEXT_PUBLIC_IMAGE_URL + "gold.webp"
+                                process.env.NEXT_PUBLIC_IMAGE_URL +
+                                "tethergold.png"
                               }
                               alt="logo"
                               height={22}
@@ -495,26 +363,25 @@ const DepositSwap = () => {
                           </span>{" "}
                           {bridgeDirection.to}
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(paxgBalance).toFixed(4)}{" "}
-                          {bridgeDirection.to}
+                        <h6 className="m-0 font-medium text-white/50 whitespace-nowrap">
+                          Balance: {parseFloat(tethergolgBalance).toFixed(6)}{" "}
+                          {/* {bridgeDirection.to} */}
+                          XAUT
                         </h6>
                       </div>
                     </div>
                   </div>
 
-                  {/* Gas information display */}
-                  {gasRequiredWei !== "0" && (
+                  {/* Deposit address display */}
+                  {depositAddress && (
                     <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
                       <p className="m-0 text-amber-500">
-                        Gas required: {ethers.utils.formatEther(gasRequiredWei)}{" "}
-                        ETH
+                        Deposit Address: {depositAddress.slice(0, 10)}...
+                        {depositAddress.slice(-8)}
                       </p>
-                      {gasSwapData && (
-                        <p className="m-0 text-green-500">
-                          Gas swap prepared: USDC → ETH
-                        </p>
-                      )}
+                      <p className="m-0 text-green-500">
+                        You will receive: {toAmount} PAXG
+                      </p>
                     </div>
                   )}
 
@@ -523,7 +390,7 @@ const DepositSwap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeBridge}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

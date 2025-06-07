@@ -11,13 +11,17 @@ import LnbitsTransaction from "./LnbitsTransaction";
 import { toast } from "react-toastify";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
+import SideShiftTransaction from "./SideShiftTransaction";
 
-const RecentTransaction = () => {
+const RecentTransaction = ({ setSetFilterType }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [transactions, setTransactions] = useState([]);
+  const [morphotransactions, setMorphoTransactions] = useState([]);
+  const [useData, setUserData] = useState();
+
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(5);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
   const [btcTransactions, setBtcTransactions] = useState([]);
@@ -28,6 +32,7 @@ const RecentTransaction = () => {
   const [lnbitWallet2, setLnbitWallet2] = useState("");
   const [spendWallet, setSpendWallet] = useState("");
   const [applyTrue, setApplyTrue] = useState(false);
+  const [sideshiftTxs, setSideshiftTxs] = useState([]);
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [dateRange, setDateRange] = useState([
@@ -72,7 +77,6 @@ const RecentTransaction = () => {
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
-
       return {
         amount,
         category: tx.token_symbol || "USDC",
@@ -81,11 +85,13 @@ const RecentTransaction = () => {
         id: tx.transaction_hash || "",
         rawData: tx,
         status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${isSend ? "Transfer" : "Receive"
-          }`,
+        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
+          isSend ? "Transfer" : "Receive"
+        }`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
-        type: isSend ? "send" : "receive",
+        type: isSend === true ? "send" : "receive",
+        day: moment(tx.block_timestamp).format("MMMM D, YYYY h:mm A") || "",
       };
     });
   };
@@ -122,6 +128,36 @@ const RecentTransaction = () => {
     }
   };
 
+  const fetchRecentMorphoTransactions = async () => {
+    try {
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_CHAIN,
+        [process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS],
+        // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
+      setMorphoTransactions(data?.result);
+      if (data?.result?.length) {
+        const formattedTransactions = formatWalletHistoryData(
+          data.result.slice(0, 10)
+        );
+        setMorphoTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
   const fetchRecentTransactionsPaxg = async () => {
     try {
       setTransactionType("all");
@@ -135,7 +171,7 @@ const RecentTransaction = () => {
 
       const data = await fetchTokenTransfers(
         process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG,
-        [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address],
+        [process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS],
         // "0x0d8b79e9f0EC1ad55210E45CcC137CD1506B3Aab",
         userAuth?.walletAddress,
         startDate,
@@ -225,17 +261,6 @@ const RecentTransaction = () => {
     return sortedGroups;
   };
 
-  // Apply date filter and refetch data when dateRange changes
-  useEffect(() => {
-    if (userAuth?.walletAddress) {
-      // Don't automatically fetch when date range changes - wait for "Apply" button
-      if (!isDatePickerOpen) {
-        fetchRecentTransactions();
-        fetchRecentTransactionsPaxg();
-      }
-    }
-  }, [userAuth?.walletAddress, dateRange]); // Only refetch when wallet address changes
-
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
     setTransactionData(tx);
@@ -243,6 +268,8 @@ const RecentTransaction = () => {
 
   const transactionsByDate = groupTransactionsByDate(transactions);
   const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
+
+  const transactionsByDateMorpho = groupTransactionsByDate(morphotransactions);
 
   // Handle date range selection
   const handleDateRangeChange = (item) => {
@@ -254,8 +281,16 @@ const RecentTransaction = () => {
   const applyDateFilter = () => {
     setApplyTrue(true);
     if (isDateFilterActive()) {
-      fetchRecentTransactions();
-      fetchRecentTransactionsPaxg();
+      // Only fetch if on USDC or Gold tabs
+      if (activeTab === 0) {
+        fetchRecentTransactions();
+      }
+      if (activeTab === 2) {
+        fetchRecentTransactionsPaxg();
+      }
+      if (activeTab === 6) {
+        fetchRecentMorphoTransactions();
+      }
       setIsDatePickerOpen(false);
     } else {
       toast.error("Please select both start and end dates");
@@ -265,6 +300,7 @@ const RecentTransaction = () => {
   useEffect(() => {
     const data = async () => {
       let userExist = await getUser(userAuth.email);
+      setUserData(userExist);
       setLnbitWallet1(userExist?.userId?.lnbitWalletId || "");
       setLnbitWallet2(userExist?.userId?.lnbitWalletId_2 || "");
       setSpendWallet(userExist?.userId?.lnbitWalletId_3 || "");
@@ -272,7 +308,6 @@ const RecentTransaction = () => {
     data();
   }, []);
 
-  console.log("line-276", transactions)
   const tabs = [
     {
       title: "USDC",
@@ -287,49 +322,59 @@ const RecentTransaction = () => {
                       {date}
                     </p>
                     <div className="grid gap-3 grid-cols-12">
-                      {txs.map((tx, key) => (
-                        <div key={key} className="md:col-span-6 col-span-12">
-                          <div
-                            onClick={() => handleTransactionClick(tx)}
-                            className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                          >
-                            <div className="left flex items-start gap-2">
-                              <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "send"
-                                  ? sendSvg
-                                  : receiveSvg}
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.01;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx?.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="content">
-                                <h4 className="m-0 font-bold md:text-base">
-                                  {tx.isRedemption
-                                    ? "Redemption"
-                                    : tx.isDeposit
-                                      ? "Deposit"
-                                      : tx.type === "send"
-                                        ? "Send"
-                                        : "Receive"}{" "}
-                                  {tx.amount?.split(" ")[1] || "ETH"}
-                                </h4>
-                                <p
-                                  className={`m-0 ${getStatusColor(
-                                    tx.status
-                                  )} font-medium text-xs`}
-                                >
-                                  {getStatusText(tx.status)}
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                        tx.amount
+                                      ).toFixed(2)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
                                 </p>
                               </div>
                             </div>
-                            <div className="right">
-                              <p className="m-0  text-xs font-medium">
-                                {tx.status === "rejected"
-                                  ? "Insufficient Balance"
-                                  : `${tx.type === "send" ? "-" : "+"} ${tx.amount
-                                  }`}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 );
@@ -373,49 +418,59 @@ const RecentTransaction = () => {
                       {date}
                     </p>
                     <div className="grid gap-3 grid-cols-12">
-                      {txs.map((tx, key) => (
-                        <div key={key} className="md:col-span-6 col-span-12">
-                          <div
-                            onClick={() => handleTransactionClick(tx)}
-                            className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                          >
-                            <div className="left flex items-start gap-2">
-                              <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                                {tx.type === "token send"
-                                  ? sendSvg
-                                  : receiveSvg}
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.000001;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="content">
-                                <h4 className="m-0 font-bold md:text-base">
-                                  {tx.isRedemption
-                                    ? "Redemption"
-                                    : tx.isDeposit
-                                      ? "Deposit"
-                                      : tx.type === "token send"
-                                        ? "Send"
-                                        : "Receive"}{" "}
-                                  {tx.amount?.split(" ")[1] || "ETH"}
-                                </h4>
-                                <p
-                                  className={`m-0 ${getStatusColor(
-                                    tx.status
-                                  )} font-medium text-xs`}
-                                >
-                                  {getStatusText(tx.status)}
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
+                                        tx.amount
+                                      ).toFixed(6)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
                                 </p>
                               </div>
                             </div>
-                            <div className="right">
-                              <p className="m-0  text-xs font-medium">
-                                {tx.status === "rejected"
-                                  ? "Insufficient Balance"
-                                  : `${tx.type === "token send" ? "-" : "+"} ${tx.amount
-                                  }`}
-                              </p>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 );
@@ -462,11 +517,112 @@ const RecentTransaction = () => {
     },
     {
       title: "Lightning Spend",
-      component: (
+      component: spendWallet ? (
         <LnbitsTransaction
           usd={2}
           setTransactions={setSpendTxs}
           walletIdd={spendWallet}
+          dateRange={isDateFilterActive() ? dateRange[0] : null}
+          applyTrue={applyTrue}
+        />
+      ) : (
+        <div className="text-center py-4">
+          <p>Loading wallet information...</p>
+        </div>
+      ),
+    },
+    {
+      title: "MORPHO",
+      component: (
+        <>
+          {morphotransactions.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+              {Object.entries(transactionsByDateMorpho).map(([date, txs]) => {
+                return (
+                  <div key={date} className="py-3">
+                    <p className="m-0 text-white text-xs font-semibold pb-2">
+                      {date}
+                    </p>
+                    <div className="grid gap-3 grid-cols-12">
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.001;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
+                                        tx.amount
+                                      ).toFixed(4)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      title: "SideShift",
+      component: (
+        <SideShiftTransaction
+          userData={useData} // Make sure this contains sideshiftIds
+          setTransactions={setSideshiftTxs}
           dateRange={isDateFilterActive() ? dateRange[0] : null}
           applyTrue={applyTrue}
         />
@@ -531,8 +687,9 @@ const RecentTransaction = () => {
                     setIsDatePickerOpen(!isDatePickerOpen);
                     setApplyTrue(false);
                   }}
-                  className={`px-4 py-2 ${isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
-                    } text-white rounded-md flex items-center gap-2`}
+                  className={`px-4 py-2 ${
+                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                  } text-white rounded-md flex items-center gap-2`}
                 >
                   <span>{DateFilter}</span>
                   {isDateFilterActive() && (
@@ -564,6 +721,8 @@ const RecentTransaction = () => {
                   else if (activeTab === 3) dataToExport = lnbitsUsdTxs;
                   else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
                   else if (activeTab === 5) dataToExport = spendTxs;
+                  else if (activeTab === 6) dataToExport = morphotransactions;
+                  else if (activeTab === 7) dataToExport = sideshiftTxs; // Add this line
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
@@ -592,6 +751,16 @@ const RecentTransaction = () => {
                       <button
                         key={key}
                         onClick={() => {
+                          setSetFilterType(key);
+                          if (key === 0) {
+                            // USDC tab
+                            fetchRecentTransactions();
+                          } else if (key === 2) {
+                            // Gold tab
+                            fetchRecentTransactionsPaxg();
+                          } else if (key === 6) {
+                            fetchRecentMorphoTransactions();
+                          }
                           setActiveTab(key);
                           setIsOpen(false);
                         }}

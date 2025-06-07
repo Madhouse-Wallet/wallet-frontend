@@ -49,7 +49,6 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
           ? formatDateForApi(dateRange?.endDate)
           : null;
 
-        console.log("startDate", startDate, endDate, dateRange, applyTrue);
         // BitQuery API token
         const accessToken = process.env.NEXT_PUBLIC_BITQUERY_ACCESS_TOKEN;
 
@@ -242,42 +241,51 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
                   {date}
                 </p>
                 <div className="grid gap-3 grid-cols-12">
-                  {txs.map((tx, key) => (
-                    <div key={key} className="md:col-span-6 col-span-12">
-                      <div
-                        onClick={() => handleTransactionClick(tx)}
-                        className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                      >
-                        <div className="left flex items-start gap-2">
-                          <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                            {tx.type === "token send" ? sendSvg : receiveSvg}
+                  {/* {txs.map((tx, key) => ( */}
+                  {txs
+                    .filter((tx) => {
+                      const amount = parseFloat(tx.amount?.split(" ")[0] || 0);
+                      return amount >= 0.00000001;
+                    })
+                    .map((tx, key) => (
+                      <div key={key} className="md:col-span-6 col-span-12">
+                        <div
+                          onClick={() => handleTransactionClick(tx)}
+                          className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                        >
+                          <div className="left flex items-start gap-2">
+                            <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                              {tx.type === "token send" ? sendSvg : receiveSvg}
+                            </div>
+                            <div className="content">
+                              <h4 className="m-0 font-bold md:text-base">
+                                {tx.type === "token send" ? "Send" : "Receive"}{" "}
+                                BTC
+                              </h4>
+                              <p
+                                className={`m-0 ${getStatusColor(
+                                  tx.status
+                                )} font-medium text-xs`}
+                              >
+                                {getStatusText(tx.status)}
+                              </p>
+                            </div>
                           </div>
-                          <div className="content">
-                            <h4 className="m-0 font-bold md:text-base">
-                              {tx.type === "token send" ? "Send" : "Receive"}{" "}
-                              BTC
-                            </h4>
-                            <p
-                              className={`m-0 ${getStatusColor(
-                                tx.status
-                              )} font-medium text-xs`}
-                            >
-                              {getStatusText(tx.status)}
+                          <div className="right text-right">
+                            <p className="m-0 text-xs font-medium py-1">
+                              {tx.status === "rejected"
+                                ? "Insufficient Balance"
+                                : `${tx.type === "token send" ? "-" : "+"} ${parseFloat(
+                                    tx.amount
+                                  ).toFixed(8)}`}
+                            </p>
+                            <p className="m-0 text-xs font-medium py-1">
+                              {tx.day}
                             </p>
                           </div>
                         </div>
-                        <div className="right">
-                          <p className="m-0 text-xs font-medium">
-                            {tx.status === "rejected"
-                              ? "Insufficient Balance"
-                              : `${tx.type === "token send" ? "-" : "+"} ${
-                                  tx.amount
-                                }`}
-                          </p>
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             );

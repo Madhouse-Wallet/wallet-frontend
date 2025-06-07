@@ -36,7 +36,6 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
     }
 
     const response = await createNewCustomer("individual", email);
-    console.log(response, "responseresponse");
     const message = response?.error?.message;
 
     const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);

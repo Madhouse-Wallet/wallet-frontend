@@ -19,6 +19,7 @@ const ModifyKeys = () => {
   const [address, setAddress] = useState();
   const [email, setEmail] = useState();
   const [privateKey, setPrivateKey] = useState();
+  const [safePrivateKey, setSafePrivateKey] = useState();
   const [wif, setWif] = useState();
   const [passkeyData, setPasskeyData] = useState([]);
   const [passkeyDataOrig, setPasskeyDataOrig] = useState([]);
@@ -61,8 +62,7 @@ const ModifyKeys = () => {
   const checkAddress = async () => {
     try {
       setLoadingNewSigner(true);
-      console.log("email", email, "privateKey", privateKey)
-      if (email && privateKey) {
+      if (email && privateKey && safePrivateKey) {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
           toast.error("User Not Found!");
@@ -72,7 +72,7 @@ const ModifyKeys = () => {
           setAddress(userExist?.userId?.wallet);
           setPasskeyData(userExist?.userId?.passkey)
           setPasskeyDataOrig(userExist?.userId?.passkey)
-          let recoverAccount = await doAccountRecovery(privateKey, userExist?.userId?.wallet);
+          let recoverAccount = await doAccountRecovery(privateKey,safePrivateKey, userExist?.userId?.wallet);
           if (recoverAccount && recoverAccount.status) {
             setLoadingNewSigner(false);
             setStep(2);
@@ -205,6 +205,16 @@ const ModifyKeys = () => {
                     // value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Private Key"
+                  ></input>
+                </div>
+                <div className="py-2">
+                  <input
+                    type="text"
+                    name="safePrivateKey"
+                    onChange={(e) => setSafePrivateKey(e.target.value)}
+                    // value={safePriva02teKey}
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
+                    placeholder="Enter Safe Private Key"
                   ></input>
                 </div>
                 <div className="btnWrpper mt-3 text-center">

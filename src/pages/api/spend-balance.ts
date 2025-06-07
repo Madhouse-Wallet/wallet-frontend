@@ -31,7 +31,6 @@ export default async function handler(
 
     const result = await getStats(walletId, token, 2);
 
-    // console.log("result", result);
 
     if (result.status) {
       return res.status(200).json({ status: "success", data: result.data });

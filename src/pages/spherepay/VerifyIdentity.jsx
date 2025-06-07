@@ -1,7 +1,7 @@
 import React from "react";
 
 const VerifyIdentity = ({ step, setStep, src, customerId, identitySRC }) => {
-  console.log("identitySRC", identitySRC);
+
 
   return (
     <>

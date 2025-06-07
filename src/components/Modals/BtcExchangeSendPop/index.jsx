@@ -11,6 +11,11 @@ import { sendBitcoinFunction } from "@/utils/bitcoinSend";
 import { useSelector } from "react-redux";
 import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
+import { useEffect } from "react";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -39,6 +44,10 @@ const BtcExchangeSendPop = ({
   const [loadingSend, setLoadingSend] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState();
   const [openCam, setOpenCam] = useState(false);
+  const [btcBalance, setBtcBalance] = useState("0");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const submitAddress = async () => {
     try {
@@ -62,38 +71,6 @@ const BtcExchangeSendPop = ({
     } catch (error) {}
   };
 
-  // const sendNative = async () => {
-  //   try {
-  //     setLoadingSend(true);
-  //     if (!btcAmount) {
-  //       setLoadingSend(false);
-  //       return toast.error("Please Enter Valid Amount!");
-  //     }
-  //     if (!btcAddress) {
-  //       setLoadingSend(false);
-  //       return toast.error("Please Enter Valid Address!");
-  //     }
-  //     if (sendSdk) {
-  //       try {
-  //         const weiAmount = BigNumber.from((btcAmount * 1e18).toString()); // Convert to BigNumber with 18 decimals
-  //         const { targetChainTxHash, walletPublicKey } =
-  //           await sendSdk.redemptions.requestRedemption(
-  //             btcAddress,
-  //             weiAmount.toString()
-  //           );
-  //         toast.success("Send BTC Success!");
-  //       } catch (error) {
-  //         toast.error(error.message);
-  //       }
-  //     } else {
-  //       toast.error("Please Login!");
-  //     }
-  //     setLoadingSend(false);
-  //   } catch (error) {
-  //     setLoadingSend(false);
-  //     toast.error(error.message);
-  //   }
-  // };
   const getSecretData = async (storageKey, credentialId) => {
     try {
       let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
@@ -118,20 +95,15 @@ const BtcExchangeSendPop = ({
 
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth?.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        );
-        if (callGetSecretData?.status) {
-          return JSON.parse(callGetSecretData?.secret);
-        } else {
-          return false;
-        }
+      let data = JSON.parse(userAuth?.webauthKey);
+      let callGetSecretData = await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      );
+      if (callGetSecretData?.status) {
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
@@ -150,11 +122,10 @@ const BtcExchangeSendPop = ({
         setLoadingSend(false);
         return toast.error("Please Enter Valid Address!");
       }
-      console.log("btcAddress", btcAddress, btcAmount);
 
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        toast.error("Please enter a valid amount");
+        toast.error("Private Key not Found");
         return;
       }
 
@@ -162,12 +133,17 @@ const BtcExchangeSendPop = ({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: btcAddress,
         amountSatoshi: btcAmount * 100000000,
-        privateKeyHex: privateKey?.privateKey,
+        privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
 
       if (result.success) {
-        toast.success("BTC sent successfully!");
+        setSuccess(true);
+        setHash(result.transactionHash);
+        // toast.success("BTC sent successfully!");
+        setBtcAmount(0);
+        setBtcAddress();
+        setLoadingSend(false);
       } else {
         toast.error(result.error || "Transaction failed");
       }
@@ -177,6 +153,29 @@ const BtcExchangeSendPop = ({
       toast.error(error.message);
     }
   };
+
+  const fetchBalances = async () => {
+    try {
+      if (!userAuth?.walletAddress) return;
+
+      const result = await fetchBitcoinBalance(
+        userAuth?.bitcoinWallet
+        // "1LtaUUB1QrPNmBAZ9qkCYeNw56GJu5NhG2"
+      );
+
+      if (result.balance) {
+        setBtcBalance(result?.balance);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch token balances");
+    }
+  };
+
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      fetchBalances();
+    }
+  }, [userAuth?.walletAddress]);
 
   const tabData = [
     {
@@ -226,8 +225,8 @@ const BtcExchangeSendPop = ({
                 ) : (
                   <>
                     <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
-                      Unminting requires one Ethereum transaction and it takes
-                      around 3-5 hours.
+                      Bitcoin transaction confirmation typically takes 15 to 20
+                      minutes to be processed on the blockchain.
                     </p>
                   </>
                 )}
@@ -258,7 +257,7 @@ const BtcExchangeSendPop = ({
                         Amount
                       </label>
                       <span className="text-white opacity-60 text-xs">
-                        Balance: 0 tBTC
+                        Balance: {parseFloat(btcBalance).toFixed(8)} BTC
                       </span>
                     </div>
                     <div className="iconWithText relative">
@@ -268,11 +267,11 @@ const BtcExchangeSendPop = ({
                         onChange={(e) => setBtcAmount(e.target.value)}
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
-                      <button
+                      {/* <button
                         className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Max
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                   <div className="py-2">
@@ -303,7 +302,7 @@ const BtcExchangeSendPop = ({
                   </div>
                   <div className="py-2 mt-4">
                     <button
-                      onClick={sendNative}
+                      onClick={() => setTrxnApproval(true)}
                       // disabled={loadingSend}
                       className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >
@@ -325,6 +324,30 @@ const BtcExchangeSendPop = ({
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={btcAmount}
+            symbol={"BTC"}
+            toAddress={btcAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={sendNative}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Bitcoin"}
+            hash={`${process.env.NEXT_PUBLIC_BITCOIN_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999] `}
       >

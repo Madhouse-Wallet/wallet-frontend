@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { maxUint256, erc20Abi, parseErc6492Signature, getContract } from 'viem'
+import { maxUint256, erc20Abi, parseErc6492Signature, getContract } from "viem";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -70,7 +70,7 @@ export const fetchTokenTransfers = async (
       body: JSON.stringify({
         action: "getWalletTokenTransfers",
         chain: chain,
-        contractAddress: contractAddress,
+        contractAddresses: contractAddress,
         walletAddress: walletAddress,
         fromDate: fromDate,
         toDate: toDate,
@@ -118,28 +118,25 @@ export const fetchBalance = async (walletAddress: string) => {
   }
 };
 
-
-
-
 // Adapted from https://github.com/vacekj/wagmi-permit/blob/main/src/permit.ts
-export const eip2612Permit = async(
+export const eip2612Permit = async (
   token: any,
   chain: any,
   ownerAddress: any,
   spenderAddress: any,
-  value: any,
+  value: any
 ) => {
   return {
     types: {
       Permit: [
-        { name: 'owner', type: 'address' },
-        { name: 'spender', type: 'address' },
-        { name: 'value', type: 'uint256' },
-        { name: 'nonce', type: 'uint256' },
-        { name: 'deadline', type: 'uint256' },
+        { name: "owner", type: "address" },
+        { name: "spender", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
       ],
     },
-    primaryType: 'Permit',
+    primaryType: "Permit",
     domain: {
       name: await token.read.name(),
       version: await token.read.version(),
@@ -155,73 +152,73 @@ export const eip2612Permit = async(
       // restrictions, so the deadline must be MAX_UINT256.
       deadline: maxUint256,
     },
-  }
-}
+  };
+};
 
 export const eip2612Abi = [
   ...erc20Abi,
   {
     inputs: [
       {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
+        internalType: "address",
+        name: "owner",
+        type: "address",
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
-    name: 'nonces',
+    stateMutability: "view",
+    type: "function",
+    name: "nonces",
     outputs: [
       {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
   },
   {
     inputs: [],
-    name: 'version',
-    outputs: [{ internalType: 'string', name: '', type: 'string' }],
-    stateMutability: 'view',
-    type: 'function',
+    name: "version",
+    outputs: [{ internalType: "string", name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
   },
-]
+];
 
 export const signPermit = async (
   tokenAddress: any,
   client: any,
   account: any,
   spenderAddress: any,
-  permitAmount: any,
+  permitAmount: any
 ) => {
   const token = getContract({
     client,
     address: tokenAddress,
     abi: eip2612Abi,
-  })
+  });
   const permitData = await eip2612Permit(
     token,
     client.chain,
     account.address,
     spenderAddress,
-    permitAmount,
-  )
+    permitAmount
+  );
 
-  const wrappedPermitSignature = await account.signTypedData(permitData)
+  const wrappedPermitSignature = await account.signTypedData(permitData);
 
   const isValid = await client.verifyTypedData({
     ...permitData,
     address: account.address,
     signature: wrappedPermitSignature,
-  })
+  });
 
   if (!isValid) {
     throw new Error(
-      `Invalid permit signature for ${account.address}: ${wrappedPermitSignature}`,
-    )
+      `Invalid permit signature for ${account.address}: ${wrappedPermitSignature}`
+    );
   }
 
-  const { signature } = parseErc6492Signature(wrappedPermitSignature)
-  return signature
-}
+  const { signature } = parseErc6492Signature(wrappedPermitSignature);
+  return signature;
+};

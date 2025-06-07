@@ -13,6 +13,9 @@ import { toast } from "react-toastify";
 import { createUsdcToBtcShift } from "../api/sideShiftAI";
 import { fetchBitcoinBalance } from "../../pages/api/bitcoinBalance";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -20,6 +23,9 @@ const Swap = () => {
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [tbtcBalance, setTbtcBalance] = useState("0");
   const [fromAmount, setFromAmount] = useState("");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +44,7 @@ const Swap = () => {
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
-
+      setQuote(shift);
       return {
         depositAddress: shift.depositAddress,
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
@@ -64,6 +70,7 @@ const Swap = () => {
       });
 
       const data = await response.json();
+      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
@@ -189,7 +196,7 @@ const Swap = () => {
       return;
     }
 
-    if (Number.parseFloat(toAmount) > Number.parseFloat(balance)) {
+    if (Number.parseFloat(toAmount) > Number.parseFloat(usdcBalance)) {
       toast.error("Insufficient USDC balance");
       return;
     }
@@ -205,7 +212,6 @@ const Swap = () => {
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-    console.log("secretData", secretData);
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -227,10 +233,14 @@ const Swap = () => {
       ]);
 
       if (tx) {
-        // setSuccess(true);
+        setHash(tx);
+        setSuccess(true);
         // setRefundBTC(false);
-        toast.success("USDC sent successfully!");
+        // toast.success("Transaction Successfully!");
         setTimeout(fetchBalances, 2000);
+        setFromAmount("");
+        setToAmount("");
+        setQuote(null);
       } else {
         toast.error(result.error || "Transaction failed");
       }
@@ -262,6 +272,30 @@ const Swap = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"USDC"}
+            toAddress={destinationAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={handleSend}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -347,7 +381,7 @@ const Swap = () => {
                           Balance:{" "}
                           {swapDirection.to === "USDC"
                             ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
@@ -358,7 +392,7 @@ const Swap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={handleSend}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

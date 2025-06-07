@@ -3,7 +3,7 @@ import KeyStep from "./KeyStep";
 import EmailStep from "./EmailStep";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useBackground } from "@/ContextApi/backgroundContent";
-
+import { addProvisionData } from "../../lib/apiCall";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
@@ -35,7 +35,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
 
-  console.log(backgrounds, "riteshBG")
 
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {
@@ -135,6 +134,8 @@ const Login = () => {
               },
               "authUser"
             );
+            addProvisionData(userExist?.userId?.email);
+
             return true;
           } else {
             toast.error(
@@ -223,6 +224,7 @@ const Login = () => {
             },
             "authUser"
           );
+            addProvisionData(userExist?.userId?.email);
           return true;
         } else {
           toast.error(

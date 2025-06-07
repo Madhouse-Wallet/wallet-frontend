@@ -12,7 +12,7 @@ export default async function handler(
   }
 
   try {
-    const { walletId, fromDate, toDate, tag } = req.body;
+    const { walletId, fromDate, toDate, apiKey } = req.body;
 
     if (!walletId) {
       return res
@@ -28,8 +28,15 @@ export default async function handler(
         .status(401)
         .json({ status: "failure", message: "Token fetch failed" });
     }
-
-    const result = await getPayments(walletId, token, 2, fromDate, toDate, tag);
+    const result = await getPayments(
+      walletId,
+      token,
+      2,
+      fromDate,
+      toDate,
+      null,
+      apiKey
+    );
 
     if (result.status) {
       return res.status(200).json({ status: "success", data: result.data });

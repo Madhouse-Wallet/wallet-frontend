@@ -199,7 +199,6 @@ class Web3Interaction {
             recipientAddress,
             amount
           ).then((approvalResult) => {
-            console.log("approvalResult-->", approvalResult);
             if (!approvalResult.success) {
               resolve({
                 success: false,
@@ -213,9 +212,7 @@ class Web3Interaction {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, signer);
         // Perform the transfer
-        console.log("usdcContract-->", usdcContract);
         const tx = usdcContract.transfer(recipientAddress, usdcAmount);
-        console.log("tx-->", tx);
 
         // tx.wait(); // Wait for transaction confirmation
         // Wait for transaction to be mined
@@ -226,7 +223,6 @@ class Web3Interaction {
           txHash: tx.hash,
         });
       } catch (error: any) {
-        console.log("error-->",error)
         resolve({
           success: false,
           error:
@@ -245,7 +241,7 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise( (resolve) => {
+    return new Promise((resolve) => {
       try {
         // Create USDC contract instance
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
@@ -259,7 +255,6 @@ class Web3Interaction {
           balance,
         });
       } catch (error: any) {
-        console.log("error-->", error);
         resolve({
           success: false,
           error:
@@ -277,24 +272,49 @@ class Web3Interaction {
     accountAddress: string,
     provider: ethers.providers.Web3Provider
   ): Promise<{ success: boolean; balance?: string; error?: string }> => {
-    return new Promise( (resolve) => {
+    return new Promise(async (resolve) => {
       try {
         // Create USDC contract instance
-        console.log("usdcAddress=-->", usdcAddress);
         const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
-        console.log("usdcContract=-->", usdcContract);
         // Get balance
-        const balanceWei = usdcContract.balanceOf(accountAddress);
-        console.log("balanceWei=-->", balanceWei);
+        const balanceWei = await usdcContract.balanceOf(accountAddress);
         // Convert balance to human readable format (6 decimals for USDC)
         const balance = ethers.utils.formatUnits(balanceWei, 18);
-        console.log("line-293", balance);
         resolve({
           success: true,
           balance,
         });
       } catch (error: any) {
-        console.log("error-->", error);
+        resolve({
+          success: false,
+          error:
+            error.reason ||
+            error.data?.message ||
+            error.message ||
+            "Failed to fetch balance",
+        });
+      }
+    });
+  };
+
+  getGOLDBalance = async (
+    usdcAddress: string,
+    accountAddress: string,
+    provider: ethers.providers.Web3Provider
+  ): Promise<{ success: boolean; balance?: string; error?: string }> => {
+    return new Promise(async (resolve) => {
+      try {
+        // Create USDC contract instance
+        const usdcContract = new Contract(usdcAddress, this.USDC_ABI, provider);
+        // Get balance
+        const balanceWei = await usdcContract.balanceOf(accountAddress);
+        // Convert balance to human readable format (6 decimals for USDC)
+        const balance = ethers.utils.formatUnits(balanceWei, 6);
+        resolve({
+          success: true,
+          balance,
+        });
+      } catch (error: any) {
         resolve({
           success: false,
           error:
