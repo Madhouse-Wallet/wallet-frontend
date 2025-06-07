@@ -9,7 +9,6 @@ import {
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { ethers, Wallet } from "ethers";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
@@ -169,11 +168,6 @@ const DepositSwap = () => {
     setIsLoading(true);
 
     try {
-      const walletBase = new Wallet(
-        secretData?.privateKey,
-        ethers.getDefaultProvider("https://mainnet.base.org")
-      );
-
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey

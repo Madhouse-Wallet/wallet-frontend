@@ -5,6 +5,7 @@ import {
   getETHEREUMRpcProvider,
   publicClient,
   sendTransaction,
+  MAINNET_RPC_URL
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -113,9 +114,7 @@ const WithdrawalSwap = () => {
 
   const checkEthBalance = async () => {
     try {
-      const provider = ethers.getDefaultProvider(
-        "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
-      );
+      const provider = ethers.getDefaultProvider(MAINNET_RPC_URL);
       const currentEthBalance = await provider.getBalance(
         userAuth?.walletAddress
       );
@@ -276,9 +275,7 @@ const WithdrawalSwap = () => {
       const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
       const wallet = new Wallet(
         secretData?.privateKey,
-        ethers.getDefaultProvider(
-          "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
-        )
+        ethers.getDefaultProvider(MAINNET_RPC_URL) 
       );
 
       // Step 2: Estimate gas for Tether Gold transfer

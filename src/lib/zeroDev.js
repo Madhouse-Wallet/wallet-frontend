@@ -3,7 +3,6 @@ import {
   zeroAddress,
   createPublicClient,
   http,
-  parseEther,
   createWalletClient,
   parseAbi,
 } from "viem";
@@ -29,11 +28,18 @@ dotenv.config();
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
+export const BASE_RPC_URL ='https://base-mainnet.g.alchemy.com/v2/QHqyng9EupHdgy9ZH8ql2mmQqAQukRSK'
+export const MAINNET_RPC_URL ='https://eth-mainnet.g.alchemy.com/v2/QHqyng9EupHdgy9ZH8ql2mmQqAQukRSK'
 
+// Audit: https://github.com/safe-global/safe-smart-account/blob/v1.4.0/docs/Safe_Audit_Report_1_4_0.pdf
+//do not replace addresses with env vars
+const SAFE_MULTISEND_ADDRESS = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526";
+const SAFE_4337_MODULE_ADDRESS = "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
+const SAFE_SINGLETON_ADDRESS = "0x41675C099F32341bf84BFc5382aF534df5C7461a";
 
 export const publicClient = createPublicClient({
   chain: base,
-  transport: http(),
+  transport: http(BASE_RPC_URL),
 });
 
 export const pimlicoClient = createPimlicoClient({
@@ -125,7 +131,7 @@ export const setupNewAccount = async (
     const walletClient = createWalletClient({
       account,
       chain: base,
-      transport: http(),
+      transport: http(BASE_RPC_URL),
     }).extend(eip7702Actions());
 
     const relayAccount = privateKeyToAccount(relayPrivateKey);
@@ -133,7 +139,7 @@ export const setupNewAccount = async (
     const relayClient = createWalletClient({
       account: relayAccount,
       chain: base,
-      transport: http(),
+      transport: http(BASE_RPC_URL),
     });
 
     const [walletAddress] = await walletClient.getAddresses();
@@ -144,18 +150,11 @@ export const setupNewAccount = async (
     });
     await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
-    const SAFE_SINGLETON_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_SINGLETON_ADDRESS;
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
 
-    const SAFE_MULTISEND_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_MULTISEND_ADDRESS;
-
-    const SAFE_4337_MODULE_ADDRESS =
-      process.env.NEXT_PUBLIC_SAFE_4337_MODULE_ADDRESS;
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -196,7 +195,7 @@ export const setupNewAccount = async (
       res = {
         status: true,
         data: {
-          privatekey: eoaPrivateKey, //PRIVATE_KEY,
+          privatekey: eoaPrivateKey, 
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
@@ -230,7 +229,6 @@ export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) 
     }
     const eoaPrivateKey = PRIVATE_KEY;
     const safePrivateKey = SAFE_PRIVATE_KEY;
-    //eoaPrivateKey=PRIVATE_KEY
 
     const account = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
@@ -287,7 +285,6 @@ export const getAccount = async (
     const pimlicoApiKey = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
     if (!pimlicoApiKey) throw new Error("PIMLICO_API_KEY is required");
 
-    //eoaPrivateKey = PRIVATE_KEY
     const account = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
       owners: [privateKeyToAccount(safePrivateKey)],
@@ -381,9 +378,7 @@ export const sendTransaction = async (smartAccountClient, params) => {
 
 export const getRpcProvider = async () => {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://mainnet.base.org"
-    );
+    const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URL);
     return provider;
   } catch (error) {
     return false;
@@ -392,9 +387,7 @@ export const getRpcProvider = async () => {
 
 export const getETHEREUMRpcProvider = async () => {
   try {
-    const provider = new ethers.providers.JsonRpcProvider(
-      "https://mainnet.infura.io/v3/a48f9442af1a4c8da44b4fc26640e23d"
-    );
+    const provider = new ethers.providers.JsonRpcProvider(MAINNET_RPC_URL);
     return provider;
   } catch (error) {
     return false;

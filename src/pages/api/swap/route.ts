@@ -163,6 +163,7 @@ export default async function handler(
               [
                 {
                   ...swapOutput,
+                  value: typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length),
                   keys: keys as any,
                   preimage,
                   cooperative: true,
@@ -193,7 +194,7 @@ export default async function handler(
             claimTx.hashForWitnessV1(
               0,
               [swapOutput.script],
-              [swapOutput.value],
+              [typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length)],
               Transaction.SIGHASH_DEFAULT,
             ),
           );
