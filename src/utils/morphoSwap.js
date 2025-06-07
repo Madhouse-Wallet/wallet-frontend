@@ -5,22 +5,22 @@ const FEE_RECEIVER = process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER;
 export const TOKENS = {
   USDC: {
     8453: {
-      address: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+      address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
       name: "USDC",
       chainId: 8453,
     },
     1: {
-      address: process.env.NEXT_PUBLIC_USDC_ETHEREUM_CONTRACT_ADDRESS,
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       name: "USDC",
       chainId: 1,
     },
   },
   MORPHO: {
-    address: process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
+    address: '0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A',
     name: "MORPHO",
   },
   PAXG: {
-    address: process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address,
+    address: '0x45804880De22913dAFE09f4980848ECE6EcbAf78',
     name: "PAXG",
   },
 };
@@ -237,7 +237,7 @@ export async function reverseBridge(
         action: "route",
         slippage: 25,
         args: {
-          tokenIn: tokenIn.address, // PAXG address
+          tokenIn: tokenIn.address,
           amountIn: amountIn,
           tokenOut: process.env.NEXT_PUBLIC_USDC_ETHEREUM_CONTRACT_ADDRESS, // USDC on Ethereum
         },
