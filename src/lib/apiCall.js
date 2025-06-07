@@ -24,6 +24,32 @@ export const getUser = async (email) => {
   }
 };
 
+
+//update-lnaddress
+export const updateLNAddressCall = async (email,username) => {
+  try {
+    try {
+      return await fetch(`/api/update-lnaddress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,username
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
 export const addProvisionData = async (email) => {
   try {
     try {
@@ -52,6 +78,28 @@ export const addProvisionLambda = async (data) => {
   try {
     return await fetch(
       `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/addlnbitUser`,
+      {
+        method: "POST",
+
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify(data),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export const updateLNAddress = async (data) => {
+  try {
+    return await fetch(
+      `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/updt-lnaddress`,
       {
         method: "POST",
 
