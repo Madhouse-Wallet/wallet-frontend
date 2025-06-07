@@ -25,11 +25,11 @@ import dotenv from "dotenv";
 import timers from "timers-promises";
 dotenv.config();
 
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL
+export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_MAINNET_RPC_URL;
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
 const pimlicoUrl = `https://api.pimlico.io/v2/${base.id}/rpc?apikey=${PIMLICO_API_KEY}`;
-export const BASE_RPC_URL ='https://base-mainnet.g.alchemy.com/v2/QHqyng9EupHdgy9ZH8ql2mmQqAQukRSK'
-export const MAINNET_RPC_URL ='https://eth-mainnet.g.alchemy.com/v2/QHqyng9EupHdgy9ZH8ql2mmQqAQukRSK'
 
 // Audit: https://github.com/safe-global/safe-smart-account/blob/v1.4.0/docs/Safe_Audit_Report_1_4_0.pdf
 //do not replace addresses with env vars
