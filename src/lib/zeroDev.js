@@ -106,20 +106,18 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 };
 
 export const setupNewAccount = async (
-  PRIVATE_KEY,
-  SAFE_PRIVATE_KEY,
   chain = base
 ) => {
   try {
-    console.log("Private Key: ", PRIVATE_KEY);
-    console.log("safe Private Key: ", SAFE_PRIVATE_KEY);
-    const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
+    let generatePrivateKey = await getMenmonic();
+    let getSafeKey = await getPrivateKey();
+    const eoaPrivateKey = generatePrivateKey.privateKey; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
     const relayPrivateKey = RELAY_PRIVATE_KEY;
     if (!relayPrivateKey) throw new Error("RELAY_PRIVATE_KEY is required");
 
-    const safePrivateKey = SAFE_PRIVATE_KEY;
+    const safePrivateKey = getSafeKey;
     if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
     const account = privateKeyToAccount(eoaPrivateKey);
@@ -145,7 +143,7 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: BigInt(1000000)*(await publicClient.getGasPrice()) 
+      value: BigInt(1000000) * (await publicClient.getGasPrice())
     });
 
     console.log(
@@ -210,6 +208,9 @@ export const setupNewAccount = async (
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
+          privateKeyOwner: generatePrivateKey.privateKey,
+          safePrivateKey: getSafeKey,
+          seedPhraseOwner: generatePrivateKey.phrase
         },
       };
     } else {

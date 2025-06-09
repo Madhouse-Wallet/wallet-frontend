@@ -8,9 +8,7 @@ import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 import {
-  createCoinosInvoice,
   getBitcoinAddress,
-  registerCoinosUser,
 } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
@@ -196,30 +194,21 @@ const CreateWallet = () => {
         toast.error(baseWallet?.msg);
         return false;
       } else {
-        let { address } = baseWallet?.data
+        let { address,  privateKeyOwner, safePrivateKey, seedPhraseOwner } = baseWallet?.data
+        setPrivateKey(privateKeyOwner);
+        setSafeKey(safePrivateKey)
+        setSeedPhrase(seedPhraseOwner)
         const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
-        let registerCoinos = await registerCoinosUser(
-          cleanEmail,
-          process.env.NEXT_PUBLIC_COINOSIS_PASS
-        );
-        localStorage.setItem("coinosToken", registerCoinos?.token);
         const [usernameInit, domainInit] = (registerData.email).split("@");
         let token1 = (await getRandomString(6)) + "_" + usernameInit;
         let flowTokens = [
           { flow: 1, token: (token1) },
         ];
-        const resultLiquid = await createCoinosInvoice(
-          registerCoinos?.token,
-          "1",
-          "liquid",
-          token1
-        );
         const secretObj = {
-          coinosToken: registerCoinos?.token || "",
           wif: bitcoinWalletwif,
-          privateKey: privateKey,
-          safePrivateKey: safeKey,
-          seedPhrase: seedPhrase
+          privateKey: privateKeyOwner,
+          safePrivateKey: safePrivateKey,
+          seedPhrase: seedPhraseOwner
         };
         let storageKeySecret = "";
         let credentialIdSecret = "";
@@ -247,7 +236,7 @@ const CreateWallet = () => {
             address,
             bitcoinWallet,
             liquidBitcoinWallet,
-            registerCoinos?.token,
+            "",
             flowTokens,
             cleanEmail
           );
@@ -320,14 +309,6 @@ const CreateWallet = () => {
         if (getWallet.status && getWallet.status == "success") {
           setBitcoinWallet(getWallet?.data?.wallet || "")
           setBitcoinWalletWif(getWallet?.data?.wif || "")
-        }
-
-        let generatePrivateKey = await getMenmonic();
-        let getSafeKey = await getPrivateKey();
-        if (generatePrivateKey) {
-          setPrivateKey(generatePrivateKey.privateKey);
-          setSafeKey(getSafeKey)
-          setSeedPhrase(generatePrivateKey.phrase)
           setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
@@ -351,12 +332,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        // console.log("OTP-->", OTP);
+        console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        // return true;
+        return true;
         let obj = {
           email: data.email,
           name: data.username,

@@ -55,7 +55,7 @@ const OtpStep = ({
           otp: registerOTP,
         });
         if (response) {
-          setStep(3);
+          setStep(4);
         }
         setRegisterOtpLoading(false);
       }
