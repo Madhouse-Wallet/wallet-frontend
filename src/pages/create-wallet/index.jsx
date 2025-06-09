@@ -61,10 +61,7 @@ const CreateWallet = () => {
     passkey,
     wallet,
     bitcoinWallet,
-    liquidBitcoinWallet,
-    coinosToken,
     flowTokens,
-    coinosUserName
   ) => {
     try {
       try {
@@ -77,10 +74,7 @@ const CreateWallet = () => {
             passkey,
             wallet,
             bitcoinWallet,
-            liquidBitcoinWallet,
-            coinosToken,
             flowTokens,
-            coinosUserName
           }),
         })
           .then((res) => res.json())
@@ -219,7 +213,6 @@ const CreateWallet = () => {
         if (storeData.status) {
           storageKeySecret = storeData?.storageKey;
           credentialIdSecret = storeData?.credentialId;
-          let liquidBitcoinWallet = "";
        
           const data = await addUser(
             registerData.email,
@@ -233,10 +226,7 @@ const CreateWallet = () => {
             }],
             address,
             bitcoinWallet,
-            "",
-            "",
             flowTokens,
-            cleanEmail
           );
           toast.success("Sign Up Successfully!");
           dispatch(
@@ -330,12 +320,12 @@ const CreateWallet = () => {
         let OTP = generateOTP(4);
         setCheckOTP(OTP);
         setOtpTimestamp(new Date().getTime()); // Save the timestamp when OTP is generated
-        console.log("OTP-->", OTP);
+        // console.log("OTP-->", OTP);
         setRegisterData({
           email: data.email,
           username: data.username,
         });
-        return true;
+        // return true;
         let obj = {
           email: data.email,
           name: data.username,

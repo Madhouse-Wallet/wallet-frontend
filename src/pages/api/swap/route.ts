@@ -56,7 +56,7 @@ interface SwapRequest extends NextApiRequest {
 }
 
 // Constants
-const ENDPOINT =  process.env.NEXT_PUBLIC_BOLTZ_MAINNET_URL_ADDRESS;
+const ENDPOINT = process.env.NEXT_PUBLIC_BOLTZ_MAINNET_URL_ADDRESS;
 const WEBSOCKET_ENDPOINT = process.env.NEXT_PUBLIC_BOLTZ_MAINNET_WEBSOCKET_ADDRESS;
 
 const NETWORK = networks.bitcoin;
@@ -110,7 +110,7 @@ export default async function handler(
 
     // Create a WebSocket connection
     const webSocket = new WebSocket(WEBSOCKET_ENDPOINT!);
-    
+
     webSocket.on('open', () => {
       webSocket.send(
         JSON.stringify({
@@ -144,7 +144,7 @@ export default async function handler(
             boltzPublicKey,
             Buffer.from(keys.publicKey)
           ]);
-          
+
           const tweakedKey = TaprootUtils.tweakMusig(
             musig,
             SwapTreeSerializer.deserializeSwapTree(createdResponse.swapTree).tree,
@@ -152,7 +152,7 @@ export default async function handler(
 
           const lockupTx = Transaction.fromHex(msg.args[0].transaction.hex);
           const swapOutput = detectSwap(tweakedKey, lockupTx);
-          
+
           if (swapOutput === undefined) {
             console.error('No swap output found in lockup transaction');
             return;
@@ -163,7 +163,9 @@ export default async function handler(
               [
                 {
                   ...swapOutput,
-                  value: typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length),
+                  value: typeof swapOutput.value === 'number'
+                    ? swapOutput.value
+                    : (swapOutput.value as Buffer).readUIntLE(0, (swapOutput.value as Buffer).length),
                   keys: keys as any,
                   preimage,
                   cooperative: true,
@@ -194,7 +196,11 @@ export default async function handler(
             claimTx.hashForWitnessV1(
               0,
               [swapOutput.script],
-              [typeof swapOutput.value === 'number' ? swapOutput.value : swapOutput.value.readUIntLE(0, swapOutput.value.length)],
+              [
+                typeof swapOutput.value === 'number'
+                  ? swapOutput.value
+                  : (swapOutput.value as Buffer).readUIntLE(0, (swapOutput.value as Buffer).length)
+              ],
               Transaction.SIGHASH_DEFAULT,
             ),
           );
@@ -241,18 +247,18 @@ export default async function handler(
     //   error: error.message || 'Error creating swap' 
     // });
 
-     // Check if it's an Axios error with response data
-     if (error.response && error.response.data) {
-        return res.status(error.response.status).json({
-            status: 'error',
-            error: error.response.data.error || 'Error creating swap'
-        });
-    }
-    
-    // Fallback error response
-    return res.status(500).json({ 
+    // Check if it's an Axios error with response data
+    if (error.response && error.response.data) {
+      return res.status(error.response.status).json({
         status: 'error',
-        error: error.message || 'Error creating swap' 
+        error: error.response.data.error || 'Error creating swap'
+      });
+    }
+
+    // Fallback error response
+    return res.status(500).json({
+      status: 'error',
+      error: error.message || 'Error creating swap'
     });
   }
 }
