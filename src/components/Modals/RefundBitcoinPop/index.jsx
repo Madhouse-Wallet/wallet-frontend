@@ -19,7 +19,13 @@ import styled from "styled-components";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { parseAbi, parseUnits } from "viem";
 
-const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
+const RefundBitcoin = ({
+  refundBTC,
+  setRefundBTC,
+  success,
+  setSuccess,
+  setHash,
+}) => {
   const userAuth = useSelector((state) => state.Auth);
   const [toAddress, setToAddress] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
@@ -186,11 +192,12 @@ const RefundBitcoin = ({ refundBTC, setRefundBTC, success, setSuccess }) => {
       ]);
 
       if (tx) {
+        setHash(tx);
         setSuccess(true);
         setRefundBTC(false);
-        toast.success(
-          "USDC sent successfully! BTC will be sent to your wallet shortly."
-        );
+        // toast.success(
+        //   "USDC sent successfully! BTC will be sent to your wallet shortly."
+        // );
         // Wait for transaction to be mined and then fetch new balance
         setTimeout(fetchBalance, 2000);
       } else {

@@ -25,6 +25,31 @@ export const getUser = async (email) => {
 };
 
 
+//update-lnaddress
+export const updateLNAddressCall = async (email,username) => {
+  try {
+    try {
+      return await fetch(`/api/update-lnaddress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,username
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
 export const addProvisionData = async (email) => {
   try {
     try {
@@ -51,16 +76,16 @@ export const addProvisionData = async (email) => {
 
 export const addProvisionLambda = async (data) => {
   try {
+    return await fetch(
+      `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/addlnbitUser`,
+      {
+        method: "POST",
 
-    return await fetch(`${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/addlnbitUser`, {
+        headers: { "Content-Type": "application/json" },
 
-      method: "POST",
-
-      headers: { "Content-Type": "application/json" },
-
-      body: JSON.stringify(data),
-
-    })
+        body: JSON.stringify(data),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         return data;
@@ -71,6 +96,27 @@ export const addProvisionLambda = async (data) => {
   }
 };
 
+export const updateLNAddress = async (data) => {
+  try {
+    return await fetch(
+      `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/updt-lnaddress`,
+      {
+        method: "POST",
+
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify(data),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
 
 export const addCreditCard = async (data) => {
   try {
@@ -81,7 +127,6 @@ export const addCreditCard = async (data) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("addCreditCard-->", data)
         return data;
       });
   } catch (error) {
@@ -99,7 +144,6 @@ export const delCreditCard = async (data) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("delCreditCard-->", data)
         return data;
       });
   } catch (error) {
@@ -116,7 +160,7 @@ export const getUserToken = async (email) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          token: true
+          token: true,
         }),
       })
         .then((res) => res.json())
@@ -132,7 +176,6 @@ export const getUserToken = async (email) => {
     return false;
   }
 };
-
 
 //
 export const getLnbitId = async (email) => {
@@ -159,7 +202,6 @@ export const getLnbitId = async (email) => {
   }
 };
 
-
 export const sendLnbit = async (amount, onchain_address) => {
   try {
     try {
@@ -168,12 +210,11 @@ export const sendLnbit = async (amount, onchain_address) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount,
-          onchain_address
+          onchain_address,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -186,7 +227,6 @@ export const sendLnbit = async (amount, onchain_address) => {
   }
 };
 
-
 export const btcSat = async (amount, refund_address = "") => {
   try {
     try {
@@ -194,12 +234,12 @@ export const btcSat = async (amount, refund_address = "") => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount, refund_address
+          amount,
+          refund_address,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -221,12 +261,11 @@ export const receiveBtc = async (amount, email, publicKey = "") => {
         body: JSON.stringify({
           amount,
           email,
-          publicKey
+          publicKey,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -238,8 +277,6 @@ export const receiveBtc = async (amount, email, publicKey = "") => {
     return false;
   }
 };
-
-
 
 //getBitcoinAddress
 export const decodeBitcoinAddress = async (wif) => {
@@ -254,7 +291,6 @@ export const decodeBitcoinAddress = async (wif) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -267,7 +303,6 @@ export const decodeBitcoinAddress = async (wif) => {
   }
 };
 
-
 //send-bitcoin-lnbit
 export const sendBtc = async (invoice, email) => {
   try {
@@ -277,12 +312,11 @@ export const sendBtc = async (invoice, email) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           invoice,
-          email
+          email,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -295,8 +329,6 @@ export const sendBtc = async (invoice, email) => {
   }
 };
 
-
-
 // receive-bitcoin-lnbit
 
 export const getBitcoinAddress = async (email) => {
@@ -308,7 +340,6 @@ export const getBitcoinAddress = async (email) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("getBitcoinAddress-->", data);
           return data;
         });
     } catch (error) {
@@ -390,8 +421,6 @@ export const registerEnsName = async (
   duration = 31557600
 ) => {
   try {
-    console.log("details", name, smartAccount, defApiKey);
-
     const response = await axios.post(
       "/api/register-ens",
       {
@@ -410,7 +439,6 @@ export const registerEnsName = async (
       }
     );
 
-    console.log("Registration response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Registration error:", error);
@@ -445,7 +473,6 @@ export const getUserWallet = async (wallet) => {
 export const updtUser = async (findData, updtData) => {
   try {
     try {
-      console.log("email", findData, updtData);
       return await fetch(`/api/updt-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -456,7 +483,6 @@ export const updtUser = async (findData, updtData) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -481,7 +507,6 @@ export const delUser = async (email) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("data-->", data);
           return data;
         });
     } catch (error) {
@@ -496,7 +521,6 @@ export const delUser = async (email) => {
 
 export const sendOTP = async ({ email, name, otp, subject, type }) => {
   try {
-    // console.log(email)
     return await fetch(`/api/send-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -512,7 +536,6 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // console.log("data-->", data);
         return data;
       });
   } catch (error) {
@@ -535,7 +558,6 @@ export const registerCoinosUser = async (username, password) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("registerCoinosUser-->", data);
           return data;
         });
     } catch (error) {
@@ -548,7 +570,12 @@ export const registerCoinosUser = async (username, password) => {
   }
 };
 
-export const createCoinosInvoice = async (token, amount, type = "bitcoin", secret) => {
+export const createCoinosInvoice = async (
+  token,
+  amount,
+  type = "bitcoin",
+  secret
+) => {
   try {
     try {
       return await fetch(`/api/coinos`, {
@@ -559,12 +586,11 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin", secre
           token,
           amount,
           type,
-          secret
+          secret,
         }),
       })
         .then((res) => res.json())
         .then((data) => {
-          // console.log("createCoinosInvoice-->", data);
           return data;
         });
     } catch (error) {
@@ -576,7 +602,6 @@ export const createCoinosInvoice = async (token, amount, type = "bitcoin", secre
     return false;
   }
 };
-
 
 export const sendBitcoinn = async (token, amount, address) => {
   try {
@@ -593,7 +618,6 @@ export const sendBitcoinn = async (token, amount, address) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("sendBitcoin-->", data);
           return data;
         });
     } catch (error) {

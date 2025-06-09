@@ -9,13 +9,15 @@ import {
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { ethers, Wallet } from "ethers";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi, parseUnits } from "viem";
 import { createUsdcBaseToGoldShift } from "../api/sideShiftAI";
 import { updtUser } from "@/lib/apiCall";
+import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -25,6 +27,9 @@ const DepositSwap = () => {
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [shiftData, setShiftData] = useState(null);
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [depositAddress, setDepositAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -109,8 +114,6 @@ const DepositSwap = () => {
       setShiftData(shift);
       setDepositAddress(shift.depositAddress);
       setToAmount(shift.settleAmount.toString());
-
-      console.log("Shift data:", shift);
     } catch (error) {
       console.error("Shift quote error:", error);
       toast.error(error ? error.message : "Failed to get shift quote");
@@ -162,16 +165,9 @@ const DepositSwap = () => {
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-    console.log("secretData", secretData);
     setIsLoading(true);
 
     try {
-      const walletBase = new Wallet(
-        secretData?.privateKey,
-        ethers.getDefaultProvider("https://mainnet.base.org")
-      );
-      console.log("wallet", walletBase);
-
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey
@@ -182,7 +178,6 @@ const DepositSwap = () => {
       }
 
       // Send USDC to the deposit address
-      console.log("Sending USDC to deposit address:", depositAddress);
 
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
@@ -192,11 +187,12 @@ const DepositSwap = () => {
           args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
         },
       ]);
-      console.log("tx", tx.message);
       if (tx?.message?.includes("transfer amount exceeds balance")) {
         toast.error("Insufficient token balance.");
       } else if (tx) {
-        toast.success("Deposit completed successfully!");
+        setSuccess(true);
+        setHash(tx);
+        // toast.success("Deposit completed successfully!");
         fetchBalances();
         setFromAmount("");
         setToAmount("");
@@ -255,6 +251,30 @@ const DepositSwap = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"USDC"}
+            toAddress={depositAddress}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={executeDeposit}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -370,7 +390,7 @@ const DepositSwap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeDeposit}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

@@ -226,8 +226,6 @@ export async function fetchUserData(walletAddress) {
           : null,
       })),
     }));
-
-    console.log("Transformed user data:", transformedData);
     return transformedData[0];
   } catch (error) {
     console.error("Error fetching user data:", error);

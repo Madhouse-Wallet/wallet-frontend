@@ -117,7 +117,7 @@ export const registerCredential = async (username, displayName) => {
                     { type: "public-key", alg: -257 } // RS256
                 ],
                 timeout: 60000,
-  
+
                 authenticatorSelection: {
                     userVerification: "required",
                     residentKey: "required",           // Allow discoverable credentials
@@ -147,10 +147,10 @@ export const registerCredential = async (username, displayName) => {
             }
         }
     } catch (error) {
-        console.error('registerCheck error-->', error?.name, error);
+        // console.error('registerCheck error-->', error?.name, error);
         return {
             status: false,
-            msg: error.message
+            msg: "The operation was either not permitted or took too long to complete. Please ensure your device allows WebAuthn and try again."
         }
     }
 }
@@ -216,10 +216,10 @@ export const storeSecret = async (credentialIdBase, data) => {
             }
         }
     } catch (error) {
-        console.error('storeSecret error-->', error?.name, error);
+        // console.error('storeSecret error-->', error?.name, error);
         return {
             status: false,
-            msg: error.message
+            msg: "The operation was either not permitted or took too long to complete. Please ensure your device allows WebAuthn and try again."
         }
     }
 }
@@ -270,7 +270,7 @@ export const verifyUser = async (credentialIdBase) => {
                 msg: "User verified successfully"
             }
         }
-    }catch (error) {
+    } catch (error) {
         console.error('retrieveSecret error-->', error?.name, error);
         return {
             status: false,

@@ -47,7 +47,6 @@ export const createUsdcToBtcShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -109,7 +108,6 @@ export const createBtcToTbtcShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -164,7 +162,6 @@ export const createBtcToTbtcShift = async (
   }
 };
 
-
 export const createTBtcToLbtcShift = async (
   usdcAmount: string,
   bitcoinAddress: string,
@@ -172,7 +169,6 @@ export const createTBtcToLbtcShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -234,7 +230,6 @@ export const createLBtcToTbtcShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -296,7 +291,6 @@ export const createLBtcToUSDCShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -358,7 +352,6 @@ export const createBtcToUsdcShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-170");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -413,7 +406,6 @@ export const createBtcToUsdcShift = async (
   }
 };
 
-
 export const createUsdcBaseToGoldShift = async (
   usdcAmount: string,
   bitcoinAddress: string,
@@ -421,7 +413,6 @@ export const createUsdcBaseToGoldShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-424");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -483,7 +474,6 @@ export const createGoldToUsdcBaseShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-424");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -538,7 +528,6 @@ export const createGoldToUsdcBaseShift = async (
   }
 };
 
-
 export const createUsdcBaseToEthMainnetShift = async (
   usdcAmount: string,
   bitcoinAddress: string,
@@ -546,7 +535,6 @@ export const createUsdcBaseToEthMainnetShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-424");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",
@@ -608,7 +596,6 @@ export const createEthMainnetToUsdcbaseShift = async (
   affiliateId: string
 ): Promise<ShiftResponse> => {
   try {
-    console.log("line-424");
     // Step 1: Request a quote
     const quoteResponse = await axios.post<QuoteResponse>(
       "https://sideshift.ai/api/v2/quotes",

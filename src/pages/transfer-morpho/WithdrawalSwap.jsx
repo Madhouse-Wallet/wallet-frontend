@@ -7,12 +7,18 @@ import { swap, TOKENS } from "@/utils/morphoSwap";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import Image from "next/image";
 import { parseAbi } from "viem";
+import TransactionConfirmationPop from "../../components/Modals/TransactionConfirmationPop";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "../../components/Modals/TransactionSuccessPop";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
   const [debounceTimer, setDebounceTimer] = useState(null);
   const [usdcBalance, setUsdcBalance] = useState("0");
   const [morphoBalance, setMorphoBalance] = useState("0");
+  const [trxnApproval, setTrxnApproval] = useState(false);
+  const [hash, setHash] = useState("");
+  const [success, setSuccess] = useState(false);
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
@@ -111,7 +117,6 @@ const WithdrawalSwap = () => {
         userAuth?.walletAddress
       );
 
-      console.log("Enso swap quote received:", quoteResult);
       setQuote(quoteResult);
 
       if (quoteResult && quoteResult.estimate?.toAmount) {
@@ -172,7 +177,6 @@ const WithdrawalSwap = () => {
     }
 
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
-    console.log("secretData", secretData);
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -183,7 +187,6 @@ const WithdrawalSwap = () => {
         toast.error(getAccountCli?.msg);
         return;
       }
-      console.log("getAccountCli", getAccountCli);
 
       if (!getAccountCli.status) {
         toast.error(getAccountCli?.msg);
@@ -206,9 +209,10 @@ const WithdrawalSwap = () => {
               value: quote?.routeData?.tx?.value,
             },
           ]);
-          console.log("tx", tx);
           if (tx) {
-            toast.success("Swap completed successfully!");
+            setHash(tx);
+            setSuccess(true);
+            // toast.success("Swap completed successfully!");
           }
         } catch (error) {
           if (error.message && error.message.includes("user rejected")) {
@@ -272,6 +276,30 @@ const WithdrawalSwap = () => {
 
   return (
     <>
+      {trxnApproval &&
+        createPortal(
+          <TransactionConfirmationPop
+            trxnApproval={trxnApproval}
+            settrxnApproval={setTrxnApproval}
+            amount={fromAmount}
+            symbol={"Morpho"}
+            toAddress={quote?.routeData?.tx?.to}
+            fromAddress={userAuth?.walletAddress}
+            handleSend={executeSwap}
+          />,
+          document.body
+        )}
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Morpho"}
+            hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
+          />,
+          document.body
+        )}
       <section className="py-3">
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
@@ -357,7 +385,7 @@ const WithdrawalSwap = () => {
                       className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
-                      onClick={executeSwap}
+                      onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
                     >
                       {getButtonText()}

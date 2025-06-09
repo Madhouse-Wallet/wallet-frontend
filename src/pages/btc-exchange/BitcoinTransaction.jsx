@@ -49,7 +49,6 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
           ? formatDateForApi(dateRange?.endDate)
           : null;
 
-        console.log("startDate", startDate, endDate, dateRange, applyTrue);
         // BitQuery API token
         const accessToken = process.env.NEXT_PUBLIC_BITQUERY_ACCESS_TOKEN;
 
@@ -272,13 +271,16 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
                               </p>
                             </div>
                           </div>
-                          <div className="right">
-                            <p className="m-0 text-xs font-medium">
+                          <div className="right text-right">
+                            <p className="m-0 text-xs font-medium py-1">
                               {tx.status === "rejected"
                                 ? "Insufficient Balance"
-                                : `${tx.type === "token send" ? "-" : "+"} ${
+                                : `${tx.type === "token send" ? "-" : "+"} ${parseFloat(
                                     tx.amount
-                                  }`}
+                                  ).toFixed(8)}`}
+                            </p>
+                            <p className="m-0 text-xs font-medium py-1">
+                              {tx.day}
                             </p>
                           </div>
                         </div>

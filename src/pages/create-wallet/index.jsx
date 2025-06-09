@@ -220,9 +220,7 @@ const CreateWallet = () => {
           storageKeySecret = storeData?.storageKey;
           credentialIdSecret = storeData?.credentialId;
           let liquidBitcoinWallet = "";
-          if (resultLiquid) {
-            liquidBitcoinWallet = resultLiquid?.hash || "";
-          }
+       
           const data = await addUser(
             registerData.email,
             registerData.username,
@@ -235,7 +233,7 @@ const CreateWallet = () => {
             }],
             address,
             bitcoinWallet,
-            liquidBitcoinWallet,
+            "",
             "",
             flowTokens,
             cleanEmail

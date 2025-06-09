@@ -65,7 +65,6 @@ const MultiSignPop = ({ sign, setSign }) => {
           signatures,
         }
       );
-      console.log("test", { userOpHash });
       setStatus("Transaction Sent");
       toast.success("Trxn is Done!");
       setSignatures([]);

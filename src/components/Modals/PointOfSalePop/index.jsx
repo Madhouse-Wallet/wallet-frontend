@@ -45,7 +45,6 @@ const PointOfSalePop = ({
   }, [userAuth.email]);
 
   const handlePointOfSale = () => setPointSale(!pointSale);
-  console.log("userAuth.email", userAuth.email);
   return (
     <>
       <Modal

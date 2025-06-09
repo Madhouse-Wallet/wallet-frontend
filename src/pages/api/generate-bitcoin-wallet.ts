@@ -31,9 +31,7 @@ export default async function handler(
       wif,
     } = response.data;
 
-    // Log the generated address information (optional)
-    console.log("Generated Bitcoin Address:", address);
-    console.log("Private Key:", privateKey);
+
 
     // Return the wallet information
     return res.status(200).json({

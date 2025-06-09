@@ -17,9 +17,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         );
         let getToken = await userLogIn(2, existingUser?.lnbitId_3) as any;
-        // let getToken = getUserToken?.data?.token;
-        // const getToken = await logIn(2) as any;
-        // console.log("data-->", data)
         if (getToken?.status) {
             let token = getToken?.data?.token;
             const payInv = await payInvoice({
@@ -27,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 "bolt11": invoice // ← invoice from above
             }, token, 2, existingUser?.lnbitAdminKey_3) as any
             if (payInv?.status) {
-                console.log("done payment!")
                 return res.status(200).json({ status: "success", message: 'Done Payment!', userData: {} });
             } else {
                 return res.status(400).json({ status: "failure", message: payInv.msg });

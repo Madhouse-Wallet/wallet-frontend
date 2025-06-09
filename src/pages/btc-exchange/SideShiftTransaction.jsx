@@ -65,6 +65,7 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         rate: shift.rate,
         expiresAt: shift.expiresAt,
         quoteId: shift.quoteId,
+        day: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
       };
     });
   };
@@ -90,7 +91,6 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
   };
 
   useEffect(() => {
-    console.log("line-83", userData);
     const fetchTransactions = async () => {
       if (
         !userData?.userId?.sideshiftIds ||
@@ -106,8 +106,6 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
       try {
         // Extract IDs from userData
         const ids = userData?.userId?.sideshiftIds.map((item) => item.id);
-
-        console.log("Fetching SideShift data for IDs:", ids);
 
         // Fetch data from SideShift API
         const apiData = await fetchSideShiftData(ids);
@@ -273,14 +271,17 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
                             </p>
                           </div>
                         </div>
-                        <div className="right">
-                          <p className="m-0 text-xs font-medium">
+                        <div className="right text-right">
+                          <p className="m-0 text-xs font-medium py-1">
                             {tx.status === "failed"
                               ? "Transaction Failed"
                               : `${tx.depositAmount} ${tx.depositCoin}`}
                           </p>
                           <p className="m-0 text-xs font-medium opacity-70">
                             → {tx.settleAmount} {tx.settleCoin}
+                          </p>
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.day}
                           </p>
                         </div>
                       </div>
@@ -358,7 +359,6 @@ const receiveSvg = (
     />
   </svg>
 );
-
 
 const Modal = styled.div`
   padding-bottom: 100px;

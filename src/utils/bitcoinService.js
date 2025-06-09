@@ -28,7 +28,6 @@ export async function sendBitcoinAPI({
   confirmationTimeout = 30000,
 }) {
   try {
-    console.log("line-31---->Inside bitcoin send api");
     // Validate required parameters
     if (!sourceAddress) throw new Error("Source address is required");
     if (!sourcePrivateKey) throw new Error("Source private key is required");
@@ -45,7 +44,6 @@ export async function sendBitcoinAPI({
 
     // Create a key from the private key
 
-    console.log("sourcePrivateKey", sourcePrivateKey);
     const key = new bitcoin.ECKey(bigi.fromHex(sourcePrivateKey), true);
 
     // Step 1: Create the transaction

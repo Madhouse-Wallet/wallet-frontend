@@ -29,21 +29,10 @@ export default async function handler(req, res) {
           "Missing required fields: fromAddress, toAddress, amountSatoshi, privateKeyHex",
       });
     }
-    console.log("line-31", privateKeyHex);
-    // const keyPair = bitcoin.ECPair.fromWIF(
-    //   privateKeyHex,
-    //   bitcoin.networks.bitcoin
-    // );
     const keyPair = ECPair.fromWIF(privateKeyHex, bitcoin.networks.bitcoin);
     const privateKeyWallet = keyPair.privateKey.toString("hex");
 
-    // const cleanPrivateKey = privateKeyHex.startsWith("0x")
-    //   ? privateKeyHex.slice(2)
-    //   : privateKeyHex;
-
     const cleanPrivateKey = privateKeyWallet;
-
-    console.log("line-44", cleanPrivateKey, privateKeyWallet);
 
     if (cleanPrivateKey.length !== 64) {
       return res.status(400).json({

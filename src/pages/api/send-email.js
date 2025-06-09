@@ -21,20 +21,14 @@ export default async function handler(req, res) {
       });
 
       const { type, subject, emailData, email } = req.body;
-      console.log("type, subject, emailData, email", req.body);
       // Path to the HTML template
-  
-        console.log(
-          "process.env.NEXT_PUBLIC_DOMAIN-->",
-          process.env.NEXT_PUBLIC_DOMAIN
-        );
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`
-        );
-       const htmlTemplate = await response.text();
-       const  htmlBody = await replacePlaceholders(htmlTemplate, emailData);
 
-      // console.log("htmlBody-->", htmlBody)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`
+      );
+      const htmlTemplate = await response.text();
+      const htmlBody = await replacePlaceholders(htmlTemplate, emailData);
+
       const params = {
         Destination: {
           ToAddresses: [email],
@@ -61,7 +55,7 @@ export default async function handler(req, res) {
           data,
         });
       } catch (err) {
-        console.log("error->", err)
+        console.log("error->", err);
         res.status(500).json({
           status: "failure",
           message: "Failed to send email",

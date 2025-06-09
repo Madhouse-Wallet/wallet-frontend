@@ -14,7 +14,6 @@ const LnbitsTransaction = ({
   dateRange,
   applyTrue,
 }) => {
-  console.log("applyTrue", applyTrue);
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [detail, setDetail] = useState(false);
@@ -52,6 +51,7 @@ const LnbitsTransaction = ({
             : `Received ${amount.toFixed(2)} sats`),
         category: "payment",
         rawData: tx,
+        day: moment(tx.time).format("MMMM D, YYYY h:mm A"),
       };
     });
   };
@@ -59,16 +59,13 @@ const LnbitsTransaction = ({
   const fetchBitcoinTransactions = async () => {
     setLoading(true);
     try {
-      console.log("dateRange", dateRange);
       const startDate = isDateFilterActive()
         ? formatDateForApi(dateRange?.startDate)
         : null;
       const endDate = isDateFilterActive()
         ? formatDateForApi(dateRange?.endDate)
         : null;
-      console.log("line-67", startDate, endDate);
       const checkUser = await getUser(userAuth?.email);
-      console.log("line-70", checkUser);
 
       if (usd === 0) {
         const response = await fetch("/api/lnbits-transaction", {
@@ -278,14 +275,17 @@ const LnbitsTransaction = ({
                             </p>
                           </div>
                         </div>
-                        <div className="right">
-                          <p className="m-0 text-xs font-medium">
+                        <div className="right text-right">
+                          <p className="m-0 text-xs font-medium py-1">
                             {/* {tx.status === "failed"
                               ? "Failed Transaction"
                               : `${tx.type === "send" ? "-" : "+"} ${
                                   tx.amount
                                 }`} */}
-                            {tx.amount}
+                            {parseFloat(tx.amount) / 1000}
+                          </p>
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.day}
                           </p>
                         </div>
                       </div>

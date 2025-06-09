@@ -82,7 +82,6 @@ const LightningSendTab = () => {
       amount,
       userAuth.email
     );
-    // console.log("result--->", result)
 
     if (result.status === "failure") {
       setError(result.message);
