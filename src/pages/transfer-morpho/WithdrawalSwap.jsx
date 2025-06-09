@@ -25,7 +25,7 @@ const WithdrawalSwap = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [swapDirection] = useState({
-    from: "MORPHO",
+    from: "spark USDC",
     to: "USDC",
   });
 
@@ -282,7 +282,7 @@ const WithdrawalSwap = () => {
             trxnApproval={trxnApproval}
             settrxnApproval={setTrxnApproval}
             amount={fromAmount}
-            symbol={"Morpho"}
+            symbol={"spark USDC"}
             toAddress={quote?.routeData?.tx?.to}
             fromAddress={userAuth?.walletAddress}
             handleSend={executeSwap}
@@ -295,7 +295,7 @@ const WithdrawalSwap = () => {
           <TransactionSuccessPop
             success={success}
             setSuccess={setSuccess}
-            symbol={"Morpho"}
+            symbol={"Spark USDC"}
             hash={`${process.env.NEXT_PUBLIC_EXPLORER_URL}/${hash}`}
           />,
           document.body
@@ -307,7 +307,7 @@ const WithdrawalSwap = () => {
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
                   <p className="m-0 font-medium">
-                    Swap Morpho to USDC via Enso
+                    Swap Spark USDC to USDC
                   </p>
                   <div className="text-xs text-white/70">
                     Powered by Enso Finance
@@ -342,7 +342,7 @@ const WithdrawalSwap = () => {
                           {swapDirection.from}
                         </button>
                         <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(morphoBalance).toFixed(4)}{" "}
+                          Balance: {parseFloat(morphoBalance).toFixed(2)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>

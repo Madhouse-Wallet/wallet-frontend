@@ -10,7 +10,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    const { amount, email } = req.body;
+    const { amount, email, memo } = req.body;
     // const getToken = await logIn(2) as any;
     // let token = getToken?.data?.token;
     const satoshiAmount = amount;
@@ -26,7 +26,7 @@ export default async function handler(
         out: false,
         unit: "sat",
         amount: satoshiAmount,
-        memo: "invoice",
+        memo: memo,
         webhook: `https://app.madhousewallet.com/api/webhookInvoice?email=${email}`,
       },
       token,

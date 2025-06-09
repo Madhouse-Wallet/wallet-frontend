@@ -24,16 +24,16 @@ export const getUser = async (email) => {
   }
 };
 
-
 //update-lnaddress
-export const updateLNAddressCall = async (email,username) => {
+export const updateLNAddressCall = async (email, username) => {
   try {
     try {
       return await fetch(`/api/update-lnaddress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,username
+          email,
+          username,
         }),
       })
         .then((res) => res.json())
@@ -252,7 +252,12 @@ export const btcSat = async (amount, refund_address = "") => {
   }
 };
 
-export const receiveBtc = async (amount, email, publicKey = "") => {
+export const receiveBtc = async (
+  amount,
+  email,
+  memo = "Madhouse Wallet",
+  publicKey = ""
+) => {
   try {
     try {
       return await fetch(`/api/receive-bitcoin-lnbit`, {
@@ -261,6 +266,7 @@ export const receiveBtc = async (amount, email, publicKey = "") => {
         body: JSON.stringify({
           amount,
           email,
+          memo,
           publicKey,
         }),
       })

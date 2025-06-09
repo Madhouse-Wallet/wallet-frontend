@@ -27,7 +27,7 @@ const DepositSwap = () => {
   // Fixed swap direction: USDC to Morpho
   const [swapDirection] = useState({
     from: "USDC",
-    to: "MORPHO",
+    to: "spark USDC",
   });
 
   // Chain constants - Base chain (ID: 8453)
@@ -328,7 +328,7 @@ const DepositSwap = () => {
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Swap USDC to Morpho</p>
+                  <p className="m-0 font-medium">Swap USDC to Spark USDC</p>
                   <div className="text-xs text-white/70">
                     Powered by Enso Finance
                   </div>
@@ -394,7 +394,7 @@ const DepositSwap = () => {
                           {swapDirection.to}
                         </button>
                         <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(morphoBalance).toFixed(4)}{" "}
+                          Balance: {parseFloat(morphoBalance).toFixed(2)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>

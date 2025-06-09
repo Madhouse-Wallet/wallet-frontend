@@ -97,7 +97,8 @@ const PointOfSalePop = ({
                       <div className="py-2">
                         {lnbitLink ? (
                           <Link
-                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
+                            // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
@@ -113,7 +114,8 @@ const PointOfSalePop = ({
                       <div className="py-2">
                         {lnbitLink2 ? (
                           <Link
-                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
+                            // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}

@@ -532,7 +532,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       ),
     },
     {
-      title: "MORPHO",
+      title: "Spark USDC",
       component: (
         <>
           {morphotransactions.length > 0 ? (

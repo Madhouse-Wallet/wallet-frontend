@@ -1,13 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Link from "next/link";
-
+import { verifyUser } from "@/utils/webauthPrf";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
+import { toast } from "react-toastify";
+import Loader from "../../../components/loader";
+import Image from "next/image";
 
 // img
 
 const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
-
+  const router = useRouter();
+  const userAuth = useSelector((state) => state.Auth);
   const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
+  const [loading, setloading] = useState(false);
+
+  const verifyingUser = async () => {
+    setloading(true);
+    let data = JSON.parse(userAuth?.webauthKey);
+    console.log("line-16", data);
+    let userData = await verifyUser(data?.credentialIdSecret);
+    console.log("line-15", userData);
+    if (
+      userData.status === true &&
+      userData.msg === "User verified successfully"
+    ) {
+      router.push("/spherepay");
+      setloading(false);
+    } else {
+      setloading(false);
+      toast.error(userData?.msg);
+    }
+  };
   return (
     <>
       <Modal
@@ -26,8 +51,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
-            </div>
+            <div className="top pb-3"></div>
             <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
                 <div className="col-span-6">
@@ -39,19 +63,30 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                   </Link>
                 </div>
                 <div className="col-span-6">
-                  <Link
-                    href="/spherepay"
+                  <button
+                    // href="/spherepay"
+                    onClick={verifyingUser}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    Bank Account Transfer
-                  </Link>
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Bank Account Transfer"
+                    )}
+                  </button>
                 </div>
                 <div className="col-span-12">
                   <Link
                     href="/transfer-morpho"
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                   Transfer Morpho
+                    Transfer Spark USDC
                   </Link>
                 </div>
               </div>

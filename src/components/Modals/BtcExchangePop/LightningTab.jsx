@@ -3,16 +3,16 @@ import React, { useState } from "react";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
-import { receiveBtc } from "../../../lib/apiCall"
+import { receiveBtc } from "../../../lib/apiCall";
 import { useSelector } from "react-redux";
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [memo, setMemo] = useState("");
   const [amount, setAmount] = useState(""); // State for amount
   const [error, setError] = useState("");
   const userAuth = useSelector((state) => state.Auth);
-
 
   const [invoice, setInvoice] = useState("");
   const handleCopy = async (address, type) => {
@@ -82,10 +82,7 @@ const LightningTab = (walletAddress) => {
       setLoading(false);
       return;
     }
-    const result = await receiveBtc(
-      Number(amount),
-      userAuth?.email
-    );
+    const result = await receiveBtc(Number(amount), userAuth?.email, memo);
     if (result.status === "error") {
       setError(result.error);
       setLoading(false);
@@ -115,6 +112,21 @@ const LightningTab = (walletAddress) => {
               className="form-control text-[var(--textColor)] focus:text-[var(--textColor)] bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
             />
             {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
+          </div>
+          <div className="py-2">
+            <label
+              htmlFor="btcAmount"
+              className="form-label m-0 text-xs text-gray-400 pb-1 font-medium"
+            >
+              Enter Memo
+            </label>
+            <input
+              id="btcAmount"
+              type="text"
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              className="form-control text-[var(--textColor)] focus:text-[var(--textColor)] bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
+            />
           </div>
           <div className="py-2">
             <div className="btnWrpper">

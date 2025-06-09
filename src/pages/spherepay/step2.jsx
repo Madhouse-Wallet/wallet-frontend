@@ -92,7 +92,7 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
       return response;
     } catch (error) {
       console.error("Error creating customer:", error);
-      setError(error.message || "Failed to create customer");
+      setError(error?.response?.data?.message || "Failed to create customer");
       return { error };
     } finally {
       setIsLoading(false);
@@ -120,7 +120,16 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
     const response = await createNewCustomer(email, countryCode, stateCode);
 
     if (response && response.error) {
-      setError(response.error.message || "An error occurred");
+      if (
+        response?.error?.response?.data?.error ===
+        "customer/unsupported-country"
+      ) {
+        setError("Location not supported");
+      } else {
+        setError(
+          response?.error?.response?.data?.message || "An error occurred"
+        );
+      }
     } else {
       setCustomerID(response?.data?.customer?.id);
       setStep("PolicyKycStep");

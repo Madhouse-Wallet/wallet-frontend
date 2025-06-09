@@ -301,7 +301,7 @@ const BTCEchange = () => {
             Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
           );
 
-          setTotalUsdBalance(`Morpho: ${parseFloat(morphoBalance).toFixed(4)}`);
+          setTotalUsdBalance(`Spark USDC: $ ${parseFloat(morphoBalance).toFixed(2)}`);
         } catch (error) {
           console.error("Error fetching token balances:", error);
         }
