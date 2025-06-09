@@ -39,20 +39,15 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const userAuth = useSelector((state) => state.Auth);
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth?.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        );
-        if (callGetSecretData?.status) {
-          return JSON.parse(callGetSecretData?.secret);
-        } else {
-          return false;
-        }
+      let data = JSON.parse(userAuth?.webauthKey);
+      let callGetSecretData = await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      );
+      if (callGetSecretData?.status) {
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
@@ -66,6 +61,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         toast.error("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
+        console.log("line-69", userExist);
         if (userExist.status && userExist.status == "failure") {
           toast.error("Please Login!");
           setLoading(false);
@@ -77,14 +73,17 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             return;
           }
           const privateKey = await recoverSeedPhrase();
+          console.log("line-81", privateKey);
           if (!privateKey) {
-            toast.error("No Bitcoin Wallet Found!");
+            toast.error("No Private Key Found!");
             setLoading(false);
             return;
           }
           const getBtcSat = await sendLnbit(
             amount,
-            userExist?.userId?.bitcoinWallet
+            userExist?.userId?.bitcoinWallet,
+            userExist?.userId?.lnbitId_3,
+            userExist?.userId?.lnbitWalletId_3
           );
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);

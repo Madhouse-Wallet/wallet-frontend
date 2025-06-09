@@ -202,7 +202,12 @@ export const getLnbitId = async (email) => {
   }
 };
 
-export const sendLnbit = async (amount, onchain_address) => {
+export const sendLnbit = async (
+  amount,
+  onchain_address,
+  lnbitId_3,
+  lnbitWalletId_3
+) => {
   try {
     try {
       return await fetch(`/api/send-lnbit`, {
@@ -211,6 +216,8 @@ export const sendLnbit = async (amount, onchain_address) => {
         body: JSON.stringify({
           amount,
           onchain_address,
+          lnbitId_3,
+          lnbitWalletId_3,
         }),
       })
         .then((res) => res.json())
@@ -227,7 +234,12 @@ export const sendLnbit = async (amount, onchain_address) => {
   }
 };
 
-export const btcSat = async (amount, refund_address = "") => {
+export const btcSat = async (
+  amount,
+  refund_address = "",
+  lnbitId_3,
+  lnbitWalletId_3
+) => {
   try {
     try {
       return await fetch(`/api/btc-sat`, {
@@ -236,6 +248,8 @@ export const btcSat = async (amount, refund_address = "") => {
         body: JSON.stringify({
           amount,
           refund_address,
+          lnbitId_3,
+          lnbitWalletId_3,
         }),
       })
         .then((res) => res.json())

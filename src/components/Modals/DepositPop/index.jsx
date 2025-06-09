@@ -39,20 +39,15 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const userAuth = useSelector((state) => state.Auth);
   const recoverSeedPhrase = async () => {
     try {
-      let userExist = await getUser(userAuth?.email);
-      if (
-        userExist?.userId?.secretCredentialId &&
-        userExist?.userId?.secretStorageKey
-      ) {
-        let callGetSecretData = await getSecretData(
-          userExist?.userId?.secretStorageKey,
-          userExist?.userId?.secretCredentialId
-        );
-        if (callGetSecretData?.status) {
-          return JSON.parse(callGetSecretData?.secret);
-        } else {
-          return false;
-        }
+      let data = JSON.parse(userAuth?.webauthKey);
+      let callGetSecretData = await getSecretData(
+        data?.storageKeySecret,
+        data?.credentialIdSecret
+      );
+      if (callGetSecretData?.status) {
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
       }
     } catch (error) {
       console.log("Error in Fetching secret!", error);
@@ -84,7 +79,9 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           }
           const getBtcSat = await btcSat(
             amount,
-            userExist?.userId?.bitcoinWallet
+            userExist?.userId?.bitcoinWallet,
+            userExist?.userId?.lnbitId_3,
+            userExist?.userId?.lnbitWalletId_3
           );
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
