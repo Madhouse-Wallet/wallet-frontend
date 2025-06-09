@@ -256,7 +256,16 @@ const WithdrawalSwap = () => {
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (parseFloat(fromAmount) > parseFloat(morphoBalance))
       return "Insufficient MORPHO Balance";
@@ -306,9 +315,7 @@ const WithdrawalSwap = () => {
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">
-                    Swap Spark USDC to USDC
-                  </p>
+                  <p className="m-0 font-medium">Swap Spark USDC to USDC</p>
                   <div className="text-xs text-white/70">
                     Powered by Enso Finance
                   </div>

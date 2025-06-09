@@ -12,10 +12,8 @@ import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
- 
-import {
-  retrieveSecret,
-} from "../../utils/webauthPrf";
+
+import { retrieveSecret } from "../../utils/webauthPrf";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -53,6 +51,7 @@ const Setting: React.FC = () => {
   const [adminId, setAdminId] = useState<any>("");
   const [tposId1, setTposId1] = useState<any>("");
   const [tposId2, setTposId2] = useState<any>("");
+  const [loader, setLoader] = useState<boolean>(false);
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -63,17 +62,16 @@ const Setting: React.FC = () => {
   };
 
   useEffect(() => {
-
     const getUserData = async () => {
       let userExist = await getUser(userAuth.email);
-      setTposId1(userExist?.userId?.lnbitLinkId || "")
-      setTposId2(userExist?.userId?.lnbitLinkId_2 || "")
-      setAdminId(userExist?.userId?.lnbitAdminKey_3 || "")
-    }
+      setTposId1(userExist?.userId?.lnbitLinkId || "");
+      setTposId2(userExist?.userId?.lnbitLinkId_2 || "");
+      setAdminId(userExist?.userId?.lnbitAdminKey_3 || "");
+    };
     if (userAuth.email) {
       getUserData();
     }
-  }, [])
+  }, []);
 
   const getPreview = async () => {
     try {
@@ -122,7 +120,8 @@ const Setting: React.FC = () => {
   // settingindex.tsx
   const recoverSeedPhrase = async () => {
     try {
-      let data = JSON.parse(userAuth?.webauthKey)
+      setLoader(true);
+      let data = JSON.parse(userAuth?.webauthKey);
       let callGetSecretData = (await getSecretData(
         data?.storageKeySecret,
         data?.credentialIdSecret
@@ -142,6 +141,7 @@ const Setting: React.FC = () => {
         // }
         setRecoverSeed(callGetSecretData?.msg);
         setRecoverSeedStatus(false);
+        setLoader(false);
       }
     } catch (error) {
       // return {
@@ -150,6 +150,7 @@ const Setting: React.FC = () => {
       // }
       setRecoverSeed("Error in Fetching secret!");
       setRecoverSeedStatus(false);
+      setLoader(false);
     }
   };
 
@@ -367,9 +368,9 @@ const Setting: React.FC = () => {
       addProvisionData(userAuth.email);
       logoutStorage();
       selectBg(0);
-      changeBgOpacity((1));
-      selectWm(0)
-      changeWmOpacity((0.5))
+      changeBgOpacity(1);
+      selectWm(0);
+      changeWmOpacity(0.5);
       dispatch(
         loginSet({
           login: false,
@@ -412,6 +413,7 @@ const Setting: React.FC = () => {
             adminId={adminId}
             phrase={recoverSeed}
             phraseStatus={recoverSeedStatus}
+            setLoader={setLoader}
           />,
           document.body
         )}
@@ -590,7 +592,7 @@ const Setting: React.FC = () => {
                             </div>
                             {/* {userAuth?.email && ( */}
                             <span className="text-white flex items-center">
-                              {(userAuth?.email && tposId1) ? tposId1 : "--"}
+                              {userAuth?.email && tposId1 ? tposId1 : "--"}
                             </span>
                             {/* )} */}
                           </li>
@@ -603,7 +605,7 @@ const Setting: React.FC = () => {
                             </div>
                             {/* {userAuth?.email && ( */}
                             <span className="text-white flex items-center">
-                              {(userAuth?.email && tposId2) ? tposId2 : "--"}
+                              {userAuth?.email && tposId2 ? tposId2 : "--"}
                             </span>
                             {/* )} */}
                           </li>
@@ -621,22 +623,26 @@ const Setting: React.FC = () => {
                           </div>
                           {/* {userAuth?.email && ( */}
                           <span className="text-white flex items-center">
-                            {(userAuth?.email && adminId) ?
-                              (
-                                <>
-                                  {splitAddress(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`, 12)}
-                                  <button
-                                    onClick={() =>
-                                      handleCopy(`lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`)
-                                    }
-                                    className="border-0 p-0 bg-transparent pl-1"
-                                  >
-                                    {copyIcn}
-                                  </button>
-                                </>
-                              )
-
-                              : "--"}
+                            {userAuth?.email && adminId ? (
+                              <>
+                                {splitAddress(
+                                  `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`,
+                                  12
+                                )}
+                                <button
+                                  onClick={() =>
+                                    handleCopy(
+                                      `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
+                                    )
+                                  }
+                                  className="border-0 p-0 bg-transparent pl-1"
+                                >
+                                  {copyIcn}
+                                </button>
+                              </>
+                            ) : (
+                              "--"
+                            )}
                           </span>
                           {/* )} */}
                         </li>
@@ -739,8 +745,9 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${selectedBackground === bg ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedBackground === bg ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -802,8 +809,9 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${selectedWatermark === wm ? "border-2 " : ""
-                                  } border-0 p-0 bg-transparent rounded`}
+                                className={`${
+                                  selectedWatermark === wm ? "border-2 " : ""
+                                } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
@@ -937,7 +945,22 @@ const Setting: React.FC = () => {
                                 onClick={() => recoverSeedPhrase()}
                                 className="inline-flex items-center justify-center font-medium transition-[color,background-color,scale,box-shadow,opacity] disabled:pointer-events-none disabled:opacity-50 -tracking-2 leading-inter-trimmed gap-1.5 focus:outline-none focus:ring-3 shrink-0 disabled:shadow-none duration-300 umbrel-button bg-clip-padding bg-white/6 active:bg-white/3 hover:bg-white/10 focus:bg-white/10 border-[0.5px] border-white/6 ring-white/6 data-[state=open]:bg-white/10 shadow-button-highlight-soft-hpx focus:border-white/20 focus:border-1 data-[state=open]:border-1 data-[state=open]:border-white/20 rounded-full h-[30px] px-2.5 text-12 min-w-[80px]"
                               >
-                                View Secrets
+                                {loader ? (
+                                  <Image
+                                    src={
+                                      process.env.NEXT_PUBLIC_IMAGE_URL +
+                                      "loading.gif"
+                                    }
+                                    alt={""}
+                                    height={40}
+                                    width={40}
+                                    className={
+                                      "h-[20px] object-contain w-auto"
+                                    }
+                                  />
+                                ) : (
+                                  "View Secrets"
+                                )}
                               </button>
                             </div>
                           </>

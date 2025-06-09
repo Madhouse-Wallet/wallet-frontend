@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
+import Image from "next/image.js";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -31,36 +32,33 @@ const getSecretData = async (storageKey, credentialId) => {
 
 // img
 
-const WithdrawPopup = ({
-  withdrawPop,
-  setWithdrawPop,
-}) => {
+const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
-    const recoverSeedPhrase = async () => {
-      try {
-        let userExist = await getUser(userAuth?.email);
-        if (
-          userExist?.userId?.secretCredentialId &&
-          userExist?.userId?.secretStorageKey
-        ) {
-          let callGetSecretData = await getSecretData(
-            userExist?.userId?.secretStorageKey,
-            userExist?.userId?.secretCredentialId
-          );
-          if (callGetSecretData?.status) {
-            return JSON.parse(callGetSecretData?.secret);
-          } else {
-            return false;
-          }
+  const recoverSeedPhrase = async () => {
+    try {
+      let userExist = await getUser(userAuth?.email);
+      if (
+        userExist?.userId?.secretCredentialId &&
+        userExist?.userId?.secretStorageKey
+      ) {
+        let callGetSecretData = await getSecretData(
+          userExist?.userId?.secretStorageKey,
+          userExist?.userId?.secretCredentialId
+        );
+        if (callGetSecretData?.status) {
+          return JSON.parse(callGetSecretData?.secret);
+        } else {
+          return false;
         }
-      } catch (error) {
-        console.log("Error in Fetching secret!", error);
-        return false;
       }
-    };
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+      return false;
+    }
+  };
   const handleDepositPop = async () => {
     try {
       setLoading(true);
@@ -84,7 +82,10 @@ const WithdrawPopup = ({
             setLoading(false);
             return;
           }
-          const getBtcSat = await sendLnbit(amount, userExist?.userId?.bitcoinWallet);
+          const getBtcSat = await sendLnbit(
+            amount,
+            userExist?.userId?.bitcoinWallet
+          );
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
             setLoading(false);
@@ -100,7 +101,6 @@ const WithdrawPopup = ({
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -124,8 +124,6 @@ const WithdrawPopup = ({
     connectWallet();
   }, [userAuth?.passkeyCred]);
 
-
-
   return (
     <>
       <Modal
@@ -146,7 +144,9 @@ const WithdrawPopup = ({
           {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">Withdraw</h5>
+              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                Withdraw
+              </h5>
             </div>
             <div className="modalBody">
               <form action="">
@@ -167,8 +167,6 @@ const WithdrawPopup = ({
                   </div>
                 </div>
 
-
-
                 <div className="btnWrpper mt-3">
                   <button
                     type="button"
@@ -176,7 +174,17 @@ const WithdrawPopup = ({
                     disabled={loading}
                     onClick={handleDepositPop}
                   >
-                    {loading ? "Loading..." : "Submit"}
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </form>

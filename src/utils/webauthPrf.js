@@ -150,7 +150,7 @@ export const registerCredential = async (username, displayName) => {
     console.error("registerCheck error-->", error?.name, error);
     return {
       status: false,
-      msg: error.message,
+      msg: "The operation was either not permitted or took too long to complete. Please ensure your device allows WebAuthn and try again.",
     };
   }
 };
@@ -224,7 +224,7 @@ export const storeSecret = async (credentialIdBase, data) => {
     console.error("storeSecret error-->", error?.name, error);
     return {
       status: false,
-      msg: error.message,
+      msg: "The operation was either not permitted or took too long to complete. Please ensure your device allows WebAuthn and try again.",
     };
   }
 };

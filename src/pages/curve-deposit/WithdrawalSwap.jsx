@@ -5,7 +5,7 @@ import {
   getETHEREUMRpcProvider,
   publicClient,
   sendTransaction,
-  MAINNET_RPC_URL
+  MAINNET_RPC_URL,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -275,7 +275,7 @@ const WithdrawalSwap = () => {
       const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
       const wallet = new Wallet(
         secretData?.privateKey,
-        ethers.getDefaultProvider(MAINNET_RPC_URL) 
+        ethers.getDefaultProvider(MAINNET_RPC_URL)
       );
 
       // Step 2: Estimate gas for Tether Gold transfer
@@ -422,7 +422,16 @@ const WithdrawalSwap = () => {
 
   // Determine button text based on state
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance))
       return "Insufficient Tether Gold Balance";

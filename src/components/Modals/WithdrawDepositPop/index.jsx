@@ -27,7 +27,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
       userData.msg === "User verified successfully"
     ) {
       router.push("/spherepay");
-      setloading(false);
+      // setloading(false);
     } else {
       setloading(false);
       toast.error(userData?.msg);

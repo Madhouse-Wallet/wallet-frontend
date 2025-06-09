@@ -8,28 +8,29 @@ import { getUser, btcSat } from "../../../../src/lib/apiCall";
 import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
+import Image from "next/image";
 
- const getSecretData = async (storageKey, credentialId) => {
-    try {
-      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
-      if (retrieveSecretCheck?.status) {
-        return {
-          status: true,
-          secret: retrieveSecretCheck?.data?.secret,
-        };
-      } else {
-        return {
-          status: false,
-          msg: retrieveSecretCheck?.msg,
-        };
-      }
-    } catch (error) {
+const getSecretData = async (storageKey, credentialId) => {
+  try {
+    let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+    if (retrieveSecretCheck?.status) {
+      return {
+        status: true,
+        secret: retrieveSecretCheck?.data?.secret,
+      };
+    } else {
       return {
         status: false,
-        msg: "Error in Getting secret!",
+        msg: retrieveSecretCheck?.msg,
       };
     }
-  };
+  } catch (error) {
+    return {
+      status: false,
+      msg: "Error in Getting secret!",
+    };
+  }
+};
 
 const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
@@ -81,7 +82,10 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             setLoading(false);
             return;
           }
-          const getBtcSat = await btcSat(amount, userExist?.userId?.bitcoinWallet);
+          const getBtcSat = await btcSat(
+            amount,
+            userExist?.userId?.bitcoinWallet
+          );
           if (getBtcSat.status && getBtcSat.status == "failure") {
             toast.error(getBtcSat.message);
             setLoading(false);
@@ -184,7 +188,17 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                     disabled={loading}
                     onClick={handleDepositPop}
                   >
-                    {loading ? "Loading..." : "Submit"}
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </form>

@@ -21,10 +21,10 @@ const Header: React.FC<HeaderProps> = () => {
 
   const reloadPasskey = async () => {
     if (userAuth.login && !userAuth?.pos) {
-      const newPasskeyValidator = ""
-        const msg = ""
-       const status = ""
-   
+      const newPasskeyValidator = "";
+      const msg = "";
+      const status = "";
+
       if (status) {
         dispatch(
           loginSet({
@@ -141,7 +141,17 @@ const Header: React.FC<HeaderProps> = () => {
                           <span className="ml-1">{copyIcn}</span>
                         </>
                       ) : (
-                        "Loading..."
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"
+                          }
+                          alt={""}
+                          height={100000}
+                          width={10000}
+                          className={
+                            "max-w-full h-[40px] object-contain w-auto"
+                          }
+                        />
                       )}
                     </button>
                   </>
@@ -228,4 +238,3 @@ const copyIcn = (
     />
   </svg>
 );
-

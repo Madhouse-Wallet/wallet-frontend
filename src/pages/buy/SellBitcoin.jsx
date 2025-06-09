@@ -11,6 +11,7 @@ import { parseAbi } from "viem";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import Image from "next/image";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -253,7 +254,16 @@ const SellBitcoin = () => {
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (parseFloat(fromAmount) > parseFloat(tbtcBalance))
       return "Insufficient BTC Balance";

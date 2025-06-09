@@ -112,18 +112,20 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
 };
 
 export const setupNewAccount = async (
-  PRIVATE_KEY,
-  SAFE_PRIVATE_KEY,
   chain = base
 ) => {
   try {
-    const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
+    let generatePrivateKey = await getMenmonic();
+    let getSafeKey = await getPrivateKey();
+    console.log("generatePrivateKey-->", generatePrivateKey)
+    console.log("getSafeKey-->", getSafeKey)
+    const eoaPrivateKey = generatePrivateKey.privateKey; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
     const relayPrivateKey = RELAY_PRIVATE_KEY;
     if (!relayPrivateKey) throw new Error("RELAY_PRIVATE_KEY is required");
 
-    const safePrivateKey = SAFE_PRIVATE_KEY;
+    const safePrivateKey = getSafeKey;
     if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
     const account = privateKeyToAccount(eoaPrivateKey);
@@ -146,7 +148,7 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: BigInt(1000000)*(await publicClient.getGasPrice()) 
+      value: BigInt(1000000) * (await publicClient.getGasPrice())
     });
     await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
 
@@ -195,10 +197,13 @@ export const setupNewAccount = async (
       res = {
         status: true,
         data: {
-          privatekey: eoaPrivateKey, 
+          privatekey: eoaPrivateKey,
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
+          privateKeyOwner: generatePrivateKey.privateKey,
+          safePrivateKey: getSafeKey,
+          seedPhraseOwner: generatePrivateKey.phrase
         },
       };
     } else {
@@ -212,7 +217,7 @@ export const setupNewAccount = async (
     console.log("Error setting up new account -->", error);
     return {
       status: false,
-      msg: error?.message,
+      msg: "Something went wrong during account setup. Please try again later."
     };
   }
 };
@@ -250,10 +255,9 @@ export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) 
     }
     return res;
   } catch (error) {
-    console.log("error recovering account -->", error);
     return {
       status: false,
-      msg: error?.message,
+      msg: "Something went wrong during account setup. Please try again after some time!",
     };
   }
 };
@@ -297,9 +301,9 @@ export const getAccount = async (
       account: account,
       paymaster: pimlicoClient,
       bundlerTransport: http(pimlicoUrl),
- 	    userOperation: {
-		      estimateFeesPerGas: async () => {
-            return (await pimlicoClient.getUserOperationGasPrice()).fast
+      userOperation: {
+        estimateFeesPerGas: async () => {
+          return (await pimlicoClient.getUserOperationGasPrice()).fast
         },
       },
     });

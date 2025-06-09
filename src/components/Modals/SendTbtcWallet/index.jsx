@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser } from "../../../lib/apiCall.js";
 import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
+import Image from "next/image.js";
 
 const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
   const [loading, setLoading] = useState(false);
@@ -132,7 +133,17 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
                     disabled={loading}
                     onClick={handleDepositPop}
                   >
-                    {loading ? "Loading..." : "Submit"}
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </form>

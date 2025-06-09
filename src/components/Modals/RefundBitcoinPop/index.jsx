@@ -18,6 +18,7 @@ import { createUsdcToBtcShift } from "@/pages/api/sideShiftAI.ts";
 import styled from "styled-components";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { parseAbi, parseUnits } from "viem";
+import Image from "next/image.js";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -44,7 +45,12 @@ const RefundBitcoin = ({
   const handleAmountChange = async (e) => {
     const value = e.target.value;
     // Only allow positive numbers with decimals
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    const maxAmount = 1000000;
+    if (
+      value === "" ||
+      (/^\d*\.?\d{0,2}$/.test(value) &&
+        (value === "" || parseFloat(value) <= maxAmount))
+    ) {
       setAmount(value);
 
       if (value && !isNaN(parseFloat(value))) {
@@ -293,7 +299,16 @@ const RefundBitcoin = ({
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!toAddress || !amount) return "Enter an amount";
     if (parseFloat(amount) > parseFloat(balance))
       return "Insufficient USDC Balance";

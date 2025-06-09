@@ -15,6 +15,7 @@ import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { retrieveSecret } from "../../../utils/webauthPrf";
+import Image from "next/image.js";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -143,7 +144,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           />,
           document.body
         )}
-      {isLoading && <LoadingScreen />}
+      {/* {isLoading && <LoadingScreen />} */}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
         <buttonbuy
           onClick={handleClose}
@@ -225,7 +226,21 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                       disabled={!isValidAddress || !amount || isLoading}
                       className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
                     >
-                      {isLoading ? "Sending..." : "Send"}
+                      {isLoading ? (
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"
+                          }
+                          alt={""}
+                          height={100000}
+                          width={10000}
+                          className={
+                            "max-w-full h-[40px] object-contain w-auto"
+                          }
+                        />
+                      ) : (
+                        "Send"
+                      )}
                     </button>
                   </div>
                 </div>

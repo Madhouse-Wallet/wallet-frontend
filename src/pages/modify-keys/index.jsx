@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
-import { doAccountRecovery } from "../../lib/zeroDev"
+import { doAccountRecovery } from "../../lib/zeroDev";
 import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import styled from "styled-components";
@@ -68,11 +68,15 @@ const ModifyKeys = () => {
           toast.error("User Not Found!");
           setLoadingNewSigner(false);
         } else {
-          setEmail(userExist?.userId?.email)
+          setEmail(userExist?.userId?.email);
           setAddress(userExist?.userId?.wallet);
-          setPasskeyData(userExist?.userId?.passkey)
-          setPasskeyDataOrig(userExist?.userId?.passkey)
-          let recoverAccount = await doAccountRecovery(privateKey,safePrivateKey, userExist?.userId?.wallet);
+          setPasskeyData(userExist?.userId?.passkey);
+          setPasskeyDataOrig(userExist?.userId?.passkey);
+          let recoverAccount = await doAccountRecovery(
+            privateKey,
+            safePrivateKey,
+            userExist?.userId?.wallet
+          );
           if (recoverAccount && recoverAccount.status) {
             setLoadingNewSigner(false);
             setStep(2);
@@ -98,61 +102,59 @@ const ModifyKeys = () => {
   };
 
   const cancelEdit = async () => {
-    setPasskeyData(passkeyDataOrig)
-    setEdit(false)
-  }
+    setPasskeyData(passkeyDataOrig);
+    setEdit(false);
+  };
 
   const saveEdit = async () => {
     try {
       const cleanData = passkeyData
-        .filter(item => item.deleteStatus != true) // Step 1: filter
+        .filter((item) => item.deleteStatus != true) // Step 1: filter
         .map(({ edit, deleteStatus, ...rest }) => rest); // Step 2: remove fields
       let data = await updtUser(
         { email: email },
         {
           $set: {
             passkey: cleanData,
-            totalPasskey: cleanData.length
+            totalPasskey: cleanData.length,
           }, // Ensure this is inside `$set`
         }
       );
       toast.success("Successfully Updated!");
-      setPasskeyData(cleanData)
-      setPasskeyDataOrig(cleanData)
-      setEdit(false)
+      setPasskeyData(cleanData);
+      setPasskeyDataOrig(cleanData);
+      setEdit(false);
     } catch (e) {
-      console.log("saveEdit Error-->", e)
+      console.log("saveEdit Error-->", e);
     }
-  }
+  };
 
   const editDataFunc = (index, value) => {
-    setPasskeyData(prevData =>
+    setPasskeyData((prevData) =>
       prevData.map((item, i) =>
         i === index ? { ...item, displayName: value } : item
       )
     );
-    setEdit(true)
+    setEdit(true);
   };
 
-
   const allowDelFunc = (index, value) => {
-    setPasskeyData(prevData =>
+    setPasskeyData((prevData) =>
       prevData.map((item, i) =>
         i === index ? { ...item, deleteStatus: value } : item
       )
     );
-    setEdit(true)
+    setEdit(true);
   };
 
   const allowEditFunc = async (key) => {
     try {
-      setPasskeyData(prevData =>
+      setPasskeyData((prevData) =>
         prevData.map((item, index) => ({
           ...item,
           edit: index === key, // true for selected, false for others
         }))
       );
-
     } catch (e) {
       console.error("Error in allowEditFunc:", e);
     }
@@ -224,7 +226,17 @@ const ModifyKeys = () => {
                     disabled={loadingNewSigner}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {loadingNewSigner ? "Please Wait ..." : "Next"}
+                    {loadingNewSigner ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Next"
+                    )}
                   </button>
                 </div>
               </div>
@@ -234,9 +246,11 @@ const ModifyKeys = () => {
               <div className="mx-auto max-w-[700px]">
                 <div className="grid gap-3 grid-cols-12">
                   {passkeyData.map((item, key) => (
-                    <div key={key}
-                      // onClick={() => (setSelectOption(key))} 
-                      className="md:col-span-6 col-span-12">
+                    <div
+                      key={key}
+                      // onClick={() => (setSelectOption(key))}
+                      className="md:col-span-6 col-span-12"
+                    >
                       <div className="relative mt-3">
                         <PassKeyCard
                           className={`${item.deleteStatus ? `active` : ``} border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
@@ -252,14 +266,25 @@ const ModifyKeys = () => {
                             </div>
                             <div className="content">
                               <h4 className="m-0 font-bold text-xl truncate max-w-[150px]">
-                                {!(item?.edit) ?
-
-                                  <> {(item?.displayName) || ("Key " + (key + 1))}
-                                  </> :
+                                {!item?.edit ? (
                                   <>
-                                    <input name={"key" + key} value={(item.displayName) || ""} onChange={(e) => (editDataFunc(key, e.target.value))} readOnly={item?.deleteStatus} type="text" className="border-0 bg-transparent w-auto max-w-[150px] outline-0 p-0" />
-
-                                  </>}
+                                    {" "}
+                                    {item?.displayName || "Key " + (key + 1)}
+                                  </>
+                                ) : (
+                                  <>
+                                    <input
+                                      name={"key" + key}
+                                      value={item.displayName || ""}
+                                      onChange={(e) =>
+                                        editDataFunc(key, e.target.value)
+                                      }
+                                      readOnly={item?.deleteStatus}
+                                      type="text"
+                                      className="border-0 bg-transparent w-auto max-w-[150px] outline-0 p-0"
+                                    />
+                                  </>
+                                )}
                               </h4>
                               <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                                 {item.name}
@@ -267,49 +292,70 @@ const ModifyKeys = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 ">
-                            <button disabled={item?.deleteStatus} onClick={() => allowEditFunc(key)} className="border-0 p-0">{editIcn}</button>
-                            <button onClick={() => allowDelFunc(key, item.deleteStatus ? false : true)} className="border-0 p-0">{deleteIcn}</button>
+                            <button
+                              disabled={item?.deleteStatus}
+                              onClick={() => allowEditFunc(key)}
+                              className="border-0 p-0"
+                            >
+                              {editIcn}
+                            </button>
+                            <button
+                              onClick={() =>
+                                allowDelFunc(
+                                  key,
+                                  item.deleteStatus ? false : true
+                                )
+                              }
+                              className="border-0 p-0"
+                            >
+                              {deleteIcn}
+                            </button>
                           </div>
-
                         </PassKeyCard>
                       </div>
                     </div>
                   ))}
-
                 </div>
-                {edit && (<> <div className="btnWrpper mt-3 text-center mx-auto gap-3 flex items-center justify-center">
-                  <button
-                    type="button"
-                    disabled={loadingNewSigner}
-                    // onClick={checkPhrase}
-                    onClick={saveEdit}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
+                {edit && (
+                  <>
+                    {" "}
+                    <div className="btnWrpper mt-3 text-center mx-auto gap-3 flex items-center justify-center">
+                      <button
+                        type="button"
+                        disabled={loadingNewSigner}
+                        // onClick={checkPhrase}
+                        onClick={saveEdit}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loadingNewSigner}
+                        // onClick={checkPhrase}
+                        onClick={cancelEdit}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                )}
 
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    disabled={loadingNewSigner}
-                    // onClick={checkPhrase}
-                    onClick={cancelEdit}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                  >
-                    Cancel
-                  </button>
-                </div></>)}
-
-                {(!edit) && (<>
-                  <div className="btnWrpper mt-3 text-center max-w-[300px] mx-auto">
-                    <button
-                      type="button"
-                      // onClick={checkPhrase}
-                      onClick={() => router.push("/welcome")}
-                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                    >
-                      Close
-                    </button>
-                  </div></>)}
+                {!edit && (
+                  <>
+                    <div className="btnWrpper mt-3 text-center max-w-[300px] mx-auto">
+                      <button
+                        type="button"
+                        // onClick={checkPhrase}
+                        onClick={() => router.push("/welcome")}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           ) : (
@@ -323,26 +369,25 @@ const ModifyKeys = () => {
 
 const PassKeyCard = styled.div`
   &.active {
-   .keyBox {
-   position :relative;
-     &:after {
-       position: absolute;
-       left: 0;
-       content: "";
-       top: 50%;
-       transform: translateY(-50%);
-       height: 2px;
-       width: 100%;
-       background: red;
-     }
-   }
+    .keyBox {
+      position: relative;
+      &:after {
+        position: absolute;
+        left: 0;
+        content: "";
+        top: 50%;
+        transform: translateY(-50%);
+        height: 2px;
+        width: 100%;
+        background: red;
+      }
+    }
   }
-`
+`;
 
 ModifyKeys.authRoute = true;
 
 export default ModifyKeys;
-
 
 const keyIcn = (
   <svg
@@ -385,18 +430,39 @@ const check = (
     />
   </svg>
 );
-const editIcn = <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g clipPath="url(#clip0_6_2)">
-    <path d="M12.5719 10.7781L13.5719 9.77813C13.7281 9.62188 14 9.73125 14 9.95625V14.5C14 15.3281 13.3281 16 12.5 16H1.5C0.671875 16 0 15.3281 0 14.5V3.5C0 2.67188 0.671875 2 1.5 2H10.0469C10.2687 2 10.3813 2.26875 10.225 2.42812L9.225 3.42812C9.17813 3.475 9.11563 3.5 9.04688 3.5H1.5V14.5H12.5V10.9531C12.5 10.8875 12.525 10.825 12.5719 10.7781ZM17.4656 4.47188L9.25937 12.6781L6.43437 12.9906C5.61562 13.0813 4.91875 12.3906 5.00938 11.5656L5.32188 8.74063L13.5281 0.534375C14.2437 -0.18125 15.4 -0.18125 16.1125 0.534375L17.4625 1.88438C18.1781 2.6 18.1781 3.75938 17.4656 4.47188ZM14.3781 5.4375L12.5625 3.62188L6.75625 9.43125L6.52812 11.4719L8.56875 11.2438L14.3781 5.4375ZM16.4031 2.94688L15.0531 1.59688C14.925 1.46875 14.7156 1.46875 14.5906 1.59688L13.625 2.5625L15.4406 4.37813L16.4062 3.4125C16.5312 3.28125 16.5313 3.075 16.4031 2.94688Z" fill="#118C1F" />
-  </g>
-  <defs>
-    <clipPath id="clip0_6_2">
-      <rect width="18" height="16" fill="white" />
-    </clipPath>
-  </defs>
-</svg>
+const editIcn = (
+  <svg
+    width="18"
+    height="16"
+    viewBox="0 0 18 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clipPath="url(#clip0_6_2)">
+      <path
+        d="M12.5719 10.7781L13.5719 9.77813C13.7281 9.62188 14 9.73125 14 9.95625V14.5C14 15.3281 13.3281 16 12.5 16H1.5C0.671875 16 0 15.3281 0 14.5V3.5C0 2.67188 0.671875 2 1.5 2H10.0469C10.2687 2 10.3813 2.26875 10.225 2.42812L9.225 3.42812C9.17813 3.475 9.11563 3.5 9.04688 3.5H1.5V14.5H12.5V10.9531C12.5 10.8875 12.525 10.825 12.5719 10.7781ZM17.4656 4.47188L9.25937 12.6781L6.43437 12.9906C5.61562 13.0813 4.91875 12.3906 5.00938 11.5656L5.32188 8.74063L13.5281 0.534375C14.2437 -0.18125 15.4 -0.18125 16.1125 0.534375L17.4625 1.88438C18.1781 2.6 18.1781 3.75938 17.4656 4.47188ZM14.3781 5.4375L12.5625 3.62188L6.75625 9.43125L6.52812 11.4719L8.56875 11.2438L14.3781 5.4375ZM16.4031 2.94688L15.0531 1.59688C14.925 1.46875 14.7156 1.46875 14.5906 1.59688L13.625 2.5625L15.4406 4.37813L16.4062 3.4125C16.5312 3.28125 16.5313 3.075 16.4031 2.94688Z"
+        fill="#118C1F"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_6_2">
+        <rect width="18" height="16" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
-
-const deleteIcn = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M7.61601 20C7.17134 20 6.79101 19.8417 6.47501 19.525C6.15901 19.2083 6.00067 18.8287 6.00001 18.386V6H5.50001C5.35801 6 5.23934 5.952 5.14401 5.856C5.04867 5.76 5.00067 5.641 5.00001 5.499C4.99934 5.357 5.04734 5.23833 5.14401 5.143C5.24067 5.04766 5.35934 5 5.50001 5H9.00001C9.00001 4.79333 9.07667 4.61333 9.23001 4.46C9.38334 4.30666 9.56334 4.23 9.77001 4.23H14.23C14.4367 4.23 14.6167 4.30666 14.77 4.46C14.9233 4.61333 15 4.79333 15 5H18.5C18.642 5 18.7607 5.048 18.856 5.144C18.9513 5.24 18.9993 5.359 19 5.501C19.0007 5.643 18.9527 5.76166 18.856 5.857C18.7593 5.95233 18.6407 6 18.5 6H18V18.385C18 18.829 17.8417 19.209 17.525 19.525C17.2083 19.841 16.8283 19.9993 16.385 20H7.61601ZM10.308 17C10.45 17 10.569 16.952 10.665 16.856C10.761 16.76 10.8087 16.6413 10.808 16.5V8.5C10.808 8.358 10.76 8.23933 10.664 8.144C10.568 8.04866 10.449 8.00066 10.307 8C10.165 7.99933 10.0463 8.04733 9.95101 8.144C9.85567 8.24066 9.80801 8.35933 9.80801 8.5V16.5C9.80801 16.642 9.85601 16.7607 9.95201 16.856C10.048 16.952 10.1667 17 10.308 17ZM13.693 17C13.835 17 13.9537 16.952 14.049 16.856C14.1443 16.76 14.192 16.6413 14.192 16.5V8.5C14.192 8.358 14.144 8.23933 14.048 8.144C13.952 8.048 13.8333 8 13.692 8C13.55 8 13.431 8.048 13.335 8.144C13.239 8.24 13.1913 8.35866 13.192 8.5V16.5C13.192 16.642 13.24 16.7607 13.336 16.856C13.432 16.9513 13.551 16.9993 13.693 17Z" fill="#C70808" />
-</svg>
+const deleteIcn = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7.61601 20C7.17134 20 6.79101 19.8417 6.47501 19.525C6.15901 19.2083 6.00067 18.8287 6.00001 18.386V6H5.50001C5.35801 6 5.23934 5.952 5.14401 5.856C5.04867 5.76 5.00067 5.641 5.00001 5.499C4.99934 5.357 5.04734 5.23833 5.14401 5.143C5.24067 5.04766 5.35934 5 5.50001 5H9.00001C9.00001 4.79333 9.07667 4.61333 9.23001 4.46C9.38334 4.30666 9.56334 4.23 9.77001 4.23H14.23C14.4367 4.23 14.6167 4.30666 14.77 4.46C14.9233 4.61333 15 4.79333 15 5H18.5C18.642 5 18.7607 5.048 18.856 5.144C18.9513 5.24 18.9993 5.359 19 5.501C19.0007 5.643 18.9527 5.76166 18.856 5.857C18.7593 5.95233 18.6407 6 18.5 6H18V18.385C18 18.829 17.8417 19.209 17.525 19.525C17.2083 19.841 16.8283 19.9993 16.385 20H7.61601ZM10.308 17C10.45 17 10.569 16.952 10.665 16.856C10.761 16.76 10.8087 16.6413 10.808 16.5V8.5C10.808 8.358 10.76 8.23933 10.664 8.144C10.568 8.04866 10.449 8.00066 10.307 8C10.165 7.99933 10.0463 8.04733 9.95101 8.144C9.85567 8.24066 9.80801 8.35933 9.80801 8.5V16.5C9.80801 16.642 9.85601 16.7607 9.95201 16.856C10.048 16.952 10.1667 17 10.308 17ZM13.693 17C13.835 17 13.9537 16.952 14.049 16.856C14.1443 16.76 14.192 16.6413 14.192 16.5V8.5C14.192 8.358 14.144 8.23933 14.048 8.144C13.952 8.048 13.8333 8 13.692 8C13.55 8 13.431 8.048 13.335 8.144C13.239 8.24 13.1913 8.35866 13.192 8.5V16.5C13.192 16.642 13.24 16.7607 13.336 16.856C13.432 16.9513 13.551 16.9993 13.693 17Z"
+      fill="#C70808"
+    />
+  </svg>
+);

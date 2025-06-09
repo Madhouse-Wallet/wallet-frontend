@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "", liquidBitcoinWallet = "", coinosToken,
+        const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "",
             flowTokens, coinosUserName } = req.body;
 
         // Validate email
@@ -31,7 +31,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             addProvisionLambda({
                 "madhouseWallet": wallet,
                 "email": existingUser.email,
-                "liquidBitcoinWallet": liquidBitcoinWallet,
                 "bitcoinWallet": bitcoinWallet,
                 "provisionlnbitType": 1,
                 "refund_address1" : ""
@@ -40,15 +39,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         // Insert the new user
         const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, totalPasskey, wallet, bitcoinWallet, liquidBitcoinWallet,
-            coinosToken, flowTokens, coinosUserName, createdAt: new Date()
+            email, username, passkey_number: 1, passkey_status: false, passkey, totalPasskey, wallet, bitcoinWallet, 
+             flowTokens, coinosUserName, createdAt: new Date()
         });
 
         // create lnbit user on background
         addProvisionLambda({
             "madhouseWallet": wallet,
             "email": email,
-            "liquidBitcoinWallet": liquidBitcoinWallet,
             "bitcoinWallet": bitcoinWallet,
             "provisionlnbitType": 1,
             "refund_address1" : ""

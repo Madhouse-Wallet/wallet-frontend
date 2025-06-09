@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { generateOTP } from "../../../utils/globals";
+import Image from "next/image";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -280,7 +281,17 @@ const LoginPop = ({ login, setLogin }) => {
                 onClick={loginFn}
                 className="btn text-xs commonBtn flex items-center justify-center btn w-full"
               >
-                {loginLoading ? "Loading" : "Submit"}
+                {loginLoading ? (
+                  <Image
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                    alt={""}
+                    height={100000}
+                    width={10000}
+                    className={"max-w-full h-[40px] object-contain w-auto"}
+                  />
+                ) : (
+                  "Submit"
+                )}
               </button>
             </div>
           </div>
@@ -330,7 +341,17 @@ const LoginPop = ({ login, setLogin }) => {
                     onClick={sendRegisterOtp}
                     className="btn text-xs commonBtn flex items-center justify-center btn w-full"
                   >
-                    {registerOtpLoading ? "Loading" : "Submit"}
+                    {registerOtpLoading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </>
@@ -359,7 +380,17 @@ const LoginPop = ({ login, setLogin }) => {
                     onClick={registerFn}
                     className="btn text-xs commonBtn flex items-center justify-center btn w-full"
                   >
-                    {registerLoading ? "Loading" : "Submit"}
+                    {registerLoading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </>

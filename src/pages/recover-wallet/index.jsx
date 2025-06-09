@@ -5,12 +5,14 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { doRecovery } from "../../lib/zeroDev";
-import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev"
-import { getUser, updtUser, getUserToken, decodeBitcoinAddress } from "../../lib/apiCall";
+import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev";
+import {
+  getUser,
+  updtUser,
+  getUserToken,
+  decodeBitcoinAddress,
+} from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
-
-
-
 
 const RecoverWallet = () => {
   const [step, setStep] = useState(1);
@@ -84,13 +86,17 @@ const RecoverWallet = () => {
     try {
       setLoadingNewSigner(true);
       if (privateKey && wif && safeprivateKey && seedPhrase) {
-        let testMenmonic = await checkMenmonic(seedPhrase, privateKey)
+        let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
         if (!testMenmonic.status) {
           toast.error(testMenmonic.msg);
           setLoadingNewSigner(false);
           return;
         }
-        let recoverAccount = await doAccountRecovery(privateKey, safeprivateKey, address);
+        let recoverAccount = await doAccountRecovery(
+          privateKey,
+          safeprivateKey,
+          address
+        );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
         if (recoveryBitcoin?.status == "error") {
           toast.error("Invalid Wif!");
@@ -104,7 +110,7 @@ const RecoverWallet = () => {
             wif: wif || "",
             privateKey: privateKey,
             safePrivateKey: safeprivateKey,
-            seedPhrase
+            seedPhrase,
           };
           let storeData = await setSecretInPasskey(
             email + "_passkey_" + (userExist?.userId?.totalPasskey + 1),
@@ -118,20 +124,22 @@ const RecoverWallet = () => {
                 { email: userExist?.userId?.email },
                 {
                   $push: {
-                    passkey:
-                    {
-                      name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
+                    passkey: {
+                      name:
+                        email +
+                        "_passkey_" +
+                        (userExist?.userId?.totalPasskey + 1),
                       storageKeySecret,
                       credentialIdSecret,
                       displayName: "",
-                      bitcoinWallet: recoveryBitcoin?.data?.address
-                    }
+                      bitcoinWallet: recoveryBitcoin?.data?.address,
+                    },
                   },
-                  $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
+                  $set: { totalPasskey: userExist?.userId?.totalPasskey + 1 }, // Ensure this is inside `$set`
                 }
               );
             } catch (error) {
-              console.log("updtuser error-->", error)
+              console.log("updtuser error-->", error);
             }
 
             toast.success("New Key Recovered!");
@@ -178,7 +186,11 @@ const RecoverWallet = () => {
             checkAccount.newwebAuthKey
           );
           let data = await updtUser(
-            { email: { $regex: new RegExp(`^${userExist?.userId?.email}$`, 'i') } },
+            {
+              email: {
+                $regex: new RegExp(`^${userExist?.userId?.email}$`, "i"),
+              },
+            },
             {
               $push: { passkey: webAuthKeyStringObj },
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
@@ -243,14 +255,23 @@ const RecoverWallet = () => {
                     disabled={loadingNewSigner}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {loadingNewSigner ? "Please Wait ..." : "Next"}
+                    {loadingNewSigner ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Next"
+                    )}
                   </button>
                 </div>
               </form>
             </>
           ) : step == 2 ? (
             <>
-
               <div className="py-2">
                 <input
                   type="text"
@@ -299,7 +320,17 @@ const RecoverWallet = () => {
                   onClick={checkPhrase}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {loadingNewSigner ? "Please Wait ..." : "Next"}
+                  {loadingNewSigner ? (
+                    <Image
+                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                      alt={""}
+                      height={100000}
+                      width={10000}
+                      className={"max-w-full h-[40px] object-contain w-auto"}
+                    />
+                  ) : (
+                    "Next"
+                  )}
                 </button>
               </div>
             </>

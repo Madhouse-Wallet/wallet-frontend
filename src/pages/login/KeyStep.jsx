@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
-
+import Image from "next/image";
 
 const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
   const [selectOption, setSelectOption] = useState(0);
@@ -29,7 +29,10 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
               <div className="flex items-center gap-3 mb-2 justify-center">
-                <button onClick={()=> setStep(1)} className="border-0 themeClr p-0">
+                <button
+                  onClick={() => setStep(1)}
+                  className="border-0 themeClr p-0"
+                >
                   {backIcn}
                 </button>
                 <h1 className="text-center text-[32px] font-medium  m-0">
@@ -45,7 +48,11 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
         <div className="formBody pt-4 text-xs">
           <div className="grid gap-3 grid-cols-12">
             {passkeyData.map((item, key) => (
-              <div key={key} onClick={() => (setSelectOption(key))} className="md:col-span-6 col-span-12">
+              <div
+                key={key}
+                onClick={() => setSelectOption(key)}
+                className="md:col-span-6 col-span-12"
+              >
                 <div className="relative mt-3">
                   <div
                     className={` border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50"
@@ -60,15 +67,17 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
                         {keyIcn}
                       </div>
                       <div className="content">
-                        <h4 className="m-0 font-bold text-xl">{(item?.displayName) || ("Key " + (key + 1))}</h4>
+                        <h4 className="m-0 font-bold text-xl">
+                          {item?.displayName || "Key " + (key + 1)}
+                        </h4>
                         <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                           {item.name}
                         </p>
                       </div>
                     </div>
-                    {((key) == selectOption) &&
+                    {key == selectOption && (
                       <span className="icn">{check}</span>
-                    }
+                    )}
                   </div>
                 </div>
               </div>
@@ -80,7 +89,17 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
                   disabled={loginLoading}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {loginLoading ? "Loading" : "Verify"}
+                  {loginLoading ? (
+                    <Image
+                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                      alt={""}
+                      height={100000}
+                      width={10000}
+                      className={"max-w-full h-[40px] object-contain w-auto"}
+                    />
+                  ) : (
+                    "Verify"
+                  )}
                 </button>
               </div>
             </div>
