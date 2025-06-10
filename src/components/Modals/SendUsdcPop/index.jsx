@@ -12,27 +12,71 @@ import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
-import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { retrieveSecret } from "../../../utils/webauthPrf";
 import Image from "next/image.js";
+import { isValidAddress, filterAmountInput } from "../../../utils/helper.js";
+import { fail } from "assert";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop"
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [toAddress, setToAddress] = useState("");
+  const [failed, setFailed] = useState(true);
   const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
   const [openCam, setOpenCam] = useState(false);
-  const [isValidAddress, setIsValidAddress] = useState(true);
+  // const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
-  const [providerr, setProviderr] = useState(null);
+  const [addressError, setAddressError] = useState("");
+  const [amountError, setAmountError] = useState("");
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
+
+    // Filter input with 2 decimal places
+    const filteredValue = filterAmountInput(value, 2);
+
+    setAmount(filteredValue);
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(balance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
     }
+  };
+
+  const isFormValid = () => {
+    return (
+      toAddress.trim() !== "" &&
+      !addressError &&
+      isValidAddress(toAddress) &&
+      amount.trim() !== "" &&
+      !amountError &&
+      Number.parseFloat(amount) > 0 &&
+      Number.parseFloat(amount) <= Number.parseFloat(balance) &&
+      Number.parseFloat(balance) >= 0.05
+    );
+  };
+
+  // Update the button click handler
+  const handleProceedToApproval = () => {
+    if (!isFormValid()) {
+      return; // Button should be disabled anyway
+    }
+    settrxnApproval(!trxnApproval);
   };
 
   const handleClose = () => setSendUsdc(false);
@@ -40,23 +84,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!isValidAddress) {
-      toast.error("Please enter a valid address");
-      return;
-    }
-
-    if (!amount || Number.parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-
-    if (
-      Number.parseFloat(amount) > Number.parseFloat(balance) ||
-      Number.parseFloat(balance) < Number("0.05") //If wallet has less than $0.05
-    ) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
     const data = JSON.parse(userAuth?.webauthKey);
     const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
@@ -92,7 +119,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       if (tx) {
         setSuccess(true);
         setSendUsdc(false);
-        toast.success("USDC sent successfully!");
+        // toast.success("USDC sent successfully!");
         setTimeout(fetchBalance, 2000);
       } else {
         toast.error(tx || "Transaction failed");
@@ -130,8 +157,58 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     }
   };
 
+  const processAddress = (value) => {
+    // Filter out invalid characters
+    const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+
+    // Update the address value with filtered input
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidAddress(filteredValue)) {
+        setAddressError("Invalid address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+
+    return filteredValue;
+  };
+
+  const handleAddressChange = (e) => {
+    const value = e.target.value;
+
+    // Filter out invalid characters instead of blocking the entire input
+    const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+
+    // Update the address value with filtered input
+    setToAddress(filteredValue);
+
+    // Second check: Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidAddress(filteredValue)) {
+        setAddressError("Invalid address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
   return (
     <>
+     {/* {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+          />,
+          document.body
+        )} */}
       {trxnApproval &&
         createPortal(
           <TransactionApprovalPop
@@ -167,7 +244,9 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    setToAddress(data);
+                    console.log("line-215", data);
+                    processAddress(data);
+                    // setToAddress(data);
                     setOpenCam(!openCam);
                   }}
                 />
@@ -184,7 +263,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         placeholder="Address"
                         type="text"
                         value={toAddress}
-                        onChange={(e) => setToAddress(e.target.value)}
+                        onChange={handleAddressChange}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
                       <button
@@ -200,11 +279,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         {scanIcn}
                       </button>
                     </div>
+
+                    {addressError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {addressError}
+                      </div>
+                    )}
                   </div>
                   <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} USDC
-                    </label>
                     <div className="iconWithText relative">
                       <div className="absolute icn left-2 flex items-center gap-2 text-xs">
                         {usdcIcn}
@@ -215,16 +297,27 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         type="text"
                         value={amount}
                         onChange={handleAmountChange}
-                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                        className={`border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20 ${
+                          amountError ? "border-red-500" : ""
+                        }`}
                       />
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance: {parseFloat(balance).toFixed(2)} USDC
+                    </label>
                   </div>
                   <div className="py-2 mt-4">
                     <button
                       type="button"
-                      onClick={() => settrxnApproval(!trxnApproval)}
-                      disabled={!isValidAddress || !amount || isLoading}
-                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                      onClick={handleProceedToApproval}
+                      disabled={!isFormValid() || isLoading}
+                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
                         <Image

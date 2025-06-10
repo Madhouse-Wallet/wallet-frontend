@@ -12,6 +12,7 @@ import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmat
 import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
+import { filterAmountInput } from "@/utils/helper";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -26,6 +27,7 @@ const SellBitcoin = () => {
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
+  const [amountError, setAmountError] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
@@ -131,7 +133,27 @@ const SellBitcoin = () => {
 
   const handleFromAmountChange = async (e) => {
     const value = e.target.value;
-    setFromAmount(value);
+
+    // Filter input with 2 decimal places
+    const filteredValue = filterAmountInput(value);
+    console.log("line-147", filteredValue);
+
+    setFromAmount(filteredValue);
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(tbtcBalance)
+      ) {
+        setAmountError("Insufficient Bitcoin balance");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
 
     if (value && !isNaN(parseFloat(value))) {
       const timer = setTimeout(async () => {
@@ -210,15 +232,15 @@ const SellBitcoin = () => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!fromAmount || parseFloat(fromAmount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
+    // if (!fromAmount || parseFloat(fromAmount) <= 0) {
+    //   toast.error("Please enter a valid amount");
+    //   return;
+    // }
 
-    if (parseFloat(fromAmount) > parseFloat(tbtcBalance)) {
-      toast.error("Insufficient BTC balance");
-      return;
-    }
+    // if (parseFloat(fromAmount) > parseFloat(tbtcBalance)) {
+    //   toast.error("Insufficient BTC balance");
+    //   return;
+    // }
 
     setIsLoading(true);
     try {
@@ -381,6 +403,11 @@ const SellBitcoin = () => {
                         </h6>
                       </div>
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
                   </div>
                   <div className="mt-3 py-2">
                     <button

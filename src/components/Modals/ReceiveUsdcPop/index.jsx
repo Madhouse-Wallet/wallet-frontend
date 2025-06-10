@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useSelector } from "react-redux";
 import QRCode from "qrcode";
 
-
 const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [qrCode, setQRCode] = useState("");
@@ -42,11 +41,10 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
           console.error("QR Code generation failed:", err);
         }
       };
-  
+
       generateQRCode();
     }
   }, [userAuth?.walletAddress]);
-  
 
   return (
     <>
@@ -89,12 +87,17 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
                         data-tooltip-id="my-tooltip"
                         data-tooltip-content={userAuth?.walletAddress}
                         readOnly=""
+                        disabled
                         className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
                         type="text"
-                        defaultValue={userAuth?.walletAddress || "Wallet Address"}
+                        defaultValue={
+                          userAuth?.walletAddress || "Wallet Address"
+                        }
                       />
                       <button
-                        onClick={() => handleCopy(userAuth?.walletAddress, "one")}
+                        onClick={() =>
+                          handleCopy(userAuth?.walletAddress, "one")
+                        }
                         className="rounded-4 px-1.5 ring-inset transition-colors hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                         data-state="closed"
                       >
@@ -168,7 +171,6 @@ const closeIcn = (
     </defs>
   </svg>
 );
-
 
 const copyIcn = (
   <svg

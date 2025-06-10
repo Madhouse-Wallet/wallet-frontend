@@ -99,11 +99,13 @@ const BtcExchangePop = ({
                       data-tooltip-id="my-tooltip"
                       data-tooltip-content={userAuth?.bitcoinWallet}
                       disabled
-                      className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none cursor-not-allowed"
+                      readOnly=""
+                      className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
                       type="text"
                       value={
                         userAuth?.bitcoinWallet
-                          ? `${userAuth.bitcoinWallet.slice(0, 21)}.....${userAuth.bitcoinWallet.slice(-21)}`
+                          ? // ? `${userAuth.bitcoinWallet.slice(0, 21)}.....${userAuth.bitcoinWallet.slice(-21)}`
+                            userAuth.bitcoinWallet
                           : "Wallet Address"
                       }
                     />

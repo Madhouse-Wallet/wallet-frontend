@@ -33,6 +33,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [spendWallet, setSpendWallet] = useState("");
   const [applyTrue, setApplyTrue] = useState(false);
   const [sideshiftTxs, setSideshiftTxs] = useState([]);
+  const [selectedItem, setSelectedItem] = useState("20");
+
+  const selectOptions = [
+    { value: "", label: "Select an option" },
+    { value: "20", label: "20" },
+    { value: "40", label: "40" },
+    { value: "60", label: "60" },
+    { value: "80", label: "80" },
+    { value: "100", label: "100" },
+  ];
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [dateRange, setDateRange] = useState([
@@ -402,6 +412,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
           setTransactions={setBtcTransactions}
           dateRange={isDateFilterActive() ? dateRange[0] : null}
           applyTrue={applyTrue}
+          selectedItem={selectedItem}
         />
       ),
     },
@@ -682,33 +693,93 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
             <div className="flex gap-2 items-center">
               <div className="relative">
-                <button
-                  onClick={() => {
-                    setIsDatePickerOpen(!isDatePickerOpen);
-                    setApplyTrue(false);
-                  }}
-                  className={`px-4 py-2 ${
-                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
-                  } text-white rounded-md flex items-center gap-2`}
-                >
-                  <span>{DateFilter}</span>
-                  {isDateFilterActive() && (
-                    <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
-                      ✓
-                    </span>
-                  )}
-                </button>
-                {isDateFilterActive() && !isDatePickerOpen && (
-                  <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
-                    {formatDateForApi(dateRange[0].startDate)} to{" "}
-                    {formatDateForApi(dateRange[0].endDate)}
-                    <button
-                      onClick={clearDateFilter}
-                      className="ml-2 text-xs text-red-300 hover:text-red-100"
+                {activeTab === 1 ? (
+                  // Select dropdown for when activeTab is 1
+                  <div className="relative">
+                    <select
+                      value={selectedItem}
+                      onChange={(e) => setSelectedItem(e.target.value)}
+                      className="px-4 py-2 bg-black/50 text-white rounded-md border border-gray-600 focus:border-blue-500 focus:outline-none min-w-[200px] appearance-none cursor-pointer"
                     >
-                      ✕
-                    </button>
+                      {selectOptions.map((option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                          className="bg-gray-800 text-white"
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Custom dropdown arrow */}
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Show selected value indicator */}
+                    {/* {selectedItem && (
+                      <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
+                        Selected:{" "}
+                        {
+                          selectOptions.find(
+                            (opt) => opt.value === selectedItem
+                          )?.label
+                        }
+                        <button
+                          onClick={() => setSelectedItem("")}
+                          className="ml-2 text-xs text-red-300 hover:text-red-100"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )} */}
                   </div>
+                ) : (
+                  // Your existing date filter button for other tabs
+                  <>
+                    <button
+                      onClick={() => {
+                        setIsDatePickerOpen(!isDatePickerOpen);
+                        setApplyTrue(false);
+                      }}
+                      className={`px-4 py-2 ${
+                        isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                      } text-white rounded-md flex items-center gap-2`}
+                    >
+                      <span>{DateFilter}</span>
+                      {isDateFilterActive() && (
+                        <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+
+                    {isDateFilterActive() && !isDatePickerOpen && (
+                      <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
+                        {formatDateForApi(dateRange[0].startDate)} to{" "}
+                        {formatDateForApi(dateRange[0].endDate)}
+                        <button
+                          onClick={clearDateFilter}
+                          className="ml-2 text-xs text-red-300 hover:text-red-100"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <button

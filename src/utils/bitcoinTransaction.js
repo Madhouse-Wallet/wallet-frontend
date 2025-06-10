@@ -1,9 +1,9 @@
 import moment from "moment";
 
-export const fetchBitcoinTransactions = async (address) => {
+export const fetchBitcoinTransactions = async (address, limit = 20) => {
   try {
     const response = await fetch(
-      `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full`
+      `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full?limit=${limit}`
     );
 
     if (!response.ok) {
@@ -63,6 +63,7 @@ export const formatBitcoinTransactions = (data, walletAddress) => {
       summary: `${isSend ? "Sent" : "Received"} ${amount} BTC`,
       category: "bitcoin",
       rawData: tx,
+      day: moment(tx.confirmed || tx.received).format("MMMM D, YYYY h:mm A"),
     };
   });
 };

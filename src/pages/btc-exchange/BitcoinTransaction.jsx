@@ -1,17 +1,22 @@
 import React from "react";
 import {
-  fetchBitcoinTransactionsByAddress,
+  fetchBitcoinTransactions,
   formatBitcoinTransactions,
-} from "../../utils/bitquery-api";
+} from "../../utils/bitcoinTransaction";
 import { useEffect, useState } from "react";
 import BitcoinTransactionDetail from "./BitcoinTransactionDetail";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
+// import { fetchBitcoinTransactionsByAddress } from "../api/bitquery-api";
 
 // Bitcoin Transactions Component
-const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
+const BitcoinTransactionsTab = ({
+  setTransactions,
+  dateRange,
+  selectedItem,
+}) => {
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,69 +24,47 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
 
-  // Get wallet address from user auth
+  // You may want to replace this with your actual BTC wallet address
+  // const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
   const btcWalletAddress = userAuth?.bitcoinWallet;
-  // const btcWalletAddress = "bc1p0fxxzxvzyr4qdpq8pw6gn0tyl0np8wn89t3zn3fdd4j8vvvf6s2qcl7a73";
-
-  const formatDateForApi = (date) => {
-    if (!date) return null;
-    return moment(date).format("YYYY-MM-DD");
-  };
-
-  // Check if date filter is active
-  const isDateFilterActive = () => {
-    if (applyTrue === true) return true;
-  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
       if (!btcWalletAddress) return;
 
       setLoading(true);
-      setError(null);
-
       try {
-        // Use date filters only if active
-        const startDate = isDateFilterActive()
-          ? formatDateForApi(dateRange?.startDate)
-          : null;
-        const endDate = isDateFilterActive()
-          ? formatDateForApi(dateRange?.endDate)
-          : null;
-
-        // BitQuery API token
-        const accessToken = process.env.NEXT_PUBLIC_BITQUERY_ACCESS_TOKEN;
-
-        // Fetch transactions using the API
-        const data = await fetchBitcoinTransactionsByAddress(
+        const data = await fetchBitcoinTransactions(
           btcWalletAddress,
-          accessToken,
-          startDate,
-          endDate
+          selectedItem
         );
-
-        // Set raw transactions data for parent component
-        setTransactions(data);
-
-        // Format transactions for display
+        setTransactions(data?.txs);
         const formattedTransactions = formatBitcoinTransactions(
           data,
           btcWalletAddress
         );
-
         setBtcTransactions(formattedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
-        setError(
-          "Failed to load transactions. Please check your connection and wallet address."
-        );
+        setError("Failed to load transactions");
       } finally {
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, [btcWalletAddress, dateRange, applyTrue]);
+  }, [btcWalletAddress, selectedItem]);
+
+  // useEffect(() => {
+  //   const result = fetchBitcoinTransactionsByAddress(
+  //     "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD",
+  //     "2025-05-24",
+  //     "2025-05-31"
+  //   ).then((transactions) => {
+  //     console.log("Fetched transactions:", transactions);
+  //   });
+  //   console.log("result", result);
+  // }, []);
 
   // Get status color
   const getStatusColor = (status) => {
@@ -161,56 +144,6 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
 
   const transactionsByDate = groupTransactionsByDate(btcTransactions);
 
-  const sendSvg = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7 15L12 20L17 15"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 4V20"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const receiveSvg = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M7 9L12 4L17 9"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 20V4"
-        stroke="black"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
   return (
     <>
       {detail &&
@@ -241,51 +174,45 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
                   {date}
                 </p>
                 <div className="grid gap-3 grid-cols-12">
-                  {/* {txs.map((tx, key) => ( */}
-                  {txs
-                    .filter((tx) => {
-                      const amount = parseFloat(tx.amount?.split(" ")[0] || 0);
-                      return amount >= 0.00000001;
-                    })
-                    .map((tx, key) => (
-                      <div key={key} className="md:col-span-6 col-span-12">
-                        <div
-                          onClick={() => handleTransactionClick(tx)}
-                          className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
-                        >
-                          <div className="left flex items-start gap-2">
-                            <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
-                              {tx.type === "token send" ? sendSvg : receiveSvg}
-                            </div>
-                            <div className="content">
-                              <h4 className="m-0 font-bold md:text-base">
-                                {tx.type === "token send" ? "Send" : "Receive"}{" "}
-                                BTC
-                              </h4>
-                              <p
-                                className={`m-0 ${getStatusColor(
-                                  tx.status
-                                )} font-medium text-xs`}
-                              >
-                                {getStatusText(tx.status)}
-                              </p>
-                            </div>
+                  {txs.map((tx, key) => (
+                    <div key={key} className="md:col-span-6 col-span-12">
+                      <div
+                        onClick={() => handleTransactionClick(tx)}
+                        className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                      >
+                        <div className="left flex items-start gap-2">
+                          <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                            {tx.type === "token send" ? sendSvg : receiveSvg}
                           </div>
-                          <div className="right text-right">
-                            <p className="m-0 text-xs font-medium py-1">
-                              {tx.status === "rejected"
-                                ? "Insufficient Balance"
-                                : `${tx.type === "token send" ? "-" : "+"} ${parseFloat(
-                                    tx.amount
-                                  ).toFixed(8)}`}
-                            </p>
-                            <p className="m-0 text-xs font-medium py-1">
-                              {tx.day}
+                          <div className="content">
+                            <h4 className="m-0 font-bold md:text-base">
+                              {tx.type === "token send" ? "Send" : "Receive"}{" "}
+                              BTC
+                            </h4>
+                            <p
+                              className={`m-0 ${getStatusColor(
+                                tx.status
+                              )} font-medium text-xs`}
+                            >
+                              {getStatusText(tx.status)}
                             </p>
                           </div>
                         </div>
+                        <div className="right text-right">
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.status === "rejected"
+                              ? "Insufficient Balance"
+                              : `${tx.type === "token send" ? "-" : "+"} ${
+                                  tx.amount
+                                }`}
+                          </p>
+                          <p className="m-0 text-xs font-medium py-1">
+                            {tx.day}
+                          </p>
+                        </div>
                       </div>
-                    ))}
+                    </div>
+                  ))}
                 </div>
               </div>
             );
@@ -308,3 +235,27 @@ const BitcoinTransactionsTab = ({ setTransactions, dateRange, applyTrue }) => {
 };
 
 export default BitcoinTransactionsTab;
+
+const sendSvg = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    id="icon-arrow-2-up-right"
+    viewBox="0 0 512 512"
+    height={20}
+    width={20}
+  >
+    <path d="m137 107c0-12 10-22 22-22l225 0c12 0 21 10 21 22l0 225c0 12-9 21-21 21-12 0-21-9-21-21l0-174-241 241c-9 8-22 8-30 0-9-8-9-22 0-30l240-241-173 0c-12 0-22-10-22-21z" />
+  </svg>
+);
+
+const receiveSvg = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    id="icon-arrow-2-down-left"
+    viewBox="0 0 512 512"
+    height={20}
+    width={20}
+  >
+    <path d="m375 405c0 12-10 22-22 22l-225 0c-12 0-21-10-21-22l0-225c0-12 9-21 21-21 12 0 21 9 21 21l0 174 241-241c9-8 22-8 30 0 9 8 9 22 0 30l-240 241 173 0c12 0 22 10 22 21z" />
+  </svg>
+);

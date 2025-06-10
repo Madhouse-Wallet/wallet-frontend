@@ -9,6 +9,7 @@ import Image from "next/image";
 import { parseAbi } from "viem";
 import TransactionConfirmationPop from "../../components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
+import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "../../components/Modals/TransactionSuccessPop";
 
 const WithdrawalSwap = () => {
@@ -20,6 +21,7 @@ const WithdrawalSwap = () => {
   const [hash, setHash] = useState("");
   const [success, setSuccess] = useState(false);
   const [fromAmount, setFromAmount] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -138,7 +140,29 @@ const WithdrawalSwap = () => {
 
   const handleFromAmountChange = (e) => {
     const value = e.target.value;
-    setFromAmount(value);
+    // setFromAmount(value);
+
+    const filteredValue = filterAmountInput(value, 2);
+    console.log("line-147", filteredValue);
+
+    setFromAmount(filteredValue);
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
+      ) {
+        setAmountError("Insufficient Spark USDC balance");
+      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
 
     if (debounceTimer) {
       clearTimeout(debounceTimer);
@@ -385,6 +409,11 @@ const WithdrawalSwap = () => {
                           {swapDirection.to}
                         </h6>
                       </div>
+                      {amountError && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {amountError}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3 py-2">

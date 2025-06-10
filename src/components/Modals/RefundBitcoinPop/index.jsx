@@ -19,6 +19,10 @@ import styled from "styled-components";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { parseAbi, parseUnits } from "viem";
 import Image from "next/image.js";
+import {
+  isValidBitcoinAddress,
+  filterAmountInput,
+} from "../../../utils/helper.js";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -40,25 +44,46 @@ const RefundBitcoin = ({
   const [providerr, setProviderr] = useState(null);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
+  const [addressError, setAddressError] = useState("");
+  const [amountError, setAmountError] = useState("");
 
-  // Handle amount input change
   const handleAmountChange = async (e) => {
     const value = e.target.value;
     // Only allow positive numbers with decimals
-    const maxAmount = 1000000;
-    if (
-      value === "" ||
-      (/^\d*\.?\d{0,2}$/.test(value) &&
-        (value === "" || parseFloat(value) <= maxAmount))
-    ) {
-      setAmount(value);
+    const filteredValue = filterAmountInput(value, 2);
+    console.log("line-54", filteredValue, value);
+    setAmount(filteredValue);
 
-      if (value && !isNaN(parseFloat(value))) {
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+        return;
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+        return;
+      } else if (Number.parseFloat(balance) < 0.05) {
+        setAmountError("Minimum balance of $0.05 required");
+        return;
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
+
+    if (filteredValue && amountError === "") {
+      if (filteredValue && !isNaN(parseFloat(filteredValue))) {
         const timer = setTimeout(async () => {
           setIsLoading(true);
           try {
-            const quotePromise = getQuote(value);
-            const shiftPromise = getDestinationAddress(value, toAddress);
+            const quotePromise = getQuote(filteredValue);
+            const shiftPromise = getDestinationAddress(
+              filteredValue,
+              toAddress
+            );
 
             const [quoteResult, shiftResult] = await Promise.all([
               quotePromise,
@@ -316,6 +341,120 @@ const RefundBitcoin = ({
     return "Refund Bitcoin";
   };
 
+  const handleAddressChange = (e) => {
+    const value = e.target.value.trim();
+
+    // Smart filtering based on Bitcoin address patterns
+    let filteredValue = "";
+
+    if (value.toLowerCase().startsWith("bc1p")) {
+      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
+      filteredValue = value.replace(
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
+      filteredValue = value.replace(
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("1")) {
+      // Legacy addresses (P2PKH): starts with 1 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("3")) {
+      // Script addresses (P2SH): starts with 3 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else {
+      // For any other input, allow Base58 + bech32 characters to let validation handle it
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        ""
+      );
+    }
+
+    // Additional length constraints to prevent obviously invalid addresses
+    if (filteredValue.length > 62) {
+      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
+    }
+
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
+  const handleProccessAddressChange = (value) => {
+    // const value = e.target.value.trim();
+
+    // Smart filtering based on Bitcoin address patterns
+    let filteredValue = "";
+
+    if (value.toLowerCase().startsWith("bc1p")) {
+      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
+      filteredValue = value.replace(
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
+      filteredValue = value.replace(
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("1")) {
+      // Legacy addresses (P2PKH): starts with 1 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("3")) {
+      // Script addresses (P2SH): starts with 3 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else {
+      // For any other input, allow Base58 + bech32 characters to let validation handle it
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        ""
+      );
+    }
+
+    // Additional length constraints to prevent obviously invalid addresses
+    if (filteredValue.length > 62) {
+      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
+    }
+
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
   return (
     <>
       {trxnApproval &&
@@ -361,7 +500,8 @@ const RefundBitcoin = ({
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    setToAddress(data);
+                    handleProccessAddressChange(data);
+                    // setToAddress(data);
                     setOpenCam(!openCam);
                   }}
                 />
@@ -378,7 +518,7 @@ const RefundBitcoin = ({
                         placeholder="Bitcoin Address"
                         type="text"
                         value={toAddress}
-                        onChange={(e) => setToAddress(e.target.value)}
+                        onChange={handleAddressChange}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
                       {/* QR Scanner Button */}
@@ -395,11 +535,13 @@ const RefundBitcoin = ({
                         {scanIcn}
                       </button>
                     </div>
+                    {addressError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {addressError}
+                      </div>
+                    )}
                   </div>
                   <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} USDC
-                    </label>
                     <div className="iconWithText relative">
                       <div className="absolute icn left-2 flex items-center gap-2 text-xs">
                         {usdcIcn}
@@ -414,6 +556,16 @@ const RefundBitcoin = ({
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                       />
                     </div>
+
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance: {balance} USDC
+                    </label>
                   </div>
 
                   {toAmount && (

@@ -17,6 +17,7 @@ import { createUsdcBaseToGoldShift } from "../api/sideShiftAI";
 import { updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
+import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 
 const DepositSwap = () => {
@@ -31,6 +32,7 @@ const DepositSwap = () => {
   const [hash, setHash] = useState("");
   const [success, setSuccess] = useState(false);
   const [depositAddress, setDepositAddress] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Fixed direction: USDC on Base to PAXG on Ethereum
@@ -128,7 +130,29 @@ const DepositSwap = () => {
   const handleFromAmountChange = useCallback(
     (e) => {
       const value = e.target.value;
-      setFromAmount(value);
+      // setFromAmount(value);
+
+      const filteredValue = filterAmountInput(value, 2);
+      console.log("line-147", filteredValue);
+
+      setFromAmount(filteredValue);
+
+      // Validate amount
+      if (filteredValue.trim() !== "") {
+        if (Number.parseFloat(filteredValue) <= 0) {
+          setAmountError("Amount must be greater than 0");
+        } else if (
+          Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
+        ) {
+          setAmountError("Insufficient USDC balance");
+        } else if (Number.parseFloat(usdcBalance) < 0.01) {
+          setAmountError("Minimum balance of $0.01 required");
+        } else {
+          setAmountError("");
+        }
+      } else {
+        setAmountError("");
+      }
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
@@ -384,6 +408,11 @@ const DepositSwap = () => {
                   {/* Deposit address display */}
                   {depositAddress && (
                     <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                      {amountError && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {amountError}
+                        </div>
+                      )}
                       <p className="m-0 text-amber-500">
                         Deposit Address: {depositAddress.slice(0, 10)}...
                         {depositAddress.slice(-8)}

@@ -5,6 +5,7 @@ import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
 import { receiveBtc } from "../../../lib/apiCall";
 import { useSelector } from "react-redux";
+import { filterAmountInput } from "@/utils/helper";
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
@@ -93,6 +94,30 @@ const LightningTab = (walletAddress) => {
     setInvoice(result?.data?.invoice);
   };
 
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+
+    // Filter input with 2 decimal places
+    const filteredValue = filterAmountInput(value, 0);
+
+    setAmount(filteredValue);
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (
+        Number.parseFloat(filteredValue) <= 0 ||
+        !amount ||
+        isNaN(Number(amount))
+      ) {
+        setError("Amount must be greater than 0");
+      } else {
+        setError("");
+      }
+    } else {
+      setError("");
+    }
+  };
+
   return (
     <>
       {step == 1 ? (
@@ -108,7 +133,7 @@ const LightningTab = (walletAddress) => {
               id="btcAmount"
               type="text"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleAmountChange}
               className="form-control text-[var(--textColor)] focus:text-[var(--textColor)] bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
             />
             {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
@@ -137,7 +162,7 @@ const LightningTab = (walletAddress) => {
                 }}
                 type="button"
                 className="flex items-center justify-center btn commonBtn w-full"
-                disabled={loading}
+                disabled={loading || error !== "" || !amount}
               >
                 {loading ? "Processing..." : "Next"}
               </button>
