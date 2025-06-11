@@ -163,7 +163,7 @@ const BTCDebitCard: React.FC = () => {
                   <div className="flex align-items-center gap-2">
                     <BackBtn />
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Bitcoin Debt Card
+                      Lightning
                     </h4>
                   </div>
                 </div>

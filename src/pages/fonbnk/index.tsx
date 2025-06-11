@@ -1,3 +1,4 @@
+import { filterAmountInput } from "@/utils/helper";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -24,18 +25,20 @@ export default function Fonbnk() {
 
   const handleOnRampChange = (e: any) => {
     const { id, value } = e.target;
-    setOnRampForm((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+
+    if (id === "amount") {
+      const filteredValue = filterAmountInput(value, 2, 20);
+      setOnRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+    }
   };
 
   const handleOffRampChange = (e: any) => {
     const { id, value } = e.target;
-    setOffRampForm((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+
+    if (id === "amount") {
+      const filteredValue = filterAmountInput(value, 2, 20);
+      setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+    }
   };
 
   const handleOnRampSubmit = (e: any) => {
@@ -189,7 +192,6 @@ export default function Fonbnk() {
       ),
     },
   ];
-
 
   return (
     <section className="ifrmae pt-12 relative">
