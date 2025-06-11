@@ -33,15 +33,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [spendWallet, setSpendWallet] = useState("");
   const [applyTrue, setApplyTrue] = useState(false);
   const [sideshiftTxs, setSideshiftTxs] = useState([]);
-  const [selectedItem, setSelectedItem] = useState("20");
+  const [selectedItem, setSelectedItem] = useState("10");
 
   const selectOptions = [
     { value: "", label: "Select an option" },
+    { value: "10", label: "10" },
     { value: "20", label: "20" },
+    { value: "30", label: "30" },
     { value: "40", label: "40" },
-    { value: "60", label: "60" },
-    { value: "80", label: "80" },
-    { value: "100", label: "100" },
+    { value: "50", label: "50" },
   ];
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);

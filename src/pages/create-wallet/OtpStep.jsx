@@ -65,14 +65,45 @@ const OtpStep = ({
     }
   };
 
+  // const resendOtp = async () => {
+  //   try {
+  //     localStorage.setItem(resendOtp,)
+  //     let response = await resendOtpFunc();
+  //     if (response) {
+  //       startResendTimer();
+  //     }
+  //   } catch (error) {
+  //     console.log("createRegister error -->", error);
+  //     setRegisterOtpLoading(false);
+  //   }
+  // };
+
   const resendOtp = async () => {
     try {
+      // Get the current resend count from localStorage
+      let resendCount = parseInt(
+        localStorage.getItem("resendOtpCount") || "0",
+        10
+      );
+
+      // If more than 3 attempts, redirect to login
+      if (resendCount >= 3) {
+        console.log("Too many OTP attempts. Redirecting...");
+        setStep(1);
+        return;
+      }
+
+      // Otherwise, proceed with OTP resend
       let response = await resendOtpFunc();
       if (response) {
+        // Increment resend count and store it
+        resendCount += 1;
+        localStorage.setItem("resendOtpCount", resendCount.toString());
+
         startResendTimer();
       }
     } catch (error) {
-      console.log("createRegister error -->", error);
+      console.log("resendOtp error -->", error);
       setRegisterOtpLoading(false);
     }
   };

@@ -1,6 +1,6 @@
 import moment from "moment";
 
-export const fetchBitcoinTransactions = async (address, limit = 20) => {
+export const fetchBitcoinTransactions = async (address, limit = 10) => {
   try {
     const response = await fetch(
       `https://api.blockcypher.com/v1/btc/main/addrs/${address}/full?limit=${limit}`
