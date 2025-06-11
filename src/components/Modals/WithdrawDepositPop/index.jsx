@@ -19,9 +19,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
   const verifyingUser = async () => {
     setloading(true);
     let data = JSON.parse(userAuth?.webauthKey);
-    console.log("line-16", data);
     let userData = await verifyUser(data?.credentialIdSecret);
-    console.log("line-15", userData);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"

@@ -3,7 +3,14 @@ import { Country, State } from "country-state-city";
 import iso3166 from "iso-3166-1";
 import SpherePayAPI from "../api/spherePayApi";
 
-const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
+const Step2 = ({
+  step,
+  setStep,
+  userEmail,
+  setCustomerID,
+  setCountryCode,
+  setStateCode,
+}) => {
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [isStateOpen, setIsStateOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
@@ -17,13 +24,21 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
   const countryDropdownRef = useRef(null);
   const stateDropdownRef = useRef(null);
 
+  function getCountryFlagEmoji(countryCode) {
+    return countryCode
+      .toUpperCase()
+      .replace(/./g, (char) =>
+        String.fromCodePoint(127397 + char.charCodeAt())
+      );
+  }
+
   const allCountries = Country.getAllCountries().map((country) => {
     const isoCountry = iso3166.whereAlpha2(country.isoCode);
     return {
       code: country.isoCode, // 2-digit code (needed for state lookup)
       alpha3: isoCountry ? isoCountry.alpha3 : country.isoCode, // 3-digit code
       name: country.name,
-      emoji: "🏳️", // Placeholder flag
+      emoji: getCountryFlagEmoji(country.isoCode), // Placeholder flag
     };
   });
 
@@ -117,23 +132,27 @@ const Step2 = ({ step, setStep, userEmail, setCustomerID }) => {
 
     const email = userEmail; // Fallback if email not provided
 
-    const response = await createNewCustomer(email, countryCode, stateCode);
+    setCountryCode(countryCode);
+    setStateCode(stateCode);
+    setStep("PolicyKycStep");
 
-    if (response && response.error) {
-      if (
-        response?.error?.response?.data?.error ===
-        "customer/unsupported-country"
-      ) {
-        setError("Location not supported");
-      } else {
-        setError(
-          response?.error?.response?.data?.message || "An error occurred"
-        );
-      }
-    } else {
-      setCustomerID(response?.data?.customer?.id);
-      setStep("PolicyKycStep");
-    }
+    // const response = await createNewCustomer(email, countryCode, stateCode);
+
+    // if (response && response.error) {
+    //   if (
+    //     response?.error?.response?.data?.error ===
+    //     "customer/unsupported-country"
+    //   ) {
+    //     setError("Location not supported");
+    //   } else {
+    //     setError(
+    //       response?.error?.response?.data?.message || "An error occurred"
+    //     );
+    //   }
+    // } else {
+    //   setCustomerID(response?.data?.customer?.id);
+    //   setStep("PolicyKycStep");
+    // }
   };
 
   return (

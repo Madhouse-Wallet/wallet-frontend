@@ -231,7 +231,6 @@ const WithdrawalSwap = () => {
       // setFromAmount(value);
 
       const filteredValue = filterAmountInput(value);
-      console.log("line-147", filteredValue);
 
       setFromAmount(filteredValue);
 
@@ -268,9 +267,9 @@ const WithdrawalSwap = () => {
       setUsdValue({ from: "0", to: "0" });
 
       // Set new timer for 2 seconds
-      if (value && !Number.isNaN(Number.parseFloat(value))) {
+      if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
         const newTimer = setTimeout(() => {
-          updateBridgeQuote(value);
+          updateBridgeQuote(filteredValue);
         }, 2000);
         setDebounceTimer(newTimer);
       }

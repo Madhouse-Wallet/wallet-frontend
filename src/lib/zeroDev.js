@@ -117,8 +117,6 @@ export const setupNewAccount = async (
   try {
     let generatePrivateKey = await getMenmonic();
     let getSafeKey = await getPrivateKey();
-    console.log("generatePrivateKey-->", generatePrivateKey)
-    console.log("getSafeKey-->", getSafeKey)
     const eoaPrivateKey = generatePrivateKey.privateKey; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 

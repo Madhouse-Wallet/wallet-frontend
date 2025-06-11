@@ -134,9 +134,7 @@ const SellBitcoin = () => {
   const handleFromAmountChange = async (e) => {
     const value = e.target.value;
 
-    // Filter input with 2 decimal places
     const filteredValue = filterAmountInput(value);
-    console.log("line-147", filteredValue);
 
     setFromAmount(filteredValue);
 
@@ -155,21 +153,24 @@ const SellBitcoin = () => {
       setAmountError("");
     }
 
-    if (value && !isNaN(parseFloat(value))) {
+    if (filteredValue && !isNaN(parseFloat(filteredValue))) {
       const timer = setTimeout(async () => {
         setIsLoading(true);
         try {
-          // First check the amount value
-          if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
+          // First check the amount filteredValue
+          if (
+            parseFloat(filteredValue) <=
+            process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+          ) {
             // For amounts <= 0.1 BTC, use SideShift
-            const shiftResult = await getDestinationAddress(value);
+            const shiftResult = await getDestinationAddress(filteredValue);
             if (shiftResult) {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
             }
           } else {
             // For amounts > 0.1 BTC, use ThorSwap
-            const quoteResult = await getQuote(value);
+            const quoteResult = await getQuote(filteredValue);
             if (quoteResult) {
               setDestinationAddress(quoteResult.estimatedDepositAddress);
               setToAmount(quoteResult.estimate);

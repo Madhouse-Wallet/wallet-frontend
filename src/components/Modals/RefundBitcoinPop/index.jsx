@@ -51,22 +51,18 @@ const RefundBitcoin = ({
     const value = e.target.value;
     // Only allow positive numbers with decimals
     const filteredValue = filterAmountInput(value, 2);
-    console.log("line-54", filteredValue, value);
     setAmount(filteredValue);
 
     // Validate amount
     if (filteredValue.trim() !== "") {
       if (Number.parseFloat(filteredValue) <= 0) {
         setAmountError("Amount must be greater than 0");
-        return;
       } else if (
         Number.parseFloat(filteredValue) > Number.parseFloat(balance)
       ) {
         setAmountError("Insufficient USDC balance");
-        return;
-      } else if (Number.parseFloat(balance) < 0.05) {
-        setAmountError("Minimum balance of $0.05 required");
-        return;
+      } else if (Number.parseFloat(balance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
       }
@@ -74,7 +70,7 @@ const RefundBitcoin = ({
       setAmountError("");
     }
 
-    if (filteredValue && amountError === "") {
+    if (filteredValue) {
       if (filteredValue && !isNaN(parseFloat(filteredValue))) {
         const timer = setTimeout(async () => {
           setIsLoading(true);

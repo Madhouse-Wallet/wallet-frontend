@@ -143,7 +143,6 @@ const WithdrawalSwap = () => {
     // setFromAmount(value);
 
     const filteredValue = filterAmountInput(value, 2);
-    console.log("line-147", filteredValue);
 
     setFromAmount(filteredValue);
 
@@ -171,9 +170,9 @@ const WithdrawalSwap = () => {
     setToAmount("");
     setQuote(null);
 
-    if (value && !Number.isNaN(Number.parseFloat(value))) {
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
       const newTimer = setTimeout(() => {
-        updateQuote(value);
+        updateQuote(filteredValue);
       }, 2000);
       setDebounceTimer(newTimer);
     }
@@ -409,12 +408,12 @@ const WithdrawalSwap = () => {
                           {swapDirection.to}
                         </h6>
                       </div>
-                      {amountError && (
-                        <div className="text-red-500 text-xs mt-1">
-                          {amountError}
-                        </div>
-                      )}
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
                   </div>
                   <div className="mt-3 py-2">
                     <button

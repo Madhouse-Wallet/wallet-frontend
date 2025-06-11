@@ -139,12 +139,8 @@ const Swap = () => {
 
   const handleFromAmountChange = async (e) => {
     const value = e.target.value;
-    console.log("line-142", value);
-    // setFromAmount(value);
 
-    // Filter input with 2 decimal places
     const filteredValue = filterAmountInput(value, 2);
-    console.log("line-147", filteredValue);
 
     setFromAmount(filteredValue);
 

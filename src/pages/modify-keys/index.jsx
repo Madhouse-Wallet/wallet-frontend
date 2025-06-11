@@ -9,6 +9,7 @@ import { doAccountRecovery } from "../../lib/zeroDev";
 import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import styled from "styled-components";
+import { filterHexxInput } from "../../utils/helper";
 
 const ModifyKeys = () => {
   const [step, setStep] = useState(1);
@@ -24,6 +25,9 @@ const ModifyKeys = () => {
   const [passkeyData, setPasskeyData] = useState([]);
   const [passkeyDataOrig, setPasskeyDataOrig] = useState([]);
   const router = useRouter();
+  const [error, setError] = useState("");
+  const [privateKeyError, setPrivateKeyError] = useState("");
+  const [safePrivateKeyError, setSafePrivateKeyError] = useState("");
 
   const setSecretInPasskey = async (userName, data) => {
     try {
@@ -160,6 +164,57 @@ const ModifyKeys = () => {
     }
   };
 
+  const handleEmailChange = (e) => {
+    let value = e.target.value;
+
+    // Allow only common email characters (letters, numbers, @ . _ -)
+    const filteredValue = value.replace(/[^a-zA-Z0-9@._-]/g, "");
+
+    // Optional max length limit
+    const maxLength = 50;
+    const limitedValue = filteredValue.slice(0, maxLength);
+
+    setEmail(limitedValue);
+    setError("");
+
+    // Optional: Validate email only after user finishes typing
+    if (limitedValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(limitedValue)) {
+      setError("Invalid email format");
+    }
+  };
+
+  const handlePrivateInputChange = (e) => {
+    const value = e.target.value;
+
+    const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
+
+    setPrivateKey(filteredValue);
+
+    const isValidPrivateKey = /^(0x)?[0-9a-fA-F]{64}$/.test(filteredValue);
+
+    if (!isValidPrivateKey) {
+      setPrivateKeyError("Invalid private key");
+    } else {
+      setPrivateKeyError("");
+    }
+  };
+
+  const handleSafePrivateInputChange = (e) => {
+    const value = e.target.value;
+
+    const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
+
+    setSafePrivateKey(filteredValue);
+
+    const isValidPrivateKey = /^(0x)?[0-9a-fA-F]{64}$/.test(filteredValue);
+
+    if (!isValidPrivateKey) {
+      setSafePrivateKeyError("Invalid safe private key");
+    } else {
+      setSafePrivateKeyError("");
+    }
+  };
+
   return (
     <>
       <div className="mx-auto ">
@@ -193,37 +248,60 @@ const ModifyKeys = () => {
                   <input
                     type="text"
                     name="email"
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Email"
-                  ></input>
+                  />
+                  {error && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {error}
+                    </div>
+                  )}
                 </div>
                 <div className="py-2">
                   <input
                     type="text"
                     name="privateKey"
-                    onChange={(e) => setPrivateKey(e.target.value)}
+                    onChange={handlePrivateInputChange}
                     // value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Private Key"
-                  ></input>
+                  />
+                  {privateKeyError && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {privateKeyError}
+                    </div>
+                  )}
                 </div>
                 <div className="py-2">
                   <input
                     type="text"
                     name="safePrivateKey"
-                    onChange={(e) => setSafePrivateKey(e.target.value)}
+                    onChange={handleSafePrivateInputChange}
                     // value={safePriva02teKey}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Safe Private Key"
-                  ></input>
+                  />
+                  {safePrivateKeyError && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {safePrivateKeyError}
+                    </div>
+                  )}
                 </div>
                 <div className="btnWrpper mt-3 text-center">
                   <button
                     type="button"
                     onClick={checkAddress}
-                    disabled={loadingNewSigner}
+                    disabled={
+                      loadingNewSigner ||
+                      error ||
+                      privateKeyError ||
+                      safePrivateKeyError ||
+                      !email ||
+                      !privateKey ||
+                      !safePrivateKey
+                    }
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loadingNewSigner ? (

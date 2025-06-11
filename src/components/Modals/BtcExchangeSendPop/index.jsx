@@ -19,6 +19,7 @@ import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import {
   isValidBitcoinAddress,
   filterAmountInput,
+  filterHexInput,
 } from "../../../utils/helper.js";
 
 const BtcExchangeSendPop = ({
@@ -198,7 +199,7 @@ const BtcExchangeSendPop = ({
     const value = e.target.value;
 
     // Filter input with 2 decimal places
-    const filteredValue = filterAmountInput(value);
+    const filteredValue = filterAmountInput(value, 18, 20);
 
     setBtcAmount(filteredValue);
 
@@ -224,50 +225,36 @@ const BtcExchangeSendPop = ({
 
   const handleAddressChange = (e) => {
     const value = e.target.value.trim();
-
-    // Smart filtering based on Bitcoin address patterns
     let filteredValue = "";
 
+    // Match Bitcoin address patterns
     if (value.toLowerCase().startsWith("bc1p")) {
-      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
-        ""
+        62
       );
     } else if (value.toLowerCase().startsWith("bc1")) {
-      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
-        ""
+        62
       );
-    } else if (value.startsWith("1")) {
-      // Legacy addresses (P2PKH): starts with 1 + Base58
-      filteredValue = value.replace(
+    } else if (value.startsWith("1") || value.startsWith("3")) {
+      filteredValue = filterHexInput(
+        value,
         /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
-        ""
-      );
-    } else if (value.startsWith("3")) {
-      // Script addresses (P2SH): starts with 3 + Base58
-      filteredValue = value.replace(
-        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
-        ""
+        35
       );
     } else {
-      // For any other input, allow Base58 + bech32 characters to let validation handle it
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
-        ""
+        62
       );
     }
-
-    // Additional length constraints to prevent obviously invalid addresses
-    if (filteredValue.length > 62) {
-      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
-    }
-
     setBtcAddress(filteredValue);
 
-    // Validate address format (only if not empty)
     if (filteredValue.trim() !== "") {
       if (!isValidBitcoinAddress(filteredValue)) {
         setAddressError("Invalid Bitcoin address format");
@@ -281,50 +268,37 @@ const BtcExchangeSendPop = ({
 
   const handleProccessAddressChange = (value) => {
     // const value = e.target.value.trim();
-
-    // Smart filtering based on Bitcoin address patterns
     let filteredValue = "";
 
+    // Match Bitcoin address patterns
     if (value.toLowerCase().startsWith("bc1p")) {
-      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
-        ""
+        62
       );
     } else if (value.toLowerCase().startsWith("bc1")) {
-      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
-        ""
+        62
       );
-    } else if (value.startsWith("1")) {
-      // Legacy addresses (P2PKH): starts with 1 + Base58
-      filteredValue = value.replace(
+    } else if (value.startsWith("1") || value.startsWith("3")) {
+      filteredValue = filterHexInput(
+        value,
         /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
-        ""
-      );
-    } else if (value.startsWith("3")) {
-      // Script addresses (P2SH): starts with 3 + Base58
-      filteredValue = value.replace(
-        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
-        ""
+        35
       );
     } else {
-      // For any other input, allow Base58 + bech32 characters to let validation handle it
-      filteredValue = value.replace(
+      filteredValue = filterHexInput(
+        value,
         /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
-        ""
+        62
       );
-    }
-
-    // Additional length constraints to prevent obviously invalid addresses
-    if (filteredValue.length > 62) {
-      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
     }
 
     setBtcAddress(filteredValue);
 
-    // Validate address format (only if not empty)
     if (filteredValue.trim() !== "") {
       if (!isValidBitcoinAddress(filteredValue)) {
         setAddressError("Invalid Bitcoin address format");
@@ -399,7 +373,7 @@ const BtcExchangeSendPop = ({
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    handleProccessAddressChange(data)
+                    handleProccessAddressChange(data);
                     // setBtcAddress(data);
                     setOpenCam(!openCam);
                   }}

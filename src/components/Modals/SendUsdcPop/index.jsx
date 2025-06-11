@@ -15,9 +15,13 @@ import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { retrieveSecret } from "../../../utils/webauthPrf";
 import Image from "next/image.js";
-import { isValidAddress, filterAmountInput } from "../../../utils/helper.js";
+import {
+  isValidAddress,
+  filterAmountInput,
+  filterHexInput,
+} from "../../../utils/helper.js";
 import { fail } from "assert";
-import TransactionFailedPop from "@/components/Modals/TransactionFailedPop"
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -36,7 +40,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     const value = e.target.value;
 
     // Filter input with 2 decimal places
-    const filteredValue = filterAmountInput(value, 2);
+    const filteredValue = filterAmountInput(value, 2, 21);
 
     setAmount(filteredValue);
 
@@ -159,7 +163,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
   const processAddress = (value) => {
     // Filter out invalid characters
-    const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    const filteredValue = filterHexInput(value, /[^0-9a-fA-Fx]/g, 42);
 
     // Update the address value with filtered input
     setToAddress(filteredValue);
@@ -181,8 +186,9 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const handleAddressChange = (e) => {
     const value = e.target.value;
 
+    // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
     // Filter out invalid characters instead of blocking the entire input
-    const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    const filteredValue = filterHexInput(value, /[^0-9a-fA-Fx]/g, 42);
 
     // Update the address value with filtered input
     setToAddress(filteredValue);
@@ -201,7 +207,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
   return (
     <>
-     {/* {failed &&
+      {/* {failed &&
         createPortal(
           <TransactionFailedPop
             failed={failed}
@@ -244,7 +250,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    console.log("line-215", data);
                     processAddress(data);
                     // setToAddress(data);
                     setOpenCam(!openCam);

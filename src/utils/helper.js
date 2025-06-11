@@ -17,6 +17,46 @@ export function hasInvalidCharacters(input) {
   return invalidCharsRegex.test(input);
 }
 
+export function isValidName(input, maxLength = 50) {
+  if (input === "") return true; // allow clearing
+  const regex = /^[A-Za-z\s]*$/;
+  return regex.test(input) && input.length <= maxLength;
+}
+
+export function isValidNumber(input, maxLength = 20) {
+  if (input === "") return true; // allow clearing
+  const regex = /^\d*$/; // digits only
+  return regex.test(input) && input.length <= maxLength;
+}
+
+export function filterHexInput(value, allowedCharsRegex, maxLength) {
+  if (!value || typeof value !== "string") return "";
+
+  // Filter invalid characters
+  let filtered = value.replace(allowedCharsRegex, "");
+
+  // Trim to max length
+  if (filtered.length > maxLength) {
+    filtered = filtered.slice(0, maxLength);
+  }
+
+  return filtered;
+}
+
+export function filterHexxInput(value, disallowedCharsRegex, maxLength) {
+  if (!value || typeof value !== "string") return "";
+
+  // Remove disallowed characters
+  let filtered = value.replace(disallowedCharsRegex, "");
+
+  // Trim to max length
+  if (filtered.length > maxLength) {
+    filtered = filtered.slice(0, maxLength);
+  }
+
+  return filtered;
+}
+
 /**
  * Validates if the address is a valid Ethereum/Base chain address
  * @param {string} address - The address string to validate
@@ -34,14 +74,46 @@ export function isValidAddress(address) {
   }
 }
 
-export function filterAmountInput(value, decimalPlaces = 18) {
+// export function filterAmountInput(value, decimalPlaces = 18) {
+//   if (!value || typeof value !== "string") {
+//     return "";
+//   }
+
+//   // Remove all invalid characters (keep only digits and one decimal point)
+//   let filtered;
+
+//   if (decimalPlaces === 0) {
+//     filtered = value.replace(/[^0-9]/g, "");
+//   } else {
+//     filtered = value.replace(/[^0-9.]/g, "");
+//   }
+
+//   // Handle multiple decimal points - keep only the first one
+//   const parts = filtered.split(".");
+//   if (parts.length > 2) {
+//     filtered = parts[0] + "." + parts.slice(1).join("");
+//   }
+
+//   // Limit decimal places
+//   if (parts.length === 2 && parts[1].length > decimalPlaces) {
+//     filtered = parts[0] + "." + parts[1].substring(0, decimalPlaces);
+//   }
+
+//   // Prevent leading zeros (except for values like 0.123)
+//   if (filtered.length > 1 && filtered[0] === "0" && filtered[1] !== ".") {
+//     filtered = filtered.substring(1);
+//   }
+
+//   return filtered;
+// }
+
+export function filterAmountInput(value, decimalPlaces = 18, maxLength = 20) {
   if (!value || typeof value !== "string") {
     return "";
   }
 
   // Remove all invalid characters (keep only digits and one decimal point)
   let filtered;
-
   if (decimalPlaces === 0) {
     filtered = value.replace(/[^0-9]/g, "");
   } else {
@@ -49,19 +121,28 @@ export function filterAmountInput(value, decimalPlaces = 18) {
   }
 
   // Handle multiple decimal points - keep only the first one
-  const parts = filtered.split(".");
-  if (parts.length > 2) {
-    filtered = parts[0] + "." + parts.slice(1).join("");
+  const firstDotIndex = filtered.indexOf(".");
+  if (firstDotIndex !== -1) {
+    // Remove all other dots
+    filtered =
+      filtered.slice(0, firstDotIndex + 1) +
+      filtered.slice(firstDotIndex + 1).replace(/\./g, "");
   }
 
   // Limit decimal places
+  const parts = filtered.split(".");
   if (parts.length === 2 && parts[1].length > decimalPlaces) {
-    filtered = parts[0] + "." + parts[1].substring(0, decimalPlaces);
+    filtered = parts[0] + "." + parts[1].slice(0, decimalPlaces);
   }
 
   // Prevent leading zeros (except for values like 0.123)
   if (filtered.length > 1 && filtered[0] === "0" && filtered[1] !== ".") {
-    filtered = filtered.substring(1);
+    filtered = filtered.replace(/^0+/, "");
+  }
+
+  // ✅ Apply maxLength only after formatting
+  if (filtered.length > maxLength) {
+    filtered = filtered.slice(0, maxLength);
   }
 
   return filtered;
@@ -153,4 +234,18 @@ export function getBitcoinAddressType(address) {
   }
 
   return "unknown";
+}
+
+export function filterAlphaWithSpaces(value, maxLength = 100) {
+  if (!value || typeof value !== "string") return "";
+
+  // Keep only letters and spaces
+  let filtered = value.replace(/[^a-zA-Z\s]/g, "");
+
+  // Trim to max length
+  if (filtered.length > maxLength) {
+    filtered = filtered.slice(0, maxLength);
+  }
+
+  return filtered;
 }

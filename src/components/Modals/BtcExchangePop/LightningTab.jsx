@@ -5,7 +5,7 @@ import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
 import { receiveBtc } from "../../../lib/apiCall";
 import { useSelector } from "react-redux";
-import { filterAmountInput } from "@/utils/helper";
+import { filterAmountInput, filterHexInput } from "@/utils/helper";
 const LightningTab = (walletAddress) => {
   const [step, setStep] = useState(1);
   const [qrCode, setQRCode] = useState("");
@@ -118,6 +118,18 @@ const LightningTab = (walletAddress) => {
     }
   };
 
+  const handleMemoChange = (e) => {
+    const value = e.target.value;
+
+    // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    // Filter out invalid characters instead of blocking the entire input
+    const filteredValue = filterHexInput(value, /[^a-zA-Z0-9 ]/g, 100);
+    console.log("line-127", filteredValue.length);
+
+    // Update the address value with filtered input
+    setMemo(filteredValue);
+  };
+
   return (
     <>
       {step == 1 ? (
@@ -149,7 +161,8 @@ const LightningTab = (walletAddress) => {
               id="btcAmount"
               type="text"
               value={memo}
-              onChange={(e) => setMemo(e.target.value)}
+              // onChange={(e) => setMemo(e.target.value)}
+              onChange={handleMemoChange}
               className="form-control text-[var(--textColor)] focus:text-[var(--textColor)] bg-[var(--backgroundColor2)] focus:bg-[var(--backgroundColor2)] border-gray-600 text-xs font-medium"
             />
           </div>

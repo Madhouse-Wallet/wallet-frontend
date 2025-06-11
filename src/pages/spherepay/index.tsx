@@ -15,6 +15,8 @@ function Spharepay() {
 
   const [step, setStep] = useState("");
   const [email, setEmail] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+  const [stateCode, setStateCode] = useState("");
   const [customerId, setCustomerID] = useState("");
   const [termasSRC, setTermsSRC] = useState("");
   const [identitySRC, setIdentitySRC] = useState("");
@@ -103,6 +105,8 @@ function Spharepay() {
                         setStep={setStep}
                         userEmail={userAuth?.email}
                         setCustomerID={setCustomerID}
+                        setCountryCode={setCountryCode}
+                        setStateCode={setStateCode}
                       />
                     </>
                   ) : step == "PolicyKycStep" ? (
@@ -110,9 +114,13 @@ function Spharepay() {
                       <Step3
                         step={step}
                         setStep={setStep}
+                        email={userAuth?.email}
                         setTermsSRC={setTermsSRC}
                         setIdentitySRC={setIdentitySRC}
+                        setCustomerID={setCustomerID}
                         customerId={customerId}
+                        countryCode={countryCode}
+                        stateCode={stateCode}
                       />
                     </>
                   ) : step == "TermsOfService" ? (

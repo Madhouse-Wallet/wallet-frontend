@@ -39,6 +39,25 @@ const EmailStep = ({ step, setStep, loginFn }) => {
       setLoginLoading(false);
     }
   };
+
+  const handleEmailChange = (e) => {
+    let value = e.target.value;
+
+    // Allow only common email characters (letters, numbers, @ . _ -)
+    const filteredValue = value.replace(/[^a-zA-Z0-9@._-]/g, "");
+
+    // Optional max length limit
+    const maxLength = 50;
+    const limitedValue = filteredValue.slice(0, maxLength);
+
+    setRegisterEmail(limitedValue);
+    setError("");
+
+    // Optional: Validate email only after user finishes typing
+    if (limitedValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(limitedValue)) {
+      setError("Invalid email format");
+    }
+  };
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -76,7 +95,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                 <input
                   type="email"
                   value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                   placeholder="Enter your email address"
                   defaultValue=""
@@ -92,7 +111,7 @@ const EmailStep = ({ step, setStep, loginFn }) => {
               <div className="btnWrpper text-center mt-3">
                 <button
                   onClick={loginTry}
-                  disabled={loginLoading}
+                  disabled={loginLoading || !registerEmail || error}
                   type="submit"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >

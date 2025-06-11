@@ -133,7 +133,6 @@ const DepositSwap = () => {
       // setFromAmount(value);
 
       const filteredValue = filterAmountInput(value, 2);
-      console.log("line-147", filteredValue);
 
       setFromAmount(filteredValue);
 
@@ -162,9 +161,9 @@ const DepositSwap = () => {
       setShiftData(null);
       setDepositAddress("");
 
-      if (value && !Number.isNaN(Number.parseFloat(value))) {
+      if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
         const newTimer = setTimeout(() => {
-          updateShiftQuote(value);
+          updateShiftQuote(filteredValue);
         }, 2000);
         setDebounceTimer(newTimer);
       }

@@ -89,6 +89,7 @@ const OtpStep = ({
       // If more than 3 attempts, redirect to login
       if (resendCount >= 3) {
         console.log("Too many OTP attempts. Redirecting...");
+        localStorage.setItem("resendOtpCount", "0");
         setStep(1);
         return;
       }
@@ -181,7 +182,7 @@ const OtpStep = ({
               <div className="btnWrpper text-center mt-3">
                 <button
                   onClick={otpRegister}
-                  disabled={registerOtpLoading}
+                  disabled={registerOtpLoading || !registerOTP}
                   // type="submit"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
