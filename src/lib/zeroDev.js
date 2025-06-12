@@ -25,7 +25,7 @@ import dotenv from "dotenv";
 import timers from "timers-promises";
 dotenv.config();
 
-export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL;
 export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_MAINNET_RPC_URL;
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
@@ -84,16 +84,16 @@ export const checkMenmonic = async (seedPhrase, privateKey) => {
     } else {
       return {
         status: false,
-        msg: "The seed phrase and private key do not match."
+        msg: "The seed phrase and private key do not match.",
       };
     }
   } catch (error) {
     return {
       status: false,
-      msg: "The seed phrase and private key do not match."
+      msg: "The seed phrase and private key do not match.",
     };
   }
-}
+};
 
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
@@ -111,9 +111,7 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
   }
 };
 
-export const setupNewAccount = async (
-  chain = base
-) => {
+export const setupNewAccount = async (chain = base) => {
   try {
     let generatePrivateKey = await getMenmonic();
     let getSafeKey = await getPrivateKey();
@@ -146,15 +144,13 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: BigInt(1000000) * (await publicClient.getGasPrice())
+      value: BigInt(1000000) * (await publicClient.getGasPrice()),
     });
     await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
-
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
-
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -182,7 +178,6 @@ export const setupNewAccount = async (
       authorizationList: [authorization],
     });
 
-
     const safeAccount = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
       owners: [privateKeyToAccount(safePrivateKey)],
@@ -201,7 +196,7 @@ export const setupNewAccount = async (
           trxn: txHash.data,
           privateKeyOwner: generatePrivateKey.privateKey,
           safePrivateKey: getSafeKey,
-          seedPhraseOwner: generatePrivateKey.phrase
+          seedPhraseOwner: generatePrivateKey.phrase,
         },
       };
     } else {
@@ -215,12 +210,16 @@ export const setupNewAccount = async (
     console.log("Error setting up new account -->", error);
     return {
       status: false,
-      msg: "Something went wrong during account setup. Please try again later."
+      msg: "Something went wrong during account setup. Please try again later.",
     };
   }
 };
 
-export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) => {
+export const doAccountRecovery = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  address
+) => {
   try {
     const getAccount = await checkPrivateKey(PRIVATE_KEY);
     const getOwnerAccount = await checkPrivateKey(SAFE_PRIVATE_KEY);
@@ -301,7 +300,7 @@ export const getAccount = async (
       bundlerTransport: http(pimlicoUrl),
       userOperation: {
         estimateFeesPerGas: async () => {
-          return (await pimlicoClient.getUserOperationGasPrice()).fast
+          return (await pimlicoClient.getUserOperationGasPrice()).fast;
         },
       },
     });
@@ -375,8 +374,46 @@ export const sendTransaction = async (smartAccountClient, params) => {
     //return true;
   } catch (error) {
     console.log(`Error in transaction: ${error}`);
-    return error;
+    return {
+      success: false,
+      error: {
+        message: error.message,
+        type: getErrorType(error),
+        details: error,
+      },
+    };
   }
+};
+
+const getErrorType = (error) => {
+  const errorMessage = error.message.toLowerCase();
+
+  if (
+    errorMessage.includes("invalid address") ||
+    errorMessage.includes("address")
+  ) {
+    return "INVALID_ADDRESS";
+  }
+  if (
+    errorMessage.includes("insufficient funds") ||
+    errorMessage.includes("balance")
+  ) {
+    return "INSUFFICIENT_FUNDS";
+  }
+  if (
+    errorMessage.includes("user rejected") ||
+    errorMessage.includes("denied")
+  ) {
+    return "USER_REJECTED";
+  }
+  if (errorMessage.includes("network") || errorMessage.includes("connection")) {
+    return "NETWORK_ERROR";
+  }
+  if (errorMessage.includes("gas")) {
+    return "GAS_ERROR";
+  }
+
+  return "UNKNOWN_ERROR";
 };
 
 export const getRpcProvider = async () => {

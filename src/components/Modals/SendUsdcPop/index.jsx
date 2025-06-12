@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import {
   getAccount,
   sendTransaction,
@@ -20,13 +19,12 @@ import {
   filterAmountInput,
   filterHexInput,
 } from "../../../utils/helper.js";
-import { fail } from "assert";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [toAddress, setToAddress] = useState("");
-  const [failed, setFailed] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
   const [openCam, setOpenCam] = useState(false);
@@ -35,6 +33,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const [balance, setBalance] = useState("0");
   const [addressError, setAddressError] = useState("");
   const [amountError, setAmountError] = useState("");
+  const [error, setError] = useState("");
+  const [txError, setTxError] = useState("");
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -94,7 +94,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
@@ -107,7 +106,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
@@ -119,17 +117,22 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           args: [toAddress, parseUnits(amount.toString(), 6)],
         },
       ]);
-
-      if (tx) {
+      if (tx && !tx.error) {
+        // tx is a transaction hash (success)
         setSuccess(true);
         setSendUsdc(false);
-        // toast.success("USDC sent successfully!");
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(tx || "Transaction failed");
+        // tx is an error object (failure)
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(tx || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +160,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      setError("Failed to fetch USDC balance");
     }
   };
 
@@ -207,14 +210,15 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
   return (
     <>
-      {/* {failed &&
+      {failed &&
         createPortal(
           <TransactionFailedPop
             failed={failed}
             setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
           />,
           document.body
-        )} */}
+        )}
       {trxnApproval &&
         createPortal(
           <TransactionApprovalPop
@@ -316,6 +320,10 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       Balance: {parseFloat(balance).toFixed(2)} USDC
                     </label>
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
                   <div className="py-2 mt-4">
                     <button

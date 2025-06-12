@@ -21,6 +21,7 @@ import {
   filterAmountInput,
   filterHexInput,
 } from "../../../utils/helper.js";
+import TransactionFailedPop from "../TransactionFailedPop";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -54,6 +55,9 @@ const BtcExchangeSendPop = ({
   const [hash, setHash] = useState("");
   const [success, setSuccess] = useState(false);
   const [addressError, setAddressError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
   const [amountError, setAmountError] = useState("");
 
   const submitAddress = async () => {
@@ -124,7 +128,6 @@ const BtcExchangeSendPop = ({
 
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        toast.error("Private Key not Found");
         return;
       }
 
@@ -139,17 +142,20 @@ const BtcExchangeSendPop = ({
       if (result.success) {
         setSuccess(true);
         setHash(result.transactionHash);
-        // toast.success("BTC sent successfully!");
         setBtcAmount(0);
         setBtcAddress();
         setLoadingSend(false);
       } else {
-        toast.error(result.error || "Transaction failed");
+        console.log("line-149", result);
+        setFailed(true);
+        setTxError(result.error || "Transaction failed");
       }
       setLoadingSend(false);
     } catch (error) {
+      console.log("line-153", error);
       setLoadingSend(false);
-      toast.error(error.message);
+      setFailed(true);
+      setTxError(error || "Transaction failed");
     }
   };
 
@@ -166,7 +172,7 @@ const BtcExchangeSendPop = ({
         setBtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch USDC balance");
     }
   };
 
@@ -439,6 +445,10 @@ const BtcExchangeSendPop = ({
                         {addressError}
                       </div>
                     )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
                   <div className="py-2 mt-4">
                     <button
@@ -478,6 +488,16 @@ const BtcExchangeSendPop = ({
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop

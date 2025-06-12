@@ -35,7 +35,7 @@ const OtpStep = ({
 
   const startResendTimer = () => {
     setIsResendDisabled(true);
-    setTimeLeft(120); // 2 minutes in seconds
+    setTimeLeft(30); // 2 minutes in seconds
   };
 
   const formatTime = (seconds) => {

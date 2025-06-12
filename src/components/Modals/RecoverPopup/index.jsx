@@ -15,14 +15,16 @@ const RecoverPopup = ({
   phraseStatus,
   adminId,
   setLoader,
+  step,
+  setloading,
 }) => {
-  const [step, setStep] = useState(1);
   const [lndHubUrl, setLndHubUrl] = useState(
     `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
   );
   const handleAdjustPop = () => {
     setRecover(!recover);
     setLoader(false);
+    setloading(false);
   };
   useEffect(() => {
     setLndHubUrl(
@@ -36,6 +38,15 @@ const RecoverPopup = ({
         toast.success("Copied Successfully!");
       } else {
       }
+    } catch (error) {
+      console.log("error-->", error);
+    }
+  };
+
+  const handleCopyURL = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied Successfully!");
     } catch (error) {
       console.log("error-->", error);
     }
@@ -376,7 +387,7 @@ const RecoverPopup = ({
                     <div className="col-span-12">
                       <div className="text-center my-3">
                         <button
-                          onClick={() => handleCopy(lndHubUrl || "")}
+                          onClick={() => handleCopyURL(lndHubUrl || "")}
                           type="submit"
                           className={` bg-white/40 active:bg-white/90 text-black hover:bg-white/80 ring-white/40 text-white inline-flex h-[42px] text-xs items-center rounded-full  gap-3 px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
@@ -385,7 +396,7 @@ const RecoverPopup = ({
                         </button>
                       </div>
                     </div>
-                    {!phraseStatus && (
+                    {/* {!phraseStatus && (
                       <>
                         <div className="col-span-12">
                           <div className="text-center my-3">
@@ -399,17 +410,7 @@ const RecoverPopup = ({
                           </div>
                         </div>
                       </>
-                    )}
-                    <div className="col-span-12">
-                      {/* <div className="btnWrpper text-center mt-3">
-                <button
-                  // type="submit"
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Next
-                </button>
-              </div> */}
-                    </div>
+                    )} */}
                   </div>
                 </div>
               </div>

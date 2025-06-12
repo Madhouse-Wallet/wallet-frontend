@@ -106,8 +106,8 @@ const LightningTab = (walletAddress) => {
     if (filteredValue.trim() !== "") {
       if (
         Number.parseFloat(filteredValue) <= 0 ||
-        !amount ||
-        isNaN(Number(amount))
+        !String(filteredValue || "").trim() ||
+        isNaN(Number(filteredValue))
       ) {
         setError("Amount must be greater than 0");
       } else {

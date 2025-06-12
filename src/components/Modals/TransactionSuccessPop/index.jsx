@@ -38,13 +38,16 @@ const TransactionSuccessPop = ({ success, setSuccess, symbol, hash }) => {
                 You've successfully Send {symbol}. Thank you for using MadHouse
                 Wallet!"
               </p>
-              <Link
-                href={hash}
-                target="_blank"
-                className="themeClr font-semibold"
-              >
-                Transaction Link
-              </Link>
+              {hash !== "" && (
+                <Link
+                  href={hash}
+                  target="_blank"
+                  className="themeClr font-semibold"
+                >
+                  Transaction Link
+                </Link>
+              )}
+
               <div className="btnWrpper mt-5">
                 <button
                   onClick={() => {

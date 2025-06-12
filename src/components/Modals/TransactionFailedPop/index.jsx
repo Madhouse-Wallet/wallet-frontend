@@ -3,9 +3,10 @@ import styled from "styled-components";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const TransactionFailedPop = ({ failed, setFailed, symbol, hash }) => {
+const TransactionFailedPop = ({ failed, setFailed, symbol, hash, txError }) => {
   const handleFailed = () => setFailed(!failed);
   const router = useRouter();
+  console.log("txError", txError);
   return (
     <>
       <Modal
@@ -35,8 +36,8 @@ const TransactionFailedPop = ({ failed, setFailed, symbol, hash }) => {
                 Failed
               </h4>
               <p className="m-0 py-2">
-                You've successfully Send {symbol}. Thank you for using MadHouse
-                Wallet!"
+                {txError || "Transaction failed"}
+                Please try again after some time.
               </p>
               {/* <Link
                 href={hash}
