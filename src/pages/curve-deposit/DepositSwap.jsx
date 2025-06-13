@@ -9,7 +9,6 @@ import {
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi, parseUnits } from "viem";
@@ -19,6 +18,7 @@ import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmat
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -34,6 +34,9 @@ const DepositSwap = () => {
   const [depositAddress, setDepositAddress] = useState("");
   const [amountError, setAmountError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   // Fixed direction: USDC on Base to PAXG on Ethereum
   const [bridgeDirection] = useState({
@@ -82,7 +85,7 @@ const DepositSwap = () => {
       if (balance) {
         setUsdcBalance(balance);
       } else {
-        toast.error("Failed to fetch USDC balance");
+        setError("Failed to fetch USDC balance");
       }
 
       // Fetch PAXG balance on Ethereum
@@ -97,7 +100,7 @@ const DepositSwap = () => {
       }
     } catch (error) {
       console.log("error", error);
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch Tether Gold balance");
     }
   };
 
@@ -117,8 +120,7 @@ const DepositSwap = () => {
       setDepositAddress(shift.depositAddress);
       setToAmount(shift.settleAmount.toString());
     } catch (error) {
-      console.error("Shift quote error:", error);
-      toast.error(error ? error.message : "Failed to get shift quote");
+      setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setShiftData(null);
       setDepositAddress("");
@@ -127,53 +129,50 @@ const DepositSwap = () => {
     }
   };
 
-  const handleFromAmountChange = useCallback(
-    (e) => {
-      const value = e.target.value;
-      // setFromAmount(value);
+  const handleFromAmountChange = (e) => {
+    setError("");
+    const value = e.target.value;
+    // setFromAmount(value);
 
-      const filteredValue = filterAmountInput(value, 2);
+    const filteredValue = filterAmountInput(value, 2);
 
-      setFromAmount(filteredValue);
+    setFromAmount(filteredValue);
 
-      // Validate amount
-      if (filteredValue.trim() !== "") {
-        if (Number.parseFloat(filteredValue) <= 0) {
-          setAmountError("Amount must be greater than 0");
-        } else if (
-          Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
-        ) {
-          setAmountError("Insufficient USDC balance");
-        } else if (Number.parseFloat(usdcBalance) < 0.01) {
-          setAmountError("Minimum balance of $0.01 required");
-        } else {
-          setAmountError("");
-        }
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
       }
+    } else {
+      setAmountError("");
+    }
 
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
-      setToAmount("");
-      setShiftData(null);
-      setDepositAddress("");
+    setToAmount("");
+    setShiftData(null);
+    setDepositAddress("");
 
-      if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
-        const newTimer = setTimeout(() => {
-          updateShiftQuote(filteredValue);
-        }, 2000);
-        setDebounceTimer(newTimer);
-      }
-    },
-    [debounceTimer]
-  );
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const newTimer = setTimeout(() => {
+        updateShiftQuote(filteredValue);
+      }, 2000);
+      setDebounceTimer(newTimer);
+    }
+  };
 
   const executeDeposit = async () => {
     if (!shiftData || !depositAddress || !userAuth?.walletAddress) {
-      toast.error("Shift data not available or wallet not connected");
+      setError("Shift data not available or wallet not connected");
       return;
     }
 
@@ -183,7 +182,6 @@ const DepositSwap = () => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
@@ -196,11 +194,8 @@ const DepositSwap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
-
-      // Send USDC to the deposit address
 
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
@@ -210,12 +205,10 @@ const DepositSwap = () => {
           args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
         },
       ]);
-      if (tx?.message?.includes("transfer amount exceeds balance")) {
-        toast.error("Insufficient token balance.");
-      } else if (tx) {
+
+      if (tx && !tx.error) {
         setSuccess(true);
         setHash(tx);
-        // toast.success("Deposit completed successfully!");
         fetchBalances();
         setFromAmount("");
         setToAmount("");
@@ -234,19 +227,15 @@ const DepositSwap = () => {
           }
         );
       } else {
-        toast.error(tx || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error.message || tx);
       }
     } catch (error) {
-      console.error("Deposit execution error:", error);
-      if (error.message?.includes("user rejected")) {
-        toast.error("Transaction was rejected by user");
-      } else if (error.message?.includes("insufficient funds")) {
-        toast.error("Insufficient funds for transaction");
-      } else {
-        toast.error(
-          `Failed to execute deposit: ${error.message || "Unknown error"}`
-        );
-      }
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -283,6 +272,16 @@ const DepositSwap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -407,11 +406,6 @@ const DepositSwap = () => {
                   {/* Deposit address display */}
                   {depositAddress && (
                     <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      {amountError && (
-                        <div className="text-red-500 text-xs mt-1">
-                          {amountError}
-                        </div>
-                      )}
                       <p className="m-0 text-amber-500">
                         Deposit Address: {depositAddress.slice(0, 10)}...
                         {depositAddress.slice(-8)}
@@ -420,6 +414,15 @@ const DepositSwap = () => {
                         You will receive: {toAmount} PAXG
                       </p>
                     </div>
+                  )}
+                  {amountError && (
+                    <div className="text-red-500 text-xs mt-1">
+                      {amountError}
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="text-red-500 text-xs mt-1">{error}</div>
                   )}
 
                   <div className="mt-3 py-2">

@@ -2,7 +2,6 @@ import { getAccount, publicClient, sendTransaction } from "@/lib/zeroDev.js";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
-import { toast } from "react-toastify";
 import { swap, TOKENS } from "@/utils/morphoSwap";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import Image from "next/image";
@@ -11,6 +10,7 @@ import TransactionConfirmationPop from "../../components/Modals/TransactionConfi
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "../../components/Modals/TransactionSuccessPop";
+import TransactionFailedPop from "../../components/Modals/TransactionFailedPop";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -25,6 +25,9 @@ const WithdrawalSwap = () => {
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   const [swapDirection] = useState({
     from: "spark USDC",
@@ -70,7 +73,7 @@ const WithdrawalSwap = () => {
       if (balance) {
         setUsdcBalance(balance);
       } else {
-        toast.error(usdcResult.error || "Failed to fetch USDC balance");
+        setError("Failed to fetch USDC balance");
       }
 
       const senderMPRPHOBalance = await publicClient.readContract({
@@ -89,8 +92,7 @@ const WithdrawalSwap = () => {
         setMorphoBalance(morphoResult);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
-      console.error("Balance fetch error:", error);
+      setError("Failed to fetch Spark USDC balance");
     }
   };
 
@@ -180,12 +182,7 @@ const WithdrawalSwap = () => {
 
   const executeSwap = async () => {
     if (!quote || !userAuth?.walletAddress) {
-      toast.error("Quote not available or wallet not connected");
-      return;
-    }
-
-    if (parseFloat(fromAmount) > parseFloat(morphoBalance)) {
-      toast.error("Insufficient MORPHO balance");
+      setError("Quote not available or wallet not connected");
       return;
     }
 
@@ -195,7 +192,6 @@ const WithdrawalSwap = () => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
@@ -207,17 +203,10 @@ const WithdrawalSwap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
-        return;
-      }
-
-      if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
       if (quote.approvalData && quote.routeData) {
-        toast.info("Approving USDC for Enso router...");
         try {
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
             {
@@ -232,19 +221,22 @@ const WithdrawalSwap = () => {
               value: quote?.routeData?.tx?.value,
             },
           ]);
-          if (tx) {
-            setHash(tx);
+
+          if (tx && !tx.error) {
             setSuccess(true);
-            // toast.success("Swap completed successfully!");
+            setHash(tx);
+          } else {
+            setFailed(true);
+            setTxError(tx.error.message || tx);
           }
         } catch (error) {
-          if (error.message && error.message.includes("user rejected")) {
-            toast.error("Approval transaction was rejected");
-            setIsLoading(false);
-            return;
-          } else {
-            throw error; // Re-throw for handling in the catch block
-          }
+          setTxError({
+            message: error.message || "Transaction failed",
+            type: "UNKNOWN_ERROR",
+          });
+          setFailed(!failed);
+        } finally {
+          setIsLoading(false);
         }
       }
 
@@ -253,26 +245,7 @@ const WithdrawalSwap = () => {
       setToAmount("");
       setQuote(null);
     } catch (error) {
-      if (error.message && error.message.includes("user rejected")) {
-        toast.error("Transaction was rejected by user");
-      } else if (
-        error.message &&
-        error.message.includes("insufficient funds")
-      ) {
-        toast.error("Insufficient funds for transaction");
-      } else if (
-        error.message &&
-        error.message.includes("execution reverted")
-      ) {
-        toast.error(
-          "Transaction failed: Execution reverted. The swap may have high slippage or the price moved."
-        );
-      } else {
-        toast.error(
-          `Failed to execute swap: ${error.message || "Unknown error"}`
-        );
-      }
-      console.error("Enso swap execution error:", error);
+      setError(error);
     } finally {
       setIsLoading(false);
     }
@@ -308,6 +281,16 @@ const WithdrawalSwap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -413,6 +396,10 @@ const WithdrawalSwap = () => {
                       <div className="text-red-500 text-xs mt-1">
                         {amountError}
                       </div>
+                    )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
                   </div>
                   <div className="mt-3 py-2">

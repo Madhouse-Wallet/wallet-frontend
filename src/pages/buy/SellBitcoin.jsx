@@ -1,10 +1,8 @@
 import { publicClient, usdc } from "@/lib/zeroDev";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { createBtcToUsdcShift } from "../api/sideShiftAI";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend";
-import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import { parseAbi } from "viem";
@@ -13,6 +11,7 @@ import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -29,6 +28,9 @@ const SellBitcoin = () => {
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
   const [amountError, setAmountError] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
     to: "USDC",
@@ -48,7 +50,7 @@ const SellBitcoin = () => {
         settleAmount: parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
+      setError(error?.message || "Failed to get the quotes");
       return null;
     }
   };
@@ -127,11 +129,12 @@ const SellBitcoin = () => {
         setTbtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch token balances");
     }
   };
 
   const handleFromAmountChange = async (e) => {
+    setError("");
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value);
@@ -167,6 +170,9 @@ const SellBitcoin = () => {
             if (shiftResult) {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
+            } else {
+              setDestinationAddress("");
+              setToAmount("");
             }
           } else {
             // For amounts > 0.1 BTC, use ThorSwap
@@ -174,10 +180,13 @@ const SellBitcoin = () => {
             if (quoteResult) {
               setDestinationAddress(quoteResult.estimatedDepositAddress);
               setToAmount(quoteResult.estimate);
+            } else {
+              setDestinationAddress("");
+              setToAmount("");
             }
           }
         } catch (err) {
-          toast.error("Failed to fetch quote or destination address");
+          setError("Failed to fetch quote or destination address");
         } finally {
           setIsLoading(false);
         }
@@ -233,21 +242,10 @@ const SellBitcoin = () => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    // if (!fromAmount || parseFloat(fromAmount) <= 0) {
-    //   toast.error("Please enter a valid amount");
-    //   return;
-    // }
-
-    // if (parseFloat(fromAmount) > parseFloat(tbtcBalance)) {
-    //   toast.error("Insufficient BTC balance");
-    //   return;
-    // }
-
     setIsLoading(true);
     try {
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        // toast.error("Key is not correct");
         return;
       }
 
@@ -260,17 +258,18 @@ const SellBitcoin = () => {
       });
 
       if (result.success) {
-        // toast.success("Transaction Successfully!");
         setHash(result.transactionHash);
         setSuccess(true);
         setTimeout(fetchBalances, 2000);
         setFromAmount("");
         setToAmount("");
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(result.error || "Transaction failed");
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setFailed(true);
+      setTxError(error || "Transaction failed");
     } finally {
       setIsLoading(false);
     }
@@ -306,6 +305,16 @@ const SellBitcoin = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -408,6 +417,10 @@ const SellBitcoin = () => {
                       <div className="text-red-500 text-xs mt-1">
                         {amountError}
                       </div>
+                    )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
                   </div>
                   <div className="mt-3 py-2">

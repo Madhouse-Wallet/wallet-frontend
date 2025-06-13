@@ -7,21 +7,18 @@ import KeyStep from "./keysStep";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
-import {
-  getBitcoinAddress,
-} from "../../lib/apiCall";
+import { getBitcoinAddress } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import {
   generateOTP,
   storedataLocalStorage,
   webAuthKeyStore,
-  getRandomString
+  getRandomString,
 } from "../../utils/globals";
 
-
 import { setupNewAccount, getPrivateKey, getMenmonic } from "../../lib/zeroDev";
-import { mainnet } from "viem/chains";
+import TransactionFailedPop from "../../components/Modals/TransactionFailedPop";
 
 const CreateWallet = () => {
   const [step, setStep] = useState(1);
@@ -35,6 +32,8 @@ const CreateWallet = () => {
   const [bitcoinWallet, setBitcoinWallet] = useState("");
 
   const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
 
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
@@ -61,7 +60,7 @@ const CreateWallet = () => {
     passkey,
     wallet,
     bitcoinWallet,
-    flowTokens,
+    flowTokens
   ) => {
     try {
       try {
@@ -89,8 +88,6 @@ const CreateWallet = () => {
       return false;
     }
   };
-
-
 
   const getUser = async (email) => {
     try {
@@ -167,7 +164,8 @@ const CreateWallet = () => {
           status: false,
           msg: registerCheck?.msg,
         };
-      } return res;
+      }
+      return res;
     } catch (error) {
       return {
         status: false,
@@ -185,24 +183,27 @@ const CreateWallet = () => {
       }
       const baseWallet = await setupNewAccount(privateKey, safeKey);
       if (!baseWallet?.status) {
-        toast.error(baseWallet?.msg);
+        // toast.error(baseWallet?.msg);
+        setFailed(true);
+        setTxError("Gas Price is too high currently.");
         return false;
       } else {
-        let { address,  privateKeyOwner, safePrivateKey, seedPhraseOwner } = baseWallet?.data
+        let { address, privateKeyOwner, safePrivateKey, seedPhraseOwner } =
+          baseWallet?.data;
         setPrivateKey(privateKeyOwner);
-        setSafeKey(safePrivateKey)
-        setSeedPhrase(seedPhraseOwner)
-        const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
-        const [usernameInit, domainInit] = (registerData.email).split("@");
+        setSafeKey(safePrivateKey);
+        setSeedPhrase(seedPhraseOwner);
+        const cleanEmail = registerData?.email
+          ?.split("@")[0]
+          .replace(/[^a-zA-Z0-9]/g, "");
+        const [usernameInit, domainInit] = registerData.email.split("@");
         let token1 = (await getRandomString(6)) + "_" + usernameInit;
-        let flowTokens = [
-          { flow: 1, token: (token1) },
-        ];
+        let flowTokens = [{ flow: 1, token: token1 }];
         const secretObj = {
           wif: bitcoinWalletwif,
           privateKey: privateKeyOwner,
           safePrivateKey: safePrivateKey,
-          seedPhrase: seedPhraseOwner
+          seedPhrase: seedPhraseOwner,
         };
         let storageKeySecret = "";
         let credentialIdSecret = "";
@@ -213,20 +214,22 @@ const CreateWallet = () => {
         if (storeData.status) {
           storageKeySecret = storeData?.storageKey;
           credentialIdSecret = storeData?.credentialId;
-       
+
           const data = await addUser(
             registerData.email,
             registerData.username,
-            [{
-              name: registerData.email + "_passkey_1",
-              storageKeySecret,
-              credentialIdSecret,
-              displayName: "",
-              bitcoinWallet
-            }],
+            [
+              {
+                name: registerData.email + "_passkey_1",
+                storageKeySecret,
+                credentialIdSecret,
+                displayName: "",
+                bitcoinWallet,
+              },
+            ],
             address,
             bitcoinWallet,
-            flowTokens,
+            flowTokens
           );
           toast.success("Sign Up Successfully!");
           dispatch(
@@ -240,10 +243,10 @@ const CreateWallet = () => {
               webauthKey: JSON.stringify({
                 name: registerData.email + "_passkey_1",
                 storageKeySecret,
-                credentialIdSecret
+                credentialIdSecret,
               }),
               id: data.userData._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             })
           );
           storedataLocalStorage(
@@ -257,10 +260,10 @@ const CreateWallet = () => {
               webauthKey: {
                 name: registerData.email + "_passkey_1",
                 storageKeySecret,
-                credentialIdSecret
+                credentialIdSecret,
               },
               id: data.userData._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             },
             "authUser"
           );
@@ -295,8 +298,8 @@ const CreateWallet = () => {
         }
         let getWallet = await getBitcoinAddress();
         if (getWallet.status && getWallet.status == "success") {
-          setBitcoinWallet(getWallet?.data?.wallet || "")
-          setBitcoinWalletWif(getWallet?.data?.wif || "")
+          setBitcoinWallet(getWallet?.data?.wallet || "");
+          setBitcoinWalletWif(getWallet?.data?.wif || "");
           setAddressWif(getWallet?.data?.wif || "");
           return true;
         } else {
@@ -305,7 +308,7 @@ const CreateWallet = () => {
         }
       }
     } catch (error) {
-      console.log("error-->", error)
+      console.log("error-->", error);
       return false;
     }
   };
@@ -377,6 +380,16 @@ const CreateWallet = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {step == 1 ? (
         <>
           <CreateWalletStep

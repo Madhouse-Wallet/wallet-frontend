@@ -3,13 +3,11 @@ import styled from "styled-components";
 import "react-tooltip/dist/react-tooltip.css";
 import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
-import { BigNumber } from "ethers";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend";
 import { useSelector } from "react-redux";
-import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
 import { useEffect } from "react";

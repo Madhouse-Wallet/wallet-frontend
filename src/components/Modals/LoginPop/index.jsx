@@ -126,7 +126,7 @@ const LoginPop = ({ login, setLogin }) => {
           if (authenticated) {
             let account = false;
             if (account) {
-              toast.success("Login Successfully!");
+              // toast.success("Login Successfully!");
               dispatch(
                 loginSet({
                   login: true,

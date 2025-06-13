@@ -377,7 +377,7 @@ export const sendTransaction = async (smartAccountClient, params) => {
     return {
       success: false,
       error: {
-        message: error.message,
+        message: error.message || error,
         type: getErrorType(error),
         details: error,
       },

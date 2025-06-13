@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Web3Interaction from "@/utils/web3Interaction";
-import { toast } from "react-toastify";
 import {
   getProvider,
   getAccount,
@@ -23,6 +21,7 @@ import {
   isValidBitcoinAddress,
   filterAmountInput,
 } from "../../../utils/helper.js";
+import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -46,8 +45,12 @@ const RefundBitcoin = ({
   const [quote, setQuote] = useState(null);
   const [addressError, setAddressError] = useState("");
   const [amountError, setAmountError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   const handleAmountChange = async (e) => {
+    setError("");
     const value = e.target.value;
     // Only allow positive numbers with decimals
     const filteredValue = filterAmountInput(value, 2);
@@ -151,6 +154,7 @@ const RefundBitcoin = ({
 
   const getDestinationAddress = async (amount, bitcoinAddress) => {
     try {
+      setError("");
       const shift = await createUsdcToBtcShift(
         amount,
         bitcoinAddress || userAuth?.bitcoinWallet,
@@ -163,7 +167,7 @@ const RefundBitcoin = ({
         settleAmount: parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
+      setError(error?.message || "Failed to get the quotes");
       return null;
     }
   };
@@ -172,17 +176,17 @@ const RefundBitcoin = ({
     e.preventDefault();
 
     if (!isValidAddress) {
-      toast.error("Please enter a valid Bitcoin address");
+      setError("Please enter a valid Bitcoin address");
       return;
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
+      setError("Please enter a valid amount");
       return;
     }
 
     if (parseFloat(amount) > parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
+      setError("Insufficient USDC balance");
       return;
     }
 
@@ -192,7 +196,6 @@ const RefundBitcoin = ({
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
@@ -205,7 +208,6 @@ const RefundBitcoin = ({
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
@@ -218,20 +220,21 @@ const RefundBitcoin = ({
         },
       ]);
 
-      if (tx) {
+      if (tx && !tx.error) {
         setHash(tx);
         setSuccess(true);
         setRefundBTC(false);
-        // toast.success(
-        //   "USDC sent successfully! BTC will be sent to your wallet shortly."
-        // );
-        // Wait for transaction to be mined and then fetch new balance
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -270,39 +273,34 @@ const RefundBitcoin = ({
       if (balance) {
         setBalance(balance);
       } else {
-        toast.error(result.error || "Failed to fetch balance");
+        setError("Failed to fetch USDC balance");
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      setError("Failed to fetch USDC balance");
     }
   };
 
   const initiateSwap = async () => {
     if (!toAddress) {
-      toast.error("Please enter a Bitcoin address");
+      setError("Please enter a Bitcoin address.");
       return;
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
+      setError("Please enter a valid amount.");
       return;
     }
 
     setIsLoading(true);
     try {
-      // const destinationInfo = await getDestinationAddress(amount, toAddress);
-
       if (destinationAddress && toAmount) {
-        // setDestinationAddress(destinationInfo.depositAddress);
-        // setToAmount(destinationInfo.settleAmount.toString());
         setTrxnApproval(true);
       } else {
-        toast.error("Failed to get destination address. Please try again.");
+        setError("Failed to get destination address. Please try again.");
       }
     } catch (error) {
-      console.error("Error in swap initiation:", error);
-      toast.error("Failed to initiate swap. Please try again.");
+      setError(error.message || "Failed to initiate swap. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -453,6 +451,16 @@ const RefundBitcoin = ({
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionApprovalPop
@@ -562,6 +570,10 @@ const RefundBitcoin = ({
                     <label className="form-label m-0 font-semibold text-xs ps-3">
                       Balance: {balance} USDC
                     </label>
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
 
                   {toAmount && (

@@ -12,6 +12,7 @@ import TransactionConfirmationPop from "../TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import { verifyUser } from "@/utils/webauthPrf";
 import { getUser } from "@/lib/apiCall";
+import TransactionFailedPop from "../TransactionFailedPop";
 
 // Define the scan icon component
 
@@ -26,6 +27,8 @@ const LightningSendTab = () => {
 
   const [loading, setLoading] = useState(false);
   const [invoice, setInvoice] = useState(""); // State for invoice
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
   const [sendWalletAddress, setSendWalletAddress] = useState("");
   const [decodeData, setDecodeData] = useState(null); // Initialize as null instead of string
@@ -136,7 +139,8 @@ const LightningSendTab = () => {
       handleConfirm();
     } else {
       setLoading(false);
-      toast.error(userData?.msg);
+      setFailed(true);
+      setTxError(userData?.msg || "Passkey Error");
     }
   };
 
@@ -152,13 +156,13 @@ const LightningSendTab = () => {
 
     try {
       const result = await sendBtc(invoice, userAuth.email);
-
       if (result.status === "failure") {
-        setError(result.message);
+        setFailed(true);
+        setTxError("Transaction failed");
+        // setError(result.message);
         setLoading(false);
         setTrxnApproval(false);
       } else {
-        toast.success(result.message);
         setSuccess(true);
         setLoading(false);
         setTrxnApproval(false);
@@ -168,7 +172,9 @@ const LightningSendTab = () => {
         setBtcAmount(0);
       }
     } catch (error) {
-      setError("Transaction failed");
+      setFailed(true);
+      setTxError("Transaction failed");
+      // setError("Transaction failed");
       setLoading(false);
       setTrxnApproval(false);
     }
@@ -329,7 +335,7 @@ const LightningSendTab = () => {
               height={200}
               width={200}
               className="max-w-full mx-auto h-auto w-full mb-3"
-              style={{ maxWidth: 200 }}
+              style={{ maxWidth: 230 }}
               alt="QR Code"
             />
           )}
@@ -393,6 +399,16 @@ const LightningSendTab = () => {
             setSuccess={setSuccess}
             symbol={"SATS"}
             hash={""}
+          />,
+          document.body
+        )}
+
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
           />,
           document.body
         )}

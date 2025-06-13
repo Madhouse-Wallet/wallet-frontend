@@ -77,7 +77,7 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
                   height={10000}
                   width={10000}
                   className="max-w-full mx-auto h-auto w-auto"
-                  style={{ height: 150 }}
+                  style={{ height: 230 }}
                 />
                 <div className="content mt-2" style={{ fontSize: 12 }}>
                   <div className="text-center py-5">

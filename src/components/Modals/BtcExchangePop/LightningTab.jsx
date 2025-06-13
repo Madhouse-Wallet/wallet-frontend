@@ -13,12 +13,28 @@ const LightningTab = (walletAddress) => {
   const [memo, setMemo] = useState("");
   const [amount, setAmount] = useState(""); // State for amount
   const [error, setError] = useState("");
+  const [isCopied, setIsCopied] = useState({
+    one: false,
+    two: false,
+    three: false,
+  });
   const userAuth = useSelector((state) => state.Auth);
 
   const [invoice, setInvoice] = useState("");
+
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
+      setIsCopied((prev) => ({ ...prev, [type]: true }));
+      setTimeout(
+        () =>
+          setIsCopied({
+            one: false,
+            two: false,
+            three: false,
+          }),
+        2000
+      ); // Reset the copied state after 2 seconds
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -191,8 +207,8 @@ const LightningTab = (walletAddress) => {
             src={qrCode}
             height={10000}
             width={10000}
-            className="max-w-full mx-auto h-auto w-full mb-3"
-            style={{ maxWidth: 200 }}
+            className="max-w-full mx-auto h-auto w-auto mb-3"
+            style={{ height: 230 }}
             alt="QR Code"
           />
           <Tooltip id="my-tooltip" />
@@ -229,6 +245,14 @@ const LightningTab = (walletAddress) => {
               </svg>
             </button>
           </div>
+          {isCopied?.one && (
+            <span
+              style={{ marginLeft: "10px", color: "green" }}
+              className="block text-center"
+            >
+              Copied!
+            </span>
+          )}
         </div>
       ) : null}
     </>

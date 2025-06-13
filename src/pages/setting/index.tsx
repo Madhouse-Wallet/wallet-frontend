@@ -410,7 +410,7 @@ const Setting: React.FC = () => {
           ensSetup: false,
         })
       );
-      toast.success("Logout Successfully!");
+      // toast.success("Logout Successfully!");
     } catch (error) {
       console.log("logout error --->", error);
     }

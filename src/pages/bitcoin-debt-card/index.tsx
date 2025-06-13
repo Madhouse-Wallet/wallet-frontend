@@ -283,7 +283,7 @@ const BTCDebitCard: React.FC = () => {
                         height={10000}
                         width={10000}
                         className="max-w-full mx-auto h-auto w-auto"
-                        style={{ height: 150 }}
+                        style={{ height: 230 }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button

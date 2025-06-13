@@ -36,7 +36,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         multisigActivate: false,
       })
     );
-    toast.success("Logout Successfully!");
+    // toast.success("Logout Successfully!");
   };
   return (
     <>

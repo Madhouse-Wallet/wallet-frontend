@@ -6,7 +6,6 @@ import Link from "next/link";
 const TransactionFailedPop = ({ failed, setFailed, symbol, hash, txError }) => {
   const handleFailed = () => setFailed(!failed);
   const router = useRouter();
-  console.log("txError", txError);
   return (
     <>
       <Modal
@@ -36,7 +35,7 @@ const TransactionFailedPop = ({ failed, setFailed, symbol, hash, txError }) => {
                 Failed
               </h4>
               <p className="m-0 py-2">
-                {txError || "Transaction failed"}
+                {txError || "Transaction failed"} <br />
                 Please try again after some time.
               </p>
               {/* <Link

@@ -9,7 +9,6 @@ import {
 import { parseUnits, parseAbi } from "viem";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { createUsdcToBtcShift } from "../api/sideShiftAI";
 import { fetchBitcoinBalance } from "../../pages/api/bitcoinBalance";
 import { retrieveSecret } from "@/utils/webauthPrf";
@@ -18,6 +17,7 @@ import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -34,6 +34,9 @@ const Swap = () => {
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
   const [destinationAddress, setDestinationAddress] = useState("");
   const [amountError, setAmountError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
@@ -53,7 +56,7 @@ const Swap = () => {
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
+      setError(error?.message || "Failed to get the quotes");
       return null;
     }
   };
@@ -133,11 +136,12 @@ const Swap = () => {
         setTbtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch token balances");
     }
   };
 
   const handleFromAmountChange = async (e) => {
+    setError("");
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -196,7 +200,7 @@ const Swap = () => {
             setDestinationAddress(finalAddress);
           }
         } catch (err) {
-          toast.error("Failed to fetch quote or destination address");
+          setError("Failed to fetch quote or destination address.");
         } finally {
           setIsLoading(false);
         }
@@ -215,10 +219,10 @@ const Swap = () => {
     e.preventDefault();
 
     if (!toAmount || Number.parseFloat(toAmount) <= 0) {
-      toast.error("Please enter a valid amount");
+      setError("Please enter a valid amount");
+
       return;
     }
-
 
     const data = JSON.parse(userAuth?.webauthKey);
     const retrieveSecretCheck = await retrieveSecret(
@@ -226,7 +230,6 @@ const Swap = () => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
@@ -238,7 +241,6 @@ const Swap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
@@ -251,20 +253,23 @@ const Swap = () => {
         },
       ]);
 
-      if (tx) {
+      if (tx && !tx.error) {
         setHash(tx);
         setSuccess(true);
-        // setRefundBTC(false);
-        // toast.success("Transaction Successfully!");
         setTimeout(fetchBalances, 2000);
         setFromAmount("");
         setToAmount("");
         setQuote(null);
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -300,6 +305,16 @@ const Swap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -419,6 +434,10 @@ const Swap = () => {
                       <div className="text-red-500 text-xs mt-1">
                         {amountError}
                       </div>
+                    )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
                   </div>
                   <div className="mt-3 py-2">

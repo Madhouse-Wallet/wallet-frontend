@@ -10,7 +10,6 @@ import {
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
 import { ethers, Wallet } from "ethers";
-import { toast } from "react-toastify";
 import {
   createGoldToUsdcBaseShift,
   createUsdcBaseToEthMainnetShift,
@@ -24,6 +23,7 @@ import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmat
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -45,6 +45,10 @@ const WithdrawalSwap = () => {
   const [gasRequiredWei, setGasRequiredWei] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
+
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   // Fixed bridge direction: Tether Gold on Ethereum to USDC on Base
   const [bridgeDirection] = useState({
@@ -95,7 +99,7 @@ const WithdrawalSwap = () => {
       if (balance) {
         setUsdcBalance(balance);
       } else {
-        toast.error("Failed to fetch USDC balance");
+        setError("Failed to fetch USDC balance");
       }
 
       // Fetch Tether Gold balance on Ethereum
@@ -110,7 +114,7 @@ const WithdrawalSwap = () => {
       }
     } catch (error) {
       console.log("error", error);
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch Tether Gold balance");
     }
   };
 
@@ -184,7 +188,7 @@ const WithdrawalSwap = () => {
       }
     } catch (error) {
       console.error("Bridge quote error:", error);
-      toast.error(error ? error.message : "Failed to get bridge quote");
+      setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setGoldToUsdcShift(null);
       setEthGasShift(null);
@@ -220,67 +224,64 @@ const WithdrawalSwap = () => {
         setEthGasShift(usdcToEthShift);
       }
     } catch (error) {
-      console.error("Gas shift preparation error:", error);
-      toast.error("Failed to prepare gas shift");
+      setError(error?.message || "Failed to prepare gas shift");
     }
   };
 
-  const handleFromAmountChange = useCallback(
-    (e) => {
-      const value = e.target.value;
-      // setFromAmount(value);
+  const handleFromAmountChange = (e) => {
+    setError("");
+    const value = e.target.value;
+    // setFromAmount(value);
 
-      const filteredValue = filterAmountInput(value);
+    const filteredValue = filterAmountInput(value);
 
-      setFromAmount(filteredValue);
+    setFromAmount(filteredValue);
 
-      // Validate amount
-      if (filteredValue.trim() !== "") {
-        if (Number.parseFloat(filteredValue) <= 0) {
-          setAmountError("Amount must be greater than 0");
-        } else if (
-          Number.parseFloat(filteredValue) > Number.parseFloat(goldBalance)
-        ) {
-          setAmountError("Insufficient Tether Gold balance");
-        }
-        // else if (Number.parseFloat(usdcBalance) < 0.01) {
-        //   setAmountError("Minimum balance of $0.01 required");
-        // }
-        else {
-          setAmountError("");
-        }
-      } else {
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(goldBalance)
+      ) {
+        setAmountError("Insufficient Tether Gold balance");
+      }
+      // else if (Number.parseFloat(usdcBalance) < 0.01) {
+      //   setAmountError("Minimum balance of $0.01 required");
+      // }
+      else {
         setAmountError("");
       }
+    } else {
+      setAmountError("");
+    }
 
-      // Clear existing timer
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
+    // Clear existing timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
-      // Clear previous data immediately when input changes
-      setToAmount("");
-      setGoldToUsdcShift(null);
-      setEthGasShift(null);
-      setUsdcToEthShift(null);
-      setGasRequiredWei("0");
-      setUsdValue({ from: "0", to: "0" });
+    // Clear previous data immediately when input changes
+    setToAmount("");
+    setGoldToUsdcShift(null);
+    setEthGasShift(null);
+    setUsdcToEthShift(null);
+    setGasRequiredWei("0");
+    setUsdValue({ from: "0", to: "0" });
 
-      // Set new timer for 2 seconds
-      if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
-        const newTimer = setTimeout(() => {
-          updateBridgeQuote(filteredValue);
-        }, 2000);
-        setDebounceTimer(newTimer);
-      }
-    },
-    [debounceTimer]
-  );
+    // Set new timer for 2 seconds
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const newTimer = setTimeout(() => {
+        updateBridgeQuote(filteredValue);
+      }, 2000);
+      setDebounceTimer(newTimer);
+    }
+  };
 
   // Execute the complete bridge transaction with gas handling
   const executeBridge = async () => {
     if (!goldToUsdcShift || !userAuth?.walletAddress) {
-      toast.error("Bridge data not available or wallet not connected");
+      setError("Bridge data not available or wallet not connected");
       return;
     }
 
@@ -293,7 +294,6 @@ const WithdrawalSwap = () => {
         data?.credentialIdSecret
       );
       if (!retrieveSecretCheck?.status) {
-        toast.error(retrieveSecretCheck?.msg || "Secret retrieval failed");
         return;
       }
 
@@ -343,7 +343,6 @@ const WithdrawalSwap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
@@ -365,8 +364,6 @@ const WithdrawalSwap = () => {
           );
 
           if (usdcSendTx) {
-            toast.success("USDC sent for ETH gas preparation");
-            toast.info("Waiting for ETH to arrive on mainnet...");
             // const delaySeconds =
             //   Number(usdcToEthShift?.averageShiftSeconds) + 10 || 40;
 
@@ -388,6 +385,9 @@ const WithdrawalSwap = () => {
             await new Promise((resolve) => setTimeout(resolve, 15000));
           }
         }
+      } else {
+        setFailed(true);
+        setTxError(tx.error.message || tx);
       }
 
       // Send Tether Gold to SideShift deposit address
@@ -396,14 +396,15 @@ const WithdrawalSwap = () => {
         goldAmountWei
       );
 
-      toast.info(`Tether Gold transaction submitted: ${goldTx.hash}`);
       const receipt = await goldTx.wait();
-      // toast.success(
-      //   "Tether Gold to USDC bridge transaction completed successfully!"
-      // );
 
-      setSuccess(true);
-      setHash(goldTx.hash);
+      if (goldTx) {
+        setSuccess(true);
+        setHash(goldTx.hash);
+      } else {
+        setFailed(true);
+        setTxError(tx.error.message || tx);
+      }
 
       let dataa = await updtUser(
         { email: userAuth?.email },
@@ -431,15 +432,11 @@ const WithdrawalSwap = () => {
       setUsdcToEthShift(null);
       setGasRequiredWei("0");
     } catch (error) {
-      if (error.message?.includes("user rejected")) {
-        toast.error("Transaction was rejected by user");
-      } else if (error.message?.includes("insufficient funds")) {
-        toast.error("Insufficient funds for transaction");
-      } else {
-        toast.error(
-          `Failed to execute bridge: ${error.message || "Unknown error"}`
-        );
-      }
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -480,6 +477,15 @@ const WithdrawalSwap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -619,11 +625,6 @@ const WithdrawalSwap = () => {
                   {/* SideShift transaction info */}
                   {goldToUsdcShift && (
                     <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      {amountError && (
-                        <div className="text-red-500 text-xs mt-1">
-                          {amountError}
-                        </div>
-                      )}
                       <p className="m-0 text-blue-500">
                         Deposit Address:{" "}
                         {goldToUsdcShift.depositAddress?.slice(0, 10)}...
@@ -634,6 +635,16 @@ const WithdrawalSwap = () => {
                           ? goldToUsdcShift.settleAmount
                           : "N/A"}
                       </p>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="text-red-500 text-xs mt-1">{error}</div>
+                  )}
+
+                  {amountError && (
+                    <div className="text-red-500 text-xs mt-1">
+                      {amountError}
                     </div>
                   )}
 
