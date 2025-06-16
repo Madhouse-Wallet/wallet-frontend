@@ -164,9 +164,12 @@ const Dashboard = () => {
           // );
 
           // let combinedUsdValue = usdcBalance + morphoBalance;
+
           setTotalUsdBalance(
-            usdcBalance !== "00" ? parseFloat(usdcBalance).toFixed(2) : "0"
-          ); 
+            parseFloat(usdcBalance) < 0.01
+              ? "0"
+              : parseFloat(usdcBalance).toFixed(2)
+          );
 
           const providerETH = await getETHEREUMRpcProvider();
           const provider = await getRpcProvider();

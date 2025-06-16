@@ -83,10 +83,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
     if (!txs?.length) return [];
 
     return txs.map((tx) => {
-      const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      const decimals =
+        tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+
+      const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
+      console.log(amount);
       return {
         amount,
         category: tx.token_symbol || "USDC",
@@ -95,9 +100,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         id: tx.transaction_hash || "",
         rawData: tx,
         status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
-          isSend ? "Transfer" : "Receive"
-        }`,
+        summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend === true ? "send" : "receive",
@@ -599,7 +602,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                     ? "Insufficient Balance"
                                     : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
                                         tx.amount
-                                      ).toFixed(4)}`}
+                                      ).toFixed(2)}`}
                                 </p>
                                 <p className="m-0 text-xs font-medium py-1">
                                   {tx.day}

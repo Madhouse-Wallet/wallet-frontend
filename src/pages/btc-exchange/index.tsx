@@ -144,7 +144,11 @@ const BTCEchange = () => {
           );
 
           setTotalUsdBalance(
-            `Dollars: $ ${parseFloat(usdcBalance).toFixed(2)}`
+            `Dollars: $ ${
+              parseFloat(usdcBalance) < 0.01
+                ? "0"
+                : parseFloat(usdcBalance).toFixed(2)
+            }`
           );
         } catch (err) {
           console.error("Error fetching token balances:", err);
@@ -301,7 +305,13 @@ const BTCEchange = () => {
             Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
           );
 
-          setTotalUsdBalance(`Spark USDC: $ ${parseFloat(morphoBalance).toFixed(2)}`);
+          setTotalUsdBalance(
+            `Spark USDC: $ ${
+              parseFloat(morphoBalance) < 0.01
+                ? "0"
+                : parseFloat(morphoBalance).toFixed(2)
+            }`
+          );
         } catch (error) {
           console.error("Error fetching token balances:", error);
         }
