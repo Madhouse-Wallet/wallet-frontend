@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import styled from "styled-components";
+import InvoicePop from "../../components/Modals/InvoicePop";
+import { createPortal } from "react-dom";
 
 const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
+  const [invoiceePop, setInvoicePop] = useState(false);
   const truncateAddress = (address) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(
@@ -32,10 +35,18 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
     return address.substring(2, 4).toUpperCase();
   };
 
-
-
   return (
     <>
+      {invoiceePop &&
+        createPortal(
+          <InvoicePop
+            invoiceePop={invoiceePop}
+            setInvoicePop={setInvoicePop}
+            qrCodee={rawData.bolt11}
+          />,
+          document.body
+        )}
+
       <Modal
         className={`fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
@@ -56,7 +67,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                 {/* {type
                   ? type.charAt(0).toUpperCase() + type.slice(1)
                   : "Bitcoin Transaction Details"} */}
-                TPOS Details
+                Lightning Transaction Details
               </h5>
             </div>
             <div className="modalBody">
@@ -156,20 +167,38 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                     </li>
                   )}
                   {rawData?.bolt11 && (
-                    <li className="py-2 flex items-center justify-between">
-                      <span className="text-white opacity-80">
-                        Payment Request
-                      </span>
-                      <span
-                        className="text-blue-500 text-xs font-medium cursor-pointer"
-                        onClick={() => {
-                          navigator.clipboard.writeText(rawData.bolt11);
-                          toast.success("Payment request copied to clipboard!");
-                        }}
-                      >
-                        Copy BOLT11
-                      </span>
-                    </li>
+                    <>
+                      <li className="py-2 flex items-center justify-between">
+                        <span className="text-white opacity-80">
+                          Payment Request
+                        </span>
+                        <span
+                          className="text-blue-500 text-xs font-medium cursor-pointer"
+                          onClick={() => {
+                            navigator.clipboard.writeText(rawData.bolt11);
+                            toast.success(
+                              "Payment request copied to clipboard!"
+                            );
+                          }}
+                        >
+                          Copy BOLT11
+                        </span>
+                      </li>
+
+                      <li className="py-2 flex items-center justify-between">
+                        <span className="text-white opacity-80">
+                          BOLT11 QR Code
+                        </span>
+                        <span
+                          className="text-blue-500 text-xs font-medium cursor-pointer"
+                          onClick={() => {
+                            setInvoicePop(!invoiceePop);
+                          }}
+                        >
+                          View
+                        </span>
+                      </li>
+                    </>
                   )}
                   {category && (
                     <li className="py-2 flex items-center justify-between">

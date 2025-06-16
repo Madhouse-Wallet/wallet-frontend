@@ -42,7 +42,9 @@ const LightningTab = (walletAddress) => {
 
   const generateQRCode = async (text) => {
     try {
-      const qr = await QRCode.toDataURL(text);
+      const qr = await QRCode.toDataURL(text, {
+        margin: 0.5,
+      });
       setQRCode(qr);
       setLoading(false);
     } catch (err) {
@@ -207,8 +209,8 @@ const LightningTab = (walletAddress) => {
             src={qrCode}
             height={10000}
             width={10000}
-            className="max-w-full mx-auto h-auto w-auto mb-3"
-            style={{ height: 230 }}
+            className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+            // style={{ height: 230 }}
             alt="QR Code"
           />
           <Tooltip id="my-tooltip" />

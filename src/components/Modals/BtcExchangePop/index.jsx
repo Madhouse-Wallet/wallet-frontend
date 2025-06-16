@@ -31,7 +31,9 @@ const BtcExchangePop = ({
     if (userAuth?.bitcoinWallet) {
       const generateQRCode = async () => {
         try {
-          const qr = await QRCode.toDataURL(userAuth.bitcoinWallet);
+          const qr = await QRCode.toDataURL(userAuth.bitcoinWallet, {
+            margin: 0.5,
+          });
           setQRCodee(qr);
         } catch (err) {
           console.error("QR Code generation failed:", err);
@@ -86,8 +88,8 @@ const BtcExchangePop = ({
                   src={qrCodee}
                   height={10000}
                   width={10000}
-                  className="max-w-full mx-auto h-auto w-auto"
-                  style={{ height: 230 }}
+                  className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                  // style={{ height: 230 }}
                 />
               )}
 

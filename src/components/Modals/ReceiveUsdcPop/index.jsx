@@ -35,7 +35,9 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
     if (userAuth?.walletAddress) {
       const generateQRCode = async () => {
         try {
-          const qr = await QRCode.toDataURL(userAuth.walletAddress);
+          const qr = await QRCode.toDataURL(userAuth.walletAddress, {
+            margin: 0.5,
+          });
           setQRCode(qr);
         } catch (err) {
           console.error("QR Code generation failed:", err);
@@ -63,7 +65,7 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
           {" "}
-          <div className={`relative rounded px-3`}>
+          <div className={`relative rounded`}>
             <div className="top pb-3">
               <h5 className="m-0 text-xl text-center font-bold">
                 Receive USDC
@@ -76,8 +78,8 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
                   src={qrCode}
                   height={10000}
                   width={10000}
-                  className="max-w-full mx-auto h-auto w-auto"
-                  style={{ height: 230 }}
+                  className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                  // style={{ height: 230 }}
                 />
                 <div className="content mt-2" style={{ fontSize: 12 }}>
                   <div className="text-center py-5">

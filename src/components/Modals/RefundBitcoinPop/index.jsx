@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
-import QRScannerModal from "./qRScannerModal.jsx";
+import QRScannerModal from "../SendUsdcPop/qRScannerModal";
 import { createUsdcToBtcShift } from "@/pages/api/sideShiftAI.ts";
 import styled from "styled-components";
 import { retrieveSecret } from "@/utils/webauthPrf.js";

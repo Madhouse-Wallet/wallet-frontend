@@ -87,10 +87,11 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             toast.error(getBtcSat.message);
             setLoading(false);
           } else {
+            const satoshis = Math.round(parseFloat(amount) * 100000000);
             const result = await sendBitcoinFunction({
               fromAddress: userExist?.userId?.bitcoinWallet,
               toAddress: getBtcSat?.data?.address,
-              amountSatoshi: amount * 100000000,
+              amountSatoshi: satoshis,
               privateKeyHex: privateKey?.wif,
               network: "main", // Use 'main' for mainnet
             });

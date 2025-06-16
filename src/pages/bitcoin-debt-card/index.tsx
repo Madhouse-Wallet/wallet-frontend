@@ -63,7 +63,9 @@ const BTCDebitCard: React.FC = () => {
         setCreditCardDetail(userExist?.userId?.creditCardPass);
       }
       if (userExist?.userId?.lnaddress) {
-        const qr = await QRCode.toDataURL(userExist?.userId?.lnaddress);
+        const qr = await QRCode.toDataURL(userExist?.userId?.lnaddress, {
+          margin: 0.5,
+        });
         setLnQrCode(qr);
         setLnaddress(userExist?.userId?.lnaddress);
       }
@@ -282,8 +284,8 @@ const BTCDebitCard: React.FC = () => {
                         src={lnQrCode}
                         height={10000}
                         width={10000}
-                        className="max-w-full mx-auto h-auto w-auto"
-                        style={{ height: 230 }}
+                        className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                        // style={{ height: 230 }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button

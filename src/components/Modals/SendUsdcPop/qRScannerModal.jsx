@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import { Html5Qrcode } from "html5-qrcode";
 
 const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
+  const sdkRef = useRef(null);
   const scannerRef = useRef(null);
   const isScanning = useRef(false);
 
   const stopScanner = async () => {
     try {
       if (scannerRef.current && isScanning.current) {
-        await scannerRef.current.stop();
+        await scannerRef.current.dispose();
         scannerRef.current = null;
         isScanning.current = false;
       }
@@ -23,27 +23,41 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
         return;
       }
 
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      scannerRef.current = html5QrCode;
+      // Initialize SDK if not already done
+      if (!sdkRef.current) {
+        const reference = (await import("scanbot-web-sdk")).default;
+        sdkRef.current = await reference.initialize({
+          licenseKey: "", // Leave empty for trial mode
+          enginePath: "/wasm/", // Make sure WASM files are in public/wasm folder
+        });
+      }
 
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 350, height: 250 },
+      // Create barcode scanner
+      const barcodeScanner = await sdkRef.current.createBarcodeScanner({
+        containerId: "qr-reader",
+        onBarcodesDetected: async (result) => {
+          if (result.barcodes && result.barcodes.length > 0) {
+            const decodedText = result.barcodes[0].text;
+            await stopScanner();
+            onScan(decodedText);
+            setOpenCam(false);
+          }
         },
-        async (decodedText) => {
-          await stopScanner();
-          onScan(decodedText);
-          setOpenCam(false);
-        },
-        (error) => {
-          if (!error?.message?.includes("No QR code found")) {
+        onError: (error) => {
+          if (!error?.message?.includes("No barcode found")) {
             console.warn("QR Scan Error:", error);
           }
-        }
-      );
+        },
+        preferredCamera: "camera2 0",
+        style: {
+          window: {
+            width: "100%",
+            height: "100%",
+          },
+        },
+      });
 
+      scannerRef.current = barcodeScanner;
       isScanning.current = true;
     } catch (err) {
       console.error("Failed to start scanner:", err);
@@ -67,29 +81,30 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
   if (!openCam) return null;
 
   return (
-    <div className="relative w-full">
-      <div className="flex flex-col items-center">
+    <div className="fixed inset-0 z-[100000] bg-black">
+      <div className="flex flex-col items-center justify-center h-full">
         <div
           id="qr-reader"
-          className="w-full aspect-square bg-black"
-          // style={{ maxWidth: "500px" }}
+          className="w-full h-full bg-black"
           style={{
-            maxWidth: "350px",
-            height: "250px",
+            maxWidth: "100vw",
+            maxHeight: "100vh",
           }}
         />
-        <p className="text-sm text-white text-center mt-4">
-          Place the QR code in front of your camera
-        </p>
-        <button
-          onClick={async () => {
-            await stopScanner();
-            setOpenCam(false);
-          }}
-          className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-        >
-          Cancel Scan
-        </button>
+        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center">
+          <p className="text-sm text-white text-center mb-4">
+            Place the QR code in front of your camera
+          </p>
+          <button
+            onClick={async () => {
+              await stopScanner();
+              setOpenCam(false);
+            }}
+            className="px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600"
+          >
+            Cancel Scan
+          </button>
+        </div>
       </div>
     </div>
   );

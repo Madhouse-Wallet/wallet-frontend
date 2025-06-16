@@ -106,11 +106,12 @@ const SendBitcoinPop = ({
     if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
       toast.error(sendLnbitWithdraw.message);
       setLoading(false);
-    } else { 
+    } else {
+      const satoshis = Math.round(parseFloat(amount) * 100000000);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: sendLnbitWithdraw.data.data.address,
-        amountSatoshi: amount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });

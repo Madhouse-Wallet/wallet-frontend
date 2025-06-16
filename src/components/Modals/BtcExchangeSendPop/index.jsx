@@ -129,10 +129,12 @@ const BtcExchangeSendPop = ({
         return;
       }
 
+      const satoshis = Math.round(parseFloat(btcAmount) * 100000000);
+
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: btcAddress,
-        amountSatoshi: btcAmount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
@@ -144,13 +146,11 @@ const BtcExchangeSendPop = ({
         setBtcAddress();
         setLoadingSend(false);
       } else {
-        console.log("line-149", result);
         setFailed(true);
         setTxError(result.error || "Transaction failed");
       }
       setLoadingSend(false);
     } catch (error) {
-      console.log("line-153", error);
       setLoadingSend(false);
       setFailed(true);
       setTxError(error || "Transaction failed");
@@ -204,7 +204,6 @@ const BtcExchangeSendPop = ({
 
     // Filter input with 2 decimal places
     const filteredValue = filterAmountInput(value, 18, 20);
-
     setBtcAmount(filteredValue);
 
     // Validate amount
@@ -321,7 +320,7 @@ const BtcExchangeSendPop = ({
         <>
           {" "}
           <div className="cardCstm text-center">
-            {step == 1 ? (
+            {/* {step == 1 ? (
               <>
                 <form action="">
                   <div className="grid gap-3 grid-cols-12">
@@ -370,18 +369,27 @@ const BtcExchangeSendPop = ({
               </>
             ) : (
               <></>
-            )}
+            )} */}
+            <>
+              <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
+                Bitcoin transaction confirmation typically takes 15 to 20
+                minutes to be processed on the blockchain.
+              </p>
+            </>
             {openCam ? (
               <>
-                <QRScannerModal
-                  setOpenCam={setOpenCam}
-                  openCam={openCam}
-                  onScan={(data) => {
-                    handleProccessAddressChange(data);
-                    // setBtcAddress(data);
-                    setOpenCam(!openCam);
-                  }}
-                />
+                {createPortal(
+                  <QRScannerModal
+                    setOpenCam={setOpenCam}
+                    openCam={openCam}
+                    onScan={(data) => {
+                      handleProccessAddressChange(data);
+                      // setBtcAddress(data);
+                      setOpenCam(!openCam);
+                    }}
+                  />,
+                  document.body
+                )}
               </>
             ) : (
               <>
@@ -523,13 +531,16 @@ const BtcExchangeSendPop = ({
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999] `}
       >
-        <button
-          onClick={handleBTCExchangeSend}
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
+        {!openCam && (
+          <button
+            onClick={handleBTCExchangeSend}
+            className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+            style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
+        )}
+
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}

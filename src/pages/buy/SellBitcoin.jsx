@@ -248,11 +248,11 @@ const SellBitcoin = () => {
       if (!privateKey) {
         return;
       }
-
+      const satoshis = Math.round(parseFloat(fromAmount) * 100000000);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: destinationAddress,
-        amountSatoshi: fromAmount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });

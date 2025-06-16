@@ -561,7 +561,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                           const amount = parseFloat(
                             tx.amount?.split(" ")[0] || 0
                           );
-                          return amount >= 0.001;
+                          return amount >= 0.01;
                         })
                         .map((tx, key) => (
                           <div key={key} className="md:col-span-6 col-span-12">

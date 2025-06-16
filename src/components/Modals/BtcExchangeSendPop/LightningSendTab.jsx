@@ -224,14 +224,20 @@ const LightningSendTab = () => {
       {step === 1 ? (
         <>
           {openCam ? (
-            <QRScannerModal
-              setOpenCam={setOpenCam}
-              openCam={openCam}
-              onScan={(data) => {
-                setInvoice(data);
-                setOpenCam(false);
-              }}
-            />
+            <>
+              {createPortal(
+                <QRScannerModal
+                  setOpenCam={setOpenCam}
+                  openCam={openCam}
+                  onScan={(data) => {
+                    handleProccessAddressChange(data);
+                    // setBtcAddress(data);
+                    setOpenCam(!openCam);
+                  }}
+                />,
+                document.body
+              )}
+            </>
           ) : (
             <>
               <div className="py-2">

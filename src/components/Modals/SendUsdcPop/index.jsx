@@ -233,13 +233,16 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         )}
       {/* {isLoading && <LoadingScreen />} */}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <buttonbuy
-          onClick={handleClose}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
+        {!openCam && (
+          <button
+            onClick={handleClose}
+            className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+            style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
+        )}
+
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
           <div className="relative rounded px-3">
@@ -254,6 +257,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
+                    console.log("data", data);
                     processAddress(data);
                     // setToAddress(data);
                     setOpenCam(!openCam);

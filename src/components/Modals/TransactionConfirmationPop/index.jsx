@@ -69,7 +69,7 @@ const TransactionConfirmationPop = ({
                 </div>
                 <div className="py-3">
                   <p className="m-0 text-xs font-medium text-center">
-                    Sponsored by Madhouse Wallet
+                    Powered by Madhouse Wallet
                   </p>
                 </div>
               </div>
