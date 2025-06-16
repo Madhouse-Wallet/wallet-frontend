@@ -7,7 +7,7 @@ import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
 import { doAccountRecovery } from "../../lib/zeroDev";
 import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
-import { registerCredential, storeSecret } from "../../utils/webauthPrf";
+import { registerStoreCredential } from "../../utils/webauthPrf";
 import styled from "styled-components";
 import { filterHexxInput } from "../../utils/helper";
 
@@ -31,24 +31,14 @@ const ModifyKeys = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      let registerCheck = await registerCredential(userName, userName);
+
+      const registerCheck = await registerStoreCredential(userName, userName, data);
       if (registerCheck?.status) {
-        let storeSecretCheck = await storeSecret(
-          registerCheck?.data?.credentialId,
-          data
-        );
-        if (storeSecretCheck?.status) {
-          return {
-            status: true,
-            storageKey: storeSecretCheck?.data?.storageKey,
-            credentialId: registerCheck?.data?.credentialId,
-          };
-        } else {
-          return {
-            status: false,
-            msg: storeSecretCheck?.msg,
-          };
-        }
+        return {
+          status: true,
+          storageKey: registerCheck?.data?.storageKey,
+          credentialId: registerCheck?.data?.credentialId,
+        };
       } else {
         return {
           status: false,

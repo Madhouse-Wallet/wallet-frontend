@@ -70,38 +70,48 @@ export const BackgroundProvider = ({ children }) => {
   }, []);
 
   // Function to change background and store in localStorage
-  const selectBg = (index) => {
+  const selectBg = (index, type = true) => {
     setSelectedBackground(backgrounds[index]);
     if (typeof window !== "undefined") {
       localStorage.setItem("backgroundIndex", index);
-      settingUpdt({ backgroundIndex: index });
+      if (type) {
+        settingUpdt({ backgroundIndex: index });
+      }
     }
   };
 
   // Function to change watermark and store in localStorage
-  const selectWm = (index) => {
+  const selectWm = (index, type = true) => {
     setSelectedWatermark(watermarks[index]);
     if (typeof window !== "undefined") {
       localStorage.setItem("watermarkIndex", index);
-      settingUpdt({ watermarkIndex: index });
+      if (type) {
+        settingUpdt({ watermarkIndex: index });
+      }
     }
   };
 
   // Function to change background opacity and store in localStorage
-  const changeBgOpacity = (opacity) => {
+  const changeBgOpacity = (opacity, type = true) => {
     setBgOpacity(opacity);
     if (typeof window !== "undefined") {
       localStorage.setItem("bgOpacity", opacity);
-      settingUpdt({ bgOpacity: opacity });
+      if (type) {
+        settingUpdt({ bgOpacity: opacity });
+      }
+
     }
   };
 
   // Function to change watermark opacity and store in localStorage
-  const changeWmOpacity = (opacity) => {
+  const changeWmOpacity = (opacity, type = true) => {
     setWmOpacity(opacity);
     if (typeof window !== "undefined") {
       localStorage.setItem("wmOpacity", opacity);
-      settingUpdt({ wmOpacity: opacity });
+      if (type) {
+        settingUpdt({ wmOpacity: opacity });
+      }
+
     }
   };
 

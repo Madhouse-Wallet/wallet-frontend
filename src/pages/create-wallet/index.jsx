@@ -3,13 +3,13 @@ import CreateWalletStep from "./CreateWallet";
 import OtpStep from "./OtpStep";
 import WalletBackup from "./WalletBackup";
 import KeyStep from "./keysStep";
-
+import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 import { getBitcoinAddress } from "../../lib/apiCall";
 
-import { registerCredential, storeSecret } from "../../utils/webauthPrf";
+import { registerStoreCredential } from "../../utils/webauthPrf";
 import {
   generateOTP,
   storedataLocalStorage,
@@ -23,6 +23,7 @@ import TransactionFailedPop from "../../components/Modals/TransactionFailedPop";
 const CreateWallet = () => {
   const [step, setStep] = useState(1);
   const dispatch = useDispatch();
+  const [checkEmailLoader, setCheckEmailLoader] = useState(false);
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
   const [privateKey, setPrivateKey] = useState("");
@@ -140,25 +141,14 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      const registerCheck = await registerCredential(userName, userName);
+      const registerCheck = await registerStoreCredential(userName, userName, data);
       let res;
       if (registerCheck?.status) {
-        const storeSecretCheck = await storeSecret(
-          registerCheck?.data?.credentialId,
-          data
-        );
-        if (storeSecretCheck?.status) {
-          res = {
-            status: true,
-            storageKey: storeSecretCheck?.data?.storageKey,
-            credentialId: registerCheck?.data?.credentialId,
-          };
-        } else {
-          res = {
-            status: false,
-            msg: storeSecretCheck?.msg,
-          };
-        }
+        res = {
+          status: true,
+          storageKey: registerCheck?.data?.storageKey,
+          credentialId: registerCheck?.data?.credentialId,
+        };
       } else {
         res = {
           status: false,
@@ -231,6 +221,7 @@ const CreateWallet = () => {
             bitcoinWallet,
             flowTokens
           );
+          localStorage.removeItem("verifiedData");
           toast.success("Sign Up Successfully!");
           dispatch(
             loginSet({
@@ -301,6 +292,11 @@ const CreateWallet = () => {
           setBitcoinWallet(getWallet?.data?.wallet || "");
           setBitcoinWalletWif(getWallet?.data?.wif || "");
           setAddressWif(getWallet?.data?.wif || "");
+          localStorage.setItem("verifiedData", JSON.stringify({
+            verified: true,
+            email: registerData.email,
+            username: registerData.username
+          }));
           return true;
         } else {
           toast.error("Try Again After some time!!");
@@ -378,6 +374,44 @@ const CreateWallet = () => {
     }
   };
 
+  const checkEmail = async () => {
+    try {
+      const getVerifiedData = localStorage.getItem("verifiedData");
+      if (getVerifiedData) {
+        const parsedData = JSON.parse(getVerifiedData);
+        if (parsedData.email && parsedData.verified) {
+
+          setCheckEmailLoader(true)
+          const userExist = await getUser(parsedData.email);
+          if (userExist.status && userExist.status === "success") {
+            setCheckEmailLoader(false)
+          } else {
+            let getWallet = await getBitcoinAddress();
+            if (getWallet.status && getWallet.status == "success") {
+              setRegisterData({
+                email: parsedData.email,
+                username: parsedData.username,
+              });
+              setBitcoinWallet(getWallet?.data?.wallet || "");
+              setBitcoinWalletWif(getWallet?.data?.wif || "");
+              setAddressWif(getWallet?.data?.wif || "");
+              setCheckEmailLoader(false)
+              setStep(4)
+            } else {
+              setCheckEmailLoader(false)
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log("error checkEmail-->", e)
+      setCheckEmailLoader(false)
+    }
+  }
+  useEffect(() => {
+    checkEmail()
+  }, [])
+
   return (
     <>
       {failed &&
@@ -395,6 +429,7 @@ const CreateWallet = () => {
           <CreateWalletStep
             sendRegisterOtp={sendRegisterOtp}
             step={step}
+            checkEmail={checkEmailLoader}
             setStep={setStep}
           />
         </>
