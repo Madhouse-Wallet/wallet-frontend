@@ -155,6 +155,90 @@ export const registerCredential = async (username, displayName) => {
   }
 };
 
+
+// Register a new WebAuthn credential with PRF extension
+export const registerStoreCredential = async (username, displayName, data) => {
+  try {
+    const context = "secret data";
+    const secretValue = data;
+    const contextBuffer = new TextEncoder().encode(context);
+    const credentialCreationOptions = {
+      publicKey: {
+        rp: { name: "Madhouse Wallet" },
+        user: {
+          id: generateUserId(),
+          name: username,
+          displayName: displayName,
+        },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 }, // ES256
+          { type: "public-key", alg: -257 }, // RS256
+        ],
+        timeout: 60000,
+
+        authenticatorSelection: {
+          userVerification: "required",
+          residentKey: "required", // Allow discoverable credentials
+          //authenticatorAttachment: "cross-platform", // Use platform authenticator if available
+          requireResidentKey: true, // Broader device support
+          // No authenticatorAttachment to support both platform & cross-platform
+        },
+        // extensions: { prf: {} }, // Request PRF extension
+        extensions: {
+          prf: {
+            eval: {
+              first: contextBuffer,
+            },
+          },
+        },
+        challenge: generateChallenge(),
+      },
+    };
+
+    const credential = await navigator.credentials.create(
+      credentialCreationOptions
+    );
+    const extensionResults = credential.getClientExtensionResults();
+    // Check if PRF is supported
+    if (!extensionResults.prf || extensionResults.prf.enabled !== true) {
+      return {
+        status: false,
+        msg: "PRF extension not supported by this authenticator",
+      };
+    }
+
+    if (
+      !extensionResults.prf ||
+      !extensionResults.prf.results ||
+      !extensionResults.prf.results.first
+    ) {
+      return {
+        status: false,
+        msg: "PRF result not available",
+      };
+    }
+
+    const prfResult = extensionResults.prf.results.first;
+    // Use the PRF output to encrypt the secret
+    const encryptedData = await encryptData(secretValue, prfResult);
+    // Store the encrypted data
+
+    return {
+      status: true,
+      data: {
+        credentialId: bufferToBase64(credential.rawId),
+        storageKey: JSON.stringify(encryptedData),
+      },
+    };
+  } catch (error) {
+    console.error("registerCheck error-->", error?.name, error);
+    return {
+      status: false,
+      msg: "The operation was either not permitted or took too long to complete. Please ensure your device allows WebAuthn and try again.",
+    };
+  }
+};
+
 // Encrypt and store a secret using WebAuthn PRF
 export const storeSecret = async (credentialIdBase, data) => {
   const context = "secret data";
@@ -177,11 +261,11 @@ export const storeSecret = async (credentialIdBase, data) => {
         challenge: generateChallenge(),
         allowCredentials: credentialId
           ? [
-              {
-                id: credentialId,
-                type: "public-key",
-              },
-            ]
+            {
+              id: credentialId,
+              type: "public-key",
+            },
+          ]
           : [],
         userVerification: "required",
         extensions: {
@@ -247,11 +331,11 @@ export const verifyUser = async (credentialIdBase) => {
         challenge: generateChallenge(),
         allowCredentials: credentialId
           ? [
-              {
-                id: credentialId,
-                type: "public-key",
-              },
-            ]
+            {
+              id: credentialId,
+              type: "public-key",
+            },
+          ]
           : [],
         userVerification: "required",
         extensions: {
@@ -318,11 +402,11 @@ export const retrieveSecret = async (storageKey, credentialIdBase) => {
         challenge: generateChallenge(),
         allowCredentials: credentialId
           ? [
-              {
-                id: credentialId,
-                type: "public-key",
-              },
-            ]
+            {
+              id: credentialId,
+              type: "public-key",
+            },
+          ]
           : [],
         userVerification: "required",
         extensions: {

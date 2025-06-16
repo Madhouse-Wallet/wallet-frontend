@@ -381,15 +381,17 @@ const Setting: React.FC = () => {
   const handleAccordionClick = (index: number) => {
     setOpenIndex(index === openIndex ? null : index);
   };
-
+  const clearSettings = async () => {
+    selectBg(0, false);
+    changeBgOpacity(1, false);
+    selectWm(0,false);
+    changeWmOpacity(0.5,false);
+  }
   const LogoutFuc = async () => {
     try {
       addProvisionData(userAuth.email);
       logoutStorage();
-      selectBg(0);
-      changeBgOpacity(1);
-      selectWm(0);
-      changeWmOpacity(0.5);
+
       dispatch(
         loginSet({
           login: false,
@@ -410,6 +412,8 @@ const Setting: React.FC = () => {
           ensSetup: false,
         })
       );
+
+      clearSettings()
       // toast.success("Logout Successfully!");
     } catch (error) {
       console.log("logout error --->", error);
@@ -765,9 +769,8 @@ const Setting: React.FC = () => {
                                   selectBg(index);
                                   getPreview();
                                 }}
-                                className={`${
-                                  selectedBackground === bg ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedBackground === bg ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={bg}
@@ -829,9 +832,8 @@ const Setting: React.FC = () => {
                             <li className="" key={index}>
                               <button
                                 onClick={() => selectWm(index)}
-                                className={`${
-                                  selectedWatermark === wm ? "border-2 " : ""
-                                } border-0 p-0 bg-transparent rounded`}
+                                className={`${selectedWatermark === wm ? "border-2 " : ""
+                                  } border-0 p-0 bg-transparent rounded`}
                               >
                                 <Image
                                   src={wm}
