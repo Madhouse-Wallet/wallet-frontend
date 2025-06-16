@@ -63,7 +63,7 @@
     "redux-logger": "3.0.6",
     "remeda": "2.20.0",
     "sass": "1.83.4",
-    "scanbot-web-sdk": "^7.2.0",
+    "scanbot-web-sdk": "7.2.0",
     "slick-carousel": "1.8.1",
     "stripe": "17.5.0",
     "styled-components": "6.1.14",
