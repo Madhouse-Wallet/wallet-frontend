@@ -257,7 +257,7 @@ const RecoverWallet = () => {
 
   const handlePhraseInput = (e) => {
     const value = e.target.value;
-    const filtered = filterAlphaWithSpaces(value, 150); // Adjust max length as needed
+    const filtered = filterAlphaWithSpaces(value, 250); // Adjust max length as needed
     setSeedPhrase(filtered); // Or whatever your state setter is
 
     if (
