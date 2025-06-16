@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -7,27 +7,26 @@ import { logoutStorage } from "../../../utils/globals";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch } from "react-redux";
 
-
 const ConfirmationPop = ({ confirm, setConfirm }) => {
   const userAuth = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
   const handleConfirmation = () => {
-    setConfirm(!confirm)
-  }
+    setConfirm(!confirm);
+  };
 
   const delUserFunc = async () => {
     try {
-      setLoading(true)
-      let data = await delUser(userAuth.email)
+      setLoading(true);
+      let data = await delUser(userAuth.email);
       if (data) {
-        logoutStorage()
+        logoutStorage();
         dispatch(
           loginSet({
             login: false,
             walletAddress: "",
-            bitcoinWallet: "", 
+            bitcoinWallet: "",
             signer: "",
             ensName: "",
             ensSetup: false,
@@ -35,20 +34,19 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
             email: "",
             passkeyCred: "",
             webauthKey: "",
-            id: ""
+            id: "",
           })
         );
-        setConfirm(!confirm)
-        toast.success("User Deleted Successfully!")
+        setConfirm(!confirm);
+        toast.success("User Deleted Successfully!");
       } else {
-        toast.error("Please Try Again LAter!")
       }
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
-      setLoading(false)
-      console.log("error-->", error)
+      setLoading(false);
+      console.log("error-->", error);
     }
-  }
+  };
   return (
     <>
       <Modal
@@ -72,11 +70,15 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
                 <h4 className="m-0 font-bold text-xl">Are you Sure!</h4>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <button disabled={loading} onClick={delUserFunc} className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                <button
+                  disabled={loading}
+                  onClick={delUserFunc}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {loading?"Deleting...":"Yes"}
+                  {loading ? "Deleting..." : "Yes"}
                 </button>
-                <button disabled={loading}
+                <button
+                  disabled={loading}
                   onClick={() => setConfirm(!confirm)}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >

@@ -30,9 +30,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
 
       setCheckOTP(OTP);
       if (checkUser.status && checkUser.status == "success") {
-        toast.error("Already Exist!");
       } else if (!validEmail) {
-        toast.error("Please Enter Valid Email!");
       } else {
         let obj = {
           email: userAuth.email,
@@ -47,7 +45,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
           setStep(2);
           toast.success(sendEmailData?.message);
         } else {
-          toast.error(sendEmailData?.message || sendEmailData?.error);
         }
       }
 
@@ -69,11 +66,9 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
     try {
       setLoading(true);
       if (!otp) {
-        toast.error("Invalid OTP!");
       } else {
         let checkUser = await getUser(email);
         if (checkUser.status && checkUser.status == "success") {
-          toast.error("Already Exist!");
         } else {
           if (checkOTP == otp) {
             let data = await updtUser(
@@ -105,7 +100,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
             );
             handleChangeEmail();
           } else {
-            toast.error("Invalid OTP!");
           }
         }
       }

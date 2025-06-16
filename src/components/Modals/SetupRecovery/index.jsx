@@ -20,7 +20,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
       setLoadingNewSigner(true);
       if (!userAuth?.login) {
         setLoadingNewSigner(false);
-        return toast.error("Please Login!");
+        return;
       }
       if (phrase && phrase.trim().split(" ").length == 12) {
         let checkAccount = await getRecoverAccount(
@@ -31,14 +31,13 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
         if (checkAccount && checkAccount.address == userAuth.walletAddress) {
           setStep(2);
         } else {
-          toast.error("Invalid Phrase!");
+          return;
         }
       } else {
-        toast.error("Invalid Phrase!");
+        return;
       }
       setLoadingNewSigner(false);
     } catch (error) {
-      toast.error("Invalid Phrase!");
       setLoadingNewSigner(false);
       console.log("error-->", error);
       setStep(1);
@@ -50,7 +49,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
       setLoadingNewSigner(true);
       let userExist = await getUser(userAuth.email);
       if (userExist.status && userExist.status == "failure") {
-        toast.error("User Not Found!");
+        return;
       } else {
         let passkeyNo =
           (userExist?.userId?.passkey_number &&
@@ -127,7 +126,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
           toast.success("New Key Recovered!");
           setSetUp(!setUp);
         } else {
-          toast.error(checkAccount.msg);
+          return;
         }
       }
 

@@ -40,7 +40,7 @@ const LightningSendTab = () => {
       toast.success("Copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy text:", error);
-      toast.error("Failed to copy");
+      // toast.error("Failed to copy");
     }
   };
 

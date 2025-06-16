@@ -31,8 +31,11 @@ const ModifyKeys = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-
-      const registerCheck = await registerStoreCredential(userName, userName, data);
+      const registerCheck = await registerStoreCredential(
+        userName,
+        userName,
+        data
+      );
       if (registerCheck?.status) {
         return {
           status: true,
@@ -59,7 +62,7 @@ const ModifyKeys = () => {
       if (email && privateKey && safePrivateKey) {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("User Not Found!");
+          setError("User Not Found!");
           setLoadingNewSigner(false);
         } else {
           setEmail(userExist?.userId?.email);
@@ -75,7 +78,7 @@ const ModifyKeys = () => {
             setLoadingNewSigner(false);
             setStep(2);
           } else {
-            toast.error(recoverAccount?.msg);
+            setError("User Not Found!");
             setLoadingNewSigner(false);
           }
           // setLoadingNewSigner(false);
@@ -84,10 +87,10 @@ const ModifyKeys = () => {
       } else {
         if (!privateKey) {
           setLoadingNewSigner(false);
-          toast.error("Invalid Private Keys!");
+          setError("Invalid Private Keys!");
         } else {
+          setError("Invalid Email!");
           setLoadingNewSigner(false);
-          toast.error("Invalid Email!");
         }
       }
     } catch (error) {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 
-const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
+const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
   const [selectOption, setSelectOption] = useState(0);
   const [loginLoading, setLoginLoading] = useState(false);
   const router = useRouter();
@@ -82,6 +82,16 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd }) => {
                 </div>
               </div>
             ))}
+
+            <div className="col-span-12">
+              {" "}
+              {error && (
+                <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                  {error}
+                </div>
+              )}
+            </div>
+
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3 mx-auto  max-w-[300px]">
                 <button

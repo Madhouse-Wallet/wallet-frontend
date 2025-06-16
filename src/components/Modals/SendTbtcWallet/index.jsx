@@ -17,11 +17,11 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
     try {
       setLoading(true);
       if (!userAuth?.login) {
-        toast.error("Please Login!");
+        return;
       } else {
         let userExist = await getUser(userAuth?.email);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("Please Login!");
+          return;
         } else {
           if (userExist?.userId?.liquidBitcoinWallet_3) {
             const liquidShift = await createTBtcToLbtcShift(
@@ -45,10 +45,8 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
               // Wait for transaction to be mined and then fetch new balance
               setTimeout(fetchBalance, 2000);
             } else {
-              toast.error(result.error || "Transaction failed");
             }
           } else {
-            toast.error("Please sign Up Again!");
           }
         }
       }
@@ -56,7 +54,6 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
       setTbtcWall(!btcWall);
       setLoading(false);
     } catch (error) {
-      toast.error(error?.message);
       setLoading(false);
     }
   };

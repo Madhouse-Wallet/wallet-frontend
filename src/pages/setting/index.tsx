@@ -169,7 +169,7 @@ const Setting: React.FC = () => {
       setRecover(!recover);
     } else {
       setloading(false);
-      toast.error(userData?.msg);
+      // toast.error(userData?.msg);
     }
   };
 

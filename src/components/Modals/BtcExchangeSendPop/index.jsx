@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import "react-tooltip/dist/react-tooltip.css";
-import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
@@ -57,16 +56,6 @@ const BtcExchangeSendPop = ({
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
   const [amountError, setAmountError] = useState("");
-
-  const submitAddress = async () => {
-    try {
-      if (recoveryAddress) {
-        startReceive(recoveryAddress);
-        setStep(2);
-        setLoading(true);
-      } else toast.error("Wow so easy!");
-    } catch (error) {}
-  };
 
   const handleTab = (key) => {
     setTab(key);

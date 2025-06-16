@@ -5,7 +5,7 @@ import { useState } from "react";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
 
-const EmailStep = ({ step, setStep, loginFn }) => {
+const EmailStep = ({ step, setStep, loginFn, errorr }) => {
   const [error, setError] = useState("");
 
   const [loginLoading, setLoginLoading] = useState(false);
@@ -103,6 +103,12 @@ const EmailStep = ({ step, setStep, loginFn }) => {
                 {error && (
                   <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
                     {error}
+                  </div>
+                )}
+
+                {errorr && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {errorr}
                   </div>
                 )}
               </div>

@@ -4,8 +4,6 @@ import Link from "next/link";
 import { verifyUser } from "@/utils/webauthPrf";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { toast } from "react-toastify";
-import Loader from "../../../components/loader";
 import Image from "next/image";
 
 // img
@@ -16,8 +14,10 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
   const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
   const [loading, setloading] = useState(false);
   const [loadingFonbnk, setloadingFonbnk] = useState(false);
+  const [error, setError] = useState("");
 
   const verifyingUser = async () => {
+    setError("");
     setloading(true);
     let data = JSON.parse(userAuth?.webauthKey);
     let userData = await verifyUser(data?.credentialIdSecret);
@@ -26,14 +26,14 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
       userData.msg === "User verified successfully"
     ) {
       router.push("/spherepay");
-      // setloading(false);
     } else {
       setloading(false);
-      toast.error(userData?.msg);
+      setError("Verification Failed Please try again.");
     }
   };
 
   const verifyingUserFonbnk = async () => {
+    setError("");
     setloadingFonbnk(true);
     let data = JSON.parse(userAuth?.webauthKey);
     let userData = await verifyUser(data?.credentialIdSecret);
@@ -42,10 +42,9 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
       userData.msg === "User verified successfully"
     ) {
       router.push("/fonbnk");
-      // setloadingFonbnk(false);
     } else {
       setloadingFonbnk(false);
-      toast.error(userData?.msg);
+      setError("Verification Failed Please try again.");
     }
   };
   return (
@@ -100,7 +99,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                   <button
                     // href="/spherepay"
                     onClick={verifyingUser}
-                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loading ? (
                       <Image
@@ -122,6 +121,12 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                   >
                     Spark Lend
                   </Link>
+                </div>
+
+                <div className="col-span-12">
+                  {error && (
+                    <div className="text-red-500 text-md mt-1">{error}</div>
+                  )}
                 </div>
               </div>
             </div>

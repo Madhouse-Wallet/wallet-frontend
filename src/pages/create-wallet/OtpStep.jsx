@@ -11,6 +11,8 @@ const OtpStep = ({
   registerOtpFn,
   resendOtpFunc,
   registerData,
+  errorr,
+  setError,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [registerOTP, setRegisterOTP] = useState();
@@ -48,7 +50,7 @@ const OtpStep = ({
     try {
       setRegisterOtpLoading(true);
       if (!registerOTP) {
-        toast.error("Please Enter OTP!");
+        setError("Please Enter OTP!");
         setRegisterOtpLoading(false);
       } else {
         let response = await registerOtpFn({
@@ -163,8 +165,14 @@ const OtpStep = ({
                   renderSeparator={<span></span>}
                   renderInput={(props) => <input {...props} />}
                 />
+                {errorr && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {errorr}
+                  </div>
+                )}
               </OtpWrpper>
             </div>
+
             <div className="col-span-12">
               <div className="text-center">
                 <button

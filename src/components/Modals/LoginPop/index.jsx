@@ -111,16 +111,16 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setLoginLoading(true);
       if (!loginEmail) {
-        toast.error("Please Enter Email!");
+        return;
       } else {
         let validEmail = await isValidEmail(loginEmail);
         if (!validEmail) {
           setLoginLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          return;
         }
         let userExist = await getUser(loginEmail);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("User Not Found!");
+          rerurn;
         } else {
           const authenticated = false;
           if (authenticated) {
@@ -148,10 +148,10 @@ const LoginPop = ({ login, setLogin }) => {
               setLoginEmail();
               handleLogin();
             } else {
-              toast.error("Login Failed!");
+              return;
             }
           } else {
-            toast.error("Login Failed!");
+            return;
           }
         }
       }
@@ -166,13 +166,13 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setRegisterLoading(true);
       if (!registerOTP) {
-        toast.error("Please Enter OTP!");
+        return;
       } else if (registerOTP != checkOTP) {
-        toast.error("Invalid OTP!");
+        return;
       } else {
         let userExist = await getUser(registerEmail);
         if (userExist.status && userExist.status == "success") {
-          return toast.error("User Already Exist!");
+          return;
         }
         const createdCredential = false;
         if (createdCredential) {
@@ -221,18 +221,18 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setRegisterOtpLoading(true);
       if (!registerEmail) {
-        toast.error("Please Enter Email!");
+        return;
       } else if (!registerUsername) {
-        toast.error("Please Enter Username!");
+        return;
       } else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          return;
         }
         let userExist = await getUser(registerEmail);
         if (userExist.status && userExist.status == "success") {
-          toast.error("User Already Exist!");
+          return;
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
@@ -248,7 +248,7 @@ const LoginPop = ({ login, setLogin }) => {
             setRegisterTab(2);
             toast.success(sendEmailData?.message);
           } else {
-            toast.error(sendEmailData?.message || sendEmailData?.error);
+            return;
           }
         }
       }

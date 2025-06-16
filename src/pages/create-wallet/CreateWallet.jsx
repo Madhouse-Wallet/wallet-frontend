@@ -3,7 +3,13 @@ import Image from "next/image";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
 
-const CreateWalletStep = ({ step, setStep, sendRegisterOtp, checkEmail }) => {
+const CreateWalletStep = ({
+  step,
+  setStep,
+  sendRegisterOtp,
+  checkEmail,
+  errorr,
+}) => {
   const [registerUsername, setRegisterUsername] = useState();
   const [registerEmail, setRegisterEmail] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
@@ -104,16 +110,24 @@ const CreateWalletStep = ({ step, setStep, sendRegisterOtp, checkEmail }) => {
                     {error}
                   </div>
                 )}
+
+                {errorr && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {errorr}
+                  </div>
+                )}
               </div>
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
-                  disabled={registerOtpLoading || !registerEmail || error|| checkEmail}
+                  disabled={
+                    registerOtpLoading || !registerEmail || error || checkEmail
+                  }
                   onClick={createRegister}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {(registerOtpLoading || checkEmail) ? (
+                  {registerOtpLoading || checkEmail ? (
                     <Image
                       src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                       alt={""}

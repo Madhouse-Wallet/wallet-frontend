@@ -35,6 +35,7 @@ const CreateWallet = () => {
   const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
@@ -89,7 +90,7 @@ const CreateWallet = () => {
       return false;
     }
   };
- 
+
   const getUser = async (email) => {
     try {
       try {
@@ -141,7 +142,11 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      const registerCheck = await registerStoreCredential(userName, userName, data);
+      const registerCheck = await registerStoreCredential(
+        userName,
+        userName,
+        data
+      );
       let res;
       if (registerCheck?.status) {
         res = {
@@ -168,12 +173,11 @@ const CreateWallet = () => {
     try {
       const userExist = await getUser(registerData.email);
       if (userExist.status && userExist.status === "success") {
-        toast.error("User Already Exist!");
+        setError("User Already Exist!");
         return false;
       }
       const baseWallet = await setupNewAccount(privateKey, safeKey);
       if (!baseWallet?.status) {
-        // toast.error(baseWallet?.msg);
         setFailed(true);
         setTxError("Gas Price is too high currently.");
         return false;
@@ -260,7 +264,7 @@ const CreateWallet = () => {
           );
           return true;
         } else {
-          toast.error(storeData.msg);
+          setError(storeData.msg);
           return false;
         }
       }
@@ -274,17 +278,17 @@ const CreateWallet = () => {
     try {
       // Check if OTP is expired
       if (isOtpExpired()) {
-        toast.error("OTP has expired! Please request a new one.");
+        setError("OTP has expired! Please request a new one.");
         return false;
       }
 
       if (data.otp != checkOTP) {
-        toast.error("Invalid OTP!");
+        setError("Invalid OTP!");
         return false;
       } else {
         let userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status == "success") {
-          toast.error("User Already Exist!");
+          setError("User Already Exist!");
           return false;
         }
         let getWallet = await getBitcoinAddress();
@@ -292,14 +296,17 @@ const CreateWallet = () => {
           setBitcoinWallet(getWallet?.data?.wallet || "");
           setBitcoinWalletWif(getWallet?.data?.wif || "");
           setAddressWif(getWallet?.data?.wif || "");
-          localStorage.setItem("verifiedData", JSON.stringify({
-            verified: true,
-            email: registerData.email,
-            username: registerData.username
-          }));
+          localStorage.setItem(
+            "verifiedData",
+            JSON.stringify({
+              verified: true,
+              email: registerData.email,
+              username: registerData.username,
+            })
+          );
           return true;
         } else {
-          toast.error("Try Again After some time!!");
+          setError("Try Again After some time!");
           return false;
         }
       }
@@ -313,7 +320,7 @@ const CreateWallet = () => {
     try {
       let userExist = await getUser(data.email);
       if (userExist.status && userExist.status == "success") {
-        toast.error("User Already Exist!");
+        setError("User Already Exist!");
         return false;
       } else {
         let OTP = generateOTP(4);
@@ -337,7 +344,7 @@ const CreateWallet = () => {
           toast.success(sendEmailData?.message);
           return true;
         } else {
-          toast.error(sendEmailData?.message || sendEmailData?.error);
+          setError(sendEmailData?.message || sendEmailData?.error);
           return false;
         }
       }
@@ -362,10 +369,9 @@ const CreateWallet = () => {
       let sendEmailData = await sendOTP(obj);
       if (sendEmailData.status && sendEmailData.status == "success") {
         toast.success("OTP sent to your email.");
-
         return true;
       } else {
-        toast.error(sendEmailData?.message || sendEmailData?.error);
+        setError(sendEmailData?.message || sendEmailData?.error);
         return false;
       }
     } catch (error) {
@@ -380,11 +386,10 @@ const CreateWallet = () => {
       if (getVerifiedData) {
         const parsedData = JSON.parse(getVerifiedData);
         if (parsedData.email && parsedData.verified) {
-
-          setCheckEmailLoader(true)
+          setCheckEmailLoader(true);
           const userExist = await getUser(parsedData.email);
           if (userExist.status && userExist.status === "success") {
-            setCheckEmailLoader(false)
+            setCheckEmailLoader(false);
           } else {
             let getWallet = await getBitcoinAddress();
             if (getWallet.status && getWallet.status == "success") {
@@ -395,22 +400,22 @@ const CreateWallet = () => {
               setBitcoinWallet(getWallet?.data?.wallet || "");
               setBitcoinWalletWif(getWallet?.data?.wif || "");
               setAddressWif(getWallet?.data?.wif || "");
-              setCheckEmailLoader(false)
-              setStep(4)
+              setCheckEmailLoader(false);
+              setStep(4);
             } else {
-              setCheckEmailLoader(false)
+              setCheckEmailLoader(false);
             }
           }
         }
       }
     } catch (e) {
-      console.log("error checkEmail-->", e)
-      setCheckEmailLoader(false)
+      console.log("error checkEmail-->", e);
+      setCheckEmailLoader(false);
     }
-  }
+  };
   useEffect(() => {
-    checkEmail()
-  }, [])
+    checkEmail();
+  }, []);
 
   return (
     <>
@@ -431,6 +436,7 @@ const CreateWallet = () => {
             step={step}
             checkEmail={checkEmailLoader}
             setStep={setStep}
+            errorr={error}
           />
         </>
       ) : step == 2 ? (
@@ -441,6 +447,8 @@ const CreateWallet = () => {
             registerData={registerData}
             step={step}
             setStep={setStep}
+            errorr={error}
+            setError={setError}
           />
         </>
       ) : step == 3 ? (
@@ -453,11 +461,17 @@ const CreateWallet = () => {
             addressWif={addressWif}
             step={step}
             setStep={setStep}
+            errorr={error}
           />
         </>
       ) : step == 4 ? (
         <>
-          <KeyStep registerFn={registerFn} step={step} setStep={setStep} />
+          <KeyStep
+            registerFn={registerFn}
+            step={step}
+            setStep={setStep}
+            error={error}
+          />
         </>
       ) : (
         <></>

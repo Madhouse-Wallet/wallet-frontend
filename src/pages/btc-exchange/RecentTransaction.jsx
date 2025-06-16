@@ -4,11 +4,9 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import { fetchTokenTransfers, fetchWalletHistory } from "../../lib/utils";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
-import InternalTab from "./InternalTab";
 import moment from "moment";
 import BitcoinTransactionsTab from "./BitcoinTransaction";
 import LnbitsTransaction from "./LnbitsTransaction";
-import { toast } from "react-toastify";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
@@ -34,6 +32,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [applyTrue, setApplyTrue] = useState(false);
   const [sideshiftTxs, setSideshiftTxs] = useState([]);
   const [selectedItem, setSelectedItem] = useState("10");
+  const [error, setError] = useState("");
 
   const selectOptions = [
     { value: "", label: "Select an option" },
@@ -306,7 +305,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       }
       setIsDatePickerOpen(false);
     } else {
-      toast.error("Please select both start and end dates");
+      setError("Please select both start and end dates.");
     }
   };
 
@@ -686,6 +685,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
               Apply Filter
             </button>
           </div>
+          {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
         </div>
       )}
 
@@ -804,7 +804,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                       tabs[activeTab].title + ".csv"
                     );
                   } else {
-                    toast.error("No data available to export.");
+                    setError("No data available to export.");
                   }
                 }}
                 className="px-4 py-2 bg-black/50 text-white rounded-md"

@@ -86,25 +86,21 @@ const SendBitcoinPop = ({
 
     setLoading(true);
     if (!isValidAddress) {
-      toast.error("Please enter a valid address");
       setLoading(false);
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
       setLoading(false);
       return;
     }
     // Check if amount is less than 0.1
     const privateKey = await recoverSeedPhrase();
     if (!privateKey) {
-      toast.error("Please enter a valid amount");
       setLoading(false);
       return;
     }
     const sendLnbitWithdraw = await btcSat(amount, privateKey?.publicKey);
     if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
-      toast.error(sendLnbitWithdraw.message);
       setLoading(false);
     } else {
       const satoshis = Math.round(parseFloat(amount) * 100000000);
@@ -119,7 +115,6 @@ const SendBitcoinPop = ({
         toast.success(result.transactionHash);
         setLoading(false);
       } else {
-        toast.error("Transaction Failed!");
         setLoading(false);
       }
     }
@@ -140,7 +135,6 @@ const SendBitcoinPop = ({
           }
         } catch (error) {
           console.error("Wallet connection error:", error);
-          toast.error("Failed to connect wallet. Please try again.");
         }
       }
     };
@@ -161,13 +155,13 @@ const SendBitcoinPop = ({
       const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
 
       if (result.error) {
-        toast.error(result.error || "Failed to fetch balance");
+        return;
       } else {
         setBalance(result.balance);
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      return;
     }
   };
 

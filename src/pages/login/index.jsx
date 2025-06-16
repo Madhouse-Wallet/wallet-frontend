@@ -36,7 +36,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const [error, setError] = useState("");
 
   const getUser = async (email, type = "", webAuthKey = "") => {
     try {
@@ -64,14 +64,12 @@ const Login = () => {
     }
   };
 
-
-
-
   const loginFn = async (data) => {
+    setError("");
     try {
       let validEmail = await isValidEmail(data.email);
       if (!validEmail) {
-        toast.error("Please Enter Valid Email!");
+        setError("Please Enter Valid Email!");
         return false;
       }
       let userExist = await getUser(data.email);
@@ -79,21 +77,26 @@ const Login = () => {
         const getVerifiedData = localStorage.getItem("verifiedData");
         if (getVerifiedData) {
           const parsedData = JSON.parse(getVerifiedData);
-          if (((parsedData.email).toLowerCase() == (data.email).toLowerCase()) && parsedData.verified) {
+          if (
+            parsedData.email.toLowerCase() == data.email.toLowerCase() &&
+            parsedData.verified
+          ) {
             router.push("/create-wallet");
           } else {
-            toast.error("User Not Found!");
+            setError("User Not Found!");
             return false;
           }
         } else {
-          toast.error("User Not Found!");
+          setError("User Not Found!");
           return false;
         }
-
       } else {
         // userExist?.userId?
         if (userExist?.userId?.passkey?.length == 1) {
-          let retrieveSecretCheck = await retrieveSecret(userExist?.userId?.passkey[0].storageKeySecret, userExist?.userId?.passkey[0].credentialIdSecret);
+          let retrieveSecretCheck = await retrieveSecret(
+            userExist?.userId?.passkey[0].storageKeySecret,
+            userExist?.userId?.passkey[0].credentialIdSecret
+          );
           if (retrieveSecretCheck?.status) {
             // toast.success("Login Successfully!");
             dispatch(
@@ -106,33 +109,35 @@ const Login = () => {
                 email: userExist?.userId?.email,
                 webauthKey: JSON.stringify(userExist?.userId?.passkey[0]),
                 id: userExist?.userId?._id,
-                totalPasskey: 1
+                totalPasskey: 1,
               })
             );
             //       passkeyEmail: userExist?.userId?.passkey[0].name,\\
             if (userExist?.userId?.backgroundIndex != null) {
               selectBg(userExist.userId.backgroundIndex);
-              localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+              localStorage.setItem(
+                "backgroundIndex",
+                userExist.userId.backgroundIndex
+              );
             }
 
             if (userExist?.userId?.watermarkIndex != null) {
               selectWm(parseFloat(userExist.userId.watermarkIndex));
-              localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+              localStorage.setItem(
+                "watermarkIndex",
+                userExist.userId.watermarkIndex
+              );
             }
-
 
             if (userExist?.userId?.bgOpacity != null) {
               changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
               localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
             }
 
-
             if (userExist?.userId?.bgOpacity != null) {
-              changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+              changeWmOpacity(parseFloat(userExist.userId.wmOpacity));
               localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
             }
-
-
 
             storedataLocalStorage(
               {
@@ -144,7 +149,7 @@ const Login = () => {
                 email: userExist?.userId?.email,
                 webauthKey: userExist?.userId?.passkey[0],
                 id: userExist?.userId?._id,
-                totalPasskey: 1
+                totalPasskey: 1,
               },
               "authUser"
             );
@@ -152,36 +157,39 @@ const Login = () => {
 
             return true;
           } else {
-            toast.error(
+            setError(
               "Login failed! Please use the correct email and passkey. Account not found."
             );
+
             return false;
           }
         } else if (userExist?.userId?.passkey?.length == 0) {
-          toast.error(
-            "Please Add Passkey!"
-          );
+          setError("Please Add Passkey!");
           return false;
         } else {
-          setStep(2)
-          setEmail(data.email)
-          setPasskeyData(userExist?.userId?.passkey)
+          setStep(2);
+          setEmail(data.email);
+          setPasskeyData(userExist?.userId?.passkey);
         }
       }
     } catch (error) {
-      toast.error(error.message);
+      setError(error.message);
       return false;
     }
   };
 
   const loginFn2nd = async (email, passkey) => {
+    setError("");
     try {
       let userExist = await getUser(email);
       if (userExist.status && userExist.status == "failure") {
-        toast.error("User Not Found!");
+        setError("User Not Found!");
         return false;
       } else {
-        let retrieveSecretCheck = await retrieveSecret(passkey.storageKeySecret, passkey.credentialIdSecret);
+        let retrieveSecretCheck = await retrieveSecret(
+          passkey.storageKeySecret,
+          passkey.credentialIdSecret
+        );
         if (retrieveSecretCheck?.status) {
           // toast.success("Login Successfully!");
           dispatch(
@@ -194,35 +202,36 @@ const Login = () => {
               email: userExist?.userId?.email,
               webauthKey: JSON.stringify(passkey),
               id: userExist?.userId?._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             })
           );
           //       passkeyEmail: userExist?.userId?.passkey[0].name,
 
           if (userExist?.userId?.backgroundIndex != null) {
             selectBg(userExist.userId.backgroundIndex);
-            localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
+            localStorage.setItem(
+              "backgroundIndex",
+              userExist.userId.backgroundIndex
+            );
           }
 
           if (userExist?.userId?.watermarkIndex != null) {
             selectWm(parseFloat(userExist.userId.watermarkIndex));
-            localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
+            localStorage.setItem(
+              "watermarkIndex",
+              userExist.userId.watermarkIndex
+            );
           }
-
 
           if (userExist?.userId?.bgOpacity != null) {
             changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
             localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
           }
 
-
           if (userExist?.userId?.bgOpacity != null) {
-            changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
+            changeWmOpacity(parseFloat(userExist.userId.wmOpacity));
             localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
           }
-
-
-
 
           storedataLocalStorage(
             {
@@ -234,25 +243,25 @@ const Login = () => {
               email: userExist?.userId?.email,
               webauthKey: passkey,
               id: userExist?.userId?._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             },
             "authUser"
           );
           addProvisionData(userExist?.userId?.email);
           return true;
         } else {
-          toast.error(
+          setError(
             "Login failed! Please use the correct email and passkey. Account not found."
           );
+
           return false;
         }
       }
     } catch (error) {
-      toast.error(error.message);
+      setError(error.message);
       return false;
     }
-  }
-
+  };
 
   const checkEmail = async () => {
     try {
@@ -260,11 +269,10 @@ const Login = () => {
       if (getVerifiedData) {
         const parsedData = JSON.parse(getVerifiedData);
         if (parsedData.email && parsedData.verified) {
-
-          setCheckEmailLoader(true)
+          setCheckEmailLoader(true);
           const userExist = await getUser(parsedData.email);
           if (userExist.status && userExist.status === "success") {
-            setCheckEmailLoader(false)
+            setCheckEmailLoader(false);
           } else {
             let getWallet = await getBitcoinAddress();
             if (getWallet.status && getWallet.status == "success") {
@@ -275,29 +283,42 @@ const Login = () => {
               setBitcoinWallet(getWallet?.data?.wallet || "");
               setBitcoinWalletWif(getWallet?.data?.wif || "");
               setAddressWif(getWallet?.data?.wif || "");
-              setCheckEmailLoader(false)
-              setStep(4)
+              setCheckEmailLoader(false);
+              setStep(4);
             } else {
-              setCheckEmailLoader(false)
+              setCheckEmailLoader(false);
             }
           }
         }
       }
     } catch (e) {
-      console.log("error checkEmail-->", e)
-      setCheckEmailLoader(false)
+      console.log("error checkEmail-->", e);
+      setCheckEmailLoader(false);
     }
-  }
+  };
 
   return (
     <>
       {step == 1 ? (
         <>
-          <EmailStep loginFn={loginFn} step={step} setStep={setStep} />
+          <EmailStep
+            loginFn={loginFn}
+            step={step}
+            setStep={setStep}
+            errorr={error}
+          />
         </>
       ) : step == 2 ? (
         <>
-          <KeyStep step={step} loginFn2nd={loginFn2nd} email={email} passkeyData={passkeyData} loginFn={loginFn} setStep={setStep} />
+          <KeyStep
+            step={step}
+            loginFn2nd={loginFn2nd}
+            email={email}
+            passkeyData={passkeyData}
+            loginFn={loginFn}
+            setStep={setStep}
+            error={error}
+          />
         </>
       ) : (
         <></>

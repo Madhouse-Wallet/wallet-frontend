@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import Image from "next/image";
 
-const KeyStep = ({ step, setStep, registerFn }) => {
+const KeyStep = ({ step, setStep, registerFn, error }) => {
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const router = useRouter();
   const keyFunc = async () => {
@@ -82,6 +82,10 @@ const KeyStep = ({ step, setStep, registerFn }) => {
                   </button>
                 </div>
               </div>
+
+              {error && (
+                <div className="text-red-500 text-xs mt-1">{error}</div>
+              )}
             </div>
           </form>
         </div>
