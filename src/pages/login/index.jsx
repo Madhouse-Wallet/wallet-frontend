@@ -7,6 +7,7 @@ import { addProvisionData } from "../../lib/apiCall";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
+import { useRouter } from "next/router";
 
 import {
   isValidEmail,
@@ -34,6 +35,7 @@ const Login = () => {
   const [passkeyData, setPasskeyData] = useState([]);
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
+  const router = useRouter();
 
 
   const getUser = async (email, type = "", webAuthKey = "") => {
@@ -74,8 +76,20 @@ const Login = () => {
       }
       let userExist = await getUser(data.email);
       if (userExist.status && userExist.status == "failure") {
-        toast.error("User Not Found!");
-        return false;
+        const getVerifiedData = localStorage.getItem("verifiedData");
+        if (getVerifiedData) {
+          const parsedData = JSON.parse(getVerifiedData);
+          if (((parsedData.email).toLowerCase() == (data.email).toLowerCase()) && parsedData.verified) {
+            router.push("/create-wallet");
+          } else {
+            toast.error("User Not Found!");
+            return false;
+          }
+        } else {
+          toast.error("User Not Found!");
+          return false;
+        }
+
       } else {
         // userExist?.userId?
         if (userExist?.userId?.passkey?.length == 1) {
@@ -100,19 +114,19 @@ const Login = () => {
               selectBg(userExist.userId.backgroundIndex);
               localStorage.setItem("backgroundIndex", userExist.userId.backgroundIndex);
             }
-  
+
             if (userExist?.userId?.watermarkIndex != null) {
-              selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+              selectWm(parseFloat(userExist.userId.watermarkIndex));
               localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
             }
-  
-  
+
+
             if (userExist?.userId?.bgOpacity != null) {
               changeBgOpacity(parseFloat(userExist.userId.bgOpacity));
               localStorage.setItem("bgOpacity", userExist.userId.bgOpacity);
             }
-  
-  
+
+
             if (userExist?.userId?.bgOpacity != null) {
               changeWmOpacity(parseFloat(userExist.userId.wmOpacity))
               localStorage.setItem("wmOpacity", userExist.userId.wmOpacity);
@@ -191,7 +205,7 @@ const Login = () => {
           }
 
           if (userExist?.userId?.watermarkIndex != null) {
-            selectWm(parseFloat(userExist.userId.watermarkIndex)); 
+            selectWm(parseFloat(userExist.userId.watermarkIndex));
             localStorage.setItem("watermarkIndex", userExist.userId.watermarkIndex);
           }
 
@@ -224,7 +238,7 @@ const Login = () => {
             },
             "authUser"
           );
-            addProvisionData(userExist?.userId?.email);
+          addProvisionData(userExist?.userId?.email);
           return true;
         } else {
           toast.error(
@@ -236,6 +250,42 @@ const Login = () => {
     } catch (error) {
       toast.error(error.message);
       return false;
+    }
+  }
+
+
+  const checkEmail = async () => {
+    try {
+      const getVerifiedData = localStorage.getItem("verifiedData");
+      if (getVerifiedData) {
+        const parsedData = JSON.parse(getVerifiedData);
+        if (parsedData.email && parsedData.verified) {
+
+          setCheckEmailLoader(true)
+          const userExist = await getUser(parsedData.email);
+          if (userExist.status && userExist.status === "success") {
+            setCheckEmailLoader(false)
+          } else {
+            let getWallet = await getBitcoinAddress();
+            if (getWallet.status && getWallet.status == "success") {
+              setRegisterData({
+                email: parsedData.email,
+                username: parsedData.username,
+              });
+              setBitcoinWallet(getWallet?.data?.wallet || "");
+              setBitcoinWalletWif(getWallet?.data?.wif || "");
+              setAddressWif(getWallet?.data?.wif || "");
+              setCheckEmailLoader(false)
+              setStep(4)
+            } else {
+              setCheckEmailLoader(false)
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log("error checkEmail-->", e)
+      setCheckEmailLoader(false)
     }
   }
 
