@@ -12,6 +12,7 @@ import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
+import { splitAddress } from "../../utils/globals";
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -30,6 +31,16 @@ const BTCDebitCard: React.FC = () => {
   const [lnaddress, setLnaddress] = useState<any>("");
   const [lnQrCode, setLnQrCode] = useState<any>("");
   const [lightningBalance, setLightningBalance] = useState<any>(0);
+
+
+  const handleCopy = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      toast.success("LN Address copied successfully!");
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+    }
+  };
 
   const fetchLighteningBalance = async () => {
     try {
@@ -63,7 +74,7 @@ const BTCDebitCard: React.FC = () => {
         setCreditCardDetail(userExist?.userId?.creditCardPass);
       }
       if (userExist?.userId?.lnaddress) {
-        const qr = await QRCode.toDataURL(userExist?.userId?.lnaddress, {
+        const qr = await QRCode.toDataURL(userExist?.userId?.spendLnurlpLink?.lnurl, {
           margin: 0.5,
         });
         setLnQrCode(qr);
@@ -275,9 +286,10 @@ const BTCDebitCard: React.FC = () => {
                   </div>
                   {lnaddress && lnQrCode && (
                     <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 text-center">
-                      <p className="m-0 py-2 text-white/80">
+                      <p onClick={() => (handleCopy(lnaddress))} className="m-0 py-2 text-white/80 flex justify-center items-center  pb-5  cursor-pointer">
                         <span className="font-bold">LN Address:</span>
-                        {lnaddress}
+                        {splitAddress(lnaddress, 8)}{" "}
+                        <span className="ml-1">{copyIcn}</span>
                       </p>
                       <Image
                         alt=""
@@ -285,7 +297,7 @@ const BTCDebitCard: React.FC = () => {
                         height={10000}
                         width={10000}
                         className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
-                        // style={{ height: 230 }}
+                      // style={{ height: 230 }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button
@@ -401,6 +413,25 @@ const backIcn = (
       stroke="currentColor"
       stroke-width="2"
       stroke-linejoin="round"
+    />
+  </svg>
+);
+const copyIcn = (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M6.60001 11.397C6.60001 8.671 6.60001 7.308 7.44301 6.461C8.28701 5.614 9.64401 5.614 12.36 5.614H15.24C17.955 5.614 19.313 5.614 20.156 6.461C21 7.308 21 8.671 21 11.397V16.217C21 18.943 21 20.306 20.156 21.153C19.313 22 17.955 22 15.24 22H12.36C9.64401 22 8.28701 22 7.44301 21.153C6.59901 20.306 6.60001 18.943 6.60001 16.217V11.397Z"
+      fill="currentColor"
+    />
+    <path
+      opacity="0.5"
+      d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
+      fill="currentColor"
     />
   </svg>
 );
