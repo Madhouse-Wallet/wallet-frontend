@@ -24,6 +24,55 @@ const Step2 = ({
   const countryDropdownRef = useRef(null);
   const stateDropdownRef = useRef(null);
 
+  // List of unsupported countries (using country names as they appear in the country-state-city library)
+  const unsupportedCountries = [
+    "Afghanistan",
+    "Algeria",
+    "Bangladesh",
+    "Belarus",
+    "Burundi",
+    "Central African Republic",
+    "Chad",
+    "China",
+    "Cuba",
+    "North Korea", // Democratic People's Republic of Korea
+    "Democratic Republic of the Congo",
+    "Eritrea",
+    "Ethiopia",
+    "Haiti",
+    "Iran",
+    "Iraq",
+    "Kazakhstan",
+    "Kenya",
+    "Kosovo",
+    "Lebanon",
+    "Libya",
+    "North Macedonia", // Macedonia
+    "Mali",
+    "Morocco",
+    "Myanmar", // Myanmar (Burma)
+    "Nepal",
+    "Nicaragua",
+    "Niger",
+    "Pakistan",
+    "Palestine",
+    "Qatar",
+    "Russia", // Russian Federation
+    "Sint Maarten",
+    "Slovenia",
+    "Somalia",
+    "South Sudan",
+    "Sudan",
+    "Syria",
+    "Ukraine",
+    "Venezuela",
+    "Yemen",
+    "Zimbabwe",
+  ];
+
+  // List of US states with restrictions
+  const restrictedUSStates = ["Alaska", "New York"];
+
   function getCountryFlagEmoji(countryCode) {
     return countryCode
       .toUpperCase()
@@ -32,13 +81,30 @@ const Step2 = ({
       );
   }
 
+  // Check if a country is supported
+  const isCountrySupported = (countryName) => {
+    return !unsupportedCountries.some(
+      (unsupported) =>
+        countryName.toLowerCase().includes(unsupported.toLowerCase()) ||
+        unsupported.toLowerCase().includes(countryName.toLowerCase())
+    );
+  };
+
+  // Check if a US state is restricted
+  const isUSStateRestricted = (stateName) => {
+    return restrictedUSStates.includes(stateName);
+  };
+
   const allCountries = Country.getAllCountries().map((country) => {
     const isoCountry = iso3166.whereAlpha2(country.isoCode);
+    const isSupported = isCountrySupported(country.name);
+
     return {
       code: country.isoCode, // 2-digit code (needed for state lookup)
       alpha3: isoCountry ? isoCountry.alpha3 : country.isoCode, // 3-digit code
       name: country.name,
-      emoji: getCountryFlagEmoji(country.isoCode), // Placeholder flag
+      emoji: getCountryFlagEmoji(country.isoCode),
+      isSupported: isSupported,
     };
   });
 
@@ -62,9 +128,16 @@ const Step2 = ({
   }, []);
 
   const handleCountrySelect = (country) => {
+    // Don't allow selection of unsupported countries
+    if (!country.isSupported) {
+      setError("This country is not currently supported");
+      return;
+    }
+
     setSelectedCountry(country);
     setIsCountryOpen(false);
     setCountrySearchTerm("");
+    setError(""); // Clear any previous errors
 
     const countryStates = State.getStatesOfCountry(country.code);
     setStates(countryStates);
@@ -72,6 +145,17 @@ const Step2 = ({
   };
 
   const handleStateSelect = (state) => {
+    // Check if it's a restricted US state
+    if (
+      selectedCountry?.name === "United States" &&
+      isUSStateRestricted(state.name)
+    ) {
+      setError("This state has limited service availability");
+      // Still allow selection but show warning
+    } else {
+      setError(""); // Clear any previous errors
+    }
+
     setSelectedState(state);
     setIsStateOpen(false);
     setStateSearchTerm("");
@@ -119,6 +203,11 @@ const Step2 = ({
 
     if (!selectedCountry) {
       setError("Please select a country");
+      return;
+    }
+
+    if (!selectedCountry.isSupported) {
+      setError("Selected country is not currently supported");
       return;
     }
 
@@ -221,10 +310,25 @@ const Step2 = ({
                         <button
                           type="button"
                           onClick={() => handleCountrySelect(country)}
-                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          disabled={!country.isSupported}
+                          className={`flex items-center w-full px-4 py-2 text-sm ${
+                            country.isSupported
+                              ? "text-gray-700 hover:bg-gray-100 cursor-pointer"
+                              : "text-gray-400 bg-gray-50 cursor-not-allowed opacity-50"
+                          }`}
+                          title={
+                            !country.isSupported
+                              ? "This country is not currently supported"
+                              : ""
+                          }
                         >
                           <span className="mr-2">{country.emoji}</span>
                           {country.name} ({country.alpha3})
+                          {!country.isSupported && (
+                            <span className="ml-auto text-xs text-red-400">
+                              Not supported
+                            </span>
+                          )}
                         </button>
                       </li>
                     ))}
@@ -282,17 +386,36 @@ const Step2 = ({
                       />
                     </div>
                     <ul className="py-1">
-                      {filteredStates.map((state) => (
-                        <li key={state.isoCode}>
-                          <button
-                            type="button"
-                            onClick={() => handleStateSelect(state)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            {state.name} ({state.isoCode})
-                          </button>
-                        </li>
-                      ))}
+                      {filteredStates.map((state) => {
+                        const isRestricted =
+                          selectedCountry?.name === "United States" &&
+                          isUSStateRestricted(state.name);
+                        return (
+                          <li key={state.isoCode}>
+                            <button
+                              type="button"
+                              onClick={() => handleStateSelect(state)}
+                              className={`w-full text-left px-4 py-2 text-sm ${
+                                isRestricted
+                                  ? "text-orange-600 hover:bg-orange-50"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              }`}
+                              title={
+                                isRestricted
+                                  ? "This state has limited service availability"
+                                  : ""
+                              }
+                            >
+                              {state.name} ({state.isoCode})
+                              {isRestricted && (
+                                <span className="ml-2 text-xs text-orange-500">
+                                  Limited services
+                                </span>
+                              )}
+                            </button>
+                          </li>
+                        );
+                      })}
                       {filteredStates.length === 0 && (
                         <li className="px-4 py-2 text-sm text-gray-500">
                           No states found
