@@ -90,7 +90,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
-      console.log(amount);
       return {
         amount,
         category: tx.token_symbol || "USDC",
