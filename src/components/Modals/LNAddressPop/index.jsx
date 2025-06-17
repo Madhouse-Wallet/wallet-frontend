@@ -56,7 +56,7 @@ const LNAdressPopup = ({
       // Construct the full LN address
       const fullLnAddress = `${username}@spend.madhousewallet.com`;
       const resposne = await updateLNAddressCall(userAuth?.email,username);
-      console.log("repsonse", resposne);
+      // console.log("repsonse", resposne);
       if (resposne?.status === "success") {
         setLnaddress(fullLnAddress);
         toast.success("LN Address updated successfully!");
