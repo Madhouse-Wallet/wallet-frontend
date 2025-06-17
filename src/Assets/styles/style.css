@@ -62,7 +62,7 @@ body::-webkit-scrollbar,
 .pageCard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  padding-bottom: 90px !important;
+  padding-bottom: 200px !important;
   min-height: calc(100vh - 79px);
   width: 100% !important;
 }
