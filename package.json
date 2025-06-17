@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.830.0",
     "@bitcoinerlab/secp256k1": "1.2.0",
     "@ensofinance/sdk": "1.0.18",
     "@ethersproject/hash": "5.8.0",
