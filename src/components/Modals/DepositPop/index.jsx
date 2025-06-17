@@ -167,7 +167,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                     htmlFor=""
                     className="form-label m-0 font-semibold text-xs ps-3"
                   >
-                    Enter Amount
+                    Enter Amount in BTC
                   </label>
                   <div className="iconWithText relative">
                     <input

@@ -93,7 +93,7 @@ const BitikaPop = ({ bitikaPop, setBitikaPop, lnAddress }) => {
                     htmlFor="amount"
                     className="form-label m-0 font-semibold text-xs ps-3"
                   >
-                    Enter Amount
+                    Enter Amount in KES
                   </label>
                   <div className="iconWithText relative">
                     <input

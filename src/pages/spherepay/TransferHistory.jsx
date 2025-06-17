@@ -408,7 +408,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     htmlFor="amount"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    Enter Amount
+                    Enter Amount in USD
                   </label>
                   <input
                     id="amount"
