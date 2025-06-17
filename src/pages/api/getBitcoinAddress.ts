@@ -1,9 +1,16 @@
 // pages/api/reverseSwap.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import * as bitcoin from 'bitcoinjs-lib';
+// import * as bitcoin from 'bitcoinjs-lib';
 import { ECPairFactory } from 'ecpair';
-import * as ecc from 'tiny-secp256k1';
+// import * as ecc from 'tiny-secp256k1';
 import cors from 'cors';
+
+import * as bitcoin from 'bitcoinjs-lib'
+// import * { ECPairFactory } from 'ecpair'
+// Use the same library that works: @bitcoinerlab/secp256k1
+import * as secp from '@bitcoinerlab/secp256k1'
+
+const ECPair = ECPairFactory(secp)
 
 // Types
 interface SwapRequest extends NextApiRequest {
@@ -36,10 +43,20 @@ export default async function handler(
     if (!wif) {
       return res.status(400).json({ error: 'Wif is required' });
     }
-    const ECPair = ECPairFactory(ecc);
-    const keyPair = ECPair.fromWIF(wif);
-    const publicKeyBuffer = Buffer.from(keyPair.publicKey); // wrap in Buffer
-    const { address } = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer });
+    // const ECPair = ECPairFactory(ecc);
+    // const keyPair = ECPair.fromWIF(wif);
+    // const publicKeyBuffer = Buffer.from(keyPair.publicKey); // wrap in Buffer
+    // const { address } = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer });
+    const ECPair = ECPairFactory(secp)
+
+    const keyPair = ECPair.fromWIF(wif, bitcoin.networks.bitcoin)
+
+    const { address } = bitcoin.payments.p2pkh({
+      pubkey: keyPair.publicKey,
+      network: bitcoin.networks.bitcoin,
+    })
+
+    console.log("address-->", address)
     // Return initial swap details
     return res.status(200).json({
       status: 'success',
