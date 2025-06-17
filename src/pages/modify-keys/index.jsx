@@ -5,10 +5,10 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
-import { doAccountRecovery } from "../../lib/zeroDev";
-import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
+import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev";
+import { getUser, updtUser, decodeBitcoinAddress } from "../../lib/apiCall";
 import styled from "styled-components";
-import { filterHexxInput } from "../../utils/helper";
+import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
 
 const ModifyKeys = () => {
   const [step, setStep] = useState(1);
@@ -27,18 +27,32 @@ const ModifyKeys = () => {
   const [error, setError] = useState("");
   const [privateKeyError, setPrivateKeyError] = useState("");
   const [safePrivateKeyError, setSafePrivateKeyError] = useState("");
+  const [seedPhrase, setSeedPhrase] = useState();
+  const [seedError, setSeedError] = useState("");
+  const [wifError, setWifError] = useState("");
 
- 
 
   const checkAddress = async () => {
     try {
       setLoadingNewSigner(true);
-      if (email && privateKey && safePrivateKey) {
+      if (email && privateKey && safePrivateKey && wif && seedPhrase) {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
           setError("User Not Found!");
           setLoadingNewSigner(false);
         } else {
+          let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
+          if (!testMenmonic.status) {
+            setSeedError(testMenmonic.msg);
+            setLoadingNewSigner(false);
+            return;
+          }
+          let recoveryBitcoin = await decodeBitcoinAddress(wif);
+          if (recoveryBitcoin?.status == "error" || recoveryBitcoin?.data?.address != userExist?.userId?.bitcoinWallet) {
+            setWifError("Invalid Wif!");
+            setLoadingNewSigner(false);
+            return;
+          }
           setEmail(userExist?.userId?.email);
           setAddress(userExist?.userId?.wallet);
           setPasskeyData(userExist?.userId?.passkey);
@@ -182,6 +196,38 @@ const ModifyKeys = () => {
     }
   };
 
+
+  const handlePhraseInput = (e) => {
+    const value = e.target.value;
+    const filtered = filterAlphaWithSpaces(value, 250); // Adjust max length as needed
+    setSeedPhrase(filtered); // Or whatever your state setter is
+    if (
+      filtered.trim().split(/\s+/).length !== 12 &&
+      filtered.trim().split(/\s+/).length !== 24
+    ) {
+      setSeedError("Seed phrase should be 12 or 24 words");
+    } else {
+      setSeedError("");
+    }
+  };
+
+
+  const handleWifInput = (e) => {
+    const value = e.target.value;
+    const disallowedChars =
+      /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g;
+    const filtered = filterHexxInput(value, disallowedChars, 52); // WIF length usually ≤52
+
+    setWif(filtered); // Or whatever your state setter is
+
+    if (!/^([KL5][1-9A-HJ-NP-Za-km-z]{51,52})$/.test(filtered)) {
+      setWifError("Invalid WIF format");
+    } else {
+      setWifError("");
+    }
+  };
+
+
   return (
     <>
       <div className="mx-auto ">
@@ -256,6 +302,38 @@ const ModifyKeys = () => {
                     </div>
                   )}
                 </div>
+                <div className="py-2">
+                  <input
+                    type="text"
+                    name="seedphrase"
+                    onChange={handlePhraseInput}
+                    value={seedPhrase}
+                    // value={safePriva02teKey}
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
+                    placeholder="Enter Seed Phrase"
+                  />
+                  {seedError && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {seedError}
+                    </div>
+                  )}
+                </div>
+                <div className="py-2">
+                  <input
+                    type="text"
+                    name="wif"
+                    onChange={handleWifInput}
+                    value={wif}
+                    // value={safePriva02teKey}
+                    className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
+                    placeholder="Enter Seed Phrase"
+                  />
+                  {wifError && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {wifError}
+                    </div>
+                  )}
+                </div>
                 <div className="btnWrpper mt-3 text-center">
                   <button
                     type="button"
@@ -264,10 +342,13 @@ const ModifyKeys = () => {
                       loadingNewSigner ||
                       error ||
                       privateKeyError ||
-                      safePrivateKeyError ||
+                      safePrivateKeyError || seedError ||
+                      wifError ||
                       !email ||
                       !privateKey ||
-                      !safePrivateKey
+                      !safePrivateKey ||
+                      !wif ||
+                      !seedPhrase
                     }
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
