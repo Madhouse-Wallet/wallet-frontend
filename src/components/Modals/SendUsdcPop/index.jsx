@@ -6,6 +6,7 @@ import {
   USDC_ABI,
   publicClient,
   usdc,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
@@ -108,6 +109,26 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       if (!getAccountCli.status) {
         return;
       }
+
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+        ]
+      );
+
+      // Log the gas price
+      console.log("=== Gas Price Calculation ===", gasPriceResult.usd);
+      console.log(`Gas Price in USDC: ${gasPriceResult.formatted} USDC`);
+      console.log(`Raw value: ${gasPriceResult.raw.toString()}`);
+      console.log(`Exchange Rate: ${gasPriceResult.exchangeRate}`);
+      console.log("Gas Breakdown:", gasPriceResult.gasBreakdown);
+      console.log("=============================");
 
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {

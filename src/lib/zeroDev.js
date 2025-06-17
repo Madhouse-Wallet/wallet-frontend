@@ -5,6 +5,8 @@ import {
   http,
   createWalletClient,
   parseAbi,
+  formatUnits,
+  parseUnits,
 } from "viem";
 import { ethers, utils, Wallet } from "ethers";
 import { base } from "viem/chains";
@@ -352,6 +354,8 @@ export const sendTransaction = async (smartAccountClient, params) => {
         exchangeRate) /
       BigInt(1e18);
 
+    console.log("line-357", maxCostInToken);
+
     params.unshift({
       abi: parseAbi(["function approve(address,uint)"]),
       functionName: "approve",
@@ -382,6 +386,125 @@ export const sendTransaction = async (smartAccountClient, params) => {
         details: error,
       },
     };
+  }
+};
+
+// export const calculateGasPriceInUSDC = async (smartAccountClient, params) => {
+//   try {
+//     // Get token quotes from Pimlico
+//     const quotes = await pimlicoClient.getTokenQuotes({
+//       chain: base,
+//       tokens: [usdc],
+//     });
+//     const { postOpGas, exchangeRate, paymaster } = quotes[0];
+
+//     // Add approve call to params for accurate gas estimation
+//     const paramsWithApprove = [...params];
+//     paramsWithApprove.unshift({
+//       abi: parseAbi(["function approve(address,uint)"]),
+//       functionName: "approve",
+//       args: [paymaster, parseUnits("1000", 6)], // placeholder amount
+//       to: usdc,
+//     });
+
+//     // Prepare user operation to get gas estimates
+//     const userOperation = await smartAccountClient.prepareUserOperation({
+//       calls: paramsWithApprove,
+//     });
+
+//     // Calculate total gas needed
+//     const userOperationMaxGas =
+//       userOperation.preVerificationGas +
+//       userOperation.callGasLimit +
+//       userOperation.verificationGasLimit +
+//       (userOperation.paymasterPostOpGasLimit || 0n) +
+//       (userOperation.paymasterVerificationGasLimit || 0n);
+
+//     // Calculate gas cost in ETH
+//     const userOperationMaxCost =
+//       userOperationMaxGas * userOperation.maxFeePerGas;
+
+//     // Convert to USDC using Pimlico's formula
+//     const gasPriceInUSDC =
+//       ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) *
+//         exchangeRate) /
+//       BigInt(1e18);
+
+//     // Return both raw value and formatted
+//     return {
+//       raw: gasPriceInUSDC,
+//       formatted: formatUnits(gasPriceInUSDC, 6), // USDC has 6 decimals
+//       exchangeRate: exchangeRate.toString(),
+//       gasBreakdown: {
+//         totalGas: userOperationMaxGas.toString(),
+//         maxFeePerGas: userOperation.maxFeePerGas.toString(),
+//         postOpGas: postOpGas.toString(),
+//       },
+//     };
+//   } catch (error) {
+//     console.error("Error calculating gas price in USDC:", error);
+//     throw error;
+//   }
+// };
+
+export const calculateGasPriceInUSDC = async (smartAccountClient, params) => {
+  try {
+    const quotes = await pimlicoClient.getTokenQuotes({
+      chain: base,
+      tokens: [usdc],
+    });
+
+    const { postOpGas, exchangeRate, exchangeRateNativeToUsd, paymaster } =
+      quotes[0];
+
+    // Include an approve call so gas estimate is accurate
+    const paramsWithApprove = [...params];
+    paramsWithApprove.unshift({
+      abi: parseAbi(["function approve(address,uint)"]),
+      functionName: "approve",
+      args: [paymaster, parseUnits("1000", 6)],
+      to: usdc,
+    });
+
+    const userOperation = await smartAccountClient.prepareUserOperation({
+      calls: paramsWithApprove,
+    });
+
+    const userOperationMaxGas =
+      userOperation.preVerificationGas +
+      userOperation.callGasLimit +
+      userOperation.verificationGasLimit +
+      (userOperation.paymasterPostOpGasLimit || 0n) +
+      (userOperation.paymasterVerificationGasLimit || 0n);
+
+    const userOperationMaxCost =
+      userOperationMaxGas * userOperation.maxFeePerGas;
+
+    const maxCostInWei =
+      userOperationMaxCost + postOpGas * userOperation.maxFeePerGas;
+
+    const maxCostInToken = (maxCostInWei * exchangeRate) / BigInt(1e18);
+
+    const rawCostInUsd =
+      (maxCostInWei * exchangeRateNativeToUsd) / BigInt(1e18);
+
+    const formattedCostInUsd = Number(rawCostInUsd) / 1e6;
+
+    return {
+      raw: maxCostInToken,
+      formatted: formatUnits(maxCostInToken, 6),
+      usd: formattedCostInUsd.toString(),
+      exchangeRate: exchangeRate.toString(),
+      exchangeRateNativeToUsd: exchangeRateNativeToUsd.toString(),
+      gasBreakdown: {
+        totalGas: userOperationMaxGas.toString(),
+        maxFeePerGas: userOperation.maxFeePerGas.toString(),
+        postOpGas: postOpGas.toString(),
+      },
+    };
+  } catch (error) {
+    console.error("Error calculating gas price in USDC:", error);
+    throw error;
   }
 };
 
