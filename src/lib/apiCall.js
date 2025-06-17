@@ -116,7 +116,7 @@ export const addProvisionData = async (email) => {
 export const addProvisionLambda = async (data) => {
   try {
     const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-addlnbitUser")
-    console.log(" addProvisionLambda apiResponse-->", apiResponse)
+    // console.log(" addProvisionLambda apiResponse-->", apiResponse)
     return true;
     // return await fetch(
     //   `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/addlnbitUser`,
@@ -141,7 +141,7 @@ export const addProvisionLambda = async (data) => {
 export const updateLNAddress = async (data) => {
   try {
     const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-updateLnAddress")
-    console.log(" updateLNAddress apiResponse-->", apiResponse)
+    // console.log(" updateLNAddress apiResponse-->", apiResponse)
     return apiResponse;
     // return await fetch(
     //   `${process.env.NEXT_PUBLIC_LAMBDA_API_URL}api/v1/updt-lnaddress`,
