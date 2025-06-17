@@ -5,6 +5,12 @@ import { ECPairFactory } from "ecpair";
 import * as ecc from "tiny-secp256k1";
 import cors from "cors";
 
+// import * { ECPairFactory } from 'ecpair'
+// Use the same library that works: @bitcoinerlab/secp256k1
+import * as secp from '@bitcoinerlab/secp256k1'
+
+const ECPair = ECPairFactory(secp)
+
 // Types
 interface SwapRequest extends NextApiRequest {
   body: {

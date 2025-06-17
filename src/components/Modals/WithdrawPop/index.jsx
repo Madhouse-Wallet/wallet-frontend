@@ -161,9 +161,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       type="text"
                       onChange={(e) => setAmount(e.target.value)}
                       value={amount}
-                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                     />
                   </div>
+                  {/* <p className="m-0 text-red-500">parvinder</p> */}
                 </div>
 
                 <div className="btnWrpper mt-3">
