@@ -20,7 +20,7 @@ export default async function handler(
   try {
     // Call the BlockCypher API to generate a new bitcoin address
     const response = await axios.post<BlockCypherResponse>(
-      "https://api.blockcypher.com/v1/btc/main/addrs"
+      "https://api.blockcypher.com/v1/btc/main/addrs?bech32=true"
     );
 
     // Extract the data from the response
