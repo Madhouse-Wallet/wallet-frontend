@@ -344,7 +344,7 @@ const DepositSwap = () => {
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Swap USDC to Spark USDC</p>
+                  <p className="m-0 font-medium">Lend USDC to Earn Interest</p>
                   <div className="text-xs text-white/70">
                     Powered by Enso Finance
                   </div>
