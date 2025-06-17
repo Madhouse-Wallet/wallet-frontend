@@ -9,7 +9,7 @@ import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
 import { getBitcoinAddress } from "../../lib/apiCall";
 
-import { registerStoreCredential } from "../../utils/webauthPrf";
+import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import {
   generateOTP,
   storedataLocalStorage,
@@ -142,18 +142,25 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      const registerCheck = await registerStoreCredential(
-        userName,
-        userName,
-        data
-      );
+       const registerCheck = await registerCredential(userName, userName);
       let res;
       if (registerCheck?.status) {
-        res = {
-          status: true,
-          storageKey: registerCheck?.data?.storageKey,
-          credentialId: registerCheck?.data?.credentialId,
-        };
+        const storeSecretCheck = await storeSecret(
+          registerCheck?.data?.credentialId,
+          data
+        );
+        if (storeSecretCheck?.status) {
+          res = {
+            status: true,
+            storageKey: storeSecretCheck?.data?.storageKey,
+            credentialId: registerCheck?.data?.credentialId,
+          };
+        } else {
+          res = {
+            status: false,
+            msg: storeSecretCheck?.msg,
+          };
+        }
       } else {
         res = {
           status: false,

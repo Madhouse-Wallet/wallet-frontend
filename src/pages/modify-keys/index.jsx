@@ -7,7 +7,6 @@ import { webAuthKeyStore } from "../../utils/globals";
 import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
 import { doAccountRecovery } from "../../lib/zeroDev";
 import { getUser, updtUser, getUserToken } from "../../lib/apiCall";
-import { registerStoreCredential } from "../../utils/webauthPrf";
 import styled from "styled-components";
 import { filterHexxInput } from "../../utils/helper";
 
@@ -29,32 +28,7 @@ const ModifyKeys = () => {
   const [privateKeyError, setPrivateKeyError] = useState("");
   const [safePrivateKeyError, setSafePrivateKeyError] = useState("");
 
-  const setSecretInPasskey = async (userName, data) => {
-    try {
-      const registerCheck = await registerStoreCredential(
-        userName,
-        userName,
-        data
-      );
-      if (registerCheck?.status) {
-        return {
-          status: true,
-          storageKey: registerCheck?.data?.storageKey,
-          credentialId: registerCheck?.data?.credentialId,
-        };
-      } else {
-        return {
-          status: false,
-          msg: registerCheck?.msg,
-        };
-      }
-    } catch (error) {
-      return {
-        status: false,
-        msg: "Facing issue in storing secret",
-      };
-    }
-  };
+ 
 
   const checkAddress = async () => {
     try {

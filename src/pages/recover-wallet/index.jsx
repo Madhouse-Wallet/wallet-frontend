@@ -12,7 +12,7 @@ import {
   getUserToken,
   decodeBitcoinAddress,
 } from "../../lib/apiCall";
-import { registerStoreCredential } from "../../utils/webauthPrf";
+import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
 
 const RecoverWallet = () => {
@@ -34,13 +34,24 @@ const RecoverWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-      let registerCheck = await registerStoreCredential(userName, userName);
+      let registerCheck = await registerCredential(userName, userName);
       if (registerCheck?.status) {
-        return {
-          status: true,
-          storageKey: registerCheck?.data?.storageKey,
-          credentialId: registerCheck?.data?.credentialId,
-        };
+        let storeSecretCheck = await storeSecret(
+          registerCheck?.data?.credentialId,
+          data
+        );
+        if (storeSecretCheck?.status) {
+          return {
+            status: true,
+            storageKey: storeSecretCheck?.data?.storageKey,
+            credentialId: registerCheck?.data?.credentialId,
+          };
+        } else {
+          return {
+            status: false,
+            msg: storeSecretCheck?.msg,
+          };
+        }
       } else {
         return {
           status: false,
