@@ -24,7 +24,8 @@
   /* background-image: url(../Images//umbrel/1.jpg); */
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 html {
   -webkit-text-size-adjust: 100%;
@@ -62,7 +63,7 @@ body::-webkit-scrollbar,
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   padding-bottom: 90px !important;
-  min-height: calc(100vh - 108px);
+  min-height: calc(100vh - 79px);
   width: 100% !important;
 }
 .commonBtn {

@@ -13,7 +13,7 @@ const ContentPage = () => {
   const [step, setStep] = useState("all");
   return (
     <>
-      <section className="relative dashboard pt-12">
+      <section className="relative dashboard  ">
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
