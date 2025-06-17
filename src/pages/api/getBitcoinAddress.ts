@@ -1,24 +1,18 @@
 // pages/api/reverseSwap.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import * as bitcoin from "bitcoinjs-lib";
 import { ECPairFactory } from "ecpair";
-import * as ecc from "tiny-secp256k1";
+import * as bitcoin from "bitcoinjs-lib";
+import * as secp from "@bitcoinerlab/secp256k1";
 import cors from "cors";
 
-// import * { ECPairFactory } from 'ecpair'
-// Use the same library that works: @bitcoinerlab/secp256k1
-import * as secp from '@bitcoinerlab/secp256k1'
+const ECPair = ECPairFactory(secp);
 
-const ECPair = ECPairFactory(secp)
-
-// Types
 interface SwapRequest extends NextApiRequest {
   body: {
     wif: string;
   };
 }
 
-// Setup CORS middleware
 const corsMiddleware = cors({
   origin: true,
   methods: ["POST"],
@@ -36,25 +30,24 @@ export default async function handler(req: SwapRequest, res: NextApiResponse) {
     if (!wif) {
       return res.status(400).json({ error: "Wif is required" });
     }
-    const ECPair = ECPairFactory(ecc);
-    const keyPair = ECPair.fromWIF(wif);
-    const publicKeyBuffer = Buffer.from(keyPair.publicKey); // wrap in Buffer
+
+    const keyPair = ECPair.fromWIF(wif, bitcoin.networks.bitcoin);
+
+    // Use Bech32 address format (bc1...)
     const { address } = bitcoin.payments.p2wpkh({
-      pubkey: publicKeyBuffer,
+      pubkey: keyPair.publicKey,
       network: bitcoin.networks.bitcoin,
     });
 
-    // Return initial swap details
+    console.log("address -->", address);
+
     return res.status(200).json({
       status: "success",
-      data: {
-        address,
-      },
+      data: { address },
     });
   } catch (error: any) {
     console.error("Swap creation error:", error);
 
-    // Handle Axios errors
     if (error.response?.data) {
       return res.status(error.response.status).json({
         status: "error",
@@ -62,7 +55,6 @@ export default async function handler(req: SwapRequest, res: NextApiResponse) {
       });
     }
 
-    // Generic error response
     return res.status(500).json({
       status: "error",
       error: error.message || "Internal server error",
