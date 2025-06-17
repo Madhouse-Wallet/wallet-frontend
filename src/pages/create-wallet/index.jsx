@@ -282,6 +282,7 @@ const CreateWallet = () => {
   };
 
   const registerOtpFn = async (data) => {
+    setError("");
     try {
       // Check if OTP is expired
       if (isOtpExpired()) {

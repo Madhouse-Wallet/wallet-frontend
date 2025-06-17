@@ -91,7 +91,7 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
             maxHeight: "100vh",
           }}
         />
-        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center">
+        <div className="absolute sm:bottom-20 bottom-[20px] left-0 right-0 flex flex-col items-center">
           <p className="text-sm text-white text-center mb-4">
             Place the QR code in front of your camera
           </p>

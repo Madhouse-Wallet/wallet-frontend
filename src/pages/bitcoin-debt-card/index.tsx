@@ -32,7 +32,6 @@ const BTCDebitCard: React.FC = () => {
   const [lnQrCode, setLnQrCode] = useState<any>("");
   const [lightningBalance, setLightningBalance] = useState<any>(0);
 
-
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -74,9 +73,12 @@ const BTCDebitCard: React.FC = () => {
         setCreditCardDetail(userExist?.userId?.creditCardPass);
       }
       if (userExist?.userId?.lnaddress) {
-        const qr = await QRCode.toDataURL(userExist?.userId?.spendLnurlpLink?.lnurl, {
-          margin: 0.5,
-        });
+        const qr = await QRCode.toDataURL(
+          userExist?.userId?.spendLnurlpLink?.lnurl,
+          {
+            margin: 0.5,
+          }
+        );
         setLnQrCode(qr);
         setLnaddress(userExist?.userId?.lnaddress);
       }
@@ -286,18 +288,23 @@ const BTCDebitCard: React.FC = () => {
                   </div>
                   {lnaddress && lnQrCode && (
                     <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 text-center">
-                      <p onClick={() => (handleCopy(lnaddress))} className="m-0 py-2 text-white/80 flex justify-center items-center  pb-5  cursor-pointer">
-                        <span className="font-bold">LN Address:</span>
-                        {splitAddress(lnaddress, 8)}{" "}
+                        <p className="m-0">
+                          <span className="font-bold block">LN Address:</span>
+                        </p>
+                      <div
+                        onClick={() => handleCopy(lnaddress)}
+                        className="m-0 py-2 text-white/80 flex justify-center items-center  pb-5  cursor-pointer"
+                      >
+                          {lnaddress}{" "}
                         <span className="ml-1">{copyIcn}</span>
-                      </p>
+                      </div>
                       <Image
                         alt=""
                         src={lnQrCode}
                         height={10000}
                         width={10000}
                         className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
-                      // style={{ height: 230 }}
+                        // style={{ height: 230 }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button

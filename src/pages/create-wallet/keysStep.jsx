@@ -82,10 +82,11 @@ const KeyStep = ({ step, setStep, registerFn, error }) => {
                   </button>
                 </div>
               </div>
-
-              {error && (
-                <div className="text-red-500 text-xs mt-1">{error}</div>
-              )}
+              <div className="col-span-12">
+                {error && (
+                  <div className="text-red-500 text-xs mt-1">{error}</div>
+                )}
+              </div>
             </div>
           </form>
         </div>
