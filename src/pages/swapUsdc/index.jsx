@@ -37,6 +37,7 @@ const Swap = () => {
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [swapType, setSwapType] = useState("");
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
@@ -61,7 +62,34 @@ const Swap = () => {
     }
   };
 
-  const getQuote = async (amount) => {
+  // const getQuote = async (amount) => {
+  //   try {
+  //     const response = await fetch("/api/swap-quote-thorStream", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         sellAsset: `BASE.USDC-${process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}`,
+  //         buyAsset: "BTC.BTC",
+  //         sellAmount: amount,
+  //         sourceAddress: userAuth?.walletAddress,
+  //         destinationAddress: userAuth?.bitcoinWallet,
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+  //     setQuote(data);
+  //     return {
+  //       ...data,
+  //       estimatedDepositAddress: data?.routes[0].targetAddress,
+  //       estimate: data?.routes[0].expectedBuyAmount,
+  //     };
+  //   } catch (error) {
+  //     console.error("Quote fetch error:", error);
+  //     return null;
+  //   }
+  // };
+
+  const getQuote = async (amount, attempt = 1) => {
     try {
       const response = await fetch("/api/swap-quote-thorStream", {
         method: "POST",
@@ -83,8 +111,15 @@ const Swap = () => {
         estimate: data?.routes[0].expectedBuyAmount,
       };
     } catch (error) {
-      console.error("Quote fetch error:", error);
-      return null;
+      console.error(`Quote fetch error (attempt ${attempt}):`, error);
+
+      if (attempt < 3) {
+        // Retry up to 3 times
+        return await getQuote(amount, attempt + 1);
+      } else {
+        // After 3 attempts, throw the error
+        throw error;
+      }
     }
   };
 
@@ -142,6 +177,8 @@ const Swap = () => {
 
   const handleFromAmountChange = async (e) => {
     setError("");
+    setToAmount("");
+    setSwapType("");
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -165,46 +202,128 @@ const Swap = () => {
       setAmountError("");
     }
 
+    // if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+    //   const timer = setTimeout(async () => {
+    //     setIsLoading(true);
+    //     try {
+    //       const quotePromise = getQuote(filteredValue);
+    //       const shiftPromise = getDestinationAddress(filteredValue);
+
+    //       const [quoteResult, shiftResult] = await Promise.all([
+    //         quotePromise,
+    //         shiftPromise,
+    //       ]);
+    //       const quoteSettleAmount = Number.parseFloat(
+    //         quoteResult?.estimate || 0
+    //       );
+    //       const shiftSettleAmount = Number.parseFloat(
+    //         shiftResult?.settleAmount || 0
+    //       );
+
+    //       let finalAddress = "";
+
+    //       if (
+    //         quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
+    //         shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+    //       ) {
+    //         finalAddress = shiftResult?.depositAddress;
+    //         setToAmount(shiftResult?.settleAmount);
+    //         setSwapType("Sideshift");
+    //       } else {
+    //         finalAddress = quoteResult?.estimatedDepositAddress;
+    //         setToAmount(quoteResult?.estimate);
+    //         setSwapType("Swapkit");
+    //       }
+
+    //       if (finalAddress) {
+    //         setDestinationAddress(finalAddress);
+    //       }
+    //     } catch (err) {
+    //       setError("Failed to fetch quote or destination address.");
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   }, 2000); // 500ms debounce
+
+    //   setDebounceTimer(timer);
+    // }
+
     if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
       const timer = setTimeout(async () => {
         setIsLoading(true);
+        setError(""); // Clear previous errors
+        setSwapType(""); // Clear previous provider
+
         try {
-          const quotePromise = getQuote(filteredValue);
+          // First, try to get quotes from both providers
           const shiftPromise = getDestinationAddress(filteredValue);
+          const quotePromise = getQuote(filteredValue);
 
-          const [quoteResult, shiftResult] = await Promise.all([
-            quotePromise,
+          const [shiftResult, quoteResult] = await Promise.allSettled([
             shiftPromise,
+            quotePromise,
           ]);
-          const quoteSettleAmount = Number.parseFloat(
-            quoteResult?.estimate || 0
-          );
-          const shiftSettleAmount = Number.parseFloat(
-            shiftResult?.settleAmount || 0
-          );
 
-          let finalAddress = "";
+          let finalShiftResult = null;
+          let finalQuoteResult = null;
 
-          if (
-            quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-            shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-          ) {
-            finalAddress = shiftResult?.depositAddress;
-            setToAmount(shiftResult?.settleAmount);
-          } else {
-            finalAddress = quoteResult?.estimatedDepositAddress;
-            setToAmount(quoteResult?.estimate);
+          // Extract results from Promise.allSettled
+          if (shiftResult.status === "fulfilled") {
+            finalShiftResult = shiftResult.value;
+          }
+          if (quoteResult.status === "fulfilled") {
+            finalQuoteResult = quoteResult.value;
           }
 
-          if (finalAddress) {
-            setDestinationAddress(finalAddress);
+          // If getDestinationAddress failed, use getQuote
+          if (!finalShiftResult) {
+            if (finalQuoteResult) {
+              setDestinationAddress(finalQuoteResult.estimatedDepositAddress);
+              setToAmount(finalQuoteResult.estimate);
+              setSwapType("Swapkit");
+            } else {
+              // Both failed, show error from getQuote
+              const quoteError =
+                // quoteResult.reason?.message ||
+                "Failed to get quotes from Swapkit try again after some time.";
+              setError(quoteError);
+            }
+          } else {
+            // getDestinationAddress succeeded, now compare amounts if both are available
+            if (finalQuoteResult) {
+              const quoteSettleAmount = Number.parseFloat(
+                finalQuoteResult?.estimate || 0
+              );
+              const shiftSettleAmount = Number.parseFloat(
+                finalShiftResult?.settleAmount || 0
+              );
+
+              if (
+                quoteSettleAmount <=
+                  process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
+                shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+              ) {
+                setDestinationAddress(finalShiftResult.depositAddress);
+                setToAmount(finalShiftResult.settleAmount);
+                setSwapType("Sideshift");
+              } else {
+                setDestinationAddress(finalQuoteResult.estimatedDepositAddress);
+                setToAmount(finalQuoteResult.estimate);
+                setSwapType("Swapkit");
+              }
+            } else {
+              // Only Sideshift succeeded
+              setDestinationAddress(finalShiftResult.depositAddress);
+              setToAmount(finalShiftResult.settleAmount);
+              setSwapType("Sideshift");
+            }
           }
         } catch (err) {
-          setError("Failed to fetch quote or destination address.");
+          setError("Failed to fetch quotes");
         } finally {
           setIsLoading(false);
         }
-      }, 2000); // 500ms debounce
+      }, 2000);
 
       setDebounceTimer(timer);
     } else {
@@ -346,6 +465,11 @@ const Swap = () => {
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
                   <p className="m-0 font-medium">Swap</p>
+                  {swapType && (
+                    <div className="text-xs text-white/70">
+                      Powered by {swapType}
+                    </div>
+                  )}
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
@@ -440,7 +564,7 @@ const Swap = () => {
                       </div>
                     )}
 
-                    {error && (
+                    {error && toAmount === "" && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
                   </div>

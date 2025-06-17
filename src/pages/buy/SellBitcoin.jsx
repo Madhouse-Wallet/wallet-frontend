@@ -30,6 +30,7 @@ const SellBitcoin = () => {
   const [destinationAddress, setDestinationAddress] = useState("");
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
+  const [swapType, setSwapType] = useState("");
   const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
@@ -134,6 +135,7 @@ const SellBitcoin = () => {
   };
 
   const handleFromAmountChange = async (e) => {
+    setSwapType("");
     setError("");
     const value = e.target.value;
 
@@ -170,18 +172,23 @@ const SellBitcoin = () => {
             if (shiftResult) {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
+              setSwapType("Sideshift");
             } else {
               setDestinationAddress("");
               setToAmount("");
+              setSwapType("");
             }
           } else {
             // For amounts > 0.1 BTC, use ThorSwap
             const quoteResult = await getQuote(filteredValue);
+
             if (quoteResult) {
               setDestinationAddress(quoteResult.estimatedDepositAddress);
               setToAmount(quoteResult.estimate);
+              setSwapType("Swapkit");
             } else {
               setDestinationAddress("");
+              setSwapType("");
               setToAmount("");
             }
           }
@@ -346,6 +353,11 @@ const SellBitcoin = () => {
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
                   <p className="m-0 font-medium">Swap</p>
+                  {swapType && (
+                    <div className="text-xs text-white/70">
+                      Powered by {swapType}
+                    </div>
+                  )}
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
@@ -405,10 +417,10 @@ const SellBitcoin = () => {
                             {swapDirection.to === "USDC" ? usdcIcn : BTC}
                           </span>{" "}
                           <span className="text-[12px]">
-                          {swapDirection.to}
-</span>
+                            {swapDirection.to}
+                          </span>
                         </button>
-                              <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance:{" "}
                           {swapDirection.to === "USDC"
                             ? parseFloat(usdcBalance).toFixed(2)
