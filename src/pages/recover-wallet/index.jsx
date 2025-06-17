@@ -20,6 +20,7 @@ const RecoverWallet = () => {
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
   const [phrase, setPhrase] = useState();
   const [address, setAddress] = useState();
+  const [bitcoinAddress, setBitcoinAddress] = useState();
   const [email, setEmail] = useState();
   const [privateKey, setPrivateKey] = useState();
   const [safeprivateKey, setSafePrivateKey] = useState();
@@ -76,6 +77,7 @@ const RecoverWallet = () => {
           setLoadingNewSigner(false);
         } else {
           setAddress(userExist?.userId?.wallet);
+          setBitcoinAddress(userExist?.userId?.bitcoinWallet)
           setLoadingNewSigner(false);
           setStep(2);
         }
@@ -94,7 +96,7 @@ const RecoverWallet = () => {
       if (privateKey && wif && safeprivateKey && seedPhrase) {
         let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
         if (!testMenmonic.status) {
-          toast.error(testMenmonic.msg);
+          setSeedError(testMenmonic.msg);
           setLoadingNewSigner(false);
           return;
         }
@@ -104,8 +106,8 @@ const RecoverWallet = () => {
           address
         );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
-        if (recoveryBitcoin?.status == "error") {
-          toast.error("Invalid Wif!");
+        if (recoveryBitcoin?.status == "error" || recoveryBitcoin?.data?.address != bitcoinAddress) {
+          setWifError("Invalid Wif!");
           setLoadingNewSigner(false);
           return;
         }
@@ -155,16 +157,16 @@ const RecoverWallet = () => {
             setLoadingNewSigner(false);
           }
         } else {
-          toast.error(recoverAccount?.msg);
+          setError(recoverAccount?.msg);
           setLoadingNewSigner(false);
         }
       } else {
-        toast.error("Invalid Credentials!");
+        setError("Invalid Credentials!");
         setLoadingNewSigner(false);
       }
       setLoadingNewSigner(false);
     } catch (error) {
-      toast.error("Invalid Key!");
+      setError("Invalid Key!");
       setLoadingNewSigner(false);
     }
   };
