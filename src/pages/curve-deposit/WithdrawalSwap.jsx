@@ -520,16 +520,16 @@ const WithdrawalSwap = () => {
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                           className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                          <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Ethereum Network
                         </h6>
                       </div>
@@ -547,9 +547,11 @@ const WithdrawalSwap = () => {
                               className="max-w-full object-contain w-auto smlogo"
                             />
                           </span>{" "}
+                          <span className="text-[12px]">
                           {bridgeDirection.from}
+</span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
+                       <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
                           {/* {bridgeDirection.from} */}
                           XAUT
@@ -566,17 +568,17 @@ const WithdrawalSwap = () => {
                     </button>
                   </div>
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                           className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true}
                           readOnly
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Base Network
                         </h6>
                       </div>
@@ -597,9 +599,11 @@ const WithdrawalSwap = () => {
                               />
                             )}
                           </span>{" "}
+                          <span className="text-[12px]">
                           {bridgeDirection.to}
+</span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
+                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
                           {bridgeDirection.to}
                         </h6>
@@ -650,7 +654,7 @@ const WithdrawalSwap = () => {
 
                   <div className="mt-3 py-2">
                     <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={() => setTrxnApproval(true)}

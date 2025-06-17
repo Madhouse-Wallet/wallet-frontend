@@ -306,8 +306,6 @@ const DepositSwap = () => {
           />,
           document.body
         )}
-      <section className="py-3">
-        <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
@@ -316,21 +314,21 @@ const DepositSwap = () => {
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                         <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Base Network
                         </h6>
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
                           <span className="icn">
                             {bridgeDirection.from === "USDC" ? (
                               usdcIcn
@@ -346,9 +344,11 @@ const DepositSwap = () => {
                               />
                             )}
                           </span>{" "}
-                          {bridgeDirection.from}
+                          <span className="text-[12px]">
+                            {bridgeDirection.from}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
                           {bridgeDirection.from}
                         </h6>
@@ -364,22 +364,22 @@ const DepositSwap = () => {
                     </button>
                   </div>
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true}
                           readOnly
                         />
-                        <h6 className="m-0 font-medium text-white/50">
+                        <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Ethereum Network
                         </h6>
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
+                        <button className="px-2 py-1 inline-flex items-center gap-2 text-base whitespace-nowrap">
                           <span className="icn">
                             <Image
                               src={
@@ -392,9 +392,11 @@ const DepositSwap = () => {
                               className="max-w-full object-contain w-auto smlogo"
                             />
                           </span>{" "}
-                          {bridgeDirection.to}
+                          <span className="text-[12px]">
+                            {bridgeDirection.to}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50 whitespace-nowrap">
+                        <h6 className="m-0 font-medium sm:text-xs text-[9px]  text-white/50 whitespace-nowrap">
                           Balance: {parseFloat(tethergolgBalance).toFixed(6)}{" "}
                           {/* {bridgeDirection.to} */}
                           XAUT
@@ -427,7 +429,7 @@ const DepositSwap = () => {
 
                   <div className="mt-3 py-2">
                     <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={() => setTrxnApproval(true)}
@@ -440,8 +442,6 @@ const DepositSwap = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
     </>
   );
 };

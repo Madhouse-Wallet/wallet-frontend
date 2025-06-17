@@ -133,11 +133,15 @@ const WalletBackup = ({
               </div>
             </div>
 
-            {errorr && (
-              <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
-                {errorr}
-              </div>
-            )}
+            <div className="col-span-12">
+              {" "}
+              {errorr && (
+                <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                  {errorr}
+                </div>
+              )}
+            </div>
+
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
