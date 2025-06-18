@@ -43,8 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             "refund_address1": ""
         })
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error adding user:', error);
+        // Duplicate email error
+        if (error.code === 11000 && error.keyPattern?.email) {
+            return res.status(400).json({ status: "failure", message: 'User Already Exist!', userData: {} });
+        }
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
