@@ -142,7 +142,7 @@ const CreateWallet = () => {
 
   const setSecretInPasskey = async (userName, data) => {
     try {
-       const registerCheck = await registerCredential(userName, userName);
+      const registerCheck = await registerCredential(userName, userName);
       let res;
       if (registerCheck?.status) {
         const storeSecretCheck = await storeSecret(
@@ -176,11 +176,17 @@ const CreateWallet = () => {
     }
   };
 
+  const cleatStates = async () => {
+    localStorage.removeItem("verifiedData");
+    return true;
+  }
+
   const registerFn = async () => {
     try {
       const userExist = await getUser(registerData.email);
       if (userExist.status && userExist.status === "success") {
         setError("User Already Exist!");
+        await cleatStates()
         return false;
       }
       const baseWallet = await setupNewAccount(privateKey, safeKey);
@@ -208,6 +214,12 @@ const CreateWallet = () => {
         };
         let storageKeySecret = "";
         let credentialIdSecret = "";
+        const userExist = await getUser(registerData.email);
+        if (userExist.status && userExist.status === "success") {
+          setError("User Already Exist!");
+          await cleatStates()
+          return false;
+        }
         const storeData = await setSecretInPasskey(
           registerData.email + "_passkey_1",
           JSON.stringify(secretObj)
@@ -215,7 +227,12 @@ const CreateWallet = () => {
         if (storeData.status) {
           storageKeySecret = storeData?.storageKey;
           credentialIdSecret = storeData?.credentialId;
-
+          const userExist = await getUser(registerData.email);
+          if (userExist.status && userExist.status === "success") {
+            setError("User Already Exist!");
+            await cleatStates()
+            return false;
+          }
           const data = await addUser(
             registerData.email,
             registerData.username,
@@ -232,6 +249,13 @@ const CreateWallet = () => {
             bitcoinWallet,
             flowTokens
           );
+          if (data?.status == "failure") {
+            setError(data.error);
+            await cleatStates()
+            setRegisterData({ email: "", username: "" })
+            setStep(1);
+            return false;
+          }
           localStorage.removeItem("verifiedData");
           toast.success("Sign Up Successfully!");
           dispatch(
