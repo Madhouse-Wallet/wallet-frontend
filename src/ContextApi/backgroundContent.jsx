@@ -44,7 +44,7 @@ export const BackgroundProvider = ({ children }) => {
   const [wmOpacity, setWmOpacity] = useState(0.5); // 50% visibility
 
   // Load stored values from localStorage only on client side
-  useEffect(() => {
+  useEffect(() => { 
     if (typeof window !== "undefined") {
       const bgIndex = localStorage.getItem("backgroundIndex");
       const wmIndex = localStorage.getItem("watermarkIndex");
