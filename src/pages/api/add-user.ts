@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import client from '../../lib/mongodb'; // Import the MongoDB client
-import { logIn, getUser, createTpos, createUser, createBlotzAutoReverseSwap } from "./lnbit";
-import { addLnbitTposUser, addLnbitSpendUser } from "./create-lnbitUser";
 import { addProvisionLambda } from "../../lib/apiCall"
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,37 +11,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "",
-            flowTokens, coinosUserName } = req.body;
+            flowTokens, } = req.body;
+            
+        const apiResponse = await lambdaInvokeFunction(req.body, "madhouse-backend-production-createUser") as any;
+        if (apiResponse?.status == "success") {
 
-        // Validate email
-        if (!email || typeof email !== 'string') {
-            return res.status(400).json({ status: "failure", message: "Invalid email", error: 'Invalid email' });
-        }
+            addProvisionLambda({
+                "madhouseWallet": wallet,
+                "email": email,
+                "bitcoinWallet": bitcoinWallet,
+                "provisionlnbitType": 1,
+                "refund_address1": ""
+            })
 
-        // Connect to the database
-        const db = (await client.connect()).db(); // Defaults to the database in the connection string
-        const usersCollection = db.collection('users'); // Use 'users' collection
-
-        // Check if the email already exists
-        const existingUser = await usersCollection.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
-        if (existingUser) {
-            return res.status(400).json({ status: "failure", message: 'User Already Exist!', userData: existingUser });
-        }
-        // Insert the new user
-        const result = await usersCollection.insertOne({
-            email, username, passkey_number: 1, passkey_status: false, passkey, totalPasskey, wallet, bitcoinWallet,
-            flowTokens, coinosUserName, createdAt: new Date()
-        });
-
-        // create lnbit user on background
-        addProvisionLambda({
-            "madhouseWallet": wallet,
-            "email": email,
-            "bitcoinWallet": bitcoinWallet,
-            "provisionlnbitType": 1,
-            "refund_address1": ""
-        })
-        return res.status(201).json({ status: "success", message: 'User added successfully', userData: result });
+            return res.status(200).json({ status: "success", message: apiResponse?.message, userData: apiResponse?.data });
+        } else {
+            return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
+        } 
     } catch (error) {
         console.error('Error adding user:', error);
         return res.status(500).json({ error: 'Internal server error' });
