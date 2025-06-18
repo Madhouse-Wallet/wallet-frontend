@@ -230,8 +230,8 @@ const LightningSendTab = () => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    handleProccessAddressChange(data);
-                    // setBtcAddress(data);
+                    // handleProccessAddressChange(data);
+                    setInvoice(data);
                     setOpenCam(!openCam);
                   }}
                 />,
@@ -394,6 +394,7 @@ const LightningSendTab = () => {
             fromAddress={userAuth?.walletAddress}
             handleSend={verifyingUser}
             loading={loading}
+            description={decodeData}
           />,
           document.body
         )}

@@ -6,6 +6,7 @@ import {
   publicClient,
   sendTransaction,
   USDC_ABI,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -37,6 +38,8 @@ const DepositSwap = () => {
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   // Fixed direction: USDC on Base to PAXG on Ethereum
   const [bridgeDirection] = useState({
@@ -99,7 +102,6 @@ const DepositSwap = () => {
         setTetherGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
-      console.log("error", error);
       setError("Failed to fetch Tether Gold balance");
     }
   };
@@ -137,6 +139,8 @@ const DepositSwap = () => {
     const filteredValue = filterAmountInput(value, 2);
 
     setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
 
     if (filteredValue.trim() !== "") {
       if (Number.parseFloat(filteredValue) <= 0) {
@@ -187,6 +191,7 @@ const DepositSwap = () => {
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
     setIsLoading(true);
+    setGasPriceError("");
 
     try {
       const getAccountCli = await getAccount(
@@ -197,6 +202,31 @@ const DepositSwap = () => {
         return;
       }
 
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
+          },
+        ]
+      );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(fromAmount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(usdcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${fromAmount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
+        return;
+      }
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -262,6 +292,7 @@ const DepositSwap = () => {
   const isButtonDisabled = () => {
     return (
       isLoading ||
+      gasPriceError ||
       !fromAmount ||
       !toAmount ||
       !shiftData ||
@@ -422,7 +453,17 @@ const DepositSwap = () => {
               {error && (
                 <div className="text-red-500 text-xs mt-1">{error}</div>
               )}
+              <div className="ps-3 flex flex-col gap-1 mt-2">
+                {gasPrice && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPrice} USDC
+                  </label>
+                )}
 
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+              </div>
               <div className="mt-3 py-2">
                 <button
                   className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${

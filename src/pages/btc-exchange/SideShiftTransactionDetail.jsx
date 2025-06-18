@@ -96,7 +96,7 @@ const SideShiftTransactionDetail = ({
           <div className="modalBody">
             <div className="py-3">
               <ul className="list-none pl-0 mb-0">
-                <li className="py-2 border-b border-dashed border-white/50">
+                {/* <li className="py-2 border-b border-dashed border-white/50">
                   <div className="flex items-center justify-between">
                     <h6 className="m-0 font-semibold text-base">Status</h6>
                     <a
@@ -108,7 +108,7 @@ const SideShiftTransactionDetail = ({
                       View on SideShift
                     </a>
                   </div>
-                </li>
+                </li> */}
                 <li className="py-2 border-b border-dashed border-white/50">
                   <div className="flex items-center justify-between">
                     <h6

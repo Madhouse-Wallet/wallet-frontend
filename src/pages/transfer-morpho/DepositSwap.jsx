@@ -1,4 +1,9 @@
-import { getAccount, sendTransaction, publicClient } from "@/lib/zeroDev.js";
+import {
+  getAccount,
+  sendTransaction,
+  publicClient,
+  calculateGasPriceInUSDC,
+} from "@/lib/zeroDev.js";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
@@ -28,6 +33,8 @@ const DepositSwap = () => {
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   // Fixed swap direction: USDC to Morpho
   const [swapDirection] = useState({
@@ -147,6 +154,8 @@ const DepositSwap = () => {
     const filteredValue = filterAmountInput(value, 2);
 
     setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
 
     // Validate amount
     if (filteredValue.trim() !== "") {
@@ -197,6 +206,7 @@ const DepositSwap = () => {
 
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
     setIsLoading(true);
+    setGasPriceError("");
     try {
       const getAccountCli = await getAccount(
         secretData?.privateKey,
@@ -205,9 +215,39 @@ const DepositSwap = () => {
       if (!getAccountCli.status) {
         return;
       }
-
-      // Step 1: Check if approval is needed and execute approval transaction
       if (quote.approvalData && quote.routeData) {
+        const gasPriceResult = await calculateGasPriceInUSDC(
+          getAccountCli?.kernelClient,
+          [
+            {
+              from: quote?.approvalData?.tx?.from,
+              to: quote?.approvalData?.tx?.to,
+              data: quote?.approvalData?.tx?.data,
+            },
+            {
+              from: quote?.routeData?.tx?.from,
+              to: quote?.routeData?.tx?.to,
+              data: quote?.routeData?.tx?.data,
+              value: quote?.routeData?.tx?.value,
+            },
+          ]
+        );
+        // Round gas price to 2 decimals
+        const value = Number.parseFloat(gasPriceResult.formatted);
+        const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+        setGasPrice(roundedGasPrice);
+        // Check if amount + gas price exceeds balance
+        const totalRequired =
+          Number.parseFloat(fromAmount) + Number.parseFloat(roundedGasPrice);
+
+        if (totalRequired > Number.parseFloat(usdcBalance)) {
+          setGasPriceError(
+            `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${fromAmount} + Max Gas Fee: ${roundedGasPrice})`
+          );
+          setIsLoading(false);
+          return;
+        }
+
         try {
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
             {
@@ -277,6 +317,7 @@ const DepositSwap = () => {
     return (
       isLoading ||
       !fromAmount ||
+      gasPriceError ||
       !toAmount ||
       !quote ||
       parseFloat(fromAmount) > parseFloat(usdcBalance)
@@ -433,6 +474,20 @@ const DepositSwap = () => {
 
                     {error && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+                  </div>
+
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
                     )}
                   </div>
                   <div className="mt-3 py-2">
