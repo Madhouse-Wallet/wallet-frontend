@@ -376,7 +376,7 @@ const ModifyKeys = () => {
                     value={wif}
                     // value={safePriva02teKey}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
-                    placeholder="Enter Seed Phrase"
+                     placeholder="Enter wif"
                   />
                   {wifError && (
                     <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
