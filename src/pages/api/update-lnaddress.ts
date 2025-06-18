@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import client from "../../lib/mongodb"; // Import the MongoDB client
 import { updateLNAddress } from "../../lib/apiCall";
 
 export default async function handler(

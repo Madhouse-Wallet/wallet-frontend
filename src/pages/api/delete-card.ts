@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import client from '../../lib/mongodb'; // Import the MongoDB client
 import { createPass, deletePass } from "./passninjaCard";
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -15,26 +15,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!email || typeof email !== 'string') {
             return res.status(400).json({ error: 'Invalid email' });
         }
-        // Connect to the database
-        const db = (await client.connect()).db(); // Defaults to the database in the connection string
-        const usersCollection = db.collection('users'); // Use 'users' collection
-        let existingUser = await usersCollection.findOne(
-            { email: { $regex: new RegExp(`^${email}$`, 'i') } }
-        );
-        if (existingUser?.creditCardPass) {
-            let deleteCardResults = await deletePass(existingUser?.creditCardPass?.serialNumber, existingUser?.creditCardPass?.type)
-            if (deleteCardResults?.status) {
-                const existingUser = await usersCollection.findOneAndUpdate({ email }, {
-                    $set: {
-                        creditCardPass: ""
-                    },
-                }, { returnDocument: "after" });
-                return res.status(200).json({ status: "success", message: 'User deleted successfully!', data: existingUser });
+
+        const apiResponse = await lambdaInvokeFunction({ email }, "madhouse-backend-production-getUser") as any;
+
+        if (apiResponse?.status == "success") {
+            let existingUser = apiResponse?.data;
+            if (existingUser?.creditCardPass) {
+                let deleteCardResults = await deletePass(existingUser?.creditCardPass?.serialNumber, existingUser?.creditCardPass?.type)
+                if (deleteCardResults?.status) {
+                    const existingUser = await lambdaInvokeFunction({
+                        findData: { email }, updtData: {
+                            $set: {
+                                creditCardPass: ""
+                            }
+                        }
+                    }, "madhouse-backend-production-updtUser") as any;
+                    if (existingUser?.status == "success") {
+                        return res.status(200).json({ status: "success", message: 'Card Deleted successfully!', data: existingUser?.data });
+                    } else {
+                        return res.status(400).json({ status: "failure", message: existingUser?.message, error: existingUser?.error });
+                    }
+                } else {
+                    return res.status(400).json({ status: "failure", error: deleteCardResults?.msg });
+                }
             } else {
-                return res.status(400).json({ status: "failure", error: deleteCardResults?.msg });
+                return res.status(400).json({ status: "failure", error: "No card Found!" });
             }
         } else {
-            return res.status(400).json({ status: "failure", error: "No card Found!" });
+            return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
         }
     } catch (error) {
         console.error('Error adding user:', error);

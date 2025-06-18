@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { userLogIn } from "./lnbit"; // Import the decodeInvoice function
-import client from "../../lib/mongodb"; // Import the MongoDB client
 import { decodeInvoice } from "./lnbit";
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,49 +22,42 @@ export default async function handler(
       });
     }
 
-    const db = (await client.connect()).db(); // Defaults to the database in the connection string
-    const usersCollection = db.collection("users"); // Use 'users' collection
-    const existingUser = await usersCollection.findOne({
-      email: email,
-    });
+    const apiResponse = await lambdaInvokeFunction({ email }, "madhouse-backend-production-getUser") as any;
+    if (apiResponse?.status == "success") {
+      let existingUser = apiResponse?.data;
+      // Get user token
+      let getToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
 
-    if (!existingUser) {
-      return res.status(404).json({
-        status: "failure",
-        message: "User not found",
-      });
-    }
+      if (getToken?.status) {
+        let token = getToken?.data?.token;
 
-    // Get user token
-    let getToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
-
-    if (getToken?.status) {
-      let token = getToken?.data?.token;
-
-      // Decode the invoice
-      const decodedInvoice = (await decodeInvoice(
-        invoice,
-        token,
-        2,
-        existingUser?.lnbitAdminKey_3
-      )) as any;
-      if (decodedInvoice?.status) {
-        return res.status(200).json({
-          status: "success",
-          message: "Invoice decoded successfully!",
-          invoiceData: decodedInvoice.data,
-        });
+        // Decode the invoice
+        const decodedInvoice = (await decodeInvoice(
+          invoice,
+          token,
+          2,
+          existingUser?.lnbitAdminKey_3
+        )) as any;
+        if (decodedInvoice?.status) {
+          return res.status(200).json({
+            status: "success",
+            message: "Invoice decoded successfully!",
+            invoiceData: decodedInvoice.data,
+          });
+        } else {
+          return res.status(400).json({
+            status: "failure",
+            message: decodedInvoice.msg,
+          });
+        }
       } else {
         return res.status(400).json({
           status: "failure",
-          message: decodedInvoice.msg,
+          message: getToken.msg,
         });
       }
     } else {
-      return res.status(400).json({
-        status: "failure",
-        message: getToken.msg,
-      });
+      return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
     }
   } catch (error) {
     console.error("Error decoding invoice:", error);
