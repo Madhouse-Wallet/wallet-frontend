@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
- 
+
 import {
   logIn,
   createSwapReverse,
@@ -25,7 +25,8 @@ export default async function handler(
     // let token = getToken?.data?.token;
     let getUserToken = (await userLogIn(2, lnbitId_3)) as any;
     let token = getUserToken?.data?.token as any;
-    const satoshiAmount = amount * 100000000;
+    // const satoshiAmount = amount * 100000000;
+    const satoshiAmount = amount;
     let data = (await createSwap(
       {
         wallet: lnbitWalletId_3,

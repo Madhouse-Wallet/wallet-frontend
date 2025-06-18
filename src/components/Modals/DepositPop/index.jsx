@@ -35,6 +35,8 @@ const getSecretData = async (storageKey, credentialId) => {
 const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
+  const [error, setError] = useState("");
+  const [commonError, setCommonError] = useState(false);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
   const recoverSeedPhrase = async () => {
@@ -57,23 +59,24 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const handleDepositPop = async () => {
     try {
       setLoading(true);
+      setCommonError(false)
       if (!userAuth?.login) {
-        toast.error("Please Login!");
+        setCommonError("Please Login!");
       } else {
         let userExist = await getUser(userAuth?.email);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("Please Login!");
+          setCommonError("Please Login!");
           setLoading(false);
           return;
         } else {
           if (!userExist?.userId?.bitcoinWallet) {
-            toast.error("No Bitcoin Wallet Found!");
+            setCommonError("No Bitcoin Wallet Found!");
             setLoading(false);
             return;
           }
           const privateKey = await recoverSeedPhrase();
           if (!privateKey) {
-            toast.error("No Bitcoin Wallet Found!");
+            setCommonError("No Private Key Found!");
             setLoading(false);
             return;
           }
@@ -84,7 +87,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             userExist?.userId?.lnbitWalletId_3
           );
           if (getBtcSat.status && getBtcSat.status == "failure") {
-            toast.error(getBtcSat.message);
+            setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
             const satoshis = Math.round(parseFloat(amount) * 100000000);
@@ -99,7 +102,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               toast.success(result.transactionHash);
               setLoading(false);
             } else {
-              toast.error("Transaction Failed!");
+              setCommonError("Transaction Failed!");
               setLoading(false);
             }
           }
@@ -109,10 +112,42 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
       setDepositPop(!depositPop);
       setLoading(false);
     } catch (error) {
-      toast.error(error?.message);
+      setCommonError(error?.message);
       setLoading(false);
     }
   };
+
+
+
+  useEffect(() => {
+    setCommonError(false)
+  }, [amount])
+
+  const handleAmountInput = (e) => {
+    const rawValue = e.target.value;
+
+    // Remove any non-digit characters
+    const numericValue = rawValue.replace(/[^0-9]/g, '');
+
+    // Convert to number for validation
+    const numberValue = parseInt(numericValue, 10);
+
+    // Set value regardless of validity (you can choose to block instead)
+
+    setAmount(numericValue);
+    // Validation
+    if (!numericValue) {
+      setError("Only numbers allowed");
+    } else if (numberValue < 25000) {
+      setError("Minimum value is 25,000");
+    } else if (numberValue > 25000000) {
+      setError("Maximum value is 25,000,000");
+    } else {
+      setError("");
+    }
+  };
+
+
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -167,17 +202,19 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                     htmlFor=""
                     className="form-label m-0 font-semibold text-xs ps-3"
                   >
-                    Enter Amount in BTC
+                    Enter Amount in sats
                   </label>
                   <div className="iconWithText relative">
                     <input
                       type="text"
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={handleAmountInput}
                       value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
+                      placeholder="min: (25000), max: (25000000)"
                     />
                   </div>
-                                    {/* <p className="m-0 text-red-500">parvinder</p> */}
+                  {error && (<p className="m-0 text-red-500">{error}</p>)}
+                  {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
 
                 </div>
 
