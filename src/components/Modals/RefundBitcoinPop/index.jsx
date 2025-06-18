@@ -48,11 +48,14 @@ const RefundBitcoin = ({
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [swapType, setSwapType] = useState("");
 
   const handleAmountChange = async (e) => {
     setError("");
+    setToAmount("");
+    setSwapType("");
     const value = e.target.value;
-    // Only allow positive numbers with decimals
+
     const filteredValue = filterAmountInput(value, 2);
     setAmount(filteredValue);
 
@@ -73,57 +76,94 @@ const RefundBitcoin = ({
       setAmountError("");
     }
 
-    if (filteredValue) {
-      if (filteredValue && !isNaN(parseFloat(filteredValue))) {
-        const timer = setTimeout(async () => {
-          setIsLoading(true);
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const timer = setTimeout(async () => {
+        setIsLoading(true);
+        setError(""); // Clear previous errors
+        setSwapType(""); // Clear previous provider
+
+        try {
+          // First, always try getDestinationAddress
+          let shiftResult = null;
+          let shouldTrySwapkit = false;
+
           try {
-            const quotePromise = getQuote(filteredValue);
-            const shiftPromise = getDestinationAddress(
-              filteredValue,
-              toAddress
-            );
+            shiftResult = await getDestinationAddress(filteredValue, toAddress);
 
-            const [quoteResult, shiftResult] = await Promise.all([
-              quotePromise,
-              shiftPromise,
-            ]);
-            const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
-            const shiftSettleAmount = parseFloat(
-              shiftResult?.settleAmount || 0
-            );
+            if (shiftResult) {
+              // Success with getDestinationAddress
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
+              setSwapType("Sideshift");
+            }
+          } catch (shiftError) {
+            // Check if it's the "Amount too high" error - check the message property
+            const isAmountTooHighError =
+              shiftError?.message?.includes("Amount too high") ||
+              shiftError?.toString()?.includes("Amount too high");
 
-            let finalAddress = "";
-
-            if (
-              quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-              shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-            ) {
-              finalAddress = shiftResult?.depositAddress;
-              setToAmount(shiftResult?.settleAmount);
+            if (isAmountTooHighError) {
+              // Only try Swapkit for "Amount too high" error
+              shouldTrySwapkit = true;
             } else {
-              finalAddress = quoteResult?.estimatedDepositAddress;
-              setToAmount(quoteResult?.estimate);
+              // For other errors, show error and don't try Swapkit
+              setError(
+                shiftError?.message || "Failed to get quotes from Sideshift"
+              );
+              setSwapType("Sideshift");
             }
-
-            if (finalAddress) {
-              setDestinationAddress(finalAddress);
-            }
-          } catch (err) {
-            console.error("Error fetching quote:", err);
-          } finally {
-            setIsLoading(false);
           }
-        }, 2000); // 500ms debounce
-        setDebounceTimer(timer);
-      } else {
-        setToAmount("");
-        setQuote(null);
-        setDestinationAddress("");
-      }
+
+          // Try Swapkit if Sideshift failed
+          if (shouldTrySwapkit) {
+            let quoteAttempts = 0;
+            const maxQuoteAttempts = 3;
+            let swapkitSuccess = false;
+
+            while (quoteAttempts < maxQuoteAttempts && !swapkitSuccess) {
+              try {
+                quoteAttempts++;
+
+                const quoteResult = await getQuote(filteredValue);
+
+                if (quoteResult) {
+                  setDestinationAddress(quoteResult.estimatedDepositAddress);
+                  setToAmount(quoteResult.estimate);
+                  setSwapType("Swapkit");
+                  setError(""); // Clear any previous error since getQuote succeeded
+                  swapkitSuccess = true;
+                  break;
+                }
+              } catch (quoteError) {
+                console.log(
+                  `Swapkit attempt ${quoteAttempts} failed:`,
+                  quoteError
+                );
+
+                if (quoteAttempts >= maxQuoteAttempts) {
+                  // After 3 attempts, set the error
+                  setSwapType("Swapkit");
+                  setError(
+                    "Failed to get quotes from Swapkit after multiple attempts"
+                  );
+                }
+              }
+            }
+          }
+        } catch (err) {
+          setError("Failed to fetch quotes");
+        } finally {
+          setIsLoading(false);
+        }
+      }, 2000);
+
+      setDebounceTimer(timer);
+    } else {
+      setToAmount("");
+      setQuote(null);
+      setDestinationAddress("");
     }
   };
-
   const handleClose = () => setRefundBTC(false);
 
   const getQuote = async (amount) => {
@@ -141,34 +181,33 @@ const RefundBitcoin = ({
       });
 
       const data = await response.json();
+      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
         estimate: data?.routes[0].expectedBuyAmount,
       };
     } catch (error) {
-      console.error("Quote fetch error:", error);
-      return null;
+      // Remove internal retry logic - let the caller handle retries
+      throw error;
     }
   };
 
   const getDestinationAddress = async (amount, bitcoinAddress) => {
     try {
-      setError("");
       const shift = await createUsdcToBtcShift(
         amount,
         bitcoinAddress || userAuth?.bitcoinWallet,
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
-
+      setQuote(shift);
       return {
         depositAddress: shift.depositAddress,
-        settleAmount: parseFloat(shift.settleAmount || 0),
+        settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      setError(error?.message || "Failed to get the quotes");
-      return null;
+      throw error;
     }
   };
 
@@ -211,7 +250,6 @@ const RefundBitcoin = ({
         return;
       }
 
-      
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -499,8 +537,14 @@ const RefundBitcoin = ({
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Refund Bitcoin
+                {swapType && (
+                  <div className="text-xs text-white/70">
+                    Powered by {swapType}
+                  </div>
+                )}
               </h5>
             </div>
+
             {openCam ? (
               <>
                 <QRScannerModal
@@ -571,10 +615,14 @@ const RefundBitcoin = ({
                     )}
 
                     <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} USDC
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
                     </label>
 
-                    {error && (
+                    {error && toAmount === "" && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
                   </div>

@@ -60,7 +60,6 @@ const OtpStep = ({
         if (response) {
           setStep(4);
         } else {
-          console.log("attempt-->", attempt)
           if (attempt < 2) {
             setError("")
             setStep(1);
@@ -120,11 +119,12 @@ const OtpStep = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (registerOTP?.length === 4 && !registerOtpLoading) {
-  //     otpRegister();
-  //   }
-  // }, [registerOTP]);
+  useEffect(() => {
+     setError("")
+    // if (registerOTP?.length === 4 && !registerOtpLoading) {
+    //   otpRegister();
+    // }
+  }, [registerOTP]);
 
   return (
     <>

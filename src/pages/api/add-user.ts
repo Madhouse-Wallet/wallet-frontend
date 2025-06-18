@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import client from '../../lib/mongodb'; // Import the MongoDB client
 import { addProvisionLambda } from "../../lib/apiCall"
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
@@ -12,10 +11,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const { email, username, passkey, totalPasskey = 1, wallet, bitcoinWallet = "",
             flowTokens, } = req.body;
-            
+
         const apiResponse = await lambdaInvokeFunction(req.body, "madhouse-backend-production-createUser") as any;
         if (apiResponse?.status == "success") {
-
             addProvisionLambda({
                 "madhouseWallet": wallet,
                 "email": email,
@@ -23,12 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 "provisionlnbitType": 1,
                 "refund_address1": ""
             })
-
             return res.status(200).json({ status: "success", message: apiResponse?.message, userData: apiResponse?.data });
         } else {
             return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
-        } 
-    } catch (error) {
+        }
+    } catch (error: any) {
         console.error('Error adding user:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }

@@ -343,7 +343,11 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                     )}
 
                     <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {parseFloat(balance).toFixed(2)} USDC
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
                     </label>
 
                     {error && (

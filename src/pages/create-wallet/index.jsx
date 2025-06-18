@@ -422,6 +422,7 @@ const CreateWallet = () => {
           const userExist = await getUser(parsedData.email);
           if (userExist.status && userExist.status === "success") {
             setCheckEmailLoader(false);
+            await cleatStates()
           } else {
             let getWallet = await getBitcoinAddress();
             if (getWallet.status && getWallet.status == "success") {
@@ -436,6 +437,7 @@ const CreateWallet = () => {
               setStep(4);
             } else {
               setCheckEmailLoader(false);
+              await cleatStates()
             }
           }
         }

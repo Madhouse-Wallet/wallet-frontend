@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { userLogIn, createInvoice } from "./lnbit";
-import client from "../../lib/mongodb"; // Import the MongoDB client
+ 
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 export default async function handler(
