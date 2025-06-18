@@ -16,6 +16,7 @@ const OtpStep = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [registerOTP, setRegisterOTP] = useState();
+  const [attempt, setAttempt] = useState(3);
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
@@ -58,6 +59,14 @@ const OtpStep = ({
         });
         if (response) {
           setStep(4);
+        } else {
+          console.log("attempt-->", attempt)
+          if (attempt < 2) {
+            setError("")
+            setStep(1);
+          } else {
+            setAttempt((prev) => (prev - 1))
+          }
         }
         setRegisterOtpLoading(false);
       }
@@ -111,11 +120,11 @@ const OtpStep = ({
     }
   };
 
-  useEffect(() => {
-    if (registerOTP?.length === 4 && !registerOtpLoading) {
-      otpRegister();
-    }
-  }, [registerOTP]);
+  // useEffect(() => {
+  //   if (registerOTP?.length === 4 && !registerOtpLoading) {
+  //     otpRegister();
+  //   }
+  // }, [registerOTP]);
 
   return (
     <>
@@ -168,6 +177,11 @@ const OtpStep = ({
                 {errorr && (
                   <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
                     {errorr}
+                  </div>
+                )}
+                {(attempt < 3) && (
+                  <div className="flex pt-3  items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {attempt + " Attempts left!"}
                   </div>
                 )}
               </OtpWrpper>
@@ -226,10 +240,10 @@ const OtpWrpper = styled.div`
       outline: 0;
       ${"" /* color: rgb(255 255 255 / 0.4); */}
       background: ${({ theme }) =>
-        theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
+    theme === "dark" ? "rgba(255, 255, 255, 0.04)" : "#fff3ed"};
       border: 1px solid rgb(255 255 255 / 0.1);
       border-color: ${({ theme }) =>
-        theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
+    theme === "dark" ? "rgb(255 255 255 / 0.1)" : "#ffad84"};
       font-size: 24px;
       font-weight: 600;
     }
