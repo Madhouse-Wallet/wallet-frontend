@@ -332,7 +332,7 @@ const WithdrawalSwap = () => {
                       <div className="left">
                         <input
                           type="text"
-                         className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
@@ -353,11 +353,14 @@ const WithdrawalSwap = () => {
                             />
                           </span>{" "}
                           <span className="text-[12px]">
-                          {swapDirection.from}
-</span>
+                            {swapDirection.from}
+                          </span>
                         </button>
-                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance: {parseFloat(morphoBalance).toFixed(2)}{" "}
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                          Balance:{" "}
+                          {Number(morphoBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(morphoBalance).toFixed(2)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -376,7 +379,7 @@ const WithdrawalSwap = () => {
                       <div className="left">
                         <input
                           type="text"
-                         className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true} // This input is always disabled
@@ -387,11 +390,14 @@ const WithdrawalSwap = () => {
                         <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
                           <span className="icn">{usdcIcn}</span>{" "}
                           <span className="text-[12px]">
-                          {swapDirection.to}
-</span>
+                            {swapDirection.to}
+                          </span>
                         </button>
-                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                          Balance:{" "}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>

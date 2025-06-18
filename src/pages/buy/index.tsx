@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import StripePaymentPage from "../stripePaymentPage";
 import { useSelector } from "react-redux";
-import { getAccount, getProvider } from "@/lib/zeroDev";
+import { getAccount } from "@/lib/zeroDev";
 import { BackBtn } from "@/components/common";
 import Swap from "../../pages/swapUsdc";
-import SellBitcoin from "./SellBitcoin"
+import SellBitcoin from "./SellBitcoin";
 
 const BuyCoin: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState("");
@@ -49,8 +49,7 @@ const BuyCoin: React.FC = () => {
       if (userAuth.passkeyCred) {
         let account = await getAccount(userAuth?.passkeyCred);
         if (account) {
-              setWalletAddress(account.address!);
-    
+          setWalletAddress(account.address!);
         }
       }
     } catch (error) {

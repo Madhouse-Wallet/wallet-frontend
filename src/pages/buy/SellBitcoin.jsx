@@ -382,10 +382,7 @@ const SellBitcoin = () => {
                           </span>
                         </button>
                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance:{" "}
-                          {swapDirection.from === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(8)}{" "}
+                          Balance: {parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -422,9 +419,9 @@ const SellBitcoin = () => {
                         </button>
                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance:{" "}
-                          {swapDirection.to === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
