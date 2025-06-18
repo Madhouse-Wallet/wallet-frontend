@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { userLogIn, createInvoice } from "./lnbit";
-import client from "../../lib/mongodb"; // Import the MongoDB client
+ 
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,35 +15,37 @@ export default async function handler(
     // const getToken = await logIn(2) as any;
     // let token = getToken?.data?.token;
     const satoshiAmount = amount;
-    const db = (await client.connect()).db(); // Defaults to the database in the connection string
-    const usersCollection = db.collection("users"); // Use 'users' collection
-    const existingUser = await usersCollection.findOne({
-      email: email,
-    });
-    let getUserToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
-    let token = getUserToken?.data?.token;
-    let createInvoice1 = (await createInvoice(
-      {
-        out: false,
-        unit: "sat",
-        amount: satoshiAmount,
-        memo: memo,
-        webhook: `https://app.madhousewallet.com/api/webhookInvoice?email=${email}`,
-      },
-      token,
-      2,
-      existingUser?.lnbitAdminKey_3
-    )) as any;
-    if (createInvoice1?.status) {
-      return res.status(200).json({
-        status: "success",
-        message: "Invoice Created!",
-        data: { invoice: createInvoice1?.data?.bolt11 },
-      });
+
+    const apiResponse = await lambdaInvokeFunction({ email }, "madhouse-backend-production-getUser") as any;
+    if (apiResponse?.status == "success") {
+      let existingUser = apiResponse?.data;
+      let getUserToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
+      let token = getUserToken?.data?.token;
+      let createInvoice1 = (await createInvoice(
+        {
+          out: false,
+          unit: "sat",
+          amount: satoshiAmount,
+          memo: memo,
+          webhook: `https://app.madhousewallet.com/api/webhookInvoice?email=${email}`,
+        },
+        token,
+        2,
+        existingUser?.lnbitAdminKey_3
+      )) as any;
+      if (createInvoice1?.status) {
+        return res.status(200).json({
+          status: "success",
+          message: "Invoice Created!",
+          data: { invoice: createInvoice1?.data?.bolt11 },
+        });
+      } else {
+        return res
+          .status(400)
+          .json({ status: "failure", message: createInvoice1.msg });
+      }
     } else {
-      return res
-        .status(400)
-        .json({ status: "failure", message: createInvoice1.msg });
+      return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
     }
   } catch (error) {
     console.error("Error adding user:", error);

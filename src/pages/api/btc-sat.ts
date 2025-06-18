@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import client from "../../lib/mongodb"; // Import the MongoDB client
+ 
 import {
   logIn,
   createSwapReverse,

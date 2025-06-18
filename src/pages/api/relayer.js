@@ -1,4 +1,4 @@
-import client from "../../lib/mongodb"; // Import the MongoDB client
+ 
 import {
   DefenderRelaySigner,
   DefenderRelayProvider,

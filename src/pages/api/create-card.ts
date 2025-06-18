@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import client from '../../lib/mongodb'; // Import the MongoDB client
 import { createPass, deletePass } from "./passninjaCard";
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -16,30 +16,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: 'Invalid email' });
         }
 
-        // Connect to the database
-        const db = (await client.connect()).db(); // Defaults to the database in the connection string
-        const usersCollection = db.collection('users'); // Use 'users' collection
-        let existingUser = await usersCollection.findOne(
-            { email: { $regex: new RegExp(`^${email}$`, 'i') } }
-        );
-        if (existingUser) {
-            if (existingUser?.creditCardPass) {
-                return res.status(400).json({ status: "failure", error: "Already Created!" });
-            } else {
-                let creditCardDetails = await createPass(existingUser?.wallet, type)
-                if (creditCardDetails?.status) {
-                    const existingUser = await usersCollection.findOneAndUpdate({ email }, {
-                        $set: {
-                            creditCardPass: creditCardDetails.data
-                        },
-                    }, { returnDocument: "after" });
-                    return res.status(200).json({ status: "success", message: 'Card Created successfully!', data: existingUser });
+
+        const apiResponse = await lambdaInvokeFunction({ email }, "madhouse-backend-production-getUser") as any;
+        if (apiResponse?.status == "success") {
+            let existingUser = apiResponse?.data;
+            if (existingUser) {
+                if (existingUser?.creditCardPass) {
+                    return res.status(400).json({ status: "failure", error: "Already Created!" });
                 } else {
-                    return res.status(400).json({ status: "failure", error: creditCardDetails?.msg });
+                    let creditCardDetails = await createPass(existingUser?.wallet, type)
+                    if (creditCardDetails?.status) {
+                        const existingUser = await lambdaInvokeFunction({
+                            findData: { email }, updtData: {
+                                $set: {
+                                    creditCardPass: creditCardDetails.data
+                                }
+                            }
+                        }, "madhouse-backend-production-updtUser") as any;
+                        if (existingUser?.status == "success") {
+                            return res.status(200).json({ status: "success", message: 'Card Created successfully!', data: existingUser?.data });
+                        } else {
+                            return res.status(400).json({ status: "failure", message: existingUser?.message, error: existingUser?.error });
+                        }
+                    } else {
+                        return res.status(400).json({ status: "failure", error: creditCardDetails?.msg });
+                    }
                 }
+            } else {
+                return res.status(400).json({ status: "failure", error: "User Does Not Exist!" });
             }
         } else {
-            return res.status(400).json({ status: "failure", error: "User Does Not Exist!" });
+            return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
         }
     } catch (error) {
         console.error('Error adding user:', error);

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import client from '../../lib/mongodb'; // Import the MongoDB client
+import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -8,17 +8,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const { findData = {}, updtData = {} } = req.body;
-        // Connect to the database
-        const db = (await client.connect()).db(); // Defaults to the database in the connection string
-        const usersCollection = db.collection('users'); // Use 'users' collection
-        // const existingUser = await usersCollection.findOne({ email });
-        const existingUser = await usersCollection.findOneAndUpdate(findData, updtData, { returnDocument: "after" });
-
-        if (existingUser) {
-            //   return res.status(400).json({ error: 'Email already exists' });
-            return res.status(200).json({ status: "success", message: 'User fetched successfully', userId: existingUser });
+        const apiResponse = await lambdaInvokeFunction({ findData: findData, updtData: updtData }, "madhouse-backend-production-updtUser") as any;
+        if (apiResponse?.status == "success") {
+            return res.status(200).json({ status: "success", message: apiResponse?.message, userId: apiResponse?.data });
         } else {
-            return res.status(400).json({ status: "failure", message: 'No User Found!' });
+            return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
         }
 
     } catch (error) {
