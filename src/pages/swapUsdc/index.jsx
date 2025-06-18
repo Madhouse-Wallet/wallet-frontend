@@ -5,6 +5,7 @@ import {
   USDC_ABI,
   publicClient,
   usdc,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev";
 import { parseUnits, parseAbi } from "viem";
 import React, { useEffect, useState } from "react";
@@ -38,6 +39,8 @@ const Swap = () => {
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
   const [swapType, setSwapType] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
@@ -138,6 +141,7 @@ const Swap = () => {
     setError("");
     setToAmount("");
     setSwapType("");
+    setGasPriceError("");
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -220,11 +224,6 @@ const Swap = () => {
                   break;
                 }
               } catch (quoteError) {
-                console.log(
-                  `Swapkit attempt ${quoteAttempts} failed:`,
-                  quoteError
-                );
-
                 if (quoteAttempts >= maxQuoteAttempts) {
                   // After 3 attempts, set the error
                   setSwapType("Swapkit");
@@ -270,6 +269,7 @@ const Swap = () => {
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+    setGasPriceError("");
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -277,6 +277,33 @@ const Swap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
+        return;
+      }
+
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [destinationAddress, parseUnits(fromAmount.toString(), 6)],
+          },
+        ]
+      );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if fromAmount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(fromAmount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(usdcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${fromAmount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -333,6 +360,7 @@ const Swap = () => {
     return (
       isLoading ||
       !fromAmount ||
+      gasPriceError ||
       !toAmount ||
       !quote ||
       Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
@@ -484,6 +512,20 @@ const Swap = () => {
                     {error && toAmount === "" && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
                     )}
+
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      {gasPrice && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Estimated Max Gas Fee: {gasPrice} USDC
+                        </label>
+                      )}
+
+                      {gasPriceError && (
+                        <div className="text-red-500 text-xs">
+                          {gasPriceError}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="mt-3 py-2">
                     <button

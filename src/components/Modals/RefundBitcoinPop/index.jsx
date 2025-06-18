@@ -6,6 +6,7 @@ import {
   usdc,
   sendTransaction,
   USDC_ABI,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
@@ -49,11 +50,15 @@ const RefundBitcoin = ({
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
   const [swapType, setSwapType] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   const handleAmountChange = async (e) => {
     setError("");
     setToAmount("");
+    setGasPriceError("");
     setSwapType("");
+    setGasPrice(null);
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -241,12 +246,42 @@ const RefundBitcoin = ({
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
+        return;
+      }
+
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [destinationAddress, parseUnits(amount.toString(), 6)],
+          },
+        ]
+      );
+
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(amount) + Number.parseFloat(roundedGasPrice);
+
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${amount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -350,6 +385,7 @@ const RefundBitcoin = ({
       !toAddress ||
       !amount ||
       isLoading ||
+      gasPriceError ||
       parseFloat(amount) <= 0 ||
       parseFloat(amount) > parseFloat(balance) ||
       !destinationAddress
@@ -534,11 +570,11 @@ const RefundBitcoin = ({
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
           <div className="relative rounded px-3">
-            <div className="top pb-3">
+            <div className="top py-3 mb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Refund Bitcoin
                 {swapType && (
-                  <div className="text-xs text-white/70">
+                  <div className="text-[14px] pt-2 text-white/70">
                     Powered by {swapType}
                   </div>
                 )}
@@ -646,6 +682,20 @@ const RefundBitcoin = ({
                       </div>
                     </div>
                   )}
+
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="py-2 mt-4">
                     <button

@@ -36,6 +36,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const [amountError, setAmountError] = useState("");
   const [error, setError] = useState("");
   const [txError, setTxError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -44,6 +46,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     const filteredValue = filterAmountInput(value, 2, 21);
 
     setAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
 
     // Validate amount
     if (filteredValue.trim() !== "") {
@@ -70,9 +74,11 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       isValidAddress(toAddress) &&
       amount.trim() !== "" &&
       !amountError &&
+      !gasPriceError &&
       Number.parseFloat(amount) > 0 &&
-      Number.parseFloat(amount) <= Number.parseFloat(balance) &&
-      Number.parseFloat(balance) >= 0.05
+      Number.parseFloat(amount) <= Number.parseFloat(balance)
+      // &&
+      // Number.parseFloat(balance) >= 0.05
     );
   };
 
@@ -101,6 +107,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       const getAccountCli = await getAccount(
         secretData?.privateKey,
@@ -121,15 +128,21 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           },
         ]
       );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
 
-      // Log the gas price
-      console.log("=== Gas Price Calculation ===", gasPriceResult.usd);
-      console.log(`Gas Price in USDC: ${gasPriceResult.formatted} USDC`);
-      console.log(`Raw value: ${gasPriceResult.raw.toString()}`);
-      console.log(`Exchange Rate: ${gasPriceResult.exchangeRate}`);
-      console.log("Gas Breakdown:", gasPriceResult.gasBreakdown);
-      console.log("=============================");
-
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(amount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${amount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
+        return;
+      }
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -278,7 +291,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    console.log("data", data);
                     processAddress(data);
                     // setToAddress(data);
                     setOpenCam(!openCam);
@@ -341,14 +353,27 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         {amountError}
                       </div>
                     )}
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Balance:{" "}
+                        {Number(balance) < 0.01
+                          ? "0"
+                          : Number.parseFloat(balance).toFixed(2)}{" "}
+                        USDC
+                      </label>
 
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
+                      {gasPrice && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Estimated Max Gas Fee: {gasPrice} USDC
+                        </label>
+                      )}
+
+                      {gasPriceError && (
+                        <div className="text-red-500 text-xs">
+                          {gasPriceError}
+                        </div>
+                      )}
+                    </div>
 
                     {error && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>

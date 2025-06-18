@@ -6,6 +6,7 @@ import {
   publicClient,
   sendTransaction,
   MAINNET_RPC_URL,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -36,6 +37,8 @@ const WithdrawalSwap = () => {
   const [amountError, setAmountError] = useState("");
   const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
+  const [gasPricee, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   // SideShift states
   const [goldToUsdcShift, setGoldToUsdcShift] = useState(null);
@@ -236,6 +239,8 @@ const WithdrawalSwap = () => {
     const filteredValue = filterAmountInput(value);
 
     setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
 
     // Validate amount
     if (filteredValue.trim() !== "") {
@@ -286,6 +291,7 @@ const WithdrawalSwap = () => {
     }
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       // Step 1: Retrieve Secret
       const data = JSON.parse(userAuth?.webauthKey);
@@ -348,6 +354,38 @@ const WithdrawalSwap = () => {
 
       if (currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift) {
         if (usdcToEthShift.settleAmount) {
+          const gasPriceResult = await calculateGasPriceInUSDC(
+            getAccountCli?.kernelClient,
+            [
+              {
+                to: USDC_ADDRESS,
+                abi: USDC_ABI,
+                functionName: "transfer",
+                args: [
+                  usdcToEthShift.depositAddress,
+                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
+                ],
+              },
+            ]
+          );
+          console.log("line-371", gasPriceResult);
+          // Round gas price to 2 decimals
+          const value = Number.parseFloat(gasPriceResult.formatted);
+          const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+          setGasPrice(roundedGasPrice);
+          // Check if amount + gas price exceeds balance
+          const totalRequired =
+            Number.parseFloat(usdcToEthShift.settleAmount) +
+            Number.parseFloat(roundedGasPrice);
+          console.log("line-379", totalRequired);
+          if (totalRequired > Number.parseFloat(usdcBalance)) {
+            setGasPriceError(
+              `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
+            );
+            setIsLoading(false);
+            return;
+          }
+          console.log("line-387");
           const usdcSendTx = await sendTransaction(
             getAccountCli?.kernelClient,
             [
@@ -468,6 +506,7 @@ const WithdrawalSwap = () => {
     return (
       isLoading ||
       !fromAmount ||
+      gasPriceError ||
       !toAmount ||
       !goldToUsdcShift ||
       Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance) ||
@@ -654,6 +693,20 @@ const WithdrawalSwap = () => {
                       {amountError}
                     </div>
                   )}
+
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPricee && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPricee} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="mt-3 py-2">
                     <button

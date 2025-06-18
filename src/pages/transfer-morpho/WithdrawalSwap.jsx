@@ -1,4 +1,9 @@
-import { getAccount, publicClient, sendTransaction } from "@/lib/zeroDev.js";
+import {
+  getAccount,
+  publicClient,
+  sendTransaction,
+  calculateGasPriceInUSDC,
+} from "@/lib/zeroDev.js";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
@@ -28,6 +33,8 @@ const WithdrawalSwap = () => {
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   const [swapDirection] = useState({
     from: "spark USDC",
@@ -131,8 +138,6 @@ const WithdrawalSwap = () => {
         setToAmount(formattedToAmount);
       }
     } catch (error) {
-      console.error("Enso quote error:", error);
-
       setToAmount("");
       setQuote(null);
     } finally {
@@ -147,6 +152,8 @@ const WithdrawalSwap = () => {
     const filteredValue = filterAmountInput(value, 2);
 
     setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
 
     // Validate amount
     if (filteredValue.trim() !== "") {
@@ -196,6 +203,7 @@ const WithdrawalSwap = () => {
     }
 
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+    setGasPriceError("");
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -207,6 +215,36 @@ const WithdrawalSwap = () => {
       }
 
       if (quote.approvalData && quote.routeData) {
+        const gasPriceResult = await calculateGasPriceInUSDC(
+          getAccountCli?.kernelClient,
+          [
+            {
+              from: quote?.approvalData?.tx?.from,
+              to: quote?.approvalData?.tx?.to,
+              data: quote?.approvalData?.tx?.data,
+            },
+            {
+              from: quote?.routeData?.tx?.from,
+              to: quote?.routeData?.tx?.to,
+              data: quote?.routeData?.tx?.data,
+              value: quote?.routeData?.tx?.value,
+            },
+          ]
+        );
+        // Round gas price to 2 decimals
+        const value = Number.parseFloat(gasPriceResult.formatted);
+        const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+        setGasPrice(roundedGasPrice);
+        // Check if amount + gas price exceeds balance
+        const totalRequired = Number.parseFloat(roundedGasPrice);
+        if (totalRequired > Number.parseFloat(usdcBalance)) {
+          setGasPriceError(
+            `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Max Gas Fee: ${roundedGasPrice})`
+          );
+          setIsLoading(false);
+          return;
+        }
+
         try {
           const tx = await sendTransaction(getAccountCli?.kernelClient, [
             {
@@ -274,6 +312,7 @@ const WithdrawalSwap = () => {
       isLoading ||
       !fromAmount ||
       !toAmount ||
+      gasPriceError ||
       !quote ||
       parseFloat(fromAmount) > parseFloat(morphoBalance)
     );
@@ -410,6 +449,20 @@ const WithdrawalSwap = () => {
 
                     {error && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+                  </div>
+
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
                     )}
                   </div>
                   <div className="mt-3 py-2">

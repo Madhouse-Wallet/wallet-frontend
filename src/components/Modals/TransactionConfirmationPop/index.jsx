@@ -10,6 +10,7 @@ const TransactionConfirmationPop = ({
   fromAddress,
   toAddress,
   handleSend,
+  description,
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +42,11 @@ const TransactionConfirmationPop = ({
                 <h4 className="m-0 font-bold text-xl">
                   {amount} {symbol}
                 </h4>
+                {description && (
+                  <h2 className="m-0 font-bold text-sm">
+                    Memo : {description?.description}
+                  </h2>
+                )}
               </div>
               <div className="py-3"></div>
               <div className="py-3">
