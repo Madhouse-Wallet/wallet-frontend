@@ -57,39 +57,11 @@ const Swap = () => {
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      setError(error?.message || "Failed to get the quotes");
-      return null;
+      throw error;
     }
   };
 
-  // const getQuote = async (amount) => {
-  //   try {
-  //     const response = await fetch("/api/swap-quote-thorStream", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         sellAsset: `BASE.USDC-${process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}`,
-  //         buyAsset: "BTC.BTC",
-  //         sellAmount: amount,
-  //         sourceAddress: userAuth?.walletAddress,
-  //         destinationAddress: userAuth?.bitcoinWallet,
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-  //     setQuote(data);
-  //     return {
-  //       ...data,
-  //       estimatedDepositAddress: data?.routes[0].targetAddress,
-  //       estimate: data?.routes[0].expectedBuyAmount,
-  //     };
-  //   } catch (error) {
-  //     console.error("Quote fetch error:", error);
-  //     return null;
-  //   }
-  // };
-
-  const getQuote = async (amount, attempt = 1) => {
+  const getQuote = async (amount) => {
     try {
       const response = await fetch("/api/swap-quote-thorStream", {
         method: "POST",
@@ -111,15 +83,8 @@ const Swap = () => {
         estimate: data?.routes[0].expectedBuyAmount,
       };
     } catch (error) {
-      console.error(`Quote fetch error (attempt ${attempt}):`, error);
-
-      if (attempt < 3) {
-        // Retry up to 3 times
-        return await getQuote(amount, attempt + 1);
-      } else {
-        // After 3 attempts, throw the error
-        throw error;
-      }
+      // Remove internal retry logic - let the caller handle retries
+      throw error;
     }
   };
 
@@ -153,14 +118,8 @@ const Swap = () => {
       const balance = String(
         Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
-      setUsdcBalance(balance);
 
-      // Fetch BTC balance (assuming similar method exists or create one)
-      // const tbtcResult = await web3.getUSDCBalance(
-      //   TBTC_ADDRESS,
-      //   userAuth?.walletAddress,
-      //   providerr
-      // );
+      setUsdcBalance(balance);
 
       const result = await fetchBitcoinBalance(
         userAuth?.bitcoinWallet
@@ -202,52 +161,6 @@ const Swap = () => {
       setAmountError("");
     }
 
-    // if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
-    //   const timer = setTimeout(async () => {
-    //     setIsLoading(true);
-    //     try {
-    //       const quotePromise = getQuote(filteredValue);
-    //       const shiftPromise = getDestinationAddress(filteredValue);
-
-    //       const [quoteResult, shiftResult] = await Promise.all([
-    //         quotePromise,
-    //         shiftPromise,
-    //       ]);
-    //       const quoteSettleAmount = Number.parseFloat(
-    //         quoteResult?.estimate || 0
-    //       );
-    //       const shiftSettleAmount = Number.parseFloat(
-    //         shiftResult?.settleAmount || 0
-    //       );
-
-    //       let finalAddress = "";
-
-    //       if (
-    //         quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-    //         shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-    //       ) {
-    //         finalAddress = shiftResult?.depositAddress;
-    //         setToAmount(shiftResult?.settleAmount);
-    //         setSwapType("Sideshift");
-    //       } else {
-    //         finalAddress = quoteResult?.estimatedDepositAddress;
-    //         setToAmount(quoteResult?.estimate);
-    //         setSwapType("Swapkit");
-    //       }
-
-    //       if (finalAddress) {
-    //         setDestinationAddress(finalAddress);
-    //       }
-    //     } catch (err) {
-    //       setError("Failed to fetch quote or destination address.");
-    //     } finally {
-    //       setIsLoading(false);
-    //     }
-    //   }, 2000); // 500ms debounce
-
-    //   setDebounceTimer(timer);
-    // }
-
     if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
       const timer = setTimeout(async () => {
         setIsLoading(true);
@@ -255,67 +168,71 @@ const Swap = () => {
         setSwapType(""); // Clear previous provider
 
         try {
-          // First, try to get quotes from both providers
-          const shiftPromise = getDestinationAddress(filteredValue);
-          const quotePromise = getQuote(filteredValue);
+          // First, always try getDestinationAddress
+          let shiftResult = null;
+          let shouldTrySwapkit = false;
 
-          const [shiftResult, quoteResult] = await Promise.allSettled([
-            shiftPromise,
-            quotePromise,
-          ]);
+          try {
+            shiftResult = await getDestinationAddress(filteredValue);
 
-          let finalShiftResult = null;
-          let finalQuoteResult = null;
-
-          // Extract results from Promise.allSettled
-          if (shiftResult.status === "fulfilled") {
-            finalShiftResult = shiftResult.value;
-          }
-          if (quoteResult.status === "fulfilled") {
-            finalQuoteResult = quoteResult.value;
-          }
-
-          // If getDestinationAddress failed, use getQuote
-          if (!finalShiftResult) {
-            if (finalQuoteResult) {
-              setDestinationAddress(finalQuoteResult.estimatedDepositAddress);
-              setToAmount(finalQuoteResult.estimate);
-              setSwapType("Swapkit");
-            } else {
-              // Both failed, show error from getQuote
-              const quoteError =
-                // quoteResult.reason?.message ||
-                "Failed to get quotes from Swapkit try again after some time.";
-              setError(quoteError);
-            }
-          } else {
-            // getDestinationAddress succeeded, now compare amounts if both are available
-            if (finalQuoteResult) {
-              const quoteSettleAmount = Number.parseFloat(
-                finalQuoteResult?.estimate || 0
-              );
-              const shiftSettleAmount = Number.parseFloat(
-                finalShiftResult?.settleAmount || 0
-              );
-
-              if (
-                quoteSettleAmount <=
-                  process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-                shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-              ) {
-                setDestinationAddress(finalShiftResult.depositAddress);
-                setToAmount(finalShiftResult.settleAmount);
-                setSwapType("Sideshift");
-              } else {
-                setDestinationAddress(finalQuoteResult.estimatedDepositAddress);
-                setToAmount(finalQuoteResult.estimate);
-                setSwapType("Swapkit");
-              }
-            } else {
-              // Only Sideshift succeeded
-              setDestinationAddress(finalShiftResult.depositAddress);
-              setToAmount(finalShiftResult.settleAmount);
+            if (shiftResult) {
+              // Success with getDestinationAddress
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
               setSwapType("Sideshift");
+            }
+          } catch (shiftError) {
+            // Check if it's the "Amount too high" error - check the message property
+            const isAmountTooHighError =
+              shiftError?.message?.includes("Amount too high") ||
+              shiftError?.toString()?.includes("Amount too high");
+
+            if (isAmountTooHighError) {
+              // Only try Swapkit for "Amount too high" error
+              shouldTrySwapkit = true;
+            } else {
+              // For other errors, show error and don't try Swapkit
+              setError(
+                shiftError?.message || "Failed to get quotes from Sideshift"
+              );
+              setSwapType("Sideshift");
+            }
+          }
+
+          // Try Swapkit if Sideshift failed
+          if (shouldTrySwapkit) {
+            let quoteAttempts = 0;
+            const maxQuoteAttempts = 3;
+            let swapkitSuccess = false;
+
+            while (quoteAttempts < maxQuoteAttempts && !swapkitSuccess) {
+              try {
+                quoteAttempts++;
+
+                const quoteResult = await getQuote(filteredValue);
+
+                if (quoteResult) {
+                  setDestinationAddress(quoteResult.estimatedDepositAddress);
+                  setToAmount(quoteResult.estimate);
+                  setSwapType("Swapkit");
+                  setError(""); // Clear any previous error since getQuote succeeded
+                  swapkitSuccess = true;
+                  break;
+                }
+              } catch (quoteError) {
+                console.log(
+                  `Swapkit attempt ${quoteAttempts} failed:`,
+                  quoteError
+                );
+
+                if (quoteAttempts >= maxQuoteAttempts) {
+                  // After 3 attempts, set the error
+                  setSwapType("Swapkit");
+                  setError(
+                    "Failed to get quotes from Swapkit after multiple attempts"
+                  );
+                }
+              }
             }
           }
         } catch (err) {
@@ -503,9 +420,12 @@ const Swap = () => {
                         </button>
                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance:{" "}
-                          {swapDirection.from === "USDC"
+                          {/* {swapDirection.from === "USDC"
                             ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : Number.parseFloat(tbtcBalance).toFixed(2)} */}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -549,10 +469,7 @@ const Swap = () => {
                           </span>
                         </button>
                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance:{" "}
-                          {swapDirection.to === "USDC"
-                            ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
+                          Balance: {Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>

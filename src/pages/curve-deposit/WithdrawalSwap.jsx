@@ -524,12 +524,12 @@ const WithdrawalSwap = () => {
                       <div className="left">
                         <input
                           type="text"
-                           className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
                         />
-                          <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                        <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Ethereum Network
                         </h6>
                       </div>
@@ -548,10 +548,10 @@ const WithdrawalSwap = () => {
                             />
                           </span>{" "}
                           <span className="text-[12px]">
-                          {bridgeDirection.from}
-</span>
+                            {bridgeDirection.from}
+                          </span>
                         </button>
-                       <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
                           {/* {bridgeDirection.from} */}
                           XAUT
@@ -572,13 +572,13 @@ const WithdrawalSwap = () => {
                       <div className="left">
                         <input
                           type="text"
-                           className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true}
                           readOnly
                         />
-                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                        <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
                           Base Network
                         </h6>
                       </div>
@@ -600,11 +600,14 @@ const WithdrawalSwap = () => {
                             )}
                           </span>{" "}
                           <span className="text-[12px]">
-                          {bridgeDirection.to}
-</span>
+                            {bridgeDirection.to}
+                          </span>
                         </button>
-                         <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                          Balance:{" "}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {bridgeDirection.to}
                         </h6>
                       </div>
