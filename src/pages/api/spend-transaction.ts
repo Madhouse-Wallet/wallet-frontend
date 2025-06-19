@@ -29,7 +29,6 @@ export default async function handler(
         .json({ status: "failure", message: "Token fetch failed" });
     }
     const result = await getPayments(
-      walletId,
       token,
       2,
       fromDate,

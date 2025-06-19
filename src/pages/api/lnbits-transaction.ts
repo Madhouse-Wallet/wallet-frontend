@@ -30,7 +30,6 @@ export default async function handler(
     }
 
     const result = await getPayments(
-      walletId,
       token,
       1,
       fromDate,
