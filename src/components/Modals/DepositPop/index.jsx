@@ -69,6 +69,9 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
       } else if (amount > 0.25) {
         setError("Maximum deposit is 0.25 BTC");
         return;
+      } else if (amount > bitcoinBalance) {
+        setError("Insufficient Balance");
+        return;
       }
 
       setLoading(true);
@@ -242,18 +245,18 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               <form action="">
                 <div className="py-2">
                   <div className="flex items-center justify-between">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 font-semibold text-xs ps-3"
-                  >
-                    Enter Amount in BTC
-                  </label>
-                  {userAuth?.email && <label
-                    htmlFor=""
-                    className="form-label m-0 font-semibold text-xs ps-3"
-                  >
-                    Your Balance: {bitcoinBalance}
-                  </label>}
+                    <label
+                      htmlFor=""
+                      className="form-label m-0 font-semibold text-xs ps-3"
+                    >
+                      Enter Amount in BTC
+                    </label>
+                    {userAuth?.email && <label
+                      htmlFor=""
+                      className="form-label m-0 font-semibold text-xs ps-3"
+                    >
+                      Your Balance: {bitcoinBalance}
+                    </label>}
                   </div>
                   <div className="iconWithText relative">
                     <input

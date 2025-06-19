@@ -69,6 +69,9 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       } else if (amount > 25000000) {
         setError("Maximum value is 25,000,000");
         return;
+      } else if (amount > lightningBalance) {
+        setError("Insufficient Balance");
+        return;
       }
       setLoading(true);
       setCommonError(false)
@@ -236,18 +239,18 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
               <form action="">
                 <div className="py-2">
                   <div className="flex items-center justify-between">
-                  <label
-                    htmlFor=""
-                    className="form-label m-0 font-semibold text-xs ps-3"
-                  >
-                    Enter Amount in sats
-                  </label>
-                  {userAuth?.email && <label
-                    htmlFor=""
-                    className="form-label m-0 font-semibold text-xs ps-3"
-                  >
-                    Your Balance: {lightningBalance}
-                  </label>}
+                    <label
+                      htmlFor=""
+                      className="form-label m-0 font-semibold text-xs ps-3"
+                    >
+                      Enter Amount in sats
+                    </label>
+                    {userAuth?.email && <label
+                      htmlFor=""
+                      className="form-label m-0 font-semibold text-xs ps-3"
+                    >
+                      Your Balance: {lightningBalance}
+                    </label>}
                   </div>
                   <div className="iconWithText relative">
                     <input
