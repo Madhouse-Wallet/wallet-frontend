@@ -55,7 +55,7 @@ const LNAdressPopup = ({
 
       // Construct the full LN address
       const fullLnAddress = `${username}@spend.madhousewallet.com`;
-      const resposne = await updateLNAddressCall(userAuth?.email,username);
+      const resposne = await updateLNAddressCall(userAuth?.email, username);
       // console.log("repsonse", resposne);
       if (resposne?.status === "success") {
         setLnaddress(fullLnAddress);
@@ -166,7 +166,7 @@ const LNAdressPopup = ({
 export default LNAdressPopup;
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

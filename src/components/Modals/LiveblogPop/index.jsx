@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import RecentTransaction from "./RecentTransaction";
 
-
 const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
   const handleLiveBlog = () => setLiveBlog(!liveBlog);
   return (
@@ -38,9 +37,8 @@ const LiveBlogPopup = ({ liveBlog, setLiveBlog, data, transactions }) => {
   );
 };
 
-
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);
@@ -85,4 +83,3 @@ const closeIcn = (
     </defs>
   </svg>
 );
-

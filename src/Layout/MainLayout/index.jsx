@@ -21,7 +21,9 @@ const MainLayout = ({ Component, pageProps }) => {
   return (
     <>
       <Main className="ml-auto ms-auto">
-        <Header sidebar={sidebar} setSidebar={setSidebar} />
+        {(router.pathname == "/" || router.pathname == "/dashboard") && (
+          <Header sidebar={sidebar} setSidebar={setSidebar} />
+        )}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={router.route}
@@ -32,7 +34,9 @@ const MainLayout = ({ Component, pageProps }) => {
             <Component {...pageProps} />
           </motion.div>
         </AnimatePresence>
-        <Footer />
+        {(router.pathname == "/" || router.pathname == "/dashboard") && (
+          <Footer />
+        )}
       </Main>
     </>
   );

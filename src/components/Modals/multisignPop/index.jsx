@@ -1,4 +1,4 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -94,8 +94,7 @@ const MultiSignPop = ({ sign, setSign }) => {
         >
           {" "}
           <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
-            </div>
+            <div className="top pb-3"></div>
             <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
                 <div className="col-span-6">
@@ -132,7 +131,7 @@ const MultiSignPop = ({ sign, setSign }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

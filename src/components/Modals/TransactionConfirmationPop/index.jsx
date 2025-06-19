@@ -107,7 +107,7 @@ const TransactionConfirmationPop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

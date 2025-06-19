@@ -74,7 +74,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         return;
       }
       setLoading(true);
-      setCommonError(false)
+      setCommonError(false);
       if (!userAuth?.login) {
         setCommonError("Please Login!");
       } else {
@@ -105,7 +105,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
-            fetchLighteningBalance()
+            fetchLighteningBalance();
             toast.success(getBtcSat.message);
             setLoading(false);
           }
@@ -117,8 +117,6 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       setLoading(false);
     }
   };
-
-
 
   const fetchLighteningBalance = async () => {
     try {
@@ -141,30 +139,30 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             const balanceSatss = Math.floor(balanceSats / 1000);
             setLightningBalance(balanceSatss);
           } else {
-            console.error("Failed to fetch lightning balance or empty balance.");
+            console.error(
+              "Failed to fetch lightning balance or empty balance."
+            );
           }
         }
       }
-
-
     } catch (error) {
       console.error("Error fetching lightning balance:", error);
     }
   };
 
   useEffect(() => {
-    fetchLighteningBalance()
-  }, [])
+    fetchLighteningBalance();
+  }, []);
 
   useEffect(() => {
-    setCommonError(false)
-  }, [amount])
+    setCommonError(false);
+  }, [amount]);
 
   const handleAmountInput = (e) => {
     const rawValue = e.target.value;
 
     // Remove any non-digit characters
-    const numericValue = rawValue.replace(/[^0-9]/g, '');
+    const numericValue = rawValue.replace(/[^0-9]/g, "");
 
     // Convert to number for validation
     const numberValue = parseInt(numericValue, 10);
@@ -180,7 +178,6 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     } else if (numberValue > 25000000) {
       setError("Maximum value is 25,000,000");
     } else {
-
       setError("");
     }
   };
@@ -245,12 +242,14 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                     >
                       Enter Amount in sats
                     </label>
-                    {userAuth?.email && <label
-                      htmlFor=""
-                      className="form-label m-0 font-semibold text-xs ps-3"
-                    >
-                      Your Balance: {lightningBalance}
-                    </label>}
+                    {userAuth?.email && (
+                      <label
+                        htmlFor=""
+                        className="form-label m-0 font-semibold text-xs ps-3"
+                      >
+                        Your Balance: {lightningBalance}
+                      </label>
+                    )}
                   </div>
                   <div className="iconWithText relative">
                     <input
@@ -261,8 +260,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       placeholder="min: (25000), max: (25000000)"
                     />
                   </div>
-                  {error && (<p className="m-0 text-red-500">{error}</p>)}
-                  {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
+                  {error && <p className="m-0 text-red-500">{error}</p>}
+                  {commonError && (
+                    <p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>
+                  )}
                 </div>
 
                 <div className="btnWrpper mt-3">
@@ -295,7 +296,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);
