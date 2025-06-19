@@ -147,7 +147,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           return;
         }
         setBitcoinBalance(
-          result?.balance !== 0 ? (result?.balance).toFixed(8) : "0"
+          result?.balance !== 0 ? (result?.balance).toFixed(8) : 0
         ); // <-- e.g., "$3250.47"
       }
     } catch (error) {
