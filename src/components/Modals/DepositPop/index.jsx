@@ -9,6 +9,7 @@ import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
+import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -34,9 +35,10 @@ const getSecretData = async (storageKey, credentialId) => {
 
 const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [commonError, setCommonError] = useState(false);
+  const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
   const recoverSeedPhrase = async () => {
@@ -58,6 +60,17 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   };
   const handleDepositPop = async () => {
     try {
+      if (!amount) {
+        setError("Minimum deposit is 0.00027 BTC");
+        return;
+      } else if (amount < 0.00027) {
+        setError("Minimum deposit is 0.00027 BTC");
+        return;
+      } else if (amount > 0.25) {
+        setError("Maximum deposit is 0.25 BTC");
+        return;
+      }
+
       setLoading(true);
       setCommonError(false)
       if (!userAuth?.login) {
@@ -100,6 +113,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             });
             if (result.status) {
               toast.success(result.transactionHash);
+              fetchBtcBalance()
               setLoading(false);
             } else {
               setCommonError("Transaction Failed!");
@@ -109,7 +123,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
         }
       }
 
-      setDepositPop(!depositPop);
       setLoading(false);
     } catch (error) {
       setCommonError(error?.message);
@@ -118,7 +131,29 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   };
 
 
+  const fetchBtcBalance = async () => {
+    try {
+      if (userAuth?.bitcoinWallet) {
+        const result = await fetchBitcoinBalance(
+          userAuth?.bitcoinWallet
+          // "bc1q3hk4hmaqa2vdur53sx6vx56dg8pnxw2smj85v4"
+        );
 
+        if (result?.error) {
+          console.error("Error fetching BTC balance:", result.error);
+          return;
+        }
+        setBitcoinBalance(
+          result?.balance !== 0 ? (result?.balance).toFixed(8) : "0"
+        ); // <-- e.g., "$3250.47"
+      }
+    } catch (error) {
+      console.error("Error fetching lightning balance:", error);
+    }
+  };
+  useEffect(() => {
+    fetchBtcBalance()
+  }, [])
   useEffect(() => {
     setCommonError(false)
   }, [amount])
@@ -126,26 +161,34 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const handleAmountInput = (e) => {
     const rawValue = e.target.value;
 
-    // Remove any non-digit characters
-    const numericValue = rawValue.replace(/[^0-9]/g, '');
+    // Allow only numbers and a single dot
+    const numericValue = rawValue.replace(/[^0-9.]/g, '');
 
-    // Convert to number for validation
-    const numberValue = parseInt(numericValue, 10);
+    // Prevent multiple dots
+    const parts = numericValue.split('.');
+    const cleanedValue =
+      parts.length > 2
+        ? parts[0] + '.' + parts[1] // remove extra dots
+        : numericValue;
 
-    // Set value regardless of validity (you can choose to block instead)
+    const numberValue = parseFloat(cleanedValue);
 
-    setAmount(numericValue);
+    setAmount(cleanedValue);
+
     // Validation
-    if (!numericValue) {
+    if (!cleanedValue) {
       setError("Only numbers allowed");
-    } else if (numberValue < 25000) {
-      setError("Minimum value is 25,000");
-    } else if (numberValue > 25000000) {
-      setError("Maximum value is 25,000,000");
+    } else if (isNaN(numberValue)) {
+      setError("Invalid number format");
+    } else if (numberValue < 0.00027) {
+      setError("Minimum deposit is 0.00027 BTC");
+    } else if (numberValue > 0.25) {
+      setError("Maximum deposit is 0.25 BTC");
     } else {
       setError("");
     }
   };
+
 
 
 
@@ -198,19 +241,27 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             <div className="modalBody">
               <form action="">
                 <div className="py-2">
+                  <div className="flex items-center justify-between">
                   <label
                     htmlFor=""
                     className="form-label m-0 font-semibold text-xs ps-3"
                   >
-                    Enter Amount in sats
+                    Enter Amount in BTC
                   </label>
+                  {userAuth?.email && <label
+                    htmlFor=""
+                    className="form-label m-0 font-semibold text-xs ps-3"
+                  >
+                    Your Balance: {bitcoinBalance}
+                  </label>}
+                  </div>
                   <div className="iconWithText relative">
                     <input
                       type="text"
                       onChange={handleAmountInput}
                       value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      placeholder="min: (25000), max: (25000000)"
+                      placeholder="min: (0.00027), max: (0.25)"
                     />
                   </div>
                   {error && (<p className="m-0 text-red-500">{error}</p>)}
@@ -222,7 +273,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                   <button
                     type="button"
                     className="flex items-center justify-center btn commonBtn w-full"
-                    disabled={loading}
+                    disabled={loading || error}
                     onClick={handleDepositPop}
                   >
                     {loading ? (

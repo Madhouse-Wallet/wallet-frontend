@@ -34,11 +34,13 @@ const getSecretData = async (storageKey, credentialId) => {
 
 const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [commonError, setCommonError] = useState(false);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+  const [lightningBalance, setLightningBalance] = useState(0);
+
   const recoverSeedPhrase = async () => {
     try {
       let data = JSON.parse(userAuth?.webauthKey);
@@ -56,8 +58,18 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       return false;
     }
   };
-  const handleDepositPop = async () => {
+  const handleWithdrawPop = async () => {
     try {
+      if (!amount) {
+        setError("Minimum value is 25,000");
+        return;
+      } else if (amount < 25000) {
+        setError("Minimum value is 25,000");
+        return;
+      } else if (amount > 25000000) {
+        setError("Maximum value is 25,000,000");
+        return;
+      }
       setLoading(true);
       setCommonError(false)
       if (!userAuth?.login) {
@@ -90,6 +102,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
+            fetchLighteningBalance()
             toast.success(getBtcSat.message);
             setLoading(false);
           }
@@ -101,6 +114,44 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       setLoading(false);
     }
   };
+
+
+
+  const fetchLighteningBalance = async () => {
+    try {
+      if (userAuth?.email) {
+        const userExist = await getUser(userAuth?.email);
+        if (userExist) {
+          const response = await fetch("/api/spend-balance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              walletId: userExist?.userId?.lnbitWalletId_3,
+              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+            }),
+          });
+          const { status, data } = await response.json();
+          if (status === "success" && data?.[0]?.balance != null) {
+            const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+            const balanceSatss = Math.floor(balanceSats / 1000);
+            setLightningBalance(balanceSatss);
+          } else {
+            console.error("Failed to fetch lightning balance or empty balance.");
+          }
+        }
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching lightning balance:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLighteningBalance()
+  }, [])
 
   useEffect(() => {
     setCommonError(false)
@@ -184,12 +235,20 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             <div className="modalBody">
               <form action="">
                 <div className="py-2">
+                  <div className="flex items-center justify-between">
                   <label
                     htmlFor=""
                     className="form-label m-0 font-semibold text-xs ps-3"
                   >
                     Enter Amount in sats
                   </label>
+                  {userAuth?.email && <label
+                    htmlFor=""
+                    className="form-label m-0 font-semibold text-xs ps-3"
+                  >
+                    Your Balance: {lightningBalance}
+                  </label>}
+                  </div>
                   <div className="iconWithText relative">
                     <input
                       type="text"
@@ -208,7 +267,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                     type="button"
                     className=" flex items-center justify-center btn commonBtn w-full"
                     disabled={loading || error}
-                    onClick={handleDepositPop}
+                    onClick={handleWithdrawPop}
                   >
                     {loading ? (
                       <Image
