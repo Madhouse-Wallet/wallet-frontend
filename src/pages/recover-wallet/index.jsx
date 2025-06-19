@@ -140,7 +140,7 @@ const RecoverWallet = () => {
                       storageKeySecret,
                       credentialIdSecret,
                       displayName: "",
-                      bitcoinWallet: recoveryBitcoin?.data?.address,
+                      bitcoinWallet: bitcoinAddress
                     },
                   },
                   $set: { totalPasskey: userExist?.userId?.totalPasskey + 1 }, // Ensure this is inside `$set`
