@@ -60,7 +60,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   };
   const handleWithdrawPop = async () => {
     try {
-      if (!amount) {
+      if (!userAuth?.login) {
+        setError("Please Login!");
+        return;
+      } else if (!amount) {
         setError("Minimum value is 25,000");
         return;
       } else if (amount < 25000) {

@@ -60,7 +60,10 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   };
   const handleDepositPop = async () => {
     try {
-      if (!amount) {
+      if (!userAuth?.login) {
+        setError("Please Login!");
+        return;
+      } else if (!amount) {
         setError("Minimum deposit is 0.00027 BTC");
         return;
       } else if (amount < 0.00027) {

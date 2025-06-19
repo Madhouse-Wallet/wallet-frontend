@@ -93,6 +93,7 @@ const RecoverWallet = () => {
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true);
+      setError("")
       if (privateKey && wif && safeprivateKey && seedPhrase) {
         let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
         if (!testMenmonic.status) {
@@ -106,7 +107,7 @@ const RecoverWallet = () => {
           address
         );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
-        if (recoveryBitcoin?.status == "error" ||( recoveryBitcoin?.data?.address != bitcoinAddress && recoveryBitcoin?.data?.address2 != bitcoinAddress)) {
+        if (recoveryBitcoin?.status == "error" || (recoveryBitcoin?.data?.address != bitcoinAddress && recoveryBitcoin?.data?.address2 != bitcoinAddress)) {
           setWifError("Invalid Wif!");
           setLoadingNewSigner(false);
           return;
@@ -153,7 +154,7 @@ const RecoverWallet = () => {
             toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
-            toast.error(storeData.msg);
+            setError(storeData.msg);
             setLoadingNewSigner(false);
           }
         } else {
@@ -238,7 +239,7 @@ const RecoverWallet = () => {
 
   const handlePrivateInputChange = (e) => {
     const value = e.target.value;
-
+    setError("")
     const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
 
     setPrivateKey(filteredValue);
@@ -254,7 +255,7 @@ const RecoverWallet = () => {
 
   const handleSafePrivateInputChange = (e) => {
     const value = e.target.value;
-
+    setError("")
     const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
 
     setSafePrivateKey(filteredValue);
@@ -269,6 +270,7 @@ const RecoverWallet = () => {
   };
 
   const handlePhraseInput = (e) => {
+    setError("")
     const value = e.target.value;
     const filtered = filterAlphaWithSpaces(value, 250); // Adjust max length as needed
     setSeedPhrase(filtered); // Or whatever your state setter is
@@ -284,6 +286,7 @@ const RecoverWallet = () => {
   };
 
   const handleWifInput = (e) => {
+    setError("")
     const value = e.target.value;
     const disallowedChars =
       /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g;
@@ -426,6 +429,11 @@ const RecoverWallet = () => {
                   </div>
                 )}
               </div>
+              {error && (
+                <div className="flex items-center gap-1 p-1 pb-2 pt-2 text-13 font-normal -tracking-2 text-red-500">
+                  {error}
+                </div>
+              )}
               <div className="btnWrpper mt-3 text-center">
                 <button
                   type="button"
