@@ -106,7 +106,7 @@ const RecoverWallet = () => {
           address
         );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
-        if (recoveryBitcoin?.status == "error" || recoveryBitcoin?.data?.address != bitcoinAddress) {
+        if (recoveryBitcoin?.status == "error" ||( recoveryBitcoin?.data?.address != bitcoinAddress && recoveryBitcoin?.data?.address2 != bitcoinAddress)) {
           setWifError("Invalid Wif!");
           setLoadingNewSigner(false);
           return;
