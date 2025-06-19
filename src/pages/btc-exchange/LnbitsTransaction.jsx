@@ -88,6 +88,8 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
         }
       } else if (usd === 1) {
         const response = await fetch("/api/lnbits-transaction-bitcoin", {
@@ -110,8 +112,10 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
         }
-      } else {
+      } else if (usd === 2) {
         const response = await fetch("/api/spend-transaction", {
           method: "POST",
           headers: {
@@ -131,6 +135,46 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
+        }
+      } else if (usd === 3) {
+        const response = await fetch("/api/withdraw-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userAuth?.email,
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
+        }
+      } else {
+        const response = await fetch("/api/deposit-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userAuth?.email,
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
         }
       }
     } catch (error) {

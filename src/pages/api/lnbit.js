@@ -22,7 +22,10 @@ const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
     const result = new TextDecoder().decode(response.Payload);
 
     if (response.LogResult) {
-      console.log("Lambda logs:", Buffer.from(response.LogResult, "base64").toString("ascii"));
+      console.log(
+        "Lambda logs:",
+        Buffer.from(response.LogResult, "base64").toString("ascii")
+      );
     }
 
     const parsed = JSON.parse(result);
@@ -40,10 +43,12 @@ const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   }
 };
 
-
 const logIn = async (type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "logIn", data: [type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "logIn", data: [type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("logIn apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -51,7 +56,7 @@ const logIn = async (type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -64,7 +69,10 @@ const logIn = async (type = 1) => {
 
 const userLogIn = async (type = 1, usr) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "userLogIn", data: [type, usr] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "userLogIn", data: [type, usr] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("userLogIn apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -72,7 +80,7 @@ const userLogIn = async (type = 1, usr) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -85,7 +93,10 @@ const userLogIn = async (type = 1, usr) => {
 
 const createUser = async (data, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "createUser", data: [data, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createUser", data: [data, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createUser apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -93,7 +104,7 @@ const createUser = async (data, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -106,7 +117,10 @@ const createUser = async (data, token, type = 1) => {
 
 const addUserWallet = async (id, data, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "addUserWallet", data: [id, data, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "addUserWallet", data: [id, data, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("addUserWallet apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -114,7 +128,7 @@ const addUserWallet = async (id, data, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.log("add user wallet error-->", error);
@@ -128,7 +142,10 @@ const addUserWallet = async (id, data, token, type = 1) => {
 // splitpayments/api/v1/targets
 const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "splitPaymentTarget", data: [data, apiKey, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "splitPaymentTarget", data: [data, apiKey, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("splitPaymentTarget apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -136,7 +153,7 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -150,7 +167,10 @@ const splitPaymentTarget = async (data, apiKey, token, type = 1) => {
 // create lnurlpCreate link
 const lnurlpCreate = async (data, apiKey, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "lnurlpCreate", data: [data, apiKey, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "lnurlpCreate", data: [data, apiKey, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("lnurlpCreate apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -158,7 +178,7 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -172,7 +192,10 @@ const lnurlpCreate = async (data, apiKey, token, type = 1) => {
 // create lnurlpCreate link
 const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "withdrawLinkCreate", data: [data, apiKey, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "withdrawLinkCreate", data: [data, apiKey, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("withdrawLinkCreate apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -180,7 +203,7 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -193,7 +216,10 @@ const withdrawLinkCreate = async (data, apiKey, token, type = 1) => {
 
 const getUser = async (id, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "getUser", data: [id, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "getUser", data: [id, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("getUser apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -201,7 +227,7 @@ const getUser = async (id, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -214,7 +240,10 @@ const getUser = async (id, token, type = 1) => {
 
 const createTpos = async (data, apiKey, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "createTpos", data: [data, apiKey, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createTpos", data: [data, apiKey, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createTpos apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -222,7 +251,7 @@ const createTpos = async (data, apiKey, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -235,8 +264,10 @@ const createTpos = async (data, apiKey, token, type = 1) => {
 
 const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
   try {
-
-    const apiResponse = await lambdaInvokeFunction({ name: "createBlotzAutoReverseSwap", data: [data, apiKey, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createBlotzAutoReverseSwap", data: [data, apiKey, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createBlotzAutoReverseSwap apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -244,7 +275,7 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -257,7 +288,10 @@ const createBlotzAutoReverseSwap = async (data, apiKey, token, type = 1) => {
 
 const createInvoice = async (data, token, type = 1, apiKey) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "createInvoice", data: [data, token, type, apiKey] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createInvoice", data: [data, token, type, apiKey] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createInvoice apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -265,7 +299,7 @@ const createInvoice = async (data, token, type = 1, apiKey) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -278,7 +312,10 @@ const createInvoice = async (data, token, type = 1, apiKey) => {
 
 const payInvoice = async (data, token, type = 1, apiKey) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "payInvoice", data: [data, token, type, apiKey] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "payInvoice", data: [data, token, type, apiKey] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("payInvoice apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -286,7 +323,7 @@ const payInvoice = async (data, token, type = 1, apiKey) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -299,7 +336,10 @@ const payInvoice = async (data, token, type = 1, apiKey) => {
 
 const decodeInvoice = async (invoice, token, type = 1, apiKey) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "decodeInvoice", data: [invoice, token, type, apiKey] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "decodeInvoice", data: [invoice, token, type, apiKey] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("decodeInvoice apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -307,7 +347,7 @@ const decodeInvoice = async (invoice, token, type = 1, apiKey) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("decodeInvoice API Error:", error);
@@ -320,7 +360,10 @@ const decodeInvoice = async (invoice, token, type = 1, apiKey) => {
 
 const createSwapReverse = async (data, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "createSwapReverse", data: [data, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createSwapReverse", data: [data, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createSwapReverse apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -328,7 +371,7 @@ const createSwapReverse = async (data, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -341,7 +384,10 @@ const createSwapReverse = async (data, token, type = 1) => {
 
 const createSwap = async (data, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "createSwap", data: [data, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "createSwap", data: [data, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("createSwap apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -349,7 +395,7 @@ const createSwap = async (data, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -362,7 +408,10 @@ const createSwap = async (data, token, type = 1) => {
 
 const getStats = async (walletId, token, type = 1) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "getStats", data: [walletId, token, type] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      { name: "getStats", data: [walletId, token, type] },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("getStats apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -370,7 +419,7 @@ const getStats = async (walletId, token, type = 1) => {
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -381,7 +430,6 @@ const getStats = async (walletId, token, type = 1) => {
   }
 };
 
-
 const getPayments = async (
   token,
   type = 1,
@@ -391,7 +439,13 @@ const getPayments = async (
   apiKey = null
 ) => {
   try {
-    const apiResponse = await lambdaInvokeFunction({ name: "getPayments", data: [token, type, fromDate, toDate, tag, apiKey] }, "madhouse-backend-production-lnbitCalls");
+    const apiResponse = await lambdaInvokeFunction(
+      {
+        name: "getPayments",
+        data: [token, type, fromDate, toDate, tag, apiKey],
+      },
+      "madhouse-backend-production-lnbitCalls"
+    );
     // console.log("getPayments apiResponse lambdaInvokeFunction -->", apiResponse?.data)
     if (apiResponse?.status == "success") {
       return apiResponse?.data;
@@ -399,7 +453,95 @@ const getPayments = async (
       return {
         status: false,
         msg: "fetch failed",
-      }
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+const getWithdraw = async (token, type = 1, apiKey = null) => {
+  try {
+    let backendUrl = "";
+    // let apiKey = "";
+
+    if (type === 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
+
+    const url = `${backendUrl}boltz/api/v1/swap/reverse?all_wallets=false`;
+    let response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+    });
+
+    response = await response.json();
+    if (response) {
+      return {
+        status: true,
+        data: response,
+      };
+    } else {
+      return {
+        status: false,
+        msg: response,
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
+const getDeposit = async (token, type = 1, apiKey = null) => {
+  try {
+    let backendUrl = "";
+    // let apiKey = "";
+
+    if (type === 1) {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
+    } else {
+      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
+      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
+    }
+
+    const url = `${backendUrl}boltz/api/v1/swap?all_wallets=false`;
+    let response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
+        "X-API-KEY": apiKey,
+      },
+    });
+
+    response = await response.json();
+    if (response) {
+      return {
+        status: true,
+        data: response,
+      };
+    } else {
+      return {
+        status: false,
+        msg: response,
+      };
     }
   } catch (error) {
     console.error("lnbit login API Error:", error);
@@ -424,6 +566,8 @@ module.exports = {
   getStats,
   getPayments,
   addUserWallet,
+  getWithdraw,
+  getDeposit,
   userLogIn,
   splitPaymentTarget,
   lnurlpCreate,

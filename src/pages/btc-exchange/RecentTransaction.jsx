@@ -33,6 +33,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [sideshiftTxs, setSideshiftTxs] = useState([]);
   const [selectedItem, setSelectedItem] = useState("10");
   const [error, setError] = useState("");
+  const [withdrawBoltz, setWithdrawBoltz] = useState([]);
+  const [depositBoltz, setDepositBoltz] = useState([]);
 
   const selectOptions = [
     { value: "", label: "Select an option" },
@@ -640,6 +642,18 @@ const RecentTransaction = ({ setSetFilterType }) => {
         />
       ),
     },
+    {
+      title: "Boltz Lightning Withdraw",
+      component: (
+        <LnbitsTransaction usd={3} setTransactions={setWithdrawBoltz} />
+      ),
+    },
+    {
+      title: "Boltz Lightning Deposit",
+      component: (
+        <LnbitsTransaction usd={4} setTransactions={setDepositBoltz} />
+      ),
+    },
   ];
 
   return (
@@ -795,7 +809,10 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
                   else if (activeTab === 5) dataToExport = spendTxs;
                   else if (activeTab === 6) dataToExport = morphotransactions;
-                  else if (activeTab === 7) dataToExport = sideshiftTxs; // Add this line
+                  else if (activeTab === 7)
+                    dataToExport = sideshiftTxs; // Add this
+                  else if (activeTab === 8) dataToExport = withdrawBoltz;
+                  else if (activeTab === 9) dataToExport = depositBoltz;
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
