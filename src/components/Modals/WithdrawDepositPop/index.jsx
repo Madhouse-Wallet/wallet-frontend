@@ -18,33 +18,41 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
 
   const verifyingUser = async () => {
     setError("");
-    setloading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdSecret);
-    if (
-      userData.status === true &&
-      userData.msg === "User verified successfully"
-    ) {
-      router.push("/spherepay");
+    if (userAuth?.email) {
+      setloading(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/spherepay");
+      } else {
+        setloading(false);
+        setError("Verification Failed Please try again.");
+      }
     } else {
-      setloading(false);
-      setError("Verification Failed Please try again.");
+      setError("Create an account or log in");
     }
   };
 
   const verifyingUserFonbnk = async () => {
     setError("");
-    setloadingFonbnk(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdSecret);
-    if (
-      userData.status === true &&
-      userData.msg === "User verified successfully"
-    ) {
-      router.push("/fonbnk");
+    if (userAuth?.email) {
+      setloadingFonbnk(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/fonbnk");
+      } else {
+        setloadingFonbnk(false);
+        setError("Verification Failed Please try again.");
+      }
     } else {
-      setloadingFonbnk(false);
-      setError("Verification Failed Please try again.");
+      setError("Create an account or log in");
     }
   };
   return (

@@ -139,7 +139,9 @@ const BitcoinTransactionDetail = ({ detail, setDetail, transactionData }) => {
                             {getInitials(from)}
                           </div>
                           <span className="text-blue-500 text-xs font-medium">
-                            {truncateAddress(from)}
+                            {from === "Unknown"
+                              ? "Unknown"
+                              : truncateAddress(from)}
                           </span>
                         </div>
                       </div>
@@ -147,7 +149,7 @@ const BitcoinTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         <h6 className="m-0 font-semibold text-base pb-1">To</h6>
                         <div className="rounded-20 px-2 py-1 bg-white/50">
                           <span className="text-xs font-medium">
-                            {truncateAddress(to)}
+                            {to === "Unknown" ? "Unknown" : truncateAddress(to)}
                           </span>
                         </div>
                       </div>
