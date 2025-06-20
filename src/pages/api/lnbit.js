@@ -525,42 +525,20 @@ const getPaymentSuccess = async (
   checkingId
 ) => {
   try {
-    let backendUrl = "";
-    // let apiKey = "";
-
-    if (type === 1) {
-      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL;
-      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY;
-    } else {
-      backendUrl = process.env.NEXT_PUBLIC_LNBIT_URL_2;
-      // apiKey = process.env.NEXT_PUBLIC_LNBIT_API_KEY_2;
-    }
-
-    const params = new URLSearchParams({
-      checking_id: checkingId,
-    });
-
-    const url = `${backendUrl}api/v1/payments?${params.toString()}`;
-
-    let response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: `cookie_access_token=${token}; is_lnbits_user_authorized=true`,
-        "X-API-KEY": apiKey,
+    const apiResponse = await lambdaInvokeFunction(
+      {
+        name: "getPaymentSuccess",
+        data: [token, type, apiKey, checkingId],
       },
-    });
-
-    response = await response.json();
-    if (response) {
-      return {
-        status: true,
-        data: response,
-      };
+      "madhouse-backend-production-lnbitCalls"
+    );
+    // console.log("getDeposit apiResponse lambdaInvokeFunction -->", apiResponse?.data)
+    if (apiResponse?.status == "success") {
+      return apiResponse?.data;
     } else {
       return {
         status: false,
-        msg: response,
+        msg: "fetch failed",
       };
     }
   } catch (error) {
