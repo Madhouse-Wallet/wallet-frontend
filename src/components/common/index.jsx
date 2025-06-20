@@ -36,23 +36,23 @@ export const AccordionItem = ({
               d="M14.2503 34.8332H23.7503C31.667 34.8332 34.8337 31.6665 34.8337 23.7498V14.2498C34.8337 6.33317 31.667 3.1665 23.7503 3.1665H14.2503C6.33366 3.1665 3.16699 6.33317 3.16699 14.2498V23.7498C3.16699 31.6665 6.33366 34.8332 14.2503 34.8332Z"
               fill=""
               stroke="#999999"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M18.9999 25.3369V12.6631"
               stroke="#999999"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
             <path
               d="M25.3368 19H12.6631"
               stroke="#999999"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </AccordionIcon>
@@ -135,8 +135,8 @@ const backIcn = (
       d="M22 20.418C19.5533 17.4313 17.3807 15.7367 15.482 15.334C13.5833 14.9313 11.7757 14.8705 10.059 15.1515V20.5L2 11.7725L10.059 3.5V8.5835C13.2333 8.6085 15.932 9.74733 18.155 12C20.3777 14.2527 21.6593 17.0587 22 20.418Z"
       fill="currentColor"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinejoin="round"
     />
   </svg>
 );

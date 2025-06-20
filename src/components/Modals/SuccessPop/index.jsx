@@ -125,15 +125,15 @@ const tickIcn = (
       r="48.5"
       fill="url(#paint0_linear_301_1302)"
       stroke="url(#paint1_linear_301_1302)"
-      stroke-width="3"
+      strokeWidth="3"
     />
     <g clip-path="url(#clip0_301_1302)">
       <path
         d="M36 50L46 60L66 40"
         stroke="white"
-        stroke-width="4"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </g>
     <defs>
@@ -145,8 +145,8 @@ const tickIcn = (
         y2="100"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#11CF8B" />
-        <stop offset="1" stop-color="#30EEA9" />
+        <stop stopColor="#11CF8B" />
+        <stop offset="1" stopColor="#30EEA9" />
       </linearGradient>
       <linearGradient
         id="paint1_linear_301_1302"
@@ -156,8 +156,8 @@ const tickIcn = (
         y2="100"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#7BF4C8" />
-        <stop offset="1" stop-color="#56F1B9" />
+        <stop stopColor="#7BF4C8" />
+        <stop offset="1" stopColor="#56F1B9" />
       </linearGradient>
       <clipPath id="clip0_301_1302">
         <rect
