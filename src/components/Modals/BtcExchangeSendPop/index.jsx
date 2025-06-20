@@ -136,13 +136,13 @@ const BtcExchangeSendPop = ({
         setLoadingSend(false);
       } else {
         setFailed(true);
-        setTxError(result.error || "Transaction failed");
+        setTxError("Transaction failed");
       }
       setLoadingSend(false);
     } catch (error) {
       setLoadingSend(false);
       setFailed(true);
-      setTxError(error || "Transaction failed");
+      setTxError("Transaction failed");
     }
   };
 

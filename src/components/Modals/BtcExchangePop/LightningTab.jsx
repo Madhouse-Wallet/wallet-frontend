@@ -60,6 +60,11 @@ const LightningTab = (walletAddress) => {
     try {
       const qr = await QRCode.toDataURL(text, {
         margin: 0.5,
+        width: 512,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
       });
       setQRCode(qr);
       setLoading(false);
@@ -271,10 +276,11 @@ const LightningTab = (walletAddress) => {
           </p>
           <Image
             src={qrCode}
-            height={10000}
-            width={10000}
+            height={512}
+            width={512}
             className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
             // style={{ height: 230 }}
+            style={{ imageRendering: "pixelated" }}
             alt="QR Code"
           />
           <Tooltip id="my-tooltip" />

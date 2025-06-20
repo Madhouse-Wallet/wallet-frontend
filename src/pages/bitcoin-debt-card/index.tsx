@@ -77,6 +77,11 @@ const BTCDebitCard: React.FC = () => {
           userExist?.userId?.spendLnurlpLink?.lnurl,
           {
             margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
           }
         );
         setLnQrCode(qr);
@@ -288,15 +293,14 @@ const BTCDebitCard: React.FC = () => {
                   </div>
                   {lnaddress && lnQrCode && (
                     <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 text-center">
-                        <p className="m-0">
-                          <span className="font-bold block">LN Address:</span>
-                        </p>
+                      <p className="m-0">
+                        <span className="font-bold block">LN Address:</span>
+                      </p>
                       <div
                         onClick={() => handleCopy(lnaddress)}
                         className="m-0 py-2 text-white/80 flex justify-center items-center  pb-5  cursor-pointer"
                       >
-                          {lnaddress}{" "}
-                        <span className="ml-1">{copyIcn}</span>
+                        {lnaddress} <span className="ml-1">{copyIcn}</span>
                       </div>
                       <Image
                         alt=""
@@ -305,6 +309,7 @@ const BTCDebitCard: React.FC = () => {
                         width={10000}
                         className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
                         // style={{ height: 230 }}
+                        style={{ imageRendering: "pixelated" }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button
