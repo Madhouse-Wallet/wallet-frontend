@@ -64,13 +64,13 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         setError("Please Login!");
         return;
       } else if (!amount) {
-        setError("Minimum value is 25,000");
+        setError("Minimum value is 26,000");
         return;
-      } else if (amount < 25000) {
-        setError("Minimum value is 25,000");
+      } else if (amount < 26000) {
+        setError("Minimum value is 26,000");
         return;
-      } else if (amount > 25000000) {
-        setError("Maximum value is 25,000,000");
+      } else if (amount > 24000000) {
+        setError("Maximum value is 24,000,000");
         return;
       } else if (amount > lightningBalance) {
         setError("Insufficient Balance");
@@ -178,10 +178,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     // Validation
     if (!numericValue) {
       setError("Only numbers allowed");
-    } else if (numberValue < 25000) {
-      setError("Minimum value is 25,000");
-    } else if (numberValue > 25000000) {
-      setError("Maximum value is 25,000,000");
+    } else if (numberValue < 26000) {
+      setError("Minimum value is 26,000");
+    } else if (numberValue > 24000000) {
+      setError("Maximum value is 24,000,000");
     } else {
 
       setError("");
@@ -261,7 +261,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       onChange={handleAmountInput}
                       value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      placeholder="min: (25000), max: (25000000)"
+                      placeholder="min: (26000), max: (24000000)"
                     />
                   </div>
                   {error && (<p className="m-0 text-red-500">{error}</p>)}
