@@ -26,7 +26,10 @@ import { getUser } from "@/lib/apiCall";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
+import { useRouter } from "next/router";
 const BTCEchange = () => {
+  const router = useRouter();
+
   const userAuth = useSelector((state: any) => state.Auth);
   const [btcExchange, setBtcExchange] = useState(false);
   const [loaderStatus, setLoaderStatus] = useState(false);
@@ -390,13 +393,24 @@ const BTCEchange = () => {
         )}
       {loaderStatus && createPortal(<LoadingScreen />, document.body)}
       <section className="relative dashboard  ">
-        <div className="container h-full relative">
-          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
+            {" "}
             <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className="sectionHeader ">
                   <div className="flex align-items-center gap-3">
-                    <BackBtn />
+                    {/* <BackBtn /> */}
                     <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Send & Recieve
                     </h4>
@@ -485,3 +499,17 @@ const TopHead = styled.div`
 `;
 
 export default BTCEchange;
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);

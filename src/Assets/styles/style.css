@@ -25,6 +25,8 @@
   background-attachment: fixed;
   background-size: cover;
   height: 100vh;
+  max-height: 100vh;
+  /* height: -webkit-fill-available; */
   overflow: hidden;
 }
 html {
@@ -62,7 +64,7 @@ body::-webkit-scrollbar,
 .pageCard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  padding-bottom: 200px !important;
+  /* padding-bottom: 200px !important; */
   min-height: calc(100vh - 79px);
   width: 100% !important;
 }
@@ -95,7 +97,8 @@ body::-webkit-scrollbar,
   --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from),
+  --tw-gradient-stops:
+    var(--tw-gradient-from),
     rgb(255 255 255 / 0.05) var(--tw-gradient-via-position),
     var(--tw-gradient-to);
   --tw-gradient-to: transparent var(--tw-gradient-to-position);

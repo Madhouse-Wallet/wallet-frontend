@@ -9,12 +9,11 @@ import Layout from "@/Layout/index";
 import { ThemeProvider } from "@/ContextApi/ThemeContext";
 import { BackgroundProvider } from "@/ContextApi/backgroundContent";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import "react-date-range/dist/styles.css"; // main css file
+import "react-date-range/dist/theme/default.css"; // theme css file
+import { useEffect } from "react";
 
 export default function App({ Component, pageProps, ...props }: AppProps) {
-  useScrollRestoration();
-
   return (
     <>
       <Providers>
