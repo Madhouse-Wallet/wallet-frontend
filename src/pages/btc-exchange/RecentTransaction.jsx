@@ -704,7 +704,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
       {userAuth?.walletAddress ? (
         <>
-          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
+          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99] flex-wrap">
             <h4 className="m-0 text-xl">Recent Transaction</h4>
 
             <div className="flex gap-2 items-center">
@@ -823,14 +823,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
                     setError("No data available to export.");
                   }
                 }}
-                className="px-4 py-2 bg-black/50 text-white rounded-md"
+                className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
               >
                 Export CSV
               </button>
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="px-4 py-2 bg-black/50 text-white rounded-md"
+                  className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
                 >
                   Filters
                 </button>

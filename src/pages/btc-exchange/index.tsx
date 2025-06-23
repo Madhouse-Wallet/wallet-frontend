@@ -392,7 +392,22 @@ const BTCEchange = () => {
           document.body
         )}
       {loaderStatus && createPortal(<LoadingScreen />, document.body)}
-      <section className="relative dashboard  ">
+      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+          <div className="container mx-auto">
+            <Nav className=" px-3 py-3 rounded-full shadow relative">
+              <div className="sectionHeader text-center w-full">
+                <div className="flex align-items-center justify-center gap-3">
+                  {/* <BackBtn /> */}
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Send & Recieve
+                  </h4>
+                </div>
+              </div>
+            </Nav>
+          </div>
+        </header>
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -407,16 +422,6 @@ const BTCEchange = () => {
           >
             {" "}
             <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
-                <div className="sectionHeader ">
-                  <div className="flex align-items-center gap-3">
-                    {/* <BackBtn /> */}
-                    <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Send & Recieve
-                    </h4>
-                  </div>
-                </div>
-              </div>
               <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className=" px-lg-4 ">
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
@@ -466,6 +471,12 @@ const BTCEchange = () => {
     </>
   );
 };
+
+const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: #5c2a28a3;
+  backdrop-filter: blur(12.8px);
+`;
 
 const TopHead = styled.div`
   // backdrop-filter: blur(39.6px);

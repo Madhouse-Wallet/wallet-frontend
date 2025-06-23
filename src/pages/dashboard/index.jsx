@@ -283,7 +283,7 @@ const Dashboard = () => {
         )}
 
       {/* <LoadingScreen /> */}
-      <DashboardMain className="relative flex w-full flex-col items-center">
+      <DashboardMain className="relative flex w-full flex-col items-center pt-[60px]">
         <div
           className="flex h-full w-full select-none flex-col items-center container"
           style={{ opacity: 1, transform: "none" }}
