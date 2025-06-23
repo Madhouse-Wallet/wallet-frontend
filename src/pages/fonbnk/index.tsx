@@ -20,7 +20,7 @@ export default function Fonbnk() {
 
   const currencyOptions = [
     { value: "usdc", label: "USDC" },
-    { value: "airtime", label: "Airtime" },
+    { value: "airtime", label: "KES" },
   ];
 
   const handleOnRampChange = (e: any) => {
