@@ -19,7 +19,7 @@ export default function Fonbnk() {
   });
 
   const currencyOptions = [
-    { value: "usdc", label: "USDC" },
+    { value: "usdc", label: "USD" },
     { value: "airtime", label: "KES" },
   ];
 
