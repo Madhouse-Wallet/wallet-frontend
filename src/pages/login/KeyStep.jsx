@@ -24,7 +24,7 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
   };
   return (
     <>
-      <div className="mx-auto max-w-[700px]">
+      <div className="mx-auto max-w-[700px] scrollbar-none max-h-[90vh] overflow-auto" style={{scrollbarWidth: "none"}}>
         <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
