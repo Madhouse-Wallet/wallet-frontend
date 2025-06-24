@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { addLnbitTposUser, addLnbitSpendUser } from "./create-lnbitUser";
-import { addProvisionLambda } from "../../lib/apiCall"
+import { checkLnbitCreds } from "../../lib/apiCall"
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
@@ -21,34 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (apiResponse?.status == "success") {
             let existingUser = apiResponse?.data;
             if (existingUser) {
-                if (!existingUser?.lnbitWalletId_3) {
-                    addProvisionLambda({
-                        "madhouseWallet": existingUser?.wallet,
-                        "email": email,
-                        "liquidBitcoinWallet": existingUser?.liquidBitcoinWallet,
-                        "bitcoinWallet": existingUser?.bitcoinWallet,
-                        "provisionlnbitType": 1
-                    })
-
-                } else if (!existingUser?.lnbitId) {
-                    addProvisionLambda({
-                        "madhouseWallet": existingUser?.wallet,
-                        "email": email,
-                        "liquidBitcoinWallet": existingUser?.liquidBitcoinWallet,
-                        "bitcoinWallet": existingUser?.bitcoinWallet,
-                        "provisionlnbitType": 2,
-                        "refund_address1": existingUser?.lnbitWalletId_3
-                    })
-                } else if (!existingUser?.lnbitId_2) {
-                    addProvisionLambda({
-                        "madhouseWallet": existingUser?.wallet,
-                        "email": email,
-                        "liquidBitcoinWallet": existingUser?.liquidBitcoinWallet,
-                        "bitcoinWallet": existingUser?.bitcoinWallet,
-                        "provisionlnbitType": 3,
-                        "refund_address1": existingUser?.lnbitWalletId_3
-                    })
-                }
+                checkLnbitCreds({
+                    "madhouseWallet": existingUser?.wallet,
+                    "email": email
+                })
             }
         }
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: {} });
