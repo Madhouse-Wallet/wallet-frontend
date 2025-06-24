@@ -267,7 +267,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                   {error && (<p className="m-0 text-red-500">{error}</p>)}
                   {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
                 </div>
-
+                {/* <div className="py-2">
+                  <p className="m-0 text-xs">Network Fee: 1 590</p>
+                  <p className="m-0 text-xs">Boltz Fee (0.5%): 125</p>
+                </div> */}
                 <div className="btnWrpper mt-3">
                   <button
                     type="button"
