@@ -2,7 +2,6 @@ import axios from "axios";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 const REGION = process.env.NEXT_PUBLIC_AWS_S3_REGION;
 
-
 export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
     region: REGION,
@@ -23,7 +22,10 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
     const result = new TextDecoder().decode(response.Payload);
 
     if (response.LogResult) {
-      console.log("Lambda logs:", Buffer.from(response.LogResult, "base64").toString("ascii"));
+      console.log(
+        "Lambda logs:",
+        Buffer.from(response.LogResult, "base64").toString("ascii")
+      );
     }
 
     // return JSON.parse(result);
@@ -33,12 +35,10 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
     }
 
     return parsed.body || parsed;
-
-
   } catch (error) {
-    console.log("error lambdaInvokeFunction ---->", error)
+    console.log("error lambdaInvokeFunction ---->", error);
   }
-}
+};
 export const getUser = async (email) => {
   try {
     try {
@@ -115,7 +115,10 @@ export const addProvisionData = async (email) => {
 
 export const addProvisionLambda = async (data) => {
   try {
-    const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-addlnbitUser")
+    const apiResponse = await lambdaInvokeFunction(
+      data,
+      "madhouse-backend-production-addlnbitUser"
+    );
     // console.log(" addProvisionLambda apiResponse-->", apiResponse)
     return true;
     // return await fetch(
@@ -140,7 +143,10 @@ export const addProvisionLambda = async (data) => {
 
 export const updateLNAddress = async (data) => {
   try {
-    const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-updateLnAddress")
+    const apiResponse = await lambdaInvokeFunction(
+      data,
+      "madhouse-backend-production-updateLnAddress"
+    );
     // console.log(" updateLNAddress apiResponse-->", apiResponse)
     return apiResponse;
     // return await fetch(
@@ -538,6 +544,7 @@ export const getUserWallet = async (wallet) => {
 export const updtUser = async (findData, updtData) => {
   try {
     try {
+      console.log("line-541");
       return await fetch(`/api/updt-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

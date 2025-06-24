@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
-import { updtUser } from "@/lib/apiCall";
+import { lambdaInvokeFunction } from "@/lib/apiCall";
 
 const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2024-12-18.acacia",
@@ -79,7 +79,7 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        await updtUser(
+        await updateKycStatus(
           { _id: kycData.userId },
           {
             $set: { kyc: "success" },
@@ -153,7 +153,7 @@ export default async function handler(
         }
 
         // Update KYC status in database
-        await updtUser(
+        await updateKycStatus(
           { _id: kycData.userId },
           {
             $set: { kyc: kycStatus },
@@ -176,7 +176,7 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        await updtUser(
+        await updateKycStatus(
           { _id: kycData.userId },
           {
             $set: { kyc: "processing" },
@@ -202,7 +202,7 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        await updtUser(
+        await updateKycStatus(
           { _id: kycData.userId },
           {
             $set: { kyc: "failed" },
@@ -223,3 +223,28 @@ export default async function handler(
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+const updateKycStatus = async (findData: any, updtData: any) => {
+  try {
+    const apiResponse = (await lambdaInvokeFunction(
+      { findData: findData, updtData: updtData },
+      "madhouse-backend-production-updtUser"
+    )) as any;
+    if (apiResponse?.status == "success") {
+      return {
+        status: "success",
+        message: apiResponse?.message,
+        userId: apiResponse?.data,
+      };
+    } else {
+      return {
+        status: "failure",
+        message: apiResponse?.message,
+        error: apiResponse?.error,
+      };
+    }
+  } catch (error) {
+    console.error("Error adding user:", error);
+    return { error: "Internal server error" };
+  }
+};
