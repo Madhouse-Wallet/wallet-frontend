@@ -393,21 +393,50 @@ const BTCEchange = () => {
         )}
       {loaderStatus && createPortal(<LoadingScreen />, document.body)}
       <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
         <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
           <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-full shadow relative">
-              <div className="sectionHeader text-center w-full">
+            <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap">
+              {/* <div className="sectionHeader text-center w-full">
                 <div className="flex align-items-center justify-center gap-3">
-                  {/* <BackBtn /> */}
+                  <BackBtn />
                   <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
                     Send & Recieve
                   </h4>
+                </div>
+              </div> */}
+              <div className="left">
+                <h4 className="m-0 font-normal text-base flex items-center">
+                  <span className="font-bold ms-2 text-xl">
+                    {totalUsdBalance}
+                  </span>
+                </h4>
+              </div>
+              <div className="right">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => startSend()}
+                    className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
+                  >
+                    Send
+                  </button>
+                  <button
+                    onClick={() => startReceive()}
+                    className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
+                  >
+                    Receive
+                  </button>
+                  {/* <button
+                          onClick={() => setSendBitcoin(!sendBitcoin)}
+                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
+                        >
+                          Bridge
+                        </button> */}
                 </div>
               </div>
             </Nav>
           </div>
         </header>
-        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -422,16 +451,10 @@ const BTCEchange = () => {
           >
             {" "}
             <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
+              {/* <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className=" px-lg-4 ">
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
-                    <div className="left ">
-                      <h4 className="m-0 font-normal text-base flex items-center">
-                        <span className="font-bold ms-2 text-2xl">
-                          {totalUsdBalance}
-                        </span>
-                      </h4>
-                    </div>
+                    <div className="left "></div>
                     <div className="right">
                       <div className="flex items-center gap-2">
                         <button
@@ -446,17 +469,11 @@ const BTCEchange = () => {
                         >
                           Receive
                         </button>
-                        {/* <button
-                          onClick={() => setSendBitcoin(!sendBitcoin)}
-                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
-                        >
-                          Bridge
-                        </button> */}
                       </div>
                     </div>
                   </TopHead>
                 </div>
-              </div>
+              </div> */}
               <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
