@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { buffer } from "micro";
+import { updtUser } from "@/lib/apiCall";
 
 const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2024-12-18.acacia",
@@ -78,9 +79,13 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        // await updateUserKYCStatus(kycData);
+        await updtUser(
+          { _id: kycData.userId },
+          {
+            $set: { kyc: "success" },
+          }
+        );
 
-        // You can also log additional verified data if needed
         if (verificationSession.verified_outputs) {
           console.log(
             "Verified outputs:",
@@ -109,37 +114,51 @@ export default async function handler(
         console.log(`Error: ${kycData.errorReason}`);
 
         // Handle specific failure reasons
+        let kycStatus = ""; // Default to success
+
         if (verificationSession.last_error?.code) {
           switch (verificationSession.last_error.code) {
             case "document_unverified_other":
               console.log("Document was invalid");
+              kycStatus = "document_unverified_other";
               break;
             case "document_expired":
               console.log("Document was expired");
+              kycStatus = "document_expired";
               break;
             case "document_type_not_supported":
               console.log("Document type not supported");
+              kycStatus = "document_type_not_supported";
               break;
             case "consent_declined":
               console.log("User declined consent");
+              kycStatus = "consent_declined";
               break;
             case "under_supported_age":
               console.log("User is under supported age");
+              kycStatus = "under_supported_age";
               break;
             case "country_not_supported":
               console.log("Country not supported");
+              kycStatus = "country_not_supported";
               break;
             default:
               console.log(
                 `Other error: ${verificationSession.last_error.code}`
               );
+              kycStatus = verificationSession.last_error.code;
           }
+        } else {
+          console.log("KYC verification successful");
         }
 
-        // TODO: Update your database here
-        // await updateUserKYCStatus(kycData);
-
-        break;
+        // Update KYC status in database
+        await updtUser(
+          { _id: kycData.userId },
+          {
+            $set: { kyc: kycStatus },
+          }
+        );
       }
 
       case "identity.verification_session.processing": {
@@ -157,7 +176,12 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        // await updateUserKYCStatus(kycData);
+        await updtUser(
+          { _id: kycData.userId },
+          {
+            $set: { kyc: "processing" },
+          }
+        );
 
         break;
       }
@@ -178,7 +202,12 @@ export default async function handler(
         console.log(`Session ID: ${kycData.sessionId}`);
 
         // TODO: Update your database here
-        // await updateUserKYCStatus(kycData);
+        await updtUser(
+          { _id: kycData.userId },
+          {
+            $set: { kyc: "failed" },
+          }
+        );
 
         break;
       }
@@ -194,28 +223,3 @@ export default async function handler(
     res.status(500).json({ error: "Internal server error" });
   }
 }
-
-// Example function to update database (implement according to your DB)
-// async function updateUserKYCStatus(kycData: KYCStatus) {
-//   try {
-//     // Replace with your actual database update logic
-//     // Example with Prisma:
-//     /*
-//     await prisma.user.update({
-//       where: { id: kycData.userId },
-//       data: {
-//         kycStatus: kycData.status,
-//         kycSessionId: kycData.sessionId,
-//         kycErrorCode: kycData.errorCode,
-//         kycErrorReason: kycData.errorReason,
-//         kycVerifiedAt: kycData.verifiedAt,
-//         updatedAt: new Date(),
-//       },
-//     });
-//     */
-//
-//     console.log(`Database updated for user: ${kycData.userId}`);
-//   } catch (error) {
-//     console.error("Failed to update database:", error);
-//   }
-// }

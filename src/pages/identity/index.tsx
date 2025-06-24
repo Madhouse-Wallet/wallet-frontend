@@ -27,7 +27,7 @@ export default function Identity() {
       } else {
         const initializeStripe = async () => {
           try { 
-            setStep("user");
+            setStep("identity");
             const response = await fetch("/api/config");
             const { publishableKey } = await response.json();
             const stripeInstance = await loadStripe(publishableKey);
