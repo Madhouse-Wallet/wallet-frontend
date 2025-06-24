@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { addLnbitTposUser, addLnbitSpendUser } from "./create-lnbitUser";
-import { addProvisionLambda } from "../../lib/apiCall"
+import { addProvisionLambda, checkLnbitCreds } from "../../lib/apiCall"
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
@@ -22,12 +22,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let existingUser = apiResponse?.data;
             if (existingUser) {
                 if (!existingUser?.lnbitWalletId_3) {
-                    addProvisionLambda({
+                    // addProvisionLambda({
+                    //     "madhouseWallet": existingUser?.wallet,
+                    //     "email": email,
+                    //     "liquidBitcoinWallet": existingUser?.liquidBitcoinWallet,
+                    //     "bitcoinWallet": existingUser?.bitcoinWallet,
+                    //     "provisionlnbitType": 1
+                    // })
+
+                    checkLnbitCreds({
                         "madhouseWallet": existingUser?.wallet,
                         "email": email,
-                        "liquidBitcoinWallet": existingUser?.liquidBitcoinWallet,
-                        "bitcoinWallet": existingUser?.bitcoinWallet,
-                        "provisionlnbitType": 1
                     })
 
                 } else if (!existingUser?.lnbitId) {

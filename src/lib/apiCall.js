@@ -141,6 +141,19 @@ export const addProvisionLambda = async (data) => {
   }
 };
 
+
+export const checkLnbitCreds = async (data) => {
+  try {
+    const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-checkLnbitCreds")
+    // console.log(" addProvisionLambda apiResponse-->", apiResponse)
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+
 export const updateLNAddress = async (data) => {
   try {
     const apiResponse = await lambdaInvokeFunction(
