@@ -10,7 +10,8 @@ import { getUser } from "@/lib/apiCall";
 
 export default function Identity() {
   const userAuth = useSelector((state: any) => state.Auth);
-  const [step, setStep] = useState("identity");
+  const [step, setStep] = useState("");
+  // const [step, setStep] = useState("PaymentTab");
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function Identity() {
     };
 
     fetchData();
+    // fetchData();
   }, []);
 
   const handleVerification = async () => {
