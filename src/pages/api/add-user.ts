@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { addProvisionLambda } from "../../lib/apiCall"
+import { addProvisionLambda, checkLnbitCreds } from "../../lib/apiCall"
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 
@@ -14,12 +14,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const apiResponse = await lambdaInvokeFunction(req.body, "madhouse-backend-production-createUser") as any;
         if (apiResponse?.status == "success") {
-            addProvisionLambda({
+            // addProvisionLambda({
+            //     "madhouseWallet": wallet,
+            //     "email": email,
+            //     "bitcoinWallet": bitcoinWallet,
+            //     "provisionlnbitType": 1,
+            //     "refund_address1": ""
+            // })
+            checkLnbitCreds({
                 "madhouseWallet": wallet,
                 "email": email,
-                "bitcoinWallet": bitcoinWallet,
-                "provisionlnbitType": 1,
-                "refund_address1": ""
             })
             return res.status(200).json({ status: "success", message: apiResponse?.message, userData: apiResponse?.data });
         } else {
