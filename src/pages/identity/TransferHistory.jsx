@@ -288,6 +288,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
   };
 
+  
   useEffect(() => {
     if (tab === 2) {
       fetchTransferHistory();
