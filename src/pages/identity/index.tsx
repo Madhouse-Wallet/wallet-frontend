@@ -23,7 +23,7 @@ export default function Identity() {
       }
       if (userExist?.userId?.kyc === "success") {
         setStep("user");
-      } else if (userExist?.userId?.kyc === "success") {
+      } else if (userExist?.userId?.kyc === "processing") {
         setStep("processing");
       } else {
         const initializeStripe = async () => {
