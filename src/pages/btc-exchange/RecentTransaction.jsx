@@ -10,6 +10,7 @@ import LnbitsTransaction from "./LnbitsTransaction";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
+import styled from "styled-components";
 
 const RecentTransaction = ({ setSetFilterType }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -327,7 +328,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       component: (
         <>
           {transactions.length > 0 ? (
-            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
                 return (
                   <div key={date} className="py-3">
@@ -865,7 +866,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </div>
           </div>
           <div className="py-2">
-            <div className="">{tabs[activeTab].component}</div>
+            <TabContent className="overflow-scroll max-h-[calc(100vh-240px)] scrollbar-none">
+              {tabs[activeTab].component}
+            </TabContent>
           </div>
         </>
       ) : (
@@ -885,6 +888,12 @@ const RecentTransaction = ({ setSetFilterType }) => {
     </>
   );
 };
+
+const TabContent = styled.div`
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 export default RecentTransaction;
 
