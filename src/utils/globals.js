@@ -142,3 +142,22 @@ export const calcLnToChainFeeWithReceivedAmount = async (amountReceived = 0) => 
         return null; // Handle error as needed (e.g., return an empty buffer or throw an error)
     }
 };
+
+
+export const calcFeeOnchainToLnWithReceiveAmount = async (amount, lockupFee = 0) => {
+    const boltzFeePercent = 0.5; // 0.5%
+    const claimFee = 500;        // fixed onchain claim tx fee in sats
+
+    const boltzFee = Math.floor((amount * boltzFeePercent) / 100);
+    const totalFees = boltzFee + claimFee + lockupFee;
+    const onchainPayment = amount + totalFees;
+
+    return {
+        receiveAmount: amount,
+        boltzFee,
+        claimFee,
+        lockupFee,
+        totalFees,
+        onchainPayment
+    };
+}
