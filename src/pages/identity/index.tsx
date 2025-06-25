@@ -18,15 +18,16 @@ export default function Identity() {
   useEffect(() => {
     const fetchData = async () => {
       const userExist = await getUser(userAuth.email);
-      console.log("userExist", userExist);
       if (!userExist) {
         return;
       }
       if (userExist?.userId?.kyc === "success") {
         setStep("user");
+      } else if (userExist?.userId?.kyc === "success") {
+        setStep("processing");
       } else {
         const initializeStripe = async () => {
-          try { 
+          try {
             setStep("identity");
             const response = await fetch("/api/config");
             const { publishableKey } = await response.json();
@@ -112,7 +113,7 @@ export default function Identity() {
                       Verify your identity to book
                     </h1>
                     <h4 className=" text-xs m-0 py-2">
-                      Get ready to take a photo of your ID and a selfie
+                      Get ready to take a photo of your ID and a selfie.
                     </h4>
                     <div className="btnWRpper mt-3">
                       <button
@@ -133,6 +134,23 @@ export default function Identity() {
             ) : step === "PaymentTab" ? (
               <>
                 <PaymentTabComponent step={step} setStep={setStep} />
+              </>
+            ) : step === "processing" ? (
+              <>
+                <div className="col-span-12 pt-8">
+                  <div
+                    className="cardCstm p-3 rounded-3 lg:p-6 text-center mx-auto bg-[var(--backgroundColor)]"
+                    style={{ maxWidth: 400 }}
+                  >
+                    <h1 className="font-bold m-0 py-2 text-2xl">
+                      Verifying your identity
+                    </h1>
+                    <h4 className=" text-xs m-0 py-2">
+                      Please wait while we process your ID and selfie. This may
+                      take a moment.
+                    </h4>
+                  </div>
+                </div>
               </>
             ) : (
               <></>
