@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { isValidName, isValidNumber } from "@/utils/helper";
+import { swap, swapUSDC } from "@/utils/morphoSwap";
+import { useSelector } from "react-redux";
+import { getAccount, sendTransaction } from "@/lib/zeroDev";
+import { retrieveSecret } from "@/utils/webauthPrf";
 
 const AddBankDetail = ({ step, setStep, customerId }) => {
+  const userAuth = useSelector((state) => state.Auth);
+  const [hash, setHash] = useState("");
   const [formData, setFormData] = useState({
     accountName: "",
     bankName: "",
@@ -230,6 +236,110 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     }
   };
 
+  const usdcBridge = async () => {
+    const quoteResult = await swapUSDC(
+      "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "200000",
+      8453,
+      userAuth?.walletAddress
+    );
+
+    console.log("line-242", quoteResult);
+
+    if (!quoteResult) {
+      return;
+    }
+
+    const eth = {
+      address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      name: "ETH",
+    };
+
+    const usdc = {
+      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      name: "USDC",
+    };
+
+    const gasQuoteResult = await swap(
+      eth,
+      usdc,
+      quoteResult?.routeData?.tx?.value,
+      8453,
+      userAuth?.walletAddress
+    );
+
+    console.log("line-262", gasQuoteResult);
+
+    if (!gasQuoteResult) {
+      return;
+    }
+
+    const gasQuoteFinalResult = await swap(
+      usdc,
+      eth,
+      Number(gasQuoteResult?.routeData?.amountOut || 0) + 10000,
+      8453,
+      userAuth?.walletAddress
+    );
+
+    console.log("line-276", gasQuoteFinalResult);
+
+    if (!gasQuoteFinalResult) {
+      return;
+    }
+
+    let data = JSON.parse(userAuth?.webauthKey);
+    let retrieveSecretCheck = await retrieveSecret(
+      data?.storageKeySecret,
+      data?.credentialIdSecret
+    );
+    if (!retrieveSecretCheck?.status) {
+      return;
+    }
+
+    let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+
+    const getAccountCli = await getAccount(
+      secretData?.privateKey,
+      secretData?.safePrivateKey
+    );
+
+    const gasTx = await sendTransaction(getAccountCli?.kernelClient, [
+      {
+        from: gasQuoteFinalResult?.approvalData?.tx?.from,
+        to: gasQuoteFinalResult?.approvalData?.tx?.to,
+        data: gasQuoteFinalResult?.approvalData?.tx?.data,
+      },
+      {
+        from: gasQuoteFinalResult?.routeData?.tx?.from,
+        to: gasQuoteFinalResult?.routeData?.tx?.to,
+        data: gasQuoteFinalResult?.routeData?.tx?.data,
+        value: gasQuoteFinalResult?.routeData?.tx?.value,
+      },
+    ]);
+    console.log("gasTx", gasTx);
+    if (gasTx) {
+      console.log("gasTx", gasTx);
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          from: quoteResult?.approvalData?.tx?.from,
+          to: quoteResult?.approvalData?.tx?.to,
+          data: quoteResult?.approvalData?.tx?.data,
+        },
+        {
+          from: quoteResult?.routeData?.tx?.from,
+          to: quoteResult?.routeData?.tx?.to,
+          data: quoteResult?.routeData?.tx?.data,
+          value: quoteResult?.routeData?.tx?.value,
+        },
+      ]);
+
+      console.log("line-283", tx);
+      setHash(tx);
+    }
+  };
+
   const tabData = [
     {
       title: "Bank Account",
@@ -404,6 +514,22 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     </button>
                   </div>
                 </div>
+
+                <div className="col-span-12">
+                  <div className="flex items-center justify-center gap-3 mt-5">
+                    <button
+                      type="submit"
+                      onClick={usdcBridge}
+                      className={`commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                    >
+                      Test Enso Bridge
+                    </button>
+                  </div>
+                </div>
+
+                {hash && (
+                  <p className="text-red-500 text-xs mt-1 pl-3">{hash}</p>
+                )}
               </div>
             </form>
           </div>
