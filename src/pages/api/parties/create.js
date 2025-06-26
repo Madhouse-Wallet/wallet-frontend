@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await partiesApi.createParty(req.body);
+    const { userId, ...partyData } = req.body;
+    const result = await partiesApi.createParty(partyData, userId);
 
     if (result.success) {
       res.status(200).json(result.data);

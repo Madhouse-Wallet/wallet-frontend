@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 const UserStep = ({ step, setStep }) => {
+  const userAuth = useSelector((state) => state.Auth);
+  console.log("line-6", userAuth);
   const [formData, setFormData] = useState({
     businessName: "",
     street: "",
@@ -111,27 +114,26 @@ const UserStep = ({ step, setStep }) => {
           ipAddress: userIP,
         },
       };
-
+      const userId = userAuth?.id;
       // Call the API
       const response = await fetch("/api/business-account/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(accountData),
+        // body: JSON.stringify(accountData),
+        body: JSON.stringify({
+          ...accountData,
+          userId,
+        }),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        // Success - move to next step or show success message
         console.log("Business account created successfully:", result);
-        // You might want to store the business ID or move to next step
-        if (setStep) {
-          setStep(step + 1);
-        }
+        setStep("PaymentTab");
       } else {
-        // Handle API errors
         console.error("API Error:", result.error);
         setErrors({
           submit: result.error || "Failed to create business account",

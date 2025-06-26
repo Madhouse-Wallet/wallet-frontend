@@ -41,6 +41,7 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
 };
 export const getUser = async (email) => {
   try {
+    console.log("line-44", email);
     try {
       return await fetch(`/api/get-user`, {
         method: "POST",
@@ -141,10 +142,12 @@ export const addProvisionLambda = async (data) => {
   }
 };
 
-
 export const checkLnbitCreds = async (data) => {
   try {
-    const apiResponse = await lambdaInvokeFunction(data, "madhouse-backend-production-checkLnbitCreds")
+    const apiResponse = await lambdaInvokeFunction(
+      data,
+      "madhouse-backend-production-checkLnbitCreds"
+    );
     // console.log(" addProvisionLambda apiResponse-->", apiResponse)
     return true;
   } catch (error) {
@@ -152,7 +155,6 @@ export const checkLnbitCreds = async (data) => {
     return false;
   }
 };
-
 
 export const updateLNAddress = async (data) => {
   try {

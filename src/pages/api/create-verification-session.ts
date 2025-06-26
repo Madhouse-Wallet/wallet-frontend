@@ -69,7 +69,7 @@ export default async function handler(
     console.log("userId", userId);
     const verificationSession =
       await stripe.identity.verificationSessions.create({
-        verification_flow: "vf_1RdyvOBbHYAruVQWT5LLNFz5",
+        verification_flow: process.env.NEXT_PUBLIC_STRIPE_VERIFICATION_KEY,
         // type: "document",
         metadata: {
           user_id: userId,

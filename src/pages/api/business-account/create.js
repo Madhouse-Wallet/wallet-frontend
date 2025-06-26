@@ -6,7 +6,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await businessAccountApi.createBusinessAccount(req.body);
+    const { userId, ...accountData } = req.body;
+    // const result = await businessAccountApi.createBusinessAccount(req.body);
+    const result = await businessAccountApi.createBusinessAccount(
+      accountData,
+      userId
+    );
 
     if (result.success) {
       res.status(200).json(result.data);

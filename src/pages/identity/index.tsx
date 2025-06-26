@@ -23,7 +23,25 @@ export default function Identity() {
         return;
       }
       if (userExist?.userId?.kyc?.status === "success") {
-        setStep("user");
+        try {
+          const response = await fetch(
+            `/api/business-account/${userAuth?.email}`,
+            {
+              method: "GET",
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.business.id) {
+            setStep("PaymentTab");
+          } else {
+            console.error("API Error:", result.error);
+            setStep("user");
+          }
+        } catch (error) {
+          console.log(error);
+        }
       } else if (userExist?.userId?.kyc?.status === "processing") {
         setStep("processing");
       } else {
@@ -36,7 +54,6 @@ export default function Identity() {
             setStripe(stripeInstance);
           } catch (error) {
             console.error("Failed to initialize Stripe:", error);
-            // alert('Failed to initialize verification system');
           }
         };
 
@@ -72,7 +89,6 @@ export default function Identity() {
             router.push("/");
           }
         } else {
-          // alert(error.message);
           console.log(error.message);
         }
       }
