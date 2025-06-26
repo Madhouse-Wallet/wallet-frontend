@@ -65,7 +65,12 @@ export default function Identity() {
       if (stripe) {
         const { error } = await stripe.verifyIdentity(client_secret);
         if (!error) {
-          router.push("/");
+          const userExist = await getUser(userAuth.email);
+          if (userExist?.userId?.kyc?.status === "success") {
+            setStep("user");
+          } else {
+            router.push("/");
+          }
         } else {
           // alert(error.message);
           console.log(error.message);
