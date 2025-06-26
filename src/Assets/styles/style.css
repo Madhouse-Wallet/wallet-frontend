@@ -124,7 +124,9 @@ input.form-control {
   border: 1px solid #ddd;
   width: 100%;
 }
-
+* {
+  -webkit-overflow-scrolling: auto !important; /* disables momentum scrolling on iOS */
+}
 @media (max-width: 575px) {
   .pageCard {
     height: calc(100vh - 260px);

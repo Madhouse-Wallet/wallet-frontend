@@ -235,10 +235,12 @@ export default function Fonbnk() {
           {closeIcn}
         </button>
         <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
-              <div className="tabContent pt-10">
-                <div className="">{tabData[activeTab].component}</div>
+          <div className="flex h-full flex-col justify-center">
+            <div className="grid gap-3 grid-cols-12">
+              <div className="col-span-12">
+                <div className="tabContent py-5">
+                  <div className="">{tabData[activeTab].component}</div>
+                </div>
               </div>
             </div>
           </div>

@@ -14,6 +14,17 @@ import "react-date-range/dist/theme/default.css"; // theme css file
 import { useEffect } from "react";
 
 export default function App({ Component, pageProps, ...props }: AppProps) {
+  useEffect(() => {
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
   return (
     <>
       <Providers>
