@@ -79,6 +79,11 @@ const BTCDebitCard: React.FC = () => {
           userExist?.userId?.spendLnurlpLink?.lnurl,
           {
             margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
           }
         );
         setLnQrCode(qr);
@@ -315,6 +320,7 @@ const BTCDebitCard: React.FC = () => {
                         width={10000}
                         className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
                         // style={{ height: 230 }}
+                        style={{ imageRendering: "pixelated" }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
                         <button
@@ -327,7 +333,7 @@ const BTCDebitCard: React.FC = () => {
                           onClick={() => setBitikaPop(!bitikaPop)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
-                          Buy with mpesa https://bitika.xyz
+                          Buy Lightning with M-Pesa
                         </button>
                       </div>
                     </div>
@@ -434,8 +440,8 @@ const backIcn = (
       d="M22 20.418C19.5533 17.4313 17.3807 15.7367 15.482 15.334C13.5833 14.9313 11.7757 14.8705 10.059 15.1515V20.5L2 11.7725L10.059 3.5V8.5835C13.2333 8.6085 15.932 9.74733 18.155 12C20.3777 14.2527 21.6593 17.0587 22 20.418Z"
       fill="currentColor"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinejoin="round"
     />
   </svg>
 );

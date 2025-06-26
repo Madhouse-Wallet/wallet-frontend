@@ -24,7 +24,7 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
   };
   return (
     <>
-      <div className="mx-auto max-w-[700px]">
+      <div className="mx-auto max-w-[700px] scrollbar-none max-h-[90vh] overflow-auto" style={{scrollbarWidth: "none"}}>
         <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
@@ -133,8 +133,8 @@ const check = (
     <path
       d="M9.33917 12.7758C11.6023 14.2065 13.2933 16.7632 13.2933 16.7632H13.3272C13.3272 16.7632 16.9195 10.4063 23.5935 6.49683"
       stroke="#34C759"
-      stroke-width="1.5"
-      stroke-linecap="square"
+      strokeWidth="1.5"
+      strokeLinecap="square"
     />
     <path
       opacity="0.4"
@@ -142,8 +142,8 @@ const check = (
       clip-rule="evenodd"
       d="M12.9688 23.6001C18.5031 23.6001 22.9896 19.1136 22.9896 13.5792C22.9896 8.04485 18.5031 3.55838 12.9688 3.55838C7.43442 3.55838 2.94794 8.04485 2.94794 13.5792C2.94794 19.1136 7.43442 23.6001 12.9688 23.6001Z"
       stroke="#34C759"
-      stroke-width="1.5"
-      stroke-linecap="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
   </svg>
 );
@@ -179,8 +179,8 @@ const backIcn = (
       d="M22 20.418C19.5533 17.4313 17.3807 15.7367 15.482 15.334C13.5833 14.9313 11.7757 14.8705 10.059 15.1515V20.5L2 11.7725L10.059 3.5V8.5835C13.2333 8.6085 15.932 9.74733 18.155 12C20.3777 14.2527 21.6593 17.0587 22 20.418Z"
       fill="currentColor"
       stroke="currentColor"
-      stroke-width="2"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinejoin="round"
     />
   </svg>
 );

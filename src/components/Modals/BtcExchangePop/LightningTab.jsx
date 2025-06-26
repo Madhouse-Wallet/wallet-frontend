@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
@@ -21,6 +21,22 @@ const LightningTab = (walletAddress) => {
   const userAuth = useSelector((state) => state.Auth);
 
   const [invoice, setInvoice] = useState("");
+  const pollingIntervalRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (step !== 2 && pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, [step]);
 
   const handleCopy = async (address, type) => {
     try {
@@ -44,12 +60,16 @@ const LightningTab = (walletAddress) => {
     try {
       const qr = await QRCode.toDataURL(text, {
         margin: 0.5,
+        width: 512,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
       });
       setQRCode(qr);
       setLoading(false);
     } catch (err) {
       setLoading(false);
-      console.error(err);
     }
   };
 
@@ -110,6 +130,56 @@ const LightningTab = (walletAddress) => {
     setStep(2);
     generateQRCode(result?.data?.invoice);
     setInvoice(result?.data?.invoice);
+
+    startPolling(userAuth?.email, result?.data?.checking_id);
+  };
+
+  const checkPaymentStatus = async (email, checkingId) => {
+    try {
+      const response = await fetch("/api/success-transaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          checkingId: checkingId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data?.data[0].status === "success") {
+        // Payment successful, move to step 3
+        setStep(3);
+        // Clear the polling interval
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        return true;
+      } else {
+        // Payment not yet successful, continue polling
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const startPolling = (email, checkingId) => {
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    // Start polling every 5 seconds
+    pollingIntervalRef.current = setInterval(async () => {
+      await checkPaymentStatus(email, checkingId);
+    }, 7000);
+
+    // Also check immediately
+    // checkPaymentStatus(email, checkingId);
   };
 
   const handleAmountChange = (e) => {
@@ -142,7 +212,6 @@ const LightningTab = (walletAddress) => {
     // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
     // Filter out invalid characters instead of blocking the entire input
     const filteredValue = filterHexInput(value, /[^a-zA-Z0-9 ]/g, 100);
-    console.log("line-127", filteredValue.length);
 
     // Update the address value with filtered input
     setMemo(filteredValue);
@@ -207,10 +276,11 @@ const LightningTab = (walletAddress) => {
           </p>
           <Image
             src={qrCode}
-            height={10000}
-            width={10000}
+            height={512}
+            width={512}
             className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
             // style={{ height: 230 }}
+            style={{ imageRendering: "pixelated" }}
             alt="QR Code"
           />
           <Tooltip id="my-tooltip" />
@@ -256,9 +326,82 @@ const LightningTab = (walletAddress) => {
             </span>
           )}
         </div>
+      ) : step == 3 ? (
+        <div className="text-center">
+          <span className="icn flex items-center justify-center pb-3">
+            {tickIcn}
+          </span>
+          <h4 className="m-0 font-medium text-white text-2xl pb-2">
+            🎉 Success!
+          </h4>
+          <p className="m-0 py-2">
+            You've successfully Receive Sats. Thank you for using MadHouse
+            Wallet!
+          </p>
+        </div>
       ) : null}
     </>
   );
 };
 
 export default LightningTab;
+
+const tickIcn = (
+  <svg
+    width="100"
+    height="100"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx="50"
+      cy="50"
+      r="48.5"
+      fill="url(#paint0_linear_301_1302)"
+      stroke="url(#paint1_linear_301_1302)"
+      strokeWidth="3"
+    />
+    <g clip-path="url(#clip0_301_1302)">
+      <path
+        d="M36 50L46 60L66 40"
+        stroke="white"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+    <defs>
+      <linearGradient
+        id="paint0_linear_301_1302"
+        x1="50"
+        y1="0"
+        x2="50"
+        y2="100"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#11CF8B" />
+        <stop offset="1" stopColor="#30EEA9" />
+      </linearGradient>
+      <linearGradient
+        id="paint1_linear_301_1302"
+        x1="50"
+        y1="0"
+        x2="50"
+        y2="100"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#7BF4C8" />
+        <stop offset="1" stopColor="#56F1B9" />
+      </linearGradient>
+      <clipPath id="clip0_301_1302">
+        <rect
+          width="48"
+          height="48"
+          fill="white"
+          transform="translate(26 26)"
+        />
+      </clipPath>
+    </defs>
+  </svg>
+);

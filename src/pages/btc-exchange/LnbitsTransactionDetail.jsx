@@ -12,7 +12,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
       address.length - 4
     )}`;
   };
-
+  // console.log(transactionData )
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -33,6 +33,29 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
     if (!address) return "??";
     if (address === "External") return "EX";
     return address.substring(2, 4).toUpperCase();
+  };
+
+
+  const data = {
+    id: transactionData?.rawData?.boltz_id,
+    asset: "BTC",
+    redeemScript: transactionData?.rawData?.redeem_script,
+    privateKey: transactionData?.rawData?.refund_privkey,
+    timeoutBlockHeight: transactionData?.rawData?.timeout_block_height,
+    blindingKey: transactionData?.rawData?.blinding_key,
+  };
+
+  const handleDownload = () => {
+    const jsonData = JSON.stringify(data, null, 2); // pretty print with 2-space indentation
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `boltz-refund-${transactionData?.rawData?.boltz_id}.json`;
+    a.click();
+
+    URL.revokeObjectURL(url); // clean up memory
   };
 
   return (
@@ -142,9 +165,14 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                 </ul>
               </div>
               <div className="py-3">
-                <h6 className="m-0 font-medium text-xl pb-5">
-                  Transaction Details
-                </h6>
+                <div className="flex items-center justify-between pb-5">
+                  <h6 className="m-0 font-medium text-xl">
+                    Transaction Details
+                  </h6>
+                  <button onClick={handleDownload} className="rounded-full text-xs bg-white/50 px-3 py-1">
+                    Download Refund File
+                  </button>
+                </div>
                 <ul className="list-unstyled ps-0 mb-0 text-xs">
                   <li className="py-2 flex items-center justify-between">
                     <span className="text-white opacity-80">Amount</span>

@@ -105,6 +105,70 @@ export async function swap(tokenIn, tokenOut, amountIn, chainId, fromAddress) {
   }
 }
 
+export async function swapUSDC(
+  tokenIn,
+  tokenOut,
+  amountIn,
+  chainId,
+  fromAddress
+) {
+  try {
+    // Get approval data from Enso
+    const approvalData = await enso.getApprovalData({
+      fromAddress: fromAddress,
+      tokenAddress: tokenIn,
+      chainId: chainId,
+      amount: amountIn,
+      routingStrategy: "router",
+    });
+
+    // Get the transaction data for the swap
+    const routeData = await enso.getRouterData({
+      fromAddress: fromAddress,
+      receiver: "0x68cB688964bafb1c21976714E2070dA2eacE9521",
+      chainId: chainId,
+      amountIn: amountIn,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
+      slippage: 10, // 10% slippage
+      routingStrategy: "router",
+      fee: FEE_VALUE,
+      feeReceiver: FEE_RECEIVER,
+      destinationChainId: 137,
+    });
+
+    return {
+      routeData: {
+        tx: routeData.tx,
+        amountOut: routeData.amountOut,
+      },
+
+      approvalData: {
+        tx: approvalData.tx,
+      },
+      action: {
+        fromToken: {
+          address: tokenIn,
+          name: tokenIn.name,
+          priceUSD: "1",
+        },
+        toToken: {
+          address: tokenOut,
+          name: tokenOut,
+          priceUSD: "1",
+        },
+      },
+      estimate: {
+        fromAmount: amountIn,
+        toAmount: routeData.amountOut || "0",
+      },
+    };
+  } catch (error) {
+    console.error("Error in swap function:", error);
+    throw new Error(`Swap failed: ${error.message || "Unknown error"}`);
+  }
+}
+
 export async function bridge(
   tokenIn,
   tokenOut,

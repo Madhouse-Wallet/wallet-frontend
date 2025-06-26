@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { userLogIn, createInvoice } from "./lnbit";
- 
+
 import { lambdaInvokeFunction } from "../../lib/apiCall";
 
 export default async function handler(
@@ -16,7 +16,10 @@ export default async function handler(
     // let token = getToken?.data?.token;
     const satoshiAmount = amount;
 
-    const apiResponse = await lambdaInvokeFunction({ email }, "madhouse-backend-production-getUser") as any;
+    const apiResponse = (await lambdaInvokeFunction(
+      { email },
+      "madhouse-backend-production-getUser"
+    )) as any;
     if (apiResponse?.status == "success") {
       let existingUser = apiResponse?.data;
       let getUserToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
@@ -34,10 +37,15 @@ export default async function handler(
         existingUser?.lnbitAdminKey_3
       )) as any;
       if (createInvoice1?.status) {
+        // console.log("createInvoice1-->", createInvoice1)
         return res.status(200).json({
           status: "success",
           message: "Invoice Created!",
-          data: { invoice: createInvoice1?.data?.bolt11 },
+          data: {
+            invoice: createInvoice1?.data?.bolt11,
+            checking_id: createInvoice1?.data?.checking_id,
+            payment_hash: createInvoice1?.data?.payment_hash,
+          },
         });
       } else {
         return res
@@ -45,7 +53,13 @@ export default async function handler(
           .json({ status: "failure", message: createInvoice1.msg });
       }
     } else {
-      return res.status(400).json({ status: "failure", message: apiResponse?.message, error: apiResponse?.error });
+      return res
+        .status(400)
+        .json({
+          status: "failure",
+          message: apiResponse?.message,
+          error: apiResponse?.error,
+        });
     }
   } catch (error) {
     console.error("Error adding user:", error);

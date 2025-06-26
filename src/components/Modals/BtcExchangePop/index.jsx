@@ -33,6 +33,11 @@ const BtcExchangePop = ({
         try {
           const qr = await QRCode.toDataURL(userAuth.bitcoinWallet, {
             margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
           });
           setQRCodee(qr);
         } catch (err) {
@@ -86,10 +91,11 @@ const BtcExchangePop = ({
                 <Image
                   alt=""
                   src={qrCodee}
-                  height={10000}
-                  width={10000}
+                  height={512}
+                  width={512}
                   className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
                   // style={{ height: 230 }}
+                  style={{ imageRendering: "pixelated" }}
                 />
               )}
 

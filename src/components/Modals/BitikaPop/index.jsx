@@ -36,7 +36,7 @@ const BitikaPop = ({ bitikaPop, setBitikaPop, lnAddress }) => {
       }
 
       // Construct the URL with the amount parameter
-      const baseUrl = "https://bitika-sandbox.netlify.app/";
+      const baseUrl = "https://bitika.xyz/";
       const fullUrl = `${baseUrl}?lnaddress=${lnAddress}&amount=${numericAmount}`;
 
       // Open in new window
