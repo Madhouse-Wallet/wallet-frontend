@@ -70,10 +70,11 @@ export default async function handler(
     const verificationSession =
       await stripe.identity.verificationSessions.create({
         verification_flow: "vf_1RdyvOBbHYAruVQWT5LLNFz5",
-        type: "document",
+        // type: "document",
         metadata: {
           user_id: userId,
         },
+        client_reference_id: userId,
       });
 
     if (!verificationSession.client_secret) {
