@@ -74,7 +74,7 @@ export default async function handler(
           sessionId: verificationSession.id,
           verifiedAt: new Date(),
         };
-
+        console.log(`line-77`, verificationSession, kycData);
         console.log(`✅ KYC Verified for user: ${kycData.userId}`);
         console.log(`Session ID: ${kycData.sessionId}`);
 
@@ -108,7 +108,7 @@ export default async function handler(
           errorCode: verificationSession.last_error?.code!,
           errorReason: verificationSession.last_error?.reason!,
         };
-
+        console.log(`line-111`, verificationSession, kycData);
         console.log(`❌ KYC Failed for user: ${kycData.userId}`);
         console.log(`Session ID: ${kycData.sessionId}`);
         console.log(`Error: ${kycData.errorReason}`);
@@ -151,7 +151,7 @@ export default async function handler(
         } else {
           console.log("KYC verification successful");
         }
-
+        console.log("line-154", kycStatus);
         // Update KYC status in database
         await updateKycStatus(
           { _id: kycData.userId },
@@ -171,7 +171,7 @@ export default async function handler(
           status: "pending",
           sessionId: verificationSession.id,
         };
-
+        console.log(`line-174`, verificationSession, kycData);
         console.log(`⏳ KYC Processing for user: ${kycData.userId}`);
         console.log(`Session ID: ${kycData.sessionId}`);
 
@@ -197,7 +197,7 @@ export default async function handler(
           sessionId: verificationSession.id,
           errorReason: "User canceled verification",
         };
-
+        console.log(`line-200`, verificationSession, kycData);
         console.log(`❌ KYC Canceled by user: ${kycData.userId}`);
         console.log(`Session ID: ${kycData.sessionId}`);
 
