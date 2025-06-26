@@ -82,7 +82,12 @@ export default async function handler(
         await updateKycStatus(
           { _id: kycData.userId },
           {
-            $set: { kyc: "success" },
+            $set: {
+              kyc: {
+                status: "success",
+                id: verificationSession?.id,
+              },
+            },
           }
         );
 
@@ -156,35 +161,40 @@ export default async function handler(
         await updateKycStatus(
           { _id: kycData.userId },
           {
-            $set: { kyc: kycStatus },
+            $set: {
+              kyc: {
+                status: kycStatus,
+                id: verificationSession?.id,
+              },
+            },
           }
         );
       }
 
-      case "identity.verification_session.processing": {
-        // Verification is still processing
-        const verificationSession = event.data
-          .object as Stripe.Identity.VerificationSession;
+      // case "identity.verification_session.processing": {
+      //   // Verification is still processing
+      //   const verificationSession = event.data
+      //     .object as Stripe.Identity.VerificationSession;
 
-        const kycData: KYCStatus = {
-          userId: verificationSession.metadata?.user_id || "",
-          status: "pending",
-          sessionId: verificationSession.id,
-        };
-        console.log(`line-174`, verificationSession, kycData);
-        console.log(`⏳ KYC Processing for user: ${kycData.userId}`);
-        console.log(`Session ID: ${kycData.sessionId}`);
+      //   const kycData: KYCStatus = {
+      //     userId: verificationSession.metadata?.user_id || "",
+      //     status: "pending",
+      //     sessionId: verificationSession.id,
+      //   };
+      //   console.log(`line-174`, verificationSession, kycData);
+      //   console.log(`⏳ KYC Processing for user: ${kycData.userId}`);
+      //   console.log(`Session ID: ${kycData.sessionId}`);
 
-        // TODO: Update your database here
-        await updateKycStatus(
-          { _id: kycData.userId },
-          {
-            $set: { kyc: "processing" },
-          }
-        );
+      //   // TODO: Update your database here
+      //   await updateKycStatus(
+      //     { _id: kycData.userId },
+      //     {
+      //       $set: { kyc: "processing" },
+      //     }
+      //   );
 
-        break;
-      }
+      //   break;
+      // }
 
       case "identity.verification_session.canceled": {
         // User canceled the verification
@@ -205,7 +215,12 @@ export default async function handler(
         await updateKycStatus(
           { _id: kycData.userId },
           {
-            $set: { kyc: "failed" },
+            $set: {
+              kyc: {
+                status: "failed",
+                id: verificationSession?.id,
+              },
+            },
           }
         );
 
