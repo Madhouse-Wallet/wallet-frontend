@@ -184,7 +184,7 @@ const BTCDebitCard: React.FC = () => {
             </Nav>
           </div>
         </header>
-        <div className="container relative">
+        <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}
             className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
@@ -193,8 +193,8 @@ const BTCDebitCard: React.FC = () => {
             {closeIcn}
           </button>
           <div className="pageCard  bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
-            <div className="grid gap-3 grid-cols-12 px-2 pt-3">
-              <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
+            <div className="grid gap-3 grid-cols-12 px-2 py-3">
+              <div className="p-2 px-3 px-lg-4 col-span-12">
                 <div className="flex flex-col gap-4">
                   {creditCardDetails && (
                     <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6 flex items-center gap-2 justify-center">
@@ -259,7 +259,7 @@ const BTCDebitCard: React.FC = () => {
                       )}
                     </div>
                   )}
-                  <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-10 p-6">
+                  <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-5 p-6">
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
                         <button

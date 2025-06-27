@@ -354,134 +354,120 @@ const WithdrawalSwap = () => {
           />,
           document.body
         )}
-      <section className="py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
-              <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
-                <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Swap Spark USDC to USDC</p>
-                  <div className="text-xs text-white/70">
-                    Powered by Enso Finance
+      <div className="grid gap-3 grid-cols-12">
+        <div className="col-span-12">
+          <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
+            <div className="top flex items-center justify-between">
+              <p className="m-0 font-medium">Swap Spark USDC to USDC</p>
+              <div className="text-xs text-white/70">
+                Powered by Enso Finance
+              </div>
+            </div>
+            <div className="contentBody">
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={fromAmount}
+                      onChange={handleFromAmountChange}
+                      placeholder="0.0"
+                      // disabled={isLoading}
+                    />
+                  </div>
+                  <div className="right text-right">
+                    <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
+                      <span className="icn">
+                        <Image
+                          src={process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"}
+                          alt="logo"
+                          height={22}
+                          width={22}
+                          className="max-w-full object-contain w-auto smlogo"
+                        />
+                      </span>{" "}
+                      <span className="text-[12px]">{swapDirection.from}</span>
+                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance:{" "}
+                      {Number(morphoBalance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(morphoBalance).toFixed(2)}{" "}
+                      {swapDirection.from}
+                    </h6>
                   </div>
                 </div>
-                <div className="contentBody">
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
-                          value={fromAmount}
-                          onChange={handleFromAmountChange}
-                          placeholder="0.0"
-                          // disabled={isLoading}
-                        />
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
-                          <span className="icn">
-                            <Image
-                              src={
-                                process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"
-                              }
-                              alt="logo"
-                              height={22}
-                              width={22}
-                              className="max-w-full object-contain w-auto smlogo"
-                            />
-                          </span>{" "}
-                          <span className="text-[12px]">
-                            {swapDirection.from}
-                          </span>
-                        </button>
-                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance:{" "}
-                          {Number(morphoBalance) < 0.01
-                            ? "0"
-                            : Number.parseFloat(morphoBalance).toFixed(2)}{" "}
-                          {swapDirection.from}
-                        </h6>
-                      </div>
-                    </div>
+              </div>
+              <div className="py-2 my-[-30px] text-center">
+                <button
+                  className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  disabled={true}
+                >
+                  {swapIcn}
+                </button>
+              </div>
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={toAmount}
+                      placeholder="0.0"
+                      disabled={true} // This input is always disabled
+                      readOnly
+                    />
                   </div>
-                  <div className="py-2 my-[-30px] text-center">
-                    <button
-                      className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
-                      disabled={true}
-                    >
-                      {swapIcn}
+                  <div className="right text-right">
+                    <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
+                      <span className="icn">{usdcIcn}</span>{" "}
+                      <span className="text-[12px]">{swapDirection.to}</span>
                     </button>
-                  </div>
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
-                          value={toAmount}
-                          placeholder="0.0"
-                          disabled={true} // This input is always disabled
-                          readOnly
-                        />
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
-                          <span className="icn">{usdcIcn}</span>{" "}
-                          <span className="text-[12px]">
-                            {swapDirection.to}
-                          </span>
-                        </button>
-                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance:{" "}
-                          {Number(usdcBalance) < 0.01
-                            ? "0"
-                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
-                          {swapDirection.to}
-                        </h6>
-                      </div>
-                    </div>
-                    {amountError && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {amountError}
-                      </div>
-                    )}
-
-                    {error && (
-                      <div className="text-red-500 text-xs mt-1">{error}</div>
-                    )}
-                  </div>
-
-                  <div className="ps-3 flex flex-col gap-1 mt-2">
-                    {gasPrice && (
-                      <label className="form-label m-0 font-semibold text-xs block">
-                        Estimated Max Gas Fee: {gasPrice} USDC
-                      </label>
-                    )}
-
-                    {gasPriceError && (
-                      <div className="text-red-500 text-xs">
-                        {gasPriceError}
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-3 py-2">
-                    <button
-                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
-                      onClick={() => setTrxnApproval(true)}
-                      disabled={isButtonDisabled()}
-                    >
-                      {getButtonText()}
-                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance:{" "}
+                      {Number(usdcBalance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
+                      {swapDirection.to}
+                    </h6>
                   </div>
                 </div>
+                {amountError && (
+                  <div className="text-red-500 text-xs mt-1">{amountError}</div>
+                )}
+
+                {error && (
+                  <div className="text-red-500 text-xs mt-1">{error}</div>
+                )}
+              </div>
+
+              <div className="ps-3 flex flex-col gap-1 mt-2">
+                {gasPrice && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPrice} USDC
+                  </label>
+                )}
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+              </div>
+              <div className="mt-3 py-2">
+                <button
+                  className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
+                    isButtonDisabled() ? "opacity-70" : ""
+                  }`}
+                  onClick={() => setTrxnApproval(true)}
+                  disabled={isButtonDisabled()}
+                >
+                  {getButtonText()}
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </>
   );
 };

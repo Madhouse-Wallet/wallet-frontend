@@ -226,7 +226,7 @@ export default function Fonbnk() {
           </Nav>
         </div>
       </header>
-      <div className="container relative">
+      <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
         <button
           onClick={() => router.push("/dashboard")}
           className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
