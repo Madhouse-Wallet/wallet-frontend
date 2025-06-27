@@ -159,7 +159,7 @@ const BtcExchangeSendPop = ({
         setBtcBalance(result?.balance);
       }
     } catch (error) {
-      setError("Failed to fetch USDC balance");
+      setError("Failed to fetch Bitcoin balance");
     }
   };
 
@@ -195,6 +195,11 @@ const BtcExchangeSendPop = ({
     const filteredValue = filterAmountInput(value, 18, 20);
     setBtcAmount(filteredValue);
 
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
     // Validate amount
     if (filteredValue.trim() !== "") {
       if (Number.parseFloat(filteredValue) <= 0) {
@@ -202,7 +207,7 @@ const BtcExchangeSendPop = ({
       } else if (
         Number.parseFloat(filteredValue) > Number.parseFloat(btcBalance)
       ) {
-        setAmountError("Insufficient USDC balance");
+        setAmountError("Insufficient Bitcoin balance");
       }
       // else if (Number.parseFloat(balance) < 0.05) {
       //   setAmountError("Minimum balance of $0.05 required");
