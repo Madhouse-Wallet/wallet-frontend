@@ -632,18 +632,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   </div>
                 </div>
 
-                {/* <div className="col-span-12">
-                  <div className="flex items-center justify-center gap-3 mt-5">
-                    <button
-                      type="button"
-                      onClick={usdcBridge}
-                      className={`commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                    >
-                      Test Enso Bridge
-                    </button>
-                  </div>
-                </div> */}
-
                 {hash && (
                   <p className="text-red-500 text-xs mt-1 pl-3">{hash}</p>
                 )}
