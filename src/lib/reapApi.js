@@ -182,7 +182,6 @@ async function makeReapDbCall(
       }
 
       const userExist = await getUser(userEmail);
-      console.log("line-190", userExist, userEmail);
       if (!userExist) {
         return {
           success: false,
@@ -204,7 +203,6 @@ async function makeReapDbCall(
           status: 200,
         };
       } else if (endpoint.includes("/payments")) {
-        console.log("line-212", userExist?.userId?._id);
         responseData = await getPayments(userExist?.userId?._id);
       }
 
@@ -515,12 +513,10 @@ const createPayment = async (paymentData, userId) => {
 
 const getPayments = async (userId) => {
   try {
-    console.log("line-498", userId);
     const apiResponse = await lambdaInvokeFunction(
       { userId, page: 1, limit: 20 },
       "madhouse-backend-production-getUserPayments"
     );
-    console.log("line-528", apiResponse);
     if (apiResponse?.status == "success") {
       return {
         status: "success",

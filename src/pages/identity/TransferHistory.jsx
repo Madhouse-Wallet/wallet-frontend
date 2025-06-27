@@ -24,7 +24,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     accountNumber: "",
     bankName: "",
     country: "US",
-    networkIdentifier: "",
+    network: "",
     street: "",
     city: "",
     state: "",
@@ -40,6 +40,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const currencyOptions = [
     { value: "USD", label: "USD - US Dollar" },
     { value: "EUR", label: "EUR - Euro" },
+  ];
+
+  const networksOptions = [
+    { value: "SWIFT", label: "SWIFT" },
+    { value: "CHATS", label: "CHATS" },
+    { value: "FPS", label: "FPS" },
+    { value: "FAST", label: "FAST" },
+    { value: "SEPA", label: "SEPA" },
   ];
 
   const purposeOfPaymentOptions = [
@@ -76,8 +84,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       return "Please enter receiving party name";
     if (!offRampForm.accountNumber) return "Please enter account number";
     if (!offRampForm.bankName) return "Please enter bank name";
-    if (!offRampForm.networkIdentifier)
-      return "Please enter network identifier";
+    if (!offRampForm.network) return "Please select network";
     if (!offRampForm.street) return "Please enter street address";
     if (!offRampForm.city) return "Please enter city";
     if (!offRampForm.state) return "Please enter state";
@@ -114,12 +121,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 standard: "account_number",
                 value: offRampForm.accountNumber,
               },
-              network: "SWIFT",
+              network: offRampForm.network,
               currencies: [offRampForm.currency],
               provider: {
                 name: offRampForm.bankName,
                 country: offRampForm.country,
-                networkIdentifier: offRampForm.networkIdentifier,
+                networkIdentifier: "BOFAUS3N",
               },
               addresses: [
                 {
@@ -174,7 +181,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           accountNumber: "",
           bankName: "",
           country: "US",
-          networkIdentifier: "",
+          network: "",
           street: "",
           city: "",
           state: "",
@@ -435,7 +442,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   />
                 </div>
 
-                <div className="md:col-span-6 col-span-12">
+                {/* <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
                     Network Identifier
                   </label>
@@ -448,7 +455,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     placeholder="Enter network identifier"
                     required
                   />
-                </div>
+                </div> */}
 
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
@@ -461,6 +468,28 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
                   >
                     {currencyOptions.map((option) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                    Network
+                  </label>
+                  <select
+                    id="network"
+                    value={offRampForm.network}
+                    onChange={handleOffRampChange}
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    {networksOptions.map((option) => (
                       <option
                         className="text-black"
                         key={option.value}
