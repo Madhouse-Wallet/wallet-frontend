@@ -150,7 +150,7 @@ async function makeReapDbCall(
       } else if (endpoint.includes("/payments")) {
         responseData = {
           paymentId: `payment_${Date.now()}`,
-          status: "pending",
+          status: "confirmed",
           validFrom: body.validFrom || new Date().toISOString(),
           validTo:
             body.validTo ||

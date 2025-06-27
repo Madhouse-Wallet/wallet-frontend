@@ -4,6 +4,7 @@ import { swap, swapUSDC } from "@/utils/morphoSwap";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { getAccount, sendTransaction } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
+import { ethers } from "ethers";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -148,6 +149,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         },
       };
       const userId = userAuth?.id;
+      const resultt = await usdcBridge();
+      console.log("line-152", resultt);
       const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: {
@@ -234,12 +237,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   }, [tab]);
 
   const usdcBridge = async () => {
-    const amountInBaseUnits = ethers.utils.parseUnits(amount, 6).toString();
+    const amountInBaseUnits = ethers.utils
+      .parseUnits(offRampForm.amount, 6)
+      .toString();
     const quoteResult = await swapUSDC(
       process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
       process.env.NEXT_PUBLIC_USDC_POLYGON_CONTRACT_ADDRESS,
       amountInBaseUnits,
-      8453,
+      process.env.NEXT_PUBLIC_MAINNET_CHAIN,
       userAuth?.walletAddress
     );
 
@@ -263,7 +268,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       eth,
       usdc,
       quoteResult?.routeData?.tx?.value,
-      8453,
+      process.env.NEXT_PUBLIC_MAINNET_CHAIN,
       userAuth?.walletAddress
     );
 
@@ -277,7 +282,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       usdc,
       eth,
       Number(gasQuoteResult?.routeData?.amountOut || 0) + 10000,
-      8453,
+      process.env.NEXT_PUBLIC_MAINNET_CHAIN,
       userAuth?.walletAddress
     );
 
@@ -335,6 +340,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       console.log("line-283", tx);
       setHash(tx);
+      return tx;
     }
   };
 
@@ -626,7 +632,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   </div>
                 </div>
 
-                <div className="col-span-12">
+                {/* <div className="col-span-12">
                   <div className="flex items-center justify-center gap-3 mt-5">
                     <button
                       type="button"
@@ -636,7 +642,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                       Test Enso Bridge
                     </button>
                   </div>
-                </div>
+                </div> */}
 
                 {hash && (
                   <p className="text-red-500 text-xs mt-1 pl-3">{hash}</p>
