@@ -278,7 +278,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
   // Function to get party details for display
   const getPartyDisplayInfo = (partyy) => {
-    console.log("line-281", partyy);
     const party = partyy?.data;
     const account = party.accounts?.[0] || {};
     const address = account.addresses?.[0] || {};
