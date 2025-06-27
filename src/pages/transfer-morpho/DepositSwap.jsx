@@ -157,6 +157,11 @@ const DepositSwap = () => {
     setGasPriceError("");
     setGasPrice(null);
 
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
     // Validate amount
     if (filteredValue.trim() !== "") {
       if (Number.parseFloat(filteredValue) <= 0) {
