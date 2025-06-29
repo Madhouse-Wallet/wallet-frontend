@@ -88,7 +88,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         return;
       }
       setLoading(true);
-      setCommonError(false)
+      setCommonError(false);
       if (!userAuth?.login) {
         setCommonError("Please Login!");
       } else {
@@ -119,7 +119,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
-            fetchLighteningBalance()
+            fetchLighteningBalance();
             toast.success(getBtcSat.message);
             setLoading(false);
           }
@@ -131,8 +131,6 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       setLoading(false);
     }
   };
-
-
 
   const fetchLighteningBalance = async () => {
     try {
@@ -155,24 +153,24 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             const balanceSatss = Math.floor(balanceSats / 1000);
             setLightningBalance(balanceSatss);
           } else {
-            console.error("Failed to fetch lightning balance or empty balance.");
+            console.error(
+              "Failed to fetch lightning balance or empty balance."
+            );
           }
         }
       }
-
-
     } catch (error) {
       console.error("Error fetching lightning balance:", error);
     }
   };
 
   useEffect(() => {
-    fetchLighteningBalance()
-  }, [])
+    fetchLighteningBalance();
+  }, []);
 
   useEffect(() => {
-    setCommonError(false)
-  }, [amount])
+    setCommonError(false);
+  }, [amount]);
 
 
   const clearFeeDetails = async () => {
@@ -191,7 +189,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     const rawValue = e.target.value;
 
     // Remove any non-digit characters
-    const numericValue = rawValue.replace(/[^0-9]/g, '');
+    const numericValue = rawValue.replace(/[^0-9]/g, "");
 
     // Convert to number for validation
     const numberValue = parseInt(numericValue, 10);
@@ -249,19 +247,18 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <button
-          onClick={() => setWithdrawPop(!withdrawPop)}
-          type="button"
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
         >
-          {" "}
+          <button
+            onClick={() => setWithdrawPop(!withdrawPop)}
+            type="button"
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
@@ -278,12 +275,14 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                     >
                       Enter Amount in sats
                     </label>
-                    {userAuth?.email && <label
-                      htmlFor=""
-                      className="form-label m-0 font-semibold text-xs ps-3"
-                    >
-                      Your Balance: {lightningBalance}
-                    </label>}
+                    {userAuth?.email && (
+                      <label
+                        htmlFor=""
+                        className="form-label m-0 font-semibold text-xs ps-3"
+                      >
+                        Your Balance: {lightningBalance}
+                      </label>
+                    )}
                   </div>
                   <div className="iconWithText relative">
                     <input
@@ -294,8 +293,10 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       placeholder="min: (26000), max: (24000000)"
                     />
                   </div>
-                  {error && (<p className="m-0 text-red-500">{error}</p>)}
-                  {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
+                  {error && <p className="m-0 text-red-500">{error}</p>}
+                  {commonError && (
+                    <p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>
+                  )}
                 </div>
                 <div className="py-2">
                   {/* //  feeDetails?.swapAmount  feeDetails?.lockupFee feeDetails?.claimFee  feeDetails?.boltzFee */}
@@ -335,7 +336,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

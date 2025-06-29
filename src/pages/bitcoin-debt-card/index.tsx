@@ -17,7 +17,9 @@ import { splitAddress } from "../../utils/globals";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import QRCode from "qrcode";
+import { useRouter } from "next/router";
 const BTCDebitCard: React.FC = () => {
+  const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
@@ -174,20 +176,29 @@ const BTCDebitCard: React.FC = () => {
           />,
           document.body
         )}
-      <section className="relative dashboard  ">
+      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
+        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+          <div className="container mx-auto">
+            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
+              <div className="left">
+                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                  Lightning
+                </h4>
+              </div>
+            </Nav>
+          </div>
+        </header>
         <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
           <div className="pageCard  bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <div className="grid gap-3 grid-cols-12 px-2 pt-3">
-              <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
-                <div className="sectionHeader ">
-                  <div className="flex align-items-center gap-2">
-                    <BackBtn />
-                    <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Lightning
-                    </h4>
-                  </div>
-                </div>
-              </div>
               <div className="p-2 px-3 px-lg-4 py-lg-3 col-span-12">
                 <div className="flex flex-col gap-4">
                   {creditCardDetails && (
@@ -338,6 +349,12 @@ const BTCDebitCard: React.FC = () => {
   );
 };
 
+const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: #5c2a28a3;
+  backdrop-filter: blur(12.8px);
+`;
+
 export const ContentWrp = styled.div`
   h2 {
     background: linear-gradient(90.5deg, #e2682b 0.43%, #ffb38c 128%);
@@ -445,5 +462,19 @@ const copyIcn = (
       d="M4.172 3.172C3 4.343 3 6.229 3 10V12C3 15.771 3 17.657 4.172 18.828C4.789 19.446 5.605 19.738 6.792 19.876C6.6 19.036 6.6 17.88 6.6 16.216V11.397C6.6 8.671 6.6 7.308 7.443 6.461C8.287 5.614 9.644 5.614 12.36 5.614H15.24C16.892 5.614 18.04 5.614 18.878 5.804C18.74 4.611 18.448 3.792 17.828 3.172C16.657 2 14.771 2 11 2C7.229 2 5.343 2 4.172 3.172Z"
       fill="currentColor"
     />
+  </svg>
+);
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
   </svg>
 );

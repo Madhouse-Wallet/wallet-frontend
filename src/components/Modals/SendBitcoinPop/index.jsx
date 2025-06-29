@@ -169,15 +169,15 @@ const SendBitcoinPop = ({
     <>
       {isLoading && <LoadingScreen />}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <buttonbuy
-          onClick={handleClose}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
+        <div className="modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20 z-10">
+          <button
+            onClick={handleClose}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
           {step == 1 ? (
             <>
               <div className="grid gap-3 grid-cols-12 pt-1">
@@ -250,7 +250,7 @@ const SendBitcoinPop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);
