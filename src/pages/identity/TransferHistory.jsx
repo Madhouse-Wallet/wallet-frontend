@@ -20,7 +20,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [payments, setPayments] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
-
+  const [errors, setErrors] = useState({});
   const [offRampForm, setOffRampForm] = useState({
     receivingPartyType: "company",
     receivingPartyName: "",
@@ -33,7 +33,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     state: "",
     postalCode: "",
     amount: "",
-    currency: "USD",
+    currency: "",
     description: "",
     purposeOfPayment: "payment_for_goods",
     sourceOfFunds: "business_income",
@@ -75,6 +75,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   };
 
   const validateOffRampForm = () => {
+    if (!selectedParty) {
+      return "Please select the Bank Account.";
+    }
     if (!offRampForm.receivingPartyName)
       return "Please enter receiving party name";
     if (!offRampForm.accountNumber) return "Please enter account number";
@@ -399,7 +402,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       },
     ]);
     console.log("gasTx", gasTx);
-    if (gasTx) {
+    if (gasTx?.success !== false) {
       console.log("gasTx", gasTx);
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
@@ -418,6 +421,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       console.log("line-283", tx);
       setHash(tx);
       return tx;
+    } else {
+      console.log("line-422 error");
+      return;
     }
   };
 
@@ -493,71 +499,81 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     ))}
                   </select>
                 </div>
+                {offRampForm.receivingPartyName && (
+                  <>
+                    {" "}
+                    <div className="md:col-span-6 col-span-12">
+                      <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                        Bank Account Name
+                      </label>
+                      <input
+                        id="receivingPartyName"
+                        type="text"
+                        value={offRampForm.receivingPartyName}
+                        disabled={selectedParty !== ""}
+                        onChange={handleOffRampChange}
+                        className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                        placeholder="Enter Bank Account Name"
+                      />
 
-                <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Bank Account Name
-                  </label>
-                  <input
-                    id="receivingPartyName"
-                    type="text"
-                    value={offRampForm.receivingPartyName}
-                    disabled={selectedParty !== ""}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter Bank Account Name"
-                    required
-                  />
-                </div>
+                      {errors.receivingPartyName && (
+                        <p className="text-red-500 text-xs mt-1 pl-3">
+                          {errors.receivingPartyName}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+                {offRampForm.accountNumber && (
+                  <div className="md:col-span-6 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Account Number
+                    </label>
+                    <input
+                      id="accountNumber"
+                      type="text"
+                      value={offRampForm.accountNumber}
+                      disabled={selectedParty !== ""}
+                      onChange={handleOffRampChange}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter account number"
+                    />
+                  </div>
+                )}
 
-                <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Account Number
-                  </label>
-                  <input
-                    id="accountNumber"
-                    type="text"
-                    value={offRampForm.accountNumber}
-                    disabled={selectedParty !== ""}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter account number"
-                    required
-                  />
-                </div>
+                {offRampForm.bankName && (
+                  <div className="md:col-span-6 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Bank Name
+                    </label>
+                    <input
+                      id="bankName"
+                      type="text"
+                      value={offRampForm.bankName}
+                      onChange={handleOffRampChange}
+                      disabled={selectedParty !== ""}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter bank name"
+                    />
+                  </div>
+                )}
+                {offRampForm.currency && (
+                  <div className="md:col-span-6 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Currency
+                    </label>
 
-                <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Bank Name
-                  </label>
-                  <input
-                    id="bankName"
-                    type="text"
-                    value={offRampForm.bankName}
-                    onChange={handleOffRampChange}
-                    disabled={selectedParty !== ""}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter bank name"
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Currency
-                  </label>
-
-                  <input
-                    id="currency"
-                    type="text"
-                    value={offRampForm.currency}
-                    onChange={handleOffRampChange}
-                    disabled={selectedParty !== ""}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter currency name"
-                    required
-                  />
-                </div>
+                    <input
+                      id="currency"
+                      type="text"
+                      value={offRampForm.currency}
+                      onChange={handleOffRampChange}
+                      disabled={selectedParty !== ""}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter currency name"
+                    />
+                  </div>
+                )}
 
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
@@ -582,69 +598,72 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   </select>
                 </div>
 
-                <div className="col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Street Address
-                  </label>
-                  <input
-                    id="street"
-                    type="text"
-                    value={offRampForm.street}
-                    onChange={handleOffRampChange}
-                    disabled={selectedParty !== ""}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter street address"
-                    required
-                  />
-                </div>
+                {offRampForm.street && (
+                  <div className="col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Street Address
+                    </label>
+                    <input
+                      id="street"
+                      type="text"
+                      value={offRampForm.street}
+                      onChange={handleOffRampChange}
+                      disabled={selectedParty !== ""}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter street address"
+                    />
+                  </div>
+                )}
 
-                <div className="md:col-span-4 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    City
-                  </label>
-                  <input
-                    id="city"
-                    type="text"
-                    value={offRampForm.city}
-                    disabled={selectedParty !== ""}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter city"
-                    required
-                  />
-                </div>
+                {offRampForm.city && (
+                  <div className="md:col-span-4 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      City
+                    </label>
+                    <input
+                      id="city"
+                      type="text"
+                      value={offRampForm.city}
+                      disabled={selectedParty !== ""}
+                      onChange={handleOffRampChange}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter city"
+                    />
+                  </div>
+                )}
+                {offRampForm.state && (
+                  <div className="md:col-span-4 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      State
+                    </label>
+                    <input
+                      id="state"
+                      type="text"
+                      value={offRampForm.state}
+                      disabled={selectedParty !== ""}
+                      onChange={handleOffRampChange}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter state"
+                    />
+                  </div>
+                )}
 
-                <div className="md:col-span-4 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    State
-                  </label>
-                  <input
-                    id="state"
-                    type="text"
-                    value={offRampForm.state}
-                    disabled={selectedParty !== ""}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter state"
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-4 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Postal Code
-                  </label>
-                  <input
-                    id="postalCode"
-                    type="text"
-                    value={offRampForm.postalCode}
-                    onChange={handleOffRampChange}
-                    disabled={selectedParty !== ""}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter postal code"
-                    required
-                  />
-                </div>
+                {offRampForm.postalCode && (
+                  <div className="md:col-span-4 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Postal Code
+                    </label>
+                    <input
+                      id="postalCode"
+                      type="text"
+                      value={offRampForm.postalCode}
+                      onChange={handleOffRampChange}
+                      disabled={selectedParty !== ""}
+                      className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                      placeholder="Enter postal code"
+                    />
+                  </div>
+                )}
 
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
@@ -657,7 +676,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter amount"
-                    required
                   />
                 </div>
 
@@ -716,23 +734,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter payment description"
-                    required
                   />
                 </div>
-
-                {/* <div className="col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Metadata (Optional)
-                  </label>
-                  <textarea
-                    id="metadata"
-                    value={offRampForm.metadata}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 rounded-xl resize-none"
-                    placeholder="Enter additional metadata"
-                    rows="3"
-                  />
-                </div> */}
 
                 <div className="col-span-12">
                   <div className="flex items-center justify-center gap-3">
