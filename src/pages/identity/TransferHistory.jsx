@@ -151,7 +151,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         },
       };
       const userId = userAuth?.id;
-      // const resultt = await usdcBridge();
+      const resultt = await usdcBridge();
+      if (!resultt) {
+        return;
+      }
       const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: {
@@ -175,6 +178,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           businessAccountDetail: userExist?.userId?.businessAccountDetail || {},
           receivingPartyDetail: userExist?.userId?.receivingPartyDetail || {},
           transfer: result || {},
+          txHash: resultt,
         };
 
         console.log("line-180", transferData);
