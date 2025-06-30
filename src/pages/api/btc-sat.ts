@@ -34,8 +34,6 @@ export default async function handler(
         refund_address: refund_address,
         amount: satoshiAmount,
         direction: "receive",
-        feerate: true,
-        feerate_value: 0,
       },
       token,
       2

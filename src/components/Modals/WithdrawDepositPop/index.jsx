@@ -119,7 +119,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "Mobile Money"
+                      "M-Pesa"
                     )}
                   </button>
                 </div>
@@ -138,7 +138,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "Bank Accounts"
+                      "USA Bank Accounts"
                     )}
                   </button>
                 </div>
@@ -166,7 +166,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "Payments"
+                      "SWIFT Payments"
                     )}
                   </button>
                 </div>

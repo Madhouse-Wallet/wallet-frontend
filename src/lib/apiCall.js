@@ -41,7 +41,6 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
 };
 export const getUser = async (email) => {
   try {
-    console.log("line-44", email);
     try {
       return await fetch(`/api/get-user`, {
         method: "POST",
@@ -268,11 +267,48 @@ export const getLnbitId = async (email) => {
   }
 };
 
+//send-lnbit-usdc
+export const sendLnbitUsdc = async (
+  wallet, 
+  amount,
+  lnbitId_3,
+  lnbitWalletId_3,
+  lnbitAdminKey_3
+) => {
+  try {
+    try {
+      return await fetch(`/api/send-lnbit-usdc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet,
+          amount,
+          lnbitId_3,
+          lnbitWalletId_3,
+          lnbitAdminKey_3
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const sendLnbit = async (
   amount,
   onchain_address,
   lnbitId_3,
-  lnbitWalletId_3
+  lnbitWalletId_3,
+  lnbitAdminKey_3
 ) => {
   try {
     try {
@@ -284,6 +320,7 @@ export const sendLnbit = async (
           onchain_address,
           lnbitId_3,
           lnbitWalletId_3,
+          lnbitAdminKey_3
         }),
       })
         .then((res) => res.json())
@@ -617,6 +654,37 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
         emailData: {
           name: name,
           verificationCode: otp,
+        },
+        email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+export const sendTransferDetail = async ({
+  email,
+  // name,
+  transferData,
+  subject,
+  type,
+}) => {
+  try {
+    return await fetch(`/api/send-email-transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type,
+        subject,
+        emailData: {
+          // name: name,
+          transferDetail: transferData,
         },
         email,
       }),

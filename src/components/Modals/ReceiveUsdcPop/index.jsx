@@ -6,6 +6,7 @@ import QRCode from "qrcode";
 
 const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
   const userAuth = useSelector((state) => state.Auth);
+  const [error, setError] = useState("");
   const [qrCode, setQRCode] = useState("");
   const [isCopied, setIsCopied] = useState({
     one: false,
@@ -50,6 +51,8 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
       };
 
       generateQRCode();
+    } else {
+      setError("Please create account or login.");
     }
   }, [userAuth?.walletAddress]);
 
@@ -77,15 +80,28 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
             </div>
             <div className="modalBody">
               <div className="cardCstm text-center">
-                <Image
-                  alt=""
-                  src={qrCode}
-                  height={512}
-                  width={512}
-                  className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
-                  // style={{ height: 230 }}
-                  style={{ imageRendering: "pixelated" }}
-                />
+                {error ? (
+                  <>
+                    {" "}
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {" "}
+                    <Image
+                      alt=""
+                      src={qrCode}
+                      height={512}
+                      width={512}
+                      className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                      // style={{ height: 230 }}
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  </>
+                )}
+
                 <div className="content mt-2" style={{ fontSize: 12 }}>
                   <div className="text-center py-5">
                     <h6 className="m-0 text-base pb-2">Your Wallet Address</h6>

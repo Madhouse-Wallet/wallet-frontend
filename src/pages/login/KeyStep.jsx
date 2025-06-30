@@ -59,18 +59,18 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
                         : "bg-[#fff3ed] border border-[#ffad84] cursor-pointer border rounded-10 py-2 px-3 flex items-center justify-between
                       border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                   >
-                    <div className="left flex items-center gap-2">
+                    <div className="left flex items-center gap-2 max-w-[calc(100%-30px)]">
                       <div
                         className={`border-white/10 bg-white/4 hover:bg-white/6 placeholder:text-white/30 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:bg-white/10 focus-visible:border-white/50 cursor-pointer border h-[60px] w-[60px] rounded-10 py-2 px-3 flex items-center justify-between
                       border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300  focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40`}
                       >
                         {keyIcn}
                       </div>
-                      <div className="content">
+                      <div className="content max-w-[calc(100%-65px)]">
                         <h4 className="m-0 font-bold text-xl">
                           {item?.displayName || "Key " + (key + 1)}
                         </h4>
-                        <p className="text-center text-sm font-medium opacity-50 md:text-xs">
+                        <p className="text-center text-sm font-medium opacity-50 md:text-xs truncate">
                           {item.name}
                         </p>
                       </div>
