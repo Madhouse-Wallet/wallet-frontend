@@ -60,7 +60,10 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   };
   const handleDepositPop = async () => {
     try {
-      if (!amount) {
+      if (!userAuth?.login) {
+        setError("Please Login!");
+        return;
+      } else if (!amount) {
         setError("Minimum deposit is 0.00027 BTC");
         return;
       } else if (amount < 0.00027) {
@@ -107,10 +110,17 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             setLoading(false);
           } else {
             const satoshis = Math.round(parseFloat(amount) * 100000000);
+            const btInSats = Math.floor(bitcoinBalance * 100000000);
+            if (btInSats < getBtcSat?.data?.expected_amount) {
+              const requiredBtc = (getBtcSat?.data?.expected_amount / 100000000).toFixed(8); // convert to BTC with precision
+              setCommonError(`Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`);
+              setLoading(false);
+              return;
+            }
             const result = await sendBitcoinFunction({
               fromAddress: userExist?.userId?.bitcoinWallet,
               toAddress: getBtcSat?.data?.address,
-              amountSatoshi: satoshis,
+              amountSatoshi: getBtcSat?.data?.expected_amount,
               privateKeyHex: privateKey?.wif,
               network: "main", // Use 'main' for mainnet
             });

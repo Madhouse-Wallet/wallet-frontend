@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
+import { calcLnToChainFeeWithSwapAmount, calcLnToChainFeeWithReceivedAmount } from "../../../utils/globals.js"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
 
@@ -36,6 +37,16 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
+  const [feeDetails, setFeeDetails] = useState({
+    boltzFee: "",
+    platformFee: "",
+    lockupFee: "",
+    claimFee: "",
+    totalFees: "",
+    amountReceived: "",
+    swapAmount: ""
+  });
+
   const [commonError, setCommonError] = useState(false);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
@@ -60,16 +71,19 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   };
   const handleWithdrawPop = async () => {
     try {
-      if (!amount) {
-        setError("Minimum value is 25,000");
+      if (!userAuth?.login) {
+        setError("Please Login!");
         return;
-      } else if (amount < 25000) {
-        setError("Minimum value is 25,000");
+      } else if (!amount) {
+        setError("Minimum value is 26,000");
         return;
-      } else if (amount > 25000000) {
-        setError("Maximum value is 25,000,000");
+      } else if (amount < 26000) {
+        setError("Minimum value is 26,000");
         return;
-      } else if (amount > lightningBalance) {
+      } else if (amount > 24000000) {
+        setError("Maximum value is 24,000,000");
+        return;
+      } else if (feeDetails?.swapAmount > lightningBalance) {
         setError("Insufficient Balance");
         return;
       }
@@ -158,7 +172,20 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     setCommonError(false);
   }, [amount]);
 
-  const handleAmountInput = (e) => {
+
+  const clearFeeDetails = async () => {
+    setFeeDetails({
+      boltzFee: "",
+      platformFee: "",
+      lockupFee: "",
+      claimFee: "",
+      totalFees: "",
+      amountReceived: "",
+      swapAmount: ""
+    })
+  }
+
+  const handleAmountInput = async (e) => {
     const rawValue = e.target.value;
 
     // Remove any non-digit characters
@@ -173,12 +200,19 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     // Validation
     if (!numericValue) {
       setError("Only numbers allowed");
-    } else if (numberValue < 25000) {
-      setError("Minimum value is 25,000");
-    } else if (numberValue > 25000000) {
-      setError("Maximum value is 25,000,000");
+      clearFeeDetails()
+    } else if (numberValue < 26000) {
+      setError("Minimum value is 26,000");
+      clearFeeDetails()
+    } else if (numberValue > 24000000) {
+      setError("Maximum value is 24,000,000");
+      clearFeeDetails()
     } else {
       setError("");
+      let result = await calcLnToChainFeeWithReceivedAmount(numberValue)
+      if (result) {
+        setFeeDetails(result)
+      }
     }
   };
 
@@ -256,7 +290,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       onChange={handleAmountInput}
                       value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      placeholder="min: (25000), max: (25000000)"
+                      placeholder="min: (26000), max: (24000000)"
                     />
                   </div>
                   {error && <p className="m-0 text-red-500">{error}</p>}
@@ -264,7 +298,14 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                     <p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>
                   )}
                 </div>
+                <div className="py-2">
+                  {/* //  feeDetails?.swapAmount  feeDetails?.lockupFee feeDetails?.claimFee  feeDetails?.boltzFee */}
 
+                  <p className="m-0 text-xs">Boltz Fee (0.5%): {feeDetails?.boltzFee}</p>
+                  <p className="m-0 text-xs">Network Lockup tx Fee: {feeDetails?.claimFee}</p>
+                  <p className="m-0 text-xs">Network Claim tx Fee: {feeDetails?.lockupFee}</p>
+                  <p className="m-0 text-xs">Total Pay: {feeDetails?.swapAmount}</p>
+                </div>
                 <div className="btnWrpper mt-3">
                   <button
                     type="button"

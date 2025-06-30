@@ -71,7 +71,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Dollars",
+      head: "Cash",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);

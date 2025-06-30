@@ -158,8 +158,8 @@ const btc = (
         y2="1599.84"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stop-color="#F9AA4B" />
-        <stop offset="1" stop-color="#F7931A" />
+        <stop stopColor="#F9AA4B" />
+        <stop offset="1" stopColor="#F7931A" />
       </linearGradient>
       <clipPath id="clip0_2_2">
         <rect width="16" height="16" fill="white" />

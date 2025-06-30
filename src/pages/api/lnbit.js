@@ -518,6 +518,38 @@ const getDeposit = async (token, type = 1, apiKey = null) => {
   }
 };
 
+const getPaymentSuccess = async (
+  token,
+  type = 1,
+  apiKey = null,
+  checkingId
+) => {
+  try {
+    const apiResponse = await lambdaInvokeFunction(
+      {
+        name: "getPaymentSuccess",
+        data: [token, type, apiKey, checkingId],
+      },
+      "madhouse-backend-production-lnbitCalls"
+    );
+    // console.log("getDeposit apiResponse lambdaInvokeFunction -->", apiResponse?.data)
+    if (apiResponse?.status == "success") {
+      return apiResponse?.data;
+    } else {
+      return {
+        status: false,
+        msg: "fetch failed",
+      };
+    }
+  } catch (error) {
+    console.error("lnbit login API Error:", error);
+    return {
+      status: false,
+      msg: "fetch failed",
+    };
+  }
+};
+
 module.exports = {
   logIn,
   createUser,
@@ -534,6 +566,7 @@ module.exports = {
   addUserWallet,
   getWithdraw,
   getDeposit,
+  getPaymentSuccess,
   userLogIn,
   splitPaymentTarget,
   lnurlpCreate,

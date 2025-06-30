@@ -35,6 +35,11 @@ const InvoicePop = ({ invoiceePop, setInvoicePop, qrCodee }) => {
         try {
           const qr = await QRCode.toDataURL(qrCodee, {
             margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
           });
           setQRCode(qr);
         } catch (err) {
@@ -77,6 +82,7 @@ const InvoicePop = ({ invoiceePop, setInvoicePop, qrCodee }) => {
                   width={10000}
                   className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
                   // style={{ height: 230 }}
+                  style={{ imageRendering: "pixelated" }}
                 />
                 <div className="content mt-2" style={{ fontSize: 12 }}>
                   <div className="text-center py-5">

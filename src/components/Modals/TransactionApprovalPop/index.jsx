@@ -155,9 +155,9 @@ const rightIcn = (
     <path
       d="M8.5 5L15.5 12L8.5 19"
       stroke="white"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

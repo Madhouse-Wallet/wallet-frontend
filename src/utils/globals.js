@@ -49,7 +49,7 @@ export const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export const logoutStorage = async () => {
     try {
         localStorage.removeItem("authUser");
-        localStorage.clear();   
+        localStorage.clear();
         return true
     } catch (error) {
         console.log("storedataLocalStorage error--->", error)
@@ -67,7 +67,7 @@ export const webAuthKeyStore = async (webAuthnKey) => {
             rpID: "",
         }
     } catch (error) {
-        console.log("webAuthKeyStore error -->",error)
+        console.log("webAuthKeyStore error -->", error)
     }
 }
 
@@ -79,9 +79,85 @@ export const isValidEmail = async (email) => {
     return emailRegex.test(email);
 }
 
-export const getRandomString  = async (length=4)=>{
+export const getRandomString = async (length = 4) => {
     const randomAlpha = await Array.from({ length }, () =>
         String.fromCharCode(97 + Math.floor(Math.random() * 26)) // a–z
     ).join("");
     return randomAlpha
+}
+
+
+export const calcLnToChainFeeWithSwapAmount = async (swapAmount = 0) => {
+    try {
+        const boltzFeePercent = 0.5; // e.g. 0.5% Boltz fee (replace with actual)
+        const lockupFee = 500;       // On-chain lockup fee in sats
+        const claimFee = 1000;       // Fixed on-chain claim fee in sats
+        const boltzFee = Math.floor((swapAmount * boltzFeePercent) / 100);
+        const totalFees = boltzFee + lockupFee + claimFee;
+        const platformFee = lockupFee + claimFee;
+        const amountReceived = swapAmount - totalFees;
+
+        // Convert to Uint8Array
+        return {
+            boltzFee,
+            platformFee,
+            lockupFee,
+            claimFee,
+            totalFees,
+            amountReceived,
+            swapAmount
+        }
+    } catch (e) {
+        console.error('error with calcLnToChainFeeWithSwapAmount', e);
+        return null; // Handle error as needed (e.g., return an empty buffer or throw an error)
+    }
+};
+
+
+export const calcLnToChainFeeWithReceivedAmount = async (amountReceived = 0) => {
+    try {
+        const boltzFeePercent = 0.5; // e.g. 0.5% Boltz fee (replace with actual)
+        const lockupFee = 500;       // On-chain lockup fee in sats
+        const claimFee = 1000;       // Fixed on-chain claim fee in sats
+
+        const feeFactor = 1 - boltzFeePercent / 100;
+        const swapAmount = Math.ceil((amountReceived + lockupFee + claimFee) / feeFactor);
+
+        const boltzFee = Math.floor((swapAmount * boltzFeePercent) / 100);
+        const totalFees = boltzFee + lockupFee + claimFee;
+        const platformFee = lockupFee + claimFee;
+
+        // Convert to Uint8Array
+        return {
+            boltzFee,
+            platformFee,
+            lockupFee,
+            claimFee,
+            totalFees,
+            amountReceived,
+            swapAmount
+        }
+    } catch (e) {
+        console.error('error with calcLnToChainFeeWithReceivedAmount', e);
+        return null; // Handle error as needed (e.g., return an empty buffer or throw an error)
+    }
+};
+
+
+export const calcFeeOnchainToLnWithReceiveAmount = async (amount, lockupFee = 0) => {
+    const boltzFeePercent = 0.5; // 0.5%
+    const claimFee = 500;        // fixed onchain claim tx fee in sats
+
+    const boltzFee = Math.floor((amount * boltzFeePercent) / 100);
+    const totalFees = boltzFee + claimFee + lockupFee;
+    const onchainPayment = amount + totalFees;
+
+    return {
+        receiveAmount: amount,
+        boltzFee,
+        claimFee,
+        lockupFee,
+        totalFees,
+        onchainPayment
+    };
 }

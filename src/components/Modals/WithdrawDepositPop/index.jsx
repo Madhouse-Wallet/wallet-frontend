@@ -14,6 +14,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
   const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
   const [loading, setloading] = useState(false);
   const [loadingFonbnk, setloadingFonbnk] = useState(false);
+   const [loadingPayments, setLoadingpayments] = useState(false);
   const [error, setError] = useState("");
 
   const verifyingUser = async () => {
@@ -49,6 +50,26 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
         router.push("/fonbnk");
       } else {
         setloadingFonbnk(false);
+        setError("Verification Failed Please try again.");
+      }
+    } else {
+      setError("Create an account or log in");
+    }
+  };
+
+  const verifyingUserPayments = async () => {
+    setError("");
+    if (userAuth?.email) {
+      setLoadingpayments(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/identity");
+      } else {
+        setLoadingpayments(false);
         setError("Verification Failed Please try again.");
       }
     } else {
@@ -98,7 +119,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "M-Pesa"
+                      "Mobile Money"
                     )}
                   </button>
                 </div>
@@ -121,13 +142,33 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                     )}
                   </button>
                 </div>
-                <div className="col-span-12">
+                <div className="col-span-6">
                   <Link
                     href="/transfer-morpho"
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     Spark Lend
                   </Link>
+                </div>
+
+                <div className="col-span-6">
+                  <button
+                    // href="/spherepay"
+                    onClick={verifyingUserPayments}
+                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    {loadingPayments ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Payments"
+                    )}
+                  </button>
                 </div>
 
                 <div className="col-span-12">
