@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
-import { getUser, sendLnbit } from "../../../lib/apiCall.js";
+import { getUser, sendLnbitUsdc } from "../../../lib/apiCall.js";
 import { calcLnToChainFeeWithSwapAmount, calcLnToChainFeeWithReceivedAmount } from "../../../utils/globals.js"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
@@ -33,7 +33,7 @@ const getSecretData = async (storageKey, credentialId) => {
 
 // img
 
-const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
+const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
@@ -109,9 +109,9 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             setLoading(false);
             return;
           }
-          const getBtcSat = await sendLnbit(
+          const getBtcSat = await sendLnbitUsdc(
+            userExist?.userId?.wallet,
             amount,
-            userExist?.userId?.bitcoinWallet,
             userExist?.userId?.lnbitId_3,
             userExist?.userId?.lnbitWalletId_3,
             userExist?.userId?.lnbitAdminKey_3
@@ -251,7 +251,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <button
-          onClick={() => setWithdrawPop(!withdrawPop)}
+          onClick={() => setWithdrawUsdcPop(!withdrawUsdcPop)}
           type="button"
           className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
           style={{ border: "1px solid #5f5f5f59" }}
@@ -266,7 +266,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Withdraw In Bitcoin
+                Withdraw In Dollars
               </h5>
             </div>
             <div className="modalBody">
@@ -349,7 +349,7 @@ const Modal = styled.div`
   }
 `;
 
-export default WithdrawPopup;
+export default WithdrawUsdcPopup;
 
 const closeIcn = (
   <svg

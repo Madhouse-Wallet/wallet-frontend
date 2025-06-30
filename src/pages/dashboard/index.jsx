@@ -88,7 +88,7 @@ const Dashboard = () => {
       head: "Lightning",
       icn: icn6,
       onClick: () => {
-        router.push("/bitcoin-debt-card");
+        router.push("/lightning");
       },
     },
   ];

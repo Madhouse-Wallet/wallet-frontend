@@ -12,6 +12,8 @@ import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
+import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop"
+import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop"
 import { splitAddress } from "../../utils/globals";
 
 import { createPortal } from "react-dom";
@@ -21,6 +23,8 @@ const BTCDebitCard: React.FC = () => {
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
+  const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
+  const [lightning, setLightning,] = useState(false);
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
@@ -124,6 +128,18 @@ const BTCDebitCard: React.FC = () => {
 
   return (
     <>
+      {lightning &&
+        createPortal(
+          <LightningWithdrawPop
+            withdrawUsdcPop={withdrawUsdcPop}
+            setWithdrawUsdcPop={setWithdrawUsdcPop}
+            setWithdrawPop={setWithdrawPop}
+            withdrawPop={withdrawPop}
+            lightning={lightning}
+            setLightning={setLightning}
+          />,
+          document.body
+        )}
       {depositPop &&
         createPortal(
           <DepositPopup
@@ -137,6 +153,14 @@ const BTCDebitCard: React.FC = () => {
           <WithdrawPopup
             withdrawPop={withdrawPop}
             setWithdrawPop={setWithdrawPop}
+          />,
+          document.body
+        )}
+      {withdrawUsdcPop &&
+        createPortal(
+          <WithdrawUsdcPopup
+            withdrawUsdcPop={withdrawUsdcPop}
+            setWithdrawUsdcPop={setWithdrawUsdcPop}
           />,
           document.body
         )}
@@ -257,7 +281,8 @@ const BTCDebitCard: React.FC = () => {
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
                         <button
-                          onClick={() => setWithdrawPop(!withdrawPop)}
+
+                          onClick={() => setLightning(!lightning)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
                           Withdraw

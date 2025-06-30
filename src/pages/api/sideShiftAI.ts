@@ -649,3 +649,53 @@ export const createEthMainnetToUsdcbaseShift = async (
     throw error;
   }
 };
+
+
+
+export const createVariableShift = async (
+  settleAddress: string,
+  refundAddress: string | null,
+  affiliateId: string,
+  depositCoin: string,
+  settleCoin: string,
+  depositNetwork: string,
+  settleNetwork: string | null,
+  secretKey: string
+): Promise<any> => {
+  try {
+    const payload = {
+      settleAddress,
+      refundAddress,
+      affiliateId,
+      depositCoin,
+      settleCoin,
+      depositNetwork,
+      settleNetwork,
+    };
+
+    const response = await axios.post<any>(
+      "https://sideshift.ai/api/v2/shifts/variable",
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          // Add IP header if needed here, e.g. "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        "SideShift API Error:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        `SideShift variable shift failed: ${error.response?.data?.error?.message || error.message}`
+      );
+    }
+    throw error;
+  }
+};
