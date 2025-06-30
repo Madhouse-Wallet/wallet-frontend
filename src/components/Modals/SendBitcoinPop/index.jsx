@@ -86,31 +86,28 @@ const SendBitcoinPop = ({
 
     setLoading(true);
     if (!isValidAddress) {
-      toast.error("Please enter a valid address");
       setLoading(false);
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
       setLoading(false);
       return;
     }
     // Check if amount is less than 0.1
     const privateKey = await recoverSeedPhrase();
     if (!privateKey) {
-      toast.error("Please enter a valid amount");
       setLoading(false);
       return;
     }
     const sendLnbitWithdraw = await btcSat(amount, privateKey?.publicKey);
     if (sendLnbitWithdraw.status && sendLnbitWithdraw.status == "failure") {
-      toast.error(sendLnbitWithdraw.message);
       setLoading(false);
-    } else { 
+    } else {
+      const satoshis = Math.round(parseFloat(amount) * 100000000);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: sendLnbitWithdraw.data.data.address,
-        amountSatoshi: amount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
@@ -118,7 +115,6 @@ const SendBitcoinPop = ({
         toast.success(result.transactionHash);
         setLoading(false);
       } else {
-        toast.error("Transaction Failed!");
         setLoading(false);
       }
     }
@@ -139,7 +135,6 @@ const SendBitcoinPop = ({
           }
         } catch (error) {
           console.error("Wallet connection error:", error);
-          toast.error("Failed to connect wallet. Please try again.");
         }
       }
     };
@@ -160,13 +155,13 @@ const SendBitcoinPop = ({
       const result = await fetchBitcoinBalance(userAuth?.bitcoinWallet);
 
       if (result.error) {
-        toast.error(result.error || "Failed to fetch balance");
+        return;
       } else {
         setBalance(result.balance);
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      return;
     }
   };
 
@@ -174,15 +169,15 @@ const SendBitcoinPop = ({
     <>
       {isLoading && <LoadingScreen />}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <buttonbuy
-          onClick={handleClose}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
+        <div className="modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20 z-10">
+          <button
+            onClick={handleClose}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
           {step == 1 ? (
             <>
               <div className="grid gap-3 grid-cols-12 pt-1">
@@ -255,7 +250,7 @@ const SendBitcoinPop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

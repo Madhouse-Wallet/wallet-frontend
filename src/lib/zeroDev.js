@@ -5,9 +5,11 @@ import {
   http,
   createWalletClient,
   parseAbi,
+  formatUnits,
+  parseUnits,
 } from "viem";
 import { ethers, utils, Wallet } from "ethers";
-import { base } from "viem/chains";
+import { base,polygon } from "viem/chains";
 import {
   generatePrivateKey,
   privateKeyToAccount,
@@ -25,7 +27,8 @@ import dotenv from "dotenv";
 import timers from "timers-promises";
 dotenv.config();
 
-export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL
+export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL;
+export const POLYGON_RPC_URL = process.env.NEXT_PUBLIC_POLYGON_RPC_URL;
 export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_MAINNET_RPC_URL;
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
@@ -84,16 +87,16 @@ export const checkMenmonic = async (seedPhrase, privateKey) => {
     } else {
       return {
         status: false,
-        msg: "The seed phrase and private key do not match."
+        msg: "The seed phrase and private key do not match.",
       };
     }
   } catch (error) {
     return {
       status: false,
-      msg: "The seed phrase and private key do not match."
+      msg: "The seed phrase and private key do not match.",
     };
   }
-}
+};
 
 export const checkPrivateKey = async (PRIVATE_KEY) => {
   try {
@@ -111,19 +114,17 @@ export const checkPrivateKey = async (PRIVATE_KEY) => {
   }
 };
 
-export const setupNewAccount = async (
-  PRIVATE_KEY,
-  SAFE_PRIVATE_KEY,
-  chain = base
-) => {
+export const setupNewAccount = async (chain = base) => {
   try {
-    const eoaPrivateKey = PRIVATE_KEY; //this is an issue //generatePrivateKey() // PRIVATE_KEY
+    let generatePrivateKey = await getMenmonic();
+    let getSafeKey = await getPrivateKey();
+    const eoaPrivateKey = generatePrivateKey.privateKey; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
     const relayPrivateKey = RELAY_PRIVATE_KEY;
     if (!relayPrivateKey) throw new Error("RELAY_PRIVATE_KEY is required");
 
-    const safePrivateKey = SAFE_PRIVATE_KEY;
+    const safePrivateKey = getSafeKey;
     if (!safePrivateKey) throw new Error("SAFE_PRIVATE_KEY is required");
 
     const account = privateKeyToAccount(eoaPrivateKey);
@@ -146,15 +147,13 @@ export const setupNewAccount = async (
 
     const hash = await relayClient.sendTransaction({
       to: walletAddress,
-      value: BigInt(1000000)*(await publicClient.getGasPrice()) 
+      value: BigInt(1000000) * (await publicClient.getGasPrice()),
     });
     await timers.setTimeout(8000); //need to wait for at least 3 secs or it will fail, so i wait 5 secs
-
 
     const authorization = await walletClient.signAuthorization({
       contractAddress: SAFE_SINGLETON_ADDRESS,
     });
-
 
     const owners = [privateKeyToAddress(safePrivateKey)];
     const signerThreshold = 1n;
@@ -182,7 +181,6 @@ export const setupNewAccount = async (
       authorizationList: [authorization],
     });
 
-
     const safeAccount = await toSafeSmartAccount({
       address: privateKeyToAddress(eoaPrivateKey),
       owners: [privateKeyToAccount(safePrivateKey)],
@@ -195,10 +193,13 @@ export const setupNewAccount = async (
       res = {
         status: true,
         data: {
-          privatekey: eoaPrivateKey, 
+          privatekey: eoaPrivateKey,
           address: safeAccount.address,
           account: safeAccount,
           trxn: txHash.data,
+          privateKeyOwner: generatePrivateKey.privateKey,
+          safePrivateKey: getSafeKey,
+          seedPhraseOwner: generatePrivateKey.phrase,
         },
       };
     } else {
@@ -212,12 +213,73 @@ export const setupNewAccount = async (
     console.log("Error setting up new account -->", error);
     return {
       status: false,
-      msg: error?.message,
+      msg: "Something went wrong during account setup. Please try again later.",
     };
   }
 };
 
-export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) => {
+
+export const setupMultisigAccount = async () => {
+  try {
+
+      const client = createPublicClient({
+        chain: polygon,
+        transport: http(POLYGON_RPC_URL), //need to set the RPC URL for Polygon
+      });
+    
+    const sender = generatePrivateKey()
+    const receiver = generatePrivateKey()
+    const escrow = generatePrivateKey()
+
+
+    const owners = [privateKeyToAccount(sender), privateKeyToAccount(receiver), privateKeyToAccount(escrow)]
+ 
+    const safeAccount = await toSafeSmartAccount({
+      client,
+      entryPoint: {
+        address: entryPoint07Address,
+        version: "0.7",
+      },
+      owners,
+      threshold: 2n, // 2 out of 3 owners need to sign
+      saltNonce: 0n, // optional
+      version: "1.4.1",
+    })
+
+
+    let res;
+    if (safeAccount.address) {
+      res = {
+        status: true,
+        data: {
+          privatekey: eoaPrivateKey,
+          address: safeAccount.address,
+          sender: sender.privateKey,
+          receiver: receiver.privateKey,
+          escrow: escrow.privateKey,
+        },
+      };
+    } else {
+      res = {
+        status: false,
+        msg: "Error in escrow account creation",
+      };
+    }
+    return res;
+  } catch (error) {
+    console.log("Error setting up escrow account -->", error);
+    return {
+      status: false,
+      msg: "Something went wrong during escrow account setup. Please try again later.",
+    };
+  }
+};
+
+export const doAccountRecovery = async (
+  PRIVATE_KEY,
+  SAFE_PRIVATE_KEY,
+  address
+) => {
   try {
     const getAccount = await checkPrivateKey(PRIVATE_KEY);
     const getOwnerAccount = await checkPrivateKey(SAFE_PRIVATE_KEY);
@@ -250,10 +312,9 @@ export const doAccountRecovery = async (PRIVATE_KEY, SAFE_PRIVATE_KEY, address) 
     }
     return res;
   } catch (error) {
-    console.log("error recovering account -->", error);
     return {
       status: false,
-      msg: error?.message,
+      msg: "Something went wrong during account setup. Please try again after some time!",
     };
   }
 };
@@ -298,8 +359,9 @@ export const getAccount = async (
       paymaster: pimlicoClient,
       bundlerTransport: http(pimlicoUrl),
       userOperation: {
-        estimateFeesPerGas: async () =>
-          (await pimlicoClient.getUserOperationGasPrice()).fast,
+        estimateFeesPerGas: async () => {
+          return (await pimlicoClient.getUserOperationGasPrice()).fast;
+        },
       },
     });
 
@@ -350,6 +412,8 @@ export const sendTransaction = async (smartAccountClient, params) => {
         exchangeRate) /
       BigInt(1e18);
 
+    console.log("line-357", maxCostInToken);
+
     params.unshift({
       abi: parseAbi(["function approve(address,uint)"]),
       functionName: "approve",
@@ -372,8 +436,165 @@ export const sendTransaction = async (smartAccountClient, params) => {
     //return true;
   } catch (error) {
     console.log(`Error in transaction: ${error}`);
-    return error;
+    return {
+      success: false,
+      error: {
+        message: error.message || error,
+        type: getErrorType(error),
+        details: error,
+      },
+    };
   }
+};
+
+// export const calculateGasPriceInUSDC = async (smartAccountClient, params) => {
+//   try {
+//     // Get token quotes from Pimlico
+//     const quotes = await pimlicoClient.getTokenQuotes({
+//       chain: base,
+//       tokens: [usdc],
+//     });
+//     const { postOpGas, exchangeRate, paymaster } = quotes[0];
+
+//     // Add approve call to params for accurate gas estimation
+//     const paramsWithApprove = [...params];
+//     paramsWithApprove.unshift({
+//       abi: parseAbi(["function approve(address,uint)"]),
+//       functionName: "approve",
+//       args: [paymaster, parseUnits("1000", 6)], // placeholder amount
+//       to: usdc,
+//     });
+
+//     // Prepare user operation to get gas estimates
+//     const userOperation = await smartAccountClient.prepareUserOperation({
+//       calls: paramsWithApprove,
+//     });
+
+//     // Calculate total gas needed
+//     const userOperationMaxGas =
+//       userOperation.preVerificationGas +
+//       userOperation.callGasLimit +
+//       userOperation.verificationGasLimit +
+//       (userOperation.paymasterPostOpGasLimit || 0n) +
+//       (userOperation.paymasterVerificationGasLimit || 0n);
+
+//     // Calculate gas cost in ETH
+//     const userOperationMaxCost =
+//       userOperationMaxGas * userOperation.maxFeePerGas;
+
+//     // Convert to USDC using Pimlico's formula
+//     const gasPriceInUSDC =
+//       ((userOperationMaxCost + postOpGas * userOperation.maxFeePerGas) *
+//         exchangeRate) /
+//       BigInt(1e18);
+
+//     // Return both raw value and formatted
+//     return {
+//       raw: gasPriceInUSDC,
+//       formatted: formatUnits(gasPriceInUSDC, 6), // USDC has 6 decimals
+//       exchangeRate: exchangeRate.toString(),
+//       gasBreakdown: {
+//         totalGas: userOperationMaxGas.toString(),
+//         maxFeePerGas: userOperation.maxFeePerGas.toString(),
+//         postOpGas: postOpGas.toString(),
+//       },
+//     };
+//   } catch (error) {
+//     console.error("Error calculating gas price in USDC:", error);
+//     throw error;
+//   }
+// };
+
+export const calculateGasPriceInUSDC = async (smartAccountClient, params) => {
+  try {
+    const quotes = await pimlicoClient.getTokenQuotes({
+      chain: base,
+      tokens: [usdc],
+    });
+
+    const { postOpGas, exchangeRate, exchangeRateNativeToUsd, paymaster } =
+      quotes[0];
+
+    // Include an approve call so gas estimate is accurate
+    const paramsWithApprove = [...params];
+    paramsWithApprove.unshift({
+      abi: parseAbi(["function approve(address,uint)"]),
+      functionName: "approve",
+      args: [paymaster, parseUnits("1000", 6)],
+      to: usdc,
+    });
+
+    const userOperation = await smartAccountClient.prepareUserOperation({
+      calls: paramsWithApprove,
+    });
+
+    const userOperationMaxGas =
+      userOperation.preVerificationGas +
+      userOperation.callGasLimit +
+      userOperation.verificationGasLimit +
+      (userOperation.paymasterPostOpGasLimit || 0n) +
+      (userOperation.paymasterVerificationGasLimit || 0n);
+
+    const userOperationMaxCost =
+      userOperationMaxGas * userOperation.maxFeePerGas;
+
+    const maxCostInWei =
+      userOperationMaxCost + postOpGas * userOperation.maxFeePerGas;
+
+    const maxCostInToken = (maxCostInWei * exchangeRate) / BigInt(1e18);
+
+    const rawCostInUsd =
+      (maxCostInWei * exchangeRateNativeToUsd) / BigInt(1e18);
+
+    const formattedCostInUsd = Number(rawCostInUsd) / 1e6;
+
+    return {
+      raw: maxCostInToken,
+      formatted: formatUnits(maxCostInToken, 6),
+      usd: formattedCostInUsd.toString(),
+      exchangeRate: exchangeRate.toString(),
+      exchangeRateNativeToUsd: exchangeRateNativeToUsd.toString(),
+      gasBreakdown: {
+        totalGas: userOperationMaxGas.toString(),
+        maxFeePerGas: userOperation.maxFeePerGas.toString(),
+        postOpGas: postOpGas.toString(),
+      },
+    };
+  } catch (error) {
+    console.error("Error calculating gas price in USDC:", error);
+    throw error;
+  }
+};
+
+const getErrorType = (error) => {
+  const errorMessage = error.message.toLowerCase();
+
+  if (
+    errorMessage.includes("invalid address") ||
+    errorMessage.includes("address")
+  ) {
+    return "INVALID_ADDRESS";
+  }
+  if (
+    errorMessage.includes("insufficient funds") ||
+    errorMessage.includes("balance")
+  ) {
+    return "INSUFFICIENT_FUNDS";
+  }
+  if (
+    errorMessage.includes("user rejected") ||
+    errorMessage.includes("denied")
+  ) {
+    return "USER_REJECTED";
+  }
+  if (errorMessage.includes("network") || errorMessage.includes("connection")) {
+    return "NETWORK_ERROR";
+  }
+  if (errorMessage.includes("gas")) {
+    return "GAS_ERROR";
+  }
+
+  return "UNKNOWN_ERROR";
 };
 
 export const getRpcProvider = async () => {

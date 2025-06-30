@@ -13,7 +13,7 @@ const ContentPage = () => {
   const [step, setStep] = useState("all");
   return (
     <>
-      <section className="relative dashboard pt-12">
+      <section className="relative dashboard  ">
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -218,7 +218,7 @@ const closeIcn = (
   <svg
     stroke="currentColor"
     fill="currentColor"
-    stroke-width="0"
+    strokeWidth="0"
     viewBox="0 0 24 24"
     height="24"
     width="24"

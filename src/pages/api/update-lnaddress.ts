@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import client from "../../lib/mongodb"; // Import the MongoDB client
 import { updateLNAddress } from "../../lib/apiCall";
 
 export default async function handler(
@@ -17,7 +16,7 @@ export default async function handler(
       email: email,
       newAddress: username,
     });
-    console.log("repsonse", resposne);
+    // console.log("repsonse", resposne);
     if (resposne?.status === "success") {
       return res
         .status(200)

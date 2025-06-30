@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Web3Interaction from "@/utils/web3Interaction";
-import { toast } from "react-toastify";
 import {
   getProvider,
   getAccount,
@@ -8,16 +6,23 @@ import {
   usdc,
   sendTransaction,
   USDC_ABI,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
 import LoadingScreen from "@/components/LoadingScreen";
-import QRScannerModal from "./qRScannerModal.jsx";
+import QRScannerModal from "../SendUsdcPop/qRScannerModal";
 import { createUsdcToBtcShift } from "@/pages/api/sideShiftAI.ts";
 import styled from "styled-components";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { parseAbi, parseUnits } from "viem";
+import Image from "next/image.js";
+import {
+  isValidBitcoinAddress,
+  filterAmountInput,
+} from "../../../utils/helper.js";
+import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -39,61 +44,134 @@ const RefundBitcoin = ({
   const [providerr, setProviderr] = useState(null);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
+  const [addressError, setAddressError] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
+  const [swapType, setSwapType] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
-  // Handle amount input change
   const handleAmountChange = async (e) => {
+    setError("");
+    setToAmount("");
+    setGasPriceError("");
+    setSwapType("");
+    setGasPrice(null);
     const value = e.target.value;
-    // Only allow positive numbers with decimals
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
 
-      if (value && !isNaN(parseFloat(value))) {
-        const timer = setTimeout(async () => {
-          setIsLoading(true);
-          try {
-            const quotePromise = getQuote(value);
-            const shiftPromise = getDestinationAddress(value, toAddress);
-
-            const [quoteResult, shiftResult] = await Promise.all([
-              quotePromise,
-              shiftPromise,
-            ]);
-            const quoteSettleAmount = parseFloat(quoteResult?.estimate || 0);
-            const shiftSettleAmount = parseFloat(
-              shiftResult?.settleAmount || 0
-            );
-
-            let finalAddress = "";
-
-            if (
-              quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-              shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-            ) {
-              finalAddress = shiftResult?.depositAddress;
-              setToAmount(shiftResult?.settleAmount);
-            } else {
-              finalAddress = quoteResult?.estimatedDepositAddress;
-              setToAmount(quoteResult?.estimate);
-            }
-
-            if (finalAddress) {
-              setDestinationAddress(finalAddress);
-            }
-          } catch (err) {
-            console.error("Error fetching quote:", err);
-          } finally {
-            setIsLoading(false);
-          }
-        }, 2000); // 500ms debounce
-        setDebounceTimer(timer);
+    const filteredValue = filterAmountInput(value, 2);
+    setAmount(filteredValue);
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(balance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
       } else {
-        setToAmount("");
-        setQuote(null);
-        setDestinationAddress("");
+        setAmountError("");
       }
+    } else {
+      setAmountError("");
+    }
+
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const timer = setTimeout(async () => {
+        setIsLoading(true);
+        setError(""); // Clear previous errors
+        setSwapType(""); // Clear previous provider
+
+        try {
+          // First, always try getDestinationAddress
+          let shiftResult = null;
+          let shouldTrySwapkit = false;
+
+          try {
+            shiftResult = await getDestinationAddress(filteredValue, toAddress);
+
+            if (shiftResult) {
+              // Success with getDestinationAddress
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
+              setSwapType("Sideshift");
+            }
+          } catch (shiftError) {
+            // Check if it's the "Amount too high" error - check the message property
+            const isAmountTooHighError =
+              shiftError?.message?.includes("Amount too high") ||
+              shiftError?.toString()?.includes("Amount too high");
+
+            if (isAmountTooHighError) {
+              // Only try Swapkit for "Amount too high" error
+              shouldTrySwapkit = true;
+            } else {
+              // For other errors, show error and don't try Swapkit
+              setError(
+                shiftError?.message || "Failed to get quotes from Sideshift"
+              );
+              setSwapType("Sideshift");
+            }
+          }
+
+          // Try Swapkit if Sideshift failed
+          if (shouldTrySwapkit) {
+            let quoteAttempts = 0;
+            const maxQuoteAttempts = 3;
+            let swapkitSuccess = false;
+
+            while (quoteAttempts < maxQuoteAttempts && !swapkitSuccess) {
+              try {
+                quoteAttempts++;
+
+                const quoteResult = await getQuote(filteredValue);
+
+                if (quoteResult) {
+                  setDestinationAddress(quoteResult.estimatedDepositAddress);
+                  setToAmount(quoteResult.estimate);
+                  setSwapType("Swapkit");
+                  setError(""); // Clear any previous error since getQuote succeeded
+                  swapkitSuccess = true;
+                  break;
+                }
+              } catch (quoteError) {
+                console.log(
+                  `Swapkit attempt ${quoteAttempts} failed:`,
+                  quoteError
+                );
+
+                if (quoteAttempts >= maxQuoteAttempts) {
+                  // After 3 attempts, set the error
+                  setSwapType("Swapkit");
+                  setError(
+                    "Failed to get quotes from Swapkit after multiple attempts"
+                  );
+                }
+              }
+            }
+          }
+        } catch (err) {
+          setError("Failed to fetch quotes");
+        } finally {
+          setIsLoading(false);
+        }
+      }, 2000);
+
+      setDebounceTimer(timer);
+    } else {
+      setToAmount("");
+      setQuote(null);
+      setDestinationAddress("");
     }
   };
-
   const handleClose = () => setRefundBTC(false);
 
   const getQuote = async (amount) => {
@@ -111,14 +189,15 @@ const RefundBitcoin = ({
       });
 
       const data = await response.json();
+      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
         estimate: data?.routes[0].expectedBuyAmount,
       };
     } catch (error) {
-      console.error("Quote fetch error:", error);
-      return null;
+      // Remove internal retry logic - let the caller handle retries
+      throw error;
     }
   };
 
@@ -130,14 +209,13 @@ const RefundBitcoin = ({
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
-
+      setQuote(shift);
       return {
         depositAddress: shift.depositAddress,
-        settleAmount: parseFloat(shift.settleAmount || 0),
+        settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
-      return null;
+      throw error;
     }
   };
 
@@ -145,17 +223,17 @@ const RefundBitcoin = ({
     e.preventDefault();
 
     if (!isValidAddress) {
-      toast.error("Please enter a valid Bitcoin address");
+      setError("Please enter a valid Bitcoin address");
       return;
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
+      setError("Please enter a valid amount");
       return;
     }
 
     if (parseFloat(amount) > parseFloat(balance)) {
-      toast.error("Insufficient USDC balance");
+      setError("Insufficient USDC balance");
       return;
     }
 
@@ -165,20 +243,48 @@ const RefundBitcoin = ({
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
+        return;
+      }
+
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [destinationAddress, parseUnits(amount.toString(), 6)],
+          },
+        ]
+      );
+
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(amount) + Number.parseFloat(roundedGasPrice);
+
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${amount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -191,20 +297,21 @@ const RefundBitcoin = ({
         },
       ]);
 
-      if (tx) {
+      if (tx && !tx.error) {
         setHash(tx);
         setSuccess(true);
         setRefundBTC(false);
-        // toast.success(
-        //   "USDC sent successfully! BTC will be sent to your wallet shortly."
-        // );
-        // Wait for transaction to be mined and then fetch new balance
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -243,39 +350,34 @@ const RefundBitcoin = ({
       if (balance) {
         setBalance(balance);
       } else {
-        toast.error(result.error || "Failed to fetch balance");
+        setError("Failed to fetch USDC balance");
       }
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      setError("Failed to fetch USDC balance");
     }
   };
 
   const initiateSwap = async () => {
     if (!toAddress) {
-      toast.error("Please enter a Bitcoin address");
+      setError("Please enter a Bitcoin address.");
       return;
     }
 
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
+      setError("Please enter a valid amount.");
       return;
     }
 
     setIsLoading(true);
     try {
-      // const destinationInfo = await getDestinationAddress(amount, toAddress);
-
       if (destinationAddress && toAmount) {
-        // setDestinationAddress(destinationInfo.depositAddress);
-        // setToAmount(destinationInfo.settleAmount.toString());
         setTrxnApproval(true);
       } else {
-        toast.error("Failed to get destination address. Please try again.");
+        setError("Failed to get destination address. Please try again.");
       }
     } catch (error) {
-      console.error("Error in swap initiation:", error);
-      toast.error("Failed to initiate swap. Please try again.");
+      setError(error.message || "Failed to initiate swap. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -286,6 +388,7 @@ const RefundBitcoin = ({
       !toAddress ||
       !amount ||
       isLoading ||
+      gasPriceError ||
       parseFloat(amount) <= 0 ||
       parseFloat(amount) > parseFloat(balance) ||
       !destinationAddress
@@ -293,7 +396,16 @@ const RefundBitcoin = ({
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!toAddress || !amount) return "Enter an amount";
     if (parseFloat(amount) > parseFloat(balance))
       return "Insufficient USDC Balance";
@@ -301,8 +413,132 @@ const RefundBitcoin = ({
     return "Refund Bitcoin";
   };
 
+  const handleAddressChange = (e) => {
+    const value = e.target.value.trim();
+
+    // Smart filtering based on Bitcoin address patterns
+    let filteredValue = "";
+
+    if (value.toLowerCase().startsWith("bc1p")) {
+      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
+      filteredValue = value.replace(
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
+      filteredValue = value.replace(
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("1")) {
+      // Legacy addresses (P2PKH): starts with 1 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("3")) {
+      // Script addresses (P2SH): starts with 3 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else {
+      // For any other input, allow Base58 + bech32 characters to let validation handle it
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        ""
+      );
+    }
+
+    // Additional length constraints to prevent obviously invalid addresses
+    if (filteredValue.length > 62) {
+      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
+    }
+
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
+  const handleProccessAddressChange = (value) => {
+    // const value = e.target.value.trim();
+
+    // Smart filtering based on Bitcoin address patterns
+    let filteredValue = "";
+
+    if (value.toLowerCase().startsWith("bc1p")) {
+      // Taproot addresses (P2TR): bc1p + 58 chars (bech32 charset)
+      filteredValue = value.replace(
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      // Bech32 SegWit addresses (P2WPKH/P2WSH): bc1 + bech32 charset
+      filteredValue = value.replace(
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("1")) {
+      // Legacy addresses (P2PKH): starts with 1 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else if (value.startsWith("3")) {
+      // Script addresses (P2SH): starts with 3 + Base58
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        ""
+      );
+    } else {
+      // For any other input, allow Base58 + bech32 characters to let validation handle it
+      filteredValue = value.replace(
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        ""
+      );
+    }
+
+    // Additional length constraints to prevent obviously invalid addresses
+    if (filteredValue.length > 62) {
+      filteredValue = filteredValue.substring(0, 62); // Max Bitcoin address length
+    }
+
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionApprovalPop
@@ -325,28 +561,37 @@ const RefundBitcoin = ({
         )}
       {/* {isLoading && <LoadingScreen />} */}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <buttonbuy
-          onClick={handleClose}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
+        <div className="modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20 z-10">
+          {!openCam && (
+            <button
+              onClick={handleClose}
+              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+            >
+              {closeIcn}
+            </button>
+          )}
           <div className="relative rounded px-3">
-            <div className="top pb-3">
+            <div className="top py-3 mb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
                 Refund Bitcoin
+                {swapType && (
+                  <div className="text-[14px] pt-2 text-white/70">
+                    Powered by {swapType}
+                  </div>
+                )}
               </h5>
             </div>
+
             {openCam ? (
               <>
                 <QRScannerModal
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    setToAddress(data);
+                    handleProccessAddressChange(data);
+                    // setToAddress(data);
                     setOpenCam(!openCam);
                   }}
                 />
@@ -363,7 +608,7 @@ const RefundBitcoin = ({
                         placeholder="Bitcoin Address"
                         type="text"
                         value={toAddress}
-                        onChange={(e) => setToAddress(e.target.value)}
+                        onChange={handleAddressChange}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
                       {/* QR Scanner Button */}
@@ -380,11 +625,13 @@ const RefundBitcoin = ({
                         {scanIcn}
                       </button>
                     </div>
+                    {addressError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {addressError}
+                      </div>
+                    )}
                   </div>
                   <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} USDC
-                    </label>
                     <div className="iconWithText relative">
                       <div className="absolute icn left-2 flex items-center gap-2 text-xs">
                         {usdcIcn}
@@ -399,6 +646,24 @@ const RefundBitcoin = ({
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                       />
                     </div>
+
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
+
+                    {error && toAmount === "" && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
 
                   {toAmount && (
@@ -420,6 +685,20 @@ const RefundBitcoin = ({
                       </div>
                     </div>
                   )}
+
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="py-2 mt-4">
                     <button
@@ -446,7 +725,7 @@ const RefundBitcoin = ({
 export default RefundBitcoin;
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

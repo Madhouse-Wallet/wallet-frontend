@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SpherePayAPI from "../api/spherePayApi";
+import { filterAmountInput, isValidNumber } from "@/utils/helper";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const [tab, setTab] = useState(0);
@@ -90,17 +91,38 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const handleOnRampChange = (e) => {
     const { id, value } = e.target;
-    setOnRampForm((prev) => ({ ...prev, [id]: value }));
+
+    if (id === "amount") {
+      const filteredValue = filterAmountInput(value, 2, 20);
+      setOnRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+    } else {
+      setOnRampForm((prev) => ({ ...prev, [id]: value }));
+    }
+
     setError("");
     setSuccessMessage("");
   };
 
   const handleOffRampChange = (e) => {
     const { id, value } = e.target;
-    setOffRampForm((prev) => ({ ...prev, [id]: value }));
+
+    if (id === "amount") {
+      const filteredValue = filterAmountInput(value, 2, 20);
+      setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+    } else {
+      setOffRampForm((prev) => ({ ...prev, [id]: value }));
+    }
+
     setError("");
     setSuccessMessage("");
   };
+
+  // const handleOffRampChange = (e) => {
+  //   const { id, value } = e.target;
+  //   setOffRampForm((prev) => ({ ...prev, [id]: value }));
+  //   setError("");
+  //   setSuccessMessage("");
+  // };
 
   const validateOnRampForm = () => {
     if (!onRampForm.currency) return "Please select a currency";
@@ -386,11 +408,11 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     htmlFor="amount"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    Enter Amount
+                    Enter Amount in USD
                   </label>
                   <input
                     id="amount"
-                    type="number"
+                    type="text"
                     value={onRampForm.amount}
                     onChange={handleOnRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
@@ -535,7 +557,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   </label>
                   <input
                     id="amount"
-                    type="number"
+                    type="text"
                     value={offRampForm.amount}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"

@@ -5,17 +5,20 @@ import {
   USDC_ABI,
   publicClient,
   usdc,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev";
 import { parseUnits, parseAbi } from "viem";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { createUsdcToBtcShift } from "../api/sideShiftAI";
 import { fetchBitcoinBalance } from "../../pages/api/bitcoinBalance";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import Image from "next/image";
+import { filterAmountInput } from "@/utils/helper";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -31,6 +34,13 @@ const Swap = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
   const [destinationAddress, setDestinationAddress] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
+  const [swapType, setSwapType] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
@@ -50,8 +60,7 @@ const Swap = () => {
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
-      return null;
+      throw error;
     }
   };
 
@@ -77,8 +86,8 @@ const Swap = () => {
         estimate: data?.routes[0].expectedBuyAmount,
       };
     } catch (error) {
-      console.error("Quote fetch error:", error);
-      return null;
+      // Remove internal retry logic - let the caller handle retries
+      throw error;
     }
   };
 
@@ -112,14 +121,8 @@ const Swap = () => {
       const balance = String(
         Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
       );
-      setUsdcBalance(balance);
 
-      // Fetch BTC balance (assuming similar method exists or create one)
-      // const tbtcResult = await web3.getUSDCBalance(
-      //   TBTC_ADDRESS,
-      //   userAuth?.walletAddress,
-      //   providerr
-      // );
+      setUsdcBalance(balance);
 
       const result = await fetchBitcoinBalance(
         userAuth?.bitcoinWallet
@@ -130,54 +133,118 @@ const Swap = () => {
         setTbtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch token balances");
     }
   };
 
   const handleFromAmountChange = async (e) => {
+    setError("");
+    setToAmount("");
+    setSwapType("");
+    setGasPriceError("");
     const value = e.target.value;
-    setFromAmount(value);
 
-    if (value && !Number.isNaN(Number.parseFloat(value))) {
+    const filteredValue = filterAmountInput(value, 2);
+
+    setFromAmount(filteredValue);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
+
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
       const timer = setTimeout(async () => {
         setIsLoading(true);
+        setError(""); // Clear previous errors
+        setSwapType(""); // Clear previous provider
+
         try {
-          const quotePromise = getQuote(value);
-          const shiftPromise = getDestinationAddress(value);
+          // First, always try getDestinationAddress
+          let shiftResult = null;
+          let shouldTrySwapkit = false;
 
-          const [quoteResult, shiftResult] = await Promise.all([
-            quotePromise,
-            shiftPromise,
-          ]);
-          const quoteSettleAmount = Number.parseFloat(
-            quoteResult?.estimate || 0
-          );
-          const shiftSettleAmount = Number.parseFloat(
-            shiftResult?.settleAmount || 0
-          );
+          try {
+            shiftResult = await getDestinationAddress(filteredValue);
 
-          let finalAddress = "";
+            if (shiftResult) {
+              // Success with getDestinationAddress
+              setDestinationAddress(shiftResult.depositAddress);
+              setToAmount(shiftResult.settleAmount);
+              setSwapType("Sideshift");
+            }
+          } catch (shiftError) {
+            // Check if it's the "Amount too high" error - check the message property
+            const isAmountTooHighError =
+              shiftError?.message?.includes("Amount too high") ||
+              shiftError?.toString()?.includes("Amount too high");
 
-          if (
-            quoteSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE &&
-            shiftSettleAmount <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
-          ) {
-            finalAddress = shiftResult?.depositAddress;
-            setToAmount(shiftResult?.settleAmount);
-          } else {
-            finalAddress = quoteResult?.estimatedDepositAddress;
-            setToAmount(quoteResult?.estimate);
+            if (isAmountTooHighError) {
+              // Only try Swapkit for "Amount too high" error
+              shouldTrySwapkit = true;
+            } else {
+              // For other errors, show error and don't try Swapkit
+              setError(
+                shiftError?.message || "Failed to get quotes from Sideshift"
+              );
+              setSwapType("Sideshift");
+            }
           }
 
-          if (finalAddress) {
-            setDestinationAddress(finalAddress);
+          // Try Swapkit if Sideshift failed
+          if (shouldTrySwapkit) {
+            let quoteAttempts = 0;
+            const maxQuoteAttempts = 3;
+            let swapkitSuccess = false;
+
+            while (quoteAttempts < maxQuoteAttempts && !swapkitSuccess) {
+              try {
+                quoteAttempts++;
+
+                const quoteResult = await getQuote(filteredValue);
+
+                if (quoteResult) {
+                  setDestinationAddress(quoteResult.estimatedDepositAddress);
+                  setToAmount(quoteResult.estimate);
+                  setSwapType("Swapkit");
+                  setError(""); // Clear any previous error since getQuote succeeded
+                  swapkitSuccess = true;
+                  break;
+                }
+              } catch (quoteError) {
+                if (quoteAttempts >= maxQuoteAttempts) {
+                  // After 3 attempts, set the error
+                  setSwapType("Swapkit");
+                  setError(
+                    "Failed to get quotes from Swapkit after multiple attempts"
+                  );
+                }
+              }
+            }
           }
         } catch (err) {
-          toast.error("Failed to fetch quote or destination address");
+          setError("Failed to fetch quotes");
         } finally {
           setIsLoading(false);
         }
-      }, 2000); // 500ms debounce
+      }, 2000);
 
       setDebounceTimer(timer);
     } else {
@@ -192,12 +259,8 @@ const Swap = () => {
     e.preventDefault();
 
     if (!toAmount || Number.parseFloat(toAmount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
+      setError("Please enter a valid amount");
 
-    if (Number.parseFloat(toAmount) > Number.parseFloat(usdcBalance)) {
-      toast.error("Insufficient USDC balance");
       return;
     }
 
@@ -207,11 +270,11 @@ const Swap = () => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+    setGasPriceError("");
     setIsLoading(true);
     try {
       const getAccountCli = await getAccount(
@@ -219,7 +282,33 @@ const Swap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
+        return;
+      }
+
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [destinationAddress, parseUnits(fromAmount.toString(), 6)],
+          },
+        ]
+      );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if fromAmount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(fromAmount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(usdcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${fromAmount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -232,27 +321,39 @@ const Swap = () => {
         },
       ]);
 
-      if (tx) {
+      if (tx && !tx.error) {
         setHash(tx);
         setSuccess(true);
-        // setRefundBTC(false);
-        // toast.success("Transaction Successfully!");
         setTimeout(fetchBalances, 2000);
         setFromAmount("");
         setToAmount("");
         setQuote(null);
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance))
       return "Insufficient USDC Balance";
@@ -264,6 +365,7 @@ const Swap = () => {
     return (
       isLoading ||
       !fromAmount ||
+      gasPriceError ||
       !toAmount ||
       !quote ||
       Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
@@ -272,6 +374,16 @@ const Swap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -303,14 +415,19 @@ const Swap = () => {
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
                   <p className="m-0 font-medium">Swap</p>
+                  {swapType && (
+                    <div className="text-xs text-white/70">
+                      Powered by {swapType}
+                    </div>
+                  )}
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
@@ -326,17 +443,22 @@ const Swap = () => {
                         </h6> */}
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
                           <span className="icn">
                             {swapDirection.from === "USDC" ? usdcIcn : BTC}
                           </span>{" "}
-                          {swapDirection.from}
+                          <span className="text-[12px]">
+                            {swapDirection.from}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance:{" "}
-                          {swapDirection.from === "USDC"
+                          {/* {swapDirection.from === "USDC"
                             ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(2)}{" "}
+                            : Number.parseFloat(tbtcBalance).toFixed(2)} */}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -351,11 +473,11 @@ const Swap = () => {
                     </button>
                   </div>
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true} // This input is always disabled
@@ -371,25 +493,48 @@ const Swap = () => {
                         </h6> */}
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 inline-flex items-center justify-end gap-2 text-base">
                           <span className="icn">
                             {swapDirection.to === "USDC" ? usdcIcn : BTC}
                           </span>{" "}
-                          {swapDirection.to}
+                          <span className="text-[12px]">
+                            {swapDirection.to}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance:{" "}
-                          {swapDirection.to === "USDC"
-                            ? Number.parseFloat(usdcBalance).toFixed(2)
-                            : Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                          Balance: {Number.parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
                     </div>
+
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+
+                    {error && toAmount === "" && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      {gasPrice && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Estimated Max Gas Fee: {gasPrice} USDC
+                        </label>
+                      )}
+
+                      {gasPriceError && (
+                        <div className="text-red-500 text-xs">
+                          {gasPriceError}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="mt-3 py-2">
                     <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={() => setTrxnApproval(true)}

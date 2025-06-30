@@ -1,37 +1,98 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import {
   getAccount,
   sendTransaction,
   USDC_ABI,
   publicClient,
   usdc,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import { parseUnits, parseAbi } from "viem";
 import { useSelector } from "react-redux";
 import { createPortal } from "react-dom";
 import TransactionApprovalPop from "@/components/Modals/TransactionApprovalPop";
-import LoadingScreen from "@/components/LoadingScreen";
 import QRScannerModal from "./qRScannerModal.jsx";
 import { retrieveSecret } from "../../../utils/webauthPrf";
+import Image from "next/image.js";
+import {
+  isValidAddress,
+  filterAmountInput,
+  filterHexInput,
+} from "../../../utils/helper.js";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [toAddress, setToAddress] = useState("");
+  const [failed, setFailed] = useState(false);
   const [trxnApproval, settrxnApproval] = useState();
   const [amount, setAmount] = useState("");
   const [openCam, setOpenCam] = useState(false);
-  const [isValidAddress, setIsValidAddress] = useState(true);
+  // const [isValidAddress, setIsValidAddress] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState("0");
-  const [providerr, setProviderr] = useState(null);
+  const [addressError, setAddressError] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [error, setError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
+
+    // Filter input with 2 decimal places
+    const filteredValue = filterAmountInput(value, 2, 21);
+
+    setAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
     }
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(balance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      toAddress.trim() !== "" &&
+      !addressError &&
+      isValidAddress(toAddress) &&
+      amount.trim() !== "" &&
+      !amountError &&
+      !gasPriceError &&
+      Number.parseFloat(amount) > 0 &&
+      Number.parseFloat(amount) <= Number.parseFloat(balance)
+      // &&
+      // Number.parseFloat(balance) >= 0.05
+    );
+  };
+
+  // Update the button click handler
+  const handleProceedToApproval = () => {
+    if (!isFormValid()) {
+      return; // Button should be disabled anyway
+    }
+    settrxnApproval(!trxnApproval);
   };
 
   const handleClose = () => setSendUsdc(false);
@@ -39,46 +100,54 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!isValidAddress) {
-      toast.error("Please enter a valid address");
-      return;
-    }
-
-    if (!amount || Number.parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-
-    if (
-      Number.parseFloat(amount) > Number.parseFloat(balance) ||
-      Number.parseFloat(balance) < Number("0.05") //If wallet has less than $0.05
-    ) {
-      toast.error("Insufficient USDC balance");
-      return;
-    }
     const data = JSON.parse(userAuth?.webauthKey);
     const retrieveSecretCheck = await retrieveSecret(
       data?.storageKeySecret,
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       const getAccountCli = await getAccount(
         secretData?.privateKey,
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+        ]
+      );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(amount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${amount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
+        return;
+      }
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -87,17 +156,22 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           args: [toAddress, parseUnits(amount.toString(), 6)],
         },
       ]);
-
-      if (tx) {
+      if (tx && !tx.error) {
+        // tx is a transaction hash (success)
         setSuccess(true);
         setSendUsdc(false);
-        toast.success("USDC sent successfully!");
         setTimeout(fetchBalance, 2000);
       } else {
-        toast.error(tx || "Transaction failed");
+        // tx is an error object (failure)
+        setFailed(true);
+        setTxError(tx.error || tx);
       }
     } catch (error) {
-      toast.error(tx || "Transaction failed");
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -125,12 +199,65 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
       setBalance(balance);
     } catch (error) {
       console.error("Error fetching balance:", error);
-      toast.error("Failed to fetch USDC balance");
+      setError("Failed to fetch USDC balance");
+    }
+  };
+
+  const processAddress = (value) => {
+    // Filter out invalid characters
+    // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    const filteredValue = filterHexInput(value, /[^0-9a-fA-Fx]/g, 42);
+
+    // Update the address value with filtered input
+    setToAddress(filteredValue);
+
+    // Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidAddress(filteredValue)) {
+        setAddressError("Invalid address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+
+    return filteredValue;
+  };
+
+  const handleAddressChange = (e) => {
+    const value = e.target.value;
+
+    // const filteredValue = value.replace(/[^0-9a-fA-Fx]/g, "");
+    // Filter out invalid characters instead of blocking the entire input
+    const filteredValue = filterHexInput(value, /[^0-9a-fA-Fx]/g, 42);
+
+    // Update the address value with filtered input
+    setToAddress(filteredValue);
+
+    // Second check: Validate address format (only if not empty)
+    if (filteredValue.trim() !== "") {
+      if (!isValidAddress(filteredValue)) {
+        setAddressError("Invalid address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
     }
   };
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
       {trxnApproval &&
         createPortal(
           <TransactionApprovalPop
@@ -143,17 +270,19 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           />,
           document.body
         )}
-      {isLoading && <LoadingScreen />}
+      {/* {isLoading && <LoadingScreen />} */}
       <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
-        <buttonbuy
-          onClick={handleClose}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10">
+        <div className="modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20 z-10">
+          {!openCam && (
+            <button
+              onClick={handleClose}
+              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+            >
+              {closeIcn}
+            </button>
+          )}
           <div className="relative rounded px-3">
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
@@ -166,7 +295,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                   setOpenCam={setOpenCam}
                   openCam={openCam}
                   onScan={(data) => {
-                    setToAddress(data);
+                    processAddress(data);
+                    // setToAddress(data);
                     setOpenCam(!openCam);
                   }}
                 />
@@ -183,7 +313,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         placeholder="Address"
                         type="text"
                         value={toAddress}
-                        onChange={(e) => setToAddress(e.target.value)}
+                        onChange={handleAddressChange}
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
                       />
                       <button
@@ -199,11 +329,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         {scanIcn}
                       </button>
                     </div>
+
+                    {addressError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {addressError}
+                      </div>
+                    )}
                   </div>
                   <div className="py-2">
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance: {balance} USDC
-                    </label>
                     <div className="iconWithText relative">
                       <div className="absolute icn left-2 flex items-center gap-2 text-xs">
                         {usdcIcn}
@@ -214,18 +347,64 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         type="text"
                         value={amount}
                         onChange={handleAmountChange}
-                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
+                        className={`border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20 ${
+                          amountError ? "border-red-500" : ""
+                        }`}
                       />
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Balance:{" "}
+                        {Number(balance) < 0.01
+                          ? "0"
+                          : Number.parseFloat(balance).toFixed(2)}{" "}
+                        USDC
+                      </label>
+
+                      {gasPrice && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Estimated Max Gas Fee: {gasPrice} USDC
+                        </label>
+                      )}
+
+                      {gasPriceError && (
+                        <div className="text-red-500 text-xs">
+                          {gasPriceError}
+                        </div>
+                      )}
+                    </div>
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
                   <div className="py-2 mt-4">
                     <button
                       type="button"
-                      onClick={() => settrxnApproval(!trxnApproval)}
-                      disabled={!isValidAddress || !amount || isLoading}
-                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50"
+                      onClick={handleProceedToApproval}
+                      disabled={!isFormValid() || isLoading}
+                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? "Sending..." : "Send"}
+                      {isLoading ? (
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"
+                          }
+                          alt={""}
+                          height={100000}
+                          width={10000}
+                          className={
+                            "max-w-full h-[40px] object-contain w-auto"
+                          }
+                        />
+                      ) : (
+                        "Send"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -239,7 +418,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

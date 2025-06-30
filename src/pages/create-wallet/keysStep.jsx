@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useTheme } from "@/ContextApi/ThemeContext";
+import Image from "next/image";
 
-const KeyStep = ({ step, setStep, registerFn }) => {
+const KeyStep = ({ step, setStep, registerFn, error }) => {
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const router = useRouter();
   const keyFunc = async () => {
@@ -67,9 +68,24 @@ const KeyStep = ({ step, setStep, registerFn }) => {
                     onClick={keyFunc}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {registerOtpLoading ? "Loading" : "Next"}
+                    {registerOtpLoading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Next"
+                    )}
                   </button>
                 </div>
+              </div>
+              <div className="col-span-12">
+                {error && (
+                  <div className="text-red-500 text-xs mt-1">{error}</div>
+                )}
               </div>
             </div>
           </form>
@@ -92,8 +108,8 @@ const check = (
     <path
       d="M9.33917 12.7758C11.6023 14.2065 13.2933 16.7632 13.2933 16.7632H13.3272C13.3272 16.7632 16.9195 10.4063 23.5935 6.49683"
       stroke="#34C759"
-      stroke-width="1.5"
-      stroke-linecap="square"
+      strokeWidth="1.5"
+      strokeLinecap="square"
     />
     <path
       opacity="0.4"
@@ -101,8 +117,8 @@ const check = (
       clip-rule="evenodd"
       d="M12.9688 23.6001C18.5031 23.6001 22.9896 19.1136 22.9896 13.5792C22.9896 8.04485 18.5031 3.55838 12.9688 3.55838C7.43442 3.55838 2.94794 8.04485 2.94794 13.5792C2.94794 19.1136 7.43442 23.6001 12.9688 23.6001Z"
       stroke="#34C759"
-      stroke-width="1.5"
-      stroke-linecap="round"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
   </svg>
 );

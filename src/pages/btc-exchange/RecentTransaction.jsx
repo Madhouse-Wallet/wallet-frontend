@@ -4,14 +4,13 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import { fetchTokenTransfers, fetchWalletHistory } from "../../lib/utils";
 import TransactionDetail from "@/components/Modals/TransactionDetailPop";
-import InternalTab from "./InternalTab";
 import moment from "moment";
 import BitcoinTransactionsTab from "./BitcoinTransaction";
 import LnbitsTransaction from "./LnbitsTransaction";
-import { toast } from "react-toastify";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
+import styled from "styled-components";
 
 const RecentTransaction = ({ setSetFilterType }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -33,6 +32,21 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [spendWallet, setSpendWallet] = useState("");
   const [applyTrue, setApplyTrue] = useState(false);
   const [sideshiftTxs, setSideshiftTxs] = useState([]);
+  const [selectedItem, setSelectedItem] = useState("10");
+  const [error, setError] = useState("");
+  const [withdrawBoltz, setWithdrawBoltz] = useState([]);
+  const [depositBoltz, setDepositBoltz] = useState([]);
+  const [boltzUSDC, setBoltzUSDC] = useState([]);
+  const [boltzBitcoin, setBoltzBitcoin] = useState([]);
+
+  const selectOptions = [
+    { value: "", label: "Select an option" },
+    { value: "10", label: "10" },
+    { value: "20", label: "20" },
+    { value: "30", label: "30" },
+    { value: "40", label: "40" },
+    { value: "50", label: "50" },
+  ];
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [dateRange, setDateRange] = useState([
@@ -73,7 +87,11 @@ const RecentTransaction = ({ setSetFilterType }) => {
     if (!txs?.length) return [];
 
     return txs.map((tx) => {
-      const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+      const decimals =
+        tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+
+      const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
@@ -85,9 +103,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         id: tx.transaction_hash || "",
         rawData: tx,
         status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${tx.value_decimal || "0"} ${tx.token_symbol || "USDC"} ${
-          isSend ? "Transfer" : "Receive"
-        }`,
+        summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend === true ? "send" : "receive",
@@ -293,7 +309,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       }
       setIsDatePickerOpen(false);
     } else {
-      toast.error("Please select both start and end dates");
+      setError("Please select both start and end dates.");
     }
   };
 
@@ -314,7 +330,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       component: (
         <>
           {transactions.length > 0 ? (
-            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
                 return (
                   <div key={date} className="py-3">
@@ -402,6 +418,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
           setTransactions={setBtcTransactions}
           dateRange={isDateFilterActive() ? dateRange[0] : null}
           applyTrue={applyTrue}
+          selectedItem={selectedItem}
         />
       ),
     },
@@ -532,7 +549,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       ),
     },
     {
-      title: "MORPHO",
+      title: "Spark USDC",
       component: (
         <>
           {morphotransactions.length > 0 ? (
@@ -550,7 +567,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                           const amount = parseFloat(
                             tx.amount?.split(" ")[0] || 0
                           );
-                          return amount >= 0.001;
+                          return amount >= 0.01;
                         })
                         .map((tx, key) => (
                           <div key={key} className="md:col-span-6 col-span-12">
@@ -588,7 +605,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                     ? "Insufficient Balance"
                                     : `${tx.type === "send" ? "-" : "+"} ${parseFloat(
                                         tx.amount
-                                      ).toFixed(4)}`}
+                                      ).toFixed(2)}`}
                                 </p>
                                 <p className="m-0 text-xs font-medium py-1">
                                   {tx.day}
@@ -626,6 +643,28 @@ const RecentTransaction = ({ setSetFilterType }) => {
           dateRange={isDateFilterActive() ? dateRange[0] : null}
           applyTrue={applyTrue}
         />
+      ),
+    },
+    {
+      title: "Boltz Lightning Withdraw",
+      component: (
+        <LnbitsTransaction usd={3} setTransactions={setWithdrawBoltz} />
+      ),
+    },
+    {
+      title: "Boltz Lightning Deposit",
+      component: (
+        <LnbitsTransaction usd={4} setTransactions={setDepositBoltz} />
+      ),
+    },
+    {
+      title: "Boltz Lightning TPOS USDC",
+      component: <LnbitsTransaction usd={5} setTransactions={setBoltzUSDC} />,
+    },
+    {
+      title: "Boltz Lightning TPOS Bitcoin",
+      component: (
+        <LnbitsTransaction usd={6} setTransactions={setBoltzBitcoin} />
       ),
     },
   ];
@@ -672,43 +711,104 @@ const RecentTransaction = ({ setSetFilterType }) => {
               Apply Filter
             </button>
           </div>
+          {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
         </div>
       )}
 
       {userAuth?.walletAddress ? (
         <>
-          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
+          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99] flex-wrap">
             <h4 className="m-0 text-xl">Recent Transaction</h4>
 
             <div className="flex gap-2 items-center">
               <div className="relative">
-                <button
-                  onClick={() => {
-                    setIsDatePickerOpen(!isDatePickerOpen);
-                    setApplyTrue(false);
-                  }}
-                  className={`px-4 py-2 ${
-                    isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
-                  } text-white rounded-md flex items-center gap-2`}
-                >
-                  <span>{DateFilter}</span>
-                  {isDateFilterActive() && (
-                    <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
-                      ✓
-                    </span>
-                  )}
-                </button>
-                {isDateFilterActive() && !isDatePickerOpen && (
-                  <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
-                    {formatDateForApi(dateRange[0].startDate)} to{" "}
-                    {formatDateForApi(dateRange[0].endDate)}
-                    <button
-                      onClick={clearDateFilter}
-                      className="ml-2 text-xs text-red-300 hover:text-red-100"
+                {activeTab === 1 ? (
+                  // Select dropdown for when activeTab is 1
+                  <div className="relative">
+                    <select
+                      value={selectedItem}
+                      onChange={(e) => setSelectedItem(e.target.value)}
+                      className="px-4 py-2 bg-black/50 text-white rounded-md border border-gray-600 focus:border-blue-500 focus:outline-none min-w-[200px] appearance-none cursor-pointer"
                     >
-                      ✕
-                    </button>
+                      {selectOptions.map((option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                          className="bg-gray-800 text-white"
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Custom dropdown arrow */}
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Show selected value indicator */}
+                    {/* {selectedItem && (
+                      <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
+                        Selected:{" "}
+                        {
+                          selectOptions.find(
+                            (opt) => opt.value === selectedItem
+                          )?.label
+                        }
+                        <button
+                          onClick={() => setSelectedItem("")}
+                          className="ml-2 text-xs text-red-300 hover:text-red-100"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )} */}
                   </div>
+                ) : (
+                  // Your existing date filter button for other tabs
+                  <>
+                    <button
+                      onClick={() => {
+                        setIsDatePickerOpen(!isDatePickerOpen);
+                        setApplyTrue(false);
+                      }}
+                      className={`px-4 py-2 ${
+                        isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                      } text-white rounded-md flex items-center gap-2`}
+                    >
+                      <span>{DateFilter}</span>
+                      {isDateFilterActive() && (
+                        <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
+                          ✓
+                        </span>
+                      )}
+                    </button>
+
+                    {isDateFilterActive() && !isDatePickerOpen && (
+                      <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
+                        {formatDateForApi(dateRange[0].startDate)} to{" "}
+                        {formatDateForApi(dateRange[0].endDate)}
+                        <button
+                          onClick={clearDateFilter}
+                          className="ml-2 text-xs text-red-300 hover:text-red-100"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               <button
@@ -722,7 +822,12 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 4) dataToExport = lnbitsBtcTxs;
                   else if (activeTab === 5) dataToExport = spendTxs;
                   else if (activeTab === 6) dataToExport = morphotransactions;
-                  else if (activeTab === 7) dataToExport = sideshiftTxs; // Add this line
+                  else if (activeTab === 7)
+                    dataToExport = sideshiftTxs; // Add this
+                  else if (activeTab === 8) dataToExport = withdrawBoltz;
+                  else if (activeTab === 9) dataToExport = depositBoltz;
+                  else if (activeTab === 10) dataToExport = boltzUSDC;
+                  else if (activeTab === 11) dataToExport = boltzBitcoin;
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
@@ -730,17 +835,17 @@ const RecentTransaction = ({ setSetFilterType }) => {
                       tabs[activeTab].title + ".csv"
                     );
                   } else {
-                    toast.error("No data available to export.");
+                    setError("No data available to export.");
                   }
                 }}
-                className="px-4 py-2 bg-black/50 text-white rounded-md"
+                className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
               >
                 Export CSV
               </button>
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="px-4 py-2 bg-black/50 text-white rounded-md"
+                  className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
                 >
                   Filters
                 </button>
@@ -775,7 +880,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </div>
           </div>
           <div className="py-2">
-            <div className="">{tabs[activeTab].component}</div>
+            <TabContent className="overflow-scroll max-h-[calc(100vh-240px)] scrollbar-none">
+              {tabs[activeTab].component}
+            </TabContent>
           </div>
         </>
       ) : (
@@ -795,6 +902,12 @@ const RecentTransaction = ({ setSetFilterType }) => {
     </>
   );
 };
+
+const TabContent = styled.div`
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 export default RecentTransaction;
 

@@ -48,7 +48,7 @@ const POSLogin = () => {
         toast.error("User Not Found!");
         return false;
       } else {
-        toast.success("Pos Login Successfully!");
+        // toast.success("Pos Login Successfully!");
         dispatch(
           loginSet({
             login: true,

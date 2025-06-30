@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
+import { isValidName, isValidNumber } from "@/utils/helper";
 
 const AddBankDetail = ({ step, setStep, customerId }) => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,11 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
   const [tab, setTab] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: "", message: "" });
+
+  const accounttype = [
+    { value: "checking", label: "Checking" },
+    { value: "savings", label: "Saving" },
+  ];
 
   useEffect(() => {
     if (tab === 1) {
@@ -83,8 +89,36 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
   };
 
   // Handle input changes
+  // const handleChange = (e) => {
+  //   const { id, value } = e.target;
+  //   setFormData({ ...formData, [id]: value });
+
+  //   // Clear error when field is updated
+  //   if (errors[id]) {
+  //     setErrors({ ...errors, [id]: "" });
+  //   }
+  // };
+
   const handleChange = (e) => {
     const { id, value } = e.target;
+    console.log("line-104", id, value);
+
+    // Apply different rules based on the field
+    if (
+      (id === "accountName" || id === "bankName") &&
+      !isValidName(value, 30)
+    ) {
+      return; // invalid id, do not update
+    }
+
+    if (
+      (id === "accountNumber" && !isValidNumber(value, 15)) ||
+      (id === "routingNumber" && !isValidNumber(value, 15))
+    ) {
+      return; // invalid number, do not update
+    }
+
+    // Valid input, update state
     setFormData({ ...formData, [id]: value });
 
     // Clear error when field is updated
@@ -275,7 +309,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   >
                     Account Type
                   </label>
-                  <input
+                  {/* <input
                     id="accountType"
                     type="text"
                     value={formData.accountType}
@@ -284,7 +318,26 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                       errors.accountType ? "border-red-500" : ""
                     }`}
                     placeholder="Enter account type"
-                  />
+                  /> */}
+                  <select
+                    id="accountType"
+                    value={formData.accountType}
+                    onChange={handleChange}
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    <option value="" disabled>
+                      Select Account Type
+                    </option>
+                    {accounttype.map((option) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                   {errors.accountType && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
                       {errors.accountType}

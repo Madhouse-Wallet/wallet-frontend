@@ -6,10 +6,10 @@ import {
   publicClient,
   sendTransaction,
   USDC_ABI,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi, parseUnits } from "viem";
@@ -17,7 +17,9 @@ import { createUsdcBaseToGoldShift } from "../api/sideShiftAI";
 import { updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
+import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const DepositSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -31,7 +33,13 @@ const DepositSwap = () => {
   const [hash, setHash] = useState("");
   const [success, setSuccess] = useState(false);
   const [depositAddress, setDepositAddress] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   // Fixed direction: USDC on Base to PAXG on Ethereum
   const [bridgeDirection] = useState({
@@ -80,7 +88,7 @@ const DepositSwap = () => {
       if (balance) {
         setUsdcBalance(balance);
       } else {
-        toast.error("Failed to fetch USDC balance");
+        setError("Failed to fetch USDC balance");
       }
 
       // Fetch PAXG balance on Ethereum
@@ -94,8 +102,7 @@ const DepositSwap = () => {
         setTetherGoldBalance(Number.parseFloat(paxgResult.balance).toFixed(6));
       }
     } catch (error) {
-      console.log("error", error);
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch Tether Gold balance");
     }
   };
 
@@ -115,8 +122,7 @@ const DepositSwap = () => {
       setDepositAddress(shift.depositAddress);
       setToAmount(shift.settleAmount.toString());
     } catch (error) {
-      console.error("Shift quote error:", error);
-      toast.error(error ? error.message : "Failed to get shift quote");
+      setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setShiftData(null);
       setDepositAddress("");
@@ -125,32 +131,57 @@ const DepositSwap = () => {
     }
   };
 
-  const handleFromAmountChange = useCallback(
-    (e) => {
-      const value = e.target.value;
-      setFromAmount(value);
+  const handleFromAmountChange = (e) => {
+    setError("");
+    const value = e.target.value;
+    // setFromAmount(value);
 
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+    const filteredValue = filterAmountInput(value, 2);
+
+    setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
+      ) {
+        setAmountError("Insufficient USDC balance");
+      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+        setAmountError("Minimum balance of $0.01 required");
+      } else {
+        setAmountError("");
       }
+    } else {
+      setAmountError("");
+    }
 
-      setToAmount("");
-      setShiftData(null);
-      setDepositAddress("");
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
-      if (value && !Number.isNaN(Number.parseFloat(value))) {
-        const newTimer = setTimeout(() => {
-          updateShiftQuote(value);
-        }, 2000);
-        setDebounceTimer(newTimer);
-      }
-    },
-    [debounceTimer]
-  );
+    setToAmount("");
+    setShiftData(null);
+    setDepositAddress("");
+
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const newTimer = setTimeout(() => {
+        updateShiftQuote(filteredValue);
+      }, 2000);
+      setDebounceTimer(newTimer);
+    }
+  };
 
   const executeDeposit = async () => {
     if (!shiftData || !depositAddress || !userAuth?.walletAddress) {
-      toast.error("Shift data not available or wallet not connected");
+      setError("Shift data not available or wallet not connected");
       return;
     }
 
@@ -160,12 +191,12 @@ const DepositSwap = () => {
       data?.credentialIdSecret
     );
     if (!retrieveSecretCheck?.status) {
-      toast.error(retrieveSecretCheck?.msg);
       return;
     }
 
     const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
     setIsLoading(true);
+    setGasPriceError("");
 
     try {
       const getAccountCli = await getAccount(
@@ -173,12 +204,34 @@ const DepositSwap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
-      // Send USDC to the deposit address
-
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
+          },
+        ]
+      );
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(fromAmount) + Number.parseFloat(roundedGasPrice);
+      if (totalRequired > Number.parseFloat(usdcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${fromAmount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
+        return;
+      }
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -187,12 +240,10 @@ const DepositSwap = () => {
           args: [depositAddress, parseUnits(fromAmount.toString(), 6)],
         },
       ]);
-      if (tx?.message?.includes("transfer amount exceeds balance")) {
-        toast.error("Insufficient token balance.");
-      } else if (tx) {
+
+      if (tx && !tx.error) {
         setSuccess(true);
         setHash(tx);
-        // toast.success("Deposit completed successfully!");
         fetchBalances();
         setFromAmount("");
         setToAmount("");
@@ -211,26 +262,31 @@ const DepositSwap = () => {
           }
         );
       } else {
-        toast.error(tx || "Transaction failed");
+        setFailed(true);
+        setTxError(tx.error.message || tx);
       }
     } catch (error) {
-      console.error("Deposit execution error:", error);
-      if (error.message?.includes("user rejected")) {
-        toast.error("Transaction was rejected by user");
-      } else if (error.message?.includes("insufficient funds")) {
-        toast.error("Insufficient funds for transaction");
-      } else {
-        toast.error(
-          `Failed to execute deposit: ${error.message || "Unknown error"}`
-        );
-      }
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance))
       return "Insufficient USDC Balance";
@@ -241,6 +297,7 @@ const DepositSwap = () => {
   const isButtonDisabled = () => {
     return (
       isLoading ||
+      gasPriceError ||
       !fromAmount ||
       !toAmount ||
       !shiftData ||
@@ -251,6 +308,16 @@ const DepositSwap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -275,133 +342,148 @@ const DepositSwap = () => {
           />,
           document.body
         )}
-      <section className="py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
-              <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
-                <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Deposit</p>
-                </div>
-                <div className="contentBody">
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
-                          value={fromAmount}
-                          onChange={handleFromAmountChange}
-                          placeholder="0.0"
-                        />
-                        <h6 className="m-0 font-medium text-white/50">
-                          Base Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
-                          <span className="icn">
-                            {bridgeDirection.from === "USDC" ? (
-                              usdcIcn
-                            ) : (
-                              <Image
-                                src={
-                                  process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"
-                                }
-                                alt="logo"
-                                height={22}
-                                width={22}
-                                className="max-w-full object-contain w-auto smlogo"
-                              />
-                            )}
-                          </span>{" "}
-                          {bridgeDirection.from}
-                        </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
-                          {bridgeDirection.from}
-                        </h6>
-                      </div>
-                    </div>
+      <div className="grid gap-3 grid-cols-12">
+        <div className="col-span-12">
+          <div className="bg-black/50 rounded-xl p-3">
+            <div className="top flex items-center justify-between">
+              <p className="m-0 font-medium">Deposit</p>
+            </div>
+            <div className="contentBody">
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={fromAmount}
+                      onChange={handleFromAmountChange}
+                      placeholder="0.0"
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Base Network
+                    </h6>
                   </div>
-                  <div className="py-2 my-[-30px] text-center">
-                    <button
-                      className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  <div className="right text-right">
+                    <button className="px-2 py-1 inline-flex items-center gap-2 text-base">
+                      <span className="icn">
+                        {bridgeDirection.from === "USDC" ? (
+                          usdcIcn
+                        ) : (
+                          <Image
+                            src={process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"}
+                            alt="logo"
+                            height={22}
+                            width={22}
+                            className="max-w-full object-contain w-auto smlogo"
+                          />
+                        )}
+                      </span>{" "}
+                      <span className="text-[12px]">
+                        {bridgeDirection.from}
+                      </span>
+                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance:{" "}
+                      {Number(usdcBalance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
+                      {bridgeDirection.from}
+                    </h6>
+                  </div>
+                </div>
+              </div>
+              <div className="py-2 my-[-30px] text-center">
+                <button
+                  className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  disabled={true}
+                >
+                  {swapIcn}
+                </button>
+              </div>
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={toAmount}
+                      placeholder="0.0"
                       disabled={true}
-                    >
-                      {swapIcn}
-                    </button>
+                      readOnly
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Ethereum Network
+                    </h6>
                   </div>
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
-                          value={toAmount}
-                          placeholder="0.0"
-                          disabled={true}
-                          readOnly
+                  <div className="right text-right">
+                    <button className="px-2 py-1 inline-flex items-center gap-2 text-base whitespace-nowrap">
+                      <span className="icn">
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "tethergold.png"
+                          }
+                          alt="logo"
+                          height={22}
+                          width={22}
+                          className="max-w-full object-contain w-auto smlogo"
                         />
-                        <h6 className="m-0 font-medium text-white/50">
-                          Ethereum Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
-                          <span className="icn">
-                            <Image
-                              src={
-                                process.env.NEXT_PUBLIC_IMAGE_URL +
-                                "tethergold.png"
-                              }
-                              alt="logo"
-                              height={22}
-                              width={22}
-                              className="max-w-full object-contain w-auto smlogo"
-                            />
-                          </span>{" "}
-                          {bridgeDirection.to}
-                        </button>
-                        <h6 className="m-0 font-medium text-white/50 whitespace-nowrap">
-                          Balance: {parseFloat(tethergolgBalance).toFixed(6)}{" "}
-                          {/* {bridgeDirection.to} */}
-                          XAUT
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Deposit address display */}
-                  {depositAddress && (
-                    <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      <p className="m-0 text-amber-500">
-                        Deposit Address: {depositAddress.slice(0, 10)}...
-                        {depositAddress.slice(-8)}
-                      </p>
-                      <p className="m-0 text-green-500">
-                        You will receive: {toAmount} PAXG
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="mt-3 py-2">
-                    <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
-                      onClick={() => setTrxnApproval(true)}
-                      disabled={isButtonDisabled()}
-                    >
-                      {getButtonText()}
+                      </span>{" "}
+                      <span className="text-[12px]">{bridgeDirection.to}</span>
                     </button>
+                    <h6 className="m-0 font-medium sm:text-xs text-[9px]  text-white/50 whitespace-nowrap">
+                      Balance: {parseFloat(tethergolgBalance).toFixed(6)}{" "}
+                      {/* {bridgeDirection.to} */}
+                      XAUT
+                    </h6>
                   </div>
                 </div>
+              </div>
+
+              {/* Deposit address display */}
+              {depositAddress && (
+                <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                  <p className="m-0 text-amber-500">
+                    Deposit Address: {depositAddress.slice(0, 10)}...
+                    {depositAddress.slice(-8)}
+                  </p>
+                  <p className="m-0 text-green-500">
+                    You will receive: {toAmount} PAXG
+                  </p>
+                </div>
+              )}
+              {amountError && (
+                <div className="text-red-500 text-xs mt-1">{amountError}</div>
+              )}
+
+              {error && (
+                <div className="text-red-500 text-xs mt-1">{error}</div>
+              )}
+              <div className="ps-3 flex flex-col gap-1 mt-2">
+                {gasPrice && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPrice} USDC
+                  </label>
+                )}
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+              </div>
+              <div className="mt-3 py-2">
+                <button
+                  className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
+                    isButtonDisabled() ? "opacity-70" : ""
+                  }`}
+                  onClick={() => setTrxnApproval(true)}
+                  disabled={isButtonDisabled()}
+                >
+                  {getButtonText()}
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </>
   );
 };

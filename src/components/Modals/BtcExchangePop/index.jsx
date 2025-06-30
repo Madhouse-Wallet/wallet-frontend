@@ -31,7 +31,14 @@ const BtcExchangePop = ({
     if (userAuth?.bitcoinWallet) {
       const generateQRCode = async () => {
         try {
-          const qr = await QRCode.toDataURL(userAuth.bitcoinWallet);
+          const qr = await QRCode.toDataURL(userAuth.bitcoinWallet, {
+            margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
+          });
           setQRCodee(qr);
         } catch (err) {
           console.error("QR Code generation failed:", err);
@@ -84,10 +91,11 @@ const BtcExchangePop = ({
                 <Image
                   alt=""
                   src={qrCodee}
-                  height={10000}
-                  width={10000}
-                  className="max-w-full mx-auto h-auto w-auto"
-                  style={{ height: 150 }}
+                  height={512}
+                  width={512}
+                  className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                  // style={{ height: 230 }}
+                  style={{ imageRendering: "pixelated" }}
                 />
               )}
 
@@ -99,11 +107,13 @@ const BtcExchangePop = ({
                       data-tooltip-id="my-tooltip"
                       data-tooltip-content={userAuth?.bitcoinWallet}
                       disabled
-                      className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none cursor-not-allowed"
+                      readOnly=""
+                      className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
                       type="text"
                       value={
                         userAuth?.bitcoinWallet
-                          ? `${userAuth.bitcoinWallet.slice(0, 21)}.....${userAuth.bitcoinWallet.slice(-21)}`
+                          ? // ? `${userAuth.bitcoinWallet.slice(0, 21)}.....${userAuth.bitcoinWallet.slice(-21)}`
+                            userAuth.bitcoinWallet
                           : "Wallet Address"
                       }
                     />
@@ -144,17 +154,17 @@ const BtcExchangePop = ({
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999] `}
       >
-        <button
-          onClick={handleBTCExchange}
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
+          <button
+            onClick={handleBTCExchange}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
           {tokenReceive ? (
             <>
               <div className="top pb-3">
@@ -215,7 +225,7 @@ const BtcExchangePop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
   .modalDialog {
     max-width: 500px !important;
     max-height: calc(100vh - 160px);

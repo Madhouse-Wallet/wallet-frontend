@@ -1,21 +1,24 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import "react-tooltip/dist/react-tooltip.css";
-import { toast } from "react-toastify";
 import LightningTab from "./LightningSendTab";
-import { BigNumber } from "ethers";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 
 import Image from "next/image";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend";
 import { useSelector } from "react-redux";
-import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
 import { useEffect } from "react";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import {
+  isValidBitcoinAddress,
+  filterAmountInput,
+  filterHexInput,
+} from "../../../utils/helper.js";
+import TransactionFailedPop from "../TransactionFailedPop";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -48,16 +51,11 @@ const BtcExchangeSendPop = ({
   const [trxnApproval, setTrxnApproval] = useState(false);
   const [hash, setHash] = useState("");
   const [success, setSuccess] = useState(false);
-
-  const submitAddress = async () => {
-    try {
-      if (recoveryAddress) {
-        startReceive(recoveryAddress);
-        setStep(2);
-        setLoading(true);
-      } else toast.error("Wow so easy!");
-    } catch (error) {}
-  };
+  const [addressError, setAddressError] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
+  const [amountError, setAmountError] = useState("");
 
   const handleTab = (key) => {
     setTab(key);
@@ -114,25 +112,18 @@ const BtcExchangeSendPop = ({
   const sendNative = async () => {
     try {
       setLoadingSend(true);
-      if (!btcAmount) {
-        setLoadingSend(false);
-        return toast.error("Please Enter Valid Amount!");
-      }
-      if (!btcAddress) {
-        setLoadingSend(false);
-        return toast.error("Please Enter Valid Address!");
-      }
 
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        toast.error("Private Key not Found");
         return;
       }
+
+      const satoshis = Math.round(parseFloat(btcAmount) * 100000000);
 
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: btcAddress,
-        amountSatoshi: btcAmount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
@@ -140,17 +131,18 @@ const BtcExchangeSendPop = ({
       if (result.success) {
         setSuccess(true);
         setHash(result.transactionHash);
-        // toast.success("BTC sent successfully!");
         setBtcAmount(0);
         setBtcAddress();
         setLoadingSend(false);
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError("Transaction failed");
       }
       setLoadingSend(false);
     } catch (error) {
       setLoadingSend(false);
-      toast.error(error.message);
+      setFailed(true);
+      setTxError("Transaction failed");
     }
   };
 
@@ -167,7 +159,7 @@ const BtcExchangeSendPop = ({
         setBtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch Bitcoin balance");
     }
   };
 
@@ -177,6 +169,144 @@ const BtcExchangeSendPop = ({
     }
   }, [userAuth?.walletAddress]);
 
+  const isFormValid = () => {
+    return (
+      btcAddress?.trim() !== "" &&
+      !addressError &&
+      isValidBitcoinAddress(btcAddress) &&
+      !amountError &&
+      Number.parseFloat(btcAmount) > 0 &&
+      Number.parseFloat(btcAmount) <= Number.parseFloat(btcBalance)
+    );
+  };
+
+  // Update the button click handler
+  const handleProceedToApproval = () => {
+    if (!isFormValid()) {
+      return; // Button should be disabled anyway
+    }
+    setTrxnApproval(!trxnApproval);
+  };
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+
+    // Filter input with 2 decimal places
+    const filteredValue = filterAmountInput(value, 18, 20);
+    setBtcAmount(filteredValue);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(btcBalance)
+      ) {
+        setAmountError("Insufficient Bitcoin balance");
+      }
+      // else if (Number.parseFloat(balance) < 0.05) {
+      //   setAmountError("Minimum balance of $0.05 required");
+      // }
+      else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
+  };
+
+  const handleAddressChange = (e) => {
+    const value = e.target.value.trim();
+    let filteredValue = "";
+
+    // Match Bitcoin address patterns
+    if (value.toLowerCase().startsWith("bc1p")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        62
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        62
+      );
+    } else if (value.startsWith("1") || value.startsWith("3")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        35
+      );
+    } else {
+      filteredValue = filterHexInput(
+        value,
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        62
+      );
+    }
+    setBtcAddress(filteredValue);
+
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
+  const handleProccessAddressChange = (value) => {
+    // const value = e.target.value.trim();
+    let filteredValue = "";
+
+    // Match Bitcoin address patterns
+    if (value.toLowerCase().startsWith("bc1p")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
+        62
+      );
+    } else if (value.toLowerCase().startsWith("bc1")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
+        62
+      );
+    } else if (value.startsWith("1") || value.startsWith("3")) {
+      filteredValue = filterHexInput(
+        value,
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
+        35
+      );
+    } else {
+      filteredValue = filterHexInput(
+        value,
+        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
+        62
+      );
+    }
+
+    setBtcAddress(filteredValue);
+
+    if (filteredValue.trim() !== "") {
+      if (!isValidBitcoinAddress(filteredValue)) {
+        setAddressError("Invalid Bitcoin address format");
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
+    }
+  };
+
   const tabData = [
     {
       title: "Native SegWit",
@@ -184,7 +314,7 @@ const BtcExchangeSendPop = ({
         <>
           {" "}
           <div className="cardCstm text-center">
-            {step == 1 ? (
+            {/* {step == 1 ? (
               <>
                 <form action="">
                   <div className="grid gap-3 grid-cols-12">
@@ -233,17 +363,27 @@ const BtcExchangeSendPop = ({
               </>
             ) : (
               <></>
-            )}
+            )} */}
+            <>
+              <p className="m-0 text-xs text-center font-light text-gray-300 pb-4">
+                Bitcoin transaction confirmation typically takes 15 to 20
+                minutes to be processed on the blockchain.
+              </p>
+            </>
             {openCam ? (
               <>
-                <QRScannerModal
-                  setOpenCam={setOpenCam}
-                  openCam={openCam}
-                  onScan={(data) => {
-                    setBtcAddress(data);
-                    setOpenCam(!openCam);
-                  }}
-                />
+                {createPortal(
+                  <QRScannerModal
+                    setOpenCam={setOpenCam}
+                    openCam={openCam}
+                    onScan={(data) => {
+                      handleProccessAddressChange(data);
+                      // setBtcAddress(data);
+                      setOpenCam(!openCam);
+                    }}
+                  />,
+                  document.body
+                )}
               </>
             ) : (
               <>
@@ -262,17 +402,17 @@ const BtcExchangeSendPop = ({
                     </div>
                     <div className="iconWithText relative">
                       <input
-                        type="number"
+                        type="text"
                         value={btcAmount}
-                        onChange={(e) => setBtcAmount(e.target.value)}
+                        onChange={handleAmountChange}
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
-                      {/* <button
-                        className={`absolute icn right-2 bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 inline-flex h-[38px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  justify-center disabled:pointer-events-none disabled:opacity-50`}
-                      >
-                        Max
-                      </button> */}
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
                   </div>
                   <div className="py-2">
                     <div className="flex items-center justify-between pb-1 px-3">
@@ -287,7 +427,7 @@ const BtcExchangeSendPop = ({
                       <input
                         type="text"
                         value={btcAddress}
-                        onChange={(e) => setBtcAddress(e.target.value)}
+                        onChange={handleAddressChange}
                         className={` border-white/10 bg-white/4 font-normal hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full px-11`}
                       />
                       <button
@@ -299,14 +439,38 @@ const BtcExchangeSendPop = ({
                         {scanIcn}
                       </button>
                     </div>
+
+                    {addressError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {addressError}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
                   <div className="py-2 mt-4">
                     <button
-                      onClick={() => setTrxnApproval(true)}
-                      // disabled={loadingSend}
+                      onClick={handleProceedToApproval}
+                      disabled={!isFormValid() || loadingSend}
                       className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >
-                      {loadingSend ? "Please Wait ..." : "Send"}
+                      {loadingSend ? (
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"
+                          }
+                          alt={""}
+                          height={100000}
+                          width={10000}
+                          className={
+                            "max-w-full h-[40px] object-contain w-auto"
+                          }
+                        />
+                      ) : (
+                        "Send"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -324,6 +488,16 @@ const BtcExchangeSendPop = ({
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -351,17 +525,19 @@ const BtcExchangeSendPop = ({
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999] `}
       >
-        <button
-          onClick={handleBTCExchangeSend}
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
+          {!openCam && (
+            <button
+              onClick={handleBTCExchangeSend}
+              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+            >
+              {closeIcn}
+            </button>
+          )}
           {tokenSend ? (
             <>
               <div className="top pb-3">
@@ -425,7 +601,7 @@ const BtcExchangeSendPop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
   .modalDialog {
     max-width: 500px !important;
     max-height: calc(100vh - 160px);

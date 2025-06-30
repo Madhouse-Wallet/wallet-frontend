@@ -5,24 +5,33 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { doRecovery } from "../../lib/zeroDev";
-import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev"
-import { getUser, updtUser, getUserToken, decodeBitcoinAddress } from "../../lib/apiCall";
+import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev";
+import {
+  getUser,
+  updtUser,
+  getUserToken,
+  decodeBitcoinAddress,
+} from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
-
-
-
+import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
 
 const RecoverWallet = () => {
   const [step, setStep] = useState(1);
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
   const [phrase, setPhrase] = useState();
   const [address, setAddress] = useState();
+  const [bitcoinAddress, setBitcoinAddress] = useState();
   const [email, setEmail] = useState();
   const [privateKey, setPrivateKey] = useState();
   const [safeprivateKey, setSafePrivateKey] = useState();
   const [seedPhrase, setSeedPhrase] = useState();
   const [wif, setWif] = useState();
   const router = useRouter();
+  const [error, setError] = useState("");
+  const [privateKeyError, setPrivateKeyError] = useState("");
+  const [safePrivateKeyError, setSafePrivateKeyError] = useState("");
+  const [seedError, setSeedError] = useState("");
+  const [wifError, setWifError] = useState("");
 
   const setSecretInPasskey = async (userName, data) => {
     try {
@@ -68,6 +77,7 @@ const RecoverWallet = () => {
           setLoadingNewSigner(false);
         } else {
           setAddress(userExist?.userId?.wallet);
+          setBitcoinAddress(userExist?.userId?.bitcoinWallet)
           setLoadingNewSigner(false);
           setStep(2);
         }
@@ -83,17 +93,22 @@ const RecoverWallet = () => {
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true);
+      setError("")
       if (privateKey && wif && safeprivateKey && seedPhrase) {
-        let testMenmonic = await checkMenmonic(seedPhrase, privateKey)
+        let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
         if (!testMenmonic.status) {
-          toast.error(testMenmonic.msg);
+          setSeedError(testMenmonic.msg);
           setLoadingNewSigner(false);
           return;
         }
-        let recoverAccount = await doAccountRecovery(privateKey, safeprivateKey, address);
+        let recoverAccount = await doAccountRecovery(
+          privateKey,
+          safeprivateKey,
+          address
+        );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
-        if (recoveryBitcoin?.status == "error") {
-          toast.error("Invalid Wif!");
+        if (recoveryBitcoin?.status == "error" || (recoveryBitcoin?.data?.address != bitcoinAddress && recoveryBitcoin?.data?.address2 != bitcoinAddress)) {
+          setWifError("Invalid Wif!");
           setLoadingNewSigner(false);
           return;
         }
@@ -104,7 +119,7 @@ const RecoverWallet = () => {
             wif: wif || "",
             privateKey: privateKey,
             safePrivateKey: safeprivateKey,
-            seedPhrase
+            seedPhrase,
           };
           let storeData = await setSecretInPasskey(
             email + "_passkey_" + (userExist?.userId?.totalPasskey + 1),
@@ -118,39 +133,41 @@ const RecoverWallet = () => {
                 { email: userExist?.userId?.email },
                 {
                   $push: {
-                    passkey:
-                    {
-                      name: (email + "_passkey_" + (userExist?.userId?.totalPasskey + 1)),
+                    passkey: {
+                      name:
+                        email +
+                        "_passkey_" +
+                        (userExist?.userId?.totalPasskey + 1),
                       storageKeySecret,
                       credentialIdSecret,
                       displayName: "",
-                      bitcoinWallet: recoveryBitcoin?.data?.address
-                    }
+                      bitcoinWallet: bitcoinAddress
+                    },
                   },
-                  $set: { totalPasskey: (userExist?.userId?.totalPasskey + 1) }, // Ensure this is inside `$set`
+                  $set: { totalPasskey: userExist?.userId?.totalPasskey + 1 }, // Ensure this is inside `$set`
                 }
               );
             } catch (error) {
-              console.log("updtuser error-->", error)
+              console.log("updtuser error-->", error);
             }
 
             toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
-            toast.error(storeData.msg);
+            setError(storeData.msg);
             setLoadingNewSigner(false);
           }
         } else {
-          toast.error(recoverAccount?.msg);
+          setError(recoverAccount?.msg);
           setLoadingNewSigner(false);
         }
       } else {
-        toast.error("Invalid Credentials!");
+        setError("Invalid Credentials!");
         setLoadingNewSigner(false);
       }
       setLoadingNewSigner(false);
     } catch (error) {
-      toast.error("Invalid Key!");
+      setError("Invalid Key!");
       setLoadingNewSigner(false);
     }
   };
@@ -178,7 +195,11 @@ const RecoverWallet = () => {
             checkAccount.newwebAuthKey
           );
           let data = await updtUser(
-            { email: { $regex: new RegExp(`^${userExist?.userId?.email}$`, 'i') } },
+            {
+              email: {
+                $regex: new RegExp(`^${userExist?.userId?.email}$`, "i"),
+              },
+            },
             {
               $push: { passkey: webAuthKeyStringObj },
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
@@ -194,6 +215,89 @@ const RecoverWallet = () => {
       setLoadingNewSigner(false);
     } catch (error) {
       setLoadingNewSigner(false);
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    let value = e.target.value;
+
+    // Allow only common email characters (letters, numbers, @ . _ -)
+    const filteredValue = value.replace(/[^a-zA-Z0-9@._-]/g, "");
+
+    // Optional max length limit
+    const maxLength = 50;
+    const limitedValue = filteredValue.slice(0, maxLength);
+
+    setEmail(limitedValue);
+    setError("");
+
+    // Optional: Validate email only after user finishes typing
+    if (limitedValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(limitedValue)) {
+      setError("Invalid email format");
+    }
+  };
+
+  const handlePrivateInputChange = (e) => {
+    const value = e.target.value;
+    setError("")
+    const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
+
+    setPrivateKey(filteredValue);
+
+    const isValidPrivateKey = /^(0x)?[0-9a-fA-F]{64}$/.test(filteredValue);
+
+    if (!isValidPrivateKey) {
+      setPrivateKeyError("Invalid private key");
+    } else {
+      setPrivateKeyError("");
+    }
+  };
+
+  const handleSafePrivateInputChange = (e) => {
+    const value = e.target.value;
+    setError("")
+    const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
+
+    setSafePrivateKey(filteredValue);
+
+    const isValidPrivateKey = /^(0x)?[0-9a-fA-F]{64}$/.test(filteredValue);
+
+    if (!isValidPrivateKey) {
+      setSafePrivateKeyError("Invalid safe private key");
+    } else {
+      setSafePrivateKeyError("");
+    }
+  };
+
+  const handlePhraseInput = (e) => {
+    setError("")
+    const value = e.target.value;
+    const filtered = filterAlphaWithSpaces(value, 250); // Adjust max length as needed
+    setSeedPhrase(filtered); // Or whatever your state setter is
+
+    if (
+      filtered.trim().split(/\s+/).length !== 12 &&
+      filtered.trim().split(/\s+/).length !== 24
+    ) {
+      setSeedError("Seed phrase should be 12 or 24 words");
+    } else {
+      setSeedError("");
+    }
+  };
+
+  const handleWifInput = (e) => {
+    setError("")
+    const value = e.target.value;
+    const disallowedChars =
+      /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g;
+    const filtered = filterHexxInput(value, disallowedChars, 52); // WIF length usually ≤52
+
+    setWif(filtered); // Or whatever your state setter is
+
+    if (!/^([KL5][1-9A-HJ-NP-Za-km-z]{51,52})$/.test(filtered)) {
+      setWifError("Invalid WIF format");
+    } else {
+      setWifError("");
     }
   };
 
@@ -230,76 +334,135 @@ const RecoverWallet = () => {
                   <input
                     type="text"
                     name="email"
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     value={email}
                     className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-full h-[45px] pr-11`}
                     placeholder="Enter Email"
-                  ></input>
+                  />
+                  {error && (
+                    <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                      {error}
+                    </div>
+                  )}
                 </div>
                 <div className="btnWrpper mt-3 text-center">
                   <button
                     type="button"
                     onClick={checkAddress}
-                    disabled={loadingNewSigner}
+                    disabled={loadingNewSigner || error || !email}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    {loadingNewSigner ? "Please Wait ..." : "Next"}
+                    {loadingNewSigner ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Next"
+                    )}
                   </button>
                 </div>
               </form>
             </>
           ) : step == 2 ? (
             <>
-
               <div className="py-2">
                 <input
                   type="text"
                   name="privatekey"
-                  onChange={(e) => setPrivateKey(e.target.value)}
+                  onChange={handlePrivateInputChange}
                   value={privateKey}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
                   placeholder="Enter Private Key"
                 />
+                {privateKeyError && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {privateKeyError}
+                  </div>
+                )}
               </div>
               <div className="py-2">
                 <input
                   type="text"
                   name="safeprivatekey"
-                  onChange={(e) => setSafePrivateKey(e.target.value)}
+                  onChange={handleSafePrivateInputChange}
                   value={safeprivateKey}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
                   placeholder="Enter Safe Private Key"
                 />
+                {safePrivateKeyError && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {safePrivateKeyError}
+                  </div>
+                )}
               </div>
               <div className="py-2">
                 <input
                   type="text"
                   name="seedphrasewallet"
-                  onChange={(e) => setSeedPhrase(e.target.value)}
+                  onChange={handlePhraseInput}
                   value={seedPhrase}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
                   placeholder="Enter SeedPhrase"
                 />
+                {seedError && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {seedError}
+                  </div>
+                )}
               </div>
               <div className="py-2">
                 <input
                   type="text"
                   name="wif"
-                  onChange={(e) => setWif(e.target.value)}
+                  onChange={handleWifInput}
                   value={wif}
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 rounded-lg h-[45px] pr-11`}
                   placeholder="Enter wif"
                 />
+                {wifError && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    {wifError}
+                  </div>
+                )}
               </div>
+              {error && (
+                <div className="flex items-center gap-1 p-1 pb-2 pt-2 text-13 font-normal -tracking-2 text-red-500">
+                  {error}
+                </div>
+              )}
               <div className="btnWrpper mt-3 text-center">
                 <button
                   type="button"
-                  disabled={loadingNewSigner}
+                  disabled={
+                    loadingNewSigner ||
+                    !wif ||
+                    !seedPhrase ||
+                    !privateKey ||
+                    !safeprivateKey ||
+                    seedError ||
+                    wifError ||
+                    privateKeyError ||
+                    safePrivateKeyError
+                  }
                   // onClick={checkPhrase}
                   onClick={checkPhrase}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {loadingNewSigner ? "Please Wait ..." : "Next"}
+                  {loadingNewSigner ? (
+                    <Image
+                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                      alt={""}
+                      height={100000}
+                      width={10000}
+                      className={"max-w-full h-[40px] object-contain w-auto"}
+                    />
+                  ) : (
+                    "Next"
+                  )}
                 </button>
               </div>
             </>

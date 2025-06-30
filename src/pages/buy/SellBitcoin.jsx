@@ -1,16 +1,17 @@
 import { publicClient, usdc } from "@/lib/zeroDev";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { createBtcToUsdcShift } from "../api/sideShiftAI";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend";
-import { getUser } from "@/lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import { parseAbi } from "viem";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import Image from "next/image";
+import { filterAmountInput } from "@/utils/helper";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -25,7 +26,12 @@ const SellBitcoin = () => {
   const [quote, setQuote] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
+  const [amountError, setAmountError] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [swapType, setSwapType] = useState("");
+  const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
     to: "USDC",
@@ -45,7 +51,7 @@ const SellBitcoin = () => {
         settleAmount: parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
-      console.error("SideShift API error:", error);
+      setError(error?.message || "Failed to get the quotes");
       return null;
     }
   };
@@ -124,36 +130,75 @@ const SellBitcoin = () => {
         setTbtcBalance(result?.balance);
       }
     } catch (error) {
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch token balances");
     }
   };
 
   const handleFromAmountChange = async (e) => {
+    setSwapType("");
+    setError("");
     const value = e.target.value;
-    setFromAmount(value);
 
-    if (value && !isNaN(parseFloat(value))) {
+    const filteredValue = filterAmountInput(value);
+
+    setFromAmount(filteredValue);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(tbtcBalance)
+      ) {
+        setAmountError("Insufficient Bitcoin balance");
+      } else {
+        setAmountError("");
+      }
+    } else {
+      setAmountError("");
+    }
+
+    if (filteredValue && !isNaN(parseFloat(filteredValue))) {
       const timer = setTimeout(async () => {
         setIsLoading(true);
         try {
-          // First check the amount value
-          if (parseFloat(value) <= process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE) {
+          // First check the amount filteredValue
+          if (
+            parseFloat(filteredValue) <=
+            process.env.NEXT_PUBLIC_SWAP_COMPARE_VALUE
+          ) {
             // For amounts <= 0.1 BTC, use SideShift
-            const shiftResult = await getDestinationAddress(value);
+            const shiftResult = await getDestinationAddress(filteredValue);
             if (shiftResult) {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
+              setSwapType("Sideshift");
+            } else {
+              setDestinationAddress("");
+              setToAmount("");
+              setSwapType("");
             }
           } else {
             // For amounts > 0.1 BTC, use ThorSwap
-            const quoteResult = await getQuote(value);
+            const quoteResult = await getQuote(filteredValue);
+
             if (quoteResult) {
               setDestinationAddress(quoteResult.estimatedDepositAddress);
               setToAmount(quoteResult.estimate);
+              setSwapType("Swapkit");
+            } else {
+              setDestinationAddress("");
+              setSwapType("");
+              setToAmount("");
             }
           }
         } catch (err) {
-          toast.error("Failed to fetch quote or destination address");
+          setError("Failed to fetch quote or destination address");
         } finally {
           setIsLoading(false);
         }
@@ -209,51 +254,50 @@ const SellBitcoin = () => {
   const handleSend = async (e) => {
     e.preventDefault();
 
-    if (!fromAmount || parseFloat(fromAmount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return;
-    }
-
-    if (parseFloat(fromAmount) > parseFloat(tbtcBalance)) {
-      toast.error("Insufficient BTC balance");
-      return;
-    }
-
     setIsLoading(true);
     try {
       const privateKey = await recoverSeedPhrase();
       if (!privateKey) {
-        // toast.error("Key is not correct");
         return;
       }
-
+      const satoshis = Math.round(parseFloat(fromAmount) * 100000000);
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: destinationAddress,
-        amountSatoshi: fromAmount * 100000000,
+        amountSatoshi: satoshis,
         privateKeyHex: privateKey?.wif,
         network: "main", // Use 'main' for mainnet
       });
 
       if (result.success) {
-        // toast.success("Transaction Successfully!");
         setHash(result.transactionHash);
         setSuccess(true);
         setTimeout(fetchBalances, 2000);
         setFromAmount("");
         setToAmount("");
       } else {
-        toast.error(result.error || "Transaction failed");
+        setFailed(true);
+        setTxError(result.error || "Transaction failed");
       }
     } catch (error) {
-      toast.error(error.message || "Transaction failed");
+      setFailed(true);
+      setTxError(error || "Transaction failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (parseFloat(fromAmount) > parseFloat(tbtcBalance))
       return "Insufficient BTC Balance";
@@ -273,6 +317,16 @@ const SellBitcoin = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -304,14 +358,19 @@ const SellBitcoin = () => {
               <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
                 <div className="top flex items-center justify-between">
                   <p className="m-0 font-medium">Swap</p>
+                  {swapType && (
+                    <div className="text-xs text-white/70">
+                      Powered by {swapType}
+                    </div>
+                  )}
                 </div>
                 <div className="contentBody">
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={fromAmount}
                           onChange={handleFromAmountChange}
                           placeholder="0.0"
@@ -319,17 +378,16 @@ const SellBitcoin = () => {
                         />
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 inline-flex items-center justify-end gap-2 text-base">
                           <span className="icn">
                             {swapDirection.from === "USDC" ? usdcIcn : BTC}
                           </span>{" "}
-                          {swapDirection.from}
+                          <span className="text-[12px]">
+                            {swapDirection.from}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance:{" "}
-                          {swapDirection.from === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(8)}{" "}
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                          Balance: {parseFloat(tbtcBalance).toFixed(8)}{" "}
                           {swapDirection.from}
                         </h6>
                       </div>
@@ -344,11 +402,11 @@ const SellBitcoin = () => {
                     </button>
                   </div>
                   <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
+                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
                       <div className="left">
                         <input
                           type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
+                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
                           value={toAmount}
                           placeholder="0.0"
                           disabled={true}
@@ -356,25 +414,36 @@ const SellBitcoin = () => {
                         />
                       </div>
                       <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
+                        <button className="px-2 py-1 inline-flex items-center justify-end gap-2 text-base">
                           <span className="icn">
                             {swapDirection.to === "USDC" ? usdcIcn : BTC}
                           </span>{" "}
-                          {swapDirection.to}
+                          <span className="text-[12px]">
+                            {swapDirection.to}
+                          </span>
                         </button>
-                        <h6 className="m-0 font-medium text-white/50">
+                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
                           Balance:{" "}
-                          {swapDirection.to === "USDC"
-                            ? parseFloat(usdcBalance).toFixed(2)
-                            : parseFloat(tbtcBalance).toFixed(2)}{" "}
+                          {Number(usdcBalance) < 0.01
+                            ? "0"
+                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
                           {swapDirection.to}
                         </h6>
                       </div>
                     </div>
+                    {amountError && (
+                      <div className="text-red-500 text-xs mt-1">
+                        {amountError}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
                   </div>
                   <div className="mt-3 py-2">
                     <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
+                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
                         isButtonDisabled() ? "opacity-70" : ""
                       }`}
                       onClick={() => setTrxnApproval(true)}

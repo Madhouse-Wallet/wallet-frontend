@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { generateOTP } from "../../../utils/globals";
+import Image from "next/image";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
   const [registerEmail, setRegisterEmail] = useState();
@@ -110,22 +111,22 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setLoginLoading(true);
       if (!loginEmail) {
-        toast.error("Please Enter Email!");
+        return;
       } else {
         let validEmail = await isValidEmail(loginEmail);
         if (!validEmail) {
           setLoginLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          return;
         }
         let userExist = await getUser(loginEmail);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("User Not Found!");
+          rerurn;
         } else {
           const authenticated = false;
           if (authenticated) {
             let account = false;
             if (account) {
-              toast.success("Login Successfully!");
+              // toast.success("Login Successfully!");
               dispatch(
                 loginSet({
                   login: true,
@@ -147,10 +148,10 @@ const LoginPop = ({ login, setLogin }) => {
               setLoginEmail();
               handleLogin();
             } else {
-              toast.error("Login Failed!");
+              return;
             }
           } else {
-            toast.error("Login Failed!");
+            return;
           }
         }
       }
@@ -165,13 +166,13 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setRegisterLoading(true);
       if (!registerOTP) {
-        toast.error("Please Enter OTP!");
+        return;
       } else if (registerOTP != checkOTP) {
-        toast.error("Invalid OTP!");
+        return;
       } else {
         let userExist = await getUser(registerEmail);
         if (userExist.status && userExist.status == "success") {
-          return toast.error("User Already Exist!");
+          return;
         }
         const createdCredential = false;
         if (createdCredential) {
@@ -220,18 +221,18 @@ const LoginPop = ({ login, setLogin }) => {
     try {
       setRegisterOtpLoading(true);
       if (!registerEmail) {
-        toast.error("Please Enter Email!");
+        return;
       } else if (!registerUsername) {
-        toast.error("Please Enter Username!");
+        return;
       } else {
         let validEmail = await isValidEmail(registerEmail);
         if (!validEmail) {
           setRegisterOtpLoading(false);
-          return toast.error("Please Enter Valid Email!");
+          return;
         }
         let userExist = await getUser(registerEmail);
         if (userExist.status && userExist.status == "success") {
-          toast.error("User Already Exist!");
+          return;
         } else {
           let OTP = generateOTP(4);
           setCheckOTP(OTP);
@@ -247,7 +248,7 @@ const LoginPop = ({ login, setLogin }) => {
             setRegisterTab(2);
             toast.success(sendEmailData?.message);
           } else {
-            toast.error(sendEmailData?.message || sendEmailData?.error);
+            return;
           }
         }
       }
@@ -280,7 +281,17 @@ const LoginPop = ({ login, setLogin }) => {
                 onClick={loginFn}
                 className="btn text-xs commonBtn flex items-center justify-center btn w-full"
               >
-                {loginLoading ? "Loading" : "Submit"}
+                {loginLoading ? (
+                  <Image
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                    alt={""}
+                    height={100000}
+                    width={10000}
+                    className={"max-w-full h-[40px] object-contain w-auto"}
+                  />
+                ) : (
+                  "Submit"
+                )}
               </button>
             </div>
           </div>
@@ -330,7 +341,17 @@ const LoginPop = ({ login, setLogin }) => {
                     onClick={sendRegisterOtp}
                     className="btn text-xs commonBtn flex items-center justify-center btn w-full"
                   >
-                    {registerOtpLoading ? "Loading" : "Submit"}
+                    {registerOtpLoading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </>
@@ -359,7 +380,17 @@ const LoginPop = ({ login, setLogin }) => {
                     onClick={registerFn}
                     className="btn text-xs commonBtn flex items-center justify-center btn w-full"
                   >
-                    {registerLoading ? "Loading" : "Submit"}
+                    {registerLoading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </>

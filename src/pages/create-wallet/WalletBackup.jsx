@@ -1,6 +1,15 @@
 import React from "react";
 
-const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressWif, handleCopy }) => {
+const WalletBackup = ({
+  step,
+  setStep,
+  privateKey,
+  safeKey,
+  seedPhrase,
+  addressWif,
+  handleCopy,
+  errorr,
+}) => {
   return (
     <>
       <div className="mx-auto max-w-sm">
@@ -18,7 +27,7 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
         </div>
         <div className="formBody pt-4 text-xs">
           <div className="grid gap-3 grid-cols-12">
-            {privateKey &&
+            {privateKey && (
               <div className="col-span-12">
                 <input
                   readOnly={true}
@@ -26,7 +35,8 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
                   type="text"
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                 />
-              </div>}
+              </div>
+            )}
             <div className="col-span-12">
               <div className="text-center my-3">
                 <button
@@ -45,8 +55,7 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
             </p>
           </div>
           <div className="grid gap-3 grid-cols-12">
-
-            {safeKey &&
+            {safeKey && (
               <div className="col-span-12">
                 <input
                   readOnly={true}
@@ -54,7 +63,8 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
                   type="text"
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                 />
-              </div>}
+              </div>
+            )}
             <div className="col-span-12">
               <div className="text-center my-3">
                 <button
@@ -73,7 +83,7 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
             </p>
           </div>
           <div className="grid gap-3 grid-cols-12">
-            {seedPhrase &&
+            {seedPhrase && (
               <div className="col-span-12">
                 <input
                   readOnly={true}
@@ -81,7 +91,8 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
                   type="text"
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                 />
-              </div>}
+              </div>
+            )}
             <div className="col-span-12">
               <div className="text-center my-3">
                 <button
@@ -100,8 +111,7 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
             </p>
           </div>
           <div className="grid gap-3 grid-cols-12">
-
-            {addressWif &&
+            {addressWif && (
               <div className="col-span-12">
                 <input
                   readOnly={true}
@@ -109,7 +119,8 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
                   type="text"
                   className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                 />
-              </div>}
+              </div>
+            )}
             <div className="col-span-12">
               <div className="text-center my-3">
                 <button
@@ -121,6 +132,16 @@ const WalletBackup = ({ step, setStep, privateKey, safeKey, seedPhrase, addressW
                 </button>
               </div>
             </div>
+
+            <div className="col-span-12">
+              {" "}
+              {errorr && (
+                <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                  {errorr}
+                </div>
+              )}
+            </div>
+
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button

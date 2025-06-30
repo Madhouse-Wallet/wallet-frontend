@@ -1,17 +1,78 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { useSelector } from "react-redux";
+import { BackBtn } from "@/components/common";
 
-const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
+const Step3 = ({
+  step,
+  setStep,
+  setIdentitySRC,
+  setTermsSRC,
+  customerId,
+  countryCode,
+  stateCode,
+  email,
+  setCustomerID,
+}) => {
   const userAuth = useSelector((state) => state.Auth);
   const [kycStatus, setKycStatus] = useState("pending");
   const [tosStatus, setTosStatus] = useState("pending");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const createNewCustomer = async (email, countryCode, stateCode) => {
+    setIsLoading(true);
+    setError("");
+
+    const customerData = {
+      type: "individual",
+      email: email,
+      address: {
+        state: stateCode,
+        country: countryCode,
+      },
+    };
+
+    try {
+      const response = await SpherePayAPI.createCustomer(customerData);
+      return response;
+    } catch (error) {
+      setError(error?.response?.data?.message || "Failed to create customer");
+      return { error };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const TermsOfServiceCustomer = async () => {
     try {
-      const response = await SpherePayAPI.createTosLink(customerId);
-      return response;
+      if (customerId === "") {
+        const response = await createNewCustomer(email, countryCode, stateCode);
+
+        if (response && response.error) {
+          if (
+            response?.error?.response?.data?.error ===
+            "customer/unsupported-country"
+          ) {
+            setError("Location not supported");
+          } else {
+            setError(
+              response?.error?.response?.data?.message || "An error occurred"
+            );
+          }
+        } else {
+          const result = await SpherePayAPI.createTosLink(
+            response?.data?.customer?.id
+          );
+          setCustomerID(response?.data?.customer?.id);
+          return result;
+
+          // setStep("PolicyKycStep");
+        }
+      } else {
+        const result = await SpherePayAPI.createTosLink(customerId);
+        return result;
+      }
     } catch (error) {
       console.error("Error creating ToS link:", error);
     }
@@ -20,8 +81,35 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
   // KYC API call
   const kycCustomer = async () => {
     try {
-      const response = await SpherePayAPI.createKycLink(customerId);
-      return response;
+      if (customerId === "") {
+        const response = await createNewCustomer(email, countryCode, stateCode);
+
+        if (response && response.error) {
+          if (
+            response?.error?.response?.data?.error ===
+            "customer/unsupported-country"
+          ) {
+            setError("Location not supported");
+          } else {
+            setError(
+              response?.error?.response?.data?.message || "An error occurred"
+            );
+          }
+        } else {
+          const result = await SpherePayAPI.createKycLink(
+            response?.data?.customer?.id
+          );
+          setCustomerID(response?.data?.customer?.id);
+          return result;
+          // setStep("PolicyKycStep");
+        }
+      } else {
+        const result = await SpherePayAPI.createKycLink(customerId);
+        return result;
+      }
+
+      // const response = await SpherePayAPI.createKycLink(customerId);
+      // return response;
     } catch (error) {
       console.error("Error creating KYC link:", error);
     }
@@ -30,8 +118,10 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
   const handleTermsClick = async () => {
     try {
       const response = await TermsOfServiceCustomer();
-      setTermsSRC(response); // Store the response in state
-      window.open(response?.link, "_blank");
+      if (response) {
+        setTermsSRC(response);
+        window.open(response?.link, "_blank");
+      }
     } catch (error) {
       console.error("Error processing Terms of Service:", error);
     }
@@ -40,8 +130,10 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
   const handleIdentityClick = async () => {
     try {
       const response = await kycCustomer();
-      setIdentitySRC(response); // Store the response in state
-      window.open(response?.url, "_blank");
+      if (response) {
+        setIdentitySRC(response);
+        window.open(response?.url, "_blank");
+      }
     } catch (error) {
       console.error("Error processing Identity Verification:", error);
     }
@@ -84,6 +176,8 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
 
         if (!customer) {
           setIsLoading(false);
+          setKycStatus("");
+          setTosStatus("");
           return;
         }
 
@@ -98,14 +192,15 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
         }
       } catch (error) {
         console.error("Error checking customer status:", error);
+        setIsLoading(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (customerId) {
-      checkCustomerStatus();
-    }
+    // if (customerId) {
+    checkCustomerStatus();
+    // }
   }, [customerId, setStep]);
 
   const getButtonProps = (status) => {
@@ -136,9 +231,20 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
     <>
       <div className="formWrpper mx-auto max-w-[700px] mt-5 bg-black/50 rounded-20 p-5 md:p-8">
         <div className="pb-4">
-          <h4 className="m-0 themeClr text-[28px] font-semibold">
-            Get started
-          </h4>
+          <div className="flex gap-3 items-center">
+            {!customerId && (
+              <button
+                onClick={() => setStep("select-country")}
+                className="border-0 themeClr p-0"
+              >
+                {backIcn}
+              </button>
+            )}
+
+            <h4 className="m-0 themeClr text-[28px] font-semibold">
+              Get started
+            </h4>
+          </div>
           <p className="m-0 text-xs">
             Start transferring between USD and crypto in a few simple steps.
           </p>
@@ -235,6 +341,12 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
               </li>
             </ul>
 
+            {error && (
+              <div className="py-2">
+                <p className="text-red-500 text-xs">{error}</p>
+              </div>
+            )}
+
             {tosStatus === "approved" && kycStatus === "approved" && (
               <div className="mt-4 p-4 bg-green-500/20 rounded-xl text-center">
                 <p className="text-green-300 text-sm mb-2">
@@ -259,3 +371,23 @@ const Step3 = ({ step, setStep, setIdentitySRC, setTermsSRC, customerId }) => {
 };
 
 export default Step3;
+
+const backIcn = (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M22 20.418C19.5533 17.4313 17.3807 15.7367 15.482 15.334C13.5833 14.9313 11.7757 14.8705 10.059 15.1515V20.5L2 11.7725L10.059 3.5V8.5835C13.2333 8.6085 15.932 9.74733 18.155 12C20.3777 14.2527 21.6593 17.0587 22 20.418Z"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

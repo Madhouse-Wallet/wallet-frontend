@@ -1,58 +1,180 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Link from "next/link";
-
+import { verifyUser } from "@/utils/webauthPrf";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
+import Image from "next/image";
 
 // img
 
 const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
-
+  const router = useRouter();
+  const userAuth = useSelector((state) => state.Auth);
   const handleWithdrawDep = () => setWithdrawDep(!withdrawDep);
+  const [loading, setloading] = useState(false);
+  const [loadingFonbnk, setloadingFonbnk] = useState(false);
+   const [loadingPayments, setLoadingpayments] = useState(false);
+  const [error, setError] = useState("");
+
+  const verifyingUser = async () => {
+    setError("");
+    if (userAuth?.email) {
+      setloading(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/spherepay");
+      } else {
+        setloading(false);
+        setError("Verification Failed Please try again.");
+      }
+    } else {
+      setError("Create an account or log in");
+    }
+  };
+
+  const verifyingUserFonbnk = async () => {
+    setError("");
+    if (userAuth?.email) {
+      setloadingFonbnk(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/fonbnk");
+      } else {
+        setloadingFonbnk(false);
+        setError("Verification Failed Please try again.");
+      }
+    } else {
+      setError("Create an account or log in");
+    }
+  };
+
+  const verifyingUserPayments = async () => {
+    setError("");
+    if (userAuth?.email) {
+      setLoadingpayments(true);
+      let data = JSON.parse(userAuth?.webauthKey);
+      let userData = await verifyUser(data?.credentialIdSecret);
+      if (
+        userData.status === true &&
+        userData.msg === "User verified successfully"
+      ) {
+        router.push("/identity");
+      } else {
+        setLoadingpayments(false);
+        setError("Verification Failed Please try again.");
+      }
+    } else {
+      setError("Create an account or log in");
+    }
+  };
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <buttonbuy
-          onClick={handleWithdrawDep}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          {" "}
+          <button
+            onClick={handleWithdrawDep}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
           <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
-            </div>
+            <div className="top pb-3"></div>
             <div className="modalBody text-center">
               <div className="grid gap-3 grid-cols-12">
-                <div className="col-span-6">
+                {/* <div className="col-span-6">
                   <Link
                     href="/fonbnk"
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     African Transfers
                   </Link>
-                </div>
+                </div> */}
                 <div className="col-span-6">
-                  <Link
-                    href="/spherepay"
+                  <button
+                    // href="/spherepay"
+                    onClick={verifyingUserFonbnk}
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    Bank Account Transfer
-                  </Link>
+                    {loadingFonbnk ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "M-Pesa"
+                    )}
+                  </button>
                 </div>
-                <div className="col-span-12">
+                <div className="col-span-6">
+                  <button
+                    // href="/spherepay"
+                    onClick={verifyingUser}
+                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "USA Bank Accounts"
+                    )}
+                  </button>
+                </div>
+                <div className="col-span-6">
                   <Link
                     href="/transfer-morpho"
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                   Transfer Morpho
+                    Spark Lend
                   </Link>
+                </div>
+
+                <div className="col-span-6">
+                  <button
+                    // href="/spherepay"
+                    onClick={verifyingUserPayments}
+                    className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                  >
+                    {loadingPayments ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "SWIFT Payments"
+                    )}
+                  </button>
+                </div>
+
+                <div className="col-span-12">
+                  {error && (
+                    <div className="text-red-500 text-md mt-1">{error}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -64,7 +186,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

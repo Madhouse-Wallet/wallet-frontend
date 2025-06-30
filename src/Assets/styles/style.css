@@ -24,7 +24,10 @@
   /* background-image: url(../Images//umbrel/1.jpg); */
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  /* height: -webkit-fill-available; */
+  overflow: hidden;
 }
 html {
   -webkit-text-size-adjust: 100%;
@@ -59,10 +62,11 @@ body::-webkit-scrollbar,
   background: #00000099;
 }
 .pageCard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  padding-bottom: 90px !important;
-  min-height: calc(100vh - 108px);
+  /* border-top-left-radius: 20px; */
+  border-radius: 20px;
+  max-height: calc(100vh - 140px);
+  /* padding-bottom: 200px !important; */
+  /* min-height: calc(100vh - 79px); */
   width: 100% !important;
 }
 .commonBtn {
@@ -94,7 +98,8 @@ body::-webkit-scrollbar,
   --tw-gradient-to: rgb(0 0 0 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
   --tw-gradient-to: rgb(255 255 255 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from),
+  --tw-gradient-stops:
+    var(--tw-gradient-from),
     rgb(255 255 255 / 0.05) var(--tw-gradient-via-position),
     var(--tw-gradient-to);
   --tw-gradient-to: transparent var(--tw-gradient-to-position);
@@ -108,7 +113,9 @@ body::-webkit-scrollbar,
 .Toastify__toast-container {
   z-index: 999999 !important;
 }
-
+input {
+  opacity: 1 !important;
+}
 input.form-control {
   height: 45px;
 }
@@ -118,4 +125,12 @@ input.form-control {
   border-radius: 10px;
   border: 1px solid #ddd;
   width: 100%;
+}
+* {
+  -webkit-overflow-scrolling: auto !important; /* disables momentum scrolling on iOS */
+}
+@media (max-width: 575px) {
+  .pageCard {
+    max-height: calc(100vh - 260px);
+  }
 }

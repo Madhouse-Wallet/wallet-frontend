@@ -5,12 +5,12 @@ import {
   getETHEREUMRpcProvider,
   publicClient,
   sendTransaction,
-  MAINNET_RPC_URL
+  MAINNET_RPC_URL,
+  calculateGasPriceInUSDC,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
 import { ethers, Wallet } from "ethers";
-import { toast } from "react-toastify";
 import {
   createGoldToUsdcBaseShift,
   createUsdcBaseToEthMainnetShift,
@@ -22,7 +22,9 @@ import { parseAbi } from "viem";
 import { updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
+import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
+import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -32,8 +34,11 @@ const WithdrawalSwap = () => {
   const [fromAmount, setFromAmount] = useState("");
   const [trxnApproval, setTrxnApproval] = useState(false);
   const [hash, setHash] = useState("");
+  const [amountError, setAmountError] = useState("");
   const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
+  const [gasPricee, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
 
   // SideShift states
   const [goldToUsdcShift, setGoldToUsdcShift] = useState(null);
@@ -43,6 +48,10 @@ const WithdrawalSwap = () => {
   const [gasRequiredWei, setGasRequiredWei] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
+
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   // Fixed bridge direction: Tether Gold on Ethereum to USDC on Base
   const [bridgeDirection] = useState({
@@ -93,7 +102,7 @@ const WithdrawalSwap = () => {
       if (balance) {
         setUsdcBalance(balance);
       } else {
-        toast.error("Failed to fetch USDC balance");
+        setError("Failed to fetch USDC balance");
       }
 
       // Fetch Tether Gold balance on Ethereum
@@ -108,7 +117,7 @@ const WithdrawalSwap = () => {
       }
     } catch (error) {
       console.log("error", error);
-      toast.error("Failed to fetch token balances");
+      setError("Failed to fetch Tether Gold balance");
     }
   };
 
@@ -182,7 +191,7 @@ const WithdrawalSwap = () => {
       }
     } catch (error) {
       console.error("Bridge quote error:", error);
-      toast.error(error ? error.message : "Failed to get bridge quote");
+      setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setGoldToUsdcShift(null);
       setEthGasShift(null);
@@ -218,48 +227,76 @@ const WithdrawalSwap = () => {
         setEthGasShift(usdcToEthShift);
       }
     } catch (error) {
-      console.error("Gas shift preparation error:", error);
-      toast.error("Failed to prepare gas shift");
+      setError(error?.message || "Failed to prepare gas shift");
     }
   };
 
-  const handleFromAmountChange = useCallback(
-    (e) => {
-      const value = e.target.value;
-      setFromAmount(value);
+  const handleFromAmountChange = (e) => {
+    setError("");
+    const value = e.target.value;
+    // setFromAmount(value);
 
-      // Clear existing timer
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+    const filteredValue = filterAmountInput(value);
+
+    setFromAmount(filteredValue);
+    setGasPriceError("");
+    setGasPrice(null);
+
+    if (!userAuth?.email) {
+      setError("Please create account or login.");
+      return;
+    }
+
+    // Validate amount
+    if (filteredValue.trim() !== "") {
+      if (Number.parseFloat(filteredValue) <= 0) {
+        setAmountError("Amount must be greater than 0");
+      } else if (
+        Number.parseFloat(filteredValue) > Number.parseFloat(goldBalance)
+      ) {
+        setAmountError("Insufficient Tether Gold balance");
       }
-
-      // Clear previous data immediately when input changes
-      setToAmount("");
-      setGoldToUsdcShift(null);
-      setEthGasShift(null);
-      setUsdcToEthShift(null);
-      setGasRequiredWei("0");
-      setUsdValue({ from: "0", to: "0" });
-
-      // Set new timer for 2 seconds
-      if (value && !Number.isNaN(Number.parseFloat(value))) {
-        const newTimer = setTimeout(() => {
-          updateBridgeQuote(value);
-        }, 2000);
-        setDebounceTimer(newTimer);
+      // else if (Number.parseFloat(usdcBalance) < 0.01) {
+      //   setAmountError("Minimum balance of $0.01 required");
+      // }
+      else {
+        setAmountError("");
       }
-    },
-    [debounceTimer]
-  );
+    } else {
+      setAmountError("");
+    }
+
+    // Clear existing timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Clear previous data immediately when input changes
+    setToAmount("");
+    setGoldToUsdcShift(null);
+    setEthGasShift(null);
+    setUsdcToEthShift(null);
+    setGasRequiredWei("0");
+    setUsdValue({ from: "0", to: "0" });
+
+    // Set new timer for 2 seconds
+    if (filteredValue && !Number.isNaN(Number.parseFloat(filteredValue))) {
+      const newTimer = setTimeout(() => {
+        updateBridgeQuote(filteredValue);
+      }, 2000);
+      setDebounceTimer(newTimer);
+    }
+  };
 
   // Execute the complete bridge transaction with gas handling
   const executeBridge = async () => {
     if (!goldToUsdcShift || !userAuth?.walletAddress) {
-      toast.error("Bridge data not available or wallet not connected");
+      setError("Bridge data not available or wallet not connected");
       return;
     }
 
     setIsLoading(true);
+    setGasPriceError("");
     try {
       // Step 1: Retrieve Secret
       const data = JSON.parse(userAuth?.webauthKey);
@@ -268,14 +305,13 @@ const WithdrawalSwap = () => {
         data?.credentialIdSecret
       );
       if (!retrieveSecretCheck?.status) {
-        toast.error(retrieveSecretCheck?.msg || "Secret retrieval failed");
         return;
       }
 
       const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
       const wallet = new Wallet(
         secretData?.privateKey,
-        ethers.getDefaultProvider(MAINNET_RPC_URL) 
+        ethers.getDefaultProvider(MAINNET_RPC_URL)
       );
 
       // Step 2: Estimate gas for Tether Gold transfer
@@ -318,12 +354,43 @@ const WithdrawalSwap = () => {
         secretData?.safePrivateKey
       );
       if (!getAccountCli.status) {
-        toast.error(getAccountCli?.msg);
         return;
       }
 
       if (currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift) {
         if (usdcToEthShift.settleAmount) {
+          const gasPriceResult = await calculateGasPriceInUSDC(
+            getAccountCli?.kernelClient,
+            [
+              {
+                to: USDC_ADDRESS,
+                abi: USDC_ABI,
+                functionName: "transfer",
+                args: [
+                  usdcToEthShift.depositAddress,
+                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
+                ],
+              },
+            ]
+          );
+          console.log("line-371", gasPriceResult);
+          // Round gas price to 2 decimals
+          const value = Number.parseFloat(gasPriceResult.formatted);
+          const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+          setGasPrice(roundedGasPrice);
+          // Check if amount + gas price exceeds balance
+          const totalRequired =
+            Number.parseFloat(usdcToEthShift.settleAmount) +
+            Number.parseFloat(roundedGasPrice);
+          console.log("line-379", totalRequired);
+          if (totalRequired > Number.parseFloat(usdcBalance)) {
+            setGasPriceError(
+              `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
+            );
+            setIsLoading(false);
+            return;
+          }
+          console.log("line-387");
           const usdcSendTx = await sendTransaction(
             getAccountCli?.kernelClient,
             [
@@ -340,8 +407,6 @@ const WithdrawalSwap = () => {
           );
 
           if (usdcSendTx) {
-            toast.success("USDC sent for ETH gas preparation");
-            toast.info("Waiting for ETH to arrive on mainnet...");
             // const delaySeconds =
             //   Number(usdcToEthShift?.averageShiftSeconds) + 10 || 40;
 
@@ -363,6 +428,9 @@ const WithdrawalSwap = () => {
             await new Promise((resolve) => setTimeout(resolve, 15000));
           }
         }
+      } else {
+        setFailed(true);
+        setTxError(tx.error.message || tx);
       }
 
       // Send Tether Gold to SideShift deposit address
@@ -371,14 +439,15 @@ const WithdrawalSwap = () => {
         goldAmountWei
       );
 
-      toast.info(`Tether Gold transaction submitted: ${goldTx.hash}`);
       const receipt = await goldTx.wait();
-      // toast.success(
-      //   "Tether Gold to USDC bridge transaction completed successfully!"
-      // );
 
-      setSuccess(true);
-      setHash(goldTx.hash);
+      if (goldTx) {
+        setSuccess(true);
+        setHash(goldTx.hash);
+      } else {
+        setFailed(true);
+        setTxError(tx.error.message || tx);
+      }
 
       let dataa = await updtUser(
         { email: userAuth?.email },
@@ -406,15 +475,11 @@ const WithdrawalSwap = () => {
       setUsdcToEthShift(null);
       setGasRequiredWei("0");
     } catch (error) {
-      if (error.message?.includes("user rejected")) {
-        toast.error("Transaction was rejected by user");
-      } else if (error.message?.includes("insufficient funds")) {
-        toast.error("Insufficient funds for transaction");
-      } else {
-        toast.error(
-          `Failed to execute bridge: ${error.message || "Unknown error"}`
-        );
-      }
+      setTxError({
+        message: error.message || "Transaction failed",
+        type: "UNKNOWN_ERROR",
+      });
+      setFailed(!failed);
     } finally {
       setIsLoading(false);
     }
@@ -422,7 +487,16 @@ const WithdrawalSwap = () => {
 
   // Determine button text based on state
   const getButtonText = () => {
-    if (isLoading) return "Loading...";
+    if (isLoading)
+      return (
+        <Image
+          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+          alt={""}
+          height={100000}
+          width={10000}
+          className={"max-w-full h-[40px] object-contain w-auto"}
+        />
+      );
     if (!fromAmount || !toAmount) return "Enter an amount";
     if (Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance))
       return "Insufficient Tether Gold Balance";
@@ -437,6 +511,7 @@ const WithdrawalSwap = () => {
     return (
       isLoading ||
       !fromAmount ||
+      gasPriceError ||
       !toAmount ||
       !goldToUsdcShift ||
       Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance) ||
@@ -446,6 +521,15 @@ const WithdrawalSwap = () => {
 
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError?.details?.shortMessage}
+          />,
+          document.body
+        )}
       {trxnApproval &&
         createPortal(
           <TransactionConfirmationPop
@@ -470,151 +554,168 @@ const WithdrawalSwap = () => {
           />,
           document.body
         )}
-      <section className="py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
-              <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
-                <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Bridge</p>
-                </div>
-                <div className="contentBody">
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
-                          value={fromAmount}
-                          onChange={handleFromAmountChange}
-                          placeholder="0.0"
-                        />
-                        <h6 className="m-0 font-medium text-white/50">
-                          Ethereum Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
-                          <span className="icn">
-                            <Image
-                              src={
-                                process.env.NEXT_PUBLIC_IMAGE_URL +
-                                "tethergold.png"
-                              }
-                              alt="logo"
-                              height={22}
-                              width={22}
-                              className="max-w-full object-contain w-auto smlogo"
-                            />
-                          </span>{" "}
-                          {bridgeDirection.from}
-                        </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
-                          {/* {bridgeDirection.from} */}
-                          XAUT
-                        </h6>
-                      </div>
-                    </div>
+      <div className="grid gap-3 grid-cols-12">
+        <div className="col-span-12">
+          <div className="bg-black/50 rounded-xl p-3">
+            <div className="top flex items-center justify-between">
+              <p className="m-0 font-medium">Bridge</p>
+            </div>
+            <div className="contentBody">
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={fromAmount}
+                      onChange={handleFromAmountChange}
+                      placeholder="0.0"
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Ethereum Network
+                    </h6>
                   </div>
-                  <div className="py-2 my-[-30px] text-center">
-                    <button
-                      className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  <div className="right text-right">
+                    <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
+                      <span className="icn">
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "tethergold.png"
+                          }
+                          alt="logo"
+                          height={22}
+                          width={22}
+                          className="max-w-full object-contain w-auto smlogo"
+                        />
+                      </span>{" "}
+                      <span className="text-[12px]">
+                        {bridgeDirection.from}
+                      </span>
+                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
+                      {/* {bridgeDirection.from} */}
+                      XAUT
+                    </h6>
+                  </div>
+                </div>
+              </div>
+              <div className="py-2 my-[-30px] text-center">
+                <button
+                  className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  disabled={true}
+                >
+                  {swapIcn}
+                </button>
+              </div>
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={toAmount}
+                      placeholder="0.0"
                       disabled={true}
-                    >
-                      {swapIcn}
-                    </button>
+                      readOnly
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Base Network
+                    </h6>
                   </div>
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 text-xl outline-0"
-                          value={toAmount}
-                          placeholder="0.0"
-                          disabled={true}
-                          readOnly
-                        />
-                        <h6 className="m-0 font-medium text-white/50">
-                          Base Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
-                          <span className="icn">
-                            {bridgeDirection.to === "USDC" ? (
-                              usdcIcn
-                            ) : (
-                              <Image
-                                src={
-                                  process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"
-                                }
-                                alt="logo"
-                                height={22}
-                                width={22}
-                                className="max-w-full object-contain w-auto smlogo"
-                              />
-                            )}
-                          </span>{" "}
-                          {bridgeDirection.to}
-                        </button>
-                        <h6 className="m-0 font-medium text-white/50">
-                          Balance: {parseFloat(usdcBalance).toFixed(2)}{" "}
-                          {bridgeDirection.to}
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Gas information display */}
-                  {gasRequiredWei !== "0" && (
-                    <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      <p className="m-0 text-amber-500">
-                        Gas required: {ethers.utils.formatEther(gasRequiredWei)}{" "}
-                        ETH
-                      </p>
-                      {usdcToEthShift && (
-                        <p className="m-0 text-green-500">
-                          Gas swap prepared: USDC → ETH
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* SideShift transaction info */}
-                  {goldToUsdcShift && (
-                    <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      <p className="m-0 text-blue-500">
-                        Deposit Address:{" "}
-                        {goldToUsdcShift.depositAddress?.slice(0, 10)}...
-                      </p>
-                      <p className="m-0 text-blue-500">
-                        Expected USDC:{" "}
-                        {goldToUsdcShift.settleAmount
-                          ? goldToUsdcShift.settleAmount
-                          : "N/A"}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="mt-3 py-2">
-                    <button
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
-                      onClick={() => setTrxnApproval(true)}
-                      disabled={isButtonDisabled()}
-                    >
-                      {getButtonText()}
+                  <div className="right text-right">
+                    <button className="px-2 py-1 flex items-center gap-2 text-base">
+                      <span className="icn">
+                        {bridgeDirection.to === "USDC" ? (
+                          usdcIcn
+                        ) : (
+                          <Image
+                            src={process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"}
+                            alt="logo"
+                            height={22}
+                            width={22}
+                            className="max-w-full object-contain w-auto smlogo"
+                          />
+                        )}
+                      </span>{" "}
+                      <span className="text-[12px]">{bridgeDirection.to}</span>
                     </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance:{" "}
+                      {Number(usdcBalance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
+                      {bridgeDirection.to}
+                    </h6>
                   </div>
                 </div>
+              </div>
+
+              {/* Gas information display */}
+              {gasRequiredWei !== "0" && (
+                <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                  <p className="m-0 text-amber-500">
+                    Gas required: {ethers.utils.formatEther(gasRequiredWei)} ETH
+                  </p>
+                  {usdcToEthShift && (
+                    <p className="m-0 text-green-500">
+                      Gas swap prepared: USDC → ETH
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* SideShift transaction info */}
+              {goldToUsdcShift && (
+                <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                  <p className="m-0 text-blue-500">
+                    Deposit Address:{" "}
+                    {goldToUsdcShift.depositAddress?.slice(0, 10)}...
+                  </p>
+                  <p className="m-0 text-blue-500">
+                    Expected USDC:{" "}
+                    {goldToUsdcShift.settleAmount
+                      ? goldToUsdcShift.settleAmount
+                      : "N/A"}
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="text-red-500 text-xs mt-1">{error}</div>
+              )}
+
+              {amountError && (
+                <div className="text-red-500 text-xs mt-1">{amountError}</div>
+              )}
+
+              <div className="ps-3 flex flex-col gap-1 mt-2">
+                {gasPricee && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPricee} USDC
+                  </label>
+                )}
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+              </div>
+
+              <div className="mt-3 py-2">
+                <button
+                  className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
+                    isButtonDisabled() ? "opacity-70" : ""
+                  }`}
+                  onClick={() => setTrxnApproval(true)}
+                  disabled={isButtonDisabled()}
+                >
+                  {getButtonText()}
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </>
   );
 };

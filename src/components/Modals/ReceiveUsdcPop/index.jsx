@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useSelector } from "react-redux";
 import QRCode from "qrcode";
 
-
 const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
   const userAuth = useSelector((state) => state.Auth);
+  const [error, setError] = useState("");
   const [qrCode, setQRCode] = useState("");
   const [isCopied, setIsCopied] = useState({
     one: false,
@@ -36,36 +36,43 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
     if (userAuth?.walletAddress) {
       const generateQRCode = async () => {
         try {
-          const qr = await QRCode.toDataURL(userAuth.walletAddress);
+          const qr = await QRCode.toDataURL(userAuth.walletAddress, {
+            margin: 0.5,
+            width: 512,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
+          });
           setQRCode(qr);
         } catch (err) {
           console.error("QR Code generation failed:", err);
         }
       };
-  
+
       generateQRCode();
+    } else {
+      setError("Please create account or login.");
     }
   }, [userAuth?.walletAddress]);
-  
 
   return (
     <>
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <buttonbuy
-          onClick={handleReceiveUSDC}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          {" "}
-          <div className={`relative rounded px-3`}>
+          <button
+            onClick={handleReceiveUSDC}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
+          <div className={`relative rounded`}>
             <div className="top pb-3">
               <h5 className="m-0 text-xl text-center font-bold">
                 Receive USDC
@@ -73,14 +80,28 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
             </div>
             <div className="modalBody">
               <div className="cardCstm text-center">
-                <Image
-                  alt=""
-                  src={qrCode}
-                  height={10000}
-                  width={10000}
-                  className="max-w-full mx-auto h-auto w-auto"
-                  style={{ height: 150 }}
-                />
+                {error ? (
+                  <>
+                    {" "}
+                    {error && (
+                      <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {" "}
+                    <Image
+                      alt=""
+                      src={qrCode}
+                      height={512}
+                      width={512}
+                      className="max-w-full md:h-[230px] md:w-auto w-full mx-auto h-auto w-auto"
+                      // style={{ height: 230 }}
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  </>
+                )}
+
                 <div className="content mt-2" style={{ fontSize: 12 }}>
                   <div className="text-center py-5">
                     <h6 className="m-0 text-base pb-2">Your Wallet Address</h6>
@@ -89,12 +110,17 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
                         data-tooltip-id="my-tooltip"
                         data-tooltip-content={userAuth?.walletAddress}
                         readOnly=""
+                        disabled
                         className="block min-w-0 flex-1 appearance-none truncate bg-transparent py-1.5 pl-2.5 font-mono outline-none"
                         type="text"
-                        defaultValue={userAuth?.walletAddress || "Wallet Address"}
+                        defaultValue={
+                          userAuth?.walletAddress || "Wallet Address"
+                        }
                       />
                       <button
-                        onClick={() => handleCopy(userAuth?.walletAddress, "one")}
+                        onClick={() =>
+                          handleCopy(userAuth?.walletAddress, "one")
+                        }
                         className="rounded-4 px-1.5 ring-inset transition-colors hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
                         data-state="closed"
                       >
@@ -123,7 +149,7 @@ const ReceiveUSDCPop = ({ receiveUsdc, setReceiveUSDC }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);
@@ -168,7 +194,6 @@ const closeIcn = (
     </defs>
   </svg>
 );
-
 
 const copyIcn = (
   <svg

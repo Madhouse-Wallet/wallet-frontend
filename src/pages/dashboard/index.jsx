@@ -71,7 +71,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Dollars",
+      head: "Cash",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
@@ -88,7 +88,7 @@ const Dashboard = () => {
       head: "Lightning",
       icn: icn6,
       onClick: () => {
-        router.push("/bitcoin-debt-card");
+        router.push("/lightning");
       },
     },
   ];
@@ -164,9 +164,12 @@ const Dashboard = () => {
           // );
 
           // let combinedUsdValue = usdcBalance + morphoBalance;
+
           setTotalUsdBalance(
-            usdcBalance !== "00" ? parseFloat(usdcBalance).toFixed(2) : "0"
-          ); // <-- sets combined USD+ and USDC value
+            parseFloat(usdcBalance) < 0.01
+              ? "0"
+              : parseFloat(usdcBalance).toFixed(2)
+          );
 
           const providerETH = await getETHEREUMRpcProvider();
           const provider = await getRpcProvider();
@@ -280,7 +283,7 @@ const Dashboard = () => {
         )}
 
       {/* <LoadingScreen /> */}
-      <DashboardMain className="relative flex w-full flex-col items-center">
+      <DashboardMain className="relative flex w-full flex-col items-center pt-[60px]">
         <div
           className="flex h-full w-full select-none flex-col items-center container"
           style={{ opacity: 1, transform: "none" }}

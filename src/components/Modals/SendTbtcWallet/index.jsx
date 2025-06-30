@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser } from "../../../lib/apiCall.js";
 import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
+import Image from "next/image.js";
 
 const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
   const [loading, setLoading] = useState(false);
@@ -16,11 +17,11 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
     try {
       setLoading(true);
       if (!userAuth?.login) {
-        toast.error("Please Login!");
+        return;
       } else {
         let userExist = await getUser(userAuth?.email);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("Please Login!");
+          return;
         } else {
           if (userExist?.userId?.liquidBitcoinWallet_3) {
             const liquidShift = await createTBtcToLbtcShift(
@@ -44,10 +45,8 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
               // Wait for transaction to be mined and then fetch new balance
               setTimeout(fetchBalance, 2000);
             } else {
-              toast.error(result.error || "Transaction failed");
             }
           } else {
-            toast.error("Please sign Up Again!");
           }
         }
       }
@@ -55,7 +54,6 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
       setTbtcWall(!btcWall);
       setLoading(false);
     } catch (error) {
-      toast.error(error?.message);
       setLoading(false);
     }
   };
@@ -87,19 +85,18 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <button
-          onClick={() => setTbtcWall(!btcWall)}
-          type="button"
-          className="bg-[#0d1017] h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
         >
-          {" "}
+          <button
+            onClick={() => setTbtcWall(!btcWall)}
+            type="button"
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
@@ -132,7 +129,17 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
                     disabled={loading}
                     onClick={handleDepositPop}
                   >
-                    {loading ? "Loading..." : "Submit"}
+                    {loading ? (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                        alt={""}
+                        height={100000}
+                        width={10000}
+                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      />
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </form>
@@ -145,7 +152,7 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  ${"" /* padding-bottom: 100px; */}
 
   .modalDialog {
     max-height: calc(100vh - 160px);

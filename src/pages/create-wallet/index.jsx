@@ -3,31 +3,27 @@ import CreateWalletStep from "./CreateWallet";
 import OtpStep from "./OtpStep";
 import WalletBackup from "./WalletBackup";
 import KeyStep from "./keysStep";
-
+import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { toast } from "react-toastify";
-import {
-  createCoinosInvoice,
-  getBitcoinAddress,
-  registerCoinosUser,
-} from "../../lib/apiCall";
+import { getBitcoinAddress } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import {
   generateOTP,
   storedataLocalStorage,
   webAuthKeyStore,
-  getRandomString
+  getRandomString,
 } from "../../utils/globals";
 
-
 import { setupNewAccount, getPrivateKey, getMenmonic } from "../../lib/zeroDev";
-import { mainnet } from "viem/chains";
+import TransactionFailedPop from "../../components/Modals/TransactionFailedPop";
 
 const CreateWallet = () => {
   const [step, setStep] = useState(1);
   const dispatch = useDispatch();
+  const [checkEmailLoader, setCheckEmailLoader] = useState(false);
   const [checkOTP, setCheckOTP] = useState();
   const [otpTimestamp, setOtpTimestamp] = useState(null);
   const [privateKey, setPrivateKey] = useState("");
@@ -37,6 +33,9 @@ const CreateWallet = () => {
   const [bitcoinWallet, setBitcoinWallet] = useState("");
 
   const [bitcoinWalletwif, setBitcoinWalletWif] = useState("");
+  const [txError, setTxError] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [error, setError] = useState("");
 
   const [registerData, setRegisterData] = useState({ email: "", username: "" });
   const isOtpExpired = () => {
@@ -63,10 +62,7 @@ const CreateWallet = () => {
     passkey,
     wallet,
     bitcoinWallet,
-    liquidBitcoinWallet,
-    coinosToken,
-    flowTokens,
-    coinosUserName
+    flowTokens
   ) => {
     try {
       try {
@@ -79,10 +75,7 @@ const CreateWallet = () => {
             passkey,
             wallet,
             bitcoinWallet,
-            liquidBitcoinWallet,
-            coinosToken,
             flowTokens,
-            coinosUserName
           }),
         })
           .then((res) => res.json())
@@ -97,8 +90,6 @@ const CreateWallet = () => {
       return false;
     }
   };
-
-
 
   const getUser = async (email) => {
     try {
@@ -175,7 +166,8 @@ const CreateWallet = () => {
           status: false,
           msg: registerCheck?.msg,
         };
-      } return res;
+      }
+      return res;
     } catch (error) {
       return {
         status: false,
@@ -184,45 +176,50 @@ const CreateWallet = () => {
     }
   };
 
+  const cleatStates = async () => {
+    localStorage.removeItem("verifiedData");
+    return true;
+  }
+
   const registerFn = async () => {
     try {
       const userExist = await getUser(registerData.email);
       if (userExist.status && userExist.status === "success") {
-        toast.error("User Already Exist!");
+        setError("User Already Exist!");
+        await cleatStates()
         return false;
       }
       const baseWallet = await setupNewAccount(privateKey, safeKey);
       if (!baseWallet?.status) {
-        toast.error(baseWallet?.msg);
+        setFailed(true);
+        setTxError("Gas Price is too high currently.");
         return false;
       } else {
-        let { address } = baseWallet?.data
-        const cleanEmail = registerData?.email?.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
-        let registerCoinos = await registerCoinosUser(
-          cleanEmail,
-          process.env.NEXT_PUBLIC_COINOSIS_PASS
-        );
-        localStorage.setItem("coinosToken", registerCoinos?.token);
-        const [usernameInit, domainInit] = (registerData.email).split("@");
+        let { address, privateKeyOwner, safePrivateKey, seedPhraseOwner } =
+          baseWallet?.data;
+        setPrivateKey(privateKeyOwner);
+        setSafeKey(safePrivateKey);
+        setSeedPhrase(seedPhraseOwner);
+        const cleanEmail = registerData?.email
+          ?.split("@")[0]
+          .replace(/[^a-zA-Z0-9]/g, "");
+        const [usernameInit, domainInit] = registerData.email.split("@");
         let token1 = (await getRandomString(6)) + "_" + usernameInit;
-        let flowTokens = [
-          { flow: 1, token: (token1) },
-        ];
-        const resultLiquid = await createCoinosInvoice(
-          registerCoinos?.token,
-          "1",
-          "liquid",
-          token1
-        );
+        let flowTokens = [{ flow: 1, token: token1 }];
         const secretObj = {
-          coinosToken: registerCoinos?.token || "",
           wif: bitcoinWalletwif,
-          privateKey: privateKey,
-          safePrivateKey: safeKey,
-          seedPhrase: seedPhrase
+          privateKey: privateKeyOwner,
+          safePrivateKey: safePrivateKey,
+          seedPhrase: seedPhraseOwner,
         };
         let storageKeySecret = "";
         let credentialIdSecret = "";
+        const userExist = await getUser(registerData.email);
+        if (userExist.status && userExist.status === "success") {
+          setError("User Already Exist!");
+          await cleatStates()
+          return false;
+        }
         const storeData = await setSecretInPasskey(
           registerData.email + "_passkey_1",
           JSON.stringify(secretObj)
@@ -230,27 +227,36 @@ const CreateWallet = () => {
         if (storeData.status) {
           storageKeySecret = storeData?.storageKey;
           credentialIdSecret = storeData?.credentialId;
-          let liquidBitcoinWallet = "";
-          if (resultLiquid) {
-            liquidBitcoinWallet = resultLiquid?.hash || "";
+          const userExist = await getUser(registerData.email);
+          if (userExist.status && userExist.status === "success") {
+            setError("User Already Exist!");
+            await cleatStates()
+            return false;
           }
           const data = await addUser(
             registerData.email,
             registerData.username,
-            [{
-              name: registerData.email + "_passkey_1",
-              storageKeySecret,
-              credentialIdSecret,
-              displayName: "",
-              bitcoinWallet
-            }],
+            [
+              {
+                name: registerData.email + "_passkey_1",
+                storageKeySecret,
+                credentialIdSecret,
+                displayName: "",
+                bitcoinWallet,
+              },
+            ],
             address,
             bitcoinWallet,
-            liquidBitcoinWallet,
-            registerCoinos?.token,
-            flowTokens,
-            cleanEmail
+            flowTokens
           );
+          if (data?.status == "failure") {
+            setError(data.error);
+            await cleatStates()
+            setRegisterData({ email: "", username: "" })
+            setStep(1);
+            return false;
+          }
+          localStorage.removeItem("verifiedData");
           toast.success("Sign Up Successfully!");
           dispatch(
             loginSet({
@@ -263,10 +269,10 @@ const CreateWallet = () => {
               webauthKey: JSON.stringify({
                 name: registerData.email + "_passkey_1",
                 storageKeySecret,
-                credentialIdSecret
+                credentialIdSecret,
               }),
               id: data.userData._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             })
           );
           storedataLocalStorage(
@@ -280,16 +286,16 @@ const CreateWallet = () => {
               webauthKey: {
                 name: registerData.email + "_passkey_1",
                 storageKeySecret,
-                credentialIdSecret
+                credentialIdSecret,
               },
               id: data.userData._id,
-              totalPasskey: 1
+              totalPasskey: 1,
             },
             "authUser"
           );
           return true;
         } else {
-          toast.error(storeData.msg);
+          setError(storeData.msg);
           return false;
         }
       }
@@ -300,43 +306,44 @@ const CreateWallet = () => {
   };
 
   const registerOtpFn = async (data) => {
+    setError("");
     try {
       // Check if OTP is expired
       if (isOtpExpired()) {
-        toast.error("OTP has expired! Please request a new one.");
+        setError("OTP has expired! Please request a new one.");
         return false;
       }
 
       if (data.otp != checkOTP) {
-        toast.error("Invalid OTP!");
+        setError("Invalid OTP!");
         return false;
       } else {
         let userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status == "success") {
-          toast.error("User Already Exist!");
+          setError("User Already Exist!");
           return false;
         }
         let getWallet = await getBitcoinAddress();
         if (getWallet.status && getWallet.status == "success") {
-          setBitcoinWallet(getWallet?.data?.wallet || "")
-          setBitcoinWalletWif(getWallet?.data?.wif || "")
-        }
-
-        let generatePrivateKey = await getMenmonic();
-        let getSafeKey = await getPrivateKey();
-        if (generatePrivateKey) {
-          setPrivateKey(generatePrivateKey.privateKey);
-          setSafeKey(getSafeKey)
-          setSeedPhrase(generatePrivateKey.phrase)
+          setBitcoinWallet(getWallet?.data?.wallet || "");
+          setBitcoinWalletWif(getWallet?.data?.wif || "");
           setAddressWif(getWallet?.data?.wif || "");
+          localStorage.setItem(
+            "verifiedData",
+            JSON.stringify({
+              verified: true,
+              email: registerData.email,
+              username: registerData.username,
+            })
+          );
           return true;
         } else {
-          toast.error("Try Again After some time!!");
+          setError("Try Again After some time!");
           return false;
         }
       }
     } catch (error) {
-      console.log("error-->", error)
+      console.log("error-->", error);
       return false;
     }
   };
@@ -345,7 +352,7 @@ const CreateWallet = () => {
     try {
       let userExist = await getUser(data.email);
       if (userExist.status && userExist.status == "success") {
-        toast.error("User Already Exist!");
+        setError("User Already Exist!");
         return false;
       } else {
         let OTP = generateOTP(4);
@@ -369,7 +376,7 @@ const CreateWallet = () => {
           toast.success(sendEmailData?.message);
           return true;
         } else {
-          toast.error(sendEmailData?.message || sendEmailData?.error);
+          setError(sendEmailData?.message || sendEmailData?.error);
           return false;
         }
       }
@@ -394,10 +401,9 @@ const CreateWallet = () => {
       let sendEmailData = await sendOTP(obj);
       if (sendEmailData.status && sendEmailData.status == "success") {
         toast.success("OTP sent to your email.");
-
         return true;
       } else {
-        toast.error(sendEmailData?.message || sendEmailData?.error);
+        setError(sendEmailData?.message || sendEmailData?.error);
         return false;
       }
     } catch (error) {
@@ -406,14 +412,65 @@ const CreateWallet = () => {
     }
   };
 
+  const checkEmail = async () => {
+    try {
+      const getVerifiedData = localStorage.getItem("verifiedData");
+      if (getVerifiedData) {
+        const parsedData = JSON.parse(getVerifiedData);
+        if (parsedData.email && parsedData.verified) {
+          setCheckEmailLoader(true);
+          const userExist = await getUser(parsedData.email);
+          if (userExist.status && userExist.status === "success") {
+            setCheckEmailLoader(false);
+            await cleatStates()
+          } else {
+            let getWallet = await getBitcoinAddress();
+            if (getWallet.status && getWallet.status == "success") {
+              setRegisterData({
+                email: parsedData.email,
+                username: parsedData.username,
+              });
+              setBitcoinWallet(getWallet?.data?.wallet || "");
+              setBitcoinWalletWif(getWallet?.data?.wif || "");
+              setAddressWif(getWallet?.data?.wif || "");
+              setCheckEmailLoader(false);
+              setStep(4);
+            } else {
+              setCheckEmailLoader(false);
+              await cleatStates()
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log("error checkEmail-->", e);
+      setCheckEmailLoader(false);
+    }
+  };
+  useEffect(() => {
+    checkEmail();
+  }, []);
+
   return (
     <>
+      {failed &&
+        createPortal(
+          <TransactionFailedPop
+            failed={failed}
+            setFailed={setFailed}
+            txError={txError}
+          />,
+          document.body
+        )}
+
       {step == 1 ? (
         <>
           <CreateWalletStep
             sendRegisterOtp={sendRegisterOtp}
             step={step}
+            checkEmail={checkEmailLoader}
             setStep={setStep}
+            errorr={error}
           />
         </>
       ) : step == 2 ? (
@@ -424,6 +481,8 @@ const CreateWallet = () => {
             registerData={registerData}
             step={step}
             setStep={setStep}
+            errorr={error}
+            setError={setError}
           />
         </>
       ) : step == 3 ? (
@@ -436,11 +495,17 @@ const CreateWallet = () => {
             addressWif={addressWif}
             step={step}
             setStep={setStep}
+            errorr={error}
           />
         </>
       ) : step == 4 ? (
         <>
-          <KeyStep registerFn={registerFn} step={step} setStep={setStep} />
+          <KeyStep
+            registerFn={registerFn}
+            step={step}
+            setStep={setStep}
+            error={error}
+          />
         </>
       ) : (
         <></>
