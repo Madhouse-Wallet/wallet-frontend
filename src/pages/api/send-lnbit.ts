@@ -34,7 +34,7 @@ export default async function handler(
       },
       token,
       2
-    )) as any;
+    )) as any; 
     console.log("data", data);
     if (data?.status) {
       const payInv = (await payInvoice(
