@@ -267,11 +267,48 @@ export const getLnbitId = async (email) => {
   }
 };
 
+//send-lnbit-usdc
+export const sendLnbitUsdc = async (
+  wallet, 
+  amount,
+  lnbitId_3,
+  lnbitWalletId_3,
+  lnbitAdminKey_3
+) => {
+  try {
+    try {
+      return await fetch(`/api/send-lnbit-usdc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet,
+          amount,
+          lnbitId_3,
+          lnbitWalletId_3,
+          lnbitAdminKey_3
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+
 export const sendLnbit = async (
   amount,
   onchain_address,
   lnbitId_3,
-  lnbitWalletId_3
+  lnbitWalletId_3,
+  lnbitAdminKey_3
 ) => {
   try {
     try {
@@ -283,6 +320,7 @@ export const sendLnbit = async (
           onchain_address,
           lnbitId_3,
           lnbitWalletId_3,
+          lnbitAdminKey_3
         }),
       })
         .then((res) => res.json())
