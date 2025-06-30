@@ -6,7 +6,7 @@ export default function Document() {
       <Head>
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, user-scalable=no"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
 
         <link rel="icon" href="/favicn.png" />
@@ -17,7 +17,7 @@ export default function Document() {
         />
         <title>Madhouse Wallet</title>
       </Head>
-      <body>
+      <body className="">
         <Main />
         <NextScript />
       </body>

@@ -9,7 +9,7 @@ import {
   parseUnits,
 } from "viem";
 import { ethers, utils, Wallet } from "ethers";
-import { base } from "viem/chains";
+import { base,polygon } from "viem/chains";
 import {
   generatePrivateKey,
   privateKeyToAccount,
@@ -28,6 +28,7 @@ import timers from "timers-promises";
 dotenv.config();
 
 export const BASE_RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC_URL;
+export const POLYGON_RPC_URL = process.env.NEXT_PUBLIC_POLYGON_RPC_URL;
 export const MAINNET_RPC_URL = process.env.NEXT_PUBLIC_MAINNET_RPC_URL;
 const PIMLICO_API_KEY = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
 const RELAY_PRIVATE_KEY = process.env.NEXT_PUBLIC_RELAY_PRIVATE_KEY;
@@ -213,6 +214,63 @@ export const setupNewAccount = async (chain = base) => {
     return {
       status: false,
       msg: "Something went wrong during account setup. Please try again later.",
+    };
+  }
+};
+
+
+export const setupMultisigAccount = async () => {
+  try {
+
+      const client = createPublicClient({
+        chain: polygon,
+        transport: http(POLYGON_RPC_URL), //need to set the RPC URL for Polygon
+      });
+    
+    const sender = generatePrivateKey()
+    const receiver = generatePrivateKey()
+    const escrow = generatePrivateKey()
+
+
+    const owners = [privateKeyToAccount(sender), privateKeyToAccount(receiver), privateKeyToAccount(escrow)]
+ 
+    const safeAccount = await toSafeSmartAccount({
+      client,
+      entryPoint: {
+        address: entryPoint07Address,
+        version: "0.7",
+      },
+      owners,
+      threshold: 2n, // 2 out of 3 owners need to sign
+      saltNonce: 0n, // optional
+      version: "1.4.1",
+    })
+
+
+    let res;
+    if (safeAccount.address) {
+      res = {
+        status: true,
+        data: {
+          privatekey: eoaPrivateKey,
+          address: safeAccount.address,
+          sender: sender.privateKey,
+          receiver: receiver.privateKey,
+          escrow: escrow.privateKey,
+        },
+      };
+    } else {
+      res = {
+        status: false,
+        msg: "Error in escrow account creation",
+      };
+    }
+    return res;
+  } catch (error) {
+    console.log("Error setting up escrow account -->", error);
+    return {
+      status: false,
+      msg: "Something went wrong during escrow account setup. Please try again later.",
     };
   }
 };

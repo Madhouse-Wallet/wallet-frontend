@@ -13,6 +13,7 @@ import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { logoutStorage } from "../../utils/globals";
 
 import { retrieveSecret, verifyUser } from "../../utils/webauthPrf";
+import styled from "styled-components";
 
 import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
@@ -258,7 +259,19 @@ const Setting: React.FC = () => {
           <ConfirmationPop confirm={confirm} setConfirm={setConfirm} />,
           document.body
         )}
-      <section className="relative dashboard  ">
+      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
+        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+          <div className="container mx-auto">
+            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
+              <div className="left">
+                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                  Setting & Support
+                </h4>
+              </div>
+            </Nav>
+          </div>
+        </header>
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -271,17 +284,7 @@ const Setting: React.FC = () => {
             className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
           a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
           >
-            <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-3">
-              <div className="col-span-12 ">
-                <div className="sectionHeader p-2 ">
-                  <div className="flex items-center gap-3">
-                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Setting & Support
-                    </h4>
-                  </div>
-                </div>
-              </div>
-
+            <div className="grid gap-3 md:gap-4 grid-cols-12 lg:px-8 px-3 pt-10">
               <div className=" col-span-12">
                 <div
                   className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
@@ -661,6 +664,12 @@ const Setting: React.FC = () => {
     </>
   );
 };
+
+const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: #5c2a28a3;
+  backdrop-filter: blur(12.8px);
+`;
 
 export default Setting;
 

@@ -21,8 +21,10 @@ const MainLayout = ({ Component, pageProps }) => {
   return (
     <>
       <Main className="ml-auto ms-auto">
-        <Header sidebar={sidebar} setSidebar={setSidebar} />
-        <AnimatePresence mode="wait" initial={false}>
+        {(router.pathname == "/" || router.pathname == "/dashboard") && (
+          <Header sidebar={sidebar} setSidebar={setSidebar} />
+        )}
+        <AnimatePresence mode="wait" initial={false} className="h-full">
           <motion.div
             key={router.route}
             initial={{ y: "50%", opacity: 0 }}
@@ -32,15 +34,19 @@ const MainLayout = ({ Component, pageProps }) => {
             <Component {...pageProps} />
           </motion.div>
         </AnimatePresence>
-        <Footer />
+        {(router.pathname == "/" || router.pathname == "/dashboard") && (
+          <Footer />
+        )}
       </Main>
     </>
   );
 };
 
 const Main = styled.main`
-  min-height: 100vh;
-  padding-top: 80px;
+  height: 100vh;
+  > div {
+    height: 100%;
+  }
   @media (max-width: 1024px) {
     width: 100%;
   }

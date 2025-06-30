@@ -10,6 +10,7 @@ import LnbitsTransaction from "./LnbitsTransaction";
 import { getUser } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
+import styled from "styled-components";
 
 const RecentTransaction = ({ setSetFilterType }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -35,6 +36,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [error, setError] = useState("");
   const [withdrawBoltz, setWithdrawBoltz] = useState([]);
   const [depositBoltz, setDepositBoltz] = useState([]);
+  const [boltzUSDC, setBoltzUSDC] = useState([]);
+  const [boltzBitcoin, setBoltzBitcoin] = useState([]);
 
   const selectOptions = [
     { value: "", label: "Select an option" },
@@ -327,7 +330,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       component: (
         <>
           {transactions.length > 0 ? (
-            <div className="bg-black/5 lg:p-4 rounded-lg p-3">
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
                 return (
                   <div key={date} className="py-3">
@@ -654,6 +657,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
         <LnbitsTransaction usd={4} setTransactions={setDepositBoltz} />
       ),
     },
+    {
+      title: "Boltz Lightning TPOS USDC",
+      component: <LnbitsTransaction usd={5} setTransactions={setBoltzUSDC} />,
+    },
+    {
+      title: "Boltz Lightning TPOS Bitcoin",
+      component: (
+        <LnbitsTransaction usd={6} setTransactions={setBoltzBitcoin} />
+      ),
+    },
   ];
 
   return (
@@ -704,7 +717,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
       {userAuth?.walletAddress ? (
         <>
-          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99]">
+          <div className="flex items-center gap-3 mb-3 justify-between relative z-[99] flex-wrap">
             <h4 className="m-0 text-xl">Recent Transaction</h4>
 
             <div className="flex gap-2 items-center">
@@ -813,6 +826,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                     dataToExport = sideshiftTxs; // Add this
                   else if (activeTab === 8) dataToExport = withdrawBoltz;
                   else if (activeTab === 9) dataToExport = depositBoltz;
+                  else if (activeTab === 10) dataToExport = boltzUSDC;
+                  else if (activeTab === 11) dataToExport = boltzBitcoin;
 
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
@@ -823,14 +838,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
                     setError("No data available to export.");
                   }
                 }}
-                className="px-4 py-2 bg-black/50 text-white rounded-md"
+                className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
               >
                 Export CSV
               </button>
               <div className="relative inline-block text-left">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="px-4 py-2 bg-black/50 text-white rounded-md"
+                  className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
                 >
                   Filters
                 </button>
@@ -865,7 +880,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </div>
           </div>
           <div className="py-2">
-            <div className="">{tabs[activeTab].component}</div>
+            <TabContent className="overflow-scroll max-h-[calc(100vh-240px)] scrollbar-none">
+              {tabs[activeTab].component}
+            </TabContent>
           </div>
         </>
       ) : (
@@ -885,6 +902,12 @@ const RecentTransaction = ({ setSetFilterType }) => {
     </>
   );
 };
+
+const TabContent = styled.div`
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 export default RecentTransaction;
 

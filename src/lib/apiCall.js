@@ -668,6 +668,37 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
   }
 };
 
+export const sendTransferDetail = async ({
+  email,
+  // name,
+  transferData,
+  subject,
+  type,
+}) => {
+  try {
+    return await fetch(`/api/send-email-transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type,
+        subject,
+        emailData: {
+          // name: name,
+          transferDetail: transferData,
+        },
+        email,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
 export const registerCoinosUser = async (username, password) => {
   try {
     try {

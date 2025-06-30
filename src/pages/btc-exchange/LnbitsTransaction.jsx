@@ -157,7 +157,7 @@ const LnbitsTransaction = ({
         } else {
           setBtcTransactions([]);
         }
-      } else {
+      } else if (usd === 4) {
         const response = await fetch("/api/deposit-transaction", {
           method: "POST",
           headers: {
@@ -165,6 +165,48 @@ const LnbitsTransaction = ({
           },
           body: JSON.stringify({
             email: userAuth?.email,
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
+        }
+      } else if (usd === 5) {
+        const response = await fetch("/api/withdraw-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userAuth?.email,
+            tpos: true,
+            type: "usdc",
+          }),
+        });
+
+        const { status, data } = await response.json();
+
+        if (status === "success" && data) {
+          const formattedTransactions = formatBitcoinTransactionData(data);
+          setBtcTransactions(formattedTransactions);
+        } else {
+          setBtcTransactions([]);
+        }
+      } else {
+        const response = await fetch("/api/withdraw-transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userAuth?.email,
+            tpos: true,
+            type: "bitcoin",
           }),
         });
 

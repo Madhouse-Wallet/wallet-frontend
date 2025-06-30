@@ -182,7 +182,6 @@ async function makeReapDbCall(
       }
 
       const userExist = await getUser(userEmail);
-      console.log("line-190", userExist, userEmail);
       if (!userExist) {
         return {
           success: false,
@@ -204,7 +203,6 @@ async function makeReapDbCall(
           status: 200,
         };
       } else if (endpoint.includes("/payments")) {
-        console.log("line-212", userExist?.userId?._id);
         responseData = await getPayments(userExist?.userId?._id);
       }
 
@@ -284,44 +282,50 @@ export const businessAccountApi = {
 // Parties API functions
 export const partiesApi = {
   createParty: async (partyData, userId) => {
-    const body = {
+    const baseAccount = {
+      type: "bank",
+      identifier: {
+        standard: partyData.identifier?.standard || "iban",
+        value: partyData.identifier?.value || "default_iban",
+      },
+      network: partyData.network || "SWIFT",
+      currencies: partyData.currencies || ["USD"],
+      provider: {
+        name: partyData.provider?.name || "Default Bank",
+        country: partyData.provider?.country || "US",
+        networkIdentifier: partyData.provider?.networkIdentifier || "DEFAULT01",
+        networkIntermediateIdentifier:
+          partyData.provider?.networkIntermediateIdentifier || "",
+      },
+      addresses: [
+        {
+          type: "postal",
+          street: partyData.address?.street || "Default Street",
+          city: partyData.address?.city || "Default City",
+          state: partyData.address?.state || "Default State",
+          country: partyData.address?.country || "US",
+          postalCode: partyData.address?.postalCode || "00000",
+        },
+      ],
+      ...(partyData.bankCode && { bankCode: partyData.bankCode }),
+      ...(partyData.swiftCode && { swiftCode: partyData.swiftCode }),
+    };
+
+    const baseBody = {
       type: partyData.type || "individual",
       name: {
         name: partyData.name?.name || "Default Name",
       },
-      accounts: partyData.accounts || [
-        {
-          type: "bank",
-          identifier: {
-            standard: partyData.identifier?.standard || "iban",
-            value: partyData.identifier?.value || "default_iban",
-          },
-          network: partyData.network || "SWIFT",
-          currencies: partyData.currencies || ["USD"],
-          provider: {
-            name: partyData.provider?.name || "Default Bank",
-            country: partyData.provider?.country || "US",
-            networkIdentifier:
-              partyData.provider?.networkIdentifier || "DEFAULT01",
-            networkIntermediateIdentifier:
-              partyData.provider?.networkIntermediateIdentifier || "",
-          },
-          addresses: [
-            {
-              type: "postal",
-              street: partyData.address?.street || "Default Street",
-              city: partyData.address?.city || "Default City",
-              state: partyData.address?.state || "Default State",
-              country: partyData.address?.country || "US",
-              postalCode: partyData.address?.postalCode || "00000",
-            },
-          ],
-        },
-      ],
+      accounts: partyData.accounts
+        ? partyData.accounts.map((acc) => ({
+            ...acc,
+            ...(partyData.bankCode && { bankCode: partyData.bankCode }),
+            ...(partyData.swiftCode && { swiftCode: partyData.swiftCode }),
+          }))
+        : [baseAccount],
     };
 
-    // return await makeReapApiCall("/parties", "POST", body);
-    return await makeReapDbCall("/parties", "POST", body, userId);
+    return await makeReapDbCall("/parties", "POST", baseBody, userId);
   },
 
   getParty: async (receivingPartyId) => {
@@ -515,12 +519,10 @@ const createPayment = async (paymentData, userId) => {
 
 const getPayments = async (userId) => {
   try {
-    console.log("line-498", userId);
     const apiResponse = await lambdaInvokeFunction(
       { userId, page: 1, limit: 20 },
       "madhouse-backend-production-getUserPayments"
     );
-    console.log("line-528", apiResponse);
     if (apiResponse?.status == "success") {
       return {
         status: "success",

@@ -26,7 +26,10 @@ import { getUser } from "@/lib/apiCall";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
 import Web3Interaction from "@/utils/web3Interaction";
 import { ethers } from "ethers";
+import { useRouter } from "next/router";
 const BTCEchange = () => {
+  const router = useRouter();
+
   const userAuth = useSelector((state: any) => state.Auth);
   const [btcExchange, setBtcExchange] = useState(false);
   const [loaderStatus, setLoaderStatus] = useState(false);
@@ -389,30 +392,69 @@ const BTCEchange = () => {
           document.body
         )}
       {loaderStatus && createPortal(<LoadingScreen />, document.body)}
-      <section className="relative dashboard  ">
-        <div className="container h-full relative">
-          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
-            <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
-                <div className="sectionHeader ">
-                  <div className="flex align-items-center gap-3">
-                    <BackBtn />
-                    <h4 className="m-0 text-24 font-bold -tracking-3  md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Send & Recieve
-                    </h4>
-                  </div>
+      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
+        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+          <div className="container mx-auto">
+            <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap">
+              {/* <div className="sectionHeader text-center w-full">
+                <div className="flex align-items-center justify-center gap-3">
+                  <BackBtn />
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Send & Recieve
+                  </h4>
+                </div>
+              </div> */}
+              <div className="left">
+                <h4 className="m-0 font-normal text-base flex items-center">
+                  <span className="font-bold ms-2 text-xl">
+                    {totalUsdBalance}
+                  </span>
+                </h4>
+              </div>
+              <div className="right">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => startSend()}
+                    className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
+                  >
+                    Send
+                  </button>
+                  <button
+                    onClick={() => startReceive()}
+                    className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
+                  >
+                    Receive
+                  </button>
+                  {/* <button
+                          onClick={() => setSendBitcoin(!sendBitcoin)}
+                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
+                        >
+                          Bridge
+                        </button> */}
                 </div>
               </div>
-              <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
+            </Nav>
+          </div>
+        </header>
+        <div className="container relative">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
+            {" "}
+            <div className="grid gap-3 grid-cols-12 lg:px-3 pt-3">
+              {/* <div className="my-2 col-span-12 p-2 px-3 px-lg-4">
                 <div className=" px-lg-4 ">
                   <TopHead className="flex p-3 py-lg-3 px-lg-4 items-center justify-between flex-wrap md:px-[26px] md:py-[36px] overflow-hidden bg-white/5 gap-4">
-                    <div className="left ">
-                      <h4 className="m-0 font-normal text-base flex items-center">
-                        <span className="font-bold ms-2 text-2xl">
-                          {totalUsdBalance}
-                        </span>
-                      </h4>
-                    </div>
+                    <div className="left "></div>
                     <div className="right">
                       <div className="flex items-center gap-2">
                         <button
@@ -427,17 +469,11 @@ const BTCEchange = () => {
                         >
                           Receive
                         </button>
-                        {/* <button
-                          onClick={() => setSendBitcoin(!sendBitcoin)}
-                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
-                        >
-                          Bridge
-                        </button> */}
                       </div>
                     </div>
                   </TopHead>
                 </div>
-              </div>
+              </div> */}
               <div className="my-2 col-span-12">
                 <div className="px-3 px-lg-4">
                   <div className="sectionHeader ">
@@ -452,6 +488,12 @@ const BTCEchange = () => {
     </>
   );
 };
+
+const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: #5c2a28a3;
+  backdrop-filter: blur(12.8px);
+`;
 
 const TopHead = styled.div`
   // backdrop-filter: blur(39.6px);
@@ -485,3 +527,17 @@ const TopHead = styled.div`
 `;
 
 export default BTCEchange;
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    stroke-width="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);

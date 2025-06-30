@@ -554,182 +554,168 @@ const WithdrawalSwap = () => {
           />,
           document.body
         )}
-      <section className="py-3">
-        <div className="container">
-          <div className="grid gap-3 grid-cols-12">
-            <div className="col-span-12">
-              <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
-                <div className="top flex items-center justify-between">
-                  <p className="m-0 font-medium">Bridge</p>
-                </div>
-                <div className="contentBody">
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
-                          value={fromAmount}
-                          onChange={handleFromAmountChange}
-                          placeholder="0.0"
-                        />
-                        <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
-                          Ethereum Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
-                          <span className="icn">
-                            <Image
-                              src={
-                                process.env.NEXT_PUBLIC_IMAGE_URL +
-                                "tethergold.png"
-                              }
-                              alt="logo"
-                              height={22}
-                              width={22}
-                              className="max-w-full object-contain w-auto smlogo"
-                            />
-                          </span>{" "}
-                          <span className="text-[12px]">
-                            {bridgeDirection.from}
-                          </span>
-                        </button>
-                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
-                          {/* {bridgeDirection.from} */}
-                          XAUT
-                        </h6>
-                      </div>
-                    </div>
+      <div className="grid gap-3 grid-cols-12">
+        <div className="col-span-12">
+          <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
+            <div className="top flex items-center justify-between">
+              <p className="m-0 font-medium">Bridge</p>
+            </div>
+            <div className="contentBody">
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={fromAmount}
+                      onChange={handleFromAmountChange}
+                      placeholder="0.0"
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Ethereum Network
+                    </h6>
                   </div>
-                  <div className="py-2 my-[-30px] text-center">
-                    <button
-                      className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  <div className="right text-right">
+                    <button className="px-2 py-1 flex items-center gap-2 text-base whitespace-nowrap">
+                      <span className="icn">
+                        <Image
+                          src={
+                            process.env.NEXT_PUBLIC_IMAGE_URL + "tethergold.png"
+                          }
+                          alt="logo"
+                          height={22}
+                          width={22}
+                          className="max-w-full object-contain w-auto smlogo"
+                        />
+                      </span>{" "}
+                      <span className="text-[12px]">
+                        {bridgeDirection.from}
+                      </span>
+                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance: {parseFloat(goldBalance).toFixed(6)}{" "}
+                      {/* {bridgeDirection.from} */}
+                      XAUT
+                    </h6>
+                  </div>
+                </div>
+              </div>
+              <div className="py-2 my-[-30px] text-center">
+                <button
+                  className="bg-black border-[4px] border-[#30190f] shadow p-1 rounded-xl"
+                  disabled={true}
+                >
+                  {swapIcn}
+                </button>
+              </div>
+              <div className="py-2">
+                <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
+                  <div className="left">
+                    <input
+                      type="text"
+                      className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
+                      value={toAmount}
+                      placeholder="0.0"
                       disabled={true}
-                    >
-                      {swapIcn}
+                      readOnly
+                    />
+                    <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
+                      Base Network
+                    </h6>
+                  </div>
+                  <div className="right text-right">
+                    <button className="px-2 py-1 flex items-center gap-2 text-base">
+                      <span className="icn">
+                        {bridgeDirection.to === "USDC" ? (
+                          usdcIcn
+                        ) : (
+                          <Image
+                            src={process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"}
+                            alt="logo"
+                            height={22}
+                            width={22}
+                            className="max-w-full object-contain w-auto smlogo"
+                          />
+                        )}
+                      </span>{" "}
+                      <span className="text-[12px]">{bridgeDirection.to}</span>
                     </button>
-                  </div>
-                  <div className="py-2">
-                    <div className="bg-black/50 rounded-xl px-3 py-4 flex items-center justify-between text-xs relative">
-                      <div className="left">
-                        <input
-                          type="text"
-                          className="bg-transparent border-0 sm:text-xl text-base outline-0 absolute top-0 left-0 z-[999] w-full h-full pl-3 pr-[140px]"
-                          value={toAmount}
-                          placeholder="0.0"
-                          disabled={true}
-                          readOnly
-                        />
-                        <h6 className="m-0 font-medium absolute left-[10px] sm:bottom-[8px] bottom-[15px] text-[9px] sm:text-xs text-[9px] text-white/50">
-                          Base Network
-                        </h6>
-                      </div>
-                      <div className="right text-right">
-                        <button className="px-2 py-1 flex items-center gap-2 text-base">
-                          <span className="icn">
-                            {bridgeDirection.to === "USDC" ? (
-                              usdcIcn
-                            ) : (
-                              <Image
-                                src={
-                                  process.env.NEXT_PUBLIC_IMAGE_URL + "usd.png"
-                                }
-                                alt="logo"
-                                height={22}
-                                width={22}
-                                className="max-w-full object-contain w-auto smlogo"
-                              />
-                            )}
-                          </span>{" "}
-                          <span className="text-[12px]">
-                            {bridgeDirection.to}
-                          </span>
-                        </button>
-                        <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
-                          Balance:{" "}
-                          {Number(usdcBalance) < 0.01
-                            ? "0"
-                            : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
-                          {bridgeDirection.to}
-                        </h6>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Gas information display */}
-                  {gasRequiredWei !== "0" && (
-                    <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      <p className="m-0 text-amber-500">
-                        Gas required: {ethers.utils.formatEther(gasRequiredWei)}{" "}
-                        ETH
-                      </p>
-                      {usdcToEthShift && (
-                        <p className="m-0 text-green-500">
-                          Gas swap prepared: USDC → ETH
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* SideShift transaction info */}
-                  {goldToUsdcShift && (
-                    <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                      <p className="m-0 text-blue-500">
-                        Deposit Address:{" "}
-                        {goldToUsdcShift.depositAddress?.slice(0, 10)}...
-                      </p>
-                      <p className="m-0 text-blue-500">
-                        Expected USDC:{" "}
-                        {goldToUsdcShift.settleAmount
-                          ? goldToUsdcShift.settleAmount
-                          : "N/A"}
-                      </p>
-                    </div>
-                  )}
-
-                  {error && (
-                    <div className="text-red-500 text-xs mt-1">{error}</div>
-                  )}
-
-                  {amountError && (
-                    <div className="text-red-500 text-xs mt-1">
-                      {amountError}
-                    </div>
-                  )}
-
-                  <div className="ps-3 flex flex-col gap-1 mt-2">
-                    {gasPricee && (
-                      <label className="form-label m-0 font-semibold text-xs block">
-                        Estimated Max Gas Fee: {gasPricee} USDC
-                      </label>
-                    )}
-
-                    {gasPriceError && (
-                      <div className="text-red-500 text-xs">
-                        {gasPriceError}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-3 py-2">
-                    <button
-                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
-                      onClick={() => setTrxnApproval(true)}
-                      disabled={isButtonDisabled()}
-                    >
-                      {getButtonText()}
-                    </button>
+                    <h6 className="m-0 font-medium  sm:text-xs text-[9px] text-white/50">
+                      Balance:{" "}
+                      {Number(usdcBalance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(usdcBalance).toFixed(2)}{" "}
+                      {bridgeDirection.to}
+                    </h6>
                   </div>
                 </div>
+              </div>
+
+              {/* Gas information display */}
+              {gasRequiredWei !== "0" && (
+                <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                  <p className="m-0 text-amber-500">
+                    Gas required: {ethers.utils.formatEther(gasRequiredWei)} ETH
+                  </p>
+                  {usdcToEthShift && (
+                    <p className="m-0 text-green-500">
+                      Gas swap prepared: USDC → ETH
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* SideShift transaction info */}
+              {goldToUsdcShift && (
+                <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
+                  <p className="m-0 text-blue-500">
+                    Deposit Address:{" "}
+                    {goldToUsdcShift.depositAddress?.slice(0, 10)}...
+                  </p>
+                  <p className="m-0 text-blue-500">
+                    Expected USDC:{" "}
+                    {goldToUsdcShift.settleAmount
+                      ? goldToUsdcShift.settleAmount
+                      : "N/A"}
+                  </p>
+                </div>
+              )}
+
+              {error && (
+                <div className="text-red-500 text-xs mt-1">{error}</div>
+              )}
+
+              {amountError && (
+                <div className="text-red-500 text-xs mt-1">{amountError}</div>
+              )}
+
+              <div className="ps-3 flex flex-col gap-1 mt-2">
+                {gasPricee && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPricee} USDC
+                  </label>
+                )}
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+              </div>
+
+              <div className="mt-3 py-2">
+                <button
+                  className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
+                    isButtonDisabled() ? "opacity-70" : ""
+                  }`}
+                  onClick={() => setTrxnApproval(true)}
+                  disabled={isButtonDisabled()}
+                >
+                  {getButtonText()}
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </>
   );
 };
