@@ -62,8 +62,6 @@ export default async function handler(
         direction: "send",
         instant_settlement: true,
         onchain_address: finalRoute.depositAddress,
-        feerate: true,
-        feerate_value: 0,
       },
       token,
       2
