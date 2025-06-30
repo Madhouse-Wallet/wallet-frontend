@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { filterAmountInput, isValidNumber } from "@/utils/helper";
+import { filterAmountInput, isValidName, isValidNumber } from "@/utils/helper";
 import { swap, swapUSDC } from "@/utils/morphoSwap";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { getAccount, sendTransaction } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
+import { getUser, sendTransferDetail } from "@/lib/apiCall";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
+  const [parties, setParties] = useState([]);
+  const [selectedParty, setSelectedParty] = useState("");
 
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,18 +40,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     metadata: "",
   });
 
-  const currencyOptions = [
-    { value: "USD", label: "USD - US Dollar" },
-    { value: "EUR", label: "EUR - Euro" },
-  ];
-
-  const networksOptions = [
-    { value: "SWIFT", label: "SWIFT" },
-    { value: "CHATS", label: "CHATS" },
-    { value: "FPS", label: "FPS" },
-    { value: "FAST", label: "FAST" },
-    { value: "SEPA", label: "SEPA" },
-  ];
+  const networksOptions = [{ value: "SWIFT", label: "SWIFT" }];
 
   const purposeOfPaymentOptions = [
     { value: "payment_for_goods", label: "Payment for Goods" },
@@ -67,6 +59,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const handleOffRampChange = (e) => {
     const { id, value } = e.target;
+    if (id === "description" && !isValidName(value, 100)) {
+      return;
+    }
 
     if (id === "amount") {
       const filteredValue = filterAmountInput(value, 2, 20);
@@ -106,7 +101,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
-
+    setSelectedParty("");
     try {
       const paymentData = {
         receivingParty: {
@@ -156,8 +151,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         },
       };
       const userId = userAuth?.id;
-      const resultt = await usdcBridge();
-      console.log("line-152", resultt);
+      // const resultt = await usdcBridge();
       const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: {
@@ -173,21 +167,39 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const result = await response.json();
 
       if (result.paymentId) {
+        const userExist = await getUser(userAuth.email);
+        if (!userExist) {
+          return;
+        }
+        const transferData = {
+          businessAccountDetail: userExist?.userId?.businessAccountDetail || {},
+          receivingPartyDetail: userExist?.userId?.receivingPartyDetail || {},
+          transfer: result || {},
+        };
+
+        console.log("line-180", transferData);
+        const obj = {
+          // email: userAuth.email,
+          email: process.env.NEXT_PUBLIC_REAP_EMAIL_URL,
+          transferData: JSON.stringify(transferData),
+          subject: "Transfer Detail for Reap",
+          type: "transferDetail",
+        };
+        await sendTransferDetail(obj);
         setSuccessMessage("Payment created successfully!");
-        // Clear form after successful submission
         setOffRampForm({
           receivingPartyType: "company",
           receivingPartyName: "",
           accountNumber: "",
           bankName: "",
-          country: "US",
+          country: "",
           network: "",
           street: "",
           city: "",
           state: "",
           postalCode: "",
           amount: "",
-          currency: "USD",
+          currency: "",
           description: "",
           purposeOfPayment: "payment_for_goods",
           sourceOfFunds: "business_income",
@@ -221,14 +233,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       });
 
       const result = await response.json();
-      console.log("line-214", result);
       if (result.data.length) {
         setPayments(Array.isArray(result.data) ? result.data : [result.data]);
       } else {
         setError("Please make payment first.");
       }
     } catch (err) {
-      console.error("Error fetching payment history:", err);
       setError(
         "An error occurred while fetching payment history. Please try again."
       );
@@ -237,11 +247,67 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
   };
 
+  const fetchParties = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/parties/${userAuth?.email}`, {
+        method: "GET",
+      });
+
+      const result = await response.json();
+      if (result) {
+        const data = result;
+        setParties(Array.isArray(data) ? data : []);
+      } else {
+        throw new Error("Failed to fetch parties");
+      }
+    } catch (err) {
+      setError("Failed to load bank accounts. Please try again.");
+      setParties([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (tab === 1) {
       fetchPaymentHistory();
     }
   }, [tab]);
+
+  useEffect(() => {
+    fetchParties();
+  }, []);
+
+  const handlePartySelection = (e) => {
+    const partyId = e.target.value;
+    setSelectedParty(partyId);
+
+    if (partyId) {
+      const selectedPartyData = parties.find(
+        (party) => party.data.id === partyId
+      );
+      if (selectedPartyData) {
+        const account = selectedPartyData.data.accounts[0]; // Taking first account
+        const address = account.addresses[0]; // Taking first address
+        console.log(account);
+        setOffRampForm((prev) => ({
+          ...prev,
+          receivingPartyName: selectedPartyData.data.name.name,
+          accountNumber: account.identifier.value,
+          bankName: account.provider.name,
+          currency: account.currencies[0],
+          network: account.network,
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          country: address.country,
+          postalCode: address.postalCode,
+        }));
+      }
+    }
+  };
 
   const usdcBridge = async () => {
     const amountInBaseUnits = ethers.utils
@@ -397,17 +463,45 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   </select>
                 </div>
 
+                <div className="col-span-12">
+                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                    Select Bank Account
+                  </label>
+                  <select
+                    id="selectedParty"
+                    value={selectedParty}
+                    onChange={handlePartySelection}
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    <option className="text-black" value="">
+                      Select a bank account
+                    </option>
+                    {parties.map((party) => (
+                      <option
+                        className="text-black"
+                        key={party.data.id}
+                        value={party.data.id}
+                      >
+                        {party.data.name.name} -{" "}
+                        {party.data.accounts[0]?.provider?.name} (
+                        {party.data.accounts[0]?.identifier?.value})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Receiving Party Name
+                    Bank Account Name
                   </label>
                   <input
                     id="receivingPartyName"
                     type="text"
                     value={offRampForm.receivingPartyName}
+                    disabled={selectedParty !== ""}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter receiving party name"
+                    placeholder="Enter Bank Account Name"
                     required
                   />
                 </div>
@@ -420,6 +514,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     id="accountNumber"
                     type="text"
                     value={offRampForm.accountNumber}
+                    disabled={selectedParty !== ""}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter account number"
@@ -436,47 +531,28 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     type="text"
                     value={offRampForm.bankName}
                     onChange={handleOffRampChange}
+                    disabled={selectedParty !== ""}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter bank name"
                     required
                   />
                 </div>
 
-                {/* <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Network Identifier
-                  </label>
-                  <input
-                    id="networkIdentifier"
-                    type="text"
-                    value={offRampForm.networkIdentifier}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter network identifier"
-                    required
-                  />
-                </div> */}
-
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
                     Currency
                   </label>
-                  <select
+
+                  <input
                     id="currency"
+                    type="text"
                     value={offRampForm.currency}
                     onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                  >
-                    {currencyOptions.map((option) => (
-                      <option
-                        className="text-black"
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    disabled={selectedParty !== ""}
+                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                    placeholder="Enter currency name"
+                    required
+                  />
                 </div>
 
                 <div className="md:col-span-6 col-span-12">
@@ -487,6 +563,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     id="network"
                     value={offRampForm.network}
                     onChange={handleOffRampChange}
+                    disabled={true}
                     className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
                   >
                     {networksOptions.map((option) => (
@@ -510,6 +587,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     type="text"
                     value={offRampForm.street}
                     onChange={handleOffRampChange}
+                    disabled={selectedParty !== ""}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter street address"
                     required
@@ -524,6 +602,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     id="city"
                     type="text"
                     value={offRampForm.city}
+                    disabled={selectedParty !== ""}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter city"
@@ -539,6 +618,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     id="state"
                     type="text"
                     value={offRampForm.state}
+                    disabled={selectedParty !== ""}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter state"
@@ -555,6 +635,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     type="text"
                     value={offRampForm.postalCode}
                     onChange={handleOffRampChange}
+                    disabled={selectedParty !== ""}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
                     placeholder="Enter postal code"
                     required
@@ -635,7 +716,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   />
                 </div>
 
-                <div className="col-span-12">
+                {/* <div className="col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
                     Metadata (Optional)
                   </label>
@@ -647,7 +728,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     placeholder="Enter additional metadata"
                     rows="3"
                   />
-                </div>
+                </div> */}
 
                 <div className="col-span-12">
                   <div className="flex items-center justify-center gap-3">

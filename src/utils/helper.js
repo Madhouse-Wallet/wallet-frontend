@@ -29,6 +29,12 @@ export function isValidNumber(input, maxLength = 20) {
   return regex.test(input) && input.length <= maxLength;
 }
 
+export function isValidAlphanumeric(input, maxLength = 50) {
+  if (input === "") return true; // allow clearing
+  const regex = /^[A-Za-z0-9\s]*$/; // letters, numbers, and optional spaces
+  return regex.test(input) && input.length <= maxLength;
+}
+
 export function filterHexInput(value, allowedCharsRegex, maxLength) {
   if (!value || typeof value !== "string") return "";
 
