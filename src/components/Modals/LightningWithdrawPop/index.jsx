@@ -7,10 +7,12 @@ import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
 
 const LightningWithdrawPop = ({
-   withdrawUsdcPop, setWithdrawUsdcPop,
+  withdrawUsdcPop,
+  setWithdrawUsdcPop,
   lightning,
   setLightning,
-  withdrawPop, setWithdrawPop
+  withdrawPop,
+  setWithdrawPop,
 }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,18 +52,17 @@ const LightningWithdrawPop = ({
       <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
-        <buttonbuy
-          onClick={handleLightning}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </buttonbuy>
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          {" "}
+          <button
+            onClick={handleLightning}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
@@ -69,7 +70,6 @@ const LightningWithdrawPop = ({
               <div className="py-2">
                 <button
                   onClick={() => setWithdrawUsdcPop(!withdrawUsdcPop)}
-
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
