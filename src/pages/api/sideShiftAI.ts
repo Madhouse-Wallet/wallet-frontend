@@ -652,40 +652,53 @@ export const createEthMainnetToUsdcbaseShift = async (
 
 
 
-export const createVariableShift = async (
-  settleAddress: string,
-  refundAddress: string | null,
-  affiliateId: string,
-  depositCoin: string,
-  settleCoin: string,
-  depositNetwork: string,
-  settleNetwork: string | null,
-  secretKey: string
-): Promise<any> => {
+ export const createLbtcToUsdcShift = async (
+  btcAmount: string,
+  userBaseWallet: string,
+  secretKey: string,
+  affiliateId: string
+): Promise<ShiftResponse> => {
   try {
-    const payload = {
-      settleAddress,
-      refundAddress,
-      affiliateId,
-      depositCoin,
-      settleCoin,
-      depositNetwork,
-      settleNetwork,
-    };
-
-    const response = await axios.post<any>(
-      "https://sideshift.ai/api/v2/shifts/variable",
-      payload,
+    // Step 1: Request a quote
+    const quoteResponse = await axios.post<QuoteResponse>(
+      "https://sideshift.ai/api/v2/quotes",
+      {
+        affiliateId,
+        depositCoin: "BTC",
+        depositNetwork: "liquid",
+        settleCoin: "USDC",
+        settleNetwork: "base",
+        depositAmount: btcAmount,
+      },
       {
         headers: {
           "Content-Type": "application/json",
           "x-sideshift-secret": secretKey,
-          // Add IP header if needed here, e.g. "x-user-ip": FIXED_IP_ADDRESS,
+          "x-user-ip": FIXED_IP_ADDRESS,
         },
       }
     );
 
-    return response.data;
+    const quoteData = quoteResponse.data;
+
+    // Step 2: Create a fixed shift using the quote
+    const shiftResponse = await axios.post<ShiftResponse>(
+      "https://sideshift.ai/api/v2/shifts/fixed",
+      {
+        settleAddress: userBaseWallet,
+        affiliateId,
+        quoteId: quoteData.id,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    return shiftResponse.data;
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error(
@@ -693,7 +706,7 @@ export const createVariableShift = async (
         error.response?.data || error.message
       );
       throw new Error(
-        `SideShift variable shift failed: ${error.response?.data?.error?.message || error.message}`
+        `SideShift operation failed: ${error.response?.data?.error?.message || error.message}`
       );
     }
     throw error;

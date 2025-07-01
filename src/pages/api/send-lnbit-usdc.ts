@@ -7,20 +7,11 @@ import {
   createBlotzAutoReverseSwap,
   userLogIn,
 } from "./lnbit";
-import { createVariableShift } from "./sideShiftAI";
-
-const getDestinationAddress = async (walletAddress: any) => {
+import { createLbtcToUsdcShift } from "./sideShiftAI";
+import { reverseSwap } from "./botlzFee";
+const getDestinationAddress = async (walletAddress: any, amount: any) => {
   try {
-    const shift = await createVariableShift(
-      walletAddress,
-      process.env.NEXT_PUBLIC_REFUND_ADDRESS!,
-      process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID!,
-      "BTC",
-      "USDC",
-      "liquid",
-      "base",
-      process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY!
-    ) as any;
+    const shift = await createLbtcToUsdcShift(amount, walletAddress, process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY!, process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID!) as any;
     console.log("shift--> response", shift)
     return {
       status: true,
@@ -48,8 +39,10 @@ export default async function handler(
     let token = getUserToken?.data?.token as any;
     // const satoshiAmount = amount * 100000000;
     const satoshiAmount = amount;
+    let calculateOnChainAmount = await reverseSwap(satoshiAmount, "L-BTC") as any;
+    console.log("calculateOnChainAmount-->", calculateOnChainAmount)
 
-    const finalRoute = await getDestinationAddress(wallet);
+    const finalRoute = await getDestinationAddress(wallet, (calculateOnChainAmount.onchainAmount / 100000000));
     if (!finalRoute?.status) return res.status(400).json({ status: "failure", message: ("error during final route : " + finalRoute.message) });
 
 
