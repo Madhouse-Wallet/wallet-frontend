@@ -108,9 +108,9 @@ export default function Identity() {
         <meta name="description" content="Stripe Identity Verification" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className=" realtive identity h-full flex items-center sm:pt-[70px]">
+      <section className=" realtive identity h-full flex items-center sm:pt-[70px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+        <header className="siteHeader sm:fixed top-0 py-2 w-full z-[999]">
           <div className="container mx-auto">
             <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
               <div className="left">

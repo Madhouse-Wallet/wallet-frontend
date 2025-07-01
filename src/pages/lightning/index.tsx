@@ -12,8 +12,8 @@ import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
-import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop"
-import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop"
+import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop";
+import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop";
 import { splitAddress } from "../../utils/globals";
 
 import { createPortal } from "react-dom";
@@ -26,7 +26,7 @@ const BTCDebitCard: React.FC = () => {
   const [depositPop, setDepositPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
-  const [lightning, setLightning,] = useState(false);
+  const [lightning, setLightning] = useState(false);
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
@@ -200,9 +200,9 @@ const BTCDebitCard: React.FC = () => {
           />,
           document.body
         )}
-      <section className="relative dashboard  h-full flex items-center sm:pt-[70px]">
+      <section className="relative dashboard  h-full flex items-center sm:pt-[70px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+        <header className="siteHeader sm:fixed top-0 py-2 w-full z-[999]">
           <div className="container mx-auto">
             <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
               <div className="left">
@@ -292,7 +292,6 @@ const BTCDebitCard: React.FC = () => {
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
                         <button
-
                           onClick={() => setLightning(!lightning)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >

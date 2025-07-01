@@ -41,9 +41,9 @@ const TransferMorpho = () => {
   }, []);
   return (
     <>
-      <section className="relative curve h-full flex items-center sm:pt-[70px]">
+      <section className="relative curve h-full flex items-center sm:pt-[70px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+        <header className="siteHeader sm:fixed top-0 py-2 w-full z-[999]">
           <div className="container mx-auto">
             <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-between flex-wrap gap-2">
               <div className="left">
