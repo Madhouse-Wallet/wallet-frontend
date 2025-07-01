@@ -344,7 +344,7 @@ const DepositSwap = () => {
         )}
       <div className="grid gap-3 grid-cols-12">
         <div className="col-span-12">
-          <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-3">
+          <div className="bg-black/50 rounded-xl p-3">
             <div className="top flex items-center justify-between">
               <p className="m-0 font-medium">Deposit</p>
             </div>

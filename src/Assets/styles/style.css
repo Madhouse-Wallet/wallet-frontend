@@ -64,7 +64,7 @@ body::-webkit-scrollbar,
 .pageCard {
   /* border-top-left-radius: 20px; */
   border-radius: 20px;
-  height: calc(100vh - 140px);
+  max-height: calc(100vh - 140px);
   /* padding-bottom: 200px !important; */
   /* min-height: calc(100vh - 79px); */
   width: 100% !important;
@@ -131,6 +131,6 @@ input.form-control {
 }
 @media (max-width: 575px) {
   .pageCard {
-    height: calc(100vh - 260px);
+    max-height: calc(100vh - 260px);
   }
 }
