@@ -269,7 +269,7 @@ export const getLnbitId = async (email) => {
 
 //send-lnbit-usdc
 export const sendLnbitUsdc = async (
-  wallet, 
+  wallet,
   amount,
   lnbitId_3,
   lnbitWalletId_3,
@@ -285,7 +285,7 @@ export const sendLnbitUsdc = async (
           amount,
           lnbitId_3,
           lnbitWalletId_3,
-          lnbitAdminKey_3
+          lnbitAdminKey_3,
         }),
       })
         .then((res) => res.json())
@@ -301,7 +301,6 @@ export const sendLnbitUsdc = async (
     return false;
   }
 };
-
 
 export const sendLnbit = async (
   amount,
@@ -320,7 +319,7 @@ export const sendLnbit = async (
           onchain_address,
           lnbitId_3,
           lnbitWalletId_3,
-          lnbitAdminKey_3
+          lnbitAdminKey_3,
         }),
       })
         .then((res) => res.json())
@@ -603,6 +602,32 @@ export const updtUser = async (findData, updtData) => {
         body: JSON.stringify({
           findData,
           updtData,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
+export const deleteBankAccountt = async (email, partyId) => {
+  try {
+    try {
+      console.log("line-541");
+      return await fetch(`/api/delete-account`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          partyId,
         }),
       })
         .then((res) => res.json())

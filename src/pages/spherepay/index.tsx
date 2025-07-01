@@ -31,6 +31,7 @@ function Spharepay() {
     };
 
     try {
+      console.log("line-34");
       const response = await SpherePayAPI.createCustomer(customerData);
       return response;
     } catch (error: any) {
