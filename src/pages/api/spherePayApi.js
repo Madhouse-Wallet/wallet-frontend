@@ -42,7 +42,7 @@ const SpherePayAPI = {
    */
   createCustomer: async (customerData) => {
     try {
-      const response = await sphereAPIClient.post("/v1/customer", customerData);
+      const response = await sphereAPIClient.post("/v2/customer", customerData);
       return response.data;
     } catch (error) {
       return handleError(error);
@@ -127,8 +127,8 @@ const SpherePayAPI = {
   addBankAccount: async (customerId, bankAccountData) => {
     try {
       const response = await sphereAPIClient.post(
-        // `/v2/customer/${customerId}/bank-account`,
-        `/v1/bankAccount`,
+        `/v2/customers/${customerId}/bank-account`,
+        // `/v1/bankAccount`,
         bankAccountData
       );
       return response.data;
@@ -189,6 +189,7 @@ const SpherePayAPI = {
     try {
       const response = await sphereAPIClient.get(
         `/v1/bankAccount/${customerId}`
+        // `v2/customers/${customerId}/bank-account`
       );
       return response.data;
     } catch (error) {

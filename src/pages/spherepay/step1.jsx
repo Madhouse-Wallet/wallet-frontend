@@ -34,23 +34,32 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
       setError("Please enter a valid email address");
       return;
     }
+    const userExist = await getUser(email);
+    // const response = await createNewCustomer("individual", email);
+    // const message = response?.error?.message;
 
-    const response = await createNewCustomer("individual", email);
-    const message = response?.error?.message;
+    // const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
+    // const customerId = match ? match[1] : null;
 
-    const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
-    const customerId = match ? match[1] : null;
+    // if (response && response.error) {
+    //   if (
+    //     response.error.error === "customer/duplicate" ||
+    //     (response.error.message && response.error.message.includes("duplicate"))
+    //   ) {
+    //     setCustomerID(customerId);
+    //     setStep("PolicyKycStep");
+    //   } else if (
+    //     response.error.message === "Expected country, got undefined or null"
+    //   ) {
+    //     setStep("select-country");
+    //   }
+    // }
 
-    if (response && response.error) {
-      if (
-        response.error.error === "customer/duplicate" ||
-        (response.error.message && response.error.message.includes("duplicate"))
-      ) {
-        setCustomerID(customerId);
+    if (userExist) {
+      if (userExist?.userId?.spherepayId) {
+        setCustomerID(userExist?.userId?.spherepayId);
         setStep("PolicyKycStep");
-      } else if (
-        response.error.message === "Expected country, got undefined or null"
-      ) {
+      } else {
         setStep("select-country");
       }
     }

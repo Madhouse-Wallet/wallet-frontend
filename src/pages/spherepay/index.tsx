@@ -10,6 +10,7 @@ import TermsOfServiceStep from "./TermsOfServiceStep.jsx";
 import VerifyIdentity from "./VerifyIdentity.jsx";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { getUser } from "@/lib/apiCall.js";
 
 function Spharepay() {
   const userAuth = useSelector((state: any) => state.Auth);
@@ -45,23 +46,34 @@ function Spharepay() {
       // return;
     }
     const fetchData = async () => {
-      const response = await createNewCustomer("individual", userAuth?.email);
-      const message = response?.error?.message;
+      const userExist = await getUser(userAuth?.email);
 
-      const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
-      const customerId = match ? match[1] : null;
+      // const response = await createNewCustomer("individual", userAuth?.email);
+      // const message = response?.error?.message;
 
-      if (response && response.error) {
-        if (
-          response.error.error === "customer/duplicate" ||
-          (response.error.message &&
-            response.error.message.includes("duplicate"))
-        ) {
-          setCustomerID(customerId);
+      // const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
+      // const customerId = match ? match[1] : null;
+
+      // if (response && response.error) {
+      //   if (
+      //     response.error.error === "customer/duplicate" ||
+      //     (response.error.message &&
+      //       response.error.message.includes("duplicate"))
+      //   ) {
+      //     setCustomerID(customerId);
+      //     setStep("PolicyKycStep");
+      //   } else if (
+      //     response.error.message === "Expected country, got undefined or null"
+      //   ) {
+      //     setStep("select-country");
+      //   }
+      // }
+
+      if (userExist) {
+        if (userExist?.userId?.spherepayId) {
+          setCustomerID(userExist?.userId?.spherepayId);
           setStep("PolicyKycStep");
-        } else if (
-          response.error.message === "Expected country, got undefined or null"
-        ) {
+        } else {
           setStep("select-country");
         }
       }
