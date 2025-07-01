@@ -202,8 +202,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       let result = await reverseSwap(numberValue, "BTC")
       if (result) {
         setFeeDetails({
-          onchainAmount: result.onchainAmount,
-          amount: numberValue,
+          onchainAmount: result.onchainAmount
         })
       }
     }
@@ -292,7 +291,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                   )}
                 </div>
                 <div className="py-2">
-                  <p className="m-0 text-xs">Fees: {feeDetails?.amount-parseInt(feeDetails?.onchainAmount,10)} sats</p>
+                  <p className="m-0 text-xs">Fees: {parseInt(amount,10)-parseInt(feeDetails?.onchainAmount,10) || 0} sats</p>
                 </div>
                 <div className="btnWrpper mt-3">
                   <button
