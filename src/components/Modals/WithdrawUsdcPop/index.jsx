@@ -257,7 +257,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Withdraw In Dollars
+                Withdraw to Dollars
               </h5>
             </div>
             <div className="modalBody">
