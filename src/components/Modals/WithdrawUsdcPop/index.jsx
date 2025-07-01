@@ -7,6 +7,7 @@ import { getUser, sendLnbitUsdc } from "../../../lib/apiCall.js";
 import { calcLnToChainFeeWithSwapAmount, calcLnToChainFeeWithReceivedAmount } from "../../../utils/globals.js"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
+import { reverseSwap } from "../../../pages/api/botlzFee.ts";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -38,13 +39,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [feeDetails, setFeeDetails] = useState({
-    boltzFee: "",
-    platformFee: "",
-    lockupFee: "",
-    claimFee: "",
-    totalFees: "",
-    amountReceived: "",
-    swapAmount: ""
+    onchainAmount: "",
   });
 
   const [commonError, setCommonError] = useState(false);
@@ -83,7 +78,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       } else if (amount > 24000000) {
         setError("Maximum value is 24,000,000");
         return;
-      } else if (feeDetails?.swapAmount > lightningBalance) {
+      } else if (feeDetails?.onchainAmount > lightningBalance) {
         setError("Insufficient Balance");
         return;
       }
@@ -178,13 +173,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
 
   const clearFeeDetails = async () => {
     setFeeDetails({
-      boltzFee: "",
-      platformFee: "",
-      lockupFee: "",
-      claimFee: "",
-      totalFees: "",
-      amountReceived: "",
-      swapAmount: ""
+      onchainAmount: "",
     })
   }
 
@@ -212,9 +201,11 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       clearFeeDetails()
     } else {
       setError("");
-      let result = await calcLnToChainFeeWithReceivedAmount(numberValue)
+      let result = await reverseSwap(numberValue, "L-BTC")
       if (result) {
-        setFeeDetails(result)
+        setFeeDetails({
+          onchainAmount: result.onchainAmount
+        })
       }
     }
   };
@@ -299,12 +290,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
                   {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
                 </div>
                 <div className="py-2">
-                  {/* //  feeDetails?.swapAmount  feeDetails?.lockupFee feeDetails?.claimFee  feeDetails?.boltzFee */}
-
-                  <p className="m-0 text-xs">Boltz Fee (0.5%): {feeDetails?.boltzFee}</p>
-                  <p className="m-0 text-xs">Network Lockup tx Fee: {feeDetails?.claimFee}</p>
-                  <p className="m-0 text-xs">Network Claim tx Fee: {feeDetails?.lockupFee}</p>
-                  <p className="m-0 text-xs">Total Pay: {feeDetails?.swapAmount}</p>
+                  <p className="m-0 text-xs">Onchain Amount: {feeDetails?.onchainAmount}</p>
                 </div>
                 <div className="btnWrpper mt-3">
                   <button
