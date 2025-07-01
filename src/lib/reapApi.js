@@ -1,13 +1,12 @@
 // lib/reapApi.js
 import { lambdaInvokeFunction } from "../lib/apiCall";
 const REAP_CONFIG = {
-  baseUrl: "https://sandbox.payments.reap.global/api",
+  baseUrl: process.env.NEXT_PUBLIC_REAP_BASE_URL,
   headers: {
     accept: "application/json",
     "content-type": "application/json",
-    "x-reap-api-key": process.env.REAP_API_KEY || "uopb3ocp093mutg0p8v2gde94",
-    "x-reap-entity-id":
-      process.env.REAP_ENTITY_ID || "7a7e03f5-6da3-45f1-aecf-d8c5aa48ab2c",
+    "x-reap-api-key": process.env.NEXT_PUBLIC_REAP_API_KEY,
+    "x-reap-entity-id": process.env.NEXT_PUBLIC_REAP_ENTITY_ID,
   },
 };
 
@@ -113,25 +112,16 @@ async function makeReapDbCall(
             },
           },
         };
+
+        // Save to database
+        await updateUser({ _id: userId }, updateField);
+
+        return {
+          success: true,
+          data: responseData,
+          status: 201,
+        };
       } else if (endpoint.includes("/parties")) {
-        // Create receiving party response structure
-        // responseData = {
-        //   id: `party_${Date.now()}`,
-        //   type: body.type,
-        //   name: body.name,
-        //   accounts: body.accounts,
-        // };
-
-        // updateField = {
-        //   $set: {
-        //     receivingPartyDetail: {
-        //       status: "created",
-        //       data: responseData,
-        //       createdAt: new Date().toISOString(),
-        //     },
-        //   },
-        // };
-
         responseData = {
           id: `party_${Date.now()}`,
           type: body.type,
@@ -148,37 +138,39 @@ async function makeReapDbCall(
             },
           },
         };
+
+        // Save to database
+        await updateUser({ _id: userId }, updateField);
+
+        return {
+          success: true,
+          data: responseData,
+          status: 201,
+        };
       } else if (endpoint.includes("/payments")) {
-        // Create payment response structure
         responseData = {
-          id: `payment_${Date.now()}`,
+          paymentId: `payment_${Date.now()}`,
+          status: "confirmed",
+          validFrom: body.validFrom || new Date().toISOString(),
+          validTo:
+            body.validTo ||
+            new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default +24hrs
+          payment: body.payment,
           receivingParty: body.receivingParty,
-          payment: {
-            ...body.payment,
-            status: "pending",
-            createdAt: new Date().toISOString(),
-          },
+          createdAt: new Date().toISOString(),
         };
 
-        updateField = {
-          $set: {
-            payment: {
-              status: "created",
-              data: responseData,
-              createdAt: new Date().toISOString(),
-            },
-          },
+        updateField = responseData;
+
+        // Save to database
+        await createPayment(updateField, userId);
+
+        return {
+          success: true,
+          data: responseData,
+          status: 201,
         };
       }
-
-      // Save to database
-      await updateUser({ _id: userId }, updateField);
-
-      return {
-        success: true,
-        data: responseData,
-        status: 201,
-      };
     } else if (method === "GET") {
       // For GET operations - retrieve from database
       if (!userEmail) {
@@ -190,7 +182,6 @@ async function makeReapDbCall(
       }
 
       const userExist = await getUser(userEmail);
-
       if (!userExist) {
         return {
           success: false,
@@ -212,7 +203,7 @@ async function makeReapDbCall(
           status: 200,
         };
       } else if (endpoint.includes("/payments")) {
-        responseData = userExist?.userId.payment;
+        responseData = await getPayments(userExist?.userId?._id);
       }
 
       if (!responseData || !responseData.data) {
@@ -291,44 +282,50 @@ export const businessAccountApi = {
 // Parties API functions
 export const partiesApi = {
   createParty: async (partyData, userId) => {
-    const body = {
+    const baseAccount = {
+      type: "bank",
+      identifier: {
+        standard: partyData.identifier?.standard || "iban",
+        value: partyData.identifier?.value || "default_iban",
+      },
+      network: partyData.network || "SWIFT",
+      currencies: partyData.currencies || ["USD"],
+      provider: {
+        name: partyData.provider?.name || "Default Bank",
+        country: partyData.provider?.country || "US",
+        networkIdentifier: partyData.provider?.networkIdentifier || "DEFAULT01",
+        networkIntermediateIdentifier:
+          partyData.provider?.networkIntermediateIdentifier || "",
+      },
+      addresses: [
+        {
+          type: "postal",
+          street: partyData.address?.street || "Default Street",
+          city: partyData.address?.city || "Default City",
+          state: partyData.address?.state || "Default State",
+          country: partyData.address?.country || "US",
+          postalCode: partyData.address?.postalCode || "00000",
+        },
+      ],
+      ...(partyData.bankCode && { bankCode: partyData.bankCode }),
+      ...(partyData.swiftCode && { swiftCode: partyData.swiftCode }),
+    };
+
+    const baseBody = {
       type: partyData.type || "individual",
       name: {
         name: partyData.name?.name || "Default Name",
       },
-      accounts: partyData.accounts || [
-        {
-          type: "bank",
-          identifier: {
-            standard: partyData.identifier?.standard || "iban",
-            value: partyData.identifier?.value || "default_iban",
-          },
-          network: partyData.network || "SWIFT",
-          currencies: partyData.currencies || ["USD"],
-          provider: {
-            name: partyData.provider?.name || "Default Bank",
-            country: partyData.provider?.country || "US",
-            networkIdentifier:
-              partyData.provider?.networkIdentifier || "DEFAULT01",
-            networkIntermediateIdentifier:
-              partyData.provider?.networkIntermediateIdentifier || "",
-          },
-          addresses: [
-            {
-              type: "postal",
-              street: partyData.address?.street || "Default Street",
-              city: partyData.address?.city || "Default City",
-              state: partyData.address?.state || "Default State",
-              country: partyData.address?.country || "US",
-              postalCode: partyData.address?.postalCode || "00000",
-            },
-          ],
-        },
-      ],
+      accounts: partyData.accounts
+        ? partyData.accounts.map((acc) => ({
+            ...acc,
+            ...(partyData.bankCode && { bankCode: partyData.bankCode }),
+            ...(partyData.swiftCode && { swiftCode: partyData.swiftCode }),
+          }))
+        : [baseAccount],
     };
 
-    // return await makeReapApiCall("/parties", "POST", body);
-    return await makeReapDbCall("/parties", "POST", body, userId);
+    return await makeReapDbCall("/parties", "POST", baseBody, userId);
   },
 
   getParty: async (receivingPartyId) => {
@@ -352,7 +349,7 @@ export const partiesApi = {
 
 // Payment API functions
 export const paymentApi = {
-  createPayment: async (paymentData) => {
+  createPayment: async (paymentData, userId) => {
     const body = {
       receivingParty: {
         type: paymentData.receivingParty?.type || "company",
@@ -415,7 +412,8 @@ export const paymentApi = {
       },
     };
 
-    return await makeReapApiCall("/payments", "POST", body);
+    // return await makeReapApiCall("/payments", "POST", body);
+    return await makeReapDbCall("/payments", "POST", body, userId);
   },
 
   getPayment: async (paymentId) => {
@@ -426,7 +424,14 @@ export const paymentApi = {
         status: 400,
       };
     }
-    return await makeReapApiCall(`/payments/${paymentId}`, "GET");
+    // return await makeReapApiCall(`/payments/${paymentId}`, "GET");
+    return await makeReapDbCall(
+      `/payments/${paymentId}`,
+      "GET",
+      null,
+      null,
+      paymentId
+    );
   },
 };
 
@@ -473,6 +478,56 @@ const getUser = async (userEmail) => {
         status: "success",
         message: apiResponse?.message,
         userId: apiResponse?.data,
+      };
+    } else {
+      return {
+        status: "failure",
+        message: apiResponse?.message,
+        error: apiResponse?.error,
+      };
+    }
+  } catch (error) {
+    console.error("Error adding user:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const createPayment = async (paymentData, userId) => {
+  try {
+    const apiResponse = await lambdaInvokeFunction(
+      { ...paymentData, userId: userId },
+      "madhouse-backend-production-addPayment"
+    );
+    if (apiResponse?.status == "success") {
+      return {
+        status: "success",
+        message: apiResponse?.message,
+        userId: apiResponse?.data,
+      };
+    } else {
+      return {
+        status: "failure",
+        message: apiResponse?.message,
+        error: apiResponse?.error,
+      };
+    }
+  } catch (error) {
+    console.error("Error adding user:", error);
+    return { error: "Internal server error" };
+  }
+};
+
+const getPayments = async (userId) => {
+  try {
+    const apiResponse = await lambdaInvokeFunction(
+      { userId, page: 1, limit: 20 },
+      "madhouse-backend-production-getUserPayments"
+    );
+    if (apiResponse?.status == "success") {
+      return {
+        status: "success",
+        message: apiResponse?.message,
+        data: apiResponse?.data,
       };
     } else {
       return {

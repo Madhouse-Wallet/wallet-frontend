@@ -112,7 +112,9 @@ body::-webkit-scrollbar,
 .Toastify__toast-container {
   z-index: 999999 !important;
 }
-
+input {
+  opacity: 1 !important;
+}
 input.form-control {
   height: 45px;
 }

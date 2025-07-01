@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { isValidName, isValidNumber } from "@/utils/helper";
+import {
+  isValidAlphanumeric,
+  isValidName,
+  isValidNumber,
+} from "@/utils/helper";
 import { useSelector } from "react-redux";
 
 const AddBankDetail = ({ step, setStep, customerId }) => {
@@ -13,8 +17,11 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     street: "",
     city: "",
     state: "",
-    country: "US",
+    country: "",
     postalCode: "",
+    currency: "",
+    bankCode: "",
+    swiftCode: "",
   });
 
   const [parties, setParties] = useState([]);
@@ -26,29 +33,19 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: "", message: "" });
 
-  const accounttype = [
-    { value: "checking", label: "Checking" },
-    { value: "savings", label: "Saving" },
-  ];
-
-  const countries = [
-    { value: "US", label: "United States" },
-    { value: "CA", label: "Canada" },
-    { value: "GB", label: "United Kingdom" },
-    { value: "AU", label: "Australia" },
-    // Add more countries as needed
-  ];
-
-  const networkOptions = [
-    { value: "SWIFT", label: "SWIFT" },
-    { value: "ACH", label: "ACH" },
-    { value: "WIRE", label: "Wire Transfer" },
-  ];
-
-  const identifierStandards = [
-    { value: "iban", label: "IBAN" },
-    { value: "account_number", label: "Account Number" },
-    { value: "routing_number", label: "Routing Number" },
+  const currencies = [
+    { value: "", label: "Select Currency" },
+    { value: "HKD", label: "HKD - Hong Kong Dollar" },
+    { value: "SGD", label: "SGD - Singapore Dollar" },
+    { value: "USD", label: "USD - US Dollar" },
+    { value: "GBP", label: "GBP - Pound Sterling" },
+    { value: "AED", label: "AED - UAR Dirham" },
+    { value: "AUD", label: "AUD - Australian Dollar" },
+    { value: "CHF", label: "CHF - Swiss Franc" },
+    { value: "CNY", label: "CNY - Chinese Yuan" },
+    { value: "JPY", label: "JPY - Japan Yen" },
+    { value: "NZD", label: "NZD - New Zealand Dollar" },
+    { value: "EUR", label: "EUR - Euro" },
   ];
 
   useEffect(() => {
@@ -61,11 +58,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     setIsLoading(true);
     setError(null);
     try {
-      // This would typically fetch all parties for the current user/customer
-      // For now, we'll implement a simple approach
-      // You might want to modify this based on your backend structure
-      // const response = await fetch("/api/parties");
-
       const response = await fetch(`/api/parties/${userAuth?.email}`, {
         method: "GET",
       });
@@ -96,10 +88,19 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       (id === "accountName" ||
         id === "bankName" ||
         id === "city" ||
-        id === "state") &&
+        id === "state" ||
+        id === "country") &&
       !isValidName(value, 50)
     ) {
       return; // invalid name, do not update
+    }
+
+    if (id === "bankCode" && !isValidNumber(value, 3)) {
+      return;
+    }
+
+    if (id === "swiftCode" && !isValidAlphanumeric(value, 50)) {
+      return;
     }
 
     if (
@@ -131,6 +132,10 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       newErrors.bankName = "Bank name is required";
     }
 
+    if (!formData.currency.trim()) {
+      newErrors.currency = "Please select currency.";
+    }
+
     // if (!formData.accountType.trim()) {
     //   newErrors.accountType = "Account type is required";
     // }
@@ -153,6 +158,10 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
     if (!formData.state.trim()) {
       newErrors.state = "State is required";
+    }
+
+    if (!formData.country.trim()) {
+      newErrors.country = "Country is required";
     }
 
     if (!formData.postalCode.trim()) {
@@ -189,7 +198,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
               value: formData.accountNumber,
             },
             network: "SWIFT", // You can make this dynamic if needed
-            currencies: ["USD"], // You can make this dynamic
+            currencies: [formData.currency], // You can make this dynamic
             provider: {
               name: formData.bankName,
               country: formData.country,
@@ -207,6 +216,8 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
             ],
           },
         ],
+        swiftCode: formData.swiftCode,
+        bankCode: formData.bankCode,
       };
       const userId = userAuth?.id;
       const response = await fetch("/api/parties/create", {
@@ -239,8 +250,11 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
           street: "",
           city: "",
           state: "",
-          country: "US",
+          country: "",
           postalCode: "",
+          currency: "",
+          bankCode: "",
+          swiftCode: "",
         });
 
         // Switch to List tab and fetch updated data
@@ -278,7 +292,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
   // Function to get party details for display
   const getPartyDisplayInfo = (partyy) => {
-    console.log("line-281", partyy);
     const party = partyy?.data;
     const account = party.accounts?.[0] || {};
     const address = account.addresses?.[0] || {};
@@ -290,7 +303,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       // accountType: account.type || "bank",
       accountNumber: account.identifier?.value || "N/A",
       // routingNumber: account.provider?.networkIdentifier || "N/A",
-      status: party.status || "pending",
+      status: party.status || "active",
       currency: account.currencies?.[0] || "USD",
       created: party.createdAt || party.created || new Date().toISOString(),
       network: account.network || "N/A",
@@ -431,29 +444,84 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   )}
                 </div>
 
-                {/* <div className="md:col-span-6 col-span-12">
+                <div className="md:col-span-4 col-span-12">
                   <label
-                    htmlFor="routingNumber"
+                    htmlFor="currency"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    Routing Number
+                    Currency
                   </label>
-                  <input
-                    id="routingNumber"
-                    type="text"
-                    value={formData.routingNumber}
+                  <select
+                    id="currency"
+                    value={formData.currency}
                     onChange={handleChange}
-                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
-                      errors.routingNumber ? "border-red-500" : ""
-                    }`}
-                    placeholder="Enter routing number"
-                  />
-                  {errors.routingNumber && (
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    {currencies.map((option) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {errors.currency && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
-                      {errors.routingNumber}
+                      {errors.currency}
                     </p>
                   )}
-                </div> */}
+                </div>
+
+                <div className="md:col-span-4 col-span-12">
+                  <label
+                    htmlFor="bankCode"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Bank Code
+                  </label>
+                  <input
+                    id="bankCode"
+                    type="text"
+                    value={formData.bankCode}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.bankCode ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Bank Code"
+                  />
+                  {errors.bankCode && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.bankCode}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-4 col-span-12">
+                  <label
+                    htmlFor="swiftCode"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Swift Code
+                  </label>
+                  <input
+                    id="swiftCode"
+                    type="text"
+                    value={formData.swiftCode}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.swiftCode ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Swift Code"
+                  />
+                  {errors.swiftCode && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.swiftCode}
+                    </p>
+                  )}
+                </div>
 
                 <div className="col-span-12">
                   <h5 className="text-lg font-semibold mb-3 text-white/80">
@@ -540,22 +608,21 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   >
                     Country
                   </label>
-                  <select
+                  <input
                     id="country"
+                    type="text"
                     value={formData.country}
                     onChange={handleChange}
-                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                  >
-                    {countries.map((option) => (
-                      <option
-                        className="text-black"
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.country ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Country"
+                  />
+                  {errors.country && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.country}
+                    </p>
+                  )}
                 </div>
 
                 <div className="md:col-span-4 col-span-12">

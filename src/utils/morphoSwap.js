@@ -125,7 +125,7 @@ export async function swapUSDC(
     // Get the transaction data for the swap
     const routeData = await enso.getRouterData({
       fromAddress: fromAddress,
-      receiver: "0x68cB688964bafb1c21976714E2070dA2eacE9521",
+      receiver: process.env.NEXT_PUBLIC_REAP_RECEIVER_ADDRESS,
       chainId: chainId,
       amountIn: amountIn,
       tokenIn: tokenIn,
