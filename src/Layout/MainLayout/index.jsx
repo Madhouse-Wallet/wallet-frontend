@@ -20,7 +20,9 @@ const MainLayout = ({ Component, pageProps }) => {
   }, [ensDomain, userAuth?.login]);
   return (
     <>
-      <Main className="ml-auto ms-auto">
+      <Main
+        className={`${router.pathname === "/" || router.pathname === "/dashboard" ? "h-[100dvh] pt-[80px]" : "h-[100dvh]"} ml-auto ms-auto`}
+      >
         {(router.pathname == "/" || router.pathname == "/dashboard") && (
           <Header sidebar={sidebar} setSidebar={setSidebar} />
         )}
@@ -43,7 +45,6 @@ const MainLayout = ({ Component, pageProps }) => {
 };
 
 const Main = styled.main`
-  height: 100vh;
   > div {
     height: 100%;
   }

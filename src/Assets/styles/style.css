@@ -24,10 +24,9 @@
   /* background-image: url(../Images//umbrel/1.jpg); */
   background-attachment: fixed;
   background-size: cover;
-  height: 100vh;
+  /* height: 100vh;
   max-height: 100vh;
-  /* height: -webkit-fill-available; */
-  overflow: hidden;
+  overflow: hidden; */
 }
 html {
   -webkit-text-size-adjust: 100%;
@@ -64,7 +63,7 @@ body::-webkit-scrollbar,
 .pageCard {
   /* border-top-left-radius: 20px; */
   border-radius: 20px;
-  max-height: calc(100vh - 140px);
+  max-height: calc(100vh - 180px);
   /* padding-bottom: 200px !important; */
   /* min-height: calc(100vh - 79px); */
   width: 100% !important;
