@@ -443,7 +443,7 @@ const DepositSwap = () => {
               {depositAddress && (
                 <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
                   <p className="m-0 text-amber-500">
-                    Deposit Address: {depositAddress.slice(0, 10)}...
+                    Deposit Address confirmed
                     {depositAddress.slice(-8)}
                   </p>
                   <p className="m-0 text-green-500">
