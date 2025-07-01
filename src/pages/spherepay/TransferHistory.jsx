@@ -47,7 +47,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     setError("");
     try {
       const response = await SpherePayAPI.getCustomer(
-        // "customer_80e5b83cddc547ae8e5a167a71ee550b"
+        // "customer_63f1b9fa29584c1d912945667a8e095e"
         customerId
       );
 
@@ -60,7 +60,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         ) {
           const accountDetailsPromises =
             response.data.customer.bankAccounts.map((bankAccountId) =>
-              SpherePayAPI.getBankAccountDetail(bankAccountId)
+              SpherePayAPI.getBankAccountDetail(bankAccountId, customerId)
             );
 
           const accountDetailsResponses = await Promise.all(

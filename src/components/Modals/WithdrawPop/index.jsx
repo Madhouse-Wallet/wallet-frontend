@@ -6,6 +6,7 @@ import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 import { calcLnToChainFeeWithSwapAmount, calcLnToChainFeeWithReceivedAmount } from "../../../utils/globals.js"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
+import { reverseSwap } from "../../../pages/api/botlzFee.ts";
 import Image from "next/image.js";
 
 const getSecretData = async (storageKey, credentialId) => {
@@ -38,13 +39,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [feeDetails, setFeeDetails] = useState({
-    boltzFee: "",
-    platformFee: "",
-    lockupFee: "",
-    claimFee: "",
-    totalFees: "",
-    amountReceived: "",
-    swapAmount: ""
+    onchainAmount: "",
   });
 
   const [commonError, setCommonError] = useState(false);
@@ -56,8 +51,8 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
     try {
       let data = JSON.parse(userAuth?.webauthKey);
       let callGetSecretData = await getSecretData(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.storageKeyEncrypt,
+        data?.credentialIdEncrypt
       );
       if (callGetSecretData?.status) {
         return JSON.parse(callGetSecretData?.secret);
@@ -83,7 +78,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       } else if (amount > 24000000) {
         setError("Maximum value is 24,000,000");
         return;
-      } else if (feeDetails?.swapAmount > lightningBalance) {
+      } else if (feeDetails?.onchainAmount > lightningBalance) {
         setError("Insufficient Balance");
         return;
       }
@@ -176,13 +171,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
 
   const clearFeeDetails = async () => {
     setFeeDetails({
-      boltzFee: "",
-      platformFee: "",
-      lockupFee: "",
-      claimFee: "",
-      totalFees: "",
-      amountReceived: "",
-      swapAmount: ""
+      onchainAmount: "",
     })
   }
 
@@ -210,9 +199,11 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
       clearFeeDetails()
     } else {
       setError("");
-      let result = await calcLnToChainFeeWithReceivedAmount(numberValue)
+      let result = await reverseSwap(numberValue, "BTC")
       if (result) {
-        setFeeDetails(result)
+        setFeeDetails({
+          onchainAmount: result.onchainAmount
+        })
       }
     }
   };
@@ -256,7 +247,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             onClick={() => setWithdrawPop(!withdrawPop)}
             type="button"
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-            // style={{ border: "1px solid #5f5f5f59" }}
+          // style={{ border: "1px solid #5f5f5f59" }}
           >
             {closeIcn}
           </button>{" "}
@@ -300,12 +291,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                   )}
                 </div>
                 <div className="py-2">
-                  {/* //  feeDetails?.swapAmount  feeDetails?.lockupFee feeDetails?.claimFee  feeDetails?.boltzFee */}
-
-                  <p className="m-0 text-xs">Boltz Fee (0.5%): {feeDetails?.boltzFee}</p>
-                  <p className="m-0 text-xs">Network Lockup tx Fee: {feeDetails?.claimFee}</p>
-                  <p className="m-0 text-xs">Network Claim tx Fee: {feeDetails?.lockupFee}</p>
-                  <p className="m-0 text-xs">Total Pay: {feeDetails?.swapAmount}</p>
+                  <p className="m-0 text-xs">Onchain Amount: {feeDetails?.onchainAmount}</p>
                 </div>
                 <div className="btnWrpper mt-3">
                   <button

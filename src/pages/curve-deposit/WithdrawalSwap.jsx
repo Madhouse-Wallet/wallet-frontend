@@ -301,8 +301,8 @@ const WithdrawalSwap = () => {
       // Step 1: Retrieve Secret
       const data = JSON.parse(userAuth?.webauthKey);
       const retrieveSecretCheck = await retrieveSecret(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.storageKeyEncrypt,
+        data?.credentialIdEncrypt
       );
       if (!retrieveSecretCheck?.status) {
         return;

@@ -6,7 +6,14 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
   const [formData, setFormData] = useState({
     accountName: "",
     bankName: "",
+    accountHolderName: "",
+    currency: "",
     accountType: "",
+    street: "",
+    city: "",
+    state: "",
+    country: "",
+    postalCode: "",
     accountNumber: "",
     routingNumber: "",
   });
@@ -23,6 +30,11 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
   const accounttype = [
     { value: "checking", label: "Checking" },
     { value: "savings", label: "Saving" },
+  ];
+
+  const currencyOptions = [
+    { value: "usd", label: "USD - US Dollar" },
+    { value: "eur", label: "EUR - Euro" },
   ];
 
   useEffect(() => {
@@ -45,7 +57,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
         if (customer.bankAccounts && customer.bankAccounts.length > 0) {
           const accountDetailsPromises = customer.bankAccounts.map(
-            (bankAccountId) => SpherePayAPI.getBankAccountDetail(bankAccountId)
+            (bankAccountId) => SpherePayAPI.getBankAccountDetail(bankAccountId,customerId)
           );
 
           const accountDetailsResponses = await Promise.all(
@@ -105,15 +117,26 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
     // Apply different rules based on the field
     if (
-      (id === "accountName" || id === "bankName") &&
+      (id === "accountName" ||
+        id === "bankName" ||
+        id === "city" ||
+        id === "accountHolderName") &&
       !isValidName(value, 30)
     ) {
       return; // invalid id, do not update
     }
 
+    if (id === "state" && !isValidName(value, 2)) {
+      return;
+    }
+
+    if (id === "country" && !isValidName(value, 3)) {
+      return;
+    }
     if (
       (id === "accountNumber" && !isValidNumber(value, 15)) ||
-      (id === "routingNumber" && !isValidNumber(value, 15))
+      (id === "routingNumber" && !isValidNumber(value, 15)) ||
+      (id === "postalCode" && !isValidNumber(value, 10))
     ) {
       return; // invalid number, do not update
     }
@@ -139,8 +162,34 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       newErrors.bankName = "Bank name is required";
     }
 
+    if (!formData.accountHolderName.trim()) {
+      newErrors.accountHolderName = "Account holder name is required";
+    }
+    if (!formData.currency.trim()) {
+      newErrors.currency = "Please select currency.";
+    }
     if (!formData.accountType.trim()) {
       newErrors.accountType = "Account type is required";
+    }
+
+    if (!formData.street.trim()) {
+      newErrors.street = "Street address is required";
+    }
+
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required";
+    }
+
+    if (!formData.state.trim()) {
+      newErrors.state = "State is required";
+    }
+
+    if (!formData.country.trim()) {
+      newErrors.country = "Country is required";
+    }
+
+    if (!formData.postalCode.trim()) {
+      newErrors.postalCode = "Postal code is required";
     }
 
     if (!formData.accountNumber.trim()) {
@@ -171,20 +220,39 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     setSubmitMessage({ type: "", message: "" });
 
     try {
+      // const bankAccountData = {
+      //   // customer: customerId,
+      //   accountName: formData.accountName,
+      //   bankName: formData.bankName,
+      //   accountType: formData.accountType,
+      //   accountNumber: formData.accountNumber,
+      //   routingNumber: formData.routingNumber,
+      // };
+
       const bankAccountData = {
-        customer: customerId,
         accountName: formData.accountName,
         bankName: formData.bankName,
-        accountType: formData.accountType,
-        accountNumber: formData.accountNumber,
-        routingNumber: formData.routingNumber,
+        accountHolderName: formData.accountHolderName,
+        currency: formData.currency,
+        accountDetails: {
+          accountNumber: formData.accountNumber,
+          routingNumber: formData.routingNumber,
+          accountType: formData.accountType,
+        },
+        beneficiaryAddress: {
+          line1: formData.street,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country,
+          postalCode: formData.postalCode,
+        },
       };
 
       const response = await SpherePayAPI.addBankAccount(
         customerId,
         bankAccountData
       );
-
+      console.log("line-207", response);
       setSubmitMessage({
         type: "success",
         message: "Bank account added successfully!",
@@ -194,6 +262,13 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       setFormData({
         accountName: "",
         bankName: "",
+        currency: "",
+        accountHolderName: "",
+        street: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
         accountType: "",
         accountNumber: "",
         routingNumber: "",
@@ -256,10 +331,34 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12">
                   <label
-                    htmlFor="accountName"
+                    htmlFor="accountHolderName"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
                     Account Holder Name
+                  </label>
+                  <input
+                    id="accountHolderName"
+                    type="text"
+                    value={formData.accountHolderName}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.accountHolderName ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Name"
+                  />
+                  {errors.accountHolderName && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.accountHolderName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="accountName"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Account Name
                   </label>
                   <input
                     id="accountName"
@@ -309,16 +408,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   >
                     Account Type
                   </label>
-                  {/* <input
-                    id="accountType"
-                    type="text"
-                    value={formData.accountType}
-                    onChange={handleChange}
-                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
-                      errors.accountType ? "border-red-500" : ""
-                    }`}
-                    placeholder="Enter account type"
-                  /> */}
+
                   <select
                     id="accountType"
                     value={formData.accountType}
@@ -343,6 +433,31 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                       {errors.accountType}
                     </p>
                   )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                    Select Currency
+                  </label>
+                  <select
+                    id="currency"
+                    value={formData.currency}
+                    onChange={handleChange}
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    <option value="" disabled>
+                      Select Currency
+                    </option>
+                    {currencyOptions.map((option) => (
+                      <option
+                        className="text-black"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="md:col-span-6 col-span-12">
@@ -389,6 +504,132 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   {errors.routingNumber && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
                       {errors.routingNumber}
+                    </p>
+                  )}
+                </div>
+
+                <div className="col-span-12">
+                  <h5 className="text-lg font-semibold mb-3 text-white/80">
+                    Address Information
+                  </h5>
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="street"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Street Address
+                  </label>
+                  <input
+                    id="street"
+                    type="text"
+                    value={formData.street}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.street ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter street address"
+                  />
+                  {errors.street && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.street}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="city"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    City
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.city ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter city"
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.city}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-4 col-span-12">
+                  <label
+                    htmlFor="state"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    State
+                  </label>
+                  <input
+                    id="state"
+                    type="text"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.state ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter state"
+                  />
+                  {errors.state && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.state}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-4 col-span-12">
+                  <label
+                    htmlFor="country"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Country
+                  </label>
+                  <input
+                    id="country"
+                    type="text"
+                    value={formData.country}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.country ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Country"
+                  />
+                  {errors.country && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.country}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-4 col-span-12">
+                  <label
+                    htmlFor="postalCode"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Postal Code
+                  </label>
+                  <input
+                    id="postalCode"
+                    type="text"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.postalCode ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter postal code"
+                  />
+                  {errors.postalCode && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.postalCode}
                     </p>
                   )}
                 </div>

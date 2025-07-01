@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { useSelector } from "react-redux";
 import { BackBtn } from "@/components/common";
+import { updtUser } from "@/lib/apiCall";
 
 const Step3 = ({
   step,
@@ -35,6 +36,13 @@ const Step3 = ({
 
     try {
       const response = await SpherePayAPI.createCustomer(customerData);
+      let data = await updtUser(
+        { email: userAuth.email },
+        {
+          $set: { spherepayId: response?.id }, // Ensure this is inside `$set`
+        }
+      );
+      console.log("line-198", data);
       return response;
     } catch (error) {
       setError(error?.response?.data?.message || "Failed to create customer");
@@ -48,7 +56,7 @@ const Step3 = ({
     try {
       if (customerId === "") {
         const response = await createNewCustomer(email, countryCode, stateCode);
-
+        console.log("line-51", response);
         if (response && response.error) {
           if (
             response?.error?.response?.data?.error ===
@@ -61,10 +69,8 @@ const Step3 = ({
             );
           }
         } else {
-          const result = await SpherePayAPI.createTosLink(
-            response?.data?.customer?.id
-          );
-          setCustomerID(response?.data?.customer?.id);
+          const result = await SpherePayAPI.createTosLink(response?.id);
+          setCustomerID(response?.id);
           return result;
 
           // setStep("PolicyKycStep");
@@ -97,9 +103,9 @@ const Step3 = ({
           }
         } else {
           const result = await SpherePayAPI.createKycLink(
-            response?.data?.customer?.id
+            response?.id
           );
-          setCustomerID(response?.data?.customer?.id);
+          setCustomerID(response?.id);
           return result;
           // setStep("PolicyKycStep");
         }

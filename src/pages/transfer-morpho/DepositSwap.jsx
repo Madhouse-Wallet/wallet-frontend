@@ -202,8 +202,8 @@ const DepositSwap = () => {
 
     let data = JSON.parse(userAuth?.webauthKey);
     let retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeySecret,
-      data?.credentialIdSecret
+      data?.storageKeyEncrypt,
+      data?.credentialIdEncrypt
     );
     if (!retrieveSecretCheck?.status) {
       return;

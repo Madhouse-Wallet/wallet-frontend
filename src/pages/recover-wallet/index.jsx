@@ -126,8 +126,8 @@ const RecoverWallet = () => {
             JSON.stringify(secretObj)
           );
           if (storeData.status) {
-            let storageKeySecret = storeData?.storageKey;
-            let credentialIdSecret = storeData?.credentialId;
+            let storageKeyEncrypt = storeData?.storageKey;
+            let credentialIdEncrypt = storeData?.credentialId;
             try {
               let data = await updtUser(
                 { email: userExist?.userId?.email },
@@ -138,8 +138,8 @@ const RecoverWallet = () => {
                         email +
                         "_passkey_" +
                         (userExist?.userId?.totalPasskey + 1),
-                      storageKeySecret,
-                      credentialIdSecret,
+                      storageKeyEncrypt,
+                      credentialIdEncrypt,
                       displayName: "",
                       bitcoinWallet: bitcoinAddress
                     },
