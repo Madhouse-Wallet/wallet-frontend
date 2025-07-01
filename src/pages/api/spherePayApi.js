@@ -185,11 +185,11 @@ const SpherePayAPI = {
     }
   },
 
-  getBankAccountDetail: async (customerId) => {
+  getBankAccountDetail: async (bankAccountId, customerId) => {
     try {
       const response = await sphereAPIClient.get(
-        `/v1/bankAccount/${customerId}`
-        // `v2/customers/${customerId}/bank-account`
+        `/v1/bankAccount/${bankAccountId}`
+        // `v2/customers/${customerId}/bank-account/${bankAccountId}`
       );
       return response.data;
     } catch (error) {

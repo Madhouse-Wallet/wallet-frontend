@@ -57,7 +57,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
         if (customer.bankAccounts && customer.bankAccounts.length > 0) {
           const accountDetailsPromises = customer.bankAccounts.map(
-            (bankAccountId) => SpherePayAPI.getBankAccountDetail(bankAccountId)
+            (bankAccountId) => SpherePayAPI.getBankAccountDetail(bankAccountId,customerId)
           );
 
           const accountDetailsResponses = await Promise.all(
