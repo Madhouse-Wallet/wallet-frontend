@@ -447,7 +447,7 @@ const DepositSwap = () => {
                     {depositAddress.slice(-8)}
                   </p>
                   <p className="m-0 text-green-500">
-                    You will receive: {toAmount} PAXG
+                    You will receive: {toAmount} XAUt
                   </p>
                 </div>
               )}
