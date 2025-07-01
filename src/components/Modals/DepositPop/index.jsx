@@ -45,8 +45,8 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
     try {
       let data = JSON.parse(userAuth?.webauthKey);
       let callGetSecretData = await getSecretData(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.storageKeyEncrypt,
+        data?.credentialIdEncrypt
       );
       if (callGetSecretData?.status) {
         return JSON.parse(callGetSecretData?.secret);

@@ -124,8 +124,8 @@ const Setting: React.FC = () => {
       setLoader(true);
       let data = JSON.parse(userAuth?.webauthKey);
       let callGetSecretData = (await getSecretData(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.storageKeyEncrypt,
+        data?.credentialIdEncrypt
       )) as any;
       if (callGetSecretData?.status) {
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
@@ -147,7 +147,7 @@ const Setting: React.FC = () => {
   const verifyingUser = async () => {
     setloading(true);
     let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdSecret);
+    let userData = await verifyUser(data?.credentialIdEncrypt);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"

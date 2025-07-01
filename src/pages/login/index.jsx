@@ -94,8 +94,8 @@ const Login = () => {
         // userExist?.userId?
         if (userExist?.userId?.passkey?.length == 1) {
           let retrieveSecretCheck = await retrieveSecret(
-            userExist?.userId?.passkey[0].storageKeySecret,
-            userExist?.userId?.passkey[0].credentialIdSecret
+            userExist?.userId?.passkey[0].storageKeyEncrypt,
+            userExist?.userId?.passkey[0].credentialIdEncrypt
           );
           if (retrieveSecretCheck?.status) {
             // toast.success("Login Successfully!");
@@ -185,8 +185,8 @@ const Login = () => {
         return false;
       } else {
         let retrieveSecretCheck = await retrieveSecret(
-          passkey.storageKeySecret,
-          passkey.credentialIdSecret
+          passkey.storageKeyEncrypt,
+          passkey.credentialIdEncrypt
         );
         if (retrieveSecretCheck?.status) {
           // toast.success("Login Successfully!");

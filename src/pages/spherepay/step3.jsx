@@ -103,9 +103,9 @@ const Step3 = ({
           }
         } else {
           const result = await SpherePayAPI.createKycLink(
-            response?.data?.customer?.id
+            response?.id
           );
-          setCustomerID(response?.data?.customer?.id);
+          setCustomerID(response?.id);
           return result;
           // setStep("PolicyKycStep");
         }

@@ -22,7 +22,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     if (userAuth?.email) {
       setloading(true);
       let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdSecret);
+      let userData = await verifyUser(data?.credentialIdEncrypt);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"
@@ -42,7 +42,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     if (userAuth?.email) {
       setloadingFonbnk(true);
       let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdSecret);
+      let userData = await verifyUser(data?.credentialIdEncrypt);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"
@@ -62,7 +62,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     if (userAuth?.email) {
       setLoadingpayments(true);
       let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdSecret);
+      let userData = await verifyUser(data?.credentialIdEncrypt);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"

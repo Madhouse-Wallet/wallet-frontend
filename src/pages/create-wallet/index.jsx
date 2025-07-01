@@ -212,8 +212,8 @@ const CreateWallet = () => {
           safePrivateKey: safePrivateKey,
           seedPhrase: seedPhraseOwner,
         };
-        let storageKeySecret = "";
-        let credentialIdSecret = "";
+        let storageKeyEncrypt = "";
+        let credentialIdEncrypt = "";
         const userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status === "success") {
           setError("User Already Exist!");
@@ -225,8 +225,8 @@ const CreateWallet = () => {
           JSON.stringify(secretObj)
         );
         if (storeData.status) {
-          storageKeySecret = storeData?.storageKey;
-          credentialIdSecret = storeData?.credentialId;
+          storageKeyEncrypt = storeData?.storageKey;
+          credentialIdEncrypt = storeData?.credentialId;
           const userExist = await getUser(registerData.email);
           if (userExist.status && userExist.status === "success") {
             setError("User Already Exist!");
@@ -239,8 +239,8 @@ const CreateWallet = () => {
             [
               {
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                storageKeyEncrypt,
+                credentialIdEncrypt,
                 displayName: "",
                 bitcoinWallet,
               },
@@ -267,8 +267,8 @@ const CreateWallet = () => {
               email: registerData.email,
               webauthKey: JSON.stringify({
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                storageKeyEncrypt,
+                credentialIdEncrypt,
               }),
               id: data.userData._id,
               totalPasskey: 1,
@@ -283,8 +283,8 @@ const CreateWallet = () => {
               email: registerData.email,
               webauthKey: {
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                storageKeyEncrypt,
+                credentialIdEncrypt,
               },
               id: data.userData._id,
               totalPasskey: 1,
