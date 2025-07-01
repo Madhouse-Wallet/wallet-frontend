@@ -668,10 +668,10 @@ const WithdrawalSwap = () => {
               {/* SideShift transaction info */}
               {goldToUsdcShift && (
                 <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
-                  <p className="m-0 text-blue-500">
+                  <p className="m-0 text-amber-500">
                    Withdraw address confirmed
                   </p>
-                  <p className="m-0 text-blue-500">
+                  <p className="m-0 text-green-500">
                     Expected USDC:{" "}
                     {goldToUsdcShift.settleAmount
                       ? goldToUsdcShift.settleAmount
