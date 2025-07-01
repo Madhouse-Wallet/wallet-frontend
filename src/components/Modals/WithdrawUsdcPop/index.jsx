@@ -204,7 +204,8 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       let result = await reverseSwap(numberValue, "L-BTC")
       if (result) {
         setFeeDetails({
-          onchainAmount: result.onchainAmount
+          onchainAmount: result.onchainAmount,
+          amount: numberValue,
         })
       }
     }
@@ -290,7 +291,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
                   {commonError && (<p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>)}
                 </div>
                 <div className="py-2">
-                  <p className="m-0 text-xs">Fees: {numberValue-parseInt(feeDetails?.onchainAmount,10)}</p>
+                  <p className="m-0 text-xs">Fees: {feeDetails?.numberValue-parseInt(feeDetails?.onchainAmount,10)}</p>
                 </div>
                 <div className="btnWrpper mt-3">
                   <button
