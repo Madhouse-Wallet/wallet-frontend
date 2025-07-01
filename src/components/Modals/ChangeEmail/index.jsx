@@ -88,7 +88,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 passkeyCred: userAuth.passkeyValidatorNew,
                 webauthKey: userAuth.webauthKey,
                 id: userAuth.id,
-                signer: userAuth.signer,
                 ensName: userAuth.ensName || "",
                 ensSetup: userAuth.ensSetup || false,
                 multisigAddress: userAuth.multisigAddress,

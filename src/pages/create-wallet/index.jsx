@@ -263,7 +263,6 @@ const CreateWallet = () => {
               login: true,
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
-              signer: "",
               username: registerData.username,
               email: registerData.email,
               webauthKey: JSON.stringify({
@@ -280,7 +279,6 @@ const CreateWallet = () => {
               login: true,
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
-              signer: "",
               username: registerData.username,
               email: registerData.email,
               webauthKey: {

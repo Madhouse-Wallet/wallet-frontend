@@ -27,7 +27,6 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
             login: false,
             walletAddress: "",
             bitcoinWallet: "",
-            signer: "",
             ensName: "",
             ensSetup: false,
             username: "",

@@ -196,7 +196,6 @@ const Setting: React.FC = () => {
           login: false,
           walletAddress: "",
           bitcoinWallet: "",
-          signer: "",
           username: "",
           email: "",
           passkeyCred: "",

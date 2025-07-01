@@ -37,7 +37,6 @@ const Header: React.FC<HeaderProps> = () => {
             passkeyCred: newPasskeyValidator,
             webauthKey: userAuth.webauthKey,
             id: userAuth.id,
-            signer: userAuth.signer,
             multisigAddress: userAuth.multisigAddress,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,

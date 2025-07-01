@@ -23,7 +23,6 @@ const initialState = {
   id: (data?.id || ""),
   login: (data?.login || false),
   pos: (data?.pos || false),
-  signer: "",
   totalPasskey: (data?.totalPasskey || ""),
 };
 
@@ -40,7 +39,6 @@ export const authSlice = createSlice({
       state.bitcoinWallet = action.payload.bitcoinWallet;
       state.webauthKey = action.payload.webauthKey;
       state.id = action.payload.id;
-      state.signer = action.payload.signer;
       state.pos = (action.payload.pos || false);
       state.totalPasskey = (action.payload.totalPasskey || 1);
     },

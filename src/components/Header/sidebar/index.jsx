@@ -25,7 +25,6 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         walletAddress: "",
         bitcoinWallet: "",
         provider: "",
-        signer: "",
         username: "",
         multisigAddress: "",
         passkey2: "",
