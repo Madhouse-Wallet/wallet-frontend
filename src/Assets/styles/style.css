@@ -131,5 +131,6 @@ input.form-control {
 @media (max-width: 575px) {
   .pageCard {
     max-height: calc(100vh - 260px);
+    max-height: calc(100vh - 200px);
   }
 }
