@@ -60,7 +60,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         ) {
           const accountDetailsPromises =
             response.data.customer.bankAccounts.map((bankAccountId) =>
-              SpherePayAPI.getBankAccountDetail(bankAccountId)
+              SpherePayAPI.getBankAccountDetail(bankAccountId, customerId)
             );
 
           const accountDetailsResponses = await Promise.all(
