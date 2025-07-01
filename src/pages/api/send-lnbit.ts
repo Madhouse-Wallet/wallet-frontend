@@ -16,7 +16,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    const { amount, onchain_address, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 ="" } = req.body;
+    const { amount, onchain_address, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 = "" } = req.body;
     // const getToken = (await logIn(2)) as any;
     // let token = getToken?.data?.token;
     let getUserToken = (await userLogIn(2, lnbitId_3)) as any;
@@ -31,10 +31,12 @@ export default async function handler(
         direction: "send",
         instant_settlement: true,
         onchain_address: onchain_address,
+        feerate: true,
+        feerate_value: 0
       },
       token,
       2
-    )) as any; 
+    )) as any;
     console.log("data", data);
     if (data?.status) {
       const payInv = (await payInvoice(
