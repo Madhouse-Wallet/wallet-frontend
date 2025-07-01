@@ -29,7 +29,6 @@ const Header: React.FC<HeaderProps> = () => {
         dispatch(
           loginSet({
             login: userAuth.login,
-            username: userAuth.username,
             email: userAuth.email,
             pos: userAuth?.pos || false,
             walletAddress: userAuth.walletAddress,

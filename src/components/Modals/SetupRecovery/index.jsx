@@ -75,7 +75,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
           dispatch(
             loginSet({
               login: userAuth.login,
-              username: userAuth.username,
               bitcoinWallet: userAuth.bitcoinWallet,
               email: userAuth.email,
               walletAddress: userAuth.walletAddress,
@@ -106,7 +105,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               login: true,
               walletAddress: userAuth.walletAddress || "",
               bitcoinWallet: userAuth.bitcoinWallet || "",
-              username: userAuth.username,
               email: userAuth.email,
               passkeyCred: "",
               webauthKey: webAuthKeyStringObj,

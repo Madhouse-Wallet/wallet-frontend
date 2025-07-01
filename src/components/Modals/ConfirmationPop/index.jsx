@@ -29,7 +29,6 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
             bitcoinWallet: "",
             ensName: "",
             ensSetup: false,
-            username: "",
             email: "",
             passkeyCred: "",
             webauthKey: "",

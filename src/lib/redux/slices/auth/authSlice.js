@@ -18,7 +18,6 @@ const initialState = {
   walletAddress: (data?.walletAddress || ""),
   bitcoinWallet: (data?.bitcoinWallet || ""),
   webauthKey: ((data?.webauthKey && JSON.stringify(data?.webauthKey) )|| ""),
-  username: (data?.username || ""),
   email: (data?.email || ""),
   id: (data?.id || ""),
   login: (data?.login || false),
@@ -33,7 +32,6 @@ export const authSlice = createSlice({
   reducers: {
     loginSet: (state, action) => {
       state.login = action.payload.login;
-      state.username = action.payload.username;
       state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
       state.bitcoinWallet = action.payload.bitcoinWallet;

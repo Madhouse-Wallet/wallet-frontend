@@ -34,7 +34,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
       } else {
         let obj = {
           email: userAuth.email,
-          name: userAuth.username,
+          name: "",
           otp: OTP,
           subject: "Madhouse Account Verification OTP",
           type: "verifyOtp",
@@ -81,7 +81,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
             dispatch(
               loginSet({
                 login: userAuth.login,
-                username: userAuth.username,
                 email: email,
                 walletAddress: userAuth.walletAddress,
                 bitcoinWallet: userAuth.bitcoinWallet,
