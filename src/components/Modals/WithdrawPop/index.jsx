@@ -292,7 +292,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                   )}
                 </div>
                 <div className="py-2">
-                  <p className="m-0 text-xs">Fees: {feeDetails?.amount-parseInt(feeDetails?.onchainAmount,10)}</p>
+                  <p className="m-0 text-xs">Fees: {feeDetails?.amount-parseInt(feeDetails?.onchainAmount,10)} sats</p>
                 </div>
                 <div className="btnWrpper mt-3">
                   <button
