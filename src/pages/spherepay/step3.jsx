@@ -62,7 +62,7 @@ const Step3 = ({
           }
         } else {
           const setFee = await SpherePayAPI.transferFee({
-            bpsFee: "20",
+            bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
             targetCustomerId: response?.data?.customer?.id,
           });
           console.log("line-67", setFee);
@@ -102,7 +102,7 @@ const Step3 = ({
           }
         } else {
           const setFee = await SpherePayAPI.transferFee({
-            bpsFee: "20",
+            bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
             targetCustomerId: response?.data?.customer?.id,
           });
           console.log("line-67", setFee);

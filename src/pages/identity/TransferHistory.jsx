@@ -153,7 +153,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           },
         },
       };
-      const userId = userAuth?.id;
+      const userId = userAuth?.email;
       const resultt = await usdcBridge();
       if (!resultt) {
         return;

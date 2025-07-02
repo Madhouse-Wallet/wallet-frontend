@@ -4,6 +4,7 @@ import { filterAmountInput, isValidNumber } from "@/utils/helper";
 import { getAccount, sendTransaction, USDC_ABI } from "@/lib/zeroDev";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useSelector } from "react-redux";
+import { getUser, updtUser } from "@/lib/apiCall";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -186,6 +187,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       setSuccessMessage("Transfer initiated successfully!");
       console.log(response);
       setTransferData(response.data.transfer);
+      let data = await updtUser(
+        { email: userAuth?.email },
+        {
+          $push: {
+            spherePayTransferIds: response?.data?.transfer?.id,
+          },
+        }
+      );
+      console.log(data);
       // Clear form after successful submission
       setOnRampForm({
         currency: "",
@@ -289,6 +299,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         response,
         response?.data?.transfer?.instructions?.resource?.address
       );
+
       const tx = await sendUsdc(
         offRampForm.amount,
         response?.data?.transfer?.instructions?.resource?.address
@@ -297,6 +308,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         setError("USDC Transfer Failed");
         return;
       }
+      let data = await updtUser(
+        { email: userAuth?.email },
+        {
+          $push: {
+            spherePayTransferIds: response?.data?.transfer?.id,
+          },
+        }
+      );
+      console.log(data);
       setOffRampForm({
         currency: "",
         transferMethod: "",
@@ -323,10 +343,36 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const fetchTransferHistory = async () => {
     setIsHistoryLoading(true);
     try {
-      const response = await SpherePayAPI.getTransferDetail();
-      if (response && response.data && response.data.transfers) {
-        setTransfers(response.data.transfers);
-      } else {
+      const userExist = await getUser(userAuth.email);
+      const transferIds = userExist?.userId?.spherePayTransferIds;
+
+      if (!transferIds || transferIds.length === 0) {
+        setTransfers([]);
+        setError("No transfer history found");
+        return;
+      }
+
+      // Fetch details for each transfer ID
+      const transferPromises = transferIds.map((transferId) =>
+        SpherePayAPI.getTransferDetail(transferId)
+      );
+
+      const transferResponses = await Promise.all(transferPromises);
+
+      // Extract transfer data from responses
+      const transfersData = transferResponses
+        .map((response) => {
+          if (response && response.data && response.data.transfer) {
+            return response.data.transfer;
+          }
+          return null;
+        })
+        .filter((transfer) => transfer !== null)
+        .reverse();
+
+      setTransfers(transfersData);
+
+      if (transfersData.length === 0) {
         setError("Failed to retrieve transfer history");
       }
     } catch (err) {
@@ -724,19 +770,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     key={index}
                     className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all"
                   >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-sm">
-                          {transfer.source?.network || "Unknown"} to{" "}
-                          {transfer.destination?.network || "Unknown"}
-                        </p>
-                        <p className="text-xs text-white/70">
-                          {new Date(transfer.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
+                    <div className="grid gap-3 grid-cols-12">
+                      <div className="col-span-12 border-b border-dashed border-white/30 pb-3">
                         <p className="font-semibold">
-                          {transfer.amount}{" "}
+                          Amount : {transfer.amount}{" "}
                           {transfer.source?.currency?.toUpperCase() || ""}
                         </p>
                         <p
@@ -748,8 +785,38 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                                 : "text-yellow-400"
                           }`}
                         >
+                          Status :{" "}
                           {transfer.status?.charAt(0).toUpperCase() +
                             transfer.status?.slice(1) || "Pending"}
+                        </p>
+                      </div>
+                      <div className="col-span-6">
+                        <p className="text-xs text-white/50">From : </p>
+                        <p className="font-medium text-sm">
+                          {transfer.source?.network.toUpperCase() ||
+                            "Unknown"}{" "}
+                        </p>
+                      </div>
+                      <div className="col-span-6">
+                        <p className="text-xs text-white/50">To : </p>
+                        <p className="font-medium text-sm">
+                          {transfer.destination?.network.toUpperCase() ||
+                            "Unknown"}
+                        </p>
+                      </div>
+                      <div className="col-span-6">
+                        <p className="text-xs text-white/50">Date : </p>
+                        <p className="text-xs">
+                          {new Date(transfer.created).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="col-span-6">
+                        <p className="text-xs text-white/50"> Type : </p>
+
+                        <p className="text-xs">
+                          {transfer.type === "onRamp"
+                            ? "Deposit"
+                            : "Withdrawal"}
                         </p>
                       </div>
                     </div>

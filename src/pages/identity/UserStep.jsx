@@ -114,7 +114,7 @@ const UserStep = ({ step, setStep }) => {
           ipAddress: userIP,
         },
       };
-      const userId = userAuth?.id;
+      const userId = userAuth?.email;
       // Call the API
       const response = await fetch("/api/business-account/create", {
         method: "POST",

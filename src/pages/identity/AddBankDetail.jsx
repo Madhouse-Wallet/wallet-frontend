@@ -22,7 +22,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     state: "",
     country: "",
     postalCode: "",
-    currency: "",
+    currency: "USD",
     bankCode: "",
     swiftCode: "",
   });
@@ -209,8 +209,8 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
               standard: "account_number",
               value: formData.accountNumber,
             },
-            network: "SWIFT", // You can make this dynamic if needed
-            currencies: [formData.currency], // You can make this dynamic
+            network: "SWIFT",
+            currencies: [formData.currency] || "USD",
             provider: {
               name: formData.bankName,
               country: formData.country,
@@ -231,7 +231,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
         swiftCode: formData.swiftCode,
         bankCode: formData.bankCode,
       };
-      const userId = userAuth?.id;
+      const userId = userAuth?.email;
       const response = await fetch("/api/parties/create", {
         method: "POST",
         headers: {
@@ -264,7 +264,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
           state: "",
           country: "",
           postalCode: "",
-          currency: "",
+          currency: "USD",
           bankCode: "",
           swiftCode: "",
         });
@@ -429,7 +429,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                 </div>
 
                 <div className="md:col-span-4 col-span-12">
-                  <label
+                  {/* <label
                     htmlFor="currency"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
@@ -450,7 +450,19 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                         {option.label}
                       </option>
                     ))}
-                  </select>
+                  </select> */}
+
+                  <div className="md:col-span-4 col-span-12">
+                    <label
+                      htmlFor="currency"
+                      className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                    >
+                      Currency
+                    </label>
+                    <div className="flex items-center border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full">
+                      USD - US Dollar
+                    </div>
+                  </div>
 
                   {errors.currency && (
                     <p className="text-red-500 text-xs mt-1 pl-3">

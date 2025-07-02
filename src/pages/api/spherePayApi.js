@@ -205,9 +205,9 @@ const SpherePayAPI = {
     }
   },
 
-  getTransferDetail: async () => {
+  getTransferDetail: async (id) => {
     try {
-      const response = await sphereAPIClient.get(`/v1/transfer`);
+      const response = await sphereAPIClient.get(`/v1/transfer/${id}`);
       return response.data;
     } catch (error) {
       return handleError(error);
