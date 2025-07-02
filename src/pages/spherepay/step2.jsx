@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Country, State } from "country-state-city";
 import iso3166 from "iso-3166-1";
 import SpherePayAPI from "../api/spherePayApi";
-import { updtUser } from "@/lib/apiCall";
-import { useSelector } from "react-redux";
 
 const Step2 = ({
   step,
@@ -13,7 +11,6 @@ const Step2 = ({
   setCountryCode,
   setStateCode,
 }) => {
-  const userAuth = useSelector((state) => state.Auth);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const [isStateOpen, setIsStateOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
@@ -191,13 +188,6 @@ const Step2 = ({
 
     try {
       const response = await SpherePayAPI.createCustomer(customerData);
-      let data = await updtUser(
-        { email: userAuth.email },
-        {
-          $set: { spherepayId: response?.id }, // Ensure this is inside `$set`
-        }
-      );
-      console.log("line-198", data);
       return response;
     } catch (error) {
       console.error("Error creating customer:", error);
