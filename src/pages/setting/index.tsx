@@ -74,24 +74,24 @@ const Setting: React.FC = () => {
     }
   }, []);
 
-  const getPreview = async () => {
-    try {
-      return await fetch(`/api/get-preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: "https://devstack.madhousewallet.com/dashboard",
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          return data;
-        });
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
+  // const getPreview = async () => {
+  //   try {
+  //     return await fetch(`/api/get-preview`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         url: "https://devstack.madhousewallet.com/dashboard",
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         return data;
+  //       });
+  //   } catch (error) {
+  //     console.log(error);
+  //     return false;
+  //   }
+  // };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
     try {
@@ -438,7 +438,7 @@ const Setting: React.FC = () => {
                               <button
                                 onClick={() => {
                                   selectBg(index);
-                                  getPreview();
+                                  // getPreview();
                                 }}
                                 className={`${
                                   selectedBackground === bg ? "border-2 " : ""
@@ -481,7 +481,7 @@ const Setting: React.FC = () => {
                           value={bgOpacity}
                           onChange={(e) => {
                             changeBgOpacity(parseFloat(e.target.value));
-                            getPreview();
+                            // getPreview();
                           }}
                           className="w-full cursor-pointer"
                         />
