@@ -20,9 +20,26 @@ const OtpStep = ({
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
+  const OTP_VALIDITY_SECONDS = 5 * 60; // 5 minutes
+
+  const [secondsLeft, setSecondsLeft] = useState(OTP_VALIDITY_SECONDS);
+  const [otpExpired, setOtpExpired] = useState(false);
   useEffect(() => {
     startResendTimer();
   }, []);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      setOtpExpired(true);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [secondsLeft]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -108,6 +125,8 @@ const OtpStep = ({
       let response = await resendOtpFunc();
       if (response) {
         // Increment resend count and store it
+        setSecondsLeft(OTP_VALIDITY_SECONDS)
+        setOtpExpired(false)
         resendCount += 1;
         localStorage.setItem("resendOtpCount", resendCount.toString());
 
@@ -120,7 +139,7 @@ const OtpStep = ({
   };
 
   useEffect(() => {
-     setError("")
+    setError("")
     // if (registerOTP?.length === 4 && !registerOtpLoading) {
     //   otpRegister();
     // }
@@ -186,10 +205,25 @@ const OtpStep = ({
                 )}
               </OtpWrpper>
             </div>
-
             <div className="col-span-12">
               <div className="text-center">
-                <button
+                {(!otpExpired) && <button
+                  className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium`}
+                >
+                  {`OTP Expires in(${formatTime(secondsLeft)})`}
+                </button>}
+              </div>
+            </div>
+            <div className="col-span-12">
+              <div className="text-center">
+                {(otpExpired && (<>
+                  <button
+                    onClick={resendOtp}
+                    className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium`}
+                  >
+                    {"OTP Expired. Please Resend OTP."}
+                  </button>
+                </>)) || <> <button
                   onClick={resendOtp}
                   disabled={isResendDisabled}
                   className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium ${isResendDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
@@ -197,14 +231,15 @@ const OtpStep = ({
                   {isResendDisabled
                     ? `Resend OTP (${formatTime(timeLeft)})`
                     : "Resend OTP"}
-                </button>
+                </button></>}
+
               </div>
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
                   onClick={otpRegister}
-                  disabled={registerOtpLoading || !registerOTP}
+                  disabled={otpExpired || registerOtpLoading || !registerOTP}
                   // type="submit"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
