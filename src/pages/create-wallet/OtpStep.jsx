@@ -20,7 +20,8 @@ const OtpStep = ({
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
-  const OTP_VALIDITY_SECONDS = 5 * 60; // 5 minutes
+  const [loading, setLoading] = useState(false);
+  const OTP_VALIDITY_SECONDS = 1 * 10; // 5 minutes
 
   const [secondsLeft, setSecondsLeft] = useState(OTP_VALIDITY_SECONDS);
   const [otpExpired, setOtpExpired] = useState(false);
@@ -122,6 +123,7 @@ const OtpStep = ({
       }
 
       // Otherwise, proceed with OTP resend
+      setLoading(true)
       let response = await resendOtpFunc();
       if (response) {
         // Increment resend count and store it
@@ -129,10 +131,12 @@ const OtpStep = ({
         setOtpExpired(false)
         resendCount += 1;
         localStorage.setItem("resendOtpCount", resendCount.toString());
-
+        setLoading(false)
         startResendTimer();
       }
     } catch (error) {
+      setLoading(false)
+
       console.log("resendOtp error -->", error);
       setRegisterOtpLoading(false);
     }
@@ -219,6 +223,7 @@ const OtpStep = ({
                 {(otpExpired && (<>
                   <button
                     onClick={resendOtp}
+                     disabled={loading}
                     className={`m-0 text-center themeClr inline-flex hover:opacity-50 font-medium`}
                   >
                     {"OTP Expired. Please Resend OTP."}
@@ -243,7 +248,7 @@ const OtpStep = ({
                   // type="submit"
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  {registerOtpLoading ? (
+                  {registerOtpLoading || loading ? (
                     <Image
                       src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                       alt={""}

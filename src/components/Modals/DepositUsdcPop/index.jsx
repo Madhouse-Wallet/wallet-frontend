@@ -4,8 +4,8 @@ import Web3Interaction from "@/utils/web3Interaction";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
-import { getUser, btcSat } from "../../../../src/lib/apiCall";
-import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
+import { getUser, btcSat } from "../../../lib/apiCall.js";
+import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
@@ -33,7 +33,7 @@ const getSecretData = async (storageKey, credentialId) => {
   }
 };
 
-const DepositPopup = ({ depositPop, setDepositPop }) => {
+const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
@@ -233,7 +233,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
         >
           <button
-            onClick={() => setDepositPop(!depositPop)}
+            onClick={() => setDepositUsdcPop(!depositUsdcPop)}
             type="button"
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
             // style={{ border: "1px solid #5f5f5f59" }}
@@ -243,7 +243,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Deposit Bitcoin
+                Deposit USDC
               </h5>
             </div>
             <div className="modalBody">
@@ -323,7 +323,7 @@ const Modal = styled.div`
   }
 `;
 
-export default DepositPopup;
+export default DepositUsdcPopup;
 
 const closeIcn = (
   <svg

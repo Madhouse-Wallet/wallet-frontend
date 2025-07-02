@@ -7,12 +7,14 @@ import { toast } from "react-toastify";
 import { BackBtn } from "@/components/common";
 import SendTbtcWall from "@/components/Modals/SendTbtcWallet";
 import DepositPopup from "@/components/Modals/DepositPop";
+import DepositUsdcPopup from "@/components/Modals/DepositUsdcPop";
 import WithdrawPopup from "@/components/Modals/WithdrawPop";
 import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
 import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop"
+import LightningDepositPop from "@/components/Modals/LightningDepositPop"
 import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop"
 import { splitAddress } from "../../utils/globals";
 
@@ -24,9 +26,12 @@ const BTCDebitCard: React.FC = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
+  const [depositUsdcPop, setDepositUsdcPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
-  const [lightning, setLightning,] = useState(false);
+  const [lightning, setLightning] = useState(false);
+  const [LightningDeposit,
+    setLightningDeposit] = useState(false);
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
@@ -130,6 +135,19 @@ const BTCDebitCard: React.FC = () => {
 
   return (
     <>
+      {LightningDeposit &&
+        createPortal(
+          <LightningDepositPop
+            depositUsdcPop={depositUsdcPop}
+            setDepositUsdcPop={setDepositUsdcPop}
+            depositPop={depositPop}
+            setDepositPop={setDepositPop}
+
+            LightningDeposit={LightningDeposit}
+            setLightningDeposit={setLightningDeposit}
+          />,
+          document.body
+        )}
       {lightning &&
         createPortal(
           <LightningWithdrawPop
@@ -147,6 +165,15 @@ const BTCDebitCard: React.FC = () => {
           <DepositPopup
             depositPop={depositPop}
             setDepositPop={setDepositPop}
+          />,
+          document.body
+        )}
+      {depositUsdcPop &&
+        createPortal(
+          <DepositUsdcPopup
+            depositUsdcPop={depositUsdcPop}
+            setDepositUsdcPop={setDepositUsdcPop}
+
           />,
           document.body
         )}
@@ -301,7 +328,8 @@ const BTCDebitCard: React.FC = () => {
                       </div>
                       <div className="col-span-6">
                         <button
-                          onClick={() => setDepositPop(!depositPop)}
+                          // onClick={() => setDepositPop(!depositPop)}
+                          onClick={() => setLightningDeposit(!LightningDeposit)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
                           Deposit
