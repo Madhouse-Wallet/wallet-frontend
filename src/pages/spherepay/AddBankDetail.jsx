@@ -4,6 +4,7 @@ import { isValidName, isValidNumber } from "@/utils/helper";
 
 const AddBankDetail = ({ step, setStep, customerId }) => {
   const [formData, setFormData] = useState({
+    accountHolderName: "",
     accountName: "",
     bankName: "",
     accountType: "",
@@ -105,7 +106,9 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
     // Apply different rules based on the field
     if (
-      (id === "accountName" || id === "bankName") &&
+      (id === "accountName" ||
+        id === "bankName" ||
+        id === "accountHolderName") &&
       !isValidName(value, 30)
     ) {
       return; // invalid id, do not update
@@ -132,7 +135,11 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     const newErrors = {};
 
     if (!formData.accountName.trim()) {
-      newErrors.accountName = "Account holder name is required";
+      newErrors.accountName = "Account name is required";
+    }
+
+    if (!formData.accountHolderName.trim()) {
+      newErrors.accountHolderName = "Account holder name is required";
     }
 
     if (!formData.bankName.trim()) {
@@ -174,6 +181,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       const bankAccountData = {
         customer: customerId,
         accountName: formData.accountName,
+        accountHolderName: formData.accountHolderName,
         bankName: formData.bankName,
         accountType: formData.accountType,
         accountNumber: formData.accountNumber,
@@ -193,6 +201,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       // Clear form fields after successful submission
       setFormData({
         accountName: "",
+        accountHolderName: "",
         bankName: "",
         accountType: "",
         accountNumber: "",
@@ -230,6 +239,14 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     }
   };
 
+  const deleteBankAccount = async (id) => {
+    let data = await SpherePayAPI.deletebankAccount(id);
+    console.log("line-244", data);
+    if (data.message === "success") {
+      fetchCustomerData();
+    }
+  };
+
   const tabData = [
     {
       title: "Bank Account",
@@ -256,10 +273,34 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12">
                   <label
-                    htmlFor="accountName"
+                    htmlFor="accountHolderName"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
                     Account Holder Name
+                  </label>
+                  <input
+                    id="accountHolderName"
+                    type="text"
+                    value={formData.accountHolderName}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.accountHolderName ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter Name"
+                  />
+                  {errors.accountHolderName && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.accountHolderName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="accountName"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    Account Name
                   </label>
                   <input
                     id="accountName"
@@ -445,19 +486,33 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                       <h5 className="text-lg font-semibold">
                         {account.bankName}
                       </h5>
+
                       <p className="text-sm text-white/70">
                         {account.accountName}
                       </p>
                     </div>
-                    <div
-                      className={`text-xs font-medium px-3 py-1 rounded-full ${getStatusColor(account.status)} bg-white/10`}
-                    >
-                      {account.status.charAt(0).toUpperCase() +
-                        account.status.slice(1)}
+
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`text-xs font-medium px-3 py-1 rounded-full ${getStatusColor(account.status)} bg-white/10`}
+                      >
+                        {account.status.charAt(0).toUpperCase() +
+                          account.status.slice(1)}
+                      </div>
+                      <button
+                        onClick={() => deleteBankAccount(account.id)}
+                        className="border-0 p-0"
+                      >
+                        {deleteIcn}
+                      </button>
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-3 grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <p className="text-xs text-white/50">Account Holder</p>
+                      <p className="text-sm">{account.accountHolderName}</p>
+                    </div>
                     <div>
                       <p className="text-xs text-white/50">Account Type</p>
                       <p className="text-sm">{account.accountType}</p>
@@ -532,3 +587,18 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 };
 
 export default AddBankDetail;
+
+const deleteIcn = (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M7.61601 20C7.17134 20 6.79101 19.8417 6.47501 19.525C6.15901 19.2083 6.00067 18.8287 6.00001 18.386V6H5.50001C5.35801 6 5.23934 5.952 5.14401 5.856C5.04867 5.76 5.00067 5.641 5.00001 5.499C4.99934 5.357 5.04734 5.23833 5.14401 5.143C5.24067 5.04766 5.35934 5 5.50001 5H9.00001C9.00001 4.79333 9.07667 4.61333 9.23001 4.46C9.38334 4.30666 9.56334 4.23 9.77001 4.23H14.23C14.4367 4.23 14.6167 4.30666 14.77 4.46C14.9233 4.61333 15 4.79333 15 5H18.5C18.642 5 18.7607 5.048 18.856 5.144C18.9513 5.24 18.9993 5.359 19 5.501C19.0007 5.643 18.9527 5.76166 18.856 5.857C18.7593 5.95233 18.6407 6 18.5 6H18V18.385C18 18.829 17.8417 19.209 17.525 19.525C17.2083 19.841 16.8283 19.9993 16.385 20H7.61601ZM10.308 17C10.45 17 10.569 16.952 10.665 16.856C10.761 16.76 10.8087 16.6413 10.808 16.5V8.5C10.808 8.358 10.76 8.23933 10.664 8.144C10.568 8.04866 10.449 8.00066 10.307 8C10.165 7.99933 10.0463 8.04733 9.95101 8.144C9.85567 8.24066 9.80801 8.35933 9.80801 8.5V16.5C9.80801 16.642 9.85601 16.7607 9.95201 16.856C10.048 16.952 10.1667 17 10.308 17ZM13.693 17C13.835 17 13.9537 16.952 14.049 16.856C14.1443 16.76 14.192 16.6413 14.192 16.5V8.5C14.192 8.358 14.144 8.23933 14.048 8.144C13.952 8.048 13.8333 8 13.692 8C13.55 8 13.431 8.048 13.335 8.144C13.239 8.24 13.1913 8.35866 13.192 8.5V16.5C13.192 16.642 13.24 16.7607 13.336 16.856C13.432 16.9513 13.551 16.9993 13.693 17Z"
+      fill="#C70808"
+    />
+  </svg>
+);

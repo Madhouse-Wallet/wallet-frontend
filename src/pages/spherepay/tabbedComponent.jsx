@@ -42,7 +42,10 @@ const TabbedComponent = ({ customerId, step, setStep }) => {
             <Sidebar tabData={tabData} tab={tab} setTab={setTab} />
           </div>
           <div className="md:col-span-8 col-span-12 ">
-            <div className="formWrpper h-[calc(100vh-200px)] overflow-auto  p-5 md:p-8">
+            <div
+              className="formWrpper h-[calc(100vh-200px)] overflow-auto  p-5 md:p-8"
+              style={{ scrollbarWidth: "none" }}
+            >
               {tabData[tab].components}
             </div>
           </div>
