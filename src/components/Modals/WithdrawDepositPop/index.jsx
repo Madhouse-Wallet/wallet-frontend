@@ -166,7 +166,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "SWIFT Payments"
+                      "International Payments"
                     )}
                   </button>
                 </div>
