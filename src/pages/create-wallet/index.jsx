@@ -212,8 +212,8 @@ const CreateWallet = () => {
           safePrivateKey: safePrivateKey,
           seedPhrase: seedPhraseOwner,
         };
-        let storageKeyEncrypt = "";
-        let credentialIdEncrypt = "";
+        let encryptedData = "";
+        let credentialID = "";
         const userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status === "success") {
           setError("User Already Exist!");
@@ -225,8 +225,8 @@ const CreateWallet = () => {
           JSON.stringify(secretObj)
         );
         if (storeData.status) {
-          storageKeyEncrypt = storeData?.storageKey;
-          credentialIdEncrypt = storeData?.credentialId;
+          encryptedData = storeData?.storageKey;
+          credentialID = storeData?.credentialId;
           const userExist = await getUser(registerData.email);
           if (userExist.status && userExist.status === "success") {
             setError("User Already Exist!");
@@ -239,8 +239,8 @@ const CreateWallet = () => {
             [
               {
                 name: registerData.email + "_passkey_1",
-                storageKeyEncrypt,
-                credentialIdEncrypt,
+                encryptedData,
+                credentialID,
                 displayName: "",
                 bitcoinWallet,
               },
@@ -264,12 +264,12 @@ const CreateWallet = () => {
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
               email: registerData.email,
-              webauthKey: JSON.stringify({
+              webauthnData: JSON.stringify({
                 name: registerData.email + "_passkey_1",
-                storageKeyEncrypt,
-                credentialIdEncrypt,
+                encryptedData,
+                credentialID,
               }),
-              id: data.userData._id,
+         
               totalPasskey: 1,
             })
           );
@@ -279,12 +279,11 @@ const CreateWallet = () => {
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
               email: registerData.email,
-              webauthKey: {
+              webauthnData: {
                 name: registerData.email + "_passkey_1",
-                storageKeyEncrypt,
-                credentialIdEncrypt,
+                encryptedData,
+                credentialID,
               },
-              id: data.userData._id,
               totalPasskey: 1,
             },
             "authUser"

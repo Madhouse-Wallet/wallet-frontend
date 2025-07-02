@@ -237,10 +237,10 @@ const RefundBitcoin = ({
       return;
     }
 
-    const data = JSON.parse(userAuth?.webauthKey);
+    const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeyEncrypt,
-      data?.credentialIdEncrypt
+      data?.encryptedData,
+      data?.credentialID
     );
     if (!retrieveSecretCheck?.status) {
       return;

@@ -130,8 +130,8 @@ const LightningSendTab = () => {
 
   const verifyingUser = async () => {
     setLoading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdEncrypt);
+    let data = JSON.parse(userAuth?.webauthnData);
+    let userData = await verifyUser(data?.credentialID);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"

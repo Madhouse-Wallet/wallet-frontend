@@ -94,8 +94,8 @@ const Login = () => {
         // userExist?.userId?
         if (userExist?.userId?.passkey?.length == 1) {
           let retrieveSecretCheck = await retrieveSecret(
-            userExist?.userId?.passkey[0].storageKeyEncrypt,
-            userExist?.userId?.passkey[0].credentialIdEncrypt
+            userExist?.userId?.passkey[0].encryptedData,
+            userExist?.userId?.passkey[0].credentialID
           );
           if (retrieveSecretCheck?.status) {
             // toast.success("Login Successfully!");
@@ -105,8 +105,8 @@ const Login = () => {
                 walletAddress: userExist?.userId?.wallet || "",
                 bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
                 email: userExist?.userId?.email,
-                webauthKey: JSON.stringify(userExist?.userId?.passkey[0]),
-                id: userExist?.userId?._id,
+                webauthnData: JSON.stringify(userExist?.userId?.passkey[0]),
+          
                 totalPasskey: 1,
               })
             );
@@ -143,8 +143,7 @@ const Login = () => {
                 walletAddress: userExist?.userId?.wallet || "",
                 bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
                 email: userExist?.userId?.email,
-                webauthKey: userExist?.userId?.passkey[0],
-                id: userExist?.userId?._id,
+                webauthnData: userExist?.userId?.passkey[0],
                 totalPasskey: 1,
               },
               "authUser"
@@ -183,8 +182,8 @@ const Login = () => {
         return false;
       } else {
         let retrieveSecretCheck = await retrieveSecret(
-          passkey.storageKeyEncrypt,
-          passkey.credentialIdEncrypt
+          passkey.encryptedData,
+          passkey.credentialID
         );
         if (retrieveSecretCheck?.status) {
           // toast.success("Login Successfully!");
@@ -194,8 +193,8 @@ const Login = () => {
               walletAddress: userExist?.userId?.wallet || "",
               bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
               email: userExist?.userId?.email,
-              webauthKey: JSON.stringify(passkey),
-              id: userExist?.userId?._id,
+              webauthnData: JSON.stringify(passkey),
+             
               totalPasskey: 1,
             })
           );
@@ -233,8 +232,7 @@ const Login = () => {
               walletAddress: userExist?.userId?.wallet || "",
               bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
               email: userExist?.userId?.email,
-              webauthKey: passkey,
-              id: userExist?.userId?._id,
+              webauthnData: passkey,
               totalPasskey: 1,
             },
             "authUser"

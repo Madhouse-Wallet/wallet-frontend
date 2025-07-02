@@ -14,7 +14,7 @@ const MultiSignPop = ({ sign, setSign }) => {
     try {
       const getClient = await createPassKeyWeightedClient(
         type == 2 ? userAuth.passkey2 : userAuth.passkey3,
-        userAuth.webauthKey,
+        userAuth.webauthnData,
         userAuth.passkey2,
         userAuth.passkey3
       );
@@ -46,8 +46,8 @@ const MultiSignPop = ({ sign, setSign }) => {
         return toast.error("Plese Approve First");
       }
       const getClient = await createPassKeyWeightedClient(
-        userAuth.webauthKey,
-        userAuth.webauthKey,
+        userAuth.webauthnData,
+        userAuth.webauthnData,
         userAuth.passkey2,
         userAuth.passkey3
       );

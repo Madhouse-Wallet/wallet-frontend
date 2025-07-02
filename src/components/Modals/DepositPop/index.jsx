@@ -43,10 +43,10 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const userAuth = useSelector((state) => state.Auth);
   const recoverSeedPhrase = async () => {
     try {
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = await getSecretData(
-        data?.storageKeyEncrypt,
-        data?.credentialIdEncrypt
+        data?.encryptedData,
+        data?.credentialID
       );
       if (callGetSecretData?.status) {
         return JSON.parse(callGetSecretData?.secret);

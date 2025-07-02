@@ -31,8 +31,7 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
             ensSetup: false,
             email: "",
             passkeyCred: "",
-            webauthKey: "",
-            id: "",
+            webauthnData: "",
           })
         );
         setConfirm(!confirm);

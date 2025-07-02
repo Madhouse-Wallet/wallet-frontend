@@ -122,10 +122,10 @@ const Setting: React.FC = () => {
   const recoverSeedPhrase = async () => {
     try {
       setLoader(true);
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = (await getSecretData(
-        data?.storageKeyEncrypt,
-        data?.credentialIdEncrypt
+        data?.encryptedData,
+        data?.credentialID
       )) as any;
       if (callGetSecretData?.status) {
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
@@ -146,8 +146,8 @@ const Setting: React.FC = () => {
 
   const verifyingUser = async () => {
     setloading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdEncrypt);
+    let data = JSON.parse(userAuth?.webauthnData);
+    let userData = await verifyUser(data?.credentialID);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"
@@ -198,8 +198,8 @@ const Setting: React.FC = () => {
           bitcoinWallet: "",
           email: "",
           passkeyCred: "",
-          webauthKey: "",
-          id: "",
+          webauthnData: "",
+         
           multisigAddress: "",
           passkey2: "",
           passkey3: "",
