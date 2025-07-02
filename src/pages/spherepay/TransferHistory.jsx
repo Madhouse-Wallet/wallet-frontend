@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { filterAmountInput, isValidNumber } from "@/utils/helper";
+import { getAccount, sendTransaction, USDC_ABI } from "@/lib/zeroDev";
+import { retrieveSecret } from "@/utils/webauthPrf";
+import { useSelector } from "react-redux";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [customerData, setCustomerData] = useState(null);
@@ -11,6 +15,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [transfers, setTransfers] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [transferData, setTransferData] = useState();
 
   const [onRampForm, setOnRampForm] = useState({
     currency: "",
@@ -33,9 +38,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const transferMethodOptions = [
     { value: "achPush", label: "ACH Push" },
+    { value: "wire", label: "Wire Transfer" },
+  ];
+
+  const transferMethodOptionsOfframp = [
     { value: "achSameDay", label: "ACH Same Day" },
     { value: "wire", label: "Wire Transfer" },
-    { value: "sepa", label: "SEPA" },
   ];
 
   useEffect(() => {
@@ -117,13 +125,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     setSuccessMessage("");
   };
 
-  // const handleOffRampChange = (e) => {
-  //   const { id, value } = e.target;
-  //   setOffRampForm((prev) => ({ ...prev, [id]: value }));
-  //   setError("");
-  //   setSuccessMessage("");
-  // };
-
   const validateOnRampForm = () => {
     if (!onRampForm.currency) return "Please select a currency";
     if (!onRampForm.transferMethod) return "Please select a transfer method";
@@ -183,7 +184,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       const response = await SpherePayAPI.createTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
-
+      console.log(response);
+      setTransferData(response.data.transfer);
       // Clear form after successful submission
       setOnRampForm({
         currency: "",
@@ -199,6 +201,45 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const sendUsdc = async (amount, toAddress) => {
+    console.log("line-208", amount, toAddress);
+    const data = JSON.parse(userAuth?.webauthKey);
+    const retrieveSecretCheck = await retrieveSecret(
+      data?.storageKeyEncrypt,
+      data?.credentialIdEncrypt
+    );
+    if (!retrieveSecretCheck?.status) {
+      return;
+    }
+
+    const secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
+
+    try {
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
+      if (!getAccountCli.status) {
+        return;
+      }
+
+      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+      ]);
+
+      if (tx && !tx.error) {
+        return tx;
+      }
+    } catch (error) {
+      setError("USDC Transfer Failed");
     }
   };
 
@@ -244,8 +285,18 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const response =
         await SpherePayAPI.createWalletToBankTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
-
-      // Clear form after successful submission
+      console.log(
+        response,
+        response?.data?.transfer?.instructions?.resource?.address
+      );
+      const tx = await sendUsdc(
+        offRampForm.amount,
+        response?.data?.transfer?.instructions?.resource?.address
+      );
+      if (!tx) {
+        setError("USDC Transfer Failed");
+        return;
+      }
       setOffRampForm({
         currency: "",
         transferMethod: "",
@@ -434,6 +485,61 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     </button>
                   </div>
                 </div>
+
+                {transferData && (
+                  <div className="col-span-12">
+                    <div className="grid gap-3 grid-cols-12">
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Bank Name :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.bankName}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Account Holder Name :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.accountHolderName}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Bank Address :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.bankAddressString}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Account Name :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.accountName}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Account Number :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.accountNumber}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Account Type :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.resource.accountType}
+                        </p>
+                      </div>
+                      <div className="sm:col-span-6 col-span-12">
+                        <h6 className="m-0">Memo :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.memo}
+                        </p>
+                      </div>
+                      <div className="col-span-12">
+                        <h6 className="m-0"> Instruction :</h6>
+                        <p className="m-0  text-white/50 text-xs px-2 py-2">
+                          {transferData.instructions.human}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           </div>
@@ -504,7 +610,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     <option value="" disabled>
                       Select Transfer Method
                     </option>
-                    {transferMethodOptions.map((option) => (
+                    {transferMethodOptionsOfframp.map((option) => (
                       <option
                         className="text-black"
                         key={option.value}

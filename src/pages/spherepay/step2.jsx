@@ -15,7 +15,13 @@ const Step2 = ({
   const [isStateOpen, setIsStateOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
   const [stateSearchTerm, setStateSearchTerm] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState({
+    code: "US",
+    alpha3: "USA",
+    name: "United States",
+    emoji: "🇺🇸",
+    isSupported: true,
+  });
   const [selectedState, setSelectedState] = useState(null);
   const [states, setStates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,15 +113,13 @@ const Step2 = ({
       isSupported: isSupported,
     };
   });
+  useEffect(() => {
+    const countryStates = State.getStatesOfCountry("US");
+    setStates(countryStates);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        countryDropdownRef.current &&
-        !countryDropdownRef.current.contains(event.target)
-      ) {
-        setIsCountryOpen(false);
-      }
       if (
         stateDropdownRef.current &&
         !stateDropdownRef.current.contains(event.target)
@@ -201,10 +205,10 @@ const Step2 = ({
   const handleContinue = async (e) => {
     e.preventDefault();
 
-    if (!selectedCountry) {
-      setError("Please select a country");
-      return;
-    }
+    // if (!selectedCountry) {
+    //   setError("Please select a country");
+    //   return;
+    // }
 
     if (!selectedCountry.isSupported) {
       setError("Selected country is not currently supported");
@@ -263,7 +267,12 @@ const Step2 = ({
             >
               Operating residency
             </label>
-            <div className="dropdown w-full relative" ref={countryDropdownRef}>
+
+            <div className="flex items-center border-white/10 bg-white/4 text-white/70 w-full border-px md:border-hpx px-5 py-2 text-xs font-medium h-12 rounded-full">
+              <span>🇺🇸</span>
+              <span className="ml-2">United States</span>
+            </div>
+            {/* <div className="dropdown w-full relative" ref={countryDropdownRef}>
               <button
                 type="button"
                 onClick={() => setIsCountryOpen(!isCountryOpen)}
@@ -340,7 +349,7 @@ const Step2 = ({
                   </ul>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
 
           {selectedCountry && states.length > 0 && (

@@ -61,6 +61,11 @@ const Step3 = ({
             );
           }
         } else {
+          const setFee = await SpherePayAPI.transferFee({
+            bpsFee: "20",
+            targetCustomerId: response?.data?.customer?.id,
+          });
+          console.log("line-67", setFee);
           const result = await SpherePayAPI.createTosLink(
             response?.data?.customer?.id
           );
@@ -96,6 +101,11 @@ const Step3 = ({
             );
           }
         } else {
+          const setFee = await SpherePayAPI.transferFee({
+            bpsFee: "20",
+            targetCustomerId: response?.data?.customer?.id,
+          });
+          console.log("line-67", setFee);
           const result = await SpherePayAPI.createKycLink(
             response?.data?.customer?.id
           );
