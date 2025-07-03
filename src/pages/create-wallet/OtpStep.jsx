@@ -21,7 +21,7 @@ const OtpStep = ({
   const [timeLeft, setTimeLeft] = useState(0);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
-  const OTP_VALIDITY_SECONDS = 1 * 10; // 5 minutes
+  const OTP_VALIDITY_SECONDS = 5 * 60; // 5 minutes
 
   const [secondsLeft, setSecondsLeft] = useState(OTP_VALIDITY_SECONDS);
   const [otpExpired, setOtpExpired] = useState(false);
