@@ -392,51 +392,9 @@ const BTCEchange = () => {
           document.body
         )}
       {loaderStatus && createPortal(<LoadingScreen />, document.body)}
-      <section className="relative dashboard  h-full flex items-center sm:pt-[70px] sm:flex-row flex-col">
+      <section className="relative dashboard  h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader sm:fixed top-0 py-2 w-full z-[999]">
-          <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap">
-              {/* <div className="sectionHeader text-center w-full">
-                <div className="flex align-items-center justify-center gap-3">
-                  <BackBtn />
-                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                    Send & Recieve
-                  </h4>
-                </div>
-              </div> */}
-              <div className="left">
-                <h4 className="m-0 font-normal text-base flex items-center">
-                  <span className="font-bold ms-2 text-xl">
-                    {totalUsdBalance}
-                  </span>
-                </h4>
-              </div>
-              <div className="right">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => startSend()}
-                    className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
-                  >
-                    Send
-                  </button>
-                  <button
-                    onClick={() => startReceive()}
-                    className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black text-xs font-bold min-w-[120px]"
-                  >
-                    Receive
-                  </button>
-                  {/* <button
-                          onClick={() => setSendBitcoin(!sendBitcoin)}
-                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
-                        >
-                          Bridge
-                        </button> */}
-                </div>
-              </div>
-            </Nav>
-          </div>
-        </header>
+
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -445,6 +403,49 @@ const BTCEchange = () => {
           >
             {closeIcn}
           </button>
+          <header className="siteHeader top-0 py-2 w-full z-[999]">
+            <div className="container mx-auto">
+              <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap gap-2">
+                {/* <div className="sectionHeader text-center w-full">
+                <div className="flex align-items-center justify-center gap-3">
+                  <BackBtn />
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Send & Recieve
+                  </h4>
+                </div>
+              </div> */}
+                <div className="left w-full text-center">
+                  <h4 className="m-0 font-normal text-base">
+                    <span className="font-bold ms-2 text-xl">
+                      {totalUsdBalance}
+                    </span>
+                  </h4>
+                </div>
+                <div className="right w-full">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => startSend()}
+                      className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black h-[30px]  border-0 text-[10px] sm:h-[40px] sm:text-[12px] font-bold min-w-[120px] w-full"
+                    >
+                      Send
+                    </button>
+                    <button
+                      onClick={() => startReceive()}
+                      className="flex items-center justify-center bg-[#fff] border-[1px] border-[#dd6c47] text-[#dd6c47] btn border-0 rounded-20 text-black h-[30px]  border-0 text-[10px] sm:h-[40px] sm:text-[12px] font-bold min-w-[120px] w-full"
+                    >
+                      Receive
+                    </button>
+                    {/* <button
+                          onClick={() => setSendBitcoin(!sendBitcoin)}
+                          className="flex items-center justify-center bg-[#dd6c47] text-white btn border-0 rounded-20 text-black text-xs font-bold"
+                        >
+                          Bridge
+                        </button> */}
+                  </div>
+                </div>
+              </Nav>
+            </div>
+          </header>
           <div
             className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
           a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
