@@ -7,6 +7,7 @@ import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
+import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -38,6 +39,8 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
   const recoverSeedPhrase = async () => {
     try {
       let data = JSON.parse(userAuth?.webauthnData);
@@ -108,12 +111,55 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           } else {
             const satoshis = Math.round(parseFloat(amount) * 100000000);
             const btInSats = Math.floor(bitcoinBalance * 100000000);
-            if (btInSats < getBtcSat?.data?.expected_amount) {
-              const requiredBtc = (getBtcSat?.data?.expected_amount / 100000000).toFixed(8); // convert to BTC with precision
-              setCommonError(`Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`);
+
+            const gasCalulate = await bitcoinGasFeeFunction({
+              fromAddress: userExist?.userId?.bitcoinWallet,
+              toAddress: getBtcSat?.data?.address,
+              amountSatoshi: getBtcSat?.data?.expected_amount,
+              privateKeyHex: privateKey?.wif,
+              network: "main", // Use 'main' for mainnet
+            });
+
+            console.log("line-123", gasCalulate);
+            if (gasCalulate.success === false) {
+              setLoading(false);
+
+              const allNumbers =
+                gasCalulate?.error?.errors?.[0]?.error?.match(/-?\d+/g);
+              const missingSats = allNumbers
+                ? parseInt(allNumbers[allNumbers.length - 1])
+                : 0;
+              setGasPriceError(
+                `Insufficient balance. You're short by ${(Math.abs(missingSats) / 1e8).toFixed(8)} BTC to cover the amount and network fee.`
+              );
+              return;
+            }
+            const gasFeeSats = gasCalulate.details.tx.fees;
+
+            const gasFeeBTC = gasFeeSats / 100000000;
+            const btcAmount = getBtcSat?.data?.expected_amount / 100000000;
+            setGasPrice(gasFeeBTC);
+            const totalRequired = parseFloat(btcAmount) + gasFeeBTC;
+
+            if (totalRequired > Number.parseFloat(bitcoinBalance)) {
+              setGasPriceError(
+                `Insufficient balance. Required: ${totalRequired.toFixed(8)} BTC (Amount: ${btcAmount} + Network Fee: ${gasFeeBTC.toFixed(8)})`
+              );
               setLoading(false);
               return;
             }
+
+            if (btInSats < getBtcSat?.data?.expected_amount) {
+              const requiredBtc = (
+                getBtcSat?.data?.expected_amount / 100000000
+              ).toFixed(8); // convert to BTC with precision
+              setCommonError(
+                `Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`
+              );
+              setLoading(false);
+              return;
+            }
+
             const result = await sendBitcoinFunction({
               fromAddress: userExist?.userId?.bitcoinWallet,
               toAddress: getBtcSat?.data?.address,
@@ -168,6 +214,9 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
 
   const handleAmountInput = (e) => {
     const rawValue = e.target.value;
+
+    setGasPrice(null);
+    setGasPriceError("");
 
     // Allow only numbers and a single dot
     const numericValue = rawValue.replace(/[^0-9.]/g, "");
@@ -296,6 +345,16 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                     )}
                   </button>
                 </div>
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+
+                {gasPrice && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPrice} USDC
+                  </label>
+                )}
               </form>
             </div>
           </div>
