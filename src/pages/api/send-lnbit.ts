@@ -48,15 +48,21 @@ export default async function handler(
         2,
         lnbitAdminKey_3
       )) as any;
-      if (payInv?.status) {
-        return res.status(200).json({
+      console.log("payInv-->",payInv)
+         return res.status(200).json({
           status: "success",
           message: "Withdraw Done!",
-          data: payInv?.data,
+          data: {},
         });
-      } else {
-        return res.status(400).json({ status: "failure", message: data.msg });
-      }
+      // if (payInv?.status) {
+      //   return res.status(200).json({
+      //     status: "success",
+      //     message: "Withdraw Done!",
+      //     data: payInv?.data,
+      //   });
+      // } else {
+      //   return res.status(400).json({ status: "failure", message: data.msg });
+      // }
     } else {
       return res.status(400).json({ status: "failure", message: data.msg });
     }
