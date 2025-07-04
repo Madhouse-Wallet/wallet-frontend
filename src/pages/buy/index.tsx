@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import StripePaymentPage from "../stripePaymentPage";
 import { useSelector } from "react-redux";
 import { getAccount } from "@/lib/zeroDev";
-import { BackBtn } from "@/components/common";
 import Swap from "../../pages/swapUsdc";
 import SellBitcoin from "./SellBitcoin";
 import { useRouter } from "next/router";
@@ -13,9 +12,9 @@ const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [walletAddress, setWalletAddress] = useState("");
   const tabData = [
-    { title: "Buy with USDC", component: <Swap /> },
+    { title: "Buy", component: <Swap /> },
     {
-      title: "Buy with Stripe",
+      title: "Stripe",
       component: (
         <>
           <StripePaymentPage walletAddress={walletAddress} />
@@ -23,7 +22,7 @@ const BuyCoin: React.FC = () => {
       ),
     },
     {
-      title: "Sell Bitcoin",
+      title: "Sell",
       component: (
         <>
           <SellBitcoin />{" "}
@@ -76,7 +75,7 @@ const BuyCoin: React.FC = () => {
               </div> */}
               <div className="left">
                 <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Buy & Sell Bitcoin
+                  Bitcoin
                 </h4>
               </div>
               <div className="right">
