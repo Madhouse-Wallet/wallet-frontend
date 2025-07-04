@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/ContextApi/ThemeContext";
 import { BackgroundProvider } from "@/ContextApi/backgroundContent";
 import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css"; // theme css file
+import { useEffect } from "react";
 
 export default function App({ Component, pageProps, ...props }: AppProps) {
   useEffect(() => {
