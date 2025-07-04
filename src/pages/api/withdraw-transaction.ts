@@ -23,7 +23,6 @@ export default async function handler(
             let getToken = (await userLogIn(1, existingUser?.lnbitId)) as any;
             if (getToken?.status) {
               let token = getToken?.data?.token;
-              console.log("line-24", token, existingUser?.lnbitAdminKey);
               const result = (await getWithdraw(
                 token,
                 1,
@@ -47,7 +46,6 @@ export default async function handler(
             let getToken = (await userLogIn(1, existingUser?.lnbitId_2)) as any;
             if (getToken?.status) {
               let token = getToken?.data?.token;
-              console.log("line-24", token, existingUser?.lnbitAdminKey_2);
               const result = (await getWithdraw(
                 token,
                 1,
@@ -72,7 +70,6 @@ export default async function handler(
           let getToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
           if (getToken?.status) {
             let token = getToken?.data?.token;
-            console.log("line-24", token, existingUser?.lnbitAdminKey_3);
             const result = (await getWithdraw(
               token,
               2,

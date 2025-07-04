@@ -373,7 +373,6 @@ const WithdrawalSwap = () => {
               },
             ]
           );
-          console.log("line-371", gasPriceResult);
           // Round gas price to 2 decimals
           const value = Number.parseFloat(gasPriceResult.formatted);
           const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
@@ -382,7 +381,6 @@ const WithdrawalSwap = () => {
           const totalRequired =
             Number.parseFloat(usdcToEthShift.settleAmount) +
             Number.parseFloat(roundedGasPrice);
-          console.log("line-379", totalRequired);
           if (totalRequired > Number.parseFloat(usdcBalance)) {
             setGasPriceError(
               `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
@@ -390,7 +388,6 @@ const WithdrawalSwap = () => {
             setIsLoading(false);
             return;
           }
-          console.log("line-387");
           const usdcSendTx = await sendTransaction(
             getAccountCli?.kernelClient,
             [
@@ -669,7 +666,7 @@ const WithdrawalSwap = () => {
               {goldToUsdcShift && (
                 <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
                   <p className="m-0 text-amber-500">
-                   Withdraw address confirmed
+                    Withdraw address confirmed
                   </p>
                   <p className="m-0 text-green-500">
                     Expected USDC:{" "}

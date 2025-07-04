@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Web3Interaction from "@/utils/web3Interaction";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser } from "../../../lib/apiCall.js";
@@ -41,8 +40,6 @@ const SendTbtcWall = ({ btcWall, setTbtcWall }) => {
             if (result.success) {
               setSuccess(true);
               setSendUsdc(false);
-              toast.success("USDC sent successfully!");
-              // Wait for transaction to be mined and then fetch new balance
               setTimeout(fetchBalance, 2000);
             } else {
             }

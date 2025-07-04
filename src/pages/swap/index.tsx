@@ -147,10 +147,6 @@ const Swap = () => {
           }
         }
       }
-      // else {
-      //   toast.error("Please Login");
-      //   return;
-      // }
     };
 
     connectWallet();
@@ -162,8 +158,7 @@ const Swap = () => {
         <div className="container">
           <div className="grid gap-3 grid-cols-12">
             <div className="col-span-12">
-              <CowSwapCard>
-              </CowSwapCard>
+              <CowSwapCard></CowSwapCard>
             </div>
           </div>
         </div>

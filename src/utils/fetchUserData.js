@@ -88,10 +88,8 @@
 //       }
 
 //       const data = await response.json();
-//       console.log("User data retrieved:", data);
 //       return data.data.users[0];
 //     } catch (error) {
-//       console.error("Error fetching user data:", error);
 //       throw error;
 //     }
 //   }

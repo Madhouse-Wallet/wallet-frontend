@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { BackBtn } from "@/components/common";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { webAuthKeyStore } from "../../utils/globals";
-import { getRecoverAccount, doRecovery } from "../../lib/zeroDev";
 import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev";
 import { getUser, updtUser, decodeBitcoinAddress } from "../../lib/apiCall";
 import styled from "styled-components";
@@ -133,7 +130,6 @@ const ModifyKeys = () => {
           }, // Ensure this is inside `$set`
         }
       );
-      toast.success("Successfully Updated!");
       setPasskeyData(cleanData);
       setPasskeyDataOrig(cleanData);
       setEdit(false);

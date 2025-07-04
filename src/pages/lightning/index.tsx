@@ -1,10 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
-import { BackBtn } from "@/components/common";
 import SendTbtcWall from "@/components/Modals/SendTbtcWallet";
 import DepositPopup from "@/components/Modals/DepositPop";
 import DepositUsdcPopup from "@/components/Modals/DepositUsdcPop";
@@ -13,10 +11,9 @@ import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
-import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop"
-import LightningDepositPop from "@/components/Modals/LightningDepositPop"
-import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop"
-import { splitAddress } from "../../utils/globals";
+import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop";
+import LightningDepositPop from "@/components/Modals/LightningDepositPop";
+import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop";
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -30,8 +27,7 @@ const BTCDebitCard: React.FC = () => {
   const [withdrawPop, setWithdrawPop] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
   const [lightning, setLightning] = useState(false);
-  const [LightningDeposit,
-    setLightningDeposit] = useState(false);
+  const [LightningDeposit, setLightningDeposit] = useState(false);
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
@@ -46,7 +42,6 @@ const BTCDebitCard: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("LN Address copied successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -113,10 +108,8 @@ const BTCDebitCard: React.FC = () => {
         if (delCardData?.status == "success") {
           setCreditCardDetail(false);
           setLoader(false);
-          toast.success("Card Deleted!");
         } else {
           setLoader(false);
-          toast.error(delCardData.message);
         }
       }
 
@@ -142,7 +135,6 @@ const BTCDebitCard: React.FC = () => {
             setDepositUsdcPop={setDepositUsdcPop}
             depositPop={depositPop}
             setDepositPop={setDepositPop}
-
             LightningDeposit={LightningDeposit}
             setLightningDeposit={setLightningDeposit}
           />,
@@ -173,7 +165,6 @@ const BTCDebitCard: React.FC = () => {
           <DepositUsdcPopup
             depositUsdcPop={depositUsdcPop}
             setDepositUsdcPop={setDepositUsdcPop}
-
           />,
           document.body
         )}
@@ -319,7 +310,6 @@ const BTCDebitCard: React.FC = () => {
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
                         <button
-
                           onClick={() => setLightning(!lightning)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >

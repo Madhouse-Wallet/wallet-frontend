@@ -9,7 +9,6 @@ export default async function handler(req, res) {
 
   try {
     const result = await paymentApi.getPayment(id);
-    console.log("line-12", id, result);
     if (result.success) {
       res.status(200).json(result.data);
     } else {

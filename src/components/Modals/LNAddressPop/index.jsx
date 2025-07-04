@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { updateLNAddressCall } from "../../../lib/apiCall";
 import { useSelector } from "react-redux";
 
@@ -42,13 +41,11 @@ const LNAdressPopup = ({
 
       // Validate username
       if (!username.trim()) {
-        toast.error("Please enter a username");
         setLoading(false);
         return;
       }
 
       if (!usernameRegex.test(username)) {
-        toast.error("Username can only contain alphanumeric characters");
         setLoading(false);
         return;
       }
@@ -56,22 +53,13 @@ const LNAdressPopup = ({
       // Construct the full LN address
       const fullLnAddress = `${username}@spend.madhousewallet.com`;
       const resposne = await updateLNAddressCall(userAuth?.email, username);
-      // console.log("repsonse", resposne);
       if (resposne?.status === "success") {
         setLnaddress(fullLnAddress);
-        toast.success("LN Address updated successfully!");
-      } else {
-        toast.success(resposne?.message);
       }
-      // Here you can add your logic to handle the updated LN address
-      console.log("Updated LN Address:", fullLnAddress);
-
       setLNAdressPop(false);
-
       setLoading(false);
     } catch (error) {
       console.log(error);
-      toast.error("Error updating LN address");
       setLoading(false);
     }
   };

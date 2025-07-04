@@ -217,7 +217,6 @@ class Web3Interaction {
         // tx.wait(); // Wait for transaction confirmation
         // Wait for transaction to be mined
         // const receipt = await tx.wait();
-        // console.log("Transaction confirmed:", receipt.transactionHash);
         resolve({
           success: true,
           txHash: tx.hash,

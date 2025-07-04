@@ -34,20 +34,15 @@ export default async function handler(req: SwapRequest, res: NextApiResponse) {
     const keyPair = ECPair.fromWIF(wif, bitcoin.networks.bitcoin);
 
     // Use Bech32 address format (bc1...)
-const { address: segwitAddress } = bitcoin.payments.p2wpkh({
-  pubkey: keyPair.publicKey,
-  network: bitcoin.networks.bitcoin,
-});
+    const { address: segwitAddress } = bitcoin.payments.p2wpkh({
+      pubkey: keyPair.publicKey,
+      network: bitcoin.networks.bitcoin,
+    });
 
-const { address: legacyAddress } = bitcoin.payments.p2pkh({
-  pubkey: keyPair.publicKey,
-  network: bitcoin.networks.bitcoin,
-});
-
-// console.log("SegWit address:", segwitAddress);
-// console.log("Legacy address:", legacyAddress);
-
-    // console.log("address -->", address);
+    const { address: legacyAddress } = bitcoin.payments.p2pkh({
+      pubkey: keyPair.publicKey,
+      network: bitcoin.networks.bitcoin,
+    });
 
     return res.status(200).json({
       status: "success",

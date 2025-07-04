@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { createPassKeyWeightedClient } from "@/lib/zeroDev";
 import { zeroAddress } from "viem";
@@ -31,19 +30,15 @@ const MultiSignPop = ({ sign, setSign }) => {
         });
         setSignatures([...signatures, signature]);
         setStatus("Operation Approved");
-        toast.success("Approved!");
-      } else {
-        toast.error(getClient.msg);
       }
     } catch (error) {
       console.log("error-->", error);
-      toast.error(error.message);
     }
   };
   const sendTrxn = async () => {
     try {
       if (signatures.length <= 0) {
-        return toast.error("Plese Approve First");
+        return;
       }
       const getClient = await createPassKeyWeightedClient(
         userAuth.webauthnData,
@@ -66,12 +61,10 @@ const MultiSignPop = ({ sign, setSign }) => {
         }
       );
       setStatus("Transaction Sent");
-      toast.success("Trxn is Done!");
       setSignatures([]);
     } catch (error) {
       setStatus("Transaction Sent");
       setSignatures([]);
-      toast.success("Trxn Done!");
     }
   };
 

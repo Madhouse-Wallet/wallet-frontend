@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -118,7 +117,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             },
             "authUser"
           );
-          toast.success("New Key Recovered!");
           setSetUp(!setUp);
         } else {
           return;

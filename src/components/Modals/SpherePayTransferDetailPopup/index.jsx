@@ -12,7 +12,6 @@ const SpherePayTransferDetailPop = ({
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        // Optional: Add a toast notification or feedback here
         console.log("Copied to clipboard!");
       })
       .catch((err) => {

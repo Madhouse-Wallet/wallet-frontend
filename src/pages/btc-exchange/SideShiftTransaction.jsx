@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import moment from "moment";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 import { createPortal } from "react-dom";
 import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
