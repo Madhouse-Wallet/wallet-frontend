@@ -40,14 +40,13 @@ export async function bitcoinGasFeeFunction({
         network,
       }),
     });
-
     const result = await response.json();
-    console.log("line-45", response.data);
-    // if (!response.ok) {
+    console.log("line-45", result);
+    // if (result.success !== true) {
     //   throw new Error(result.error || "Failed to send transaction");
     // }
 
-    return response.data;
+    return result;
   } catch (error) {
     console.error("Error calling Bitcoin API:", error);
     return {

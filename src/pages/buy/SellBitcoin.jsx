@@ -12,6 +12,7 @@ import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
+import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -31,6 +32,8 @@ const SellBitcoin = () => {
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [swapType, setSwapType] = useState("");
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
   const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
@@ -137,6 +140,8 @@ const SellBitcoin = () => {
   const handleFromAmountChange = async (e) => {
     setSwapType("");
     setError("");
+    setGasPrice(null);
+    setGasPriceError("");
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value);
@@ -261,6 +266,42 @@ const SellBitcoin = () => {
         return;
       }
       const satoshis = Math.round(parseFloat(fromAmount) * 100000000);
+
+      const gasCalulate = await bitcoinGasFeeFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: destinationAddress,
+        amountSatoshi: satoshis,
+        privateKeyHex: privateKey?.wif,
+        network: "main", // Use 'main' for mainnet
+      });
+
+      if (gasCalulate.success === false) {
+        setIsLoading(false);
+
+        const allNumbers =
+          gasCalulate?.error?.errors?.[0]?.error?.match(/-?\d+/g);
+        const missingSats = allNumbers
+          ? parseInt(allNumbers[allNumbers.length - 1])
+          : 0;
+        setGasPriceError(
+          `Insufficient balance. You're short by ${(Math.abs(missingSats) / 1e8).toFixed(8)} BTC to cover the amount and network fee.`
+        );
+        return;
+      }
+      const gasFeeSats = gasCalulate.details.tx.fees;
+
+      const gasFeeBTC = gasFeeSats / 100000000;
+      setGasPrice(gasFeeBTC);
+      const totalRequired = parseFloat(fromAmount) + gasFeeBTC;
+
+      if (totalRequired > Number.parseFloat(tbtcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(8)} BTC (Amount: ${btcAmount} + Network Fee: ${gasFeeBTC.toFixed(8)})`
+        );
+        setIsLoading(false);
+        return;
+      }
+
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: destinationAddress,
@@ -280,6 +321,7 @@ const SellBitcoin = () => {
         setTxError(result.error || "Transaction failed");
       }
     } catch (error) {
+      console.log("line-324", error);
       setFailed(true);
       setTxError(error || "Transaction failed");
     } finally {
@@ -439,6 +481,18 @@ const SellBitcoin = () => {
 
                     {error && (
                       <div className="text-red-500 text-xs mt-1">{error}</div>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
+
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
                     )}
                   </div>
                   <div className="mt-3 py-2">

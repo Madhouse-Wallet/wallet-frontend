@@ -49,8 +49,11 @@ export default async function handler(req, res) {
 
     // 3. Request transaction skeleton
     const txCreateResponse = await axios.post(`${baseUrl}/txs/new`, newTx);
-    console.log("line-53", txCreateResponse);
-    return txCreateResponse;
+    console.log("line-53", txCreateResponse.data);
+    return res.status(200).json({
+      success: true,
+      details: txCreateResponse.data,
+    });
   } catch (error) {
     console.error("Full error object:", error);
 

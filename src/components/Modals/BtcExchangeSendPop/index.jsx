@@ -19,6 +19,7 @@ import {
   filterHexInput,
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "../TransactionFailedPop";
+import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
 
 const BtcExchangeSendPop = ({
   sendUsdc,
@@ -55,6 +56,8 @@ const BtcExchangeSendPop = ({
   const [txError, setTxError] = useState("");
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState("");
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
   const [amountError, setAmountError] = useState("");
 
   const handleTab = (key) => {
@@ -119,6 +122,41 @@ const BtcExchangeSendPop = ({
       }
 
       const satoshis = Math.round(parseFloat(btcAmount) * 100000000);
+
+      const gasCalulate = await bitcoinGasFeeFunction({
+        fromAddress: userAuth?.bitcoinWallet,
+        toAddress: btcAddress,
+        amountSatoshi: satoshis,
+        privateKeyHex: privateKey?.wif,
+        network: "main", // Use 'main' for mainnet
+      });
+
+      if (gasCalulate.success === false) {
+        setLoadingSend(false);
+
+        const allNumbers =
+          gasCalulate?.error?.errors?.[0]?.error?.match(/-?\d+/g);
+        const missingSats = allNumbers
+          ? parseInt(allNumbers[allNumbers.length - 1])
+          : 0;
+        setGasPriceError(
+          `Insufficient balance. You're short by ${(Math.abs(missingSats) / 1e8).toFixed(8)} BTC to cover the amount and network fee.`
+        );
+        return;
+      }
+      const gasFeeSats = gasCalulate.details.tx.fees;
+
+      const gasFeeBTC = gasFeeSats / 100000000;
+      setGasPrice(gasFeeBTC);
+      const totalRequired = parseFloat(btcAmount) + gasFeeBTC;
+
+      if (totalRequired > Number.parseFloat(btcBalance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(8)} BTC (Amount: ${btcAmount} + Network Fee: ${gasFeeBTC.toFixed(8)})`
+        );
+        setLoadingSend(false);
+        return;
+      }
 
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
@@ -191,7 +229,8 @@ const BtcExchangeSendPop = ({
   const handleAmountChange = (e) => {
     const value = e.target.value;
 
-    // Filter input with 2 decimal places
+    setGasPrice(null);
+    setGasPriceError("");
     const filteredValue = filterAmountInput(value, 18, 20);
     setBtcAmount(filteredValue);
 
@@ -473,6 +512,16 @@ const BtcExchangeSendPop = ({
                       )}
                     </button>
                   </div>
+
+                  {gasPriceError && (
+                    <div className="text-red-500 text-xs">{gasPriceError}</div>
+                  )}
+
+                  {gasPrice && (
+                    <label className="form-label m-0 font-semibold text-xs block">
+                      Estimated Max Gas Fee: {gasPrice} USDC
+                    </label>
+                  )}
                 </div>
               </>
             )}
