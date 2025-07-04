@@ -12,13 +12,8 @@ import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
 import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop";
-<<<<<<< HEAD
 import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop";
 import { splitAddress } from "../../utils/globals";
-=======
-import LightningDepositPop from "@/components/Modals/LightningDepositPop";
-import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop";
->>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -32,10 +27,6 @@ const BTCDebitCard: React.FC = () => {
   const [withdrawPop, setWithdrawPop] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
   const [lightning, setLightning] = useState(false);
-<<<<<<< HEAD
-=======
-  const [LightningDeposit, setLightningDeposit] = useState(false);
->>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
