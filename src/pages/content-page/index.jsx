@@ -7,13 +7,12 @@ import Documentation from "../documentation";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-
 const ContentPage = () => {
   const router = useRouter();
   const [step, setStep] = useState("all");
   return (
     <>
-      <section className="relative dashboard  ">
+      <section className="relative dashboard h-full">
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}

@@ -38,14 +38,14 @@ const PaymentTabComponent = ({ step, setStep }) => {
   return (
     <>
       <div className="px-3">
-        <div className="grid gap-3 grid-cols-12 pr-3 bg-black/50 rounded-20">
+        <div className="grid gap-3 grid-cols-12 md:pr-3 bg-black/50 rounded-20">
           <div className="md:col-span-4 col-span-12 md:sticky top-0">
             <Sidebar tab={tab} setTab={setTab} tabData={tabData} />
             {/* asdfadsf */}
           </div>
           <div className="md:col-span-8 col-span-12 ">
             <div
-              className="formWrpper h-[calc(100vh-200px)] overflow-auto  p-5 md:p-8"
+              className="formWrpper md:h-[calc(100vh-200px)] overflow-auto  p-5 md:p-8"
               style={{ scrollbarWidth: "none" }}
             >
               {tabData[tab].components}

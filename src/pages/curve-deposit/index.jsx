@@ -41,39 +41,9 @@ const CurveDeposit = () => {
   }, []);
   return (
     <>
-      <section className="relative curve h-full flex items-center sm:pt-[40px]">
+      <section className="relative curve h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
-          <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-between flex-wrap gap-2">
-              <div className="left">
-                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Tether Gold
-                </h4>
-              </div>
-              <div className="right">
-                <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 ">
-                  {tabData.map((item, index) => (
-                    <li key={index} className="">
-                      <button
-                        className={` ${
-                          activeTab === index
-                            ? "bg-[#ffad84] border-[#ffad84]"
-                            : "bg-white border-white"
-                        }  flex w-full h-[30px]  border-2 text-[10px] items-center rounded-full  px-3 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
-             // Highlight active tab
-              `}
-                        onClick={() => setActiveTab(index)}
-                      >
-                        {item.title}
-                      </button>
-                    </li>
-                  ))}
-                </TabNav>
-              </div>
-            </Nav>
-          </div>
-        </header>
+
         <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}
@@ -82,6 +52,37 @@ const CurveDeposit = () => {
           >
             {closeIcn}
           </button>
+          <header className="siteHeader  py-2 w-full z-[999]">
+            <div className="container mx-auto">
+              <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap gap-2">
+                <div className="left w-full text-center">
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Tether Gold
+                  </h4>
+                </div>
+                <div className="right w-full">
+                  <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 ">
+                    {tabData.map((item, index) => (
+                      <li key={index} className="w-full">
+                        <button
+                          className={` ${
+                            activeTab === index
+                              ? "bg-[#ffad84] border-[#ffad84]"
+                              : "bg-white border-white"
+                          }  flex w-full h-[30px]  border-2 text-[10px] sm:h-[40px] sm:text-[12px] items-center rounded-full  px-3 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+             // Highlight active tab
+              `}
+                          onClick={() => setActiveTab(index)}
+                        >
+                          {item.title}
+                        </button>
+                      </li>
+                    ))}
+                  </TabNav>
+                </div>
+              </Nav>
+            </div>
+          </header>
           <div
             className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
           a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"

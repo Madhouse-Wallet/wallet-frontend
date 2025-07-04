@@ -10,7 +10,27 @@ import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css"; // theme css file
 
 export default function App({ Component, pageProps, ...props }: AppProps) {
+<<<<<<< HEAD
+  useEffect(() => {
+    const header = document.getElementById("header");
+
+    const preventRubberBand = (e: TouchEvent) => {
+      if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
+        e.preventDefault(); // stop downward bounce
+      }
+    };
+
+    header?.addEventListener("touchstart", preventRubberBand, {
+      passive: false,
+    });
+
+    return () => {
+      header?.removeEventListener("touchstart", preventRubberBand);
+    };
+  }, []);
+=======
  
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
   return (
     <>
       <Providers>
