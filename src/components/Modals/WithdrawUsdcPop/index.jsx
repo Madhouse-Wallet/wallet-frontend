@@ -123,7 +123,8 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
-            fetchLighteningBalance()
+            fetchLighteningBalance();
+            toast.success(getBtcSat.message);
             setLoading(false);
           }
         }
