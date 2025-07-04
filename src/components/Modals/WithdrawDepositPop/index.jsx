@@ -21,8 +21,8 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     setError("");
     if (userAuth?.email) {
       setloading(true);
-      let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdEncrypt);
+      let data = JSON.parse(userAuth?.webauthnData);
+      let userData = await verifyUser(data?.credentialID);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"
@@ -41,8 +41,8 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     setError("");
     if (userAuth?.email) {
       setloadingFonbnk(true);
-      let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdEncrypt);
+      let data = JSON.parse(userAuth?.webauthnData);
+      let userData = await verifyUser(data?.credentialID);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"
@@ -61,8 +61,8 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
     setError("");
     if (userAuth?.email) {
       setLoadingpayments(true);
-      let data = JSON.parse(userAuth?.webauthKey);
-      let userData = await verifyUser(data?.credentialIdEncrypt);
+      let data = JSON.parse(userAuth?.webauthnData);
+      let userData = await verifyUser(data?.credentialID);
       if (
         userData.status === true &&
         userData.msg === "User verified successfully"
@@ -166,7 +166,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "SWIFT Payments"
+                      "International Payments"
                     )}
                   </button>
                 </div>

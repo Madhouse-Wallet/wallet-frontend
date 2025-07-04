@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import WalletBackup from "../../../pages/create-wallet/WalletBackup";
-
-// css
-
-// img
 
 const RecoverPopup = ({
   recover,
@@ -35,8 +28,6 @@ const RecoverPopup = ({
     try {
       if (phrase) {
         await navigator.clipboard.writeText(text);
-        toast.success("Copied Successfully!");
-      } else {
       }
     } catch (error) {
       console.log("error-->", error);
@@ -46,7 +37,6 @@ const RecoverPopup = ({
   const handleCopyURL = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Copied Successfully!");
     } catch (error) {
       console.log("error-->", error);
     }

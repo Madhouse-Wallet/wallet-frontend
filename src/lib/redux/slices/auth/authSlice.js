@@ -17,9 +17,8 @@ if (typeof window !== "undefined") {
 const initialState = {
   walletAddress: (data?.walletAddress || ""),
   bitcoinWallet: (data?.bitcoinWallet || ""),
-  webauthKey: ((data?.webauthKey && JSON.stringify(data?.webauthKey) )|| ""),
+  webauthnData: ((data?.webauthnData && JSON.stringify(data?.webauthnData) )|| ""),
   email: (data?.email || ""),
-  id: (data?.id || ""),
   login: (data?.login || false),
   pos: (data?.pos || false),
   totalPasskey: (data?.totalPasskey || ""),
@@ -35,8 +34,7 @@ export const authSlice = createSlice({
       state.email = action.payload.email;
       state.walletAddress = action.payload.walletAddress;
       state.bitcoinWallet = action.payload.bitcoinWallet;
-      state.webauthKey = action.payload.webauthKey;
-      state.id = action.payload.id;
+      state.webauthnData = action.payload.webauthnData;
       state.pos = (action.payload.pos || false);
       state.totalPasskey = (action.payload.totalPasskey || 1);
     },

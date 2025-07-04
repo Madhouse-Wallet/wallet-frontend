@@ -185,10 +185,10 @@ const DepositSwap = () => {
       return;
     }
 
-    const data = JSON.parse(userAuth?.webauthKey);
+    const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeyEncrypt,
-      data?.credentialIdEncrypt
+      data?.encryptedData,
+      data?.credentialID
     );
     if (!retrieveSecretCheck?.status) {
       return;
@@ -443,11 +443,10 @@ const DepositSwap = () => {
               {depositAddress && (
                 <div className="mt-2 bg-black/30 rounded-lg p-2 text-xs">
                   <p className="m-0 text-amber-500">
-                    Deposit Address: {depositAddress.slice(0, 10)}...
-                    {depositAddress.slice(-8)}
+                    Deposit address confirmed
                   </p>
                   <p className="m-0 text-green-500">
-                    You will receive: {toAmount} PAXG
+                    You will receive: {toAmount} XAUt
                   </p>
                 </div>
               )}

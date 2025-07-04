@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { BackBtn } from "@/components/common";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { webAuthKeyStore } from "../../utils/globals";
 import { doRecovery } from "../../lib/zeroDev";
@@ -73,17 +72,15 @@ const RecoverWallet = () => {
       if (email) {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
-          toast.error("User Not Found!");
           setLoadingNewSigner(false);
         } else {
           setAddress(userExist?.userId?.wallet);
-          setBitcoinAddress(userExist?.userId?.bitcoinWallet)
+          setBitcoinAddress(userExist?.userId?.bitcoinWallet);
           setLoadingNewSigner(false);
           setStep(2);
         }
       } else {
         setLoadingNewSigner(false);
-        toast.error("Invalid Address!");
       }
     } catch (error) {
       setLoadingNewSigner(false);
@@ -93,7 +90,7 @@ const RecoverWallet = () => {
   const checkPhrase = async () => {
     try {
       setLoadingNewSigner(true);
-      setError("")
+      setError("");
       if (privateKey && wif && safeprivateKey && seedPhrase) {
         let testMenmonic = await checkMenmonic(seedPhrase, privateKey);
         if (!testMenmonic.status) {
@@ -107,7 +104,11 @@ const RecoverWallet = () => {
           address
         );
         let recoveryBitcoin = await decodeBitcoinAddress(wif);
-        if (recoveryBitcoin?.status == "error" || (recoveryBitcoin?.data?.address != bitcoinAddress && recoveryBitcoin?.data?.address2 != bitcoinAddress)) {
+        if (
+          recoveryBitcoin?.status == "error" ||
+          (recoveryBitcoin?.data?.address != bitcoinAddress &&
+            recoveryBitcoin?.data?.address2 != bitcoinAddress)
+        ) {
           setWifError("Invalid Wif!");
           setLoadingNewSigner(false);
           return;
@@ -126,8 +127,8 @@ const RecoverWallet = () => {
             JSON.stringify(secretObj)
           );
           if (storeData.status) {
-            let storageKeyEncrypt = storeData?.storageKey;
-            let credentialIdEncrypt = storeData?.credentialId;
+            let encryptedData = storeData?.storageKey;
+            let credentialID = storeData?.credentialId;
             try {
               let data = await updtUser(
                 { email: userExist?.userId?.email },
@@ -138,10 +139,10 @@ const RecoverWallet = () => {
                         email +
                         "_passkey_" +
                         (userExist?.userId?.totalPasskey + 1),
-                      storageKeyEncrypt,
-                      credentialIdEncrypt,
+                      encryptedData,
+                      credentialID,
                       displayName: "",
-                      bitcoinWallet: bitcoinAddress
+                      bitcoinWallet: bitcoinAddress,
                     },
                   },
                   $set: { totalPasskey: userExist?.userId?.totalPasskey + 1 }, // Ensure this is inside `$set`
@@ -151,7 +152,6 @@ const RecoverWallet = () => {
               console.log("updtuser error-->", error);
             }
 
-            toast.success("New Key Recovered!");
             router.push("/welcome");
           } else {
             setError(storeData.msg);
@@ -178,7 +178,6 @@ const RecoverWallet = () => {
       // updtUser
       let userExist = await getUser(email);
       if (userExist.status && userExist.status == "failure") {
-        toast.error("User Not Found!");
       } else {
         let passkeyNo =
           (userExist?.userId?.passkey_number &&
@@ -205,10 +204,7 @@ const RecoverWallet = () => {
               $set: { passkey_number: passkeyNo }, // Ensure this is inside `$set`
             }
           );
-          toast.success("New Key Recovered!");
           router.push("/welcome");
-        } else {
-          toast.error(checkAccount.msg);
         }
       }
 
@@ -239,7 +235,7 @@ const RecoverWallet = () => {
 
   const handlePrivateInputChange = (e) => {
     const value = e.target.value;
-    setError("")
+    setError("");
     const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
 
     setPrivateKey(filteredValue);
@@ -255,7 +251,7 @@ const RecoverWallet = () => {
 
   const handleSafePrivateInputChange = (e) => {
     const value = e.target.value;
-    setError("")
+    setError("");
     const filteredValue = filterHexxInput(value, /[^0-9a-fA-Fx]/g, 66);
 
     setSafePrivateKey(filteredValue);
@@ -270,7 +266,7 @@ const RecoverWallet = () => {
   };
 
   const handlePhraseInput = (e) => {
-    setError("")
+    setError("");
     const value = e.target.value;
     const filtered = filterAlphaWithSpaces(value, 250); // Adjust max length as needed
     setSeedPhrase(filtered); // Or whatever your state setter is
@@ -286,7 +282,7 @@ const RecoverWallet = () => {
   };
 
   const handleWifInput = (e) => {
-    setError("")
+    setError("");
     const value = e.target.value;
     const disallowedChars =
       /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g;

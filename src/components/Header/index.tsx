@@ -8,7 +8,6 @@ import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
-import { toast } from "react-toastify";
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,8 +33,7 @@ const Header: React.FC<HeaderProps> = () => {
             walletAddress: userAuth.walletAddress,
             bitcoinWallet: userAuth.bitcoinWallet,
             passkeyCred: newPasskeyValidator,
-            webauthKey: userAuth.webauthKey,
-            id: userAuth.id,
+            webauthnData: userAuth.webauthnData,
             multisigAddress: userAuth.multisigAddress,
             passkey2: userAuth.passkey2,
             passkey3: userAuth.passkey3,
@@ -63,7 +61,6 @@ const Header: React.FC<HeaderProps> = () => {
     try {
       await navigator.clipboard.writeText(address);
       setIsCopied((prev) => ({ ...prev, [type]: true }));
-      toast.success("Wallet Address copied successfully!");
       setTimeout(
         () =>
           setIsCopied({

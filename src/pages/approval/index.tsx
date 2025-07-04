@@ -18,7 +18,7 @@ const Approvals: React.FC = () => {
   }, []);
   return (
     <>
-      <section className="relative dashboard  ">
+      <section className="relative dashboard  h-full">
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}

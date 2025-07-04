@@ -42,7 +42,7 @@ const SpherePayAPI = {
    */
   createCustomer: async (customerData) => {
     try {
-      const response = await sphereAPIClient.post("/v2/customer", customerData);
+      const response = await sphereAPIClient.post("/v1/customer", customerData);
       return response.data;
     } catch (error) {
       return handleError(error);
@@ -127,10 +127,19 @@ const SpherePayAPI = {
   addBankAccount: async (customerId, bankAccountData) => {
     try {
       const response = await sphereAPIClient.post(
-        `/v2/customers/${customerId}/bank-account`,
-        // `/v1/bankAccount`,
+        // `/v2/customer/${customerId}/bank-account`,
+        `/v1/bankAccount`,
         bankAccountData
       );
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  deletebankAccount: async (id) => {
+    try {
+      const response = await sphereAPIClient.delete(`/v1/bankAccount/${id}`);
       return response.data;
     } catch (error) {
       return handleError(error);
@@ -185,11 +194,10 @@ const SpherePayAPI = {
     }
   },
 
-  getBankAccountDetail: async (bankAccountId, customerId) => {
+  getBankAccountDetail: async (customerId) => {
     try {
       const response = await sphereAPIClient.get(
-        `/v1/bankAccount/${bankAccountId}`
-        // `v2/customers/${customerId}/bank-account/${bankAccountId}`
+        `/v1/bankAccount/${customerId}`
       );
       return response.data;
     } catch (error) {
@@ -197,9 +205,18 @@ const SpherePayAPI = {
     }
   },
 
-  getTransferDetail: async () => {
+  getTransferDetail: async (id) => {
     try {
-      const response = await sphereAPIClient.get(`/v1/transfer`);
+      const response = await sphereAPIClient.get(`/v1/transfer/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  transferFee: async (feeData) => {
+    try {
+      const response = await sphereAPIClient.post(`/v1/transfer/fee`, feeData);
       return response.data;
     } catch (error) {
       return handleError(error);

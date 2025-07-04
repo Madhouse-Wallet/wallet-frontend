@@ -283,12 +283,12 @@ const Dashboard = () => {
         )}
 
       {/* <LoadingScreen /> */}
-      <DashboardMain className="relative flex w-full flex-col items-center pt-[60px]">
+      <DashboardMain className="relative flex w-full flex-col items-start justify-start">
         <div
-          className="flex h-full w-full select-none flex-col items-center container"
+          className="flex h-full w-full select-none flex-col items-start container justify-start"
           style={{ opacity: 1, transform: "none" }}
         >
-          <div className="pt-3 md:pt-8 sm:block hidden" />
+          {/* <div className="pt-3 md:pt-8 sm:block hidden" /> */}
           <div className="pt-1 md:pt-6  " />
           <div
             className="flex w-full  animate-in fade-in slide-in-from-bottom-8"
@@ -359,6 +359,7 @@ const Dashboard = () => {
 const DashboardMain = styled.div`
   overflow: auto;
   max-height: calc(100vh - 100px);
+  padding-bottom: 100px;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;

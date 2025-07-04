@@ -1,20 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
-import { BackBtn } from "@/components/common";
 import SendTbtcWall from "@/components/Modals/SendTbtcWallet";
 import DepositPopup from "@/components/Modals/DepositPop";
+import DepositUsdcPopup from "@/components/Modals/DepositUsdcPop";
 import WithdrawPopup from "@/components/Modals/WithdrawPop";
 import LNAdressPopup from "@/components/Modals/LNAddressPop";
 import BitikaPop from "@/components/Modals/BitikaPop";
 import CreateCardPop from "@/components/Modals/CreateCardPop";
 import { getUser, delCreditCard } from "@/lib/apiCall";
-import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop"
-import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop"
-import { splitAddress } from "../../utils/globals";
+import LightningWithdrawPop from "@/components/Modals/LightningWithdrawPop";
+import LightningDepositPop from "@/components/Modals/LightningDepositPop";
+import WithdrawUsdcPopup from "@/components/Modals/WithdrawUsdcPop";
 
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -24,9 +23,11 @@ const BTCDebitCard: React.FC = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
+  const [depositUsdcPop, setDepositUsdcPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
-  const [lightning, setLightning,] = useState(false);
+  const [lightning, setLightning] = useState(false);
+  const [LightningDeposit, setLightningDeposit] = useState(false);
   const [lnAdressPop, setLNAdressPop] = useState(false);
   const [bitikaPop, setBitikaPop] = useState(false);
   const [step, setStep] = useState(1);
@@ -41,7 +42,6 @@ const BTCDebitCard: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("LN Address copied successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -108,10 +108,8 @@ const BTCDebitCard: React.FC = () => {
         if (delCardData?.status == "success") {
           setCreditCardDetail(false);
           setLoader(false);
-          toast.success("Card Deleted!");
         } else {
           setLoader(false);
-          toast.error(delCardData.message);
         }
       }
 
@@ -130,6 +128,18 @@ const BTCDebitCard: React.FC = () => {
 
   return (
     <>
+      {LightningDeposit &&
+        createPortal(
+          <LightningDepositPop
+            depositUsdcPop={depositUsdcPop}
+            setDepositUsdcPop={setDepositUsdcPop}
+            depositPop={depositPop}
+            setDepositPop={setDepositPop}
+            LightningDeposit={LightningDeposit}
+            setLightningDeposit={setLightningDeposit}
+          />,
+          document.body
+        )}
       {lightning &&
         createPortal(
           <LightningWithdrawPop
@@ -147,6 +157,14 @@ const BTCDebitCard: React.FC = () => {
           <DepositPopup
             depositPop={depositPop}
             setDepositPop={setDepositPop}
+          />,
+          document.body
+        )}
+      {depositUsdcPop &&
+        createPortal(
+          <DepositUsdcPopup
+            depositUsdcPop={depositUsdcPop}
+            setDepositUsdcPop={setDepositUsdcPop}
           />,
           document.body
         )}
@@ -200,19 +218,9 @@ const BTCDebitCard: React.FC = () => {
           />,
           document.body
         )}
-      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+      <section className="relative dashboard  h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
-          <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
-              <div className="left">
-                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Lightning
-                </h4>
-              </div>
-            </Nav>
-          </div>
-        </header>
+
         <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}
@@ -221,6 +229,17 @@ const BTCDebitCard: React.FC = () => {
           >
             {closeIcn}
           </button>
+          <header className="siteHeader top-0 py-2 w-full z-[999]">
+            <div className="container mx-auto">
+              <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
+                <div className="left">
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Lightning
+                  </h4>
+                </div>
+              </Nav>
+            </div>
+          </header>
           <div className="pageCard  bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <div className="grid gap-3 grid-cols-12 px-2 py-3">
               <div className="p-2 px-3 px-lg-4 col-span-12">
@@ -292,7 +311,6 @@ const BTCDebitCard: React.FC = () => {
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
                         <button
-
                           onClick={() => setLightning(!lightning)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
@@ -301,7 +319,8 @@ const BTCDebitCard: React.FC = () => {
                       </div>
                       <div className="col-span-6">
                         <button
-                          onClick={() => setDepositPop(!depositPop)}
+                          // onClick={() => setDepositPop(!depositPop)}
+                          onClick={() => setLightningDeposit(!LightningDeposit)}
                           className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
                           Deposit

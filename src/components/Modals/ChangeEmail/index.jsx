@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useTheme } from "@/ContextApi/ThemeContext";
-import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import OtpInput from "react-otp-input";
@@ -43,7 +42,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
         if (sendEmailData.status && sendEmailData.status == "success") {
           setLoading(false);
           setStep(2);
-          toast.success(sendEmailData?.message);
         } else {
         }
       }
@@ -77,7 +75,6 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 $set: { email: email }, // Ensure this is inside `$set`
               }
             );
-            toast.success("Email Changed!");
             dispatch(
               loginSet({
                 login: userAuth.login,
@@ -85,8 +82,7 @@ const ChangeEmailPop = ({ changeEmail, setChangeEmail }) => {
                 walletAddress: userAuth.walletAddress,
                 bitcoinWallet: userAuth.bitcoinWallet,
                 passkeyCred: userAuth.passkeyValidatorNew,
-                webauthKey: userAuth.webauthKey,
-                id: userAuth.id,
+                webauthnData: userAuth.webauthnData,
                 ensName: userAuth.ensName || "",
                 ensSetup: userAuth.ensSetup || false,
                 multisigAddress: userAuth.multisigAddress,

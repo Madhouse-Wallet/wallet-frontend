@@ -368,6 +368,40 @@ export const btcSat = async (
   }
 };
 
+
+
+export const lbtcSat = async (
+  amount,
+  refund_address = "",
+  lnbitId_3,
+  lnbitWalletId_3
+) => {
+  try {
+    try {
+      return await fetch(`/api/lbtc-sat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          refund_address,
+          lnbitId_3,
+          lnbitWalletId_3,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          return data;
+        });
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  } catch (error) {
+    console.log("error-->", error);
+    return false;
+  }
+};
+
 export const receiveBtc = async (
   amount,
   email,

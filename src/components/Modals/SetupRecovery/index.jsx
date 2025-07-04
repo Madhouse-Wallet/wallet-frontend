@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -79,8 +78,7 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               email: userAuth.email,
               walletAddress: userAuth.walletAddress,
               passkeyCred: checkAccount.passkeyValidatorNew,
-              webauthKey: checkAccount.newwebAuthKey,
-              id: userAuth.id,
+              webauthnData: checkAccount.newwebAuthKey, 
               ensName: userAuth.ensName || "",
               ensSetup: userAuth.ensSetup || false,
               multisigAddress: userAuth.multisigAddress,
@@ -107,8 +105,8 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
               bitcoinWallet: userAuth.bitcoinWallet || "",
               email: userAuth.email,
               passkeyCred: "",
-              webauthKey: webAuthKeyStringObj,
-              id: userAuth.id,
+              webauthnData: webAuthKeyStringObj,
+          
               multisigAddress: userAuth.multisigAddress,
               passkey2: webAuthKeyStringObj2,
               passkey3: webAuthKeyStringObj3,
@@ -119,7 +117,6 @@ const SetupRecoveryPop = ({ setUp, setSetUp }) => {
             },
             "authUser"
           );
-          toast.success("New Key Recovered!");
           setSetUp(!setUp);
         } else {
           return;

@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, btcSat } from "../../../../src/lib/apiCall";
-import { createTBtcToLbtcShift } from "../../../../src/pages/api/sideShiftAI.ts";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
+import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -41,12 +39,14 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [gasPrice, setGasPrice] = useState(null);
   const recoverSeedPhrase = async () => {
     try {
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = await getSecretData(
-        data?.storageKeyEncrypt,
-        data?.credentialIdEncrypt
+        data?.encryptedData,
+        data?.credentialID
       );
       if (callGetSecretData?.status) {
         return JSON.parse(callGetSecretData?.secret);
@@ -111,12 +111,55 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           } else {
             const satoshis = Math.round(parseFloat(amount) * 100000000);
             const btInSats = Math.floor(bitcoinBalance * 100000000);
-            if (btInSats < getBtcSat?.data?.expected_amount) {
-              const requiredBtc = (getBtcSat?.data?.expected_amount / 100000000).toFixed(8); // convert to BTC with precision
-              setCommonError(`Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`);
+
+            const gasCalulate = await bitcoinGasFeeFunction({
+              fromAddress: userExist?.userId?.bitcoinWallet,
+              toAddress: getBtcSat?.data?.address,
+              amountSatoshi: getBtcSat?.data?.expected_amount,
+              privateKeyHex: privateKey?.wif,
+              network: "main", // Use 'main' for mainnet
+            });
+
+            console.log("line-123", gasCalulate);
+            if (gasCalulate.success === false) {
+              setLoading(false);
+
+              const allNumbers =
+                gasCalulate?.error?.errors?.[0]?.error?.match(/-?\d+/g);
+              const missingSats = allNumbers
+                ? parseInt(allNumbers[allNumbers.length - 1])
+                : 0;
+              setGasPriceError(
+                `Insufficient balance. You're short by ${(Math.abs(missingSats) / 1e8).toFixed(8)} BTC to cover the amount and network fee.`
+              );
+              return;
+            }
+            const gasFeeSats = gasCalulate.details.tx.fees;
+
+            const gasFeeBTC = gasFeeSats / 100000000;
+            const btcAmount = getBtcSat?.data?.expected_amount / 100000000;
+            setGasPrice(gasFeeBTC);
+            const totalRequired = parseFloat(btcAmount) + gasFeeBTC;
+
+            if (totalRequired > Number.parseFloat(bitcoinBalance)) {
+              setGasPriceError(
+                `Insufficient balance. Required: ${totalRequired.toFixed(8)} BTC (Amount: ${btcAmount} + Network Fee: ${gasFeeBTC.toFixed(8)})`
+              );
               setLoading(false);
               return;
             }
+
+            if (btInSats < getBtcSat?.data?.expected_amount) {
+              const requiredBtc = (
+                getBtcSat?.data?.expected_amount / 100000000
+              ).toFixed(8); // convert to BTC with precision
+              setCommonError(
+                `Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`
+              );
+              setLoading(false);
+              return;
+            }
+
             const result = await sendBitcoinFunction({
               fromAddress: userExist?.userId?.bitcoinWallet,
               toAddress: getBtcSat?.data?.address,
@@ -125,7 +168,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               network: "main", // Use 'main' for mainnet
             });
             if (result.status) {
-              toast.success(result.transactionHash);
               fetchBtcBalance();
               setLoading(false);
             } else {
@@ -173,6 +215,9 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const handleAmountInput = (e) => {
     const rawValue = e.target.value;
 
+    setGasPrice(null);
+    setGasPriceError("");
+
     // Allow only numbers and a single dot
     const numericValue = rawValue.replace(/[^0-9.]/g, "");
 
@@ -194,8 +239,8 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
       setError("Invalid number format");
     } else if (numberValue < 0.00027) {
       setError("Minimum deposit is 0.00027 BTC");
-    } else if (numberValue > 0.25) {
-      setError("Maximum deposit is 0.25 BTC");
+    } else if (numberValue > 0.24) {
+      setError("Maximum deposit is 0.24 BTC");
     } else {
       setError("");
     }
@@ -243,7 +288,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Deposit
+                Deposit Bitcoin
               </h5>
             </div>
             <div className="modalBody">
@@ -271,7 +316,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                       onChange={handleAmountInput}
                       value={amount}
                       className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      placeholder="min: (0.00027), max: (0.25)"
+                      placeholder="min: (0.00027), max: (0.24)"
                     />
                   </div>
                   {error && <p className="m-0 text-red-500">{error}</p>}
@@ -300,6 +345,16 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
                     )}
                   </button>
                 </div>
+
+                {gasPriceError && (
+                  <div className="text-red-500 text-xs">{gasPriceError}</div>
+                )}
+
+                {gasPrice && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Estimated Max Gas Fee: {gasPrice} USDC
+                  </label>
+                )}
               </form>
             </div>
           </div>

@@ -16,7 +16,6 @@ export default async function handler(
       email: email,
       newAddress: username,
     });
-    // console.log("repsonse", resposne);
     if (resposne?.status === "success") {
       return res
         .status(200)

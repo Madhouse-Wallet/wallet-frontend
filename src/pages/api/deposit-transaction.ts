@@ -21,7 +21,6 @@ export default async function handler(
         let getToken = (await userLogIn(2, existingUser?.lnbitId_3)) as any;
         if (getToken?.status) {
           let token = getToken?.data?.token;
-          console.log("line-24", token, existingUser?.lnbitAdminKey_3);
           const result = (await getDeposit(
             token,
             2,

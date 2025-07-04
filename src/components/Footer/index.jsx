@@ -140,15 +140,27 @@ const FootNav = styled.ul`
     span {
       font-size: 13px;
     }
-    ${
-      "" /* svg {
-      height: 28px;
-      width: 28px;
-    } */
-    }
     &:hover {
       img {
         transform: translateY(-18px) scale(1.3);
+      }
+    }
+  }
+
+  @media (max-height: 480px) {
+    a,
+    button {
+      img {
+        height: 35px !important;
+        width: 35px !important;
+      }
+      span {
+        font-size: 8px !important;
+      }
+      &:hover {
+        img {
+          transform: translateY(-8px) scale(1.1);
+        }
       }
     }
   }

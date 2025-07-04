@@ -14,8 +14,6 @@ import { logoutStorage } from "../../utils/globals";
 
 import { retrieveSecret, verifyUser } from "../../utils/webauthPrf";
 import styled from "styled-components";
-
-import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, addProvisionData } from "../../lib/apiCall";
@@ -56,7 +54,6 @@ const Setting: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Copied Successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -74,24 +71,23 @@ const Setting: React.FC = () => {
     }
   }, []);
 
-  const getPreview = async () => {
-    try {
-      return await fetch(`/api/get-preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: "https://devstack.madhousewallet.com/dashboard",
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          return data;
-        });
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
+  // const getPreview = async () => {
+  //   try {
+  //     return await fetch(`/api/get-preview`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         url: "https://devstack.madhousewallet.com/dashboard",
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         return data;
+  //       });
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
     try {
@@ -122,10 +118,10 @@ const Setting: React.FC = () => {
   const recoverSeedPhrase = async () => {
     try {
       setLoader(true);
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = (await getSecretData(
-        data?.storageKeyEncrypt,
-        data?.credentialIdEncrypt
+        data?.encryptedData,
+        data?.credentialID
       )) as any;
       if (callGetSecretData?.status) {
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
@@ -146,8 +142,8 @@ const Setting: React.FC = () => {
 
   const verifyingUser = async () => {
     setloading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdEncrypt);
+    let data = JSON.parse(userAuth?.webauthnData);
+    let userData = await verifyUser(data?.credentialID);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"
@@ -156,7 +152,6 @@ const Setting: React.FC = () => {
       setRecover(!recover);
     } else {
       setloading(false);
-      // toast.error(userData?.msg);
     }
   };
 
@@ -198,8 +193,8 @@ const Setting: React.FC = () => {
           bitcoinWallet: "",
           email: "",
           passkeyCred: "",
-          webauthKey: "",
-          id: "",
+          webauthnData: "",
+
           multisigAddress: "",
           passkey2: "",
           passkey3: "",
@@ -211,7 +206,6 @@ const Setting: React.FC = () => {
       );
 
       clearSettings();
-      // toast.success("Logout Successfully!");
     } catch (error) {
       console.log("logout error --->", error);
     }
@@ -257,19 +251,9 @@ const Setting: React.FC = () => {
           <ConfirmationPop confirm={confirm} setConfirm={setConfirm} />,
           document.body
         )}
-      <section className="relative dashboard  h-full flex items-center sm:pt-[40px]">
+      <section className="relative dashboard  h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
-          <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
-              <div className="left">
-                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Setting & Support
-                </h4>
-              </div>
-            </Nav>
-          </div>
-        </header>
+
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
@@ -278,6 +262,17 @@ const Setting: React.FC = () => {
           >
             {closeIcn}
           </button>
+          <header className="siteHeader top-0 py-2 w-full z-[999]">
+            <div className="container mx-auto">
+              <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-center flex-wrap gap-2">
+                <div className="left">
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Setting & Support
+                  </h4>
+                </div>
+              </Nav>
+            </div>
+          </header>
           <div
             className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
           a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
@@ -438,7 +433,7 @@ const Setting: React.FC = () => {
                               <button
                                 onClick={() => {
                                   selectBg(index);
-                                  getPreview();
+                                  // getPreview();
                                 }}
                                 className={`${
                                   selectedBackground === bg ? "border-2 " : ""
@@ -481,7 +476,7 @@ const Setting: React.FC = () => {
                           value={bgOpacity}
                           onChange={(e) => {
                             changeBgOpacity(parseFloat(e.target.value));
-                            getPreview();
+                            // getPreview();
                           }}
                           className="w-full cursor-pointer"
                         />

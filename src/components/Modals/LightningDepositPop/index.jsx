@@ -6,13 +6,14 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
 
-const LightningWithdrawPop = ({
-  withdrawUsdcPop,
-  setWithdrawUsdcPop,
-  lightning,
-  setLightning,
-  withdrawPop,
-  setWithdrawPop,
+const LightningDepositPop = ({
+  depositUsdcPop, setDepositUsdcPop,
+
+  depositPop,
+  setDepositPop,
+  LightningDeposit,
+  setLightningDeposit,
+
 }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +47,7 @@ const LightningWithdrawPop = ({
     }
   }, [userAuth.email]);
 
-  const handleLightning = () => setLightning(!lightning);
+  const handleLightningDeposit = () => setLightningDeposit(!LightningDeposit);
   return (
     <>
       <Modal
@@ -54,38 +55,39 @@ const LightningWithdrawPop = ({
       >
         <div className="absolute inset-0 backdrop-blur-xl"></div>
         <div
-          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
+          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-          <button
-            onClick={handleLightning}
-            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-            // style={{ border: "1px solid #5f5f5f59" }}
-          >
-            {closeIcn}
-          </button>{" "}
+        <button
+          onClick={handleLightningDeposit}
+              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+        >
+          {closeIcn}
+        </button>
+          {" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
               {isLoading && createPortal(<LoadingScreen />, document.body)}
               <div className="py-2">
                 <button
-                  onClick={() => setWithdrawUsdcPop(!withdrawUsdcPop)}
+                  onClick={() => setDepositUsdcPop(!depositUsdcPop)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                 >
-                  Withdraw sats to Dollars
+                  Deposit with Dollars
                 </button>
               </div>
 
               <div className="py-2">
                 <button
-                  onClick={() => setWithdrawPop(!withdrawPop)}
+                  onClick={() => setDepositPop(!depositPop)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  Withdraw sats to Bitcoin
+                  Deposit with Bitcoin
                 </button>
               </div>
             </div>
@@ -98,7 +100,6 @@ const LightningWithdrawPop = ({
 
 const Modal = styled.div`
   // padding-bottom: 100px;
-
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 350px !important;
@@ -110,7 +111,7 @@ const Modal = styled.div`
   }
 `;
 
-export default LightningWithdrawPop;
+export default LightningDepositPop;
 
 const closeIcn = (
   <svg

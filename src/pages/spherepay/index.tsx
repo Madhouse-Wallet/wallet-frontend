@@ -10,7 +10,6 @@ import TermsOfServiceStep from "./TermsOfServiceStep.jsx";
 import VerifyIdentity from "./VerifyIdentity.jsx";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { getUser } from "@/lib/apiCall.js";
 
 function Spharepay() {
   const userAuth = useSelector((state: any) => state.Auth);
@@ -32,7 +31,6 @@ function Spharepay() {
     };
 
     try {
-      console.log("line-34");
       const response = await SpherePayAPI.createCustomer(customerData);
       return response;
     } catch (error: any) {
@@ -46,34 +44,23 @@ function Spharepay() {
       // return;
     }
     const fetchData = async () => {
-      const userExist = await getUser(userAuth?.email);
+      const response = await createNewCustomer("individual", userAuth?.email);
+      const message = response?.error?.message;
 
-      // const response = await createNewCustomer("individual", userAuth?.email);
-      // const message = response?.error?.message;
+      const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
+      const customerId = match ? match[1] : null;
 
-      // const match = message.match(/id:\s*(customer_[a-zA-Z0-9]+)/);
-      // const customerId = match ? match[1] : null;
-
-      // if (response && response.error) {
-      //   if (
-      //     response.error.error === "customer/duplicate" ||
-      //     (response.error.message &&
-      //       response.error.message.includes("duplicate"))
-      //   ) {
-      //     setCustomerID(customerId);
-      //     setStep("PolicyKycStep");
-      //   } else if (
-      //     response.error.message === "Expected country, got undefined or null"
-      //   ) {
-      //     setStep("select-country");
-      //   }
-      // }
-
-      if (userExist) {
-        if (userExist?.userId?.spherepayId) {
-          setCustomerID(userExist?.userId?.spherepayId);
+      if (response && response.error) {
+        if (
+          response.error.error === "customer/duplicate" ||
+          (response.error.message &&
+            response.error.message.includes("duplicate"))
+        ) {
+          setCustomerID(customerId);
           setStep("PolicyKycStep");
-        } else {
+        } else if (
+          response.error.message === "Expected country, got undefined or null"
+        ) {
           setStep("select-country");
         }
       }
@@ -84,19 +71,9 @@ function Spharepay() {
 
   return (
     <>
-      <section className="ifrmae relative h-full flex items-center sm:pt-[40px]">
+      <section className="ifrmae relative h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
-        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
-          <div className="container mx-auto">
-            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-center flex-wrap gap-2">
-              <div className="left">
-                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Spherepay
-                </h4>
-              </div>
-            </Nav>
-          </div>
-        </header>
+
         <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}
@@ -105,6 +82,17 @@ function Spharepay() {
           >
             {closeIcn}
           </button>
+          <header className="siteHeader top-0 py-2 w-full z-[999]">
+            <div className="">
+              <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-center flex-wrap gap-2">
+                <div className="left">
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Spherepay
+                  </h4>
+                </div>
+              </Nav>
+            </div>
+          </header>
           <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
             <div className="grid gap-3 grid-cols-12 px-2 py-5">
               <div className="col-span-12">
