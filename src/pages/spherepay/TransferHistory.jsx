@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { filterAmountInput, isValidNumber } from "@/utils/helper";
-import { getAccount, sendTransaction, USDC_ABI } from "@/lib/zeroDev";
+import {
+  calculateGasPriceInUSDC,
+  getAccount,
+  publicClient,
+  sendTransaction,
+  usdc,
+  USDC_ABI,
+} from "@/lib/zeroDev";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useSelector } from "react-redux";
 import { getUser, updtUser } from "@/lib/apiCall";
+import { parseAbi, parseUnits } from "viem";
+import { createPortal } from "react-dom";
+import SpherePayTransferDetailPop from "@/components/Modals/SpherePayTransferDetailPopup";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [spherePayTransfer, setSpherePayTransfer] = useState(false);
   const [customerData, setCustomerData] = useState(null);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [error, setError] = useState("");
@@ -17,6 +28,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [transfers, setTransfers] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [transferData, setTransferData] = useState();
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [balance, setBalance] = useState("0");
 
   const [onRampForm, setOnRampForm] = useState({
     currency: "",
@@ -26,7 +40,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   });
 
   const [offRampForm, setOffRampForm] = useState({
-    currency: "",
+    currency: "usd",
     transferMethod: "",
     bankAccountId: "",
     amount: "",
@@ -50,6 +64,38 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   useEffect(() => {
     fetchCustomerData();
   }, [customerId]);
+
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      fetchBalance();
+    }
+  }, [userAuth?.walletAddress]);
+
+  const fetchBalance = async () => {
+    try {
+      if (!userAuth?.walletAddress) return;
+
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+      );
+      if (balance) {
+        setBalance(balance);
+      } else {
+        setError("Failed to fetch USDC balance");
+      }
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      setError("Failed to fetch USDC balance");
+    }
+  };
 
   const fetchCustomerData = async () => {
     setIsLoading(true);
@@ -114,10 +160,13 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const handleOffRampChange = (e) => {
     const { id, value } = e.target;
-
     if (id === "amount") {
       const filteredValue = filterAmountInput(value, 2, 20);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+      if (parseFloat(value) > parseFloat(balance)) {
+        setError("Insufficient USDC Balance");
+        return;
+      }
     } else {
       setOffRampForm((prev) => ({ ...prev, [id]: value }));
     }
@@ -203,6 +252,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         bankAccountId: "",
         amount: "",
       });
+      setSpherePayTransfer(true);
     } catch (err) {
       console.error("Error initiating on-ramp transfer:", err);
       setError(
@@ -215,11 +265,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   };
 
   const sendUsdc = async (amount, toAddress) => {
-    console.log("line-208", amount, toAddress);
-    const data = JSON.parse(userAuth?.webauthKey);
+    const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeyEncrypt,
-      data?.credentialIdEncrypt
+      data?.encryptedData,
+      data?.credentialID
     );
     if (!retrieveSecretCheck?.status) {
       return;
@@ -236,6 +285,35 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         return;
       }
 
+      const gasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+        ]
+      );
+
+      // Round gas price to 2 decimals
+      const value = Number.parseFloat(gasPriceResult.formatted);
+      const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+      setGasPrice(roundedGasPrice);
+
+      // Check if amount + gas price exceeds balance
+      const totalRequired =
+        Number.parseFloat(amount) + Number.parseFloat(roundedGasPrice);
+
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${amount} + Max Gas Fee: ${roundedGasPrice})`
+        );
+        setIsLoading(false);
+        return;
+      }
+
       const tx = await sendTransaction(getAccountCli?.kernelClient, [
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
@@ -249,6 +327,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         return tx;
       }
     } catch (error) {
+      console.log("error", error);
       setError("USDC Transfer Failed");
     }
   };
@@ -264,6 +343,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
+    setGasPrice(null);
+    setGasPriceError("");
 
     try {
       if (
@@ -326,7 +407,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     } catch (err) {
       console.error("Error initiating off-ramp transfer:", err);
       setError(
-        err.response.data.message ||
+        (err.response.data.message ===
+          "Please resubmit the following parameters that are either missing or invalid" &&
+          "Please increase the amount.") ||
           "Failed to initiate transfer. Please try again."
       );
     } finally {
@@ -531,61 +614,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     </button>
                   </div>
                 </div>
-
-                {transferData && (
-                  <div className="col-span-12">
-                    <div className="grid gap-3 grid-cols-12">
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Bank Name :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.bankName}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Account Holder Name :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.accountHolderName}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Bank Address :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.bankAddressString}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Account Name :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.accountName}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Account Number :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.accountNumber}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Account Type :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.resource.accountType}
-                        </p>
-                      </div>
-                      <div className="sm:col-span-6 col-span-12">
-                        <h6 className="m-0">Memo :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.memo}
-                        </p>
-                      </div>
-                      <div className="col-span-12">
-                        <h6 className="m-0"> Instruction :</h6>
-                        <p className="m-0  text-white/50 text-xs px-2 py-2">
-                          {transferData.instructions.human}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </form>
           </div>
@@ -620,27 +648,11 @@ const TransferHistory = ({ step, setStep, customerId }) => {
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Select Currency
+                    Currency
                   </label>
-                  <select
-                    id="currency"
-                    value={offRampForm.currency}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                  >
-                    <option value="" disabled>
-                      Select Currency
-                    </option>
-                    {currencyOptions.map((option) => (
-                      <option
-                        className="text-black"
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full flex items-center">
+                    USD - US Dollar
+                  </div>
                 </div>
 
                 <div className="md:col-span-6 col-span-12">
@@ -701,12 +713,23 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 </div>
 
                 <div className="col-span-12">
-                  <label
-                    htmlFor="amount"
-                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
-                  >
-                    Enter Amount
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="amount"
+                      className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                    >
+                      Enter Amount
+                    </label>
+
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
+                  </div>
+
                   <input
                     id="amount"
                     type="text"
@@ -729,6 +752,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     >
                       {isLoading ? "Processing..." : "Transfer"}
                     </button>
+                  </div>
+                </div>
+                <div className="col-span-12">
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -832,6 +870,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   return (
     <>
+      {spherePayTransfer &&
+        createPortal(
+          <SpherePayTransferDetailPop
+            transferData={transferData}
+            spherePayTransfer={spherePayTransfer}
+            setSpherePayTransfer={setSpherePayTransfer}
+          />,
+          document.body
+        )}
       <div className="pb-4">
         <div className="p-2 rounded-xl bg-black/50 flex items-center justify-center">
           {tabData.map((item, key) => (
@@ -845,7 +892,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           ))}
         </div>
       </div>
-
       {isLoading && (tab === 0 || tab === 1) ? (
         <div className="flex items-center justify-center py-10">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>

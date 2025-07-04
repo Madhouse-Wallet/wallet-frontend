@@ -2,10 +2,17 @@ import React, { useEffect, useState } from "react";
 import { filterAmountInput, isValidName, isValidNumber } from "@/utils/helper";
 import { swap, swapUSDC } from "@/utils/morphoSwap";
 import { retrieveSecret } from "@/utils/webauthPrf";
-import { getAccount, sendTransaction } from "@/lib/zeroDev";
+import {
+  calculateGasPriceInUSDC,
+  getAccount,
+  publicClient,
+  sendTransaction,
+  usdc,
+} from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
 import { getUser, sendTransferDetail } from "@/lib/apiCall";
+import { parseAbi } from "viem";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -14,6 +21,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [gasPrice, setGasPrice] = useState(null);
+  const [gasPriceError, setGasPriceError] = useState("");
+  const [balance, setBalance] = useState("0");
 
   const [hash, setHash] = useState("");
   const [error, setError] = useState("");
@@ -66,6 +76,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     if (id === "amount") {
       const filteredValue = filterAmountInput(value, 2, 20);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
+      if (parseFloat(value) > parseFloat(balance)) {
+        setError("Insufficient USDC Balance");
+        return;
+      }
     } else {
       setOffRampForm((prev) => ({ ...prev, [id]: value }));
     }
@@ -287,6 +301,38 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     fetchParties();
   }, []);
 
+  useEffect(() => {
+    if (userAuth?.walletAddress) {
+      fetchBalance();
+    }
+  }, [userAuth?.walletAddress]);
+
+  const fetchBalance = async () => {
+    try {
+      if (!userAuth?.walletAddress) return;
+
+      const senderUsdcBalance = await publicClient.readContract({
+        abi: parseAbi([
+          "function balanceOf(address account) returns (uint256)",
+        ]),
+        address: usdc,
+        functionName: "balanceOf",
+        args: [userAuth?.walletAddress],
+      });
+      const balance = String(
+        Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+      );
+      if (balance) {
+        setBalance(balance);
+      } else {
+        setError("Failed to fetch USDC balance");
+      }
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      setError("Failed to fetch USDC balance");
+    }
+  };
+
   const handlePartySelection = (e) => {
     const partyId = e.target.value;
     setSelectedParty(partyId);
@@ -383,47 +429,118 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
     let secretData = JSON.parse(retrieveSecretCheck?.data?.secret);
 
-    const getAccountCli = await getAccount(
-      secretData?.privateKey,
-      secretData?.safePrivateKey
-    );
+    try {
+      const getAccountCli = await getAccount(
+        secretData?.privateKey,
+        secretData?.safePrivateKey
+      );
 
-    const gasTx = await sendTransaction(getAccountCli?.kernelClient, [
-      {
-        from: gasQuoteFinalResult?.approvalData?.tx?.from,
-        to: gasQuoteFinalResult?.approvalData?.tx?.to,
-        data: gasQuoteFinalResult?.approvalData?.tx?.data,
-      },
-      {
-        from: gasQuoteFinalResult?.routeData?.tx?.from,
-        to: gasQuoteFinalResult?.routeData?.tx?.to,
-        data: gasQuoteFinalResult?.routeData?.tx?.data,
-        value: gasQuoteFinalResult?.routeData?.tx?.value,
-      },
-    ]);
-    console.log("gasTx", gasTx);
-    if (gasTx?.success !== false) {
-      console.log("gasTx", gasTx);
-      const tx = await sendTransaction(getAccountCli?.kernelClient, [
+      console.log("line-434", gasQuoteFinalResult);
+      const gasGasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            from: gasQuoteFinalResult?.approvalData?.tx?.from,
+            to: gasQuoteFinalResult?.approvalData?.tx?.to,
+            data: gasQuoteFinalResult?.approvalData?.tx?.data,
+          },
+          {
+            from: gasQuoteFinalResult?.routeData?.tx?.from,
+            to: gasQuoteFinalResult?.routeData?.tx?.to,
+            data: gasQuoteFinalResult?.routeData?.tx?.data,
+            value: gasQuoteFinalResult?.routeData?.tx?.value,
+          },
+        ]
+      );
+
+      // Round gas price to 2 decimals
+      const gasValue = Number.parseFloat(gasGasPriceResult.formatted);
+      const roundedGasGasPrice = (Math.ceil(gasValue * 100) / 100).toFixed(2);
+
+      console.log("Gas transaction estimated gas price:", roundedGasGasPrice);
+
+      // Estimate gas for the main transaction
+      const mainGasPriceResult = await calculateGasPriceInUSDC(
+        getAccountCli?.kernelClient,
+        [
+          {
+            from: quoteResult?.approvalData?.tx?.from,
+            to: quoteResult?.approvalData?.tx?.to,
+            data: quoteResult?.approvalData?.tx?.data,
+          },
+          {
+            from: quoteResult?.routeData?.tx?.from,
+            to: quoteResult?.routeData?.tx?.to,
+            data: quoteResult?.routeData?.tx?.data,
+            value: quoteResult?.routeData?.tx?.value,
+          },
+        ]
+      );
+
+      // Round gas price to 2 decimals
+      const mainValue = Number.parseFloat(mainGasPriceResult.formatted);
+      const roundedMainGasPrice = (Math.ceil(mainValue * 100) / 100).toFixed(2);
+
+      console.log("Main transaction estimated gas price:", roundedMainGasPrice);
+
+      // Calculate total gas required
+      const totalGasRequired =
+        Number.parseFloat(roundedGasGasPrice) +
+        Number.parseFloat(roundedMainGasPrice);
+
+      console.log("Total gas required:", totalGasRequired.toFixed(2));
+
+      // Check if user has sufficient balance (you may want to add balance check here)
+      const totalRequired =
+        Number.parseFloat(offRampForm.amount) + totalGasRequired;
+      if (totalRequired > Number.parseFloat(balance)) {
+        setGasPriceError(
+          `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${offRampForm.amount} + Max Gas Fee: ${totalGasRequired.toFixed(2)})`
+        );
+        return;
+      }
+
+      console.log("line-499", gasQuoteFinalResult);
+
+      const gasTx = await sendTransaction(getAccountCli?.kernelClient, [
         {
-          from: quoteResult?.approvalData?.tx?.from,
-          to: quoteResult?.approvalData?.tx?.to,
-          data: quoteResult?.approvalData?.tx?.data,
+          from: gasQuoteFinalResult?.approvalData?.tx?.from,
+          to: gasQuoteFinalResult?.approvalData?.tx?.to,
+          data: gasQuoteFinalResult?.approvalData?.tx?.data,
         },
         {
-          from: quoteResult?.routeData?.tx?.from,
-          to: quoteResult?.routeData?.tx?.to,
-          data: quoteResult?.routeData?.tx?.data,
-          value: quoteResult?.routeData?.tx?.value,
+          from: gasQuoteFinalResult?.routeData?.tx?.from,
+          to: gasQuoteFinalResult?.routeData?.tx?.to,
+          data: gasQuoteFinalResult?.routeData?.tx?.data,
+          value: gasQuoteFinalResult?.routeData?.tx?.value,
         },
       ]);
+      console.log("gasTx", gasTx);
+      if (gasTx?.success !== false) {
+        console.log("gasTx", gasTx);
+        const tx = await sendTransaction(getAccountCli?.kernelClient, [
+          {
+            from: quoteResult?.approvalData?.tx?.from,
+            to: quoteResult?.approvalData?.tx?.to,
+            data: quoteResult?.approvalData?.tx?.data,
+          },
+          {
+            from: quoteResult?.routeData?.tx?.from,
+            to: quoteResult?.routeData?.tx?.to,
+            data: quoteResult?.routeData?.tx?.data,
+            value: quoteResult?.routeData?.tx?.value,
+          },
+        ]);
 
-      console.log("line-283", tx);
-      setHash(tx);
-      return tx;
-    } else {
-      console.log("line-422 error");
-      return;
+        console.log("line-283", tx);
+        setHash(tx);
+        return tx;
+      } else {
+        console.log("line-422 error");
+        return;
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -666,9 +783,19 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 )}
 
                 <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Amount
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Amount
+                    </label>
+
+                    <label className="form-label m-0 font-semibold text-xs ps-3">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
+                  </div>
                   <input
                     id="amount"
                     type="text"
@@ -746,6 +873,22 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     >
                       {isLoading ? "Creating Payment..." : "Create Payment"}
                     </button>
+                  </div>
+                </div>
+
+                <div className="col-span-12">
+                  <div className="ps-3 flex flex-col gap-1 mt-2">
+                    {gasPrice && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {gasPriceError && (
+                      <div className="text-red-500 text-xs">
+                        {gasPriceError}
+                      </div>
+                    )}
                   </div>
                 </div>
 
