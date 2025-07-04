@@ -14,7 +14,7 @@ const BuyCoin: React.FC = () => {
   const tabData = [
     { title: "Buy", component: <Swap /> },
     {
-      title: "Stripe",
+      title: "Buy with Stripe",
       component: (
         <>
           <StripePaymentPage walletAddress={walletAddress} />
