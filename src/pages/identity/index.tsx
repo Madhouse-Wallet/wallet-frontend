@@ -116,11 +116,19 @@ export default function Identity() {
                   className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
                 >
                   <div className="flex align-items-center gap-3 pb-3">
-                    <BackBtn />
+                    {/* <BackBtn /> */}
                     <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
                       Payments
                     </h4>
                   </div>
+
+                  <button
+                    onClick={() => router.push("/dashboard")}
+                    className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+                    style={{ background: "transparent" }}
+                  >
+                    {closeIcn}
+                  </button>
                 </div>
               </div>
             </div>
@@ -184,3 +192,17 @@ export default function Identity() {
     </>
   );
 }
+
+const closeIcn = (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 24 24"
+    height="24"
+    width="24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 10.5858L9.17157 7.75736L7.75736 9.17157L10.5858 12L7.75736 14.8284L9.17157 16.2426L12 13.4142L14.8284 16.2426L16.2426 14.8284L13.4142 12L16.2426 9.17157L14.8284 7.75736L12 10.5858Z"></path>
+  </svg>
+);
