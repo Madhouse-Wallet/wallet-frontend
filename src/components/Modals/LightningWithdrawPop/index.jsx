@@ -7,12 +7,8 @@ import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
 
 const LightningWithdrawPop = ({
-<<<<<<< HEAD
   withdrawUsdcPop,
   setWithdrawUsdcPop,
-=======
-  withdrawUsdcPop, setWithdrawUsdcPop,
->>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
   lightning,
   setLightning,
   withdrawPop,
@@ -62,20 +58,11 @@ const LightningWithdrawPop = ({
         >
           <button
             onClick={handleLightning}
-<<<<<<< HEAD
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
             // style={{ border: "1px solid #5f5f5f59" }}
           >
             {closeIcn}
           </button>{" "}
-=======
-             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-              // style={{ border: "1px solid #5f5f5f59" }}
-          >
-            {closeIcn}
-          </button>
-          {" "}
->>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
           <div className={`relative rounded px-3`}>
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
