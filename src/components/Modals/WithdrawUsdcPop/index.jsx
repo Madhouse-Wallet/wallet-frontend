@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbitUsdc } from "../../../lib/apiCall.js";
+<<<<<<< HEAD
 import {
   calcLnToChainFeeWithSwapAmount,
   calcLnToChainFeeWithReceivedAmount,
 } from "../../../utils/globals.js";
+=======
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
+import { reverseSwap } from "../../../pages/api/botlzFee.ts";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -41,6 +44,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [feeDetails, setFeeDetails] = useState({
+<<<<<<< HEAD
     boltzFee: "",
     platformFee: "",
     lockupFee: "",
@@ -48,6 +52,9 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
     totalFees: "",
     amountReceived: "",
     swapAmount: "",
+=======
+    onchainAmount: "",
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
   });
 
   const [commonError, setCommonError] = useState(false);
@@ -57,10 +64,10 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
 
   const recoverSeedPhrase = async () => {
     try {
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = await getSecretData(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.encryptedData,
+        data?.credentialID
       );
       if (callGetSecretData?.status) {
         return JSON.parse(callGetSecretData?.secret);
@@ -86,7 +93,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       } else if (amount > 24000000) {
         setError("Maximum value is 24,000,000");
         return;
-      } else if (feeDetails?.swapAmount > lightningBalance) {
+      } else if (feeDetails?.onchainAmount > lightningBalance) {
         setError("Insufficient Balance");
         return;
       }
@@ -123,8 +130,12 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
+<<<<<<< HEAD
             fetchLighteningBalance();
             toast.success(getBtcSat.message);
+=======
+            fetchLighteningBalance()
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
             setLoading(false);
           }
         }
@@ -178,6 +189,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
 
   const clearFeeDetails = async () => {
     setFeeDetails({
+<<<<<<< HEAD
       boltzFee: "",
       platformFee: "",
       lockupFee: "",
@@ -187,6 +199,11 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       swapAmount: "",
     });
   };
+=======
+      onchainAmount: "",
+    })
+  }
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
 
   const handleAmountInput = async (e) => {
     const rawValue = e.target.value;
@@ -212,9 +229,17 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       clearFeeDetails();
     } else {
       setError("");
+<<<<<<< HEAD
       let result = await calcLnToChainFeeWithReceivedAmount(numberValue);
       if (result) {
         setFeeDetails(result);
+=======
+      let result = await reverseSwap(numberValue, "L-BTC")
+      if (result) {
+        setFeeDetails({
+          onchainAmount: result.onchainAmount
+        })
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
       }
     }
   };
@@ -254,6 +279,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
         <div
           className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
         >
+<<<<<<< HEAD
           <button
             onClick={() => setWithdrawUsdcPop(!withdrawUsdcPop)}
             type="button"
@@ -262,10 +288,21 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
           >
             {closeIcn}
           </button>{" "}
+=======
+        <button
+          onClick={() => setWithdrawUsdcPop(!withdrawUsdcPop)}
+          type="button"
+          className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+        >
+          {closeIcn}
+        </button>
+          {" "}
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Withdraw In Dollars
+                Withdraw to Dollars
               </h5>
             </div>
             <div className="modalBody">
@@ -302,6 +339,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
                   )}
                 </div>
                 <div className="py-2">
+<<<<<<< HEAD
                   {/* //  feeDetails?.swapAmount  feeDetails?.lockupFee feeDetails?.claimFee  feeDetails?.boltzFee */}
 
                   <p className="m-0 text-xs">
@@ -316,6 +354,9 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
                   <p className="m-0 text-xs">
                     Total Pay: {feeDetails?.swapAmount}
                   </p>
+=======
+                  <p className="m-0 text-xs">Fees: {parseInt(amount,10)-parseInt(feeDetails?.onchainAmount,10) || 0} sats</p>
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
                 </div>
                 <div className="btnWrpper mt-3">
                   <button
@@ -347,7 +388,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  // padding-bottom: 100px;
 
   .modalDialog {
     max-height: calc(100vh - 160px);

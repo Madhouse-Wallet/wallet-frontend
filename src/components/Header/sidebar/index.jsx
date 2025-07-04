@@ -8,7 +8,6 @@ import Image from "next/image";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
-import { toast } from "react-toastify";
 const Sidebar = ({ sidebar, setSidebar }) => {
   const router = useRouter();
   const userAuth = useSelector((state) => state.Auth);
@@ -25,8 +24,6 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         walletAddress: "",
         bitcoinWallet: "",
         provider: "",
-        signer: "",
-        username: "",
         multisigAddress: "",
         passkey2: "",
         passkey3: "",
@@ -36,7 +33,6 @@ const Sidebar = ({ sidebar, setSidebar }) => {
         multisigActivate: false,
       })
     );
-    // toast.success("Logout Successfully!");
   };
   return (
     <>

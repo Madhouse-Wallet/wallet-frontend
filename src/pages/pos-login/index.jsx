@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
-import { toast } from "react-toastify";
-
 import { isValidEmail, storedataLocalStorage } from "../../utils/globals";
 
 import EmailStep from "./EmailStep";
@@ -40,27 +37,22 @@ const POSLogin = () => {
     try {
       let validEmail = await isValidEmail(data.email);
       if (!validEmail) {
-        toast.error("Please Enter Valid Email!");
         return false;
       }
       let userExist = await getUser(data.email);
       if (userExist.status && userExist.status == "failure") {
-        toast.error("User Not Found!");
         return false;
       } else {
-        // toast.success("Pos Login Successfully!");
         dispatch(
           loginSet({
             login: true,
             pos: true,
             walletAddress: userExist.userId.wallet || "",
             bitcoinWallet: userExist.userId.bitcoinWallet || "",
-            signer: "",
-            username: userExist.userId.username || "",
             email: userExist.userId.email,
             passkeyCred: "",
-            webauthKey: "",
-            id: userExist.userId._id,
+            webauthnData: "",
+
             multisigAddress: userExist.userId.multisigAddress || "",
             passkey2: userExist.userId.passkey2 || "",
             passkey3: userExist.userId.passkey3 || "",
@@ -75,12 +67,10 @@ const POSLogin = () => {
             login: true,
             walletAddress: userExist.userId.wallet || "",
             bitcoinWallet: userExist.userId.bitcoinWallet || "",
-            signer: "",
             pos: true,
-            username: userExist.userId.username || "",
             email: userExist.userId.email,
             passkeyCred: "",
-            webauthKey: "",
+            webauthnData: "",
             id: userExist.userId._id,
             multisigAddress: userExist.userId.multisigAddress || "",
             passkey2: "",
@@ -95,7 +85,6 @@ const POSLogin = () => {
         return true;
       }
     } catch (error) {
-      toast.error(error.message);
       return false;
     }
   };

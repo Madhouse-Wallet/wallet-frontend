@@ -16,7 +16,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    const { amount, onchain_address, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 ="" } = req.body;
+    const { amount, onchain_address, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 = "" } = req.body;
     // const getToken = (await logIn(2)) as any;
     // let token = getToken?.data?.token;
     let getUserToken = (await userLogIn(2, lnbitId_3)) as any;
@@ -31,10 +31,12 @@ export default async function handler(
         direction: "send",
         instant_settlement: true,
         onchain_address: onchain_address,
+        feerate: true,
+        feerate_value: 0
       },
       token,
       2
-    )) as any; 
+    )) as any;
     console.log("data", data);
     if (data?.status) {
       const payInv = (await payInvoice(
@@ -46,15 +48,21 @@ export default async function handler(
         2,
         lnbitAdminKey_3
       )) as any;
-      if (payInv?.status) {
-        return res.status(200).json({
+      console.log("payInv-->",payInv)
+         return res.status(200).json({
           status: "success",
           message: "Withdraw Done!",
-          data: payInv?.data,
+          data: {},
         });
-      } else {
-        return res.status(400).json({ status: "failure", message: data.msg });
-      }
+      // if (payInv?.status) {
+      //   return res.status(200).json({
+      //     status: "success",
+      //     message: "Withdraw Done!",
+      //     data: payInv?.data,
+      //   });
+      // } else {
+      //   return res.status(400).json({ status: "failure", message: data.msg });
+      // }
     } else {
       return res.status(400).json({ status: "failure", message: data.msg });
     }

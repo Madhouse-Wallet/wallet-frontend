@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -112,7 +111,6 @@ const SendBitcoinPop = ({
         network: "main", // Use 'main' for mainnet
       });
       if (result.status) {
-        toast.success(result.transactionHash);
         setLoading(false);
       } else {
         setLoading(false);

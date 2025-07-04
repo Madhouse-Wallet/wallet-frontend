@@ -7,8 +7,12 @@ import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
 
 const LightningWithdrawPop = ({
+<<<<<<< HEAD
   withdrawUsdcPop,
   setWithdrawUsdcPop,
+=======
+  withdrawUsdcPop, setWithdrawUsdcPop,
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
   lightning,
   setLightning,
   withdrawPop,
@@ -58,11 +62,20 @@ const LightningWithdrawPop = ({
         >
           <button
             onClick={handleLightning}
+<<<<<<< HEAD
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
             // style={{ border: "1px solid #5f5f5f59" }}
           >
             {closeIcn}
           </button>{" "}
+=======
+             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+              // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>
+          {" "}
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
           <div className={`relative rounded px-3`}>
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
@@ -74,7 +87,7 @@ const LightningWithdrawPop = ({
                   rel="noopener noreferrer"
                   className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                 >
-                  Withdraw in Dollars
+                  Withdraw sats to Dollars
                 </button>
               </div>
 
@@ -85,7 +98,7 @@ const LightningWithdrawPop = ({
                   rel="noopener noreferrer"
                   className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  Withdraw in Bitcoin
+                  Withdraw sats to Bitcoin
                 </button>
               </div>
             </div>
@@ -97,7 +110,7 @@ const LightningWithdrawPop = ({
 };
 
 const Modal = styled.div`
-  padding-bottom: 100px;
+  // padding-bottom: 100px;
 
   .modalDialog {
     max-height: calc(100vh - 160px);

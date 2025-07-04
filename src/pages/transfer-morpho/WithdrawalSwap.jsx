@@ -198,10 +198,10 @@ const WithdrawalSwap = () => {
       return;
     }
 
-    let data = JSON.parse(userAuth?.webauthKey);
+    let data = JSON.parse(userAuth?.webauthnData);
     let retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeySecret,
-      data?.credentialIdSecret
+      data?.encryptedData,
+      data?.credentialID
     );
     if (!retrieveSecretCheck?.status) {
       return;

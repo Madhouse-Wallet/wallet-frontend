@@ -6,7 +6,6 @@ import { useBackground } from "@/ContextApi/backgroundContent";
 import { addProvisionData } from "../../lib/apiCall";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
-import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
 import {
@@ -94,21 +93,18 @@ const Login = () => {
         // userExist?.userId?
         if (userExist?.userId?.passkey?.length == 1) {
           let retrieveSecretCheck = await retrieveSecret(
-            userExist?.userId?.passkey[0].storageKeySecret,
-            userExist?.userId?.passkey[0].credentialIdSecret
+            userExist?.userId?.passkey[0].encryptedData,
+            userExist?.userId?.passkey[0].credentialID
           );
           if (retrieveSecretCheck?.status) {
-            // toast.success("Login Successfully!");
             dispatch(
               loginSet({
                 login: true,
                 walletAddress: userExist?.userId?.wallet || "",
                 bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-                signer: "",
-                username: userExist?.userId?.username,
                 email: userExist?.userId?.email,
-                webauthKey: JSON.stringify(userExist?.userId?.passkey[0]),
-                id: userExist?.userId?._id,
+                webauthnData: JSON.stringify(userExist?.userId?.passkey[0]),
+
                 totalPasskey: 1,
               })
             );
@@ -144,11 +140,8 @@ const Login = () => {
                 login: true,
                 walletAddress: userExist?.userId?.wallet || "",
                 bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-                signer: "",
-                username: userExist?.userId?.username,
                 email: userExist?.userId?.email,
-                webauthKey: userExist?.userId?.passkey[0],
-                id: userExist?.userId?._id,
+                webauthnData: userExist?.userId?.passkey[0],
                 totalPasskey: 1,
               },
               "authUser"
@@ -187,21 +180,18 @@ const Login = () => {
         return false;
       } else {
         let retrieveSecretCheck = await retrieveSecret(
-          passkey.storageKeySecret,
-          passkey.credentialIdSecret
+          passkey.encryptedData,
+          passkey.credentialID
         );
         if (retrieveSecretCheck?.status) {
-          // toast.success("Login Successfully!");
           dispatch(
             loginSet({
               login: true,
               walletAddress: userExist?.userId?.wallet || "",
               bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-              signer: "",
-              username: userExist?.userId?.username,
               email: userExist?.userId?.email,
-              webauthKey: JSON.stringify(passkey),
-              id: userExist?.userId?._id,
+              webauthnData: JSON.stringify(passkey),
+
               totalPasskey: 1,
             })
           );
@@ -238,11 +228,8 @@ const Login = () => {
               login: true,
               walletAddress: userExist?.userId?.wallet || "",
               bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
-              signer: "",
-              username: userExist?.userId?.username,
               email: userExist?.userId?.email,
-              webauthKey: passkey,
-              id: userExist?.userId?._id,
+              webauthnData: passkey,
               totalPasskey: 1,
             },
             "authUser"

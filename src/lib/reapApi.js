@@ -114,7 +114,7 @@ async function makeReapDbCall(
         };
 
         // Save to database
-        await updateUser({ _id: userId }, updateField);
+        await updateUser({ email: userId }, updateField);
 
         return {
           success: true,
@@ -140,7 +140,7 @@ async function makeReapDbCall(
         };
 
         // Save to database
-        await updateUser({ _id: userId }, updateField);
+        await updateUser({ email: userId }, updateField);
 
         return {
           success: true,
@@ -203,7 +203,7 @@ async function makeReapDbCall(
           status: 200,
         };
       } else if (endpoint.includes("/payments")) {
-        responseData = await getPayments(userExist?.userId?._id);
+        responseData = await getPayments(userExist?.userId?.email);
       }
 
       if (!responseData || !responseData.data) {
@@ -495,7 +495,7 @@ const getUser = async (userEmail) => {
 const createPayment = async (paymentData, userId) => {
   try {
     const apiResponse = await lambdaInvokeFunction(
-      { ...paymentData, userId: userId },
+      { ...paymentData, email: userId },
       "madhouse-backend-production-addPayment"
     );
     if (apiResponse?.status == "success") {
@@ -517,10 +517,10 @@ const createPayment = async (paymentData, userId) => {
   }
 };
 
-const getPayments = async (userId) => {
+const getPayments = async (email) => {
   try {
     const apiResponse = await lambdaInvokeFunction(
-      { userId, page: 1, limit: 20 },
+      { email, page: 1, limit: 20 },
       "madhouse-backend-production-getUserPayments"
     );
     if (apiResponse?.status == "success") {

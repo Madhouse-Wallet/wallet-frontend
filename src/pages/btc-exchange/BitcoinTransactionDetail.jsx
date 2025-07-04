@@ -1,5 +1,4 @@
 import React from "react";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 
 // Bitcoin Transaction Detail Component
@@ -121,7 +120,6 @@ const BitcoinTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(transactionHash);
-                          toast.success("Transaction ID copied to clipboard!");
                         }}
                       >
                         Copy transaction ID

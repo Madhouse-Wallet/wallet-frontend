@@ -5,7 +5,6 @@ import { Tooltip } from "react-tooltip";
 import QRCode from "qrcode";
 import QRScannerModal from "../../Modals/SendUsdcPop/qRScannerModal";
 import { sendBtc } from "../../../lib/apiCall";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import TransactionSuccessPop from "../TransactionSuccessPop";
 import TransactionConfirmationPop from "../TransactionConfirmationPop";
@@ -37,10 +36,8 @@ const LightningSendTab = () => {
   const handleCopy = async (address, type) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy text:", error);
-      // toast.error("Failed to copy");
     }
   };
 
@@ -107,7 +104,6 @@ const LightningSendTab = () => {
 
     try {
       const decodeInvoiceResponse = await decodeInvoice(invoice);
-      console.log("line-85", decodeInvoiceResponse);
 
       if (decodeInvoiceResponse.status === "success") {
         setDecodeData(decodeInvoiceResponse.data);
@@ -130,8 +126,8 @@ const LightningSendTab = () => {
 
   const verifyingUser = async () => {
     setLoading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdSecret);
+    let data = JSON.parse(userAuth?.webauthnData);
+    let userData = await verifyUser(data?.credentialID);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"

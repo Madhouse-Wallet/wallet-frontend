@@ -6,7 +6,6 @@ import KeyStep from "./keysStep";
 import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
-import { toast } from "react-toastify";
 import { getBitcoinAddress } from "../../lib/apiCall";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
@@ -48,7 +47,6 @@ const CreateWallet = () => {
     try {
       if (privateKey) {
         await navigator.clipboard.writeText(text);
-        toast.success("Copied Successfully!");
       } else {
       }
     } catch (error) {
@@ -179,14 +177,14 @@ const CreateWallet = () => {
   const cleatStates = async () => {
     localStorage.removeItem("verifiedData");
     return true;
-  }
+  };
 
   const registerFn = async () => {
     try {
       const userExist = await getUser(registerData.email);
       if (userExist.status && userExist.status === "success") {
         setError("User Already Exist!");
-        await cleatStates()
+        await cleatStates();
         return false;
       }
       const baseWallet = await setupNewAccount(privateKey, safeKey);
@@ -212,12 +210,12 @@ const CreateWallet = () => {
           safePrivateKey: safePrivateKey,
           seedPhrase: seedPhraseOwner,
         };
-        let storageKeySecret = "";
-        let credentialIdSecret = "";
+        let encryptedData = "";
+        let credentialID = "";
         const userExist = await getUser(registerData.email);
         if (userExist.status && userExist.status === "success") {
           setError("User Already Exist!");
-          await cleatStates()
+          await cleatStates();
           return false;
         }
         const storeData = await setSecretInPasskey(
@@ -225,12 +223,12 @@ const CreateWallet = () => {
           JSON.stringify(secretObj)
         );
         if (storeData.status) {
-          storageKeySecret = storeData?.storageKey;
-          credentialIdSecret = storeData?.credentialId;
+          encryptedData = storeData?.storageKey;
+          credentialID = storeData?.credentialId;
           const userExist = await getUser(registerData.email);
           if (userExist.status && userExist.status === "success") {
             setError("User Already Exist!");
-            await cleatStates()
+            await cleatStates();
             return false;
           }
           const data = await addUser(
@@ -239,8 +237,8 @@ const CreateWallet = () => {
             [
               {
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                encryptedData,
+                credentialID,
                 displayName: "",
                 bitcoinWallet,
               },
@@ -251,27 +249,24 @@ const CreateWallet = () => {
           );
           if (data?.status == "failure") {
             setError(data.error);
-            await cleatStates()
-            setRegisterData({ email: "", username: "" })
+            await cleatStates();
+            setRegisterData({ email: "", username: "" });
             setStep(1);
             return false;
           }
           localStorage.removeItem("verifiedData");
-          toast.success("Sign Up Successfully!");
           dispatch(
             loginSet({
               login: true,
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
-              signer: "",
-              username: registerData.username,
               email: registerData.email,
-              webauthKey: JSON.stringify({
+              webauthnData: JSON.stringify({
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                encryptedData,
+                credentialID,
               }),
-              id: data.userData._id,
+
               totalPasskey: 1,
             })
           );
@@ -280,15 +275,12 @@ const CreateWallet = () => {
               login: true,
               walletAddress: address || "",
               bitcoinWallet: bitcoinWallet || "",
-              signer: "",
-              username: registerData.username,
               email: registerData.email,
-              webauthKey: {
+              webauthnData: {
                 name: registerData.email + "_passkey_1",
-                storageKeySecret,
-                credentialIdSecret,
+                encryptedData,
+                credentialID,
               },
-              id: data.userData._id,
               totalPasskey: 1,
             },
             "authUser"
@@ -373,7 +365,6 @@ const CreateWallet = () => {
         };
         let sendEmailData = await sendOTP(obj);
         if (sendEmailData.status && sendEmailData.status == "success") {
-          toast.success(sendEmailData?.message);
           return true;
         } else {
           setError(sendEmailData?.message || sendEmailData?.error);
@@ -400,7 +391,6 @@ const CreateWallet = () => {
       };
       let sendEmailData = await sendOTP(obj);
       if (sendEmailData.status && sendEmailData.status == "success") {
-        toast.success("OTP sent to your email.");
         return true;
       } else {
         setError(sendEmailData?.message || sendEmailData?.error);
@@ -422,7 +412,7 @@ const CreateWallet = () => {
           const userExist = await getUser(parsedData.email);
           if (userExist.status && userExist.status === "success") {
             setCheckEmailLoader(false);
-            await cleatStates()
+            await cleatStates();
           } else {
             let getWallet = await getBitcoinAddress();
             if (getWallet.status && getWallet.status == "success") {
@@ -437,7 +427,7 @@ const CreateWallet = () => {
               setStep(4);
             } else {
               setCheckEmailLoader(false);
-              await cleatStates()
+              await cleatStates();
             }
           }
         }

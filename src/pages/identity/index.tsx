@@ -108,6 +108,7 @@ export default function Identity() {
         <meta name="description" content="Stripe Identity Verification" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+<<<<<<< HEAD
       <section className=" realtive identity h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
 
@@ -190,6 +191,30 @@ export default function Identity() {
                   ) : (
                     <></>
                   )}
+=======
+      <section className="pt-12 realtive identity">
+        <div className="container relative">
+          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
+            <div className="grid gap-3 grid-cols-12">
+              <div className=" col-span-12  z-10">
+                <div
+                  className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
+                >
+                  <div className="flex align-items-center gap-3 pb-3">
+                    {/* <BackBtn /> */}
+                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
+                      Payments
+                    </h4>
+                  </div>
+
+                  <button
+                    onClick={() => router.push("/dashboard")}
+                    className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+                    style={{ background: "transparent" }}
+                  >
+                    {closeIcn}
+                  </button>
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
                 </div>
               </div>
             </div>
@@ -200,12 +225,15 @@ export default function Identity() {
   );
 }
 
+<<<<<<< HEAD
 const Nav = styled.nav`
   // background: var(--cardBg);
   background: #5c2a28a3;
   backdrop-filter: blur(12.8px);
 `;
 
+=======
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
 const closeIcn = (
   <svg
     stroke="currentColor"

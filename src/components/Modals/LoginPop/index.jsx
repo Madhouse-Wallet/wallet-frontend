@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
 import { generateOTP } from "../../../utils/globals";
@@ -126,14 +125,11 @@ const LoginPop = ({ login, setLogin }) => {
           if (authenticated) {
             let account = false;
             if (account) {
-              // toast.success("Login Successfully!");
               dispatch(
                 loginSet({
                   login: true,
                   walletAddress: account?.account?.address || "",
                   bitcoinWallet: userExist.userId.bitcoinWallet || "",
-                  signer: "",
-                  username: userExist.userId.username || "",
                   email: userExist.userId.email,
                   passkeyCred: userExist.userId.passkey || "",
                   multisigAddress: userExist.userId.multisigAddress || "",
@@ -185,15 +181,12 @@ const LoginPop = ({ login, setLogin }) => {
             createdCredential.id,
             account?.account?.address
           );
-          toast.success("Sign Up Successfully!");
           setRegisterTab(2);
           dispatch(
             loginSet({
               login: true,
               walletAddress: account?.account?.address || "",
               bitcoinWallet: data.userData.bitcoinWallet || "",
-              signer: "",
-              username: registerUsername,
               email: registerEmail,
               passkeyCred: createdCredential || "",
               multisigAddress: data.userData.multisigAddress || "",
@@ -246,7 +239,6 @@ const LoginPop = ({ login, setLogin }) => {
           let sendEmailData = await sendOTP(obj);
           if (sendEmailData.status && sendEmailData.status == "success") {
             setRegisterTab(2);
-            toast.success(sendEmailData?.message);
           } else {
             return;
           }

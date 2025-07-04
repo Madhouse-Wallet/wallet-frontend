@@ -137,6 +137,15 @@ const SpherePayAPI = {
     }
   },
 
+  deletebankAccount: async (id) => {
+    try {
+      const response = await sphereAPIClient.delete(`/v1/bankAccount/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
   /**
    * Initiate a transfer between a source and destination
    * @param {Object} transferData - Transfer details
@@ -196,9 +205,18 @@ const SpherePayAPI = {
     }
   },
 
-  getTransferDetail: async () => {
+  getTransferDetail: async (id) => {
     try {
-      const response = await sphereAPIClient.get(`/v1/transfer`);
+      const response = await sphereAPIClient.get(`/v1/transfer/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
+  transferFee: async (feeData) => {
+    try {
+      const response = await sphereAPIClient.post(`/v1/transfer/fee`, feeData);
       return response.data;
     } catch (error) {
       return handleError(error);

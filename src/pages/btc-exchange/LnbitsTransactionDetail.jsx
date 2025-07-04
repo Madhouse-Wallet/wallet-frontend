@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 import InvoicePop from "../../components/Modals/InvoicePop";
 import { createPortal } from "react-dom";
@@ -12,7 +11,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
       address.length - 4
     )}`;
   };
-  // console.log(transactionData )
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -117,7 +115,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(transactionHash);
-                          toast.success("Transaction ID copied to clipboard!");
                         }}
                       >
                         Copy transaction ID
@@ -206,9 +203,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                           className="text-blue-500 text-xs font-medium cursor-pointer"
                           onClick={() => {
                             navigator.clipboard.writeText(rawData.bolt11);
-                            toast.success(
-                              "Payment request copied to clipboard!"
-                            );
                           }}
                         >
                           Copy BOLT11

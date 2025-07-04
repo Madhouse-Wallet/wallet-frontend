@@ -14,8 +14,6 @@ import { logoutStorage } from "../../utils/globals";
 
 import { retrieveSecret, verifyUser } from "../../utils/webauthPrf";
 import styled from "styled-components";
-
-import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, addProvisionData } from "../../lib/apiCall";
@@ -56,7 +54,6 @@ const Setting: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Copied Successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -74,24 +71,23 @@ const Setting: React.FC = () => {
     }
   }, []);
 
-  const getPreview = async () => {
-    try {
-      return await fetch(`/api/get-preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: "https://devstack.madhousewallet.com/dashboard",
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          return data;
-        });
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
+  // const getPreview = async () => {
+  //   try {
+  //     return await fetch(`/api/get-preview`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         url: "https://devstack.madhousewallet.com/dashboard",
+  //       }),
+  //     })
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         return data;
+  //       });
+  //   } catch (error) {
+  //     return false;
+  //   }
+  // };
 
   const getSecretData = async (storageKey: any, credentialId: any) => {
     try {
@@ -122,10 +118,10 @@ const Setting: React.FC = () => {
   const recoverSeedPhrase = async () => {
     try {
       setLoader(true);
-      let data = JSON.parse(userAuth?.webauthKey);
+      let data = JSON.parse(userAuth?.webauthnData);
       let callGetSecretData = (await getSecretData(
-        data?.storageKeySecret,
-        data?.credentialIdSecret
+        data?.encryptedData,
+        data?.credentialID
       )) as any;
       if (callGetSecretData?.status) {
         setRecoverSeed(JSON.parse(callGetSecretData?.secret));
@@ -146,8 +142,8 @@ const Setting: React.FC = () => {
 
   const verifyingUser = async () => {
     setloading(true);
-    let data = JSON.parse(userAuth?.webauthKey);
-    let userData = await verifyUser(data?.credentialIdSecret);
+    let data = JSON.parse(userAuth?.webauthnData);
+    let userData = await verifyUser(data?.credentialID);
     if (
       userData.status === true &&
       userData.msg === "User verified successfully"
@@ -156,7 +152,6 @@ const Setting: React.FC = () => {
       setRecover(!recover);
     } else {
       setloading(false);
-      // toast.error(userData?.msg);
     }
   };
 
@@ -196,12 +191,10 @@ const Setting: React.FC = () => {
           login: false,
           walletAddress: "",
           bitcoinWallet: "",
-          signer: "",
-          username: "",
           email: "",
           passkeyCred: "",
-          webauthKey: "",
-          id: "",
+          webauthnData: "",
+
           multisigAddress: "",
           passkey2: "",
           passkey3: "",
@@ -213,7 +206,6 @@ const Setting: React.FC = () => {
       );
 
       clearSettings();
-      // toast.success("Logout Successfully!");
     } catch (error) {
       console.log("logout error --->", error);
     }
@@ -441,7 +433,7 @@ const Setting: React.FC = () => {
                               <button
                                 onClick={() => {
                                   selectBg(index);
-                                  getPreview();
+                                  // getPreview();
                                 }}
                                 className={`${
                                   selectedBackground === bg ? "border-2 " : ""
@@ -484,7 +476,7 @@ const Setting: React.FC = () => {
                           value={bgOpacity}
                           onChange={(e) => {
                             changeBgOpacity(parseFloat(e.target.value));
-                            getPreview();
+                            // getPreview();
                           }}
                           className="w-full cursor-pointer"
                         />

@@ -264,10 +264,10 @@ const Swap = () => {
       return;
     }
 
-    const data = JSON.parse(userAuth?.webauthKey);
+    const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
-      data?.storageKeySecret,
-      data?.credentialIdSecret
+      data?.encryptedData,
+      data?.credentialID
     );
     if (!retrieveSecretCheck?.status) {
       return;

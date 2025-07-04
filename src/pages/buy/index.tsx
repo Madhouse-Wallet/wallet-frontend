@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import StripePaymentPage from "../stripePaymentPage";
 import { useSelector } from "react-redux";
 import { getAccount } from "@/lib/zeroDev";
-import { BackBtn } from "@/components/common";
 import Swap from "../../pages/swapUsdc";
 import SellBitcoin from "./SellBitcoin";
 import { useRouter } from "next/router";
@@ -13,9 +12,9 @@ const BuyCoin: React.FC = () => {
   const router = useRouter();
   const [walletAddress, setWalletAddress] = useState("");
   const tabData = [
-    { title: "Buy with USDC", component: <Swap /> },
+    { title: "Buy", component: <Swap /> },
     {
-      title: "Buy with Debit/Credit Card",
+      title: "Buy with Stripe",
       component: (
         <>
           <StripePaymentPage walletAddress={walletAddress} />
@@ -23,7 +22,7 @@ const BuyCoin: React.FC = () => {
       ),
     },
     {
-      title: "Sell Bitcoin",
+      title: "Sell",
       component: (
         <>
           <SellBitcoin />{" "}
@@ -67,7 +66,49 @@ const BuyCoin: React.FC = () => {
     <>
       <section className="relative dashboard h-full flex items-center py-[30px] sm:flex-row flex-col">
         <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
+<<<<<<< HEAD
 
+=======
+        <header className="siteHeader fixed top-0 py-2 w-full z-[999]">
+          <div className="container mx-auto">
+            <Nav className=" px-3 py-3 rounded-[30px] shadow relative flex items-center justify-between flex-wrap gap-2">
+              {/* <div className="sectionHeader text-center w-full">
+                <div className="flex align-items-center justify-center gap-3">
+                  <BackBtn />
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Send & Recieve
+                  </h4>
+                </div>
+              </div> */}
+              <div className="left">
+                <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                  Bitcoin
+                </h4>
+              </div>
+              <div className="right">
+                <ul className="list-none pl-0 mb-0 flex items-center flex-wrap gap-x-3 gap-y-[5px] ">
+                  {tabData.map((item, index) => (
+                    <li key={index} className="">
+                      <button
+                        className={` ${
+                          activeTab === index
+                            ? "bg-[#ffad84] border-[#ffad84]"
+                            : "bg-white border-white"
+                        }  flex w-full h-[30px]  border-2 text-[10px] items-center rounded-full  px-3 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+             // Highlight active tab
+              `}
+                        onClick={() => setActiveTab(index)}
+                      >
+                        {item.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Nav>
+          </div>
+        </header>
+>>>>>>> 16f0024962c01a3369dcd14b299a2f115032a7fe
         <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}

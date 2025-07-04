@@ -1,6 +1,5 @@
 import React from "react";
 import moment from "moment";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 
 const SideShiftTransactionDetail = ({
@@ -120,7 +119,6 @@ const SideShiftTransactionDetail = ({
                       className="text-blue-500 text-xs font-medium cursor-pointer"
                       onClick={() => {
                         navigator.clipboard.writeText(tx.id);
-                        toast.success("Transaction ID copied to clipboard!");
                       }}
                     >
                       Copy transaction ID

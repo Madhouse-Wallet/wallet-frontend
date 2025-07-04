@@ -5,7 +5,7 @@ import TransferHistory from "./TransferHistory";
 
 const PaymentTabComponent = ({ step, setStep }) => {
   const [tab, setTab] = useState(0);
-  const [userData, setUserData] = useState("");
+
 
   const tabData = [
     {

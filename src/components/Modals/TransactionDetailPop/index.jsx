@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { ethers } from "ethers";
-import { toast } from "react-toastify";
 
 const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
   const truncateAddress = (address) => {
@@ -78,7 +77,6 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(transactionHash);
-                          toast.success("Transaction ID copied to clipboard!");
                         }}
                       >
                         Copy transaction ID

@@ -324,6 +324,19 @@ const RecentTransaction = ({ setSetFilterType }) => {
     data();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".filter-dropdown")) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const tabs = [
     {
       title: "USDC",
@@ -842,12 +855,26 @@ const RecentTransaction = ({ setSetFilterType }) => {
               >
                 Export CSV
               </button>
-              <div className="relative inline-block text-left">
+              <div className="relative inline-block text-left filter-dropdown">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px]"
+                  className="px-4 py-2 bg-black/50 text-white rounded-md text-xs h-[40px] flex items-center gap-2"
                 >
-                  Filters
+                  <span>Filters</span>
+                  {/* <span>Filters: {tabs[activeTab].title}</span> */}
+                  <svg
+                    className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
                 </button>
 
                 {isOpen && (
@@ -856,7 +883,11 @@ const RecentTransaction = ({ setSetFilterType }) => {
                       <button
                         key={key}
                         onClick={() => {
+                          setIsOpen(false); // Close dropdown first
                           setSetFilterType(key);
+                          setActiveTab(key);
+
+                          // Then handle the API calls
                           if (key === 0) {
                             // USDC tab
                             fetchRecentTransactions();
@@ -866,12 +897,17 @@ const RecentTransaction = ({ setSetFilterType }) => {
                           } else if (key === 6) {
                             fetchRecentMorphoTransactions();
                           }
-                          setActiveTab(key);
-                          setIsOpen(false);
                         }}
-                        className="block px-4 text-xs py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                        className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${
+                          activeTab === key
+                            ? "bg-blue-100 text-blue-700"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
                       >
-                        {item.title}
+                        <span>{item.title}</span>
+                        {activeTab === key && (
+                          <span className="text-blue-600">✓</span>
+                        )}
                       </button>
                     ))}
                   </div>
