@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 
 const UserStep = ({ step, setStep }) => {
   const userAuth = useSelector((state) => state.Auth);
-  console.log("line-6", userAuth);
   const [formData, setFormData] = useState({
     businessName: "",
     street: "",
@@ -131,16 +130,13 @@ const UserStep = ({ step, setStep }) => {
       const result = await response.json();
 
       if (response.ok) {
-        console.log("Business account created successfully:", result);
         setStep("PaymentTab");
       } else {
-        console.error("API Error:", result.error);
         setErrors({
           submit: result.error || "Failed to create business account",
         });
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       setErrors({ submit: "Network error. Please try again." });
     } finally {
       setIsLoading(false);

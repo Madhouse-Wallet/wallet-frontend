@@ -16,13 +16,6 @@ export async function bitcoinGasFeeFunction({
   network = "main",
 }) {
   try {
-    console.log(
-      "line-19",
-      fromAddress,
-      toAddress,
-      amountSatoshi,
-      privateKeyHex
-    );
     if (!fromAddress || !toAddress || !amountSatoshi || !privateKeyHex) {
       throw new Error("Missing required parameters");
     }
@@ -41,7 +34,6 @@ export async function bitcoinGasFeeFunction({
       }),
     });
     const result = await response.json();
-    console.log("line-45", result);
     // if (result.success !== true) {
     //   throw new Error(result.error || "Failed to send transaction");
     // }

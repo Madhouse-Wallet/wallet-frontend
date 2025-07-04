@@ -6,7 +6,6 @@ import { useBackground } from "@/ContextApi/backgroundContent";
 import { addProvisionData } from "../../lib/apiCall";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
-import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 
 import {
@@ -98,7 +97,6 @@ const Login = () => {
             userExist?.userId?.passkey[0].credentialID
           );
           if (retrieveSecretCheck?.status) {
-            // toast.success("Login Successfully!");
             dispatch(
               loginSet({
                 login: true,
@@ -106,7 +104,7 @@ const Login = () => {
                 bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
                 email: userExist?.userId?.email,
                 webauthnData: JSON.stringify(userExist?.userId?.passkey[0]),
-          
+
                 totalPasskey: 1,
               })
             );
@@ -186,7 +184,6 @@ const Login = () => {
           passkey.credentialID
         );
         if (retrieveSecretCheck?.status) {
-          // toast.success("Login Successfully!");
           dispatch(
             loginSet({
               login: true,
@@ -194,7 +191,7 @@ const Login = () => {
               bitcoinWallet: userExist?.userId?.bitcoinWallet || "",
               email: userExist?.userId?.email,
               webauthnData: JSON.stringify(passkey),
-             
+
               totalPasskey: 1,
             })
           );

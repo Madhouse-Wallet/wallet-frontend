@@ -66,7 +66,6 @@ export default async function handler(
   try {
     await runMiddleware(req, res, corsMiddleware);
     const { userId } = req.body;
-    console.log("userId", userId);
     const verificationSession =
       await stripe.identity.verificationSessions.create({
         verification_flow: process.env.NEXT_PUBLIC_STRIPE_VERIFICATION_KEY,

@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbitUsdc } from "../../../lib/apiCall.js";
-import { calcLnToChainFeeWithSwapAmount, calcLnToChainFeeWithReceivedAmount } from "../../../utils/globals.js"
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
 import { reverseSwap } from "../../../pages/api/botlzFee.ts";
@@ -116,7 +114,6 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
             setLoading(false);
           } else {
             fetchLighteningBalance()
-            toast.success(getBtcSat.message);
             setLoading(false);
           }
         }

@@ -37,7 +37,6 @@ const RecentTransaction = ({ transactions, data }) => {
     const groups = {};
 
     txs.forEach((tx) => {
-
       if (tx?.date && typeof tx.date === "string") {
         const txDate = moment(tx.date, "MMMM D, YYYY h:mm A");
 
@@ -59,8 +58,6 @@ const RecentTransaction = ({ transactions, data }) => {
                 groups[dateKey] = [];
               }
               groups[dateKey].push(tx);
-            } else {
-              console.error("Invalid date format:", tx.date);
             }
           } catch (error) {
             console.error("Error parsing date:", tx.date, error);
@@ -77,7 +74,6 @@ const RecentTransaction = ({ transactions, data }) => {
         console.error("Missing or invalid date:", tx?.date);
       }
     });
-
 
     const sortedGroups = {};
     Object.keys(groups)

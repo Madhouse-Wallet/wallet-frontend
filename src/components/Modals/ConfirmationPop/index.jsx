@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { delUser } from "@/lib/apiCall";
 import { logoutStorage } from "../../../utils/globals";
@@ -35,7 +34,6 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
           })
         );
         setConfirm(!confirm);
-        toast.success("User Deleted Successfully!");
       } else {
       }
       setLoading(false);

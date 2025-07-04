@@ -37,7 +37,6 @@ export default async function handler(
         existingUser?.lnbitAdminKey_3
       )) as any;
       if (createInvoice1?.status) {
-        // console.log("createInvoice1-->", createInvoice1)
         return res.status(200).json({
           status: "success",
           message: "Invoice Created!",

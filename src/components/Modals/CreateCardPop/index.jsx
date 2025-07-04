@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Link from "next/link";
-import { useSelector } from "react-redux";
-import LoadingScreen from "@/components/LoadingScreen";
-import { createPortal } from "react-dom";
 import { addCreditCard } from "../../../lib/apiCall";
-import { toast } from "react-toastify";
 
 const CreateCardPop = ({
   createCard,
@@ -28,10 +23,8 @@ const CreateCardPop = ({
         setUrl(addCardData.data.creditCardPass.url);
         setStep(2);
         setLoader(false);
-        toast.success("Card Created!");
       } else {
         setLoader(false);
-        toast.error(addCardData.message);
       }
       // setStep(2)
     } catch (error) {

@@ -7,7 +7,6 @@ export default async function handler(req, res) {
 
   try {
     const { userId, ...paymentData } = req.body;
-    console.log("line-10", userId, paymentData);
     const result = await paymentApi.createPayment(paymentData, userId);
 
     if (result.success) {

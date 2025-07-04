@@ -14,8 +14,6 @@ import { logoutStorage } from "../../utils/globals";
 
 import { retrieveSecret, verifyUser } from "../../utils/webauthPrf";
 import styled from "styled-components";
-
-import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, addProvisionData } from "../../lib/apiCall";
@@ -56,7 +54,6 @@ const Setting: React.FC = () => {
   const handleCopy = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success("Copied Successfully!");
     } catch (error) {
       console.error("Failed to copy text:", error);
     }
@@ -88,7 +85,6 @@ const Setting: React.FC = () => {
   //         return data;
   //       });
   //   } catch (error) {
-  //     console.log(error);
   //     return false;
   //   }
   // };
@@ -156,7 +152,6 @@ const Setting: React.FC = () => {
       setRecover(!recover);
     } else {
       setloading(false);
-      // toast.error(userData?.msg);
     }
   };
 
@@ -199,7 +194,7 @@ const Setting: React.FC = () => {
           email: "",
           passkeyCred: "",
           webauthnData: "",
-         
+
           multisigAddress: "",
           passkey2: "",
           passkey3: "",
@@ -211,7 +206,6 @@ const Setting: React.FC = () => {
       );
 
       clearSettings();
-      // toast.success("Logout Successfully!");
     } catch (error) {
       console.log("logout error --->", error);
     }

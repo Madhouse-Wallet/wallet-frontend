@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Web3Interaction from "@/utils/web3Interaction";
-import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, btcSat } from "../../../lib/apiCall.js";
-import { createTBtcToLbtcShift } from "../../../pages/api/sideShiftAI.ts";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
@@ -125,7 +122,6 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
               network: "main", // Use 'main' for mainnet
             });
             if (result.status) {
-              toast.success(result.transactionHash);
               fetchBtcBalance();
               setLoading(false);
             } else {

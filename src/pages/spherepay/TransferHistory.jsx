@@ -234,7 +234,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       const response = await SpherePayAPI.createTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
-      console.log(response);
       setTransferData(response.data.transfer);
       let data = await updtUser(
         { email: userAuth?.email },
@@ -244,7 +243,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           },
         }
       );
-      console.log(data);
       // Clear form after successful submission
       setOnRampForm({
         currency: "",
@@ -376,10 +374,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const response =
         await SpherePayAPI.createWalletToBankTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
-      console.log(
-        response,
-        response?.data?.transfer?.instructions?.resource?.address
-      );
 
       const tx = await sendUsdc(
         offRampForm.amount,
@@ -397,7 +391,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           },
         }
       );
-      console.log(data);
       setOffRampForm({
         currency: "",
         transferMethod: "",

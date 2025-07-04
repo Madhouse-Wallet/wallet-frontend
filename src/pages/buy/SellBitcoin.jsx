@@ -321,7 +321,6 @@ const SellBitcoin = () => {
         setTxError(result.error || "Transaction failed");
       }
     } catch (error) {
-      console.log("line-324", error);
       setFailed(true);
       setTxError(error || "Transaction failed");
     } finally {

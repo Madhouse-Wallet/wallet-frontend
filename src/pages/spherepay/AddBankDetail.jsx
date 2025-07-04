@@ -102,7 +102,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    console.log("line-104", id, value);
 
     // Apply different rules based on the field
     if (
@@ -241,7 +240,6 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
 
   const deleteBankAccount = async (id) => {
     let data = await SpherePayAPI.deletebankAccount(id);
-    console.log("line-244", data);
     if (data.message === "success") {
       fetchCustomerData();
     }

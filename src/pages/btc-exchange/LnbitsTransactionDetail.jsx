@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 import InvoicePop from "../../components/Modals/InvoicePop";
 import { createPortal } from "react-dom";
@@ -12,7 +11,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
       address.length - 4
     )}`;
   };
-  // console.log(transactionData )
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -35,7 +33,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
     return address.substring(2, 4).toUpperCase();
   };
 
-
   const data = {
     id: transactionData?.rawData?.boltz_id,
     asset: "BTC",
@@ -47,10 +44,10 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
 
   const handleDownload = () => {
     const jsonData = JSON.stringify(data, null, 2); // pretty print with 2-space indentation
-    const blob = new Blob([jsonData], { type: 'application/json' });
+    const blob = new Blob([jsonData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `boltz-refund-${transactionData?.rawData?.boltz_id}.json`;
     a.click();
@@ -118,7 +115,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
                           navigator.clipboard.writeText(transactionHash);
-                          toast.success("Transaction ID copied to clipboard!");
                         }}
                       >
                         Copy transaction ID
@@ -169,7 +165,10 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                   <h6 className="m-0 font-medium text-xl">
                     Transaction Details
                   </h6>
-                  <button onClick={handleDownload} className="rounded-full text-xs bg-white/50 px-3 py-1">
+                  <button
+                    onClick={handleDownload}
+                    className="rounded-full text-xs bg-white/50 px-3 py-1"
+                  >
                     Download Refund File
                   </button>
                 </div>
@@ -204,9 +203,6 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                           className="text-blue-500 text-xs font-medium cursor-pointer"
                           onClick={() => {
                             navigator.clipboard.writeText(rawData.bolt11);
-                            toast.success(
-                              "Payment request copied to clipboard!"
-                            );
                           }}
                         >
                           Copy BOLT11
