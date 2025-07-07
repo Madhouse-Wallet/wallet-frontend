@@ -900,13 +900,13 @@ const RecentTransaction = ({ setSetFilterType }) => {
                         }}
                         className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${
                           activeTab === key
-                            ? "bg-blue-100 text-blue-700"
+                            ? "bg-[#df723b]/20 themeClr"
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
                         <span>{item.title}</span>
                         {activeTab === key && (
-                          <span className="text-blue-600">✓</span>
+                          <span className="themeClr">✓</span>
                         )}
                       </button>
                     ))}
