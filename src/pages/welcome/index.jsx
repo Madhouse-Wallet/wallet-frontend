@@ -30,9 +30,9 @@ const Welcome = () => {
               <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                 Please review our privacy policy before proceeding: 
               </p> 
-              <p className={` bg-white  text-black text-center text-sm font-medium opacity-50 md:text-xs`}>
+              <p className={` bg-white rounded-full text-black text-center text-sm font-medium opacity-50 md:text-xs`}>
                 <a href="https://madhouse-wallet.gitbook.io/docs/legal-policies/privacy">
-                  Privacy Policy
+                 --Privacy Policy-- 
                 </a>
               </p>
             </div>
