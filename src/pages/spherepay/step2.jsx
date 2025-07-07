@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Country, State } from "country-state-city";
 import iso3166 from "iso-3166-1";
 import SpherePayAPI from "../api/spherePayApi";
+import { createPortal } from "react-dom";
 
 const Step2 = ({
   step,
@@ -26,6 +27,47 @@ const Step2 = ({
   const [states, setStates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dropdownPos, setDropdownPos] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+    openUpward: false,
+  });
+
+  const calculateDropdownPosition = () => {
+    if (!stateDropdownRef.current) return;
+
+    const rect = stateDropdownRef.current.getBoundingClientRect();
+    const dropdownHeight = 240; // or use a ref for actual height
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    const openUpward =
+      spaceBelow < dropdownHeight && spaceAbove > dropdownHeight;
+
+    setDropdownPos({
+      top: openUpward
+        ? rect.top + window.scrollY - dropdownHeight
+        : rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+      openUpward,
+    });
+  };
+
+  useEffect(() => {
+    if (isStateOpen) {
+      calculateDropdownPosition();
+
+      window.addEventListener("resize", calculateDropdownPosition);
+      window.addEventListener("scroll", calculateDropdownPosition, true); // true = capture phase for nested scrolls
+    }
+
+    return () => {
+      window.removeEventListener("resize", calculateDropdownPosition);
+      window.removeEventListener("scroll", calculateDropdownPosition, true);
+    };
+  }, [isStateOpen]);
 
   const countryDropdownRef = useRef(null);
   const stateDropdownRef = useRef(null);
@@ -383,56 +425,66 @@ const Step2 = ({
                   </svg>
                 </button>
 
-                {isStateOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-auto">
-                    <div className="sticky top-0 bg-white p-2 border-b">
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded-md text-black text-sm"
-                        placeholder="Search states..."
-                        value={stateSearchTerm}
-                        onChange={(e) => setStateSearchTerm(e.target.value)}
-                      />
-                    </div>
-                    <ul className="py-1">
-                      {filteredStates.map((state) => {
-                        const isRestricted =
-                          selectedCountry?.name === "United States" &&
-                          isUSStateRestricted(state.name);
-                        return (
-                          <li key={state.isoCode}>
-                            <button
-                              type="button"
-                              onClick={() => handleStateSelect(state)}
-                              className={`w-full text-left px-4 py-2 text-sm ${
-                                isRestricted
-                                  ? "text-orange-600 hover:bg-orange-50"
-                                  : "text-gray-700 hover:bg-gray-100"
-                              }`}
-                              title={
-                                isRestricted
-                                  ? "This state has limited service availability"
-                                  : ""
-                              }
-                            >
-                              {state.name} ({state.isoCode})
-                              {isRestricted && (
-                                <span className="ml-2 text-xs text-orange-500">
-                                  Limited services
-                                </span>
-                              )}
-                            </button>
+                {isStateOpen &&
+                  createPortal(
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: dropdownPos.top,
+                        left: dropdownPos.left,
+                        width: dropdownPos.width,
+                      }}
+                      className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-auto riteshlll"
+                    >
+                      <div className="sticky top-0 bg-white p-2 border-b">
+                        <input
+                          type="text"
+                          className="w-full p-2 border rounded-md text-black text-sm"
+                          placeholder="Search states..."
+                          value={stateSearchTerm}
+                          onChange={(e) => setStateSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      <ul className="py-1">
+                        {filteredStates.map((state) => {
+                          const isRestricted =
+                            selectedCountry?.name === "United States" &&
+                            isUSStateRestricted(state.name);
+                          return (
+                            <li key={state.isoCode}>
+                              <button
+                                type="button"
+                                onClick={() => handleStateSelect(state)}
+                                className={`w-full text-left px-4 py-2 text-sm ${
+                                  isRestricted
+                                    ? "text-orange-600 hover:bg-orange-50"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                }`}
+                                title={
+                                  isRestricted
+                                    ? "This state has limited service availability"
+                                    : ""
+                                }
+                              >
+                                {state.name} ({state.isoCode})
+                                {isRestricted && (
+                                  <span className="ml-2 text-xs text-orange-500">
+                                    Limited services
+                                  </span>
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                        {filteredStates.length === 0 && (
+                          <li className="px-4 py-2 text-sm text-gray-500">
+                            No states found
                           </li>
-                        );
-                      })}
-                      {filteredStates.length === 0 && (
-                        <li className="px-4 py-2 text-sm text-gray-500">
-                          No states found
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                )}
+                        )}
+                      </ul>
+                    </div>,
+                    document.body
+                  )}
               </div>
             </div>
           )}

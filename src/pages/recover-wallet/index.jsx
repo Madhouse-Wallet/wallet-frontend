@@ -328,6 +328,14 @@ const RecoverWallet = () => {
               <form action="">
                 <div className="py-2">
                   <input
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({
+                          block: "center",
+                          behavior: "smooth",
+                        });
+                      }, 300);
+                    }}
                     type="text"
                     name="email"
                     onChange={handleEmailChange}

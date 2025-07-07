@@ -916,7 +916,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </div>
           </div>
           <div className="py-2">
-            <TabContent className="overflow-scroll max-h-[calc(100vh-240px)] scrollbar-none">
+            <TabContent className="overflow-scroll md:max-h-[calc(100vh-240px)] scrollbar-none">
               {tabs[activeTab].component}
             </TabContent>
           </div>
