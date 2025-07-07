@@ -2,11 +2,20 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { getProvider, getAccount } from "@/lib/zeroDev";
-import { getUser, btcSat } from "../../../lib/apiCall.js";
+import { getUser, lbtcSat } from "../../../lib/apiCall.js";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
-import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
+import { parseAbi, parseUnits } from "viem";
+
+
+import {
+  getETHEREUMRpcProvider,
+  getRpcProvider,
+  publicClient,
+} from "@/lib/zeroDev";
+import { createUsdcToLbtcToShiftQuote, createLbtcToUsdcShiftQuote, createUsdcToLbtcToShiftFixed } from "@/pages/api/sideShiftAI";
+
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -35,9 +44,11 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [commonError, setCommonError] = useState(false);
-  const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
+  const [usdcBalance, setTotalUsdBalance] = useState(0.0);
   const [providerr, setProviderr] = useState(null);
   const userAuth = useSelector((state) => state.Auth);
+  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
+
   const recoverSeedPhrase = async () => {
     try {
       let data = JSON.parse(userAuth?.webauthnData);
@@ -55,24 +66,18 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
       return false;
     }
   };
+
+
   const handleDepositPop = async () => {
     try {
       if (!userAuth?.login) {
         setError("Please Login!");
         return;
-      } else if (!amount) {
-        setError("Minimum deposit is 0.00027 BTC");
-        return;
-      } else if (amount < 0.00027) {
-        setError("Minimum deposit is 0.00027 BTC");
-        return;
-      } else if (amount > 0.25) {
-        setError("Maximum deposit is 0.25 BTC");
-        return;
-      } else if (amount > bitcoinBalance) {
-        setError("Insufficient Balance");
-        return;
       }
+      //  else if (amount > usdcBalance) {
+      //   setError("Insufficient Balance");
+      //   return;
+      // }
 
       setLoading(true);
       setCommonError(false);
@@ -90,77 +95,157 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
             setLoading(false);
             return;
           }
-          const privateKey = await recoverSeedPhrase();
-          if (!privateKey) {
-            setCommonError("No Private Key Found!");
-            setLoading(false);
-            return;
-          }
-          const getBtcSat = await btcSat(
+          // const privateKey = await recoverSeedPhrase();
+          // if (!privateKey) {
+          //   setCommonError("No Private Key Found!");
+          //   setLoading(false);
+          //   return;
+          // }
+          let getQuoteUsdcToLbtc = await createUsdcToLbtcToShiftQuote(
             amount,
-            userExist?.userId?.bitcoinWallet,
-            userExist?.userId?.lnbitId_3,
-            userExist?.userId?.lnbitWalletId_3
-          );
-          if (getBtcSat.status && getBtcSat.status == "failure") {
-            setCommonError(getBtcSat.message);
-            setLoading(false);
-          } else {
-            const satoshis = Math.round(parseFloat(amount) * 100000000);
-            const btInSats = Math.floor(bitcoinBalance * 100000000);
-            if (btInSats < getBtcSat?.data?.expected_amount) {
-              const requiredBtc = (getBtcSat?.data?.expected_amount / 100000000).toFixed(8); // convert to BTC with precision
-              setCommonError(`Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`);
+            process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+            process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+          )
+          if (getQuoteUsdcToLbtc && getQuoteUsdcToLbtc?.settleAmount) {
+            console.log("getQuoteUsdcToLbtc-->", getQuoteUsdcToLbtc.settleAmount)
+            const sats = Math.round((getQuoteUsdcToLbtc.settleAmount) * 100000000)
+            if (sats < 10000 || sats > 24000000) {
+              setCommonError("Insufficient Amount!");
               setLoading(false);
               return;
             }
-            const result = await sendBitcoinFunction({
-              fromAddress: userExist?.userId?.bitcoinWallet,
-              toAddress: getBtcSat?.data?.address,
-              amountSatoshi: getBtcSat?.data?.expected_amount,
-              privateKeyHex: privateKey?.wif,
-              network: "main", // Use 'main' for mainnet
-            });
-            if (result.status) {
-              fetchBtcBalance();
+            const getBtcSat = await lbtcSat(
+              getQuoteUsdcToLbtc.settleAmount,
+              "lq1qqt9wfx8t52fd7qzn2w0mzjnaf2r0c5ke3gr8dprah8rffu2nhv6mt46lc83vy78jxfmllushw655p8k74mjhguepyphve4hvq",
+              userExist?.userId?.lnbitId_3,
+              userExist?.userId?.lnbitWalletId_3
+            );
+            console.log("getBtcSat-->", getBtcSat)
+            if (getBtcSat.status && getBtcSat.status == "failure") {
+              setCommonError(getBtcSat.message);
               setLoading(false);
             } else {
-              setCommonError("Transaction Failed!");
-              setLoading(false);
+              // getBtcSat?.data?.expected_amount
+              // createLbtcToUsdcShiftQuote
+
+              let getQuoteLbtcToUsdc = await createLbtcToUsdcShiftQuote(
+                (getBtcSat?.data?.expected_amount / 100000000).toFixed(8),
+                process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+                process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+              )
+              console.log("getQuoteLbtcToUsdc-->", getQuoteLbtcToUsdc)
+              if (getQuoteLbtcToUsdc && getQuoteLbtcToUsdc?.settleAmount) {
+                const totalAmount = Number(
+                  (getQuoteLbtcToUsdc?.settleAmount * 1.08).toFixed(6)
+                );
+                console.log("totalAmount-->", totalAmount)
+                getQuoteUsdcToLbtc = await createUsdcToLbtcToShiftQuote(
+                  totalAmount,
+                  process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+                  process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+                )
+                console.log("final quote-->", getQuoteUsdcToLbtc.settleAmount);
+                console.log(getQuoteUsdcToLbtc.settleAmount * 100000000, getBtcSat?.data?.expected_amount)
+                if (usdcBalance < totalAmount) {
+                  setCommonError(`Insufficient USDC balance. You need at least ${totalAmount} USDC for this transaction.`);
+                  setLoading(false);
+                } else {
+                  let routeData = await createUsdcToLbtcToShiftFixed(
+                    getQuoteUsdcToLbtc,
+                    getBtcSat?.data?.address,
+                    process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
+                    process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
+                  )
+                  console.log("routeData-- usdc to lbtc", routeData)
+                  setLoading(false);
+                }
+
+                return;
+              } else {
+                setCommonError("Please Try again After sometime!");
+                setLoading(false);
+                return;
+              }
             }
+          } else {
+            setCommonError("Please Try again After sometime!");
+            setLoading(false);
+            return;
           }
+
+          // const getBtcSat = await lbtcSat(
+          //   amount,
+          //   "lq1qqt9wfx8t52fd7qzn2w0mzjnaf2r0c5ke3gr8dprah8rffu2nhv6mt46lc83vy78jxfmllushw655p8k74mjhguepyphve4hvq",
+          //   userExist?.userId?.lnbitId_3,
+          //   userExist?.userId?.lnbitWalletId_3
+          // );
+          // if (getBtcSat.status && getBtcSat.status == "failure") {
+          //   setCommonError(getBtcSat.message);
+          //   setLoading(false);
+          // } else {
+          //   const satoshis = Math.round(parseFloat(amount) * 100000000);
+          //   const btInSats = Math.floor(usdcBalance * 100000000);
+          //   if (btInSats < getBtcSat?.data?.expected_amount) {
+          //     const requiredBtc = (getBtcSat?.data?.expected_amount / 100000000).toFixed(8); // convert to BTC with precision
+          //     setCommonError(`Insufficient BTC balance. You need at least ${requiredBtc} BTC for this transaction.`);
+          //     setLoading(false);
+          //     return;
+          //   }
+          //   const result = await sendBitcoinFunction({
+          //     fromAddress: userExist?.userId?.bitcoinWallet,
+          //     toAddress: getBtcSat?.data?.address,
+          //     amountSatoshi: getBtcSat?.data?.expected_amount,
+          //     privateKeyHex: privateKey?.wif,
+          //     network: "main", // Use 'main' for mainnet
+          //   });
+          // if (result.status) {
+          //   fetchUsdBalance();
+          //   setLoading(false);
+          // } else {
+          //   setCommonError("Transaction Failed!");
+          //   setLoading(false);
+          // }
         }
       }
-
       setLoading(false);
+
+
     } catch (error) {
       setCommonError(error?.message);
       setLoading(false);
     }
   };
 
-  const fetchBtcBalance = async () => {
+  const fetchUsdBalance = async () => {
     try {
       if (userAuth?.bitcoinWallet) {
-        const result = await fetchBitcoinBalance(
-          userAuth?.bitcoinWallet
-          // "bc1q3hk4hmaqa2vdur53sx6vx56dg8pnxw2smj85v4"
-        );
 
-        if (result?.error) {
-          console.error("Error fetching BTC balance:", result.error);
-          return;
-        }
-        setBitcoinBalance(
-          result?.balance !== 0 ? (result?.balance).toFixed(8) : 0
-        ); // <-- e.g., "$3250.47"
+        if (!userAuth?.walletAddress) return;
+
+        const senderUsdcBalance = await publicClient.readContract({
+          abi: parseAbi([
+            "function balanceOf(address account) returns (uint256)",
+          ]),
+          address: USDC_ADDRESS,
+          functionName: "balanceOf",
+          args: [userAuth?.walletAddress],
+        });
+        const usdcBalance = String(
+          Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
+        );
+        console.log("usdcBalance-->", usdcBalance)
+        setTotalUsdBalance(
+          parseFloat(usdcBalance) < 0.01
+            ? "0"
+            : parseFloat(usdcBalance).toFixed(2)
+        );
       }
     } catch (error) {
       console.error("Error fetching lightning balance:", error);
     }
   };
   useEffect(() => {
-    fetchBtcBalance();
+    fetchUsdBalance();
   }, []);
   useEffect(() => {
     setCommonError(false);
@@ -188,13 +273,14 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
       setError("Only numbers allowed");
     } else if (isNaN(numberValue)) {
       setError("Invalid number format");
-    } else if (numberValue < 0.00027) {
-      setError("Minimum deposit is 0.00027 BTC");
-    } else if (numberValue > 0.24) {
-      setError("Maximum deposit is 0.24 BTC");
+    } else if (numberValue < 10.8) {
+      setError("Minimum deposit is 10.8 USDC");
+    } else if (numberValue > 21567) {
+      setError("Maximum deposit is 21567 USDC");
     } else {
       setError("");
     }
+
   };
 
   useEffect(() => {
@@ -232,7 +318,7 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
             onClick={() => setDepositUsdcPop(!depositUsdcPop)}
             type="button"
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-            // style={{ border: "1px solid #5f5f5f59" }}
+          // style={{ border: "1px solid #5f5f5f59" }}
           >
             {closeIcn}
           </button>{" "}
@@ -250,14 +336,14 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
                       htmlFor=""
                       className="form-label m-0 font-semibold text-xs ps-3"
                     >
-                      Enter Amount in BTC
+                      Enter Amount in USDC
                     </label>
                     {userAuth?.email && (
                       <label
                         htmlFor=""
                         className="form-label m-0 font-semibold text-xs ps-3"
                       >
-                        Your Balance: {bitcoinBalance}
+                        Your Balance: {usdcBalance}
                       </label>
                     )}
                   </div>

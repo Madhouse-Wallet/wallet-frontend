@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import UserStep from "./UserStep";
 import PaymentTabComponent from "./PaymentTabComponent";
 import { getUser } from "@/lib/apiCall";
+import styled from "styled-components";
 
 export default function Identity() {
   const userAuth = useSelector((state: any) => state.Auth);
@@ -107,91 +108,103 @@ export default function Identity() {
         <meta name="description" content="Stripe Identity Verification" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <section className="pt-12 realtive identity">
-        <div className="container relative">
-          <div className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]">
-            <div className="grid gap-3 grid-cols-12">
-              <div className=" col-span-12  z-10">
-                <div
-                  className={` sectionHeader  px-3 py-4 contrast-more:bg-black border-b border-gray-900`}
-                >
-                  <div className="flex align-items-center gap-3 pb-3">
-                    {/* <BackBtn /> */}
-                    <h4 className="m-0 text-[18px] sm:text-[20px] font-bold -tracking-3 md:text-3xl flex-1 whitespace-nowrap capitalize leading-none">
-                      Payments
-                    </h4>
-                  </div>
+      <section className=" realtive identity h-full flex items-center py-[30px] sm:flex-row flex-col">
+        <div className="absolute inset-0 backdrop-blur-xl h-full"></div>
 
-                  <button
-                    onClick={() => router.push("/dashboard")}
-                    className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
-                    style={{ background: "transparent" }}
-                  >
-                    {closeIcn}
-                  </button>
+        <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            style={{ background: "transparent" }}
+          >
+            {closeIcn}
+          </button>
+          <header className="siteHeader top-0 py-2 w-full z-[999]">
+            <div className="">
+              <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-center flex-wrap gap-2">
+                <div className="left">
+                  <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
+                    Payments
+                  </h4>
+                </div>
+              </Nav>
+            </div>
+          </header>
+          <div
+            className="pageCard bg-black/2 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 datbackg
+          a-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]"
+          >
+            <div className="grid gap-3 grid-cols-12 px-2 py-3">
+              <div className="p-2 px-3 px-lg-4 col-span-12">
+                <div className="flex flex-col gap-4">
+                  {step === "identity" ? (
+                    <>
+                      <div className="col-span-12 pt-8">
+                        <div
+                          className="cardCstm p-3 rounded-3 lg:p-6 text-center mx-auto bg-[var(--backgroundColor)]"
+                          // style={{ maxWidth: 400 }}
+                        >
+                          <h1 className="font-bold m-0 py-2 text-2xl">
+                            Verify your identity to book
+                          </h1>
+                          <h4 className=" text-xs m-0 py-2">
+                            Get ready to take a photo of your ID and a selfie.
+                          </h4>
+                          <div className="btnWRpper mt-3">
+                            <button
+                              onClick={handleVerification}
+                              className="inline-flex items-center justify-center commonBtn btn "
+                              disabled={isLoading || !stripe}
+                            >
+                              {isLoading ? "Loading..." : "Verify me"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : step === "user" ? (
+                    <>
+                      <UserStep step={step} setStep={setStep} />
+                    </>
+                  ) : step === "PaymentTab" ? (
+                    <>
+                      <PaymentTabComponent step={step} setStep={setStep} />
+                    </>
+                  ) : step === "processing" ? (
+                    <>
+                      <div className="col-span-12 pt-8">
+                        <div
+                          className="cardCstm p-3 rounded-3 lg:p-6 text-center mx-auto bg-[var(--backgroundColor)]"
+                          style={{ maxWidth: 400 }}
+                        >
+                          <h1 className="font-bold m-0 py-2 text-2xl">
+                            Verifying your identity
+                          </h1>
+                          <h4 className=" text-xs m-0 py-2">
+                            Please wait while we process your ID and selfie.
+                            This may take a moment.
+                          </h4>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
             </div>
-
-            {step === "identity" ? (
-              <>
-                <div className="col-span-12 pt-8">
-                  <div
-                    className="cardCstm p-3 rounded-3 lg:p-6 text-center mx-auto bg-[var(--backgroundColor)]"
-                    style={{ maxWidth: 400 }}
-                  >
-                    <h1 className="font-bold m-0 py-2 text-2xl">
-                      Verify your identity to book
-                    </h1>
-                    <h4 className=" text-xs m-0 py-2">
-                      Get ready to take a photo of your ID and a selfie.
-                    </h4>
-                    <div className="btnWRpper mt-3">
-                      <button
-                        onClick={handleVerification}
-                        className="inline-flex items-center justify-center commonBtn btn "
-                        disabled={isLoading || !stripe}
-                      >
-                        {isLoading ? "Loading..." : "Verify me"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : step === "user" ? (
-              <>
-                <UserStep step={step} setStep={setStep} />
-              </>
-            ) : step === "PaymentTab" ? (
-              <>
-                <PaymentTabComponent step={step} setStep={setStep} />
-              </>
-            ) : step === "processing" ? (
-              <>
-                <div className="col-span-12 pt-8">
-                  <div
-                    className="cardCstm p-3 rounded-3 lg:p-6 text-center mx-auto bg-[var(--backgroundColor)]"
-                    style={{ maxWidth: 400 }}
-                  >
-                    <h1 className="font-bold m-0 py-2 text-2xl">
-                      Verifying your identity
-                    </h1>
-                    <h4 className=" text-xs m-0 py-2">
-                      Please wait while we process your ID and selfie. This may
-                      take a moment.
-                    </h4>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
           </div>
         </div>
       </section>
     </>
   );
 }
+
+const Nav = styled.nav`
+  // background: var(--cardBg);
+  background: #5c2a28a3;
+  backdrop-filter: blur(12.8px);
+`;
 
 const closeIcn = (
   <svg
