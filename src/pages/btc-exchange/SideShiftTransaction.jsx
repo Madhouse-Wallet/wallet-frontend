@@ -203,7 +203,12 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
           moment(b, "YYYY-MM-DD").valueOf() - moment(a, "YYYY-MM-DD").valueOf()
       )
       .forEach((key) => {
-        sortedGroups[key] = groups[key];
+        // ADD THIS: Sort transactions within each date group by time (newest first)
+        sortedGroups[key] = groups[key].sort((a, b) => {
+          const timeA = moment(a.date, "MMMM D, YYYY h:mm A");
+          const timeB = moment(b.date, "MMMM D, YYYY h:mm A");
+          return timeB.valueOf() - timeA.valueOf(); // Newest first
+        });
       });
 
     return sortedGroups;

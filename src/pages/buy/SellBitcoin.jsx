@@ -13,6 +13,7 @@ import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
+import { updtUser } from "@/lib/apiCall";
 
 const SellBitcoin = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -34,6 +35,7 @@ const SellBitcoin = () => {
   const [swapType, setSwapType] = useState("");
   const [gasPriceError, setGasPriceError] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
+  const [shiftData, setShiftData] = useState(null);
   const [error, setError] = useState("");
   const [swapDirection] = useState({
     from: "BTC",
@@ -48,13 +50,14 @@ const SellBitcoin = () => {
         process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
-
+      setShiftData(shift);
       return {
         depositAddress: shift.depositAddress,
         settleAmount: parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
       setError(error?.message || "Failed to get the quotes");
+      setShiftData(null);
       return null;
     }
   };
@@ -187,6 +190,7 @@ const SellBitcoin = () => {
               setDestinationAddress("");
               setToAmount("");
               setSwapType("");
+              setShiftData(null);
             }
           } else {
             // For amounts > 0.1 BTC, use ThorSwap
@@ -301,7 +305,6 @@ const SellBitcoin = () => {
         setIsLoading(false);
         return;
       }
-
       const result = await sendBitcoinFunction({
         fromAddress: userAuth?.bitcoinWallet,
         toAddress: destinationAddress,
@@ -314,6 +317,22 @@ const SellBitcoin = () => {
         setHash(result.transactionHash);
         setSuccess(true);
         setTimeout(fetchBalances, 2000);
+        if (shiftData) {
+          await updtUser(
+            { email: userAuth?.email },
+            {
+              $push: {
+                sideshiftIds: {
+                  id: shiftData.id,
+                  date: new Date(), // stores the current date/time
+                  type: "sellBitcoin", // or whatever type value you want to store
+                },
+              },
+            }
+          );
+          setShiftData(null);
+        }
+
         setFromAmount("");
         setToAmount("");
       } else {
