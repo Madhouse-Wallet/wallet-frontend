@@ -33,7 +33,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [balance, setBalance] = useState("0");
 
   const [onRampForm, setOnRampForm] = useState({
-    currency: "",
+    currency: "usd",
     transferMethod: "",
     bankAccountId: "",
     amount: "",
@@ -495,28 +495,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             <form onSubmit={handleOnRampSubmit} className="mt-5">
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Select Currency
-                  </label>
-                  <select
-                    id="currency"
-                    value={onRampForm.currency}
-                    onChange={handleOnRampChange}
-                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                  >
-                    <option value="" disabled>
-                      Select Currency
-                    </option>
-                    {currencyOptions.map((option) => (
-                      <option
-                        className="text-black"
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="md:col-span-6 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Currency
+                    </label>
+                    <div className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full flex items-center">
+                      USD - US Dollar
+                    </div>
+                  </div>
                 </div>
 
                 <div className="md:col-span-6 col-span-12">
@@ -800,6 +786,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div
                     key={index}
                     className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all"
+                    onClick={() => {
+                      if (
+                        transfer.status === "pending" &&
+                        transfer.type === "onRamp"
+                      ) {
+                        setTransferData(transfer);
+                        setSpherePayTransfer(true);
+                      }
+                    }}
                   >
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-12 border-b border-dashed border-white/30 pb-3">

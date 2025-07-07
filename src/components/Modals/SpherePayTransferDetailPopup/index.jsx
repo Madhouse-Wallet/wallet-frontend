@@ -19,6 +19,36 @@ const SpherePayTransferDetailPop = ({
       });
   };
 
+  const parseInstructionData = (instructionText) => {
+    // Extract amount and currency
+    const amountMatch = instructionText.match(/Send (\d+)\s+(\w+)/i);
+    const amount = amountMatch
+      ? `${amountMatch[1]} ${amountMatch[2].toUpperCase()}`
+      : "";
+
+    // Extract network
+    const networkMatch = instructionText.match(/via the (\w+) network/i);
+    const network = networkMatch ? networkMatch[1].toUpperCase() : "";
+
+    // Extract source account ending
+    const sourceAccountMatch = instructionText.match(
+      /account number of \*+(\d+)/
+    );
+    const sourceAccount = sourceAccountMatch
+      ? `****${sourceAccountMatch[1]}`
+      : "";
+
+    // For memo, since it's not present in the instruction, we can use a default or leave empty
+    const memo = ""; // or you can set a default value
+
+    return {
+      amount: amount,
+      network: network,
+      memo: memo,
+      accountEnding: sourceAccount,
+    };
+  };
+
   return (
     <>
       <Modal
@@ -141,36 +171,92 @@ const SpherePayTransferDetailPop = ({
                     </span>
                   </p>
                 </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Memo :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.memo}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(transferData.instructions.memo)
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
+
                 <div className="col-span-12">
-                  <h6 className="m-0 flex items-center gap-1">
-                    {" "}
-                    Instruction :{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(transferData.instructions.human)
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 ">
+                  <h6 className="m-0">Instruction :</h6>
+                  {/* <p className="m-0 text-white/50 text-xs px-2 py-2">
                     {transferData.instructions.human}
-                  </p>
+                  </p> */}
+
+                  {/* Parsed instruction data */}
+                  <div className="mt-4 grid gap-3 grid-cols-12">
+                    {(() => {
+                      const parsedData = parseInstructionData(
+                        transferData.instructions.human
+                      );
+                      return (
+                        <>
+                          {parsedData.amount && (
+                            <div className="sm:col-span-6 col-span-12">
+                              <h6 className="m-0">Amount to Send :</h6>
+                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                                `{parsedData.amount}`{" "}
+                                <span
+                                  onClick={() =>
+                                    copyToClipboard(parsedData.amount)
+                                  }
+                                  className="cursor-pointer hover:text-white transition-colors"
+                                >
+                                  {copyIcn}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                          {parsedData.network && (
+                            <div className="sm:col-span-6 col-span-12">
+                              <h6 className="m-0">Network to use :</h6>
+                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                                `{parsedData.network}`{" "}
+                                <span
+                                  onClick={() =>
+                                    copyToClipboard(parsedData.network)
+                                  }
+                                  className="cursor-pointer hover:text-white transition-colors"
+                                >
+                                  {copyIcn}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                          <div className="sm:col-span-6 col-span-12">
+                            <h6 className="m-0">Memo :</h6>
+                            <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {transferData.instructions.memo}{" "}
+                              <span
+                                onClick={() =>
+                                  copyToClipboard(
+                                    transferData.instructions.memo
+                                  )
+                                }
+                                className="cursor-pointer hover:text-white transition-colors"
+                              >
+                                {copyIcn}
+                              </span>
+                            </p>
+                          </div>
+                          {parsedData.accountEnding && (
+                            <div className="col-span-12">
+                              <h6 className="m-0">
+                                Please send funds to the bank account referenced
+                                above from the bank account number ending in :
+                              </h6>
+                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                                `{parsedData.accountEnding}`{" "}
+                                <span
+                                  onClick={() =>
+                                    copyToClipboard(parsedData.accountEnding)
+                                  }
+                                  className="cursor-pointer hover:text-white transition-colors"
+                                >
+                                  {copyIcn}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>

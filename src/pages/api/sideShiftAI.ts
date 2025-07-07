@@ -30,7 +30,7 @@ interface ShiftResponse {
 }
 
 // Fixed IP address as used in curl commands
-const FIXED_IP_ADDRESS = "201.144.119.146";
+const FIXED_IP_ADDRESS = process.env.NEXT_PUBLIC_IP_ADDRESS;
 
 /**
  * Combined function to create a USDC to BTC fixed shift in one call
@@ -650,8 +650,6 @@ export const createEthMainnetToUsdcbaseShift = async (
   }
 };
 
-
-
 export const createLbtcToUsdcShift = async (
   btcAmount: string,
   userBaseWallet: string,
@@ -713,10 +711,6 @@ export const createLbtcToUsdcShift = async (
   }
 };
 
-
-
-
-
 export const createUsdcToLbtcToShiftQuote = async (
   usdcAmount: string,
   secretKey: string,
@@ -759,7 +753,6 @@ export const createUsdcToLbtcToShiftQuote = async (
   }
 };
 
-
 export const createLbtcToUsdcShiftQuote = async (
   usdcAmount: string,
   secretKey: string,
@@ -801,10 +794,6 @@ export const createLbtcToUsdcShiftQuote = async (
     throw error;
   }
 };
-
-
-
-
 
 export const createUsdcToLbtcToShiftFixed = async (
   quoteData: any,
