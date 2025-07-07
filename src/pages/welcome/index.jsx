@@ -27,10 +27,14 @@ const Welcome = () => {
               <h1 className="text-center text-base font-medium  m-0">
                 Madhouse Wallet
               </h1>
-              {/* <p className="text-center text-sm font-medium opacity-50 md:text-xs">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-              </p> */}
+              <p className="text-center text-sm font-medium opacity-50 md:text-xs">
+                Please review our privacy policy before proceeding: 
+              </p> 
+              <p className={` bg-white  text-black text-center text-sm font-medium opacity-50 md:text-xs`}>
+                <a href="https://madhouse-wallet.gitbook.io/docs/legal-policies/privacy">
+                  Privacy Policy
+                </a>
+              </p>
             </div>
           </div>
         </div>
