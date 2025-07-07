@@ -11,6 +11,11 @@ const inter = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
+const isIOS = () => {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
 const Layout = ({ Component, pageProps }) => {
   const { selectedBackground, selectedWatermark, bgOpacity, wmOpacity } =
     useBackground();
@@ -29,20 +34,6 @@ const Layout = ({ Component, pageProps }) => {
       setIsAuth(true);
     }
   }, [Component]);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
-    };
-
-    updateHeight(); // initial call
-    window.addEventListener("resize", updateHeight);
-
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, []);
 
   return (
     <div

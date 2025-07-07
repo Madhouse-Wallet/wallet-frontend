@@ -282,6 +282,14 @@ const ModifyKeys = () => {
                 <form action="">
                   <div className="py-2">
                     <input
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({
+                            block: "center",
+                            behavior: "smooth",
+                          });
+                        }, 300);
+                      }}
                       type="text"
                       name="emailx"
                       onChange={handleEmailChange}
@@ -327,6 +335,14 @@ const ModifyKeys = () => {
               <div className="mx-auto max-w-sm">
                 <div className="py-2">
                   <input
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({
+                          block: "center",
+                          behavior: "smooth",
+                        });
+                      }, 300);
+                    }}
                     type="text"
                     name="privateKey"
                     onChange={handlePrivateInputChange}
@@ -342,6 +358,14 @@ const ModifyKeys = () => {
                 </div>
                 <div className="py-2">
                   <input
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({
+                          block: "center",
+                          behavior: "smooth",
+                        });
+                      }, 300);
+                    }}
                     type="text"
                     name="safePrivateKey"
                     onChange={handleSafePrivateInputChange}
@@ -357,6 +381,14 @@ const ModifyKeys = () => {
                 </div>
                 <div className="py-2">
                   <input
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({
+                          block: "center",
+                          behavior: "smooth",
+                        });
+                      }, 300);
+                    }}
                     type="text"
                     name="seedphrase"
                     onChange={handlePhraseInput}
@@ -373,6 +405,14 @@ const ModifyKeys = () => {
                 </div>
                 <div className="py-2">
                   <input
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({
+                          block: "center",
+                          behavior: "smooth",
+                        });
+                      }, 300);
+                    }}
                     type="text"
                     name="wif"
                     onChange={handleWifInput}
@@ -462,6 +502,14 @@ const ModifyKeys = () => {
                                 ) : (
                                   <>
                                     <input
+                                      onFocus={(e) => {
+                                        setTimeout(() => {
+                                          e.target.scrollIntoView({
+                                            block: "center",
+                                            behavior: "smooth",
+                                          });
+                                        }, 300);
+                                      }}
                                       name={"key" + key}
                                       value={item.displayName || ""}
                                       onChange={(e) =>
