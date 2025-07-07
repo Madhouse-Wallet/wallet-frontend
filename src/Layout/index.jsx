@@ -30,8 +30,25 @@ const Layout = ({ Component, pageProps }) => {
     }
   }, [Component]);
 
+  useEffect(() => {
+    const updateHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
+    updateHeight(); // initial call
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
   return (
-    <div className={`${inter.className} relative w-100 overflow-hidden`}>
+    <div
+      id="portal-root"
+      className={`${inter.className} relative w-100 overflow-hidden`}
+    >
       <Image
         src={selectedBackground}
         height={100000}

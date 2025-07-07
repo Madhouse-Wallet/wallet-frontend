@@ -19,14 +19,15 @@
 :root body {
   font-family: "Inter", sans-serif;
   background: #0a0915;
+  overscroll-behavior: none;
   color: #fff;
   /* color: var(--textColor); */
   /* background-image: url(../Images//umbrel/1.jpg); */
   background-attachment: fixed;
   background-size: cover;
-  /* height: 100vh;
-  max-height: 100vh;
-  overflow: hidden; */
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 html {
   -webkit-text-size-adjust: 100%;
