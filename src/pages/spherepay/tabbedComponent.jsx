@@ -36,7 +36,7 @@ const TabbedComponent = ({ customerId, step, setStep }) => {
   ];
   return (
     <>
-      <div className="px-3">
+      <div className="px-3 ">
         <div className="grid gap-3 grid-cols-12 md:pr-3 bg-black/50 rounded-20">
           <div className="md:col-span-4 col-span-12 md:sticky top-0">
             <Sidebar tabData={tabData} tab={tab} setTab={setTab} />
