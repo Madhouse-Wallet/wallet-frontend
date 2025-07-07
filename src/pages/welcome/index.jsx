@@ -25,7 +25,7 @@ const Welcome = () => {
                 />
               </div>
               <h1 className="text-center text-base font-medium  m-0">
-                Madhouse Wallet
+               Get Started
               </h1>
               <p className="text-center text-sm font-medium opacity-50 md:text-xs">
                 Please review our privacy policy before proceeding: 
