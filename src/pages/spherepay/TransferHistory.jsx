@@ -785,7 +785,11 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 {transfers.map((transfer, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all"
+                    className={`p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all ${
+                      transfer.status === "pending" &&
+                      transfer.type === "onRamp" &&
+                      "cursor-pointer"
+                    }`}
                     onClick={() => {
                       if (
                         transfer.status === "pending" &&
