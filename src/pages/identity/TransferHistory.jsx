@@ -467,7 +467,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       console.log("Gas transaction estimated gas price:", roundedGasGasPrice);
 
-      const FeeAmount = offRampForm.amount * 0.0025;
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
       console.log("line-133", FeeAmount);
 
       let COMMISSION_FEES;
