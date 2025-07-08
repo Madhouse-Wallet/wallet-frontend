@@ -27,6 +27,7 @@ const Step2 = ({
   const [states, setStates] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const dropdownPortalRef = useRef(null);
   const [dropdownPos, setDropdownPos] = useState({
     top: 0,
     left: 0,
@@ -66,6 +67,23 @@ const Step2 = ({
     return () => {
       window.removeEventListener("resize", calculateDropdownPosition);
       window.removeEventListener("scroll", calculateDropdownPosition, true);
+    };
+  }, [isStateOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isStateOpen &&
+        !stateDropdownRef.current?.contains(event.target) &&
+        !dropdownPortalRef.current?.contains(event.target)
+      ) {
+        setIsStateOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isStateOpen]);
 
@@ -158,19 +176,6 @@ const Step2 = ({
   useEffect(() => {
     const countryStates = State.getStatesOfCountry("US");
     setStates(countryStates);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        stateDropdownRef.current &&
-        !stateDropdownRef.current.contains(event.target)
-      ) {
-        setIsStateOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleCountrySelect = (country) => {
@@ -428,6 +433,7 @@ const Step2 = ({
                 {isStateOpen &&
                   createPortal(
                     <div
+                      ref={dropdownPortalRef}
                       style={{
                         position: "absolute",
                         top: dropdownPos.top,
