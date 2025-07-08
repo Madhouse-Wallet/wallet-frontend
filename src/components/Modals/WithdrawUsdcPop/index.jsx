@@ -10,6 +10,8 @@ import {
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import Image from "next/image.js";
 import { reverseSwap } from "../../../pages/api/botlzFee.ts";
+import TransactionSuccessPop from "../TransactionSuccessPop/index.jsx";
+import { createPortal } from "react-dom";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -41,6 +43,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
   const [convertAmount, setConvertAmount] = useState(0);
+  const [success, setSuccess] = useState(false);
   const [feeDetails, setFeeDetails] = useState({
     boltzFee: "",
     platformFee: "",
@@ -130,8 +133,9 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
             setLoading(false);
           } else {
             fetchLighteningBalance();
-            toast.success(getBtcSat.message);
+            // toast.success(getBtcSat.message);
             setLoading(false);
+            setSuccess(true)
           }
         }
       }
@@ -278,7 +282,18 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
 
   return (
     <>
-      <Modal
+
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"USDC"}
+            hash={''}
+          />,
+          document.body
+        )}
+        {!success && ( <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <div className="absolute inset-0 backdrop-blur-xl"></div>
@@ -375,7 +390,8 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal>)}
+     
     </>
   );
 };
