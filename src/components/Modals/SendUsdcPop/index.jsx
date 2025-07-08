@@ -21,6 +21,7 @@ import {
   filterHexInput,
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
+import { getUser, updtUser } from "@/lib/apiCall.js";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -100,6 +101,13 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const handleSend = async (e) => {
     e.preventDefault();
 
+    let user = await getUser(userAuth?.email);
+    console.log("line-104", user);
+
+    if (!user) {
+      return;
+    }
+
     const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
       data?.encryptedData,
@@ -122,6 +130,26 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         return;
       }
 
+      const FeeAmount = amount * 0.0025;
+      console.log("line-133", FeeAmount);
+
+      let COMMISSION_FEES;
+      if (!user?.userId?.commission_fees) {
+        console.log("line-138");
+        let data = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: { commission_fees: process.env.NEXT_PUBLIC_MADHOUSE_FEE },
+          }
+        );
+        COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
+      } else {
+        console.log("line-147");
+        COMMISSION_FEES = user?.userId?.commission_fees;
+      }
+
+      console.log("line-148", COMMISSION_FEES);
+
       const gasPriceResult = await calculateGasPriceInUSDC(
         getAccountCli?.kernelClient,
         [
@@ -130,6 +158,21 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
             abi: USDC_ABI,
             functionName: "transfer",
             args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [
+              process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+              parseUnits(FeeAmount.toString(), 6),
+            ],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
           },
         ]
       );
@@ -154,6 +197,21 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           abi: USDC_ABI,
           functionName: "transfer",
           args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [
+            process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+            parseUnits(FeeAmount.toString(), 6),
+          ],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
         },
       ]);
       if (tx && !tx.error) {

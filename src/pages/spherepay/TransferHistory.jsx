@@ -263,6 +263,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   };
 
   const sendUsdc = async (amount, toAddress) => {
+    let user = await getUser(userAuth?.email);
+    console.log("line-104", user);
+
+    if (!user) {
+      return;
+    }
     const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
       data?.encryptedData,
@@ -283,6 +289,24 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         return;
       }
 
+      const FeeAmount = amount * 0.0025;
+      console.log("line-133", FeeAmount);
+
+      let COMMISSION_FEES;
+      if (!user?.userId?.commission_fees) {
+        console.log("line-138");
+        let data = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: { commission_fees: process.env.NEXT_PUBLIC_MADHOUSE_FEE },
+          }
+        );
+        COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
+      } else {
+        console.log("line-147");
+        COMMISSION_FEES = user?.userId?.commission_fees;
+      }
+
       const gasPriceResult = await calculateGasPriceInUSDC(
         getAccountCli?.kernelClient,
         [
@@ -291,6 +315,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             abi: USDC_ABI,
             functionName: "transfer",
             args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [
+              process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+              parseUnits(FeeAmount.toString(), 6),
+            ],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
           },
         ]
       );
@@ -318,6 +357,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           abi: USDC_ABI,
           functionName: "transfer",
           args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [
+            process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+            parseUnits(FeeAmount.toString(), 6),
+          ],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
         },
       ]);
 
