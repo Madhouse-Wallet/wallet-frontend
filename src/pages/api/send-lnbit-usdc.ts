@@ -7,14 +7,20 @@ import {
   createBlotzAutoReverseSwap,
   userLogIn,
 } from "./lnbit";
-import { createLbtcToUsdcShift } from "./sideShiftAI";
-import { reverseSwap } from "./botlzFee";
-const getDestinationAddress = async (walletAddress: any, amount: any) => {
+import { createLbtcToUsdcShiftWithdraw } from "./sideShiftAI";
+import { createReverseSwap, createReverseSwapSocket } from "./boltzSocket"
+import { lambdaInvokeFunction } from "@/lib/apiCall";
+
+
+
+const getDestinationAddress = async (walletAddress: any, amount: any, boltzSwapId: any) => {
   try {
-    const shift = await createLbtcToUsdcShift(amount, walletAddress, process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY!, process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID!) as any;
+    const shift = await createLbtcToUsdcShiftWithdraw(amount, walletAddress, process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY!, process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID!, process.env.NEXT_PUBLIC_REFUND_ADDRESS!, boltzSwapId) as any;
+
     console.log("shift--> response", shift)
     return {
       status: true,
+      shift,
       depositAddress: shift.depositAddress,
       settleAmount: parseFloat(shift.settleAmount || 0),
     };
@@ -24,6 +30,7 @@ const getDestinationAddress = async (walletAddress: any, amount: any) => {
   }
 };
 
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -32,58 +39,95 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    const { wallet = "", amount, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 = "" } = req.body;
-    // const getToken = (await logIn(2)) as any;
-    // let token = getToken?.data?.token;
+    const { email = "", wallet = "", amount, lnbitId_3, lnbitWalletId_3, lnbitAdminKey_3 = "" } = req.body;
+
+    console.log("req.body -->", req.body)
+
+    const sats = amount;
+
+    const liquidBTCNetworkFee = Number(process.env.NEXT_PUBLIC_LIQUID_BTC_NETWORK_FEE) //200 sats is the averave fee for a Liquid transaction settlements
+
+    const minSwap = Number(process.env.NEXT_PUBLIC_MIN_USDC_SWAP_SATS);
+    const maxSwap = Number(process.env.NEXT_PUBLIC_MAX_USDC_SWAP_SATS);
+
+    if (sats > maxSwap || sats < minSwap) {
+      return res.status(400).json({ status: "failure", message: "Insufficient Balance" })
+    }
+
+    let invoice_amount = Math.floor(sats)
+    console.log("invoice_amount-->", invoice_amount)
+
     let getUserToken = (await userLogIn(2, lnbitId_3)) as any;
     let token = getUserToken?.data?.token as any;
-    // const satoshiAmount = amount * 100000000;
-    const satoshiAmount = amount;
-    let calculateOnChainAmount = await reverseSwap(satoshiAmount, "L-BTC") as any;
-    console.log("calculateOnChainAmount-->", calculateOnChainAmount)
 
-    const finalRoute = await getDestinationAddress(wallet, (calculateOnChainAmount.onchainAmount / 100000000));
+
+    let createBoltzSwapApi = await createReverseSwap(invoice_amount)
+
+    if (!createBoltzSwapApi?.status) return res.status(400).json({ status: "failure", message: ("error creating swap : " + createBoltzSwapApi.message) });
+
+
+    const shift_amount = parseInt(createBoltzSwapApi.data.onchainAmount) - liquidBTCNetworkFee;
+    console.log("shift_amount-->", shift_amount)
+
+
+    const finalRoute = await getDestinationAddress(wallet, (shift_amount / 100000000), createBoltzSwapApi.data.id);
+
     if (!finalRoute?.status) return res.status(400).json({ status: "failure", message: ("error during final route : " + finalRoute.message) });
 
 
+    const shiftRouteAdd = await lambdaInvokeFunction({
+      email: email,
+      wallet: wallet,
+      type: "tpos usdc shift",
+      data: finalRoute.shift
+    }, "madhouse-backend-production-addSideShiftTrxn");
 
-    let data = (await createSwapReverse(
+    console.log("finalRoute-->", finalRoute)
+
+    const swapSocket = await createReverseSwapSocket(createBoltzSwapApi.data,
+      createBoltzSwapApi.preimage, createBoltzSwapApi.keys, finalRoute.depositAddress);
+
+    console.log("Step 4: Created swap", swapSocket);
+
+
+    if (!swapSocket?.status) return res.status(400).json({ status: "failure", message: swapSocket.message });
+
+    const boltzRouteAdd = await lambdaInvokeFunction({
+      email: email,
+      wallet: wallet,
+      type: "tpos usdc shift",
+      data: createBoltzSwapApi.data
+    }, "madhouse-backend-production-addBoltzTrxn");
+
+    // pay invoice
+    const invoice = await payInvoice({ out: true, bolt11: swapSocket.data.invoice }, token,
+      2,
+      lnbitAdminKey_3);
+
+    console.log("tpos usdc invoice-->", invoice)
+    if (!invoice?.status) return res.status(400).json({ status: "failure", message: invoice.msg });
+    const apiResponse = await lambdaInvokeFunction(
       {
-        wallet: lnbitWalletId_3,
-        asset: "L-BTC/BTC",
-        amount: satoshiAmount,
-        direction: "send",
-        instant_settlement: true,
-        onchain_address: finalRoute.depositAddress,
-        feerate: true,
-        feerate_value: 0
+        findData: {
+          email: email
+        }, updtData: {
+          $push: {
+            sideshiftIds: {
+              id: finalRoute.shift.id,
+              date: new Date(), // stores the current date/time
+              type: "TposUsdc", // or whatever type value you want to store
+            },
+          },
+        }
       },
-      token,
-      2
-    )) as any;
-    console.log("data", data);
-    if (data?.status) {
-      const payInv = (await payInvoice(
-        {
-          out: true,
-          bolt11: data?.data?.invoice, // ← invoice from above
-        },
-        token,
-        2,
-        lnbitAdminKey_3
-      )) as any;
-      if (payInv?.status) {
-        return res.status(200).json({
-          status: "success",
-          message: "Withdraw Done!",
-          data: payInv?.data,
-        });
-      } else {
-        return res.status(400).json({ status: "failure", message: data.msg });
-      }
-    } else {
-      return res.status(400).json({ status: "failure", message: data.msg });
-    }
+      "madhouse-backend-production-updtUser"
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Successfully Transfered the USDC!",
+      data: invoice?.data,
+    });
   } catch (error) {
     console.error("Error adding user:", error);
     return res.status(500).json({ error: "Internal server error" });
