@@ -65,7 +65,7 @@ export default async function handler(
     requestBody.append("lock_wallet_address", "true");
     requestBody.append(
       "customer_ip_address",
-      process.env.NEXT_PUBLIC_IP_ADDRESS!
+      process.env.NEXT_PUBLIC_STRIPE_IP_ADDRESS!
     );
 
     [destinationCurrency].forEach((currency) =>
