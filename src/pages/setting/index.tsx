@@ -17,7 +17,10 @@ import styled from "styled-components";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, addProvisionData } from "../../lib/apiCall";
+import { useToast } from "@/ContextApi/ToastContext";
 const Setting: React.FC = () => {
+  const { showToast } = useToast();
+
   const {
     selectBg,
     backgrounds,
@@ -185,7 +188,7 @@ const Setting: React.FC = () => {
     try {
       addProvisionData(userAuth.email);
       logoutStorage();
-
+      showToast("Logout Successfully");
       dispatch(
         loginSet({
           login: false,

@@ -8,12 +8,14 @@ import { createPortal } from "react-dom";
 import LoginPop from "../Modals/LoginPop";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { splitAddress } from "../../utils/globals";
+import { useToast } from "@/ContextApi/ToastContext";
 interface HeaderProps {
   sidebar: boolean;
   setSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Header: React.FC<HeaderProps> = () => {
+  const { showToast } = useToast();
   const userAuth = useSelector((state: any) => state.Auth);
   const [login, setLogin] = useState<boolean>(false);
   const dispatch = useDispatch();
@@ -61,6 +63,7 @@ const Header: React.FC<HeaderProps> = () => {
     try {
       await navigator.clipboard.writeText(address);
       setIsCopied((prev) => ({ ...prev, [type]: true }));
+      showToast("Copied Successfully");
       setTimeout(
         () =>
           setIsCopied({
