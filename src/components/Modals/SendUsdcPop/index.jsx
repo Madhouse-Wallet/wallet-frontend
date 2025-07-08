@@ -423,7 +423,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 550px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);
