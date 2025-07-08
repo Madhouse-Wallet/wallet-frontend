@@ -21,7 +21,7 @@ export default async function handler(
       flowTokens,
     } = req.body;
     req.body.commission_fees = process.env.NEXT_PUBLIC_COMMISSION_FEES;
-
+ 
     const apiResponse = (await lambdaInvokeFunction(
       req.body,
       "madhouse-backend-production-createUser"
