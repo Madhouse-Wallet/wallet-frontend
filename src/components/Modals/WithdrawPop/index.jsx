@@ -120,6 +120,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
           } else {
             fetchLighteningBalance();
             setLoading(false);
+            setSuccess(true)
           }
         }
       }
