@@ -218,9 +218,9 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
       setError(`Maximum value is ${maxSwap}`);
       clearFeeDetails();
     }
-    //  else if (numberValue > lightningBalance) {
-    //   setError(`Insufficient Balance!`);
-    // } 
+    else if (numberValue > lightningBalance) {
+      setError(`Insufficient Balance!`);
+    }
     else {
       const feePortion = 1 - (1 / feeMultiplier); // ~0.0909
       const estimatedFee = Math.floor(numberValue * feePortion);
