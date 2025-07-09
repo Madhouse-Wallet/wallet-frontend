@@ -252,11 +252,9 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
         !success && (<Modal
           className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
         >
-          <button
-            onClick={() => setWithdrawPop(!withdrawPop)}
-            type="button"
-            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-            // style={{ border: "1px solid #5f5f5f59" }}
+          <div className="absolute inset-0 backdrop-blur-xl"></div>
+          <div
+            className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
           >
             <button
               onClick={() => setWithdrawPop(!withdrawPop)}
@@ -282,44 +280,22 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                       >
                         Enter Amount in sats
                       </label>
-                    )}
-                  </div>
-                  <div className="iconWithText relative">
-                    <input
-                      type="text"
-                      onChange={handleAmountInput}
-                      value={amount}
-                      className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
-                      placeholder="min: (26000), max: (24000000)"
-                    />
-                  </div>
-                  {error && <p className="m-0 text-red-500">{error}</p>}
-                  {commonError && (
-                    <p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>
-                  )}
-                </div>
-                <div className="py-2">
-                  <p className="m-0 text-xs">
-                    Fees:{" "}
-                    {parseInt(amount, 10) -
-                      parseInt(feeDetails?.onchainAmount, 10) || 0}{" "}
-                    sats
-                  </p>
-                </div>
-                <div className="btnWrpper mt-3">
-                  <button
-                    type="button"
-                    className=" flex items-center justify-center btn commonBtn w-full"
-                    disabled={loading || error}
-                    onClick={handleWithdrawPop}
-                  >
-                    {loading ? (
-                      <Image
-                        src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
-                        alt={""}
-                        height={100000}
-                        width={10000}
-                        className={"max-w-full h-[40px] object-contain w-auto"}
+                      {userAuth?.email && (
+                        <label
+                          htmlFor=""
+                          className="form-label m-0 font-semibold text-xs ps-3"
+                        >
+                          Your Balance: {lightningBalance}
+                        </label>
+                      )}
+                    </div>
+                    <div className="iconWithText relative">
+                      <input
+                        type="text"
+                        onChange={handleAmountInput}
+                        value={amount}
+                        className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full"
+                        placeholder="min: (26000), max: (24000000)"
                       />
                     </div>
                     {error && <p className="m-0 text-red-500">{error}</p>}
