@@ -39,13 +39,12 @@ const webSocketEndpoint = 'wss://api.boltz.exchange/v2/ws'
 // const invoiceAmount = 170//10_000;
 const network = networks.liquid;
 
-// await init();
 let secp: any; // <-- declare `secp` in the outer scope
 
 (async () => {
-  const zkp = (await import("@vulpemventures/secp256k1-zkp")).default;
-  secp = await zkp();
-  init(secp);
+    const zkp = (await import("@vulpemventures/secp256k1-zkp")).default;
+    secp = await zkp();
+    init(secp);
 })();
 export const createReverseSwap = async (invoiceAmount: any) => {
     try {
