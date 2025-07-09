@@ -135,7 +135,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       setTransactions(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
-          data.result.slice(0, 10)
+          data.result.slice(0, 100)
         );
         setTransactions(formattedTransactions);
       }
@@ -337,6 +337,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
     };
   }, []);
 
+  console.log("transactions", transactions);
   const tabs = [
     {
       title: "USDC",
@@ -345,6 +346,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
           {transactions.length > 0 ? (
             <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
+                console.log("line-349", txs);
                 return (
                   <div key={date} className="py-3">
                     <p className="m-0 text-white text-xs font-semibold pb-2">
