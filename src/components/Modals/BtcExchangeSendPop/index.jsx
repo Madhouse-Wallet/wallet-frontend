@@ -513,7 +513,7 @@ const handleAddressChange = (e) => {
 
                   {gasPrice && (
                     <label className="form-label m-0 font-semibold text-xs block">
-                      Estimated Max Gas Fee: {gasPrice} USDC
+                      Estimated Fee: {gasPrice} BTC
                     </label>
                   )}
                 </div>
