@@ -2,6 +2,7 @@ import React from "react";
 import {
   fetchBitcoinTransactions,
   formatBitcoinTransactions,
+  getCurrentUserTimezone,
 } from "../../utils/bitcoinTransaction";
 import { useEffect, useState } from "react";
 import BitcoinTransactionDetail from "./BitcoinTransactionDetail";
@@ -38,12 +39,16 @@ const BitcoinTransactionsTab = ({
           btcWalletAddress,
           selectedItem
         );
-        setTransactions(data?.txs);
+        const userTimezone = getCurrentUserTimezone();
+        console.log(userTimezone);
         const formattedTransactions = formatBitcoinTransactions(
           data,
-          btcWalletAddress
+          btcWalletAddress,
+          userTimezone
+          // "America/New_York"
         );
         setBtcTransactions(formattedTransactions);
+        setTransactions(formattedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
         setError("Failed to load transactions");
@@ -90,7 +95,7 @@ const BitcoinTransactionsTab = ({
       case "pending":
         return "Pending";
       default:
-        return "Unknown";
+        return "Pending";
     }
   };
 

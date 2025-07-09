@@ -4,10 +4,27 @@ import axios from "axios";
 
 // Import bitcoin signing dependencies
 const bitcoin = require("bitcoinjs-lib");
-// const secp = require("tiny-secp256k1");
 const secp = require("@bitcoinerlab/secp256k1");
 const ecfactory = require("ecpair");
 const ECPair = ecfactory.ECPairFactory(secp);
+
+// Helper function to detect address type
+function getAddressType(address) {
+  if (address.startsWith("bc1q") || address.startsWith("tb1q")) {
+    return "p2wpkh"; // SegWit v0 (bech32)
+  } else if (address.startsWith("bc1p") || address.startsWith("tb1p")) {
+    return "p2tr"; // Taproot (bech32m)
+  } else if (address.startsWith("3") || address.startsWith("2")) {
+    return "p2sh"; // Pay-to-Script-Hash
+  } else if (
+    address.startsWith("1") ||
+    address.startsWith("m") ||
+    address.startsWith("n")
+  ) {
+    return "p2pkh"; // Legacy Pay-to-Public-Key-Hash
+  }
+  throw new Error(`Unknown address type: ${address}`);
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -29,30 +46,48 @@ export default async function handler(req, res) {
           "Missing required fields: fromAddress, toAddress, amountSatoshi, privateKeyHex",
       });
     }
-    const keyPair = ECPair.fromWIF(privateKeyHex, bitcoin.networks.bitcoin);
-    const privateKeyWallet = keyPair.privateKey.toString("hex");
 
-    const cleanPrivateKey = privateKeyWallet;
+    // Handle private key input (WIF or hex)
+    let keys;
+    let cleanPrivateKey;
 
-    if (cleanPrivateKey.length !== 64) {
-      return res.status(400).json({
-        error: `Invalid private key length: Expected 64 hex characters but received ${cleanPrivateKey.length}`,
-      });
+    try {
+      // Try to parse as WIF first
+      keys = ECPair.fromWIF(privateKeyHex, bitcoin.networks.bitcoin);
+      cleanPrivateKey = keys.privateKey.toString("hex");
+    } catch (error) {
+      // If WIF parsing fails, treat as hex
+      cleanPrivateKey = privateKeyHex.startsWith("0x")
+        ? privateKeyHex.slice(2)
+        : privateKeyHex;
+
+      if (cleanPrivateKey.length !== 64) {
+        return res.status(400).json({
+          error: `Invalid private key length: Expected 64 hex characters but received ${cleanPrivateKey.length}`,
+        });
+      }
+
+      const keyBuffer = Buffer.from(cleanPrivateKey, "hex");
+      keys = ECPair.fromPrivateKey(keyBuffer);
     }
 
     const baseUrl = `https://api.blockcypher.com/v1/btc/${network}`;
+    const fromAddressType = getAddressType(fromAddress);
 
-    // 1. Generate keypair from private key
-    const keyBuffer = Buffer.from(cleanPrivateKey, "hex");
-    const keys = ECPair.fromPrivateKey(keyBuffer);
-
-    // 2. Create a new transaction template
+    // Create transaction template with appropriate parameters
     const newTx = {
       inputs: [{ addresses: [fromAddress] }],
       outputs: [{ addresses: [toAddress], value: amountSatoshi }],
+      preference: "high",
+      confirmations: 1, 
     };
 
-    // 3. Request transaction skeleton
+    // Add SegWit-specific parameters if sending from SegWit address
+    if (fromAddressType === "p2wpkh") {
+      newTx.prefer_bech32 = true;
+    }
+
+    // Request transaction skeleton
     const txCreateResponse = await axios.post(`${baseUrl}/txs/new`, newTx);
     const tmpTx = txCreateResponse.data;
 
@@ -63,24 +98,52 @@ export default async function handler(req, res) {
       });
     }
 
-    // 4. Sign each tosign hash per BlockCypher's spec
+    // Sign transaction based on address type
     tmpTx.pubkeys = [];
-    tmpTx.signatures = tmpTx.tosign.map((tosignHex) => {
+    tmpTx.signatures = [];
+
+    for (let i = 0; i < tmpTx.tosign.length; i++) {
+      const tosignHex = tmpTx.tosign[i];
+
+      if (!tosignHex) {
+        return res.status(400).json({
+          success: false,
+          error: `Empty tosign data at index ${i}`,
+        });
+      }
+
+      // Add public key
       tmpTx.pubkeys.push(keys.publicKey.toString("hex"));
 
       const hashBuffer = Buffer.from(tosignHex, "hex");
-      const signature = keys.sign(hashBuffer);
 
-      const derSig = bitcoin.script.signature.encode(
-        signature,
-        bitcoin.Transaction.SIGHASH_ALL
-      );
+      if (fromAddressType === "p2wpkh") {
+        // SegWit signing - BlockCypher expects signature WITH SIGHASH_ALL byte
+        const signature = keys.sign(hashBuffer);
 
-      // Remove trailing "01" (SIGHASH_ALL) byte per BlockCypher spec
-      return derSig.toString("hex").slice(0, -2);
-    });
+        // For SegWit, we need the signature WITH the SIGHASH_ALL byte
+        const derSig = bitcoin.script.signature.encode(
+          signature,
+          bitcoin.Transaction.SIGHASH_ALL
+        );
 
-    // 5. Broadcast the signed transaction
+        // For SegWit, keep the SIGHASH_ALL byte (don't remove it)
+        tmpTx.signatures.push(derSig.toString("hex"));
+      } else {
+        // Legacy signing (P2PKH, P2SH)
+        const signature = keys.sign(hashBuffer);
+
+        const derSig = bitcoin.script.signature.encode(
+          signature,
+          bitcoin.Transaction.SIGHASH_ALL
+        );
+
+        // Remove trailing "01" (SIGHASH_ALL) byte per BlockCypher spec for legacy
+        tmpTx.signatures.push(derSig.toString("hex").slice(0, -2));
+      }
+    }
+
+    // Broadcast the signed transaction
     const txSendResponse = await axios.post(`${baseUrl}/txs/send`, tmpTx);
     const finalTx = txSendResponse.data;
 
@@ -114,4 +177,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
