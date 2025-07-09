@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useTheme } from "@/ContextApi/ThemeContext";
 import Image from "next/image";
+import { useToast } from "../../ContextApi/ToastContext";
 
 const KeyStep = ({ step, setStep, registerFn, error }) => {
+  const { showToast } = useToast();
+
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const router = useRouter();
   const keyFunc = async () => {
@@ -11,6 +14,7 @@ const KeyStep = ({ step, setStep, registerFn, error }) => {
       setRegisterOtpLoading(true);
       let response = await registerFn();
       if (response) {
+        showToast("Account Created!");
         router.push("/dashboard");
       } else {
         setRegisterOtpLoading(false);

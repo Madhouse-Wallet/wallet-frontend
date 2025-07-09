@@ -3,8 +3,11 @@ import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { useToast } from "../../ContextApi/ToastContext";
 
 const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
+  const { showToast } = useToast();
+
   const [selectOption, setSelectOption] = useState(0);
   const [loginLoading, setLoginLoading] = useState(false);
   const router = useRouter();
@@ -13,6 +16,8 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
       setLoginLoading(true);
       let response = await loginFn2nd(email, passkeyData[selectOption]);
       if (response) {
+        showToast("Login Successfully");
+
         router.push("/dashboard");
       } else {
         setLoginLoading(false);

@@ -129,10 +129,7 @@ const Header: React.FC<HeaderProps> = () => {
 
                 {userAuth.login ? (
                   <>
-                    <Tooltip id="my-tooltip" style={{ fontSize: "10px" }} />
                     <button
-                      data-tooltip-id="my-tooltip"
-                      data-tooltip-content={isCopied.one ? "Copied!" : "Copy"}
                       onClick={() => handleCopy(userAuth?.walletAddress, "one")}
                       className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
                     >
