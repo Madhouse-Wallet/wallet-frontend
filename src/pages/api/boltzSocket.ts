@@ -43,11 +43,9 @@ const network = networks.liquid;
 let secp: any; // <-- declare `secp` in the outer scope
 
 (async () => {
-    let zkp = (await import("@vulpemventures/secp256k1-zkp")).default;
-    secp = await zkp();
-    //   init(secp);
-    // const zkp = await Secp256k1ZKP();
-    init(secp);
+  const zkp = (await import("@vulpemventures/secp256k1-zkp")).default;
+  secp = await zkp();
+  init(secp);
 })();
 export const createReverseSwap = async (invoiceAmount: any) => {
     try {
