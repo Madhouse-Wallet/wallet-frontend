@@ -17,7 +17,10 @@ import styled from "styled-components";
 import { createPortal } from "react-dom";
 import { splitAddress } from "../../utils/globals";
 import { getUser, addProvisionData } from "../../lib/apiCall";
+import { useToast } from "@/ContextApi/ToastContext";
 const Setting: React.FC = () => {
+  const { showToast } = useToast();
+
   const {
     selectBg,
     backgrounds,
@@ -185,7 +188,7 @@ const Setting: React.FC = () => {
     try {
       addProvisionData(userAuth.email);
       logoutStorage();
-
+      showToast("Logout Successfully");
       dispatch(
         loginSet({
           login: false,
@@ -257,7 +260,7 @@ const Setting: React.FC = () => {
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
-            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            className="border-0 p-0 absolute z-[99] top-[12px] right-[25px] opacity-40 hover:opacity-70"
             style={{ background: "transparent" }}
           >
             {closeIcn}
@@ -282,7 +285,7 @@ const Setting: React.FC = () => {
                 <div
                   className={` bg-white/5 h-full rounded-12 relative overflow-hidden  px-3 py-4 flex-wrap  lg:p-6 flex justify-between gap-3`}
                 >
-                  <div className="left">
+                  <div className="left sm:w-[340px] w-full">
                     <h4 className="m-0 font-bold text-xl">Information</h4>
                     <ul className="list-none pl-0 mb-0 text-xs">
                       <li className="flex gap-2 py-1">
@@ -293,7 +296,7 @@ const Setting: React.FC = () => {
                           wallet ID:
                         </div>
                         {/* {userAuth?.walletAddress && ( */}
-                        <span className="text-white flex items-center">
+                        <span className="text-white flex items-center truncate w-[calc(100%-170px)] ">
                           {userAuth?.walletAddress ? (
                             <>
                               {splitAddress(userAuth?.walletAddress)}
@@ -323,7 +326,7 @@ const Setting: React.FC = () => {
                               Bitcoin wallet ID:
                             </div>
                             {/* {userAuth?.walletAddress && ( */}
-                            <span className="text-white flex items-center">
+                            <span className="text-white flex items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.bitcoinWallet ? (
                                 <>
                                   {splitAddress(userAuth?.bitcoinWallet)}
@@ -352,7 +355,7 @@ const Setting: React.FC = () => {
                           Email Address:
                         </div>
                         {/* {userAuth?.email && ( */}
-                        <span className="text-white flex items-center">
+                        <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                           {userAuth?.email ? userAuth?.email : "--"}
                         </span>
                         {/* )} */}
@@ -368,7 +371,7 @@ const Setting: React.FC = () => {
                               USD Tpos ID:
                             </div>
                             {/* {userAuth?.email && ( */}
-                            <span className="text-white flex items-center">
+                            <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.email && tposId1 ? tposId1 : "--"}
                             </span>
                             {/* )} */}
@@ -381,7 +384,7 @@ const Setting: React.FC = () => {
                               Bitcoin Tpos ID:
                             </div>
                             {/* {userAuth?.email && ( */}
-                            <span className="text-white flex items-center">
+                            <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.email && tposId2 ? tposId2 : "--"}
                             </span>
                             {/* )} */}

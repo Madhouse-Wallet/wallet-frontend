@@ -445,7 +445,7 @@ const Step2 = ({
                       <div className="sticky top-0 bg-white p-2 border-b">
                         <input
                           type="text"
-                          className="w-full p-2 border rounded-md text-black text-sm"
+                          className="w-full p-2 border border-[#d1d1d1] rounded-md text-black text-sm bg-white"
                           placeholder="Search states..."
                           value={stateSearchTerm}
                           onChange={(e) => setStateSearchTerm(e.target.value)}
