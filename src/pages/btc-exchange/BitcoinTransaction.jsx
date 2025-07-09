@@ -39,9 +39,6 @@ const BitcoinTransactionsTab = ({
           btcWalletAddress,
           selectedItem
         );
-        console.log("line-41", data);
-        console.log("line-42", data?.txs);
-        setTransactions(data);
         const userTimezone = getCurrentUserTimezone();
         console.log(userTimezone);
         const formattedTransactions = formatBitcoinTransactions(
@@ -51,6 +48,7 @@ const BitcoinTransactionsTab = ({
           // "America/New_York"
         );
         setBtcTransactions(formattedTransactions);
+        setTransactions(formattedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
         setError("Failed to load transactions");

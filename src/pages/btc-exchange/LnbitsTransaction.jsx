@@ -90,10 +90,10 @@ const LnbitsTransaction = ({
         });
 
         const { status, data } = await response.json();
-        setTransactions(data);
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
