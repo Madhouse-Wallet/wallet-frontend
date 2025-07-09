@@ -19,6 +19,7 @@ import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
+import { updtUser } from "@/lib/apiCall";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -31,6 +32,7 @@ const Swap = () => {
   const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
+  const [shiftData, setShiftData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
   const [destinationAddress, setDestinationAddress] = useState("");
@@ -55,11 +57,13 @@ const Swap = () => {
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
       setQuote(shift);
+      setShiftData(shift);
       return {
         depositAddress: shift.depositAddress,
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
+      setShiftData(null);
       throw error;
     }
   };
@@ -189,6 +193,8 @@ const Swap = () => {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
               setSwapType("Sideshift");
+            } else {
+              setShiftData(null);
             }
           } catch (shiftError) {
             // Check if it's the "Amount too high" error - check the message property
@@ -328,6 +334,21 @@ const Swap = () => {
         setFromAmount("");
         setToAmount("");
         setQuote(null);
+        if (shiftData) {
+          await updtUser(
+            { email: userAuth?.email },
+            {
+              $push: {
+                sideshiftIds: {
+                  id: shiftData.id,
+                  date: new Date(), // stores the current date/time
+                  type: "buyBitcoin", // or whatever type value you want to store
+                },
+              },
+            }
+          );
+          setShiftData(null);
+        }
       } else {
         setFailed(true);
         setTxError(tx.error || tx);

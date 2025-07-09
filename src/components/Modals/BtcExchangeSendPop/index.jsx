@@ -259,48 +259,42 @@ const BtcExchangeSendPop = ({
     }
   };
 
-  const handleAddressChange = (e) => {
-    const value = e.target.value.trim();
-    let filteredValue = "";
+  
 
-    // Match Bitcoin address patterns
-    if (value.toLowerCase().startsWith("bc1p")) {
-      filteredValue = filterHexInput(
-        value,
-        /[^bc1p023456789acdefghjklmnqrstuvwxyz]/g,
-        62
-      );
-    } else if (value.toLowerCase().startsWith("bc1")) {
-      filteredValue = filterHexInput(
-        value,
-        /[^bc1023456789acdefghjklmnqrstuvwxyz]/g,
-        62
-      );
-    } else if (value.startsWith("1") || value.startsWith("3")) {
-      filteredValue = filterHexInput(
-        value,
-        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]/g,
-        35
-      );
-    } else {
-      filteredValue = filterHexInput(
-        value,
-        /[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyzbc]/g,
-        62
-      );
-    }
-    setBtcAddress(filteredValue);
+function isValidBitcoinAddress(address) {
+  if (!address || typeof address !== "string") return false;
 
-    if (filteredValue.trim() !== "") {
-      if (!isValidBitcoinAddress(filteredValue)) {
-        setAddressError("Invalid Bitcoin address format");
-      } else {
-        setAddressError("");
-      }
+  const bech32Regex = /^(bc1)[0-9a-z]{25,39}$/;
+  const base58Regex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+
+  if (address.toLowerCase().startsWith("bc1")) {
+    return bech32Regex.test(address.toLowerCase());
+  }
+
+  return base58Regex.test(address);
+}
+
+
+const handleAddressChange = (e) => {
+  const value = e.target.value.trim();
+  let filteredValue = value;
+
+ 
+  setBtcAddress(filteredValue);
+
+  if (filteredValue.trim() !== "") {
+    if (!isValidBitcoinAddress(filteredValue)) {
+      setAddressError("Invalid Bitcoin address format");
     } else {
       setAddressError("");
     }
-  };
+  } else {
+    setAddressError("");
+  }
+};
+
+
+
 
   const handleProccessAddressChange = (value) => {
     // const value = e.target.value.trim();
@@ -519,7 +513,7 @@ const BtcExchangeSendPop = ({
 
                   {gasPrice && (
                     <label className="form-label m-0 font-semibold text-xs block">
-                      Estimated Max Gas Fee: {gasPrice} USDC
+                      Estimated Fee: {gasPrice} BTC
                     </label>
                   )}
                 </div>

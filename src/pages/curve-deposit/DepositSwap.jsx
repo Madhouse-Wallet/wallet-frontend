@@ -247,7 +247,6 @@ const DepositSwap = () => {
         fetchBalances();
         setFromAmount("");
         setToAmount("");
-        setShiftData(null);
         setDepositAddress("");
         let data = await updtUser(
           { email: userAuth?.email },
@@ -261,6 +260,7 @@ const DepositSwap = () => {
             },
           }
         );
+        setShiftData(null);
       } else {
         setFailed(true);
         setTxError(tx.error.message || tx);

@@ -5,6 +5,9 @@ import { getProvider, getAccount } from "@/lib/zeroDev";
 import { getUser, sendLnbit } from "../../../lib/apiCall.js";
 import { retrieveSecret } from "@/utils/webauthPrf.js";
 import { reverseSwap } from "../../../pages/api/botlzFee.ts";
+import { createPortal } from "react-dom";
+import TransactionSuccessPop from "../TransactionSuccessPop/index.jsx";
+
 import Image from "next/image.js";
 
 const getSecretData = async (storageKey, credentialId) => {
@@ -36,6 +39,8 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState();
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
   const [feeDetails, setFeeDetails] = useState({
     onchainAmount: "",
   });
@@ -115,6 +120,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
           } else {
             fetchLighteningBalance();
             setLoading(false);
+            setSuccess(true)
           }
         }
       }
@@ -232,12 +238,19 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
 
   return (
     <>
-      <Modal
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
-      >
-        <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div
-          className={`modalDialog relative p-3 pt-[25px] lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] max-w-[400px] w-full`}
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Bitcoin"}
+            hash={''}
+          />,
+          document.body
+        )}
+      {
+        !success && (<Modal
+          className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
         >
           <button
             onClick={() => setWithdrawPop(!withdrawPop)}
@@ -245,30 +258,29 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
             // style={{ border: "1px solid #5f5f5f59" }}
           >
-            {closeIcn}
-          </button>{" "}
-          <div className={`relative rounded px-3`}>
-            <div className="top pb-3">
-              <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                Withdraw In Bitcoin
-              </h5>
-            </div>
-            <div className="modalBody">
-              <form action="">
-                <div className="py-2">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor=""
-                      className="form-label m-0 font-semibold text-xs ps-3"
-                    >
-                      Enter Amount in sats
-                    </label>
-                    {userAuth?.email && (
+            <button
+              onClick={() => setWithdrawPop(!withdrawPop)}
+              type="button"
+              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+            >
+              {closeIcn}
+            </button>{" "}
+            <div className={`relative rounded px-3`}>
+              <div className="top pb-3">
+                <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
+                  Withdraw In Bitcoin
+                </h5>
+              </div>
+              <div className="modalBody">
+                <form action="">
+                  <div className="py-2">
+                    <div className="flex items-center justify-between">
                       <label
                         htmlFor=""
                         className="form-label m-0 font-semibold text-xs ps-3"
                       >
-                        Your Balance: {lightningBalance}
+                        Enter Amount in sats
                       </label>
                     )}
                   </div>
@@ -309,16 +321,41 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
                         width={10000}
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
-                    ) : (
-                      "Submit"
+                    </div>
+                    {error && <p className="m-0 text-red-500">{error}</p>}
+                    {commonError && (
+                      <p className="m-0 text-red-500 pb-2 pt-3">{commonError}</p>
                     )}
-                  </button>
-                </div>
-              </form>
+                  </div>
+                  <div className="py-2">
+                    <p className="m-0 text-xs">Fees: {parseInt(amount, 10) - parseInt(feeDetails?.onchainAmount, 10) || 0} sats</p>
+                  </div>
+                  <div className="btnWrpper mt-3">
+                    <button
+                      type="button"
+                      className=" flex items-center justify-center btn commonBtn w-full"
+                      disabled={loading || error}
+                      onClick={handleWithdrawPop}
+                    >
+                      {loading ? (
+                        <Image
+                          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                          alt={""}
+                          height={100000}
+                          width={10000}
+                          className={"max-w-full h-[40px] object-contain w-auto"}
+                        />
+                      ) : (
+                        "Submit"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>)
+      }
     </>
   );
 };

@@ -23,6 +23,7 @@ import {
   filterAmountInput,
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
+import { updtUser } from "@/lib/apiCall";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -103,6 +104,8 @@ const RefundBitcoin = ({
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
               setSwapType("Sideshift");
+            } else {
+              setQuote(null);
             }
           } catch (shiftError) {
             // Check if it's the "Amount too high" error - check the message property
@@ -168,7 +171,6 @@ const RefundBitcoin = ({
       setDebounceTimer(timer);
     } else {
       setToAmount("");
-      setQuote(null);
       setDestinationAddress("");
     }
   };
@@ -189,7 +191,6 @@ const RefundBitcoin = ({
       });
 
       const data = await response.json();
-      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
@@ -215,6 +216,7 @@ const RefundBitcoin = ({
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
+      setQuote(null);
       throw error;
     }
   };
@@ -301,6 +303,21 @@ const RefundBitcoin = ({
         setHash(tx);
         setSuccess(true);
         setRefundBTC(false);
+        if (quote) {
+          await updtUser(
+            { email: userAuth?.email },
+            {
+              $push: {
+                sideshiftIds: {
+                  id: quote.id,
+                  date: new Date(), // stores the current date/time
+                  type: "refundBitcoin", // or whatever type value you want to store
+                },
+              },
+            }
+          );
+        }
+        setQuote(null);
         setTimeout(fetchBalance, 2000);
       } else {
         setFailed(true);

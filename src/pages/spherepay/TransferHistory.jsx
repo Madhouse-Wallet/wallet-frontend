@@ -33,7 +33,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [balance, setBalance] = useState("0");
 
   const [onRampForm, setOnRampForm] = useState({
-    currency: "",
+    currency: "usd",
     transferMethod: "",
     bankAccountId: "",
     amount: "",
@@ -263,6 +263,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   };
 
   const sendUsdc = async (amount, toAddress) => {
+    let user = await getUser(userAuth?.email);
+    console.log("line-104", user);
+
+    if (!user) {
+      return;
+    }
     const data = JSON.parse(userAuth?.webauthnData);
     const retrieveSecretCheck = await retrieveSecret(
       data?.encryptedData,
@@ -283,6 +289,25 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         return;
       }
 
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = amount * FEE_PERCENTAGE;
+      console.log("line-133", FeeAmount);
+
+      let COMMISSION_FEES;
+      if (!user?.userId?.commission_fees) {
+        console.log("line-138");
+        let data = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: { commission_fees: process.env.NEXT_PUBLIC_MADHOUSE_FEE },
+          }
+        );
+        COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
+      } else {
+        console.log("line-147");
+        COMMISSION_FEES = user?.userId?.commission_fees;
+      }
+
       const gasPriceResult = await calculateGasPriceInUSDC(
         getAccountCli?.kernelClient,
         [
@@ -291,6 +316,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             abi: USDC_ABI,
             functionName: "transfer",
             args: [toAddress, parseUnits(amount.toString(), 6)],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [
+              process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+              parseUnits(FeeAmount.toString(), 6),
+            ],
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
           },
         ]
       );
@@ -318,6 +358,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           abi: USDC_ABI,
           functionName: "transfer",
           args: [toAddress, parseUnits(amount.toString(), 6)],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [
+            process.env.NEXT_PUBLIC_MADHOUSE_FEE,
+            parseUnits(FeeAmount.toString(), 6),
+          ],
+        },
+        {
+          to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: "transfer",
+          args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
         },
       ]);
 
@@ -495,28 +550,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             <form onSubmit={handleOnRampSubmit} className="mt-5">
               <div className="grid gap-3 grid-cols-12">
                 <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Select Currency
-                  </label>
-                  <select
-                    id="currency"
-                    value={onRampForm.currency}
-                    onChange={handleOnRampChange}
-                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                  >
-                    <option value="" disabled>
-                      Select Currency
-                    </option>
-                    {currencyOptions.map((option) => (
-                      <option
-                        className="text-black"
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="md:col-span-6 col-span-12">
+                    <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                      Currency
+                    </label>
+                    <div className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full flex items-center">
+                      USD - US Dollar
+                    </div>
+                  </div>
                 </div>
 
                 <div className="md:col-span-6 col-span-12">
@@ -799,7 +840,20 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 {transfers.map((transfer, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all"
+                    className={`p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all ${
+                      transfer.status === "pending" &&
+                      transfer.type === "onRamp" &&
+                      "cursor-pointer"
+                    }`}
+                    onClick={() => {
+                      if (
+                        transfer.status === "pending" &&
+                        transfer.type === "onRamp"
+                      ) {
+                        setTransferData(transfer);
+                        setSpherePayTransfer(true);
+                      }
+                    }}
                   >
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-12 border-b border-dashed border-white/30 pb-3">

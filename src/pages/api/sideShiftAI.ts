@@ -30,7 +30,7 @@ interface ShiftResponse {
 }
 
 // Fixed IP address as used in curl commands
-const FIXED_IP_ADDRESS = "201.144.119.146";
+const FIXED_IP_ADDRESS = process.env.NEXT_PUBLIC_IP_ADDRESS;
 
 /**
  * Combined function to create a USDC to BTC fixed shift in one call
@@ -650,8 +650,6 @@ export const createEthMainnetToUsdcbaseShift = async (
   }
 };
 
-
-
 export const createLbtcToUsdcShift = async (
   btcAmount: string,
   userBaseWallet: string,
@@ -715,6 +713,72 @@ export const createLbtcToUsdcShift = async (
 
 
 
+export const createLbtcToUsdcShiftWithdraw = async (
+  btcAmount: string,
+  userBaseWallet: string,
+  secretKey: string,
+  affiliateId: string,
+  refundAddress: string,
+  boltzSwapId: string
+): Promise<ShiftResponse> => {
+  try {
+    // Step 1: Request a quote
+    const quoteResponse = await axios.post<QuoteResponse>(
+      "https://sideshift.ai/api/v2/quotes",
+      {
+        affiliateId,
+        "depositCoin": "btc",
+        "depositNetwork": "liquid",
+        "settleCoin": "usdc",
+        "settleNetwork": "base",
+        "settleAmount": null,
+        depositAmount: btcAmount,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    const quoteData = quoteResponse.data;
+
+    // Step 2: Create a fixed shift using the quote
+    const shiftResponse = await axios.post<ShiftResponse>(
+      "https://sideshift.ai/api/v2/shifts/fixed",
+      {
+        settleAddress: userBaseWallet,
+        affiliateId,
+        quoteId: quoteData.id,
+        "refundAddress": refundAddress,
+        "refundMemo": `Failed to settle shift for Wallet Address: ${userBaseWallet} Boltz Reverse Swap ID: ${boltzSwapId}`,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "x-sideshift-secret": secretKey,
+          "x-user-ip": FIXED_IP_ADDRESS,
+        },
+      }
+    );
+
+    return shiftResponse.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.error(
+        "SideShift API Error:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        `SideShift operation failed: ${error.response?.data?.error?.message || error.message}`
+      );
+    }
+    throw error;
+  }
+};
+
 
 
 export const createUsdcToLbtcToShiftQuote = async (
@@ -759,7 +823,6 @@ export const createUsdcToLbtcToShiftQuote = async (
   }
 };
 
-
 export const createLbtcToUsdcShiftQuote = async (
   usdcAmount: string,
   secretKey: string,
@@ -801,10 +864,6 @@ export const createLbtcToUsdcShiftQuote = async (
     throw error;
   }
 };
-
-
-
-
 
 export const createUsdcToLbtcToShiftFixed = async (
   quoteData: any,

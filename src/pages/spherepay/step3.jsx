@@ -123,30 +123,71 @@ const Step3 = ({
     }
   };
 
+  // const handleTermsClick = async () => {
+  //   try {
+  //     const response = await TermsOfServiceCustomer();
+  //     if (response) {
+  //       setTermsSRC(response);
+  //       window.open(response?.link, "_blank");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error processing Terms of Service:", error);
+  //   }
+  // };
+
+  // const handleIdentityClick = async () => {
+  //   try {
+  //     const response = await kycCustomer();
+  //     if (response) {
+  //       setIdentitySRC(response);
+  //       window.open(response?.url, "_blank");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error processing Identity Verification:", error);
+  //   }
+  // };
+
   const handleTermsClick = async () => {
     try {
+      // Open blank window immediately on user click
+      const newWindow = window.open("about:blank", "_blank");
+
       const response = await TermsOfServiceCustomer();
-      if (response) {
+      if (response && newWindow) {
         setTermsSRC(response);
-        window.open(response?.link, "_blank");
+        newWindow.location.href = response?.link;
+      } else if (newWindow) {
+        newWindow.close();
       }
     } catch (error) {
       console.error("Error processing Terms of Service:", error);
+      // Close window if error occurs
+      if (newWindow && !newWindow.closed) {
+        newWindow.close();
+      }
     }
   };
 
   const handleIdentityClick = async () => {
     try {
+      // Open blank window immediately on user click
+      const newWindow = window.open("about:blank", "_blank");
+
       const response = await kycCustomer();
-      if (response) {
+      if (response && newWindow) {
         setIdentitySRC(response);
-        window.open(response?.url, "_blank");
+        newWindow.location.href = response?.url;
+      } else if (newWindow) {
+        newWindow.close();
       }
     } catch (error) {
       console.error("Error processing Identity Verification:", error);
+      // Close window if error occurs
+      if (newWindow && !newWindow.closed) {
+        newWindow.close();
+      }
     }
   };
-
   const getCustomer = async () => {
     try {
       const response = await SpherePayAPI.getCustomer(

@@ -91,7 +91,7 @@ const UserStep = ({ step, setStep }) => {
 
     try {
       // Get user's IP address
-      const userIP = "201.144.119.146";
+      const userIP = process.env.NEXT_PUBLIC_IP_ADDRESS;
 
       // Prepare data for API
       const accountData = {
