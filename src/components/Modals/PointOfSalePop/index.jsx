@@ -65,98 +65,100 @@ const PointOfSalePop = ({
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
               {isLoading && createPortal(<LoadingScreen />, document.body)}
-              {step == 1 ? (
-                <>
-                  <div className="py-2">
-                    <button
-                      onClick={() => setStep(2)}
-                      className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                    >
-                      Terminal
-                    </button>
-                  </div>
+              <div className="grid gap-3 grid-cols-12">
+                {step == 1 ? (
+                  <>
+                    <div className="col-span-12">
+                      <button
+                        onClick={() => setStep(2)}
+                        className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Terminal
+                      </button>
+                    </div>
 
-                  <div className="py-2">
-                    <button
-                      onClick={() => {
-                        setPointSale(!pointSale);
-                        setRefundBTC(!refundBTC);
-                      }}
-                      className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                    >
-                      Refund
-                    </button>
-                  </div>
-                </>
-              ) : step == "2" ? (
-                <>
-                  {userAuth.email ? (
-                    <>
-                      {" "}
-                      <div className="py-2">
-                        {lnbitLink ? (
+                    <div className="col-span-12">
+                      <button
+                        onClick={() => {
+                          setPointSale(!pointSale);
+                          setRefundBTC(!refundBTC);
+                        }}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      >
+                        Refund
+                      </button>
+                    </div>
+                  </>
+                ) : step == "2" ? (
+                  <>
+                    {userAuth.email ? (
+                      <>
+                        {" "}
+                        <div className="col-span-12">
+                          {lnbitLink ? (
+                            <Link
+                              // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
+                              href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
+                            >
+                              Accept in Dollars
+                            </Link>
+                          ) : (
+                            <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
+                              Accept in Dollars
+                            </div>
+                          )}
+                        </div>
+                        <div className="col-span-12">
+                          {lnbitLink2 ? (
+                            <Link
+                              // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
+                              href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                            >
+                              Accept in Bitcoin
+                            </Link>
+                          ) : (
+                            <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
+                              Accept in Bitcoin
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="col-span-12">
                           <Link
-                            // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}&email=${userAuth.email}&walletId=${walletId}`}
-                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink}`}
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                           >
                             Accept in Dollars
                           </Link>
-                        ) : (
-                          <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                            Accept in Dollars
-                          </div>
-                        )}
-                      </div>
-                      <div className="py-2">
-                        {lnbitLink2 ? (
+                        </div>
+
+                        <div className="col-span-12">
                           <Link
-                            // href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}&email=${userAuth.email}&walletId=${walletId}`}
-                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}?id=${lnbitLink2}`}
+                            href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                           >
                             Accept in Bitcoin
                           </Link>
-                        ) : (
-                          <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                            Accept in Bitcoin
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="py-2">
-                        <Link
-                          href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
-                        >
-                          Accept in Dollars
-                        </Link>
-                      </div>
-
-                      <div className="py-2">
-                        <Link
-                          href={`${process.env.NEXT_PUBLIC_TPOS_URL}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                        >
-                          Accept in Bitcoin
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <></>
-              )}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -171,7 +173,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 350px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);
@@ -192,11 +193,11 @@ const closeIcn = (
     <g clip-path="url(#clip0_0_6282)">
       <path
         d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
       <path
         d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
     </g>
     <defs>
@@ -204,7 +205,7 @@ const closeIcn = (
         <rect
           width="15"
           height="15"
-          fill="var(--textColor)"
+          fill="currentColor"
           transform="translate(0.564453)"
         />
       </clipPath>

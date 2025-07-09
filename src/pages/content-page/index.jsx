@@ -16,7 +16,7 @@ const ContentPage = () => {
         <div className="container relative">
           <button
             onClick={() => router.push("/dashboard")}
-            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            className="border-0 p-0 absolute z-[99] top-[12px] right-[25px] opacity-40 hover:opacity-70"
             style={{ background: "transparent" }}
           >
             {closeIcn}
