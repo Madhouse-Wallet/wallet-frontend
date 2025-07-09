@@ -90,7 +90,7 @@ const BitcoinTransactionsTab = ({
       case "pending":
         return "Pending";
       default:
-        return "Unknown";
+        return "Pending";
     }
   };
 
