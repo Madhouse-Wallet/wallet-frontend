@@ -2,6 +2,7 @@ import React from "react";
 import {
   fetchBitcoinTransactions,
   formatBitcoinTransactions,
+  getCurrentUserTimezone,
 } from "../../utils/bitcoinTransaction";
 import { useEffect, useState } from "react";
 import BitcoinTransactionDetail from "./BitcoinTransactionDetail";
@@ -38,10 +39,16 @@ const BitcoinTransactionsTab = ({
           btcWalletAddress,
           selectedItem
         );
-        setTransactions(data?.txs);
+        console.log("line-41", data);
+        console.log("line-42", data?.txs);
+        setTransactions(data);
+        const userTimezone = getCurrentUserTimezone();
+        console.log(userTimezone);
         const formattedTransactions = formatBitcoinTransactions(
           data,
-          btcWalletAddress
+          btcWalletAddress,
+          userTimezone
+          // "America/New_York"
         );
         setBtcTransactions(formattedTransactions);
       } catch (err) {

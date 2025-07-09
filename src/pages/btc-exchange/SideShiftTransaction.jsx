@@ -4,8 +4,10 @@ import moment from "moment";
 import styled from "styled-components";
 import { createPortal } from "react-dom";
 import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
+import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
 
 const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
+  const userTimezone = getCurrentUserTimezone();
   const [sideshiftTransactions, setSideshiftTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,7 +47,10 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         id: shift.id || `sideshift_${index}`,
         amount: `${shift.depositAmount || shift.settleAmount || "0"} ${shift.depositCoin || shift.settleCoin || "UNKNOWN"}`,
         category: shift.depositCoin || shift.settleCoin || "SIDESHIFT",
-        date: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
+        date:
+          moment(shift.createdAt)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
         from: shift.depositAddress || "",
         to: shift.settleAddress || "",
         status: shift.status || "pending",
@@ -64,7 +69,10 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         rate: shift.rate,
         expiresAt: shift.expiresAt,
         quoteId: shift.quoteId,
-        day: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
+        day:
+          moment(shift.createdAt)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
       };
     });
   };

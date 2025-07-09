@@ -1,4 +1,15 @@
-import moment from "moment";
+import moment from "moment-timezone";
+
+// Get the current user's timezone
+export const getCurrentUserTimezone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (error) {
+    console.error("Error getting user timezone:", error);
+    // Fallback to UTC if timezone detection fails
+    return "UTC";
+  }
+};
 
 // Fetch Bitcoin transactions using the new API endpoint
 export const fetchBitcoinTransactions = async (address, limit = 10) => {
@@ -19,11 +30,18 @@ export const fetchBitcoinTransactions = async (address, limit = 10) => {
   }
 };
 
-// Format Bitcoin transaction data from the new API structure
-export const formatBitcoinTransactions = (data, walletAddress) => {
+// Format Bitcoin transaction data from the new API structure with timezone support
+export const formatBitcoinTransactions = (
+  data,
+  walletAddress,
+  timezone = null
+) => {
   if (!data) {
     return [];
   }
+
+  // Use provided timezone or get current user's timezone
+  const userTimezone = timezone || getCurrentUserTimezone();
 
   // Check if confirmed transactions exist and have length
   const confirmedTxs =
@@ -97,10 +115,10 @@ export const formatBitcoinTransactions = (data, walletAddress) => {
       transactionType = tx.tx_input_n !== -1 ? "token send" : "token receive";
     }
 
-    // Handle date formatting for confirmed vs unconfirmed transactions
+    // Handle date formatting for confirmed vs unconfirmed transactions with timezone
     const transactionDate = tx.isConfirmed
-      ? moment(tx.confirmed).format("MMMM D, YYYY h:mm A")
-      : moment(tx.received).format("MMMM D, YYYY h:mm A");
+      ? moment(tx.confirmed).tz(userTimezone).format("MMMM D, YYYY h:mm A z")
+      : moment(tx.received).tz(userTimezone).format("MMMM D, YYYY h:mm A z");
 
     // Determine status based on confirmations
     let status;
@@ -134,6 +152,8 @@ export const formatBitcoinTransactions = (data, walletAddress) => {
       // Additional fields for unconfirmed transactions
       preference: tx.preference || null,
       received: tx.received || null,
+      // Add timezone info
+      timezone: userTimezone,
     };
   });
 };
