@@ -74,7 +74,7 @@ const TransactionConfirmationPop = ({
                 </div>
                 <div className="py-3">
                   <p className="m-0 text-xs font-medium text-center">
-                    Madhouse Wallet
+                    Lightning Transaction Confirmation
                   </p>
                 </div>
               </div>
