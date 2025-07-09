@@ -78,6 +78,8 @@ export default async function handler(req, res) {
     const newTx = {
       inputs: [{ addresses: [fromAddress] }],
       outputs: [{ addresses: [toAddress], value: amountSatoshi }],
+      preference: "high",
+      confirmations: 1, 
     };
 
     // Add SegWit-specific parameters if sending from SegWit address
