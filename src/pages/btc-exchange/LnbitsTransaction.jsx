@@ -33,6 +33,7 @@ const LnbitsTransaction = ({
   };
 
   const formatBitcoinTransactionData = (txs) => {
+    console.log("line-36", txs);
     return txs.map((tx) => {
       const amount = tx.amount;
       const isSend = amount < 0;
@@ -93,6 +94,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          console.log("line-97", formattedTransactions);
           setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);

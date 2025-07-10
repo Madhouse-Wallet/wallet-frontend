@@ -22,6 +22,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [spherePayTransfer, setSpherePayTransfer] = useState(false);
   const [customerData, setCustomerData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -522,6 +523,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
   }, [tab]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let user = await getUser(userAuth?.email);
+      setUserData(user?.userId);
+    };
+    fetchData();
+  }, []);
+
   const tabData = [
     {
       title: "On Ramp",
@@ -781,7 +790,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={
+                        isLoading || userData?.EnableSpherepay === false
+                      }
                       className="commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isLoading ? "Processing..." : "Transfer"}
