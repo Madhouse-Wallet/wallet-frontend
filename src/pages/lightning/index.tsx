@@ -19,12 +19,16 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { useRouter } from "next/router";
+import { RadioToggle } from "@/components/common";
+import { updtUser } from "../../lib/apiCall";
+
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
   const [depositUsdcPop, setDepositUsdcPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
+  const [initValueAutoTransfer, setInitValueAutoTransfer] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
   const [lightning, setLightning] = useState(false);
   const [LightningDeposit, setLightningDeposit] = useState(false);
@@ -46,6 +50,20 @@ const BTCDebitCard: React.FC = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+  const setAutomation = async (value: any) => {
+    try {
+      // console.log("userAuth.email ->",userAuth.email, value )
+      let data = await updtUser(
+        { email: userAuth.email },
+        {
+          $set: { autoTransfer: value }, // Ensure this is inside `$set`
+        }
+      );
+    } catch (error) {
+
+    }
+  }
 
   const fetchLighteningBalance = async () => {
     try {
@@ -77,6 +95,7 @@ const BTCDebitCard: React.FC = () => {
       let userExist = await getUser(email);
       if (userExist?.userId?.creditCardPass) {
         setCreditCardDetail(userExist?.userId?.creditCardPass);
+        setInitValueAutoTransfer(userExist?.userId?.autoTransfer || false)
       }
       if (userExist?.userId?.lnaddress) {
         const qr = await QRCode.toDataURL(
@@ -344,6 +363,24 @@ const BTCDebitCard: React.FC = () => {
                           Delete Pass
                         </button>
                       </div>
+                      {
+                        userAuth.email && (<div className="col-span-12">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${initValueAutoTransfer ? 'bg-[#df723b]' : 'bg-gray-300'
+                                }`}
+                              onClick={() => { setInitValueAutoTransfer(!initValueAutoTransfer); setAutomation(!initValueAutoTransfer) }}
+                            >
+                              <div
+                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${initValueAutoTransfer ? 'translate-x-4' : 'translate-x-0'
+                                  }`}
+                              />
+                            </div>
+                            <p className="m-0 text-white/30">Enable automatic withdrawal of Lightning funds to USDC.</p>
+                          </div>
+                        </div>)
+                      }
+
                     </div>
                   </div>
                   {lnaddress && lnQrCode && (

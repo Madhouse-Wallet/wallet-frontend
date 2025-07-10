@@ -167,7 +167,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               privateKeyHex: privateKey?.wif,
               network: "main", // Use 'main' for mainnet
             });
-            if (result.status) {
+            if (result.success) {
               fetchBtcBalance();
               setLoading(false);
             } else {

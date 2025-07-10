@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AccordionIcon, CstmDropdown } from "./commonStyled";
 import { useRouter } from "next/navigation";
 import { AccordionWrapper } from "./commonStyled";
@@ -120,6 +120,24 @@ export const BackBtn = () => {
     </>
   );
 };
+
+export const RadioToggle = ({ runfunc, initValueAutoTransfer }) => {
+  console.log("initValueAutoTransfer-->",initValueAutoTransfer)
+  const [enabled, setEnabled] = useState(initValueAutoTransfer);
+
+  return (
+    <div
+      className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${enabled ? 'bg-[#df723b]' : 'bg-gray-300'
+        }`}
+      onClick={() => { setEnabled(!enabled); runfunc(!enabled) }}
+    >
+      <div
+        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-4' : 'translate-x-0'
+          }`}
+      />
+    </div>
+  );
+}
 
 const backIcn = (
   <svg
