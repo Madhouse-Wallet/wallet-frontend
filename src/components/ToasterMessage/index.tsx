@@ -23,7 +23,7 @@ export default function CustomToast({
   }, []);
 
   return (
-    <div className="flex items-end justify-start h-full w-full fixed bottom-0 left-0 z-[9999] p-4">
+    <div className="flex items-end justify-start h-auto w-auto fixed bottom-0 left-0 z-[9999] p-4">
       {/* <div className="fixed bg-black/50 top-0 left-0 h-lvh w-full transition-opacity fill-mode-both opacity-100 pointer-events-none inset-0 scale-125 object-cover object-center blur-[var(--wallpaper-blur)] duration-700 backdrop-blur-md z-[-1]"></div> */}
 
       <div
