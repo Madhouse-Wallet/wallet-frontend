@@ -8,6 +8,8 @@ import { sendBitcoinFunction } from "@/utils/bitcoinSend.js";
 import Image from "next/image";
 import { fetchBitcoinBalance } from "@/pages/api/bitcoinBalance";
 import { bitcoinGasFeeFunction } from "@/utils/bitcoinGasFee";
+import TransactionSuccessPop from "../TransactionSuccessPop/index.jsx";
+import { createPortal } from "react-dom";
 
 const getSecretData = async (storageKey, credentialId) => {
   try {
@@ -41,6 +43,8 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [gasPriceError, setGasPriceError] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
+  const [success, setSuccess] = useState(false);
+
   const recoverSeedPhrase = async () => {
     try {
       let data = JSON.parse(userAuth?.webauthnData);
@@ -167,9 +171,10 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               privateKeyHex: privateKey?.wif,
               network: "main", // Use 'main' for mainnet
             });
-            if (result.status) {
+            if (result.success) {
               fetchBtcBalance();
               setLoading(false);
+              setSuccess(true)
             } else {
               setCommonError("Transaction Failed!");
               setLoading(false);
@@ -270,7 +275,17 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
 
   return (
     <>
-      <Modal
+      {success &&
+        createPortal(
+          <TransactionSuccessPop
+            success={success}
+            setSuccess={setSuccess}
+            symbol={"Bitcoin"}
+            hash={''}
+          />,
+          document.body
+        )}
+      {!success && <Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <div className="absolute inset-0 backdrop-blur-xl"></div>
@@ -281,7 +296,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             onClick={() => setDepositPop(!depositPop)}
             type="button"
             className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-            // style={{ border: "1px solid #5f5f5f59" }}
+          // style={{ border: "1px solid #5f5f5f59" }}
           >
             {closeIcn}
           </button>{" "}
@@ -359,7 +374,7 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal>}
     </>
   );
 };

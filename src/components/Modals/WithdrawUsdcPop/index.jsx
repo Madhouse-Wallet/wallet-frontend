@@ -237,14 +237,16 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
         setError("");
         setConvertAmount(numberValue)
       } else {
-        let convertAmount = Math.floor(numberValue / feeMultiplier);
-        console.log("convertAmount-->", convertAmount)
-        if (convertAmount < miniSwap) {
-          setError(`Insufficient balance after fees.`)
-        } else {
-          setError("");
-          setConvertAmount(convertAmount)
-        }
+        setError(`Insufficient balance after Buffer fees.`)
+
+        // let convertAmount = Math.floor(numberValue / feeMultiplier);
+        // console.log("convertAmount-->", convertAmount)
+        // if (convertAmount < miniSwap) {
+        //   setError(`Insufficient balance after fees.`)
+        // } else {
+        //   setError("");
+        //   setConvertAmount(convertAmount)
+        // }
       }
 
       // let result = await calcLnToChainFeeWithReceivedAmount(numberValue);
@@ -293,7 +295,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
           />,
           document.body
         )}
-        {!success && ( <Modal
+      {!success && (<Modal
         className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
       >
         <div className="absolute inset-0 backdrop-blur-xl"></div>
@@ -391,7 +393,7 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
           </div>
         </div>
       </Modal>)}
-     
+
     </>
   );
 };
