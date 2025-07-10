@@ -354,7 +354,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
           {transactions.length > 0 ? (
             <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDate).map(([date, txs]) => {
-                console.log("line-349", txs);
                 return (
                   <div key={date} className="py-3">
                     <p className="m-0 text-white text-xs font-semibold pb-2">
@@ -856,7 +855,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 9) dataToExport = depositBoltz;
                   else if (activeTab === 10) dataToExport = boltzUSDC;
                   else if (activeTab === 11) dataToExport = boltzBitcoin;
-                  console.log("line-845", dataToExport, btcTransactions);
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
                       dataToExport,

@@ -6,7 +6,12 @@ import { createPortal } from "react-dom";
 import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
 import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
 
-const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
+const SideShiftTransaction = ({
+  userData,
+  dateRange,
+  applyTrue,
+  setTransactions,
+}) => {
   const userTimezone = getCurrentUserTimezone();
   const [sideshiftTransactions, setSideshiftTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -129,6 +134,7 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         );
 
         setSideshiftTransactions(filteredTransactions);
+        setTransactions(filteredTransactions);
       } catch (err) {
         console.error("Failed to fetch SideShift transactions:", err);
         setError(
