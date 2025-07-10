@@ -19,7 +19,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [parties, setParties] = useState([]);
   const [selectedParty, setSelectedParty] = useState("");
-
+  const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [gasPrice, setGasPrice] = useState(null);
@@ -307,6 +307,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       fetchBalance();
     }
   }, [userAuth?.walletAddress]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let user = await getUser(userAuth?.email);
+      setUserData(user?.userId);
+    };
+    fetchData();
+  }, []);
 
   const fetchBalance = async () => {
     try {
@@ -907,7 +915,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={
+                        isLoading || userData?.EnableSpherepay === false
+                      }
                       className="commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isLoading ? "Creating Payment..." : "Create Payment"}

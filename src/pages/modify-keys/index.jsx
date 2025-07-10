@@ -6,8 +6,11 @@ import { doAccountRecovery, checkMenmonic } from "../../lib/zeroDev";
 import { getUser, updtUser, decodeBitcoinAddress } from "../../lib/apiCall";
 import styled from "styled-components";
 import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
+import { useToast } from "../../ContextApi/ToastContext";
 
 const ModifyKeys = () => {
+  const { showToast } = useToast();
+
   const [step, setStep] = useState(1);
   const [edit, setEdit] = useState({});
   const [editData, setEditData] = useState({});
@@ -134,6 +137,7 @@ const ModifyKeys = () => {
       setPasskeyData(cleanData);
       setPasskeyDataOrig(cleanData);
       setEdit(false);
+      showToast("Passkey Modified!");
     } catch (e) {
       console.log("saveEdit Error-->", e);
     }

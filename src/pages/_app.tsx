@@ -8,9 +8,18 @@ import { ThemeProvider } from "@/ContextApi/ThemeContext";
 import { BackgroundProvider } from "@/ContextApi/backgroundContent";
 import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css"; // theme css file
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import CustomToast from "@/components/ToasterMessage";
+import { ToastProvider } from "@/ContextApi/ToastContext";
 
 export default function App({ Component, pageProps, ...props }: AppProps) {
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setToastVisible(true);
+  };
   useEffect(() => {
     const header = document.getElementById("header");
 
@@ -31,11 +40,13 @@ export default function App({ Component, pageProps, ...props }: AppProps) {
   return (
     <>
       <Providers>
-        <BackgroundProvider>
-          <ThemeProvider>
-            <Layout Component={Component} pageProps={pageProps} {...props} />
-          </ThemeProvider>
-        </BackgroundProvider>
+        <ToastProvider>
+          <BackgroundProvider>
+            <ThemeProvider>
+              <Layout Component={Component} pageProps={pageProps} {...props} />
+            </ThemeProvider>
+          </BackgroundProvider>
+        </ToastProvider>
       </Providers>
     </>
   );

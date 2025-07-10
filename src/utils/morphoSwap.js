@@ -19,11 +19,7 @@ export const TOKENS = {
   MORPHO: {
     address: process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
     name: "MORPHO",
-  },
-  PAXG: {
-    address: process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_PAXG_Address,
-    name: "PAXG",
-  },
+  }
 };
 
 const enso = new EnsoClient({

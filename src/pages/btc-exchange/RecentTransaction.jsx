@@ -742,7 +742,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         <>
           <div className="flex items-center gap-3 mb-3 justify-between relative z-[99] flex-wrap">
             <div className="left">
-              <h4 className="m-0 text-xl">Recent Transaction</h4>
+              <h4 className="m-0 text-xl">Recent Transactions</h4>
               <p className="m-0 text-white flex items-center gap-2">
                 <span className="themeClr">{clockIcn}</span>
                 {userTimezone}

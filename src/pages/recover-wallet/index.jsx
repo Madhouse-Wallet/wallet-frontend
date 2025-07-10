@@ -13,8 +13,11 @@ import {
 } from "../../lib/apiCall";
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
+import { useToast } from "../../ContextApi/ToastContext";
 
 const RecoverWallet = () => {
+  const { showToast } = useToast();
+
   const [step, setStep] = useState(1);
   const [loadingNewSigner, setLoadingNewSigner] = useState(false);
   const [phrase, setPhrase] = useState();
@@ -151,6 +154,7 @@ const RecoverWallet = () => {
             } catch (error) {
               console.log("updtuser error-->", error);
             }
+            showToast("Passkey Added!");
 
             router.push("/welcome");
           } else {

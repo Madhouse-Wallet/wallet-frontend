@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
-// import { fetchBitcoinTransactionsByAddress } from "../api/bitquery-api";
 
 // Bitcoin Transactions Component
 const BitcoinTransactionsTab = ({
@@ -24,9 +23,6 @@ const BitcoinTransactionsTab = ({
   const [error, setError] = useState(null);
   const [detail, setDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
-
-  // You may want to replace this with your actual BTC wallet address
-  // const btcWalletAddress = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
   const btcWalletAddress = userAuth?.bitcoinWallet;
 
   useEffect(() => {
@@ -47,8 +43,34 @@ const BitcoinTransactionsTab = ({
           userTimezone
           // "America/New_York"
         );
-        setBtcTransactions(formattedTransactions);
-        setTransactions(formattedTransactions);
+        // setBtcTransactions(formattedTransactions);
+        // setTransactions(formattedTransactions);
+
+        // Sort transactions: pending/unconfirmed first, then by date (newest first)
+        const sortedTransactions = formattedTransactions.sort((a, b) => {
+          // Define priority order: unconfirmed = 0, pending = 1, confirmed = 2
+          const getPriority = (status) => {
+            if (status === "unconfirmed") return 0;
+            if (status === "pending") return 1;
+            return 2; // confirmed
+          };
+
+          const priorityA = getPriority(a.status);
+          const priorityB = getPriority(b.status);
+
+          // First sort by priority (lower number = higher priority)
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+
+          // If same priority, sort by date (newest first)
+          const dateA = new Date(a.rawData.confirmed || a.rawData.received);
+          const dateB = new Date(b.rawData.confirmed || b.rawData.received);
+          return dateB - dateA;
+        });
+
+        setBtcTransactions(sortedTransactions);
+        setTransactions(sortedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
         setError("Failed to load transactions");
@@ -59,17 +81,6 @@ const BitcoinTransactionsTab = ({
 
     fetchTransactions();
   }, [btcWalletAddress, selectedItem]);
-
-  // useEffect(() => {
-  //   const result = fetchBitcoinTransactionsByAddress(
-  //     "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD",
-  //     "2025-05-24",
-  //     "2025-05-31"
-  //   ).then((transactions) => {
-  //     console.log("Fetched transactions:", transactions);
-  //   });
-  //   console.log("result", result);
-  // }, []);
 
   // Get status color
   const getStatusColor = (status) => {
