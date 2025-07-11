@@ -53,6 +53,7 @@ const RefundBitcoin = ({
   const [swapType, setSwapType] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
+  const [maxAmount, setMaxAmount] = useState(null);
 
   const handleAmountChange = async (e) => {
     setError("");
@@ -60,6 +61,7 @@ const RefundBitcoin = ({
     setGasPriceError("");
     setSwapType("");
     setGasPrice(null);
+    setMaxAmount();
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -68,15 +70,22 @@ const RefundBitcoin = ({
       setError("Please create account or login.");
       return;
     }
-    // Validate amount
+
     if (filteredValue.trim() !== "") {
-      if (Number.parseFloat(filteredValue) <= 0) {
+      const amount = Number.parseFloat(filteredValue);
+      const totalBalance = Number.parseFloat(balance);
+      const bufferAmount =
+        totalBalance *
+        Number.parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+
+      if (amount <= 0) {
         setAmountError("Amount must be greater than 0");
-      } else if (
-        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
-      ) {
+      } else if (amount > totalBalance) {
         setAmountError("Insufficient USDC balance");
-      } else if (Number.parseFloat(balance) < 0.01) {
+      } else if (amount > totalBalance - bufferAmount) {
+        setAmountError("Insufficient USDC balance");
+        setMaxAmount(totalBalance - bufferAmount);
+      } else if (totalBalance < 0.01) {
         setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
@@ -405,13 +414,14 @@ const RefundBitcoin = ({
       !toAddress ||
       !amount ||
       isLoading ||
+      amountError ||
       gasPriceError ||
       parseFloat(amount) <= 0 ||
       parseFloat(amount) > parseFloat(balance) ||
       !destinationAddress
     );
   };
-
+  console.log("amountError", amountError);
   const getButtonText = () => {
     if (isLoading)
       return (
@@ -663,26 +673,33 @@ const RefundBitcoin = ({
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                       />
                     </div>
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      <label className="orm-label m-0 font-semibold text-xs block">
+                        Balance:{" "}
+                        {Number(balance) < 0.01
+                          ? "0"
+                          : Number.parseFloat(balance).toFixed(2)}{" "}
+                        USDC
+                      </label>
 
-                    {amountError && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {amountError}
-                      </div>
-                    )}
+                      {amountError && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {amountError}
+                        </div>
+                      )}
 
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
+                      {maxAmount && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Amount you can transfer is less than or equal to{" "}
+                          {maxAmount.toFixed(2)} USDC
+                        </label>
+                      )}
 
-                    {error && toAmount === "" && (
-                      <div className="text-red-500 text-xs mt-1">{error}</div>
-                    )}
+                      {error && toAmount === "" && (
+                        <div className="text-red-500 text-xs mt-1">{error}</div>
+                      )}
+                    </div>
                   </div>
-
                   {toAmount && (
                     <div className="py-2">
                       <label className="form-label m-0 font-semibold text-xs ps-3">

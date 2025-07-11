@@ -74,7 +74,12 @@ const TransactionConfirmationPop = ({
                 </div>
                 <div className="py-3">
                   <p className="m-0 text-xs font-medium text-center">
-                    Lightning Transaction Confirmation
+                    {symbol === "SATS"
+                      ? "Lightning"
+                      : symbol === "BTC"
+                        ? "Bitcoin"
+                        : symbol}{" "}
+                    Transaction Confirmation
                   </p>
                 </div>
               </div>

@@ -39,6 +39,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const [txError, setTxError] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
+  const [maxAmount, setMaxAmount] = useState(null);
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -49,6 +50,8 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     setAmount(filteredValue);
     setGasPriceError("");
     setGasPrice(null);
+    setAmountError("");
+    setMaxAmount();
 
     if (!userAuth?.email) {
       setError("Please create account or login.");
@@ -57,13 +60,20 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
     // Validate amount
     if (filteredValue.trim() !== "") {
-      if (Number.parseFloat(filteredValue) <= 0) {
+      const amount = Number.parseFloat(filteredValue);
+      const totalBalance = Number.parseFloat(balance);
+      const bufferAmount =
+        totalBalance *
+        Number.parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+
+      if (amount <= 0) {
         setAmountError("Amount must be greater than 0");
-      } else if (
-        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
-      ) {
+      } else if (amount > totalBalance) {
         setAmountError("Insufficient USDC balance");
-      } else if (Number.parseFloat(balance) < 0.01) {
+      } else if (amount > totalBalance - bufferAmount) {
+        setAmountError("Insufficient USDC balance");
+        setMaxAmount(totalBalance - bufferAmount);
+      } else if (totalBalance < 0.01) {
         setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
@@ -412,11 +422,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         }`}
                       />
                     </div>
-                    {amountError && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {amountError}
-                      </div>
-                    )}
+
                     <div className="ps-3 flex flex-col gap-1 mt-2">
                       <label className="form-label m-0 font-semibold text-xs block">
                         Balance:{" "}
@@ -426,9 +432,22 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         USDC
                       </label>
 
+                      {amountError && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {amountError}
+                        </div>
+                      )}
+
                       {gasPrice && (
                         <label className="form-label m-0 font-semibold text-xs block">
                           Estimated Max Gas Fee: {gasPrice} USDC
+                        </label>
+                      )}
+
+                      {maxAmount && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Amount you can transfer is less than or equal to{" "}
+                          {maxAmount.toFixed(2)} USDC
                         </label>
                       )}
 

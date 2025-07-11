@@ -35,6 +35,7 @@ const DepositSwap = () => {
   const [error, setError] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
+  const [maxAmount, setMaxAmount] = useState(null);
 
   // Fixed swap direction: USDC to Morpho
   const [swapDirection] = useState({
@@ -156,6 +157,7 @@ const DepositSwap = () => {
     setFromAmount(filteredValue);
     setGasPriceError("");
     setGasPrice(null);
+    setMaxAmount();
 
     if (!userAuth?.email) {
       setError("Please create account or login.");
@@ -164,13 +166,20 @@ const DepositSwap = () => {
 
     // Validate amount
     if (filteredValue.trim() !== "") {
-      if (Number.parseFloat(filteredValue) <= 0) {
+      const amount = Number.parseFloat(filteredValue);
+      const totalBalance = Number.parseFloat(usdcBalance);
+      const bufferAmount =
+        totalBalance *
+        Number.parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+
+      if (amount <= 0) {
         setAmountError("Amount must be greater than 0");
-      } else if (
-        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
-      ) {
+      } else if (amount > totalBalance) {
         setAmountError("Insufficient USDC balance");
-      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+      } else if (amount > totalBalance - bufferAmount) {
+        setAmountError("Insufficient USDC balance");
+        setMaxAmount(totalBalance - bufferAmount);
+      } else if (totalBalance < 0.01) {
         setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
@@ -323,6 +332,7 @@ const DepositSwap = () => {
       isLoading ||
       !fromAmount ||
       gasPriceError ||
+      amountError ||
       !toAmount ||
       !quote ||
       parseFloat(fromAmount) > parseFloat(usdcBalance)
@@ -465,6 +475,13 @@ const DepositSwap = () => {
                 </div>
                 {amountError && (
                   <div className="text-red-500 text-xs mt-1">{amountError}</div>
+                )}
+
+                {maxAmount && (
+                  <label className="form-label m-0 font-semibold text-xs block">
+                    Amount you can transfer is less than or equal to{" "}
+                    {maxAmount.toFixed(2)} USDC
+                  </label>
                 )}
 
                 {error && (

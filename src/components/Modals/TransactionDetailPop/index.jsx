@@ -83,31 +83,44 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                       </span>
                     </div>
                   </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <div className="left">
-                        <h6 className="m-0 font-semibold text-base pb-1">
-                          From
-                        </h6>
-                        <div className="flex items-center gap-1">
-                          <div className="flex-shrink-0 h-[30px] w-[30px] rounded-full text-xs font-medium bg-white/50 flex items-center justify-center">
-                            {getInitials(from)}
+                  {!from ||
+                  !to ||
+                  from === "0x0000000000000000000000000000000000000000" ||
+                  to === "0x0000000000000000000000000000000000000000" ? (
+                    <></>
+                  ) : (
+                    <>
+                      {" "}
+                      <li className="py-2 border-b border-dashed border-white/50">
+                        <div className="flex items-center justify-between">
+                          <div className="left">
+                            <h6 className="m-0 font-semibold text-base pb-1">
+                              From
+                            </h6>
+                            <div className="flex items-center gap-1">
+                              <div className="flex-shrink-0 h-[30px] w-[30px] rounded-full text-xs font-medium bg-white/50 flex items-center justify-center">
+                                {getInitials(from)}
+                              </div>
+                              <span className="text-blue-500 text-xs font-medium">
+                                {truncateAddress(from)}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-blue-500 text-xs font-medium">
-                            {truncateAddress(from)}
-                          </span>
+                          <div className="right text-right">
+                            <h6 className="m-0 font-semibold text-base pb-1">
+                              To
+                            </h6>
+                            <div className="rounded-20 px-2 py-1 bg-white/50">
+                              <span className="text-xs font-medium">
+                                {truncateAddress(to)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="right text-right">
-                        <h6 className="m-0 font-semibold text-base pb-1">To</h6>
-                        <div className="rounded-20 px-2 py-1 bg-white/50">
-                          <span className="text-xs font-medium">
-                            {truncateAddress(to)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
+                      </li>
+                    </>
+                  )}
+
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Date</h6>

@@ -549,7 +549,7 @@ const handleAddressChange = (e) => {
             amount={btcAmount}
             symbol={"BTC"}
             toAddress={btcAddress}
-            fromAddress={userAuth?.walletAddress}
+            fromAddress={userAuth?.bitcoinWallet}
             handleSend={sendNative}
           />,
           document.body

@@ -125,7 +125,7 @@ const BitcoinTransactionDetail = ({ detail, setDetail, transactionData }) => {
                       </span>
                     </div>
                   </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
+                  {/* <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <div className="left">
                         <h6 className="m-0 font-semibold text-base pb-1">
@@ -151,7 +151,7 @@ const BitcoinTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         </div>
                       </div>
                     </div>
-                  </li>
+                  </li> */}
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Date</h6>
