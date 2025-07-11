@@ -961,7 +961,6 @@ const TabContent = styled.div`
 export default RecentTransaction;
 
 const exportTransactionsToCSV = (data, fileName = "transactions.csv") => {
-  console.log("line-964", data);
   if (!data?.length) return;
 
   // Function to flatten nested objects
