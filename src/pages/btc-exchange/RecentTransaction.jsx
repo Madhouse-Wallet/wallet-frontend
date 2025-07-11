@@ -961,18 +961,61 @@ const TabContent = styled.div`
 export default RecentTransaction;
 
 const exportTransactionsToCSV = (data, fileName = "transactions.csv") => {
+  console.log("line-964", data);
   if (!data?.length) return;
 
-  const headers = Object.keys(data[0]);
-  const rows = data.map((row) =>
-    headers.map((header) =>
-      typeof row[header] === "string" ? `"${row[header]}"` : row[header]
-    )
+  // Function to flatten nested objects
+  const flattenObject = (obj, prefix = "") => {
+    let flattened = {};
+
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const newKey = prefix ? `${prefix}_${key}` : key;
+
+        if (obj[key] === null || obj[key] === undefined) {
+          flattened[newKey] = "";
+        } else if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
+          // Recursively flatten nested objects
+          Object.assign(flattened, flattenObject(obj[key], newKey));
+        } else if (Array.isArray(obj[key])) {
+          // Handle arrays by converting to JSON string
+          flattened[newKey] = JSON.stringify(obj[key]);
+        } else {
+          flattened[newKey] = obj[key];
+        }
+      }
+    }
+
+    return flattened;
+  };
+
+  // Flatten all objects in the data array
+  const flattenedData = data.map((item) => flattenObject(item));
+
+  // Get all unique headers from all flattened objects
+  const allHeaders = [
+    ...new Set(flattenedData.flatMap((item) => Object.keys(item))),
+  ];
+
+  // Create rows with all headers, filling missing values with empty strings
+  const rows = flattenedData.map((row) =>
+    allHeaders.map((header) => {
+      const value = row[header] !== undefined ? row[header] : "";
+      // Escape quotes and wrap in quotes if the value contains commas, quotes, or newlines
+      if (
+        typeof value === "string" &&
+        (value.includes(",") || value.includes('"') || value.includes("\n"))
+      ) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    })
   );
 
+  // Create CSV content
   const csvContent =
     "data:text/csv;charset=utf-8," +
-    [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    [allHeaders.join(","), ...rows.map((row) => row.join(","))].join("\n");
 
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
