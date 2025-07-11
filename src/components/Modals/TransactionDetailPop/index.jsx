@@ -8,6 +8,7 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
+  
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
