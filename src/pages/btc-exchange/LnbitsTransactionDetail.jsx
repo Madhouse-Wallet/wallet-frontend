@@ -114,7 +114,9 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                       <span
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
-                          navigator.clipboard.writeText(transactionHash);
+                          navigator.clipboard.writeText(
+                            transactionHash || rawData?.boltz_id
+                          );
                         }}
                       >
                         Copy transaction ID

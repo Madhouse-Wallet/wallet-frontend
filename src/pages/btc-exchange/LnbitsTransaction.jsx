@@ -257,6 +257,8 @@ const LnbitsTransaction = ({
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
+      case "complete":
+        return "text-green-500";
       default:
         return "text-gray-500";
     }
@@ -271,6 +273,8 @@ const LnbitsTransaction = ({
         return "Failed";
       case "pending":
         return "Pending";
+      case "complete":
+        return "Confirmed";
       default:
         return "Unknown";
     }
