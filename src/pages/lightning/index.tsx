@@ -345,7 +345,10 @@ const BTCDebitCard: React.FC = () => {
                           {creditCardDetails?.type &&
                             creditCardDetails?.type == "apple" && (
                               <button
-                                onClick={() => setStep(2)}
+                                // onClick={() => setStep(2)}
+                                onClick={() =>
+                                  window.open(creditCardDetails?.url, "_blank")
+                                }
                                 className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[55px] text-left text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] gap-2 justify-center disabled:pointer-events-none disabled:opacity-50`}
                               >
                                 <div className="left">{applewallet}</div>
