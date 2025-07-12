@@ -19,12 +19,17 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { useRouter } from "next/router";
+import { RadioToggle } from "@/components/common";
+import { updtUser } from "../../lib/apiCall";
+import { retrieveSecret } from "@/utils/webauthPrf";
+
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
   const [depositPop, setDepositPop] = useState(false);
   const [depositUsdcPop, setDepositUsdcPop] = useState(false);
   const [withdrawPop, setWithdrawPop] = useState(false);
+  const [initValueAutoTransfer, setInitValueAutoTransfer] = useState(false);
   const [withdrawUsdcPop, setWithdrawUsdcPop] = useState(false);
   const [lightning, setLightning] = useState(false);
   const [LightningDeposit, setLightningDeposit] = useState(false);
@@ -38,6 +43,7 @@ const BTCDebitCard: React.FC = () => {
   const [lnaddress, setLnaddress] = useState<any>("");
   const [lnQrCode, setLnQrCode] = useState<any>("");
   const [lightningBalance, setLightningBalance] = useState<any>(0);
+  const [commonError, setCommonError] = useState<any>("");
 
   const handleCopy = async (address: string) => {
     try {
@@ -46,6 +52,71 @@ const BTCDebitCard: React.FC = () => {
       console.error("Failed to copy text:", error);
     }
   };
+
+
+  const getSecretData = async (storageKey: any, credentialId: any) => {
+    try {
+      let retrieveSecretCheck = await retrieveSecret(storageKey, credentialId);
+      if (retrieveSecretCheck?.status) {
+        return {
+          status: true,
+          secret: retrieveSecretCheck?.data?.secret,
+        };
+      } else {
+        return {
+          status: false,
+          msg: retrieveSecretCheck?.msg,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        msg: "Error in Getting secret!",
+      };
+    }
+  };
+
+  const recoverSeedPhrase = async () => {
+    try {
+      let data = JSON.parse(userAuth?.webauthnData);
+      let callGetSecretData = await getSecretData(
+        data?.encryptedData,
+        data?.credentialID
+      ) as any;
+      if (callGetSecretData?.status) {
+        return JSON.parse(callGetSecretData?.secret);
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.log("Error in Fetching secret!", error);
+      return false;
+    }
+  };
+
+
+  const setAutomation = async (value: any) => {
+    try {
+      const privateKey = await recoverSeedPhrase();
+      if (!privateKey) {
+        setCommonError("Invalid Passkey!");
+        // setLoading(false);
+        return;
+      }
+      setCommonError("");
+      // console.log("userAuth.email ->",userAuth.email, value )
+      setInitValueAutoTransfer(!initValueAutoTransfer);
+      let data = await updtUser(
+        { email: userAuth.email },
+        {
+          $set: { autoTransfer: value }, // Ensure this is inside `$set`
+        }
+      );
+
+    } catch (error) {
+
+    }
+  }
 
   const fetchLighteningBalance = async () => {
     try {
@@ -77,6 +148,7 @@ const BTCDebitCard: React.FC = () => {
       let userExist = await getUser(email);
       if (userExist?.userId?.creditCardPass) {
         setCreditCardDetail(userExist?.userId?.creditCardPass);
+        setInitValueAutoTransfer(userExist?.userId?.autoTransfer || false)
       }
       if (userExist?.userId?.lnaddress) {
         const qr = await QRCode.toDataURL(
@@ -98,10 +170,32 @@ const BTCDebitCard: React.FC = () => {
     }
   };
 
+  const createCardCred = async () => {
+    try {
+      setCommonError("")
+      const privateKey = await recoverSeedPhrase();
+      if (!privateKey) {
+        setCommonError("Invalid Passkey!");
+        return;
+      }
+      setCreateCard(!createCard)
+    } catch (error) {
+
+    }
+  }
+
+
   const delCard = async () => {
     try {
+      setCommonError("")
       if (userAuth.email) {
         setLoader(true);
+        const privateKey = await recoverSeedPhrase();
+        if (!privateKey) {
+          setCommonError("Invalid Passkey!");
+          setLoader(false);
+          return;
+        }
         const delCardData = await delCreditCard({
           email: userAuth.email,
         });
@@ -224,7 +318,7 @@ const BTCDebitCard: React.FC = () => {
         <div className="px-3 mx-auto relative w-full sm:min-w-[500px] sm:max-w-[max-content]">
           <button
             onClick={() => router.push("/dashboard")}
-            className="border-0 p-0 absolute z-[99] top-[6px] right-[15px] opacity-40 hover:opacity-70"
+            className="border-0 p-0 absolute z-[99] top-[12px] right-[25px] opacity-40 hover:opacity-70"
             style={{ background: "transparent" }}
           >
             {closeIcn}
@@ -251,7 +345,10 @@ const BTCDebitCard: React.FC = () => {
                           {creditCardDetails?.type &&
                             creditCardDetails?.type == "apple" && (
                               <button
-                                onClick={() => setStep(2)}
+                                // onClick={() => setStep(2)}
+                                onClick={() =>
+                                  window.open(creditCardDetails?.url, "_blank")
+                                }
                                 className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[55px] text-left text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] gap-2 justify-center disabled:pointer-events-none disabled:opacity-50`}
                               >
                                 <div className="left">{applewallet}</div>
@@ -329,7 +426,7 @@ const BTCDebitCard: React.FC = () => {
                       <div className="col-span-6">
                         <button
                           disabled={creditCardDetails || lightningBalance <= 0}
-                          onClick={() => setCreateCard(!createCard)}
+                          onClick={() => createCardCred()}
                           className={`  bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
                           Create Pass
@@ -344,6 +441,25 @@ const BTCDebitCard: React.FC = () => {
                           Delete Pass
                         </button>
                       </div>
+                      {
+                        userAuth.email && (<div className="col-span-12">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${initValueAutoTransfer ? 'bg-[#df723b]' : 'bg-gray-300'
+                                }`}
+                              onClick={() => { setAutomation(!initValueAutoTransfer) }}
+                            >
+                              <div
+                                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${initValueAutoTransfer ? 'translate-x-4' : 'translate-x-0'
+                                  }`}
+                              />
+                            </div>
+                            <p className="m-0 text-white/30 text-xs">Enable automatic withdrawal of Lightning funds to USDC.</p>
+                          </div>
+                          {commonError && (<><p className="m-0 text-red-500 text-xs mt-3">{commonError}</p></>)}
+                        </div>)
+                      }
+
                     </div>
                   </div>
                   {lnaddress && lnQrCode && (

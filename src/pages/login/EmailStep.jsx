@@ -93,6 +93,14 @@ const EmailStep = ({ step, setStep, loginFn, errorr }) => {
             <div className="col-span-12">
               <div className="relative mt-3">
                 <input
+                  onFocus={(e) => {
+                    setTimeout(() => {
+                      e.target.scrollIntoView({
+                        block: "center",
+                        behavior: "smooth",
+                      });
+                    }, 300);
+                  }}
                   type="email"
                   value={registerEmail}
                   onChange={handleEmailChange}

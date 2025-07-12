@@ -387,7 +387,7 @@ const LightningSendTab = () => {
             amount={decodeData.num_satoshis}
             symbol={"SATS"}
             toAddress={invoice}
-            fromAddress={userAuth?.walletAddress}
+            fromAddress={userAuth?.bitcoinWallet}
             handleSend={verifyingUser}
             loading={loading}
             description={decodeData}

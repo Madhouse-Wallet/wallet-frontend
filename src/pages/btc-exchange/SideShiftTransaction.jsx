@@ -4,8 +4,15 @@ import moment from "moment";
 import styled from "styled-components";
 import { createPortal } from "react-dom";
 import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
+import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
 
-const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
+const SideShiftTransaction = ({
+  userData,
+  dateRange,
+  applyTrue,
+  setTransactions,
+}) => {
+  const userTimezone = getCurrentUserTimezone();
   const [sideshiftTransactions, setSideshiftTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,7 +52,10 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         id: shift.id || `sideshift_${index}`,
         amount: `${shift.depositAmount || shift.settleAmount || "0"} ${shift.depositCoin || shift.settleCoin || "UNKNOWN"}`,
         category: shift.depositCoin || shift.settleCoin || "SIDESHIFT",
-        date: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
+        date:
+          moment(shift.createdAt)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
         from: shift.depositAddress || "",
         to: shift.settleAddress || "",
         status: shift.status || "pending",
@@ -64,7 +74,10 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         rate: shift.rate,
         expiresAt: shift.expiresAt,
         quoteId: shift.quoteId,
-        day: moment(shift.createdAt).format("MMMM D, YYYY h:mm A"),
+        day:
+          moment(shift.createdAt)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
       };
     });
   };
@@ -121,6 +134,7 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
         );
 
         setSideshiftTransactions(filteredTransactions);
+        setTransactions(filteredTransactions);
       } catch (err) {
         console.error("Failed to fetch SideShift transactions:", err);
         setError(
@@ -203,7 +217,12 @@ const SideShiftTransaction = ({ userData, dateRange, applyTrue }) => {
           moment(b, "YYYY-MM-DD").valueOf() - moment(a, "YYYY-MM-DD").valueOf()
       )
       .forEach((key) => {
-        sortedGroups[key] = groups[key];
+        // ADD THIS: Sort transactions within each date group by time (newest first)
+        sortedGroups[key] = groups[key].sort((a, b) => {
+          const timeA = moment(a.date, "MMMM D, YYYY h:mm A");
+          const timeB = moment(b.date, "MMMM D, YYYY h:mm A");
+          return timeB.valueOf() - timeA.valueOf(); // Newest first
+        });
       });
 
     return sortedGroups;
@@ -365,7 +384,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 550px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);

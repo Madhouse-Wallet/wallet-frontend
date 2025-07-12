@@ -11,6 +11,11 @@ const inter = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
+const isIOS = () => {
+  if (typeof navigator === "undefined") return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
 const Layout = ({ Component, pageProps }) => {
   const { selectedBackground, selectedWatermark, bgOpacity, wmOpacity } =
     useBackground();
@@ -31,7 +36,10 @@ const Layout = ({ Component, pageProps }) => {
   }, [Component]);
 
   return (
-    <div className={`${inter.className} relative w-100 overflow-hidden`}>
+    <div
+      id="portal-root"
+      className={`${inter.className} relative w-100 overflow-hidden`}
+    >
       <Image
         src={selectedBackground}
         height={100000}

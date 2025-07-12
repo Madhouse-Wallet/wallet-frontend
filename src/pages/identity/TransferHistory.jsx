@@ -8,17 +8,18 @@ import {
   publicClient,
   sendTransaction,
   usdc,
+  USDC_ABI,
 } from "@/lib/zeroDev";
 import { useSelector } from "react-redux";
 import { ethers } from "ethers";
-import { getUser, sendTransferDetail } from "@/lib/apiCall";
-import { parseAbi } from "viem";
+import { getUser, sendTransferDetail, updtUser } from "@/lib/apiCall";
+import { parseAbi, parseUnits } from "viem";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [parties, setParties] = useState([]);
   const [selectedParty, setSelectedParty] = useState("");
-
+  const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [gasPrice, setGasPrice] = useState(null);
@@ -307,6 +308,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
   }, [userAuth?.walletAddress]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let user = await getUser(userAuth?.email);
+      setUserData(user?.userId);
+    };
+    fetchData();
+  }, []);
+
   const fetchBalance = async () => {
     try {
       if (!userAuth?.walletAddress) return;
@@ -363,6 +372,13 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   };
 
   const usdcBridge = async () => {
+    let user = await getUser(userAuth?.email);
+    console.log("line-104", user);
+
+    if (!user) {
+      return;
+    }
+
     const amountInBaseUnits = ethers.utils
       .parseUnits(offRampForm.amount, 6)
       .toString();
@@ -459,6 +475,25 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       console.log("Gas transaction estimated gas price:", roundedGasGasPrice);
 
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
+      console.log("line-133", FeeAmount);
+
+      let COMMISSION_FEES;
+      if (!user?.userId?.commission_fees) {
+        console.log("line-138");
+        let data = await updtUser(
+          { email: userAuth.email },
+          {
+            $set: { commission_fees: process.env.NEXT_PUBLIC_MADHOUSE_FEE },
+          }
+        );
+        COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
+      } else {
+        console.log("line-147");
+        COMMISSION_FEES = user?.userId?.commission_fees;
+      }
+
       // Estimate gas for the main transaction
       const mainGasPriceResult = await calculateGasPriceInUSDC(
         getAccountCli?.kernelClient,
@@ -473,6 +508,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: quoteResult?.routeData?.tx?.to,
             data: quoteResult?.routeData?.tx?.data,
             value: quoteResult?.routeData?.tx?.value,
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
           },
         ]
       );
@@ -529,6 +570,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: quoteResult?.routeData?.tx?.to,
             data: quoteResult?.routeData?.tx?.data,
             value: quoteResult?.routeData?.tx?.value,
+          },
+          {
+            to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: "transfer",
+            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
           },
         ]);
 
@@ -868,7 +915,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={
+                        isLoading || userData?.EnableSpherepay === false
+                      }
                       className="commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isLoading ? "Creating Payment..." : "Create Payment"}

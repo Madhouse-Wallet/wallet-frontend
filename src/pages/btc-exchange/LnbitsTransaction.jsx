@@ -5,6 +5,7 @@ import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
 import { getUser } from "@/lib/apiCall";
+import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
 
 // Bitcoin Transaction Component
 const LnbitsTransaction = ({
@@ -14,6 +15,7 @@ const LnbitsTransaction = ({
   dateRange,
   applyTrue,
 }) => {
+  const userTimezone = getCurrentUserTimezone();
   const userAuth = useSelector((state) => state.Auth);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [detail, setDetail] = useState(false);
@@ -40,7 +42,9 @@ const LnbitsTransaction = ({
         transactionHash: tx.checking_id,
         from: isSend ? userAuth?.walletAddress : "External",
         to: isSend ? "External" : userAuth?.walletAddress,
-        date: moment(tx.time).format("MMMM D, YYYY h:mm A"),
+        date:
+          moment(tx.time).tz(userTimezone).format("MMMM D, YYYY h:mm A z") ||
+          "",
         status: tx.status,
         amount: `${amount.toFixed(2)} sats`,
         type: isSend ? "send" : "receive",
@@ -51,7 +55,9 @@ const LnbitsTransaction = ({
             : `Received ${amount.toFixed(2)} sats`),
         category: "payment",
         rawData: tx,
-        day: moment(tx.time).format("MMMM D, YYYY h:mm A"),
+        day:
+          moment(tx.time).tz(userTimezone).format("MMMM D, YYYY h:mm A z") ||
+          "",
       };
     });
   };
@@ -84,10 +90,10 @@ const LnbitsTransaction = ({
         });
 
         const { status, data } = await response.json();
-        setTransactions(data);
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -112,6 +118,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -135,6 +142,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -154,6 +162,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -173,6 +182,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -194,6 +204,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -215,6 +226,7 @@ const LnbitsTransaction = ({
         if (status === "success" && data) {
           const formattedTransactions = formatBitcoinTransactionData(data);
           setBtcTransactions(formattedTransactions);
+          setTransactions(formattedTransactions);
         } else {
           setBtcTransactions([]);
         }
@@ -245,6 +257,8 @@ const LnbitsTransaction = ({
         return "text-red-500";
       case "pending":
         return "text-yellow-500";
+      case "complete":
+        return "text-green-500";
       default:
         return "text-gray-500";
     }
@@ -259,6 +273,8 @@ const LnbitsTransaction = ({
         return "Failed";
       case "pending":
         return "Pending";
+      case "complete":
+        return "Confirmed";
       default:
         return "Unknown";
     }

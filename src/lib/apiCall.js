@@ -269,6 +269,7 @@ export const getLnbitId = async (email) => {
 
 //send-lnbit-usdc
 export const sendLnbitUsdc = async (
+  email,
   wallet,
   amount,
   lnbitId_3,
@@ -281,6 +282,7 @@ export const sendLnbitUsdc = async (
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email,
           wallet,
           amount,
           lnbitId_3,

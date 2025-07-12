@@ -23,6 +23,7 @@ import {
   filterAmountInput,
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
+import { updtUser } from "@/lib/apiCall";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -52,6 +53,7 @@ const RefundBitcoin = ({
   const [swapType, setSwapType] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
+  const [maxAmount, setMaxAmount] = useState(null);
 
   const handleAmountChange = async (e) => {
     setError("");
@@ -59,6 +61,7 @@ const RefundBitcoin = ({
     setGasPriceError("");
     setSwapType("");
     setGasPrice(null);
+    setMaxAmount();
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -67,15 +70,22 @@ const RefundBitcoin = ({
       setError("Please create account or login.");
       return;
     }
-    // Validate amount
+
     if (filteredValue.trim() !== "") {
-      if (Number.parseFloat(filteredValue) <= 0) {
+      const amount = Number.parseFloat(filteredValue);
+      const totalBalance = Number.parseFloat(balance);
+      const bufferAmount =
+        totalBalance *
+        Number.parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+
+      if (amount <= 0) {
         setAmountError("Amount must be greater than 0");
-      } else if (
-        Number.parseFloat(filteredValue) > Number.parseFloat(balance)
-      ) {
+      } else if (amount > totalBalance) {
         setAmountError("Insufficient USDC balance");
-      } else if (Number.parseFloat(balance) < 0.01) {
+      } else if (amount > totalBalance - bufferAmount) {
+        setAmountError("Insufficient USDC balance");
+        setMaxAmount(totalBalance - bufferAmount);
+      } else if (totalBalance < 0.01) {
         setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
@@ -103,6 +113,8 @@ const RefundBitcoin = ({
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
               setSwapType("Sideshift");
+            } else {
+              setQuote(null);
             }
           } catch (shiftError) {
             // Check if it's the "Amount too high" error - check the message property
@@ -168,7 +180,6 @@ const RefundBitcoin = ({
       setDebounceTimer(timer);
     } else {
       setToAmount("");
-      setQuote(null);
       setDestinationAddress("");
     }
   };
@@ -189,7 +200,6 @@ const RefundBitcoin = ({
       });
 
       const data = await response.json();
-      setQuote(data);
       return {
         ...data,
         estimatedDepositAddress: data?.routes[0].targetAddress,
@@ -215,6 +225,7 @@ const RefundBitcoin = ({
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
+      setQuote(null);
       throw error;
     }
   };
@@ -301,6 +312,21 @@ const RefundBitcoin = ({
         setHash(tx);
         setSuccess(true);
         setRefundBTC(false);
+        if (quote) {
+          await updtUser(
+            { email: userAuth?.email },
+            {
+              $push: {
+                sideshiftIds: {
+                  id: quote.id,
+                  date: new Date(), // stores the current date/time
+                  type: "refundBitcoin", // or whatever type value you want to store
+                },
+              },
+            }
+          );
+        }
+        setQuote(null);
         setTimeout(fetchBalance, 2000);
       } else {
         setFailed(true);
@@ -388,13 +414,14 @@ const RefundBitcoin = ({
       !toAddress ||
       !amount ||
       isLoading ||
+      amountError ||
       gasPriceError ||
       parseFloat(amount) <= 0 ||
       parseFloat(amount) > parseFloat(balance) ||
       !destinationAddress
     );
   };
-
+  console.log("amountError", amountError);
   const getButtonText = () => {
     if (isLoading)
       return (
@@ -646,26 +673,33 @@ const RefundBitcoin = ({
                         className="border-white/10 bg-white/4 hover:bg-white/6 text-white/40 flex text-xs w-full border-px md:border-hpx px-5 py-2 h-12 rounded-full pl-20"
                       />
                     </div>
+                    <div className="ps-3 flex flex-col gap-1 mt-2">
+                      <label className="orm-label m-0 font-semibold text-xs block">
+                        Balance:{" "}
+                        {Number(balance) < 0.01
+                          ? "0"
+                          : Number.parseFloat(balance).toFixed(2)}{" "}
+                        USDC
+                      </label>
 
-                    {amountError && (
-                      <div className="text-red-500 text-xs mt-1">
-                        {amountError}
-                      </div>
-                    )}
+                      {amountError && (
+                        <div className="text-red-500 text-xs mt-1">
+                          {amountError}
+                        </div>
+                      )}
 
-                    <label className="form-label m-0 font-semibold text-xs ps-3">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
+                      {maxAmount && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Amount you can transfer is less than or equal to{" "}
+                          {maxAmount.toFixed(2)} USDC
+                        </label>
+                      )}
 
-                    {error && toAmount === "" && (
-                      <div className="text-red-500 text-xs mt-1">{error}</div>
-                    )}
+                      {error && toAmount === "" && (
+                        <div className="text-red-500 text-xs mt-1">{error}</div>
+                      )}
+                    </div>
                   </div>
-
                   {toAmount && (
                     <div className="py-2">
                       <label className="form-label m-0 font-semibold text-xs ps-3">
@@ -730,7 +764,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 550px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);
@@ -749,11 +782,11 @@ const closeIcn = (
     <g clip-path="url(#clip0_0_6282)">
       <path
         d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
       <path
         d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
     </g>
     <defs>
@@ -761,7 +794,7 @@ const closeIcn = (
         <rect
           width="15"
           height="15"
-          fill="var(--textColor)"
+          fill="currentColor"
           transform="translate(0.564453)"
         />
       </clipPath>

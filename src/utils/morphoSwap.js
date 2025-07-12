@@ -1,29 +1,25 @@
 import { EnsoClient } from "@ensofinance/sdk";
 
-const FEE_RECEIVER = process.env.NEXT_PUBLIC_ENSO_API_FEE_RECEIVER;
+const FEE_RECEIVER = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
 const FEE_VALUE = process.env.NEXT_PUBLIC_ENSO_API_FEE_VALUE;
 
 export const TOKENS = {
   USDC: {
     8453: {
-      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      address: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
       name: "USDC",
       chainId: 8453,
     },
     1: {
-      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      address: process.env.NEXT_PUBLIC_USDC_ETHEREUM_CONTRACT_ADDRESS,
       name: "USDC",
       chainId: 1,
     },
   },
   MORPHO: {
-    address: "0x7BfA7C4f149E7415b73bdeDfe609237e29CBF34A",
+    address: process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS,
     name: "MORPHO",
-  },
-  PAXG: {
-    address: "0x45804880De22913dAFE09f4980848ECE6EcbAf78",
-    name: "PAXG",
-  },
+  }
 };
 
 const enso = new EnsoClient({
@@ -134,7 +130,7 @@ export async function swapUSDC(
       routingStrategy: "router",
       fee: FEE_VALUE,
       feeReceiver: FEE_RECEIVER,
-      destinationChainId: 137,
+      destinationChainId: process.env.NEXT_PUBLIC_POLYGON_CHAIN,
     });
 
     return {

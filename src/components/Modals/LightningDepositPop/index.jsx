@@ -7,13 +7,13 @@ import { createPortal } from "react-dom";
 import { getUser } from "../../../lib/apiCall";
 
 const LightningDepositPop = ({
-  depositUsdcPop, setDepositUsdcPop,
+  depositUsdcPop,
+  setDepositUsdcPop,
 
   depositPop,
   setDepositPop,
   LightningDeposit,
   setLightningDeposit,
-
 }) => {
   const userAuth = useSelector((state) => state.Auth);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,14 +57,13 @@ const LightningDepositPop = ({
         <div
           className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
         >
-        <button
-          onClick={handleLightningDeposit}
-              className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
-              // style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
-          {" "}
+          <button
+            onClick={handleLightningDeposit}
+            className=" h-10 w-10 items-center rounded-20 p-0 absolute mx-auto right-0 top-0 z-[99999] inline-flex justify-center"
+            // style={{ border: "1px solid #5f5f5f59" }}
+          >
+            {closeIcn}
+          </button>{" "}
           <div className={`relative rounded px-3`}>
             <div className="top pb-3"></div>
             <div className="modalBody text-center">
@@ -76,7 +75,7 @@ const LightningDepositPop = ({
                   rel="noopener noreferrer"
                   className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                 >
-                  Deposit with Dollars
+                  Deposit from Dollars to SATs
                 </button>
               </div>
 
@@ -87,7 +86,7 @@ const LightningDepositPop = ({
                   rel="noopener noreferrer"
                   className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
-                  Deposit with Bitcoin
+                  Deposit from Bitcoin to SATs
                 </button>
               </div>
             </div>
@@ -103,7 +102,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 350px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);
@@ -124,11 +122,11 @@ const closeIcn = (
     <g clip-path="url(#clip0_0_6282)">
       <path
         d="M1.98638 14.906C1.61862 14.9274 1.25695 14.8052 0.97762 14.565C0.426731 14.0109 0.426731 13.1159 0.97762 12.5617L13.0403 0.498994C13.6133 -0.0371562 14.5123 -0.00735193 15.0485 0.565621C15.5333 1.08376 15.5616 1.88015 15.1147 2.43132L2.98092 14.565C2.70519 14.8017 2.34932 14.9237 1.98638 14.906Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
       <path
         d="M14.0347 14.9061C13.662 14.9045 13.3047 14.7565 13.0401 14.4941L0.977383 2.4313C0.467013 1.83531 0.536401 0.938371 1.13239 0.427954C1.66433 -0.0275797 2.44884 -0.0275797 2.98073 0.427954L15.1145 12.4907C15.6873 13.027 15.7169 13.9261 15.1806 14.4989C15.1593 14.5217 15.1372 14.5437 15.1145 14.5651C14.8174 14.8234 14.4263 14.9469 14.0347 14.9061Z"
-        fill="var(--textColor)"
+        fill="currentColor"
       />
     </g>
     <defs>
@@ -136,7 +134,7 @@ const closeIcn = (
         <rect
           width="15"
           height="15"
-          fill="var(--textColor)"
+          fill="currentColor"
           transform="translate(0.564453)"
         />
       </clipPath>

@@ -19,6 +19,7 @@ import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
+import { updtUser } from "@/lib/apiCall";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -31,6 +32,7 @@ const Swap = () => {
   const [success, setSuccess] = useState(false);
   const [toAmount, setToAmount] = useState("");
   const [quote, setQuote] = useState(null);
+  const [shiftData, setShiftData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [usdValue, setUsdValue] = useState({ from: "0", to: "0" });
   const [destinationAddress, setDestinationAddress] = useState("");
@@ -41,6 +43,7 @@ const Swap = () => {
   const [swapType, setSwapType] = useState("");
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
+  const [maxAmount, setMaxAmount] = useState(null);
   const [swapDirection] = useState({
     from: "USDC",
     to: "BTC",
@@ -55,11 +58,13 @@ const Swap = () => {
         process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
       );
       setQuote(shift);
+      setShiftData(shift);
       return {
         depositAddress: shift.depositAddress,
         settleAmount: Number.parseFloat(shift.settleAmount || 0),
       };
     } catch (error) {
+      setShiftData(null);
       throw error;
     }
   };
@@ -142,6 +147,7 @@ const Swap = () => {
     setToAmount("");
     setSwapType("");
     setGasPriceError("");
+    setMaxAmount();
     const value = e.target.value;
 
     const filteredValue = filterAmountInput(value, 2);
@@ -155,13 +161,20 @@ const Swap = () => {
 
     // Validate amount
     if (filteredValue.trim() !== "") {
-      if (Number.parseFloat(filteredValue) <= 0) {
+      const amount = Number.parseFloat(filteredValue);
+      const totalBalance = Number.parseFloat(usdcBalance);
+      const bufferAmount =
+        totalBalance *
+        Number.parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+
+      if (amount <= 0) {
         setAmountError("Amount must be greater than 0");
-      } else if (
-        Number.parseFloat(filteredValue) > Number.parseFloat(usdcBalance)
-      ) {
+      } else if (amount > totalBalance) {
         setAmountError("Insufficient USDC balance");
-      } else if (Number.parseFloat(usdcBalance) < 0.01) {
+      } else if (amount > totalBalance - bufferAmount) {
+        setAmountError("Insufficient USDC balance");
+        setMaxAmount(totalBalance - bufferAmount);
+      } else if (totalBalance < 0.01) {
         setAmountError("Minimum balance of $0.01 required");
       } else {
         setAmountError("");
@@ -189,6 +202,8 @@ const Swap = () => {
               setDestinationAddress(shiftResult.depositAddress);
               setToAmount(shiftResult.settleAmount);
               setSwapType("Sideshift");
+            } else {
+              setShiftData(null);
             }
           } catch (shiftError) {
             // Check if it's the "Amount too high" error - check the message property
@@ -328,6 +343,21 @@ const Swap = () => {
         setFromAmount("");
         setToAmount("");
         setQuote(null);
+        if (shiftData) {
+          await updtUser(
+            { email: userAuth?.email },
+            {
+              $push: {
+                sideshiftIds: {
+                  id: shiftData.id,
+                  date: new Date(), // stores the current date/time
+                  type: "buyBitcoin", // or whatever type value you want to store
+                },
+              },
+            }
+          );
+          setShiftData(null);
+        }
       } else {
         setFailed(true);
         setTxError(tx.error || tx);
@@ -366,6 +396,7 @@ const Swap = () => {
       isLoading ||
       !fromAmount ||
       gasPriceError ||
+      amountError ||
       !toAmount ||
       !quote ||
       Number.parseFloat(fromAmount) > Number.parseFloat(usdcBalance)
@@ -512,6 +543,13 @@ const Swap = () => {
                       <div className="text-red-500 text-xs mt-1">
                         {amountError}
                       </div>
+                    )}
+
+                    {maxAmount && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Amount you can transfer is less than or equal to{" "}
+                        {maxAmount.toFixed(2)} USDC
+                      </label>
                     )}
 
                     {error && toAmount === "" && (

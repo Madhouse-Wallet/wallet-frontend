@@ -26,8 +26,6 @@ const Footer = () => {
         <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-black/50 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
           <li className="relative aspect-square">
             <Link
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content="home"
               href={"https://maps.app.goo.gl/Rdf2CmyTtm7oRsKE9?g_st=i"}
               target="_blank"
               rel="noopener noreferrer"
@@ -46,11 +44,8 @@ const Footer = () => {
               </span>
             </Link>
           </li>
-
           <li className="relative aspect-square">
             <Link
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content="Setting"
               href={"/setting"}
               className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
@@ -69,8 +64,6 @@ const Footer = () => {
           </li>
           <li className="relative aspect-square">
             <Link
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content="Content Pages"
               href={"https://madhouse-wallet.gitbook.io/docs"}
               target="_blank"
               // href={"/content-page"}
@@ -92,8 +85,6 @@ const Footer = () => {
           </li>
           <li className="relative aspect-square">
             <Link
-              data-tooltip-id="my-tooltip"
-              data-tooltip-content="home"
               href={"https://chat.madhousewallet.com/home/"}
               target="_blank"
               rel="noopener noreferrer"

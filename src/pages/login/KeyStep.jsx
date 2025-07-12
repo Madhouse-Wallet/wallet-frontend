@@ -3,8 +3,11 @@ import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { useToast } from "../../ContextApi/ToastContext";
 
 const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
+  const { showToast } = useToast();
+
   const [selectOption, setSelectOption] = useState(0);
   const [loginLoading, setLoginLoading] = useState(false);
   const router = useRouter();
@@ -13,6 +16,8 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
       setLoginLoading(true);
       let response = await loginFn2nd(email, passkeyData[selectOption]);
       if (response) {
+        showToast("Login Successfully");
+
         router.push("/dashboard");
       } else {
         setLoginLoading(false);
@@ -24,7 +29,7 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
   };
   return (
     <>
-      <div className="mx-auto max-w-[700px] scrollbar-none max-h-[90vh] overflow-auto" style={{scrollbarWidth: "none"}}>
+      <div className="mx-auto max-w-[700px] ">
         <div className="top pb-3">
           <div className="relative z-10 duration-300 animate-in fade-in slide-in-from-bottom-8">
             <div className="flex flex-col items-center gap-1 px-4">
@@ -46,7 +51,10 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
           </div>
         </div>
         <div className="formBody pt-4 text-xs">
-          <div className="grid gap-3 grid-cols-12">
+          <div
+            className="grid gap-3 grid-cols-12 md:max-h-[calc(100vh-300px)] max-h-[calc(100vh-400px)] scrollbar-none  overflow-auto"
+            style={{ scrollbarWidth: "none" }}
+          >
             {passkeyData.map((item, key) => (
               <div
                 key={key}
@@ -82,36 +90,34 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
                 </div>
               </div>
             ))}
-
-            <div className="col-span-12">
-              {" "}
-              {error && (
-                <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
-                  {error}
-                </div>
-              )}
-            </div>
-
-            <div className="col-span-12">
-              <div className="btnWrpper text-center mt-3 mx-auto  max-w-[300px]">
-                <button
-                  onClick={loginTry}
-                  disabled={loginLoading}
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  {loginLoading ? (
-                    <Image
-                      src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
-                      alt={""}
-                      height={100000}
-                      width={10000}
-                      className={"max-w-full h-[40px] object-contain w-auto"}
-                    />
-                  ) : (
-                    "Verify"
-                  )}
-                </button>
+          </div>
+          <div className="">
+            {" "}
+            {error && (
+              <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                {error}
               </div>
+            )}
+          </div>
+          <div className="btnWrpper">
+            <div className="btnWrpper text-center mt-3 mx-auto  max-w-[300px]">
+              <button
+                onClick={loginTry}
+                disabled={loginLoading}
+                className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+              >
+                {loginLoading ? (
+                  <Image
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
+                    alt={""}
+                    height={100000}
+                    width={10000}
+                    className={"max-w-full h-[40px] object-contain w-auto"}
+                  />
+                ) : (
+                  "Verify"
+                )}
+              </button>
             </div>
           </div>
         </div>

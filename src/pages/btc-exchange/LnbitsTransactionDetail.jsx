@@ -114,14 +114,16 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                       <span
                         className="text-blue-500 text-xs font-medium cursor-pointer"
                         onClick={() => {
-                          navigator.clipboard.writeText(transactionHash);
+                          navigator.clipboard.writeText(
+                            transactionHash || rawData?.boltz_id
+                          );
                         }}
                       >
                         Copy transaction ID
                       </span>
                     </div>
                   </li>
-                  <li className="py-2 border-b border-dashed border-white/50">
+                  {/* <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <div className="left">
                         <h6 className="m-0 font-semibold text-base pb-1">
@@ -149,7 +151,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         </div>
                       </div>
                     </div>
-                  </li>
+                  </li> */}
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Date</h6>
@@ -193,7 +195,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                       </span>
                     </li>
                   )}
-                  {rawData?.bolt11 && (
+                  {/* {rawData?.bolt11 && (
                     <>
                       <li className="py-2 flex items-center justify-between">
                         <span className="text-white opacity-80">
@@ -223,7 +225,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         </span>
                       </li>
                     </>
-                  )}
+                  )} */}
                   {category && (
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Category</span>
@@ -265,7 +267,6 @@ const Modal = styled.div`
   .modalDialog {
     max-height: calc(100vh - 160px);
     max-width: 550px !important;
-    padding-bottom: 40px !important;
 
     input {
       color: var(--textColor);
