@@ -608,8 +608,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                       : tx.isDeposit
                                         ? "Deposit"
                                         : tx.type === "send"
-                                          ? "Deposit"
-                                          : "Withdraw"}{" "}
+                                          ? "Withdraw"
+                                          : "Deposit"}{" "}
                                     {tx.amount?.split(" ")[1] || "ETH"}
                                   </h4>
                                   <p
