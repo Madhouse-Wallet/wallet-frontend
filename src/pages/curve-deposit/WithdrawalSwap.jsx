@@ -336,8 +336,18 @@ const WithdrawalSwap = () => {
 
       const currentEthBalance = await checkEthBalance();
       const requiredGas = ethers.BigNumber.from(gasEstimate.totalGasCost);
-
+      console.log("line=339 requiredGas:", requiredGas);
+      console.log(
+        "line=339 requiredGas in ETH:",
+        ethers.utils.formatEther(requiredGas)
+      );
+      console.log("line=340 currentEthBalance:", currentEthBalance);
+      console.log(
+        "line=340 currentEthBalance in ETH:",
+        ethers.utils.formatEther(currentEthBalance)
+      );
       if (currentEthBalance.lt(requiredGas)) {
+        console.log("line=341");
         const shortfall = requiredGas.sub(currentEthBalance);
         const minimumAmount = ethers.utils.parseEther("0.0013");
 
@@ -357,79 +367,96 @@ const WithdrawalSwap = () => {
         return;
       }
 
+      console.log(
+        "line-360",
+        getAccountCli,
+        currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift,
+        currentEthBalance.lt(requiredGas),
+        usdcToEthShift,
+        ethGasShift
+      );
+
       if (currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift) {
-        if (usdcToEthShift.settleAmount) {
-          const gasPriceResult = await calculateGasPriceInUSDC(
-            getAccountCli?.kernelClient,
-            [
-              {
-                to: USDC_ADDRESS,
-                abi: USDC_ABI,
-                functionName: "transfer",
-                args: [
-                  usdcToEthShift.depositAddress,
-                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
-                ],
-              },
-            ]
-          );
-          // Round gas price to 2 decimals
-          const value = Number.parseFloat(gasPriceResult.formatted);
-          const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
-          setGasPrice(roundedGasPrice);
-          // Check if amount + gas price exceeds balance
-          const totalRequired =
-            Number.parseFloat(usdcToEthShift.settleAmount) +
-            Number.parseFloat(roundedGasPrice);
-          if (totalRequired > Number.parseFloat(usdcBalance)) {
-            setGasPriceError(
-              `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
-            );
-            setIsLoading(false);
-            return;
-          }
-          const usdcSendTx = await sendTransaction(
-            getAccountCli?.kernelClient,
-            [
-              {
-                to: USDC_ADDRESS,
-                abi: USDC_ABI,
-                functionName: "transfer",
-                args: [
-                  usdcToEthShift.depositAddress,
-                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
-                ],
-              },
-            ]
-          );
-
-          if (usdcSendTx) {
-            // const delaySeconds =
-            //   Number(usdcToEthShift?.averageShiftSeconds) + 10 || 40;
-
-            // await new Promise((resolve) =>
-            //   setTimeout(resolve, delaySeconds * 1000)
-            // );
-            let data = await updtUser(
-              { email: userAuth?.email },
-              {
-                $push: {
-                  sideshiftIds: {
-                    id: usdcToEthShift.id,
-                    date: new Date(), // stores the current date/time
-                    type: "gasShift", // or whatever type value you want to store
-                  },
+        try {
+          console.log("line-363", getAccountCli);
+          if (usdcToEthShift.settleAmount) {
+            console.log("line-365", getAccountCli);
+            const gasPriceResult = await calculateGasPriceInUSDC(
+              getAccountCli?.kernelClient,
+              [
+                {
+                  to: USDC_ADDRESS,
+                  abi: USDC_ABI,
+                  functionName: "transfer",
+                  args: [
+                    usdcToEthShift.depositAddress,
+                    parseUnits(usdcToEthShift.settleAmount.toString(), 6),
+                  ],
                 },
-              }
+              ]
             );
-            await new Promise((resolve) => setTimeout(resolve, 15000));
+            // Round gas price to 2 decimals
+            const value = Number.parseFloat(gasPriceResult.formatted);
+            const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+            setGasPrice(roundedGasPrice);
+            // Check if amount + gas price exceeds balance
+            const totalRequired =
+              Number.parseFloat(usdcToEthShift.settleAmount) +
+              Number.parseFloat(roundedGasPrice);
+            if (totalRequired > Number.parseFloat(usdcBalance)) {
+              setGasPriceError(
+                `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
+              );
+              setIsLoading(false);
+              return;
+            }
+
+            console.log("line-396", gasPriceResult, usdcToEthShift);
+            const usdcSendTx = await sendTransaction(
+              getAccountCli?.kernelClient,
+              [
+                {
+                  to: USDC_ADDRESS,
+                  abi: USDC_ABI,
+                  functionName: "transfer",
+                  args: [
+                    usdcToEthShift.depositAddress,
+                    parseUnits(usdcToEthShift.settleAmount.toString(), 6),
+                  ],
+                },
+              ]
+            );
+
+            if (usdcSendTx) {
+              // const delaySeconds =
+              //   Number(usdcToEthShift?.averageShiftSeconds) + 10 || 40;
+
+              // await new Promise((resolve) =>
+              //   setTimeout(resolve, delaySeconds * 1000)
+              // );
+              let data = await updtUser(
+                { email: userAuth?.email },
+                {
+                  $push: {
+                    sideshiftIds: {
+                      id: usdcToEthShift.id,
+                      date: new Date(), // stores the current date/time
+                      type: "gasShift", // or whatever type value you want to store
+                    },
+                  },
+                }
+              );
+              await new Promise((resolve) => setTimeout(resolve, 15000));
+            }
           }
+        } catch (error) {
+          console.log("line-452");
+          setFailed(true);
+          setTxError(error || "Transaction failed please try again.");
         }
-      } else {
-        setFailed(true);
-        setTxError(tx.error.message || tx);
       }
 
+      console.log("line-456");
       // Send Tether Gold to SideShift deposit address
       const goldTx = await goldContract.transfer(
         goldToUsdcShift.depositAddress,
@@ -443,7 +470,7 @@ const WithdrawalSwap = () => {
         setHash(goldTx.hash);
       } else {
         setFailed(true);
-        setTxError(tx.error.message || tx);
+        setTxError(goldTx.error.message || goldTx);
       }
 
       let dataa = await updtUser(

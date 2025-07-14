@@ -98,6 +98,22 @@ const RecentTransaction = ({ setSetFilterType }) => {
       const isSend =
         tx.from_address?.toLowerCase() ===
         userAuth?.walletAddress?.toLowerCase();
+
+      // Add fee detection logic
+      let feeType = null;
+      if (
+        tx.to_address?.toLowerCase() ===
+        process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
+      ) {
+        feeType = "Madhouse Fee";
+      } else if (
+        tx.to_address?.toLowerCase() ===
+          process.env.NEXT_PUBLIC_COMMISSION_FEES?.toLowerCase() ||
+        tx.to_address?.toLowerCase() ===
+          useData?.userId?.commission_fees?.toLowerCase()
+      ) {
+        feeType = "Commission Fee";
+      }
       return {
         amount,
         category: tx.token_symbol || "USDC",
@@ -113,6 +129,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         to: tx.to_address || "",
         transactionHash: tx.transaction_hash || "",
         type: isSend === true ? "send" : "receive",
+        feeType,
         day:
           moment(tx.block_timestamp)
             .tz(userTimezone)
@@ -396,6 +413,11 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                   >
                                     {getStatusText(tx.status)}
                                   </p>
+                                  {tx.feeType && (
+                                    <p className="m-0 text-xs font-medium py-1">
+                                      {tx.feeType}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                               <div className="right text-right">
@@ -699,6 +721,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
             detail={detail}
             setDetail={setDetail}
             transactionData={transactionData}
+            userData={useData}
           />,
           document.body
         )}

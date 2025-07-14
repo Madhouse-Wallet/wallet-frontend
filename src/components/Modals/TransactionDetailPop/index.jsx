@@ -2,13 +2,17 @@ import React from "react";
 import styled from "styled-components";
 import { ethers } from "ethers";
 
-const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
+const TransactionDetailPop = ({
+  detail,
+  setDetail,
+  transactionData,
+  userData,
+}) => {
   const truncateAddress = (address) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
-  
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -23,12 +27,14 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     to = "",
     transactionHash = "",
     type = "",
+    feeType = "",
   } = transactionData || {};
 
   const getInitials = (address) => {
     if (!address) return "??";
     return address.substring(2, 4).toUpperCase();
   };
+
   return (
     <>
       <Modal
@@ -178,6 +184,13 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Summary</span>
                       <span className="text-white font-medium">{summary}</span>
+                    </li>
+                  )}
+
+                  {feeType && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Fee</span>
+                      <span className="text-white font-medium">{feeType}</span>
                     </li>
                   )}
                 </ul>

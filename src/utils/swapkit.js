@@ -9,7 +9,7 @@
  * @param {string} params.sourceAddress - The source wallet address
  * @param {string} params.destinationAddress - The destination wallet address
  * @param {string} [apiKey] - The SwapKit API key
- * @returns {Promise<Object>} - The quote response 
+ * @returns {Promise<Object>} - The quote response
  */
 async function getSwapQuote(
   { sellAsset, buyAsset, sellAmount, sourceAddress, destinationAddress },
@@ -47,7 +47,7 @@ async function getSwapQuote(
         allowSmartContractSender: true,
         allowSmartContractReceiver: true,
         disableSecurityChecks: true,
-        includeTx: true,
+        // includeTx: true,
         cfBoost: true,
       }),
     });
