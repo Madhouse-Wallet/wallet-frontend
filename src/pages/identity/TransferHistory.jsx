@@ -25,6 +25,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
   const [balance, setBalance] = useState("0");
+  const [feeAmount, setFeeAmount] = useState(null);
 
   const [hash, setHash] = useState("");
   const [error, setError] = useState("");
@@ -75,7 +76,13 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
 
     if (id === "amount") {
+      console.log("line-79", id);
+      setFeeAmount(null);
       const filteredValue = filterAmountInput(value, 2, 20);
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = filteredValue * FEE_PERCENTAGE;
+      console.log("line-dsf83", FeeAmount);
+      setFeeAmount(FeeAmount);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
       if (parseFloat(value) > parseFloat(balance)) {
         setError("Insufficient USDC Balance");
@@ -475,9 +482,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       console.log("Gas transaction estimated gas price:", roundedGasGasPrice);
 
-      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
-      const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
-      console.log("line-133", FeeAmount);
+      // const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      // const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
+      // console.log("line-133", FeeAmount);
 
       let COMMISSION_FEES;
       if (!user?.userId?.commission_fees) {
@@ -513,7 +520,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
           },
         ]
       );
@@ -575,7 +582,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
           },
         ]);
 
@@ -937,6 +944,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                       <div className="text-red-500 text-xs">
                         {gasPriceError}
                       </div>
+                    )}
+
+                    {feeAmount > 0 && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Commission Fee: {feeAmount} USDC
+                      </label>
                     )}
                   </div>
                 </div>
