@@ -177,7 +177,9 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                 <ul className="list-unstyled ps-0 mb-0 text-xs">
                   <li className="py-2 flex items-center justify-between">
                     <span className="text-white opacity-80">Amount</span>
-                    <span className="text-white font-medium">{amount}</span>
+                    <span className="text-white font-medium">
+                      {parseInt(amount)}
+                    </span>
                   </li>
                   {rawData?.fee !== undefined && (
                     <li className="py-2 flex items-center justify-between">
