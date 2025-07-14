@@ -456,7 +456,7 @@ const WithdrawalSwap = () => {
         }
       }
 
-      console.log("line-456");
+      console.log("line-4566");
       // Send Tether Gold to SideShift deposit address
       const goldTx = await goldContract.transfer(
         goldToUsdcShift.depositAddress,
