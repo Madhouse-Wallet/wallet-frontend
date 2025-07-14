@@ -178,7 +178,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                   <li className="py-2 flex items-center justify-between">
                     <span className="text-white opacity-80">Amount</span>
                     <span className="text-white font-medium">
-                      {parseInt(amount)}
+                      {parseFloat(amount) / 1000}
                     </span>
                   </li>
                   {rawData?.fee !== undefined && (

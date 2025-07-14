@@ -53,6 +53,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
     setGasPrice(null);
     setAmountError("");
     setMaxAmount();
+    setFeeAmount(null);
 
     if (!userAuth?.email) {
       setError("Please create account or login.");
