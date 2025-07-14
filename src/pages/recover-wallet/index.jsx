@@ -76,6 +76,9 @@ const RecoverWallet = () => {
         let userExist = await getUser(email);
         if (userExist.status && userExist.status == "failure") {
           setLoadingNewSigner(false);
+        } else if (userExist?.userId?.passkey && userExist?.userId?.passkey.length >= 10) {
+          setError("Maximum number of passkeys (10) reached for this account.")
+          setLoadingNewSigner(false);
         } else {
           setAddress(userExist?.userId?.wallet);
           setBitcoinAddress(userExist?.userId?.bitcoinWallet);
@@ -118,6 +121,9 @@ const RecoverWallet = () => {
         }
         if (recoverAccount && recoverAccount.status) {
           let userExist = await getUserToken(email);
+          if (userExist?.userId?.passkey && userExist?.userId?.passkey.length >= 10) {
+            setError("Maximum number of passkeys (10) reached for this account.")
+          }
           let secretObj = {
             coinosToken: userExist?.userId?.coinosToken || "",
             wif: wif || "",
@@ -182,6 +188,8 @@ const RecoverWallet = () => {
       // updtUser
       let userExist = await getUser(email);
       if (userExist.status && userExist.status == "failure") {
+      } else if (userExist?.userId?.passkey && userExist?.userId?.passkey.length >= 10) {
+        setError("Maximum number of passkeys (10) reached for this account.")
       } else {
         let passkeyNo =
           (userExist?.userId?.passkey_number &&
