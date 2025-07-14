@@ -108,9 +108,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         feeType = "Madhouse Fee";
       } else if (
         tx.to_address?.toLowerCase() ===
-          process.env.NEXT_PUBLIC_COMMISSION_FEES?.toLowerCase() ||
-        tx.to_address?.toLowerCase() ===
-          useData?.userId?.commission_fees?.toLowerCase()
+        useData?.userId?.commission_fees?.toLowerCase()
       ) {
         feeType = "Commission Fee";
       }
