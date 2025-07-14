@@ -12,10 +12,10 @@ export const getCurrentUserTimezone = () => {
 };
 
 // Fetch Bitcoin transactions using the new API endpoint
-export const fetchBitcoinTransactions = async (address, limit = 10) => {
+export const fetchBitcoinTransactions = async (address, limit = 100) => {
   try {
     const response = await fetch(
-      `https://api.blockcypher.com/v1/btc/main/addrs/${address}?limit=${limit}`
+      `https://api.blockcypher.com/v1/btc/main/addrs/${address}`
     );
 
     if (!response.ok) {

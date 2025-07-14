@@ -24,7 +24,7 @@ const Footer = () => {
 
       <FooterDiv className="fixed bottom-0 left-1/2 z-50 -translate-x-1/2 pb-3">
         <FootNav className="mx-auto flex items-end gap-4 rounded-2xl bg-black/50 contrast-more:bg-neutral-700 backdrop-blur-2xl contrast-more:backdrop-blur-none px-3 shadow-dock shrink-0 will-change-transform transform-gpu border-hpx border-white/10">
-          <li className="relative aspect-square">
+          {/* <li className="relative aspect-square">
             <Link
               href={"https://maps.app.goo.gl/Rdf2CmyTtm7oRsKE9?g_st=i"}
               target="_blank"
@@ -43,6 +43,25 @@ const Footer = () => {
                 Map
               </span>
             </Link>
+          </li> */}
+
+          <li className="relative aspect-square">
+            <button
+              disabled
+              className="relative origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
+            >
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "map.png"}
+                height={1000}
+                width={1000}
+                className="max-w-full w-auto mx-auto"
+                alt=""
+                style={{ height: 50 }}
+              />
+              <span className=" font-medium block text-center text-white">
+                Card
+              </span>
+            </button>
           </li>
           <li className="relative aspect-square">
             <Link

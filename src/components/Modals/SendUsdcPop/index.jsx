@@ -40,6 +40,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
   const [maxAmount, setMaxAmount] = useState(null);
+  const [feeAmount, setFeeAmount] = useState(null);
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -60,6 +61,12 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
 
     // Validate amount
     if (filteredValue.trim() !== "") {
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = filteredValue * FEE_PERCENTAGE;
+      console.log("line-66", FeeAmount);
+      setFeeAmount(FeeAmount);
+
+      console.log("line-133", setFeeAmount);
       const amount = Number.parseFloat(filteredValue);
       const totalBalance = Number.parseFloat(balance);
       const bufferAmount =
@@ -140,11 +147,6 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
         return;
       }
 
-      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
-      const FeeAmount = amount * FEE_PERCENTAGE;
-
-      console.log("line-133", FeeAmount);
-
       let COMMISSION_FEES;
       if (!user?.userId?.commission_fees) {
         console.log("line-138");
@@ -177,14 +179,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
             functionName: "transfer",
             args: [
               process.env.NEXT_PUBLIC_MADHOUSE_FEE,
-              parseUnits(FeeAmount.toString(), 6),
+              parseUnits(setFeeAmount.toString(), 6),
             ],
           },
           {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(setFeeAmount.toString(), 6)],
           },
         ]
       );
@@ -216,14 +218,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
           functionName: "transfer",
           args: [
             process.env.NEXT_PUBLIC_MADHOUSE_FEE,
-            parseUnits(FeeAmount.toString(), 6),
+            parseUnits(setFeeAmount.toString(), 6),
           ],
         },
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
           abi: USDC_ABI,
           functionName: "transfer",
-          args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+          args: [COMMISSION_FEES, parseUnits(setFeeAmount.toString(), 6)],
         },
       ]);
       if (tx && !tx.error) {
@@ -430,6 +432,14 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                           ? "0"
                           : Number.parseFloat(balance).toFixed(2)}{" "}
                         USDC
+                      </label>
+
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Madhouse Fee: {feeAmount} USDC
+                      </label>
+
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Commission Fee: {feeAmount} USDC
                       </label>
 
                       {amountError && (
