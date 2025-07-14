@@ -434,13 +434,16 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                         USDC
                       </label>
 
-                      <label className="form-label m-0 font-semibold text-xs block">
-                        Madhouse Fee: {feeAmount} USDC
-                      </label>
-
-                      <label className="form-label m-0 font-semibold text-xs block">
-                        Commission Fee: {feeAmount} USDC
-                      </label>
+                      {feeAmount && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Madhouse Fee: {feeAmount} USDC
+                        </label>
+                      )}
+                      {feeAmount && (
+                        <label className="form-label m-0 font-semibold text-xs block">
+                          Commission Fee: {feeAmount} USDC
+                        </label>
+                      )}
 
                       {amountError && (
                         <div className="text-red-500 text-xs mt-1">
