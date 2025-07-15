@@ -75,7 +75,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
   // Clear date filter function
   const clearDateFilter = () => {
-    console.log(activeTab, "line-77");
     setDateRange([
       {
         startDate: null,
@@ -293,7 +292,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
   };
 
   const fetchFeeTransactions = async () => {
-    console.log("line-296");
     try {
       setTransactionType("all");
 

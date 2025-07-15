@@ -48,7 +48,7 @@ const Footer = () => {
           <li className="relative aspect-square">
             <button
               disabled
-              className="relative filter grayscale origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
+              className="relative filter opacity-50 origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
                 src={process.env.NEXT_PUBLIC_IMAGE_URL + "cardIcn.png"}
