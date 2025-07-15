@@ -11,7 +11,7 @@ import {
 } from "@/lib/zeroDev";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useSelector } from "react-redux";
-import { getUser, updtUser } from "@/lib/apiCall";
+import { getUser, lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import { parseAbi, parseUnits } from "viem";
 import { createPortal } from "react-dom";
 import SpherePayTransferDetailPop from "@/components/Modals/SpherePayTransferDetailPopup";
@@ -242,14 +242,17 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const response = await SpherePayAPI.createTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
       setTransferData(response.data.transfer);
-      let data = await updtUser(
-        { email: userAuth?.email },
+
+      await lambdaInvokeFunction(
         {
-          $push: {
-            spherePayTransferIds: response?.data?.transfer?.id,
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "on-ramp",
+          data: response?.data?.transfer?.id,
+        },
+        "madhouse-backend-production-addSpherepayTrxn"
       );
+
       // Clear form after successful submission
       setOnRampForm({
         currency: "",
@@ -441,13 +444,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         setError("USDC Transfer Failed");
         return;
       }
-      let data = await updtUser(
-        { email: userAuth?.email },
+
+      await lambdaInvokeFunction(
         {
-          $push: {
-            spherePayTransferIds: response?.data?.transfer?.id,
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "off-ramp",
+          data: response?.data?.transfer?.id,
+        },
+        "madhouse-backend-production-addSpherepayTrxn"
       );
       setOffRampForm({
         currency: "",
@@ -477,8 +482,16 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const fetchTransferHistory = async () => {
     setIsHistoryLoading(true);
     try {
-      const userExist = await getUser(userAuth.email);
-      const transferIds = userExist?.userId?.spherePayTransferIds;
+      const shpherePayIdsData = await lambdaInvokeFunction(
+        {
+          email: userAuth?.email,
+          type: "spherepay",
+          page: 1,
+          limit: 100,
+        },
+        "madhouse-backend-production-getUserTrxn"
+      );
+      const transferIds = shpherePayIdsData?.data?.ids;
 
       if (!transferIds || transferIds.length === 0) {
         setTransfers([]);
@@ -813,12 +826,16 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
                     {feeAmount > 0 && (
                       <label className="form-label m-0 font-semibold text-xs block">
-                        Madhouse Fee: {feeAmount} USDC
+                        Madhouse Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
                       </label>
                     )}
                     {feeAmount > 0 && (
                       <label className="form-label m-0 font-semibold text-xs block">
-                        Commission Fee: {feeAmount} USDC
+                        Commission Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
                       </label>
                     )}
 

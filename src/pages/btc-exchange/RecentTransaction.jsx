@@ -850,7 +850,10 @@ const RecentTransaction = ({ setSetFilterType }) => {
                         {formatDateForApi(dateRange[0].startDate)} to{" "}
                         {formatDateForApi(dateRange[0].endDate)}
                         <button
-                          onClick={clearDateFilter}
+                          onClick={() => {
+                            clearDateFilter();
+                            setApplyTrue(false);
+                          }}
                           className="ml-2 text-xs text-red-300 hover:text-red-100"
                         >
                           ✕

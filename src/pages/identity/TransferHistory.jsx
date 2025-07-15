@@ -948,7 +948,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
                     {feeAmount > 0 && (
                       <label className="form-label m-0 font-semibold text-xs block">
-                        Commission Fee: {feeAmount} USDC
+                        Commission Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
                       </label>
                     )}
                   </div>

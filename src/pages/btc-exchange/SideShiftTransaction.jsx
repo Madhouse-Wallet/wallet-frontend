@@ -5,6 +5,8 @@ import styled from "styled-components";
 import { createPortal } from "react-dom";
 import SideShiftTransactionDetail from "./SideShiftTransactionDetail";
 import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
+import { lambdaInvokeFunction } from "@/lib/apiCall";
+import { useSelector } from "react-redux";
 
 const SideShiftTransaction = ({
   userData,
@@ -12,6 +14,7 @@ const SideShiftTransaction = ({
   applyTrue,
   setTransactions,
 }) => {
+  const userAuth = useSelector((state) => state.Auth);
   const userTimezone = getCurrentUserTimezone();
   const [sideshiftTransactions, setSideshiftTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -104,10 +107,17 @@ const SideShiftTransaction = ({
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      if (
-        !userData?.userId?.sideshiftIds ||
-        userData?.userId?.sideshiftIds.length === 0
-      ) {
+      const sideShiftIdsData = await lambdaInvokeFunction(
+        {
+          email: userAuth?.email,
+          type: "sideShift",
+          page: 1,
+          limit: 100,
+        },
+        "madhouse-backend-production-getUserTrxn"
+      );
+      const transferIds = sideShiftIdsData?.data?.ids;
+      if (!transferIds || transferIds.length === 0) {
         setSideshiftTransactions([]);
         return;
       }
@@ -116,16 +126,29 @@ const SideShiftTransaction = ({
       setError(null);
 
       try {
-        // Extract IDs from userData
-        const ids = userData?.userId?.sideshiftIds.map((item) => item.id);
+        const ids = transferIds.map((item) => item);
+        console.log("line-131", ids.length);
 
-        // Fetch data from SideShift API
-        const apiData = await fetchSideShiftData(ids);
+        // Process IDs in batches of 10
+        const batchSize = 10;
+        const allApiData = [];
 
-        // Format the data
+        for (let i = 0; i < ids.length; i += batchSize) {
+          const batch = ids.slice(i, i + batchSize);
+          const batchApiData = await fetchSideShiftData(batch);
+
+          // Assuming fetchSideShiftData returns an array, merge results
+          if (Array.isArray(batchApiData)) {
+            allApiData.push(...batchApiData);
+          } else {
+            // If it returns an object, you might need to handle differently
+            allApiData.push(batchApiData);
+          }
+        }
+
         const formattedTransactions = formatSideShiftTransactions(
-          apiData,
-          userData?.userId?.sideshiftIds
+          allApiData,
+          transferIds
         );
 
         // Apply date filtering if needed
@@ -146,7 +169,9 @@ const SideShiftTransaction = ({
     };
 
     fetchTransactions();
-  }, [userData, dateRange, applyTrue]);
+  }, [userData, applyTrue]);
+
+  console.log("line-174", applyTrue);
 
   // Get status color
   const getStatusColor = (status) => {

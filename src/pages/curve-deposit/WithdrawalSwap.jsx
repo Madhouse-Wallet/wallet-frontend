@@ -20,7 +20,7 @@ import {
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi, parseUnits } from "viem";
-import { updtUser } from "@/lib/apiCall";
+import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
@@ -445,17 +445,14 @@ const WithdrawalSwap = () => {
               );
 
               if (usdcSendTx) {
-                let data = await updtUser(
-                  { email: userAuth?.email },
+                await lambdaInvokeFunction(
                   {
-                    $push: {
-                      sideshiftIds: {
-                        id: usdcToEthShift.id,
-                        date: new Date(), // stores the current date/time
-                        type: "gasShift", // or whatever type value you want to store
-                      },
-                    },
-                  }
+                    email: userAuth?.email,
+                    wallet: userAuth?.walletAddress,
+                    type: "gasShift",
+                    data: usdcToEthShift,
+                  },
+                  "madhouse-backend-production-addSideShiftTrxn"
                 );
                 // await new Promise((resolve) => setTimeout(resolve, 15000));
 
@@ -520,17 +517,14 @@ const WithdrawalSwap = () => {
         setTxError(goldTx.error.message || goldTx);
       }
 
-      let dataa = await updtUser(
-        { email: userAuth?.email },
+      await lambdaInvokeFunction(
         {
-          $push: {
-            sideshiftIds: {
-              id: goldToUsdcShift.id,
-              date: new Date(),
-              type: "goldWithdraw",
-            },
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "goldWithdraw",
+          data: goldToUsdcShift,
+        },
+        "madhouse-backend-production-addSideShiftTrxn"
       );
 
       setTimeout(() => {
