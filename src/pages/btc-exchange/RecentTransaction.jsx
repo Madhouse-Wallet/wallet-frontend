@@ -58,6 +58,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       startDate: null,
       endDate: null,
       key: "selection",
+      color: "#df723b",
     },
   ]);
   const [transactionType, setTransactionType] = useState("all");
@@ -80,6 +81,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         startDate: null,
         endDate: null,
         key: "selection",
+        color: "#df723b",
       },
     ]);
     // Refetch transactions without date filter
@@ -935,7 +937,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </button>
             <button
               onClick={applyDateFilter}
-              className="px-3 py-1 bg-blue-600 text-white rounded"
+              className="px-3 py-1 bg-[#df723b] text-white rounded"
             >
               Apply Filter
             </button>
@@ -1017,15 +1019,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
                     <button
                       onClick={() => {
                         setIsDatePickerOpen(!isDatePickerOpen);
-                        setApplyTrue(false);
+                        // setApplyTrue(false);
                       }}
                       className={`px-4 py-2 ${
-                        isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                        isDateFilterActive() ? "bg-[#df723b]" : "bg-black/50"
                       } text-white rounded-md flex items-center gap-2`}
                     >
                       <span>{DateFilter}</span>
                       {isDateFilterActive() && (
-                        <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
+                        <span className="text-xs bg-white text-[#df723b] rounded-full w-5 h-5 flex items-center justify-center">
                           ✓
                         </span>
                       )}

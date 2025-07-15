@@ -4,8 +4,10 @@ import Link from "next/link";
 import styled from "styled-components";
 import { createPortal } from "react-dom";
 import PointOfSalePop from "@/components/Modals/PointOfSalePop";
+import { useToast } from "@/ContextApi/ToastContext";
 
 const Footer = () => {
+  const { showToast } = useToast();
   const [pointSale, setPointSale] = useState();
   const [refundBTC, setRefundBTC] = useState();
 
@@ -47,7 +49,8 @@ const Footer = () => {
 
           <li className="relative aspect-square">
             <button
-              disabled
+              // disabled
+              onClick={()=> showToast("Coming Soon")}
               className="relative filter opacity-50 origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
