@@ -97,51 +97,55 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const formatWalletHistoryData = (txs) => {
     if (!txs?.length) return [];
 
-    return txs.map((tx) => {
-      // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
-      const decimals =
-        tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+    return txs
+      .map((tx) => {
+        // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+        const decimals =
+          tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
 
-      const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
-      const isSend =
-        tx.from_address?.toLowerCase() ===
-        userAuth?.walletAddress?.toLowerCase();
+        const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
+        const isSend =
+          tx.from_address?.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
 
-      // Add fee detection logic
-      let feeType = null;
-      if (
-        tx.to_address?.toLowerCase() ===
-        process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
-      ) {
-        feeType = "Madhouse Fee";
-      } else if (
-        tx.to_address?.toLowerCase() ===
-        useData?.userId?.commission_fees?.toLowerCase()
-      ) {
-        feeType = "Commission Fee";
-      }
-      return {
-        amount,
-        category: tx.token_symbol || "USDC",
-        date:
-          moment(tx.block_timestamp)
-            .tz(userTimezone)
-            .format("MMMM D, YYYY h:mm A z") || "",
-        from: tx.from_address || "",
-        id: tx.transaction_hash || "",
-        rawData: tx,
-        status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
-        to: tx.to_address || "",
-        transactionHash: tx.transaction_hash || "",
-        type: isSend === true ? "send" : "receive",
-        feeType,
-        day:
-          moment(tx.block_timestamp)
-            .tz(userTimezone)
-            .format("MMMM D, YYYY h:mm A z") || "",
-      };
-    });
+        // Add fee detection logic
+        let feeType = null;
+        if (
+          tx.to_address?.toLowerCase() ===
+          process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
+        ) {
+          feeType = "Madhouse Fee";
+        } else if (
+          tx.to_address?.toLowerCase() ===
+          useData?.userId?.commission_fees?.toLowerCase()
+        ) {
+          feeType = "Commission Fee";
+        }
+
+        return {
+          amount,
+          category: tx.token_symbol || "USDC",
+          date:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          from: tx.from_address || "",
+          id: tx.transaction_hash || "",
+          rawData: tx,
+          status: "confirmed", // You can modify this if you plan to add status checks later
+          summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
+          to: tx.to_address || "",
+          transactionHash: tx.transaction_hash || "",
+          type: isSend === true ? "send" : "receive",
+          day:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          feeType, // Keep this temporarily for filtering
+        };
+      })
+      .filter((tx) => tx.feeType === null) // Filter out transactions with fee types
+      .map(({ feeType, ...tx }) => tx); // Remove feeType from final objects
   };
 
   const fetchRecentTransactions = async () => {
