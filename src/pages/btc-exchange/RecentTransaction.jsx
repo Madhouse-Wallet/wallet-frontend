@@ -22,6 +22,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [useData, setUserData] = useState();
 
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
+  const [feeTransaction, setFeeTransactions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(5);
   const [detail, setDetail] = useState(false);
@@ -74,6 +75,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
   // Clear date filter function
   const clearDateFilter = () => {
+    console.log(activeTab, "line-77");
     setDateRange([
       {
         startDate: null,
@@ -82,8 +84,13 @@ const RecentTransaction = ({ setSetFilterType }) => {
       },
     ]);
     // Refetch transactions without date filter
-    fetchRecentTransactions();
-    fetchRecentTransactionsPaxg();
+    if (activeTab === 0) {
+      fetchRecentTransactions();
+    } else if (activeTab === 2) {
+      fetchRecentTransactionsPaxg();
+    } else if (activeTab === 13) {
+      fetchFeeTransactions();
+    }
   };
 
   const formatWalletHistoryData = (txs) => {
@@ -230,7 +237,94 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  // Get status color
+  const formatFeeTransactions = (txs) => {
+    if (!txs?.length) return [];
+
+    return txs
+      .map((tx) => {
+        const decimals =
+          tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+
+        const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
+        const isSend =
+          tx.from_address?.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+
+        // Add fee detection logic
+        let feeType = null;
+        if (
+          tx.to_address?.toLowerCase() ===
+          process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
+        ) {
+          feeType = "Madhouse Fee";
+        } else if (
+          tx.to_address?.toLowerCase() ===
+          useData?.userId?.commission_fees?.toLowerCase()
+        ) {
+          feeType = "Commission Fee";
+        }
+
+        // Only return transactions that have a fee type
+        if (feeType === null) return null;
+
+        return {
+          amount,
+          category: tx.token_symbol || "USDC",
+          date:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          from: tx.from_address || "",
+          id: tx.transaction_hash || "",
+          rawData: tx,
+          status: "confirmed",
+          summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
+          to: tx.to_address || "",
+          transactionHash: tx.transaction_hash || "",
+          type: isSend === true ? "send" : "receive",
+          feeType,
+          day:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+        };
+      })
+      .filter(Boolean); // Remove null entries
+  };
+
+  const fetchFeeTransactions = async () => {
+    console.log("line-296");
+    try {
+      setTransactionType("all");
+
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(dateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_CHAIN,
+        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
+        // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
+      setFeeTransactions(data?.result);
+      if (data?.result?.length) {
+        const formattedTransactions = formatFeeTransactions(
+          data.result.slice(0, 100)
+        );
+        setFeeTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
@@ -308,7 +402,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
   const transactionsByDate = groupTransactionsByDate(transactions);
   const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
-
+  const transactionsByDateFee = groupTransactionsByDate(feeTransaction);
   const transactionsByDateMorpho = groupTransactionsByDate(morphotransactions);
 
   // Handle date range selection
@@ -330,6 +424,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
       }
       if (activeTab === 6) {
         fetchRecentMorphoTransactions();
+      }
+      if (activeTab === 13) {
+        fetchFeeTransactions();
       }
       setIsDatePickerOpen(false);
     } else {
@@ -709,6 +806,97 @@ const RecentTransaction = ({ setSetFilterType }) => {
         <LnbitsTransaction usd={6} setTransactions={setBoltzBitcoin} />
       ),
     },
+    {
+      title: "Fees",
+      component: (
+        <>
+          {feeTransaction.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(transactionsByDateFee).map(([date, txs]) => {
+                return (
+                  <div key={date} className="py-3">
+                    <p className="m-0 text-white text-xs font-semibold pb-2">
+                      {date}
+                    </p>
+                    <div className="grid gap-3 grid-cols-12">
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.01;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx?.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                  {tx.feeType && (
+                                    <p className="m-0 text-xs font-medium py-1">
+                                      {tx.feeType}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                        tx.amount
+                                      ).toFixed(2)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
   ];
 
   return (
@@ -879,6 +1067,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 9) dataToExport = depositBoltz;
                   else if (activeTab === 10) dataToExport = boltzUSDC;
                   else if (activeTab === 11) dataToExport = boltzBitcoin;
+                  else if (activeTab === 12) dataToExport = feeTransaction;
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
                       dataToExport,
@@ -933,6 +1122,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                             fetchRecentTransactionsPaxg();
                           } else if (key === 6) {
                             fetchRecentMorphoTransactions();
+                          } else if (key === 12) {
+                            fetchFeeTransactions();
                           }
                         }}
                         className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${
