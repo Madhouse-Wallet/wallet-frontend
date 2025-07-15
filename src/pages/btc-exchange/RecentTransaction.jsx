@@ -88,7 +88,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       fetchRecentTransactions();
     } else if (activeTab === 2) {
       fetchRecentTransactionsPaxg();
-    } else if (activeTab === 13) {
+    } else if (activeTab === 12) {
       fetchFeeTransactions();
     }
   };
@@ -425,7 +425,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       if (activeTab === 6) {
         fetchRecentMorphoTransactions();
       }
-      if (activeTab === 13) {
+      if (activeTab === 12) {
         fetchFeeTransactions();
       }
       setIsDatePickerOpen(false);

@@ -116,6 +116,7 @@ const SideShiftTransaction = ({
         },
         "madhouse-backend-production-getUserTrxn"
       );
+      console.log("line-119", sideShiftIdsData);
       const transferIds = sideShiftIdsData?.data?.ids;
       if (!transferIds || transferIds.length === 0) {
         setSideshiftTransactions([]);

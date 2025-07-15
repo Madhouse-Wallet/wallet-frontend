@@ -197,9 +197,9 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                       </span>
                     </li>
                   )}
-                  {/* {rawData?.bolt11 && (
+                  {rawData?.bolt11 && (
                     <>
-                      <li className="py-2 flex items-center justify-between">
+                      {/* <li className="py-2 flex items-center justify-between">
                         <span className="text-white opacity-80">
                           Payment Request
                         </span>
@@ -211,7 +211,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         >
                           Copy BOLT11
                         </span>
-                      </li>
+                      </li> */}
 
                       <li className="py-2 flex items-center justify-between">
                         <span className="text-white opacity-80">
@@ -227,7 +227,7 @@ const LnbitsTransactionDetail = ({ detail, setDetail, transactionData }) => {
                         </span>
                       </li>
                     </>
-                  )} */}
+                  )}
                   {category && (
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Category</span>
