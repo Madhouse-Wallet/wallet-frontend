@@ -85,12 +85,22 @@ const RecentTransaction = ({ setSetFilterType }) => {
       },
     ]);
     // Refetch transactions without date filter
+    const resetDate = [
+      {
+        startDate: null,
+        endDate: null,
+        key: "selection",
+        color: "#df723b",
+      },
+    ];
     if (activeTab === 0) {
-      fetchRecentTransactions();
+      fetchRecentTransactions(resetDate);
     } else if (activeTab === 2) {
-      fetchRecentTransactionsPaxg();
+      fetchRecentTransactionsPaxg(resetDate);
     } else if (activeTab === 12) {
-      fetchFeeTransactions();
+      fetchFeeTransactions(resetDate);
+    } else if (activeTab === 6) {
+      fetchRecentMorphoTransactions(resetDate);
     }
   };
 
@@ -148,15 +158,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
       .map(({ feeType, ...tx }) => tx); // Remove feeType from final objects
   };
 
-  const fetchRecentTransactions = async () => {
+  const fetchRecentTransactions = async (customDateRange = null) => {
     try {
       setTransactionType("all");
-
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -180,13 +190,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  const fetchRecentMorphoTransactions = async () => {
+  const fetchRecentMorphoTransactions = async (customDateRange = null) => {
     try {
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -201,7 +212,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       setMorphoTransactions(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
-          data.result.slice(0, 10)
+          data.result.slice(0, 100)
         );
         setMorphoTransactions(formattedTransactions);
       }
@@ -210,15 +221,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  const fetchRecentTransactionsPaxg = async () => {
+  const fetchRecentTransactionsPaxg = async (customDateRange = null) => {
     try {
       setTransactionType("all");
-
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -233,7 +244,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       setTransactionsPaxg(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
-          data.result.slice(0, 10)
+          data.result.slice(0, 100)
         );
         setTransactionsPaxg(formattedTransactions);
       }
@@ -297,15 +308,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
       .filter(Boolean); // Remove null entries
   };
 
-  const fetchFeeTransactions = async () => {
+  const fetchFeeTransactions = async (customDateRange = null) => {
     try {
       setTransactionType("all");
-
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
