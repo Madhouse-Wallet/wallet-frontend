@@ -50,8 +50,9 @@ const Footer = () => {
           <li className="relative aspect-square">
             <button
               // disabled
-              onClick={()=> showToast("Coming Soon")}
-              className="relative filter opacity-50 origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
+              onClick={() => window.open("http://app.offramp.xyz/login?referralCode=t89ein", "_blank")
+              }
+              className="relative filter origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
               <Image
                 src={process.env.NEXT_PUBLIC_IMAGE_URL + "cardIcn.png"}
@@ -180,11 +181,10 @@ const FootNav = styled.ul`
   }
   @media (max-width: 767px) {
     a {
-      ${
-        "" /* height: 35px;
+      ${"" /* height: 35px;
       width: 35px;
       border-radius: 5px !important; */
-      }
+  }
       svg {
         height: 18px;
         width: 18px;
