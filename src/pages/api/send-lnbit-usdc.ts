@@ -62,7 +62,7 @@ export default async function handler(
     console.log("req.body -->", req.body);
 
     const sats = amount;
-
+    
     const liquidBTCNetworkFee = Number(
       process.env.NEXT_PUBLIC_LIQUID_BTC_NETWORK_FEE
     ); //200 sats is the averave fee for a Liquid transaction settlements
@@ -141,7 +141,7 @@ export default async function handler(
         email: email,
         wallet: wallet,
         type: "withdraw usdc shift",
-        data: createBoltzSwapApi.storeData,
+        data: { ...createBoltzSwapApi.storeData, address: finalRoute.depositAddress }
       },
       "madhouse-backend-production-addBoltzTrxn"
     );
