@@ -52,14 +52,16 @@ export const createReverseSwap = async (invoiceAmount: any) => {
         // Create a random preimage for the swap; has to have a length of 32 bytes
         const preimage = randomBytes(32);
         const keys = ECPair.makeRandom();
+        let claimPublicKey = Buffer.from(keys.publicKey).toString('hex');
+        let preimageHash = crypto.sha256(preimage).toString('hex');
         // Create a Reverse Swap
         const createdResponse = (
             await axios.post(`${endpoint}/v2/swap/reverse`, {
                 invoiceAmount,
                 to: 'L-BTC',
                 from: 'BTC',
-                claimPublicKey: Buffer.from(keys.publicKey).toString('hex'),
-                preimageHash: crypto.sha256(preimage).toString('hex'),
+                claimPublicKey,
+                preimageHash
             })
         ).data;
 
@@ -70,7 +72,13 @@ export const createReverseSwap = async (invoiceAmount: any) => {
             status: true,
             data: createdResponse,
             keys,
-            preimage
+            preimage,
+            storeData: {
+                ...createdResponse,
+                claimPublicKey,
+                preimageHash,
+                preimage: preimage.toString('hex')
+            }
         };
     } catch (error: any) {
         console.error("Detailed error:", error);

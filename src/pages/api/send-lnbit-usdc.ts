@@ -141,7 +141,7 @@ export default async function handler(
         email: email,
         wallet: wallet,
         type: "withdraw usdc shift",
-        data: createBoltzSwapApi.data,
+        data: createBoltzSwapApi.storeData,
       },
       "madhouse-backend-production-addBoltzTrxn"
     );
