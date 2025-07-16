@@ -43,8 +43,10 @@ const LnbitsTransaction = ({
         from: isSend ? userAuth?.walletAddress : "External",
         to: isSend ? "External" : userAuth?.walletAddress,
         date:
-          moment(tx.time).tz(userTimezone).format("MMMM D, YYYY h:mm A z") ||
-          "",
+          moment
+            .utc(tx.time)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
         status: tx.status,
         amount: `${amount.toFixed(2)} sats`,
         type: isSend ? "send" : "receive",
@@ -56,8 +58,10 @@ const LnbitsTransaction = ({
         category: "payment",
         rawData: tx,
         day:
-          moment(tx.time).tz(userTimezone).format("MMMM D, YYYY h:mm A z") ||
-          "",
+          moment
+            .utc(tx.time)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
       };
     });
   };
