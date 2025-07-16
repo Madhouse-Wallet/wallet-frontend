@@ -4,7 +4,7 @@ import LnbitsTransactionDetail from "./LnbitsTransactionDetail";
 import Image from "next/image";
 import moment from "moment";
 import { createPortal } from "react-dom";
-import { getUser } from "@/lib/apiCall";
+import { getUser, lambdaInvokeFunction } from "@/lib/apiCall";
 import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
 
 // Bitcoin Transaction Component
@@ -49,6 +49,40 @@ const LnbitsTransaction = ({
             .format("MMMM D, YYYY h:mm A z") || "",
         status: tx.status,
         amount: `${amount.toFixed(2)} sats`,
+        type: isSend ? "send" : "receive",
+        summary:
+          tx.memo ||
+          (isSend
+            ? `Sent ${amount.toFixed(2)} sats`
+            : `Received ${amount.toFixed(2)} sats`),
+        category: "payment",
+        rawData: tx,
+        day:
+          moment
+            .utc(tx.time)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
+      };
+    });
+  };
+
+  const formatTposTransactionData = (txs) => {
+    return txs.map((tx) => {
+      const amount = tx.amount;
+      const isSend = amount < 0;
+
+      return {
+        id: tx.id,
+        transactionHash: tx.checking_id,
+        from: isSend ? userAuth?.walletAddress : "External",
+        to: isSend ? "External" : userAuth?.walletAddress,
+        date:
+          moment
+            .utc(tx.time)
+            .tz(userTimezone)
+            .format("MMMM D, YYYY h:mm A z") || "",
+        status: tx.status,
+        amount: `${onchainAmount.toFixed(2)} sats`,
         type: isSend ? "send" : "receive",
         summary:
           tx.memo ||
@@ -150,26 +184,6 @@ const LnbitsTransaction = ({
         } else {
           setBtcTransactions([]);
         }
-      } else if (usd === 3) {
-        const response = await fetch("/api/withdraw-transaction", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: userAuth?.email,
-          }),
-        });
-
-        const { status, data } = await response.json();
-
-        if (status === "success" && data) {
-          const formattedTransactions = formatBitcoinTransactionData(data);
-          setBtcTransactions(formattedTransactions);
-          setTransactions(formattedTransactions);
-        } else {
-          setBtcTransactions([]);
-        }
       } else if (usd === 4) {
         const response = await fetch("/api/deposit-transaction", {
           method: "POST",
@@ -190,29 +204,7 @@ const LnbitsTransaction = ({
         } else {
           setBtcTransactions([]);
         }
-      } else if (usd === 5) {
-        const response = await fetch("/api/withdraw-transaction", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: userAuth?.email,
-            tpos: true,
-            type: "usdc",
-          }),
-        });
-
-        const { status, data } = await response.json();
-
-        if (status === "success" && data) {
-          const formattedTransactions = formatBitcoinTransactionData(data);
-          setBtcTransactions(formattedTransactions);
-          setTransactions(formattedTransactions);
-        } else {
-          setBtcTransactions([]);
-        }
-      } else {
+      } else if (usd === 6) {
         const response = await fetch("/api/withdraw-transaction", {
           method: "POST",
           headers: {
@@ -237,16 +229,12 @@ const LnbitsTransaction = ({
       }
     } catch (error) {
       console.error("Error fetching Bitcoin transactions:", error);
+      setTransactions([]);
+      setBtcTransactions([]);
     } finally {
       setLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   if (userAuth?.btcWalletId && userAuth?.btcToken) {
-  //     fetchBitcoinTransactions();
-  //   }
-  // }, [userAuth?.btcWalletId, userAuth?.btcToken]);
 
   useEffect(() => {
     fetchBitcoinTransactions();
@@ -342,6 +330,7 @@ const LnbitsTransaction = ({
             detail={detail}
             setDetail={setDetail}
             transactionData={transactionData}
+            usd={usd}
           />,
           document.body
         )}
