@@ -631,7 +631,6 @@ export const getUserWallet = async (wallet) => {
 export const updtUser = async (findData, updtData) => {
   try {
     try {
-      console.log("line-541");
       return await fetch(`/api/updt-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -657,7 +656,6 @@ export const updtUser = async (findData, updtData) => {
 export const deleteBankAccountt = async (email, partyId) => {
   try {
     try {
-      console.log("line-541");
       return await fetch(`/api/delete-account`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

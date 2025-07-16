@@ -160,7 +160,6 @@ const WithdrawalSwap = () => {
         totalGasCost: totalGasCost,
       };
     } catch (error) {
-      console.error("Gas estimation error:", error);
       // Fallback gas values
       const gasPrice = await wallet.provider.getGasPrice();
       const fallbackGasLimit = ethers.BigNumber.from("100000");
@@ -192,7 +191,6 @@ const WithdrawalSwap = () => {
         setToAmount(goldShift?.settleAmount);
       }
     } catch (error) {
-      console.error("Bridge quote error:", error);
       setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setGoldToUsdcShift(null);
@@ -214,7 +212,6 @@ const WithdrawalSwap = () => {
         SIDESHIFT_SECRET_KEY,
         SIDESHIFT_AFFILIATE_ID
       );
-      console.log("line-215", ethGasShift);
       setUsdcToEthShift(ethGasShift);
 
       // Step 2: Get ETH Mainnet to USDC Base shift for the deposit amount
@@ -228,7 +225,6 @@ const WithdrawalSwap = () => {
         );
 
         setEthGasShift(usdcToEthShift);
-        console.log("line-228", usdcToEthShift);
       }
 
       return {
@@ -345,19 +341,8 @@ const WithdrawalSwap = () => {
 
       const currentEthBalance = await checkEthBalance();
       const requiredGas = ethers.BigNumber.from(gasEstimate.totalGasCost);
-      console.log("line=339 requiredGas:", requiredGas);
-      console.log(
-        "line=339 requiredGas in ETH:",
-        ethers.utils.formatEther(requiredGas)
-      );
-      console.log("line=340 currentEthBalance:", currentEthBalance);
-      console.log(
-        "line=340 currentEthBalance in ETH:",
-        ethers.utils.formatEther(currentEthBalance)
-      );
 
       if (currentEthBalance.lt(requiredGas)) {
-        console.log("line=341");
         const shortfall = requiredGas.sub(currentEthBalance);
         const minimumAmount = ethers.utils.parseEther("0.0013");
 
@@ -369,7 +354,6 @@ const WithdrawalSwap = () => {
           amountToShift.toString()
         );
 
-        console.log("line-369", ethGasShift, usdcToEthShift);
         // Step 3: Execute gas shift (if necessary)
         const getAccountCli = await getAccount(
           secretData?.privateKey,
@@ -379,24 +363,13 @@ const WithdrawalSwap = () => {
           return;
         }
 
-        console.log(
-          "line-360",
-          getAccountCli,
-          currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift,
-          currentEthBalance.lt(requiredGas),
-          usdcToEthShift,
-          ethGasShift
-        );
-
         if (
           currentEthBalance.lt(requiredGas) &&
           usdcToEthShift &&
           ethGasShift
         ) {
           try {
-            console.log("line-363", getAccountCli);
             if (usdcToEthShift.depositAmount) {
-              console.log("line-365", getAccountCli);
               const gasPriceResult = await calculateGasPriceInUSDC(
                 getAccountCli?.kernelClient,
                 [
@@ -411,12 +384,9 @@ const WithdrawalSwap = () => {
                   },
                 ]
               );
-              // Round gas price to 2 decimals
               const value = Number.parseFloat(gasPriceResult.formatted);
               const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
-              console.log("line-417", value, roundedGasPrice, gasPriceResult);
               setGasPrice(roundedGasPrice);
-              // Check if amount + gas price exceeds balance
               const totalRequired =
                 Number.parseFloat(usdcToEthShift.depositAmount) +
                 Number.parseFloat(roundedGasPrice);
@@ -428,7 +398,6 @@ const WithdrawalSwap = () => {
                 return;
               }
 
-              console.log("line-396", gasPriceResult, usdcToEthShift);
               const usdcSendTx = await sendTransaction(
                 getAccountCli?.kernelClient,
                 [
@@ -461,20 +430,10 @@ const WithdrawalSwap = () => {
                     const response = await axios.get(
                       `https://sideshift.ai/api/v2/shifts/${usdcToEthShift.id}`
                     );
-                    console.log(
-                      "Shift status response:",
-                      JSON.stringify(response.data)
-                    );
 
                     if (response.data.status === "settled") {
-                      console.log(
-                        "Shift has been settled, proceeding to next step"
-                      );
                       return true; // Status is settled, exit polling
                     } else {
-                      console.log(
-                        `Shift status: ${response.data.status}, continuing to poll...`
-                      );
                       return false; // Not settled yet, continue polling
                     }
                   } catch (error) {
@@ -494,13 +453,11 @@ const WithdrawalSwap = () => {
               }
             }
           } catch (error) {
-            console.log("line-452", error);
             setFailed(true);
             setTxError(error || "Transaction failed please try again.");
           }
         }
       }
-      console.log("line-4566");
       // Send Tether Gold to SideShift deposit address
       const goldTx = await goldContract.transfer(
         goldToUsdcShift.depositAddress,
