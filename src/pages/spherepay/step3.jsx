@@ -123,29 +123,6 @@ const Step3 = ({
     }
   };
 
-  // const handleTermsClick = async () => {
-  //   try {
-  //     const response = await TermsOfServiceCustomer();
-  //     if (response) {
-  //       setTermsSRC(response);
-  //       window.open(response?.link, "_blank");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error processing Terms of Service:", error);
-  //   }
-  // };
-
-  // const handleIdentityClick = async () => {
-  //   try {
-  //     const response = await kycCustomer();
-  //     if (response) {
-  //       setIdentitySRC(response);
-  //       window.open(response?.url, "_blank");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error processing Identity Verification:", error);
-  //   }
-  // };
 
   const handleTermsClick = async () => {
     try {

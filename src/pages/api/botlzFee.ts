@@ -32,8 +32,8 @@ export const reverseSwap = async (invoiceAmount:any, type: any) => {
     })
   ).data;
 
-  console.log('Created swap');
-  console.log(createdResponse);
+  // console.log('Created swap');
+  // console.log(createdResponse);
   return createdResponse;
     } catch (error) {
         console.log("error-->",error)

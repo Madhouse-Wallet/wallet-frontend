@@ -228,11 +228,8 @@ const WithdrawUsdcPopup = ({ withdrawUsdcPop, setWithdrawUsdcPop }) => {
     else {
       const feePortion = 1 - (1 / feeMultiplier); // ~0.0909
       const estimatedFee = Math.floor(numberValue * feePortion);
-      console.log("estimatedFee-->", estimatedFee)
-      console.log("feePortion-->", feePortion)
 
       const remainingBalance = lightningBalance - numberValue;
-      console.log("remainingBalance-->", remainingBalance)
       if (remainingBalance >= estimatedFee) {
         setError("");
         setConvertAmount(numberValue)

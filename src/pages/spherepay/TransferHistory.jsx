@@ -167,7 +167,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const filteredValue = filterAmountInput(value, 2, 20);
       const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
       const FeeAmount = filteredValue * FEE_PERCENTAGE;
-      console.log("line-83", FeeAmount);
       setFeeAmount(FeeAmount);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
       if (parseFloat(value) > parseFloat(balance)) {
@@ -274,7 +273,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const sendUsdc = async (amount, toAddress) => {
     let user = await getUser(userAuth?.email);
-    console.log("line-104", user);
 
     if (!user) {
       return;
@@ -301,7 +299,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
       let COMMISSION_FEES;
       if (!user?.userId?.commission_fees) {
-        console.log("line-138");
         let data = await updtUser(
           { email: userAuth.email },
           {
@@ -310,7 +307,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         );
         COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
       } else {
-        console.log("line-147");
         COMMISSION_FEES = user?.userId?.commission_fees;
       }
 

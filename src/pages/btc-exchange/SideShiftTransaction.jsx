@@ -116,7 +116,6 @@ const SideShiftTransaction = ({
         },
         "madhouse-backend-production-getUserTrxn"
       );
-      console.log("line-119", sideShiftIdsData);
       const transferIds = sideShiftIdsData?.data?.ids;
       if (!transferIds || transferIds.length === 0) {
         setSideshiftTransactions([]);
@@ -128,7 +127,6 @@ const SideShiftTransaction = ({
 
       try {
         const ids = transferIds.map((item) => item);
-        console.log("line-131", ids.length);
 
         // Process IDs in batches of 10
         const batchSize = 10;
@@ -171,8 +169,6 @@ const SideShiftTransaction = ({
 
     fetchTransactions();
   }, [userData, applyTrue]);
-
-  console.log("line-174", applyTrue);
 
   // Get status color
   const getStatusColor = (status) => {

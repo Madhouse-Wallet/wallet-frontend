@@ -65,9 +65,9 @@ export const createReverseSwap = async (invoiceAmount: any) => {
             })
         ).data;
 
-        console.log('Swap quote');
-        console.log(createdResponse);
-        console.log();
+        // console.log('Swap quote');
+        // console.log(createdResponse);
+        // console.log();
         return {
             status: true,
             data: createdResponse,
@@ -118,9 +118,9 @@ export const createReverseSwapSocket = async (createdResponse: any, preimage: an
                 return;
             }
 
-            console.log('Got WebSocket update');
-            console.log(msg);
-            console.log();
+            // console.log('Got WebSocket update');
+            // console.log(msg);
+            // console.log();
 
             switch (msg.args[0].status) {
                 // "swap.created" means Boltz is waiting for the invoice to be paid

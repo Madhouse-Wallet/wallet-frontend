@@ -26,7 +26,7 @@ const getDestinationAddress = async (
       boltzSwapId
     )) as any;
 
-    console.log("shift--> response", shift);
+    // console.log("shift--> response", shift);
     return {
       status: true,
       shift,
@@ -59,7 +59,7 @@ export default async function handler(
       lnbitAdminKey_3 = "",
     } = req.body;
 
-    console.log("req.body -->", req.body);
+    // console.log("req.body -->", req.body);
 
     const sats = amount;
     
@@ -77,7 +77,7 @@ export default async function handler(
     }
 
     let invoice_amount = Math.floor(sats);
-    console.log("invoice_amount-->", invoice_amount);
+    // console.log("invoice_amount-->", invoice_amount);
 
     let getUserToken = (await userLogIn(2, lnbitId_3)) as any;
     let token = getUserToken?.data?.token as any;
@@ -94,7 +94,7 @@ export default async function handler(
 
     const shift_amount =
       parseInt(createBoltzSwapApi.data.onchainAmount) - liquidBTCNetworkFee;
-    console.log("shift_amount-->", shift_amount);
+    // console.log("shift_amount-->", shift_amount);
 
     const finalRoute = await getDestinationAddress(
       wallet,
@@ -120,7 +120,7 @@ export default async function handler(
       "madhouse-backend-production-addSideShiftTrxn"
     );
 
-    console.log("finalRoute-->", finalRoute);
+    // console.log("finalRoute-->", finalRoute);
 
     const swapSocket = await createReverseSwapSocket(
       createBoltzSwapApi.data,
@@ -129,7 +129,7 @@ export default async function handler(
       finalRoute.depositAddress
     );
 
-    console.log("Step 4: Created swap", swapSocket);
+    // console.log("Step 4: Created swap", swapSocket);
 
     if (!swapSocket?.status)
       return res
@@ -154,7 +154,7 @@ export default async function handler(
       lnbitAdminKey_3
     );
 
-    console.log("withdraw usdc invoice-->", invoice);
+    // console.log("withdraw usdc invoice-->", invoice);
     if (!invoice?.status)
       return res.status(400).json({ status: "failure", message: invoice.msg });
 

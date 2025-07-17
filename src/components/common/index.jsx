@@ -122,7 +122,6 @@ export const BackBtn = () => {
 };
 
 export const RadioToggle = ({ runfunc, initValueAutoTransfer }) => {
-  console.log("initValueAutoTransfer-->",initValueAutoTransfer)
   const [enabled, setEnabled] = useState(initValueAutoTransfer);
 
   return (

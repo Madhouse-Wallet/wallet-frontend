@@ -155,11 +155,6 @@ const RefundBitcoin = ({
                   break;
                 }
               } catch (quoteError) {
-                console.log(
-                  `Swapkit attempt ${quoteAttempts} failed:`,
-                  quoteError
-                );
-
                 if (quoteAttempts >= maxQuoteAttempts) {
                   // After 3 attempts, set the error
                   setSwapType("Swapkit");
@@ -418,7 +413,6 @@ const RefundBitcoin = ({
       !destinationAddress
     );
   };
-  console.log("amountError", amountError);
   const getButtonText = () => {
     if (isLoading)
       return (
