@@ -6,8 +6,8 @@ const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: {
-      accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-      secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_LAMBDA_ACCESS_KEY,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_LAMBDA_SECRET_KEY,
     },
   });
 
