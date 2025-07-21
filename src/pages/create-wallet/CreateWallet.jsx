@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
-import { loadCaptchaEnginge, LoadCanvasTemplate, validateCaptcha } from "react-simple-captcha";
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const CreateWalletStep = ({
   step,
@@ -15,25 +15,18 @@ const CreateWalletStep = ({
   const [registerEmail, setRegisterEmail] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [error, setError] = useState("");
-  const [captchaValid, setCaptchaValid] = useState(false);
-  const [captchaInput, setCaptchaInput] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [recaptchaError, setRecaptchaError] = useState("");
 
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Harder challenge: 8 chars, uppercase letters and numbers only
-      loadCaptchaEnginge(8, "#18181b", "#fff");
-    }
-  }, []);
-
-  const handleCaptchaInput = (e) => {
-    const value = e.target.value;
-    setCaptchaInput(value);
-    setCaptchaValid(validateCaptcha(value, false));
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+    setRecaptchaError("");
   };
 
   const createRegister = async () => {
     try {
       setRegisterOtpLoading(true);
+      setRecaptchaError("");
       if (!registerEmail) {
         setError("Please Enter Email!");
         setRegisterOtpLoading(false);
@@ -42,6 +35,9 @@ const CreateWalletStep = ({
         if (!validEmail) {
           setRegisterOtpLoading(false);
           setError("Please Enter Valid Email!");
+        } else if (!recaptchaToken) {
+          setRecaptchaError("Please complete the captcha challenge.");
+          setRegisterOtpLoading(false);
         } else {
           let response = await sendRegisterOtp({
             email: registerEmail,
@@ -97,7 +93,7 @@ const CreateWalletStep = ({
         reloadBtn.style.color = "#fff";
       }
     }
-  }, [captchaInput]);
+  }, []);
 
   return (
     <>
@@ -163,32 +159,24 @@ const CreateWalletStep = ({
                 )}
               </div>
             </div>
-            <div className="col-span-12">
-              <div className="mt-2 flex flex-col items-center">
-                {/* Style the captcha container */}
-                <div className="w-full flex flex-col items-center gap-2">
-                  <LoadCanvasTemplate />
-                  {/* Style the canvas and reload button via script after render */}
+            <div className="col-span-12 flex flex-col items-center">
+              <ReCAPTCHA
+                sitekey="6LdT0YkrAAAAAKNrCVrpZ5lWndeBk_CLot4GPLTj"
+                onChange={handleRecaptchaChange}
+                theme="light"
+                className="mb-2"
+              />
+              {recaptchaError && (
+                <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                  {recaptchaError}
                 </div>
-                <input
-                  type="text"
-                  value={captchaInput}
-                  onChange={handleCaptchaInput}
-                  placeholder="Enter captcha"
-                  className="mt-2 border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                />
-                {!captchaValid && captchaInput && (
-                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
-                    Invalid captcha
-                  </div>
-                )}
-              </div>
+              )}
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
                   disabled={
-                    registerOtpLoading || !registerEmail || error || checkEmail || !captchaValid
+                    registerOtpLoading || !registerEmail || error || checkEmail || !recaptchaToken
                   }
                   onClick={createRegister}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
