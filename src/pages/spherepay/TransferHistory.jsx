@@ -15,6 +15,7 @@ import { getUser, lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import { parseAbi, parseUnits } from "viem";
 import { createPortal } from "react-dom";
 import SpherePayTransferDetailPop from "@/components/Modals/SpherePayTransferDetailPopup";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const TransferHistory = ({ step, setStep, customerId }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -659,15 +660,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
                 <div className="col-span-12">
                   <div className="flex items-center justify-center gap-3">
-                    <button
+                    <PrimaryButton
                       type="submit"
-                      disabled={
-                        isLoading || userData?.EnableSpherepay === false
-                      }
-                      className="commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
+                      disabled={isLoading || userData?.EnableSpherepay === false}
                     >
                       {isLoading ? "Processing..." : "Transfer"}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
               </div>

@@ -10,6 +10,7 @@ import {
 import styled from "styled-components";
 import { fetchUserData } from "../../utils/fetchUserData";
 import { useSelector } from "react-redux";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const formatAddress = (address) => {
   if (!address) return "";
@@ -230,32 +231,20 @@ const InternalTab = () => {
     <>
       <TabNav className="list-none pl-0 mb-0 flex items-center gap-3 mb-3">
         <li className="">
-          <button
-            onClick={() => setActiveView("depositor")}
-            className={` ${
-              activeView === "depositor"
-                ? "bg-[#ffad84] border-[#ffad84]"
-                : "bg-white border-white"
-            }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
-             // Highlight active tab
-              `}
+          <PrimaryButton
+            asChild
+            className={`${activeView === "depositor" ? "bg-[#ffad84] border-[#ffad84]" : "bg-white border-white"} flex w-full h-[42px] border-2 text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
           >
-            Deposit
-          </button>
+            <button type="button" onClick={() => setActiveView("depositor")}>Deposit</button>
+          </PrimaryButton>
         </li>
         <li className="">
-          <button
-            onClick={() => setActiveView("redeemer")}
-            className={` ${
-              activeView === "redeemer"
-                ? "bg-[#ffad84] border-[#ffad84]"
-                : "bg-white border-white"
-            }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
-           // Highlight active tab
-            `}
+          <PrimaryButton
+            asChild
+            className={`${activeView === "redeemer" ? "bg-[#ffad84] border-[#ffad84]" : "bg-white border-white"} flex w-full h-[42px] border-2 text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
           >
-            Redeem
-          </button>
+            <button type="button" onClick={() => setActiveView("redeemer")}>Redeem</button>
+          </PrimaryButton>
         </li>
       </TabNav>
       <div className="overflow-auto">

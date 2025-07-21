@@ -20,6 +20,7 @@ import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -568,15 +569,13 @@ const Swap = () => {
                     </div>
                   </div>
                   <div className="mt-3 py-2">
-                    <button
-                      className={`flex btn md:rounded-xl rounded-[8px] items-center justify-center commonBtn w-full  text-[12px] ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
+                    <PrimaryButton
                       onClick={() => setTrxnApproval(true)}
                       disabled={isButtonDisabled()}
+                      className={`md:rounded-xl rounded-[8px] text-[12px] ${isButtonDisabled() ? "opacity-70" : ""}`}
                     >
                       {getButtonText()}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Link from "next/link";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
   const handleBuySell = () => setBuySell(!buySell);
@@ -24,20 +25,14 @@ const BuySellBitcoinPop = ({ buySell, setBuySell }) => {
             <div className="top pb-3"></div>
             <div className="modalBody">
               <div className="py-2">
-                <Link
-                  href="/buy"
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Buy{" "}
-                </Link>
+                <PrimaryButton asChild>
+                  <Link href="/buy">Buy</Link>
+                </PrimaryButton>
               </div>
               <div className="py-2">
-                <Link
-                  href="/sell"
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                >
-                  Sell
-                </Link>
+                <PrimaryButton asChild>
+                  <Link href="/sell">Sell</Link>
+                </PrimaryButton>
               </div>
             </div>
           </div>

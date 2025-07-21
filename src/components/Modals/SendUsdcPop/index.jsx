@@ -22,6 +22,7 @@ import {
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 import { getUser, updtUser } from "@/lib/apiCall.js";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
   const userAuth = useSelector((state) => state.Auth);
@@ -472,28 +473,24 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                     )}
                   </div>
                   <div className="py-2 mt-4">
-                    <button
+                    <PrimaryButton
                       type="button"
                       onClick={handleProceedToApproval}
                       disabled={!isFormValid() || isLoading}
-                      className="flex items-center justify-center commonBtn rounded-full w-full h-[50px] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="rounded-full w-full h-[50px] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
                         <Image
-                          src={
-                            process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"
-                          }
+                          src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                           alt={""}
                           height={100000}
                           width={10000}
-                          className={
-                            "max-w-full h-[40px] object-contain w-auto"
-                          }
+                          className={"max-w-full h-[40px] object-contain w-auto"}
                         />
                       ) : (
                         "Send"
                       )}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
               </>

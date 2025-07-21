@@ -24,6 +24,7 @@ import {
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
 import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -726,16 +727,14 @@ const RefundBitcoin = ({
                   </div>
 
                   <div className="py-2 mt-4">
-                    <button
+                    <PrimaryButton
                       type="button"
                       onClick={() => initiateSwap()}
                       disabled={isButtonDisabled()}
-                      className={`flex btn rounded-xl items-center justify-center commonBtn w-full ${
-                        isButtonDisabled() ? "opacity-70" : ""
-                      }`}
+                      className={`rounded-xl ${isButtonDisabled() ? "opacity-70" : ""}`}
                     >
                       {getButtonText()}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
               </>

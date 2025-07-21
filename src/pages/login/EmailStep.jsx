@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const EmailStep = ({ step, setStep, loginFn, errorr }) => {
   const [error, setError] = useState("");
@@ -123,25 +124,23 @@ const EmailStep = ({ step, setStep, loginFn, errorr }) => {
             </div>
             <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
-                <button
+                <PrimaryButton
                   onClick={loginTry}
                   disabled={loginLoading || !registerEmail || error}
                   type="submit"
-                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   {loginLoading ? (
                     <Image
                       src={process.env.NEXT_PUBLIC_IMAGE_URL + "loading.gif"}
                       alt={""}
                       height={100000}
-                      i
                       width={10000}
                       className={"max-w-full h-[40px] object-contain w-auto"}
                     />
                   ) : (
                     "Log in"
                   )}
-                </button>
+                </PrimaryButton>
               </div>
             </div>
           </div>

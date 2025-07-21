@@ -22,6 +22,7 @@ import { useRouter } from "next/router";
 import { RadioToggle } from "@/components/common";
 import { updtUser } from "../../lib/apiCall";
 import { retrieveSecret } from "@/utils/webauthPrf";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const BTCDebitCard: React.FC = () => {
   const router = useRouter();
@@ -406,39 +407,30 @@ const BTCDebitCard: React.FC = () => {
                   <div className="max-w-[500px] w-full bg-black/50 mx-auto rounded-xl mt-5 p-6">
                     <div className="grid gap-3 grid-cols-12">
                       <div className="col-span-6">
-                        <button
-                          onClick={() => setLightning(!lightning)}
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                        >
+                        <PrimaryButton onClick={() => setLightning(!lightning)}>
                           Withdraw
-                        </button>
+                        </PrimaryButton>
                       </div>
                       <div className="col-span-6">
-                        <button
-                          // onClick={() => setDepositPop(!depositPop)}
-                          onClick={() => setLightningDeposit(!LightningDeposit)}
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                        >
+                        <PrimaryButton onClick={() => setLightningDeposit(!LightningDeposit)}>
                           Deposit
-                        </button>
+                        </PrimaryButton>
                       </div>
                       <div className="col-span-6">
-                        <button
+                        <PrimaryButton
                           disabled={creditCardDetails || lightningBalance <= 0}
                           onClick={() => createCardCred()}
-                          className={`  bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                         >
                           Create Pass
-                        </button>
+                        </PrimaryButton>
                       </div>
                       <div className="col-span-6">
-                        <button
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        <PrimaryButton
                           disabled={loader || !creditCardDetails}
                           onClick={() => delCard()}
                         >
                           Delete Pass
-                        </button>
+                        </PrimaryButton>
                       </div>
                       {
                         userAuth.email && (<div className="col-span-12">
@@ -482,18 +474,12 @@ const BTCDebitCard: React.FC = () => {
                         style={{ imageRendering: "pixelated" }}
                       />
                       <div className="flex items-center justify-center gap-3 mt-4">
-                        <button
-                          onClick={() => setLNAdressPop(!lnAdressPop)}
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                        >
+                        <PrimaryButton onClick={() => setLNAdressPop(!lnAdressPop)}>
                           Modify LN Address
-                        </button>
-                        <button
-                          onClick={() => setBitikaPop(!bitikaPop)}
-                          className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-                        >
+                        </PrimaryButton>
+                        <PrimaryButton onClick={() => setBitikaPop(!bitikaPop)}>
                           Buy Lightning with M-Pesa
-                        </button>
+                        </PrimaryButton>
                       </div>
                     </div>
                   )}

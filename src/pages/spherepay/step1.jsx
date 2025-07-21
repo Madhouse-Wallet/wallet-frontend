@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SpherePayAPI from "../api/spherePayApi";
+import PrimaryButton from "@/components/common/PrimaryButton";
 
 const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -86,13 +87,9 @@ const Step1 = ({ step, setStep, email, setEmail, setCustomerID }) => {
           </div>
           <div className="py-2">
             <div className="flex items-center justify-center gap-3">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
-              >
+              <PrimaryButton type="submit" disabled={isLoading}>
                 {isLoading ? "Processing..." : "Sign in"}
-              </button>
+              </PrimaryButton>
             </div>
           </div>
         </form>
