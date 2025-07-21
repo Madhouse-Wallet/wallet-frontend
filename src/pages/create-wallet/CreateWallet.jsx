@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
+import { loadCaptchaEnginge, LoadCanvasTemplate, validateCaptcha } from "react-simple-captcha";
 
 const CreateWalletStep = ({
   step,
@@ -14,6 +15,20 @@ const CreateWalletStep = ({
   const [registerEmail, setRegisterEmail] = useState();
   const [registerOtpLoading, setRegisterOtpLoading] = useState(false);
   const [error, setError] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      loadCaptchaEnginge(6, "#18181b", "#fff");
+    }
+  }, []);
+
+  const handleCaptchaInput = (e) => {
+    const value = e.target.value;
+    setCaptchaInput(value);
+    setCaptchaValid(validateCaptcha(value, false));
+  };
 
   const createRegister = async () => {
     try {
@@ -61,6 +76,27 @@ const CreateWalletStep = ({
       setError("Invalid email format");
     }
   };
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Style the canvas to match the reload button, no black
+      const canvas = document.getElementById("canv");
+      if (canvas) {
+        canvas.className = "rounded-full border border-white/10 bg-white/10 w-full max-w-xs h-12 mt-2 text-white px-4 py-2";
+        canvas.style.background = "rgba(255,255,255,0.1)";
+        // Remove any explicit black color
+        if (canvas.style.color === "#000" || canvas.style.color === "black") {
+          canvas.style.color = "#fff";
+        }
+      }
+      // Style the reload button
+      const reloadBtn = document.getElementById("reload_href");
+      if (reloadBtn) {
+        reloadBtn.className = "block mx-auto mt-2 bg-white/10 hover:bg-white/20 text-white font-medium text-xs px-4 py-2 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:bg-white/20 disabled:pointer-events-none disabled:opacity-50 text-center";
+        reloadBtn.style.color = "#fff";
+      }
+    }
+  }, [captchaInput]);
 
   return (
     <>
@@ -127,10 +163,31 @@ const CreateWalletStep = ({
               </div>
             </div>
             <div className="col-span-12">
+              <div className="mt-2 flex flex-col items-center">
+                {/* Style the captcha container */}
+                <div className="w-full flex flex-col items-center gap-2">
+                  <LoadCanvasTemplate />
+                  {/* Style the canvas and reload button via script after render */}
+                </div>
+                <input
+                  type="text"
+                  value={captchaInput}
+                  onChange={handleCaptchaInput}
+                  placeholder="Enter captcha"
+                  className="mt-2 border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                />
+                {!captchaValid && captchaInput && (
+                  <div className="flex items-center gap-1 p-1 text-13 font-normal -tracking-2 text-red-500">
+                    Invalid captcha
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="col-span-12">
               <div className="btnWrpper text-center mt-3">
                 <button
                   disabled={
-                    registerOtpLoading || !registerEmail || error || checkEmail
+                    registerOtpLoading || !registerEmail || error || checkEmail || !captchaValid
                   }
                   onClick={createRegister}
                   className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
