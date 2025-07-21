@@ -32,16 +32,20 @@ const TposTransactionDetail = ({ detail, setDetail, transactionData }) => {
   };
 
   const handleDownload = () => {
-    const jsonData = JSON.stringify(data, null, 2); // pretty print with 2-space indentation
-    const blob = new Blob([jsonData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `boltz-refund-${transactionData?.swapId}.json`;
-    a.click();
-
-    URL.revokeObjectURL(url); // clean up memory
+    try {
+      const jsonData = JSON.stringify(data, null, 2); // pretty print with 2-space indentation
+      const blob = new Blob([jsonData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `boltz-refund-${transactionData?.swapId}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url); // clean up memory
+    } catch (error) {
+      console.error("Download error:", error);
+    }
   };
 
   return (

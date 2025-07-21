@@ -17,34 +17,33 @@ const BitikaPop = ({ bitikaPop, setBitikaPop, lnAddress }) => {
   };
 
   const handleSubmit = () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
       const numericAmount = parseFloat(amount);
-
       // Validate amount
       if (!amount || amount === "" || isNaN(numericAmount)) {
         setAmountError("Please enter a valid amount");
         setLoading(false);
         return;
       }
-
       if (numericAmount <= 0) {
         setAmountError("Amount must be greater than 0");
         setLoading(false);
         return;
       }
-
       // Construct the URL with the amount parameter
       const baseUrl = "https://bitika.xyz/";
       const fullUrl = `${baseUrl}?lnaddress=${lnAddress}&amount=${numericAmount}`;
-
       // Open in new window
-      window.open(fullUrl, "_blank");
-
+      try {
+        window.open(fullUrl, "_blank");
+      } catch (err) {
+        setAmountError("Could not open Bitika window. Please check your popup blocker.");
+        setLoading(false);
+        return;
+      }
       // Close the modal
       setBitikaPop(false);
-
       setLoading(false);
     } catch (error) {
       setAmountError("Error processing request");

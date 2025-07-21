@@ -30,9 +30,13 @@ export const ThemeProvider = ({ children }) => {
   // Initialize theme (default: dark)
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") || "dark"; // Ensure dark mode is default
+      try {
+        return localStorage.getItem("theme") || "dark";
+      } catch {
+        return "dark";
+      }
     }
-    return "dark"; // Fallback for SSR
+    return "dark";
   });
 
   // Toggle theme
@@ -47,18 +51,20 @@ export const ThemeProvider = ({ children }) => {
   // Apply the theme variables to the root element and update body class
   useEffect(() => {
     if (typeof document !== "undefined") {
-      const root = document.documentElement;
-      const body = document.body;
-      const currentTheme = themeVariables[theme];
-
-      // Set CSS variables
-      Object.entries(currentTheme).forEach(([key, value]) => {
-        root.style.setProperty(`--${key}`, value);
-      });
-
-      // Remove existing theme class and add new one
-      body.classList.remove("light", "dark");
-      body.classList.add(theme);
+      try {
+        const root = document.documentElement;
+        const body = document.body;
+        const currentTheme = themeVariables[theme];
+        // Set CSS variables
+        Object.entries(currentTheme).forEach(([key, value]) => {
+          root.style.setProperty(`--${key}`, value);
+        });
+        // Remove existing theme class and add new one
+        body.classList.remove("light", "dark");
+        body.classList.add(theme);
+      } catch {
+        // fail silently
+      }
     }
   }, [theme]);
 
