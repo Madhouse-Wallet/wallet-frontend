@@ -124,7 +124,6 @@ const DepositPopup = ({ depositPop, setDepositPop }) => {
               network: "main", // Use 'main' for mainnet
             });
 
-            console.log("line-123", gasCalulate);
             if (gasCalulate.success === false) {
               setLoading(false);
 

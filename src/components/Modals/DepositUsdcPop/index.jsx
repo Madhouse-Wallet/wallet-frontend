@@ -108,10 +108,6 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
             process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
           );
           if (getQuoteUsdcToLbtc && getQuoteUsdcToLbtc?.settleAmount) {
-            console.log(
-              "getQuoteUsdcToLbtc-->",
-              getQuoteUsdcToLbtc.settleAmount
-            );
             const sats = Math.round(
               getQuoteUsdcToLbtc.settleAmount * 100000000
             );
@@ -126,7 +122,6 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
               userExist?.userId?.lnbitId_3,
               userExist?.userId?.lnbitWalletId_3
             );
-            console.log("getBtcSat-->", getBtcSat);
             if (getBtcSat.status && getBtcSat.status == "failure") {
               setCommonError(getBtcSat.message);
               setLoading(false);
@@ -139,21 +134,14 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
                 process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
                 process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
               );
-              console.log("getQuoteLbtcToUsdc-->", getQuoteLbtcToUsdc);
               if (getQuoteLbtcToUsdc && getQuoteLbtcToUsdc?.settleAmount) {
                 const totalAmount = Number(
                   (getQuoteLbtcToUsdc?.settleAmount * 1.08).toFixed(6)
                 );
-                console.log("totalAmount-->", totalAmount);
                 getQuoteUsdcToLbtc = await createUsdcToLbtcToShiftQuote(
                   totalAmount,
                   process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
                   process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
-                );
-                console.log("final quote-->", getQuoteUsdcToLbtc.settleAmount);
-                console.log(
-                  getQuoteUsdcToLbtc.settleAmount * 100000000,
-                  getBtcSat?.data?.expected_amount
                 );
                 if (usdcBalance < totalAmount) {
                   setCommonError(
@@ -167,7 +155,6 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
                     process.env.NEXT_PUBLIC_SIDESHIFT_SECRET_KEY,
                     process.env.NEXT_PUBLIC_SIDESHIFT_AFFILIATE_ID
                   );
-                  console.log("routeData-- usdc to lbtc", routeData);
                   setLoading(false);
                 }
 
@@ -241,7 +228,6 @@ const DepositUsdcPopup = ({ depositUsdcPop, setDepositUsdcPop }) => {
         const usdcBalance = String(
           Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
         );
-        console.log("usdcBalance-->", usdcBalance);
         setTotalUsdBalance(
           parseFloat(usdcBalance) < 0.01
             ? "0"

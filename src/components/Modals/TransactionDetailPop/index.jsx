@@ -2,13 +2,17 @@ import React from "react";
 import styled from "styled-components";
 import { ethers } from "ethers";
 
-const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
+const TransactionDetailPop = ({
+  detail,
+  setDetail,
+  transactionData,
+  userData,
+}) => {
   const truncateAddress = (address) => {
     if (!address) return "";
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
-  
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -23,12 +27,14 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
     to = "",
     transactionHash = "",
     type = "",
+    feeType = "",
   } = transactionData || {};
 
   const getInitials = (address) => {
     if (!address) return "??";
     return address.substring(2, 4).toUpperCase();
   };
+
   return (
     <>
       <Modal
@@ -60,7 +66,7 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Status</h6>
                       <a
-                        href={`${category === "USDC" ? process.env.NEXT_PUBLIC_EXPLORER_URL : process.env.NEXT_PUBLIC_ETHEREUM_EXPLORER_URL}/${transactionHash}`}
+                        href={`${category === "USDC" || category === "sparkUSDC" ? process.env.NEXT_PUBLIC_EXPLORER_URL : process.env.NEXT_PUBLIC_ETHEREUM_EXPLORER_URL}/${transactionHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 text-xs font-medium"
@@ -178,6 +184,13 @@ const TransactionDetailPop = ({ detail, setDetail, transactionData }) => {
                     <li className="py-2 flex items-center justify-between">
                       <span className="text-white opacity-80">Summary</span>
                       <span className="text-white font-medium">{summary}</span>
+                    </li>
+                  )}
+
+                  {feeType && (
+                    <li className="py-2 flex items-center justify-between">
+                      <span className="text-white opacity-80">Fee</span>
+                      <span className="text-white font-medium">{feeType}</span>
                     </li>
                   )}
                 </ul>

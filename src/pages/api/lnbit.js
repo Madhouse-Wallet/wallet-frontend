@@ -6,8 +6,8 @@ const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: {
-      accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-      secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_LAMBDA_ACCESS_KEY,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_LAMBDA_SECRET_KEY,
     },
   });
 
@@ -22,10 +22,10 @@ const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
     const result = new TextDecoder().decode(response.Payload);
 
     if (response.LogResult) {
-      console.log(
-        "Lambda logs:",
-        Buffer.from(response.LogResult, "base64").toString("ascii")
-      );
+      // console.log(
+      //   "Lambda logs:",
+      //   Buffer.from(response.LogResult, "base64").toString("ascii")
+      // );
     }
 
     const parsed = JSON.parse(result);

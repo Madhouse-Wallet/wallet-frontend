@@ -52,25 +52,33 @@ export const createReverseSwap = async (invoiceAmount: any) => {
         // Create a random preimage for the swap; has to have a length of 32 bytes
         const preimage = randomBytes(32);
         const keys = ECPair.makeRandom();
+        let claimPublicKey = Buffer.from(keys.publicKey).toString('hex');
+        let preimageHash = crypto.sha256(preimage).toString('hex');
         // Create a Reverse Swap
         const createdResponse = (
             await axios.post(`${endpoint}/v2/swap/reverse`, {
                 invoiceAmount,
                 to: 'L-BTC',
                 from: 'BTC',
-                claimPublicKey: Buffer.from(keys.publicKey).toString('hex'),
-                preimageHash: crypto.sha256(preimage).toString('hex'),
+                claimPublicKey,
+                preimageHash
             })
         ).data;
 
-        console.log('Swap quote');
-        console.log(createdResponse);
-        console.log();
+        // console.log('Swap quote');
+        // console.log(createdResponse);
+        // console.log();
         return {
             status: true,
             data: createdResponse,
             keys,
-            preimage
+            preimage,
+            storeData: {
+                ...createdResponse,
+                claimPublicKey,
+                preimageHash,
+                preimage: preimage.toString('hex')
+            }
         };
     } catch (error: any) {
         console.error("Detailed error:", error);
@@ -110,9 +118,9 @@ export const createReverseSwapSocket = async (createdResponse: any, preimage: an
                 return;
             }
 
-            console.log('Got WebSocket update');
-            console.log(msg);
-            console.log();
+            // console.log('Got WebSocket update');
+            // console.log(msg);
+            // console.log();
 
             switch (msg.args[0].status) {
                 // "swap.created" means Boltz is waiting for the invoice to be paid

@@ -11,7 +11,7 @@ import {
 } from "@/lib/zeroDev";
 import { retrieveSecret } from "@/utils/webauthPrf";
 import { useSelector } from "react-redux";
-import { getUser, updtUser } from "@/lib/apiCall";
+import { getUser, lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import { parseAbi, parseUnits } from "viem";
 import { createPortal } from "react-dom";
 import SpherePayTransferDetailPop from "@/components/Modals/SpherePayTransferDetailPopup";
@@ -32,6 +32,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
   const [balance, setBalance] = useState("0");
+  const [feeAmount, setFeeAmount] = useState(null);
 
   const [onRampForm, setOnRampForm] = useState({
     currency: "usd",
@@ -157,12 +158,16 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
     setError("");
     setSuccessMessage("");
+    setFeeAmount(null);
   };
 
   const handleOffRampChange = (e) => {
     const { id, value } = e.target;
     if (id === "amount") {
       const filteredValue = filterAmountInput(value, 2, 20);
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = filteredValue * FEE_PERCENTAGE;
+      setFeeAmount(FeeAmount);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
       if (parseFloat(value) > parseFloat(balance)) {
         setError("Insufficient USDC Balance");
@@ -236,14 +241,17 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const response = await SpherePayAPI.createTransfer(transferData);
       setSuccessMessage("Transfer initiated successfully!");
       setTransferData(response.data.transfer);
-      let data = await updtUser(
-        { email: userAuth?.email },
+
+      await lambdaInvokeFunction(
         {
-          $push: {
-            spherePayTransferIds: response?.data?.transfer?.id,
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "on-ramp",
+          data: response?.data?.transfer?.id,
+        },
+        "madhouse-backend-production-addSpherepayTrxn"
       );
+
       // Clear form after successful submission
       setOnRampForm({
         currency: "",
@@ -265,7 +273,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const sendUsdc = async (amount, toAddress) => {
     let user = await getUser(userAuth?.email);
-    console.log("line-104", user);
 
     if (!user) {
       return;
@@ -290,13 +297,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         return;
       }
 
-      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
-      const FeeAmount = amount * FEE_PERCENTAGE;
-      console.log("line-133", FeeAmount);
-
       let COMMISSION_FEES;
       if (!user?.userId?.commission_fees) {
-        console.log("line-138");
         let data = await updtUser(
           { email: userAuth.email },
           {
@@ -305,7 +307,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         );
         COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
       } else {
-        console.log("line-147");
         COMMISSION_FEES = user?.userId?.commission_fees;
       }
 
@@ -324,14 +325,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             functionName: "transfer",
             args: [
               process.env.NEXT_PUBLIC_MADHOUSE_FEE,
-              parseUnits(FeeAmount.toString(), 6),
+              parseUnits(feeAmount.toString(), 6),
             ],
           },
           {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
           },
         ]
       );
@@ -366,14 +367,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           functionName: "transfer",
           args: [
             process.env.NEXT_PUBLIC_MADHOUSE_FEE,
-            parseUnits(FeeAmount.toString(), 6),
+            parseUnits(feeAmount.toString(), 6),
           ],
         },
         {
           to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
           abi: USDC_ABI,
           functionName: "transfer",
-          args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+          args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
         },
       ]);
 
@@ -439,13 +440,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         setError("USDC Transfer Failed");
         return;
       }
-      let data = await updtUser(
-        { email: userAuth?.email },
+
+      await lambdaInvokeFunction(
         {
-          $push: {
-            spherePayTransferIds: response?.data?.transfer?.id,
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "off-ramp",
+          data: response?.data?.transfer?.id,
+        },
+        "madhouse-backend-production-addSpherepayTrxn"
       );
       setOffRampForm({
         currency: "",
@@ -475,8 +478,16 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const fetchTransferHistory = async () => {
     setIsHistoryLoading(true);
     try {
-      const userExist = await getUser(userAuth.email);
-      const transferIds = userExist?.userId?.spherePayTransferIds;
+      const shpherePayIdsData = await lambdaInvokeFunction(
+        {
+          email: userAuth?.email,
+          type: "spherepay",
+          page: 1,
+          limit: 100,
+        },
+        "madhouse-backend-production-getUserTrxn"
+      );
+      const transferIds = shpherePayIdsData?.data?.ids;
 
       if (!transferIds || transferIds.length === 0) {
         setTransfers([]);
@@ -650,7 +661,9 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div className="flex items-center justify-center gap-3">
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={
+                        isLoading || userData?.EnableSpherepay === false
+                      }
                       className="commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isLoading ? "Processing..." : "Transfer"}
@@ -804,6 +817,21 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     {gasPrice && (
                       <label className="form-label m-0 font-semibold text-xs block">
                         Estimated Max Gas Fee: {gasPrice} USDC
+                      </label>
+                    )}
+
+                    {feeAmount > 0 && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Madhouse Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
+                      </label>
+                    )}
+                    {feeAmount > 0 && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Commission Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
                       </label>
                     )}
 

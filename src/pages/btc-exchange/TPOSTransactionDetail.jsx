@@ -3,19 +3,8 @@ import styled from "styled-components";
 import InvoicePop from "../../components/Modals/InvoicePop";
 import { createPortal } from "react-dom";
 
-const LnbitsTransactionDetail = ({
-  detail,
-  setDetail,
-  transactionData,
-  usd,
-}) => {
+const TposTransactionDetail = ({ detail, setDetail, transactionData }) => {
   const [invoiceePop, setInvoicePop] = useState(false);
-  const truncateAddress = (address) => {
-    if (!address) return "";
-    return `${address.substring(0, 6)}...${address.substring(
-      address.length - 4
-    )}`;
-  };
   const handleTransactionDetail = () => setDetail(!detail);
 
   const {
@@ -30,21 +19,16 @@ const LnbitsTransactionDetail = ({
     to = "",
     transactionHash = "",
     type = "",
+    invoice = "",
   } = transactionData || {};
 
-  const getInitials = (address) => {
-    if (!address) return "??";
-    if (address === "External") return "EX";
-    return address.substring(2, 4).toUpperCase();
-  };
-
   const data = {
-    id: transactionData?.rawData?.boltz_id,
-    asset: "BTC",
-    redeemScript: transactionData?.rawData?.redeem_script,
-    privateKey: transactionData?.rawData?.refund_privkey,
-    timeoutBlockHeight: transactionData?.rawData?.timeout_block_height,
-    blindingKey: transactionData?.rawData?.blinding_key,
+    claimPublicKey: transactionData?.claimPublicKey || "",
+    refundPublicKey: transactionData?.refundPublicKey || "",
+    preimage: transactionData?.preimage || "",
+    blindingKey: transactionData?.blindingKey || "",
+    address: transactionData?.to || "",
+    tree: transactionData?.swapTree || "",
   };
 
   const handleDownload = () => {
@@ -54,7 +38,7 @@ const LnbitsTransactionDetail = ({
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `boltz-refund-${transactionData?.rawData?.boltz_id}.json`;
+    a.download = `boltz-refund-${transactionData?.swapId}.json`;
     a.click();
 
     URL.revokeObjectURL(url); // clean up memory
@@ -67,7 +51,7 @@ const LnbitsTransactionDetail = ({
           <InvoicePop
             invoiceePop={invoiceePop}
             setInvoicePop={setInvoicePop}
-            qrCodee={rawData.bolt11}
+            qrCodee={invoice}
           />,
           document.body
         )}
@@ -89,32 +73,17 @@ const LnbitsTransactionDetail = ({
           <div className={`relative rounded px-3`}>
             <div className="top pb-3">
               <h5 className="text-2xl font-bold leading-none -tracking-4 text-white/80">
-                {/* {type
-                  ? type.charAt(0).toUpperCase() + type.slice(1)
-                  : "Bitcoin Transaction Details"} */}
-                Lightning Transaction Details
+                Boltz Withdraw Details
               </h5>
             </div>
             <div className="modalBody">
               <div className="py-3">
                 <ul className="list-none pl-0 mb-0">
-                  {/* <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <h6 className="m-0 font-semibold text-base">Status</h6>
-                      <a
-                        href={`${process.env.NEXT_PUBLIC_BTC_EXPLORER_URL}/${transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 text-xs font-medium"
-                      >
-                        View on block explorer
-                      </a>
-                    </div>
-                  </li> */}
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base capitalize">
-                        {status || "Pending"}
+                        {/* {status || "Pending"} */}
+                        Transaction ID
                       </h6>
                       <span
                         className="text-blue-500 text-xs font-medium cursor-pointer"
@@ -128,35 +97,6 @@ const LnbitsTransactionDetail = ({
                       </span>
                     </div>
                   </li>
-                  {/* <li className="py-2 border-b border-dashed border-white/50">
-                    <div className="flex items-center justify-between">
-                      <div className="left">
-                        <h6 className="m-0 font-semibold text-base pb-1">
-                          From
-                        </h6>
-                        <div className="flex items-center gap-1">
-                          <div className="flex-shrink-0 h-[30px] w-[30px] rounded-full text-xs font-medium bg-white/50 flex items-center justify-center">
-                            {getInitials(from)}
-                          </div>
-                          <span className="text-blue-500 text-xs font-medium">
-                            {from === "External"
-                              ? "External Wallet"
-                              : truncateAddress(from)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="right text-right">
-                        <h6 className="m-0 font-semibold text-base pb-1">To</h6>
-                        <div className="rounded-20 px-2 py-1 bg-white/50">
-                          <span className="text-xs font-medium">
-                            {to === "External"
-                              ? "External Wallet"
-                              : truncateAddress(to)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </li> */}
                   <li className="py-2 border-b border-dashed border-white/50">
                     <div className="flex items-center justify-between">
                       <h6 className="m-0 font-semibold text-base">Date</h6>
@@ -172,22 +112,18 @@ const LnbitsTransactionDetail = ({
                   <h6 className="m-0 font-medium text-xl">
                     Transaction Details
                   </h6>
-                  {usd === 0 || usd === 1 || usd === 2 ? (
-                    <></>
-                  ) : (
-                    <button
-                      onClick={handleDownload}
-                      className="rounded-full text-xs bg-white/50 px-3 py-1"
-                    >
-                      Download Refund File
-                    </button>
-                  )}
+                  <button
+                    onClick={handleDownload}
+                    className="rounded-full text-xs bg-white/50 px-3 py-1"
+                  >
+                    Download Refund File
+                  </button>
                 </div>
                 <ul className="list-unstyled ps-0 mb-0 text-xs">
                   <li className="py-2 flex items-center justify-between">
                     <span className="text-white opacity-80">Amount</span>
                     <span className="text-white font-medium">
-                      {parseFloat(amount) / 1000}
+                      {parseFloat(amount)}
                     </span>
                   </li>
                   {rawData?.fee !== undefined && (
@@ -206,25 +142,11 @@ const LnbitsTransactionDetail = ({
                       </span>
                     </li>
                   )}
-                  {rawData?.bolt11 && (
+                  {invoice && (
                     <>
-                      {/* <li className="py-2 flex items-center justify-between">
-                        <span className="text-white opacity-80">
-                          Payment Request
-                        </span>
-                        <span
-                          className="text-blue-500 text-xs font-medium cursor-pointer"
-                          onClick={() => {
-                            navigator.clipboard.writeText(rawData.bolt11);
-                          }}
-                        >
-                          Copy BOLT11
-                        </span>
-                      </li> */}
-
                       <li className="py-2 flex items-center justify-between">
                         <span className="text-white opacity-80">
-                          BOLT11 QR Code
+                          Payment Invoice
                         </span>
                         <span
                           className="text-blue-500 text-xs font-medium cursor-pointer"
@@ -270,7 +192,7 @@ const LnbitsTransactionDetail = ({
   );
 };
 
-export default LnbitsTransactionDetail;
+export default TposTransactionDetail;
 
 const Modal = styled.div`
   ${"" /* padding-bottom: 100px; */}

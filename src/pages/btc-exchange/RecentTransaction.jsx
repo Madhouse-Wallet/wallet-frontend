@@ -7,11 +7,12 @@ import TransactionDetail from "@/components/Modals/TransactionDetailPop";
 import moment from "moment-timezone";
 import BitcoinTransactionsTab from "./BitcoinTransaction";
 import LnbitsTransaction from "./LnbitsTransaction";
-import { getUser } from "../../lib/apiCall";
+import { getUser, lambdaInvokeFunction } from "../../lib/apiCall";
 import { DateRange } from "react-date-range";
 import SideShiftTransaction from "./SideShiftTransaction";
 import styled from "styled-components";
 import { getCurrentUserTimezone } from "@/utils/bitcoinTransaction";
+import TposTransactionDetail from "./TPOSTransactionDetail";
 
 const RecentTransaction = ({ setSetFilterType }) => {
   const userTimezone = getCurrentUserTimezone();
@@ -22,10 +23,13 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [useData, setUserData] = useState();
 
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
+  const [feeTransaction, setFeeTransactions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(5);
   const [detail, setDetail] = useState(false);
+  const [tposDetail, setTposDetail] = useState(false);
   const [transactionData, setTransactionData] = useState(null);
+  const [tposTransactionData, setTposTransactionData] = useState(null);
   const [btcTransactions, setBtcTransactions] = useState([]);
   const [lnbitsUsdTxs, setLnbitsUsdTxs] = useState([]);
   const [spendTxs, setSpendTxs] = useState([]);
@@ -39,7 +43,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const [error, setError] = useState("");
   const [withdrawBoltz, setWithdrawBoltz] = useState([]);
   const [depositBoltz, setDepositBoltz] = useState([]);
-  const [boltzUSDC, setBoltzUSDC] = useState([]);
   const [boltzBitcoin, setBoltzBitcoin] = useState([]);
 
   const selectOptions = [
@@ -57,6 +60,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       startDate: null,
       endDate: null,
       key: "selection",
+      color: "#df723b",
     },
   ]);
   const [transactionType, setTransactionType] = useState("all");
@@ -79,57 +83,98 @@ const RecentTransaction = ({ setSetFilterType }) => {
         startDate: null,
         endDate: null,
         key: "selection",
+        color: "#df723b",
       },
     ]);
     // Refetch transactions without date filter
-    fetchRecentTransactions();
-    fetchRecentTransactionsPaxg();
+    const resetDate = [
+      {
+        startDate: null,
+        endDate: null,
+        key: "selection",
+        color: "#df723b",
+      },
+    ];
+    if (activeTab === 0) {
+      fetchRecentTransactions(resetDate);
+    } else if (activeTab === 2) {
+      fetchRecentTransactionsPaxg(resetDate);
+    } else if (activeTab === 12) {
+      fetchFeeTransactions(resetDate);
+    } else if (activeTab === 6) {
+      fetchRecentMorphoTransactions(resetDate);
+    } else if (activeTab === 8) {
+      fetchTPOSWithdrawTransactions(8);
+    } else if (activeTab === 10) {
+      fetchTPOSWithdrawTransactions(10);
+    } else if (activeTab === 13) {
+      fetchTPOSWithdrawTransactions(13);
+    }
   };
 
   const formatWalletHistoryData = (txs) => {
     if (!txs?.length) return [];
 
-    return txs.map((tx) => {
-      // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
-      const decimals =
-        tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+    return txs
+      .map((tx) => {
+        // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
+        const decimals =
+          tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
 
-      const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
-      const isSend =
-        tx.from_address?.toLowerCase() ===
-        userAuth?.walletAddress?.toLowerCase();
-      return {
-        amount,
-        category: tx.token_symbol || "USDC",
-        date:
-          moment(tx.block_timestamp)
-            .tz(userTimezone)
-            .format("MMMM D, YYYY h:mm A z") || "",
-        from: tx.from_address || "",
-        id: tx.transaction_hash || "",
-        rawData: tx,
-        status: "confirmed", // You can modify this if you plan to add status checks later
-        summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
-        to: tx.to_address || "",
-        transactionHash: tx.transaction_hash || "",
-        type: isSend === true ? "send" : "receive",
-        day:
-          moment(tx.block_timestamp)
-            .tz(userTimezone)
-            .format("MMMM D, YYYY h:mm A z") || "",
-      };
-    });
+        const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
+        const isSend =
+          tx.from_address?.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+
+        // Add fee detection logic
+        let feeType = null;
+        if (
+          tx.to_address?.toLowerCase() ===
+          process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
+        ) {
+          feeType = "Madhouse Fee";
+        } else if (
+          tx.to_address?.toLowerCase() ===
+          useData?.userId?.commission_fees?.toLowerCase()
+        ) {
+          feeType = "Commission Fee";
+        }
+
+        return {
+          amount,
+          category: tx.token_symbol || "USDC",
+          date:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          from: tx.from_address || "",
+          id: tx.transaction_hash || "",
+          rawData: tx,
+          status: "confirmed", // You can modify this if you plan to add status checks later
+          summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
+          to: tx.to_address || "",
+          transactionHash: tx.transaction_hash || "",
+          type: isSend === true ? "send" : "receive",
+          day:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          feeType, // Keep this temporarily for filtering
+        };
+      })
+      .filter((tx) => tx.feeType === null) // Filter out transactions with fee types
+      .map(({ feeType, ...tx }) => tx); // Remove feeType from final objects
   };
 
-  const fetchRecentTransactions = async () => {
+  const fetchRecentTransactions = async (customDateRange = null) => {
     try {
       setTransactionType("all");
-
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -153,13 +198,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  const fetchRecentMorphoTransactions = async () => {
+  const fetchRecentMorphoTransactions = async (customDateRange = null) => {
     try {
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -174,7 +220,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       setMorphoTransactions(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
-          data.result.slice(0, 10)
+          data.result.slice(0, 100)
         );
         setMorphoTransactions(formattedTransactions);
       }
@@ -183,15 +229,15 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  const fetchRecentTransactionsPaxg = async () => {
+  const fetchRecentTransactionsPaxg = async (customDateRange = null) => {
     try {
       setTransactionType("all");
-
+      const activeDateRange = customDateRange || dateRange;
       const startDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].startDate)
+        ? formatDateForApi(activeDateRange[0].startDate)
         : null;
       const endDate = isDateFilterActive()
-        ? formatDateForApi(dateRange[0].endDate)
+        ? formatDateForApi(activeDateRange[0].endDate)
         : null;
 
       const data = await fetchTokenTransfers(
@@ -206,7 +252,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       setTransactionsPaxg(data?.result);
       if (data?.result?.length) {
         const formattedTransactions = formatWalletHistoryData(
-          data.result.slice(0, 10)
+          data.result.slice(0, 100)
         );
         setTransactionsPaxg(formattedTransactions);
       }
@@ -215,7 +261,211 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
-  // Get status color
+  const formatFeeTransactions = (txs) => {
+    if (!txs?.length) return [];
+
+    return txs
+      .map((tx) => {
+        const decimals =
+          tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
+
+        const amount = `${parseFloat(tx.value_decimal).toFixed(decimals)} ${tx.token_symbol}`;
+        const isSend =
+          tx.from_address?.toLowerCase() ===
+          userAuth?.walletAddress?.toLowerCase();
+
+        // Add fee detection logic
+        let feeType = null;
+        if (
+          tx.to_address?.toLowerCase() ===
+          process.env.NEXT_PUBLIC_MADHOUSE_FEE?.toLowerCase()
+        ) {
+          feeType = "Madhouse Fee";
+        } else if (
+          tx.to_address?.toLowerCase() ===
+          useData?.userId?.commission_fees?.toLowerCase()
+        ) {
+          feeType = "Commission Fee";
+        }
+
+        // Only return transactions that have a fee type
+        if (feeType === null) return null;
+
+        return {
+          amount,
+          category: tx.token_symbol || "USDC",
+          date:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+          from: tx.from_address || "",
+          id: tx.transaction_hash || "",
+          rawData: tx,
+          status: "confirmed",
+          summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
+          to: tx.to_address || "",
+          transactionHash: tx.transaction_hash || "",
+          type: isSend === true ? "send" : "receive",
+          feeType,
+          day:
+            moment(tx.block_timestamp)
+              .tz(userTimezone)
+              .format("MMMM D, YYYY h:mm A z") || "",
+        };
+      })
+      .filter(Boolean); // Remove null entries
+  };
+
+  const fetchFeeTransactions = async (customDateRange = null) => {
+    try {
+      setTransactionType("all");
+      const activeDateRange = customDateRange || dateRange;
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(activeDateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(activeDateRange[0].endDate)
+        : null;
+
+      const data = await fetchTokenTransfers(
+        process.env.NEXT_PUBLIC_ENV_CHAIN,
+        [process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS],
+        // "0xBf3473aa4728E6b71495b07f57Ec247446c7E0Ed",
+        userAuth?.walletAddress,
+        startDate,
+        endDate
+      );
+
+      setFeeTransactions(data?.result);
+      if (data?.result?.length) {
+        const formattedTransactions = formatFeeTransactions(
+          data.result.slice(0, 100)
+        );
+        setFeeTransactions(formattedTransactions);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
+  const formatLightningSwapData = (data) => {
+    if (!data?.data?.data?.length > 0) return [];
+    return data.data.data.map((transaction) => {
+      const swapData = transaction.data;
+
+      // Calculate amount from onchainAmount (assuming it's in satoshis)
+      const amountInSats = swapData.onchainAmount || 0;
+      const amountInBTC = (amountInSats / 100000000).toFixed(8); // Convert sats to BTC
+
+      // Extract Lightning invoice amount if available
+      const invoice = swapData.invoice || "";
+      let invoiceAmount = "";
+      if (invoice.includes("lnbc")) {
+        // Basic Lightning invoice amount parsing (you might want to use a proper library)
+        const match = invoice.match(/lnbc(\d+)([munp])?/);
+        if (match) {
+          const amount = match[1];
+          const unit = match[2] || "";
+          invoiceAmount = `${amount}${unit}`;
+        }
+      }
+
+      // Format date
+      const formattedDate = moment(transaction.createdAt)
+        .tz(userTimezone)
+        .format("MMMM D, YYYY h:mm A z");
+
+      const day = moment(transaction.createdAt)
+        .tz(userTimezone)
+        .format("MMMM D, YYYY h:mm A z");
+
+      return {
+        id: transaction._id,
+        swapId: swapData.id,
+        amount: `${amountInBTC} BTC`,
+        onchainAmount: amountInSats,
+        invoiceAmount,
+        category: "Lightning Swap",
+        date: formattedDate,
+        day,
+        from: swapData.lockupAddress || "",
+        to: swapData.address || "",
+        type: transaction.type || "withdraw usdc shift",
+        status: "pending", // You can modify based on your status logic
+        summary: `${amountInBTC} BTC Lightning Swap`,
+        transactionHash: swapData.id,
+        email: transaction.email,
+        wallet: transaction.wallet,
+        invoice: swapData.invoice,
+        preimageHash: swapData.preimageHash,
+        preimage: swapData.preimage,
+        timeoutBlockHeight: swapData.timeoutBlockHeight,
+        claimPublicKey: swapData.claimPublicKey,
+        refundPublicKey: swapData.refundPublicKey,
+        blindingKey: swapData.blindingKey,
+        lockupAddress: swapData.lockupAddress,
+        swapTree: swapData.swapTree,
+        rawData: transaction,
+        createdAt: transaction.createdAt,
+        updatedAt: transaction.updatedAt,
+      };
+    });
+  };
+
+  const fetchTPOSWithdrawTransactions = async (key) => {
+    try {
+      let sideShiftIdsData;
+      if (key === 8) {
+        sideShiftIdsData = await lambdaInvokeFunction(
+          {
+            email: userAuth?.email,
+            type: "boltz",
+            page: 1,
+            limit: 100,
+            subType: "withdraw",
+          },
+          "madhouse-backend-production-getUserTrxn"
+        );
+      } else if (key === 10) {
+        sideShiftIdsData = await lambdaInvokeFunction(
+          {
+            email: userAuth?.email,
+            type: "boltz",
+            page: 1,
+            limit: 100,
+            subType: "tpos",
+          },
+          "madhouse-backend-production-getUserTrxn"
+        );
+      } else {
+        sideShiftIdsData = await lambdaInvokeFunction(
+          {
+            email: userAuth?.email,
+            type: "boltz",
+            page: 1,
+            limit: 100,
+            subType: "automatic",
+          },
+          "madhouse-backend-production-getUserTrxn"
+        );
+      }
+
+      // Format the data using your formatLightningSwapData function
+      if (sideShiftIdsData?.data?.data?.length) {
+        const formattedTransactions = formatLightningSwapData(
+          sideShiftIdsData,
+          userTimezone // Make sure userTimezone is available
+        );
+        setWithdrawBoltz(formattedTransactions);
+      } else {
+        setWithdrawBoltz([]);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      setWithdrawBoltz([]);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed":
@@ -291,10 +541,16 @@ const RecentTransaction = ({ setSetFilterType }) => {
     setTransactionData(tx);
   };
 
+  const handleTposTransactionClick = (tx) => {
+    setTposDetail(!tposDetail);
+    setTposTransactionData(tx);
+  };
+
   const transactionsByDate = groupTransactionsByDate(transactions);
   const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
-
+  const transactionsByDateFee = groupTransactionsByDate(feeTransaction);
   const transactionsByDateMorpho = groupTransactionsByDate(morphotransactions);
+  const transactionsByDateTPOSWithdraw = groupTransactionsByDate(withdrawBoltz);
 
   // Handle date range selection
   const handleDateRangeChange = (item) => {
@@ -315,6 +571,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
       }
       if (activeTab === 6) {
         fetchRecentMorphoTransactions();
+      }
+      if (activeTab === 12) {
+        fetchFeeTransactions();
       }
       setIsDatePickerOpen(false);
     } else {
@@ -396,6 +655,11 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                   >
                                     {getStatusText(tx.status)}
                                   </p>
+                                  {tx.feeType && (
+                                    <p className="m-0 text-xs font-medium py-1">
+                                      {tx.feeType}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                               <div className="right text-right">
@@ -482,8 +746,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                                       : tx.isDeposit
                                         ? "Deposit"
                                         : tx.type === "send"
-                                          ? "Send"
-                                          : "Receive"}{" "}
+                                          ? "Withdraw"
+                                          : "Deposit"}{" "}
                                     {tx.amount?.split(" ")[1] || "ETH"}
                                   </h4>
                                   <p
@@ -670,7 +934,93 @@ const RecentTransaction = ({ setSetFilterType }) => {
     {
       title: "Boltz Lightning Withdraw",
       component: (
-        <LnbitsTransaction usd={3} setTransactions={setWithdrawBoltz} />
+        <>
+          {withdrawBoltz.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(transactionsByDateTPOSWithdraw).map(
+                ([date, txs]) => {
+                  return (
+                    <div key={date} className="py-3">
+                      <p className="m-0 text-white text-xs font-semibold pb-2">
+                        {date}
+                      </p>
+                      <div className="grid gap-3 grid-cols-12">
+                        {txs
+                          .filter((tx) => {
+                            const amount = parseFloat(
+                              tx.amount?.split(" ")[0] || 0
+                            );
+                            return amount >= 0.00000001;
+                          })
+                          .map((tx, key) => (
+                            <div
+                              key={key}
+                              className="md:col-span-6 col-span-12"
+                            >
+                              <div
+                                onClick={() => handleTposTransactionClick(tx)}
+                                className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                              >
+                                <div className="left flex items-start gap-2">
+                                  <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                    {tx.type === "send" ||
+                                    tx.type === "withdraw usdc shift"
+                                      ? sendSvg
+                                      : receiveSvg}
+                                  </div>
+                                  <div className="content">
+                                    <h4 className="m-0 font-bold md:text-base">
+                                      {tx.type === "withdraw usdc shift"
+                                        ? "Boltz Withdraw"
+                                        : tx.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                      {tx.amount?.split(" ")[1] || "BTC"}
+                                    </h4>
+                                    {/* <p
+                                      className={`m-0 ${getStatusColor(
+                                        tx.status
+                                      )} font-medium text-xs`}
+                                    >
+                                      {getStatusText(tx.status)}
+                                    </p> */}
+                                  </div>
+                                </div>
+                                <div className="right text-right">
+                                  <p className="m-0  text-xs font-medium py-1">
+                                    {tx.status === "rejected"
+                                      ? "Insufficient Balance"
+                                      : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                          tx.amount?.split(" ")[0] || 0
+                                        ).toFixed(8)}`}{" "}
+                                    {/* Changed to 8 decimal places for BTC */}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    {tx.day}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
       ),
     },
     {
@@ -681,12 +1031,276 @@ const RecentTransaction = ({ setSetFilterType }) => {
     },
     {
       title: "Boltz Lightning TPOS USDC",
-      component: <LnbitsTransaction usd={5} setTransactions={setBoltzUSDC} />,
+      component: (
+        <>
+          {withdrawBoltz.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(transactionsByDateTPOSWithdraw).map(
+                ([date, txs]) => {
+                  return (
+                    <div key={date} className="py-3">
+                      <p className="m-0 text-white text-xs font-semibold pb-2">
+                        {date}
+                      </p>
+                      <div className="grid gap-3 grid-cols-12">
+                        {txs
+                          .filter((tx) => {
+                            const amount = parseFloat(
+                              tx.amount?.split(" ")[0] || 0
+                            );
+                            return amount >= 0.00000001;
+                          })
+                          .map((tx, key) => (
+                            <div
+                              key={key}
+                              className="md:col-span-6 col-span-12"
+                            >
+                              <div
+                                onClick={() => handleTposTransactionClick(tx)}
+                                className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                              >
+                                <div className="left flex items-start gap-2">
+                                  <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                    {tx.type === "send" ||
+                                    tx.type === "withdraw usdc shift"
+                                      ? sendSvg
+                                      : receiveSvg}
+                                  </div>
+                                  <div className="content">
+                                    <h4 className="m-0 font-bold md:text-base">
+                                      {tx.type === "withdraw usdc shift"
+                                        ? "Boltz Withdraw"
+                                        : tx.type === "tpos usdc shift"
+                                          ? "Boltz TPOS Withdraw"
+                                          : "Receive"}{" "}
+                                      {tx.amount?.split(" ")[1] || "BTC"}
+                                    </h4>
+                                    {/* <p
+                                      className={`m-0 ${getStatusColor(
+                                        tx.status
+                                      )} font-medium text-xs`}
+                                    >
+                                      {getStatusText(tx.status)}
+                                    </p> */}
+                                  </div>
+                                </div>
+                                <div className="right text-right">
+                                  <p className="m-0  text-xs font-medium py-1">
+                                    {tx.status === "rejected"
+                                      ? "Insufficient Balance"
+                                      : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                          tx.amount?.split(" ")[0] || 0
+                                        ).toFixed(8)}`}{" "}
+                                    {/* Changed to 8 decimal places for BTC */}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    {tx.day}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
     },
     {
       title: "Boltz Lightning TPOS Bitcoin",
       component: (
         <LnbitsTransaction usd={6} setTransactions={setBoltzBitcoin} />
+      ),
+    },
+    {
+      title: "Fees",
+      component: (
+        <>
+          {feeTransaction.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(transactionsByDateFee).map(([date, txs]) => {
+                return (
+                  <div key={date} className="py-3">
+                    <p className="m-0 text-white text-xs font-semibold pb-2">
+                      {date}
+                    </p>
+                    <div className="grid gap-3 grid-cols-12">
+                      {/* {txs.map((tx, key) => ( */}
+                      {txs
+                        .filter((tx) => {
+                          const amount = parseFloat(
+                            tx.amount?.split(" ")[0] || 0
+                          );
+                          return amount >= 0.01;
+                        })
+                        .map((tx, key) => (
+                          <div key={key} className="md:col-span-6 col-span-12">
+                            <div
+                              onClick={() => handleTransactionClick(tx)}
+                              className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                            >
+                              <div className="left flex items-start gap-2">
+                                <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                  {tx.type === "send" ? sendSvg : receiveSvg}
+                                </div>
+                                <div className="content">
+                                  <h4 className="m-0 font-bold md:text-base">
+                                    {tx.isRedemption
+                                      ? "Redemption"
+                                      : tx.isDeposit
+                                        ? "Deposit"
+                                        : tx?.type === "send"
+                                          ? "Send"
+                                          : "Receive"}{" "}
+                                    {tx.amount?.split(" ")[1] || "ETH"}
+                                  </h4>
+                                  <p
+                                    className={`m-0 ${getStatusColor(
+                                      tx.status
+                                    )} font-medium text-xs`}
+                                  >
+                                    {getStatusText(tx.status)}
+                                  </p>
+                                  {tx.feeType && (
+                                    <p className="m-0 text-xs font-medium py-1">
+                                      {tx.feeType}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="right text-right">
+                                <p className="m-0  text-xs font-medium py-1">
+                                  {tx.status === "rejected"
+                                    ? "Insufficient Balance"
+                                    : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                        tx.amount
+                                      ).toFixed(2)}`}
+                                </p>
+                                <p className="m-0 text-xs font-medium py-1">
+                                  {tx.day}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      title: "Boltz Lightning Automatic Withdraw",
+      component: (
+        <>
+          {withdrawBoltz.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(transactionsByDateTPOSWithdraw).map(
+                ([date, txs]) => {
+                  return (
+                    <div key={date} className="py-3">
+                      <p className="m-0 text-white text-xs font-semibold pb-2">
+                        {date}
+                      </p>
+                      <div className="grid gap-3 grid-cols-12">
+                        {txs
+                          .filter((tx) => {
+                            const amount = parseFloat(
+                              tx.amount?.split(" ")[0] || 0
+                            );
+                            return amount >= 0.00000001;
+                          })
+                          .map((tx, key) => (
+                            <div
+                              key={key}
+                              className="md:col-span-6 col-span-12"
+                            >
+                              <div
+                                onClick={() => handleTposTransactionClick(tx)}
+                                className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                              >
+                                <div className="left flex items-start gap-2">
+                                  <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                    {sendSvg}
+                                  </div>
+                                  <div className="content">
+                                    <h4 className="m-0 font-bold md:text-base">
+                                      {"Boltz Automatic Withdraw"}{" "}
+                                      {tx.amount?.split(" ")[1] || "BTC"}
+                                    </h4>
+                                    {/* <p
+                                      className={`m-0 ${getStatusColor(
+                                        tx.status
+                                      )} font-medium text-xs`}
+                                    >
+                                      {getStatusText(tx.status)}
+                                    </p> */}
+                                  </div>
+                                </div>
+                                <div className="right text-right">
+                                  <p className="m-0  text-xs font-medium py-1">
+                                    {tx.status === "rejected"
+                                      ? "Insufficient Balance"
+                                      : `${tx?.type === "send" ? "-" : "+"} ${parseFloat(
+                                          tx.amount?.split(" ")[0] || 0
+                                        ).toFixed(8)}`}{" "}
+                                    {/* Changed to 8 decimal places for BTC */}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    {tx.day}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
       ),
     },
   ];
@@ -699,10 +1313,20 @@ const RecentTransaction = ({ setSetFilterType }) => {
             detail={detail}
             setDetail={setDetail}
             transactionData={transactionData}
+            userData={useData}
           />,
           document.body
         )}
 
+      {tposDetail &&
+        createPortal(
+          <TposTransactionDetail
+            detail={tposDetail}
+            setDetail={setTposDetail}
+            transactionData={tposTransactionData}
+          />,
+          document.body
+        )}
       {isDatePickerOpen && (
         <div className="absolute right-0 mt-2 z-[100] bg-white shadow-lg rounded-lg">
           <DateRange
@@ -728,7 +1352,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
             </button>
             <button
               onClick={applyDateFilter}
-              className="px-3 py-1 bg-blue-600 text-white rounded"
+              className="px-3 py-1 bg-[#df723b] text-white rounded"
             >
               Apply Filter
             </button>
@@ -785,40 +1409,23 @@ const RecentTransaction = ({ setSetFilterType }) => {
                         />
                       </svg>
                     </div>
-
-                    {/* Show selected value indicator */}
-                    {/* {selectedItem && (
-                      <div className="absolute left-0 right-0 text-center text-xs text-white mt-1">
-                        Selected:{" "}
-                        {
-                          selectOptions.find(
-                            (opt) => opt.value === selectedItem
-                          )?.label
-                        }
-                        <button
-                          onClick={() => setSelectedItem("")}
-                          className="ml-2 text-xs text-red-300 hover:text-red-100"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )} */}
                   </div>
+                ) : activeTab === 8 || activeTab === 10 || activeTab === 13 ? (
+                  <></>
                 ) : (
-                  // Your existing date filter button for other tabs
                   <>
                     <button
                       onClick={() => {
                         setIsDatePickerOpen(!isDatePickerOpen);
-                        setApplyTrue(false);
+                        // setApplyTrue(false);
                       }}
                       className={`px-4 py-2 ${
-                        isDateFilterActive() ? "bg-blue-600" : "bg-black/50"
+                        isDateFilterActive() ? "bg-[#df723b]" : "bg-black/50"
                       } text-white rounded-md flex items-center gap-2`}
                     >
                       <span>{DateFilter}</span>
                       {isDateFilterActive() && (
-                        <span className="text-xs bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center">
+                        <span className="text-xs bg-white text-[#df723b] rounded-full w-5 h-5 flex items-center justify-center">
                           ✓
                         </span>
                       )}
@@ -829,7 +1436,10 @@ const RecentTransaction = ({ setSetFilterType }) => {
                         {formatDateForApi(dateRange[0].startDate)} to{" "}
                         {formatDateForApi(dateRange[0].endDate)}
                         <button
-                          onClick={clearDateFilter}
+                          onClick={() => {
+                            clearDateFilter();
+                            setApplyTrue(false);
+                          }}
                           className="ml-2 text-xs text-red-300 hover:text-red-100"
                         >
                           ✕
@@ -853,8 +1463,10 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 7) dataToExport = sideshiftTxs;
                   else if (activeTab === 8) dataToExport = withdrawBoltz;
                   else if (activeTab === 9) dataToExport = depositBoltz;
-                  else if (activeTab === 10) dataToExport = boltzUSDC;
+                  else if (activeTab === 10) dataToExport = withdrawBoltz;
                   else if (activeTab === 11) dataToExport = boltzBitcoin;
+                  else if (activeTab === 12) dataToExport = feeTransaction;
+                  else if (activeTab === 13) dataToExport = withdrawBoltz;
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
                       dataToExport,
@@ -909,6 +1521,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
                             fetchRecentTransactionsPaxg();
                           } else if (key === 6) {
                             fetchRecentMorphoTransactions();
+                          } else if (key === 12) {
+                            fetchFeeTransactions();
+                          } else if (key === 8) {
+                            fetchTPOSWithdrawTransactions(8);
+                          } else if (key === 10) {
+                            fetchTPOSWithdrawTransactions(10);
+                          } else if (key === 13) {
+                            fetchTPOSWithdrawTransactions(13);
                           }
                         }}
                         className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${

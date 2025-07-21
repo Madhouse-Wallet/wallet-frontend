@@ -412,7 +412,7 @@ export const sendTransaction = async (smartAccountClient, params) => {
         exchangeRate) /
       BigInt(1e18);
 
-    console.log("line-357", maxCostInToken);
+    // console.log("line-357", maxCostInToken);
 
     params.unshift({
       abi: parseAbi(["function approve(address,uint)"]),

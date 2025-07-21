@@ -19,7 +19,7 @@ import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import Image from "next/image";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
-import { updtUser } from "@/lib/apiCall";
+import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 
 const Swap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -344,17 +344,14 @@ const Swap = () => {
         setToAmount("");
         setQuote(null);
         if (shiftData) {
-          await updtUser(
-            { email: userAuth?.email },
+          await lambdaInvokeFunction(
             {
-              $push: {
-                sideshiftIds: {
-                  id: shiftData.id,
-                  date: new Date(), // stores the current date/time
-                  type: "buyBitcoin", // or whatever type value you want to store
-                },
-              },
-            }
+              email: userAuth?.email,
+              wallet: userAuth?.walletAddress,
+              type: "buyBitcoin",
+              data: shiftData,
+            },
+            "madhouse-backend-production-addSideShiftTrxn"
           );
           setShiftData(null);
         }

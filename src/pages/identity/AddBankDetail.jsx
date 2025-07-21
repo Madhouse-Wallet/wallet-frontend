@@ -651,7 +651,8 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                       type="submit"
                       disabled={
                         isSubmitting ||
-                        userData?.receivingPartyDetail?.length > 20
+                        userData?.receivingPartyDetail?.length >
+                          parseInt(process.env.NEXT_PUBLIC_REAP_ADD_BANK_LIMIT)
                       }
                       className={`commonBtn hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                     >

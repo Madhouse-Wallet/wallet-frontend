@@ -23,7 +23,7 @@ import {
   filterAmountInput,
 } from "../../../utils/helper.js";
 import TransactionFailedPop from "../TransactionFailedPop/index.jsx";
-import { updtUser } from "@/lib/apiCall";
+import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 
 const RefundBitcoin = ({
   refundBTC,
@@ -155,11 +155,6 @@ const RefundBitcoin = ({
                   break;
                 }
               } catch (quoteError) {
-                console.log(
-                  `Swapkit attempt ${quoteAttempts} failed:`,
-                  quoteError
-                );
-
                 if (quoteAttempts >= maxQuoteAttempts) {
                   // After 3 attempts, set the error
                   setSwapType("Swapkit");
@@ -313,17 +308,14 @@ const RefundBitcoin = ({
         setSuccess(true);
         setRefundBTC(false);
         if (quote) {
-          await updtUser(
-            { email: userAuth?.email },
+          await lambdaInvokeFunction(
             {
-              $push: {
-                sideshiftIds: {
-                  id: quote.id,
-                  date: new Date(), // stores the current date/time
-                  type: "refundBitcoin", // or whatever type value you want to store
-                },
-              },
-            }
+              email: userAuth?.email,
+              wallet: userAuth?.walletAddress,
+              type: "refundBitcoin",
+              data: quote,
+            },
+            "madhouse-backend-production-addSideShiftTrxn"
           );
         }
         setQuote(null);
@@ -421,7 +413,6 @@ const RefundBitcoin = ({
       !destinationAddress
     );
   };
-  console.log("amountError", amountError);
   const getButtonText = () => {
     if (isLoading)
       return (

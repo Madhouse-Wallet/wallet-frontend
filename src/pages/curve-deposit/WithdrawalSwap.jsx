@@ -7,6 +7,7 @@ import {
   sendTransaction,
   MAINNET_RPC_URL,
   calculateGasPriceInUSDC,
+  USDC_ABI,
 } from "@/lib/zeroDev.js";
 import Web3Interaction from "@/utils/web3Interaction";
 import { useSelector } from "react-redux";
@@ -18,13 +19,14 @@ import {
 } from "../api/sideShiftAI"; // Import SideShift functions
 import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
-import { parseAbi } from "viem";
-import { updtUser } from "@/lib/apiCall";
+import { parseAbi, parseUnits } from "viem";
+import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
 import TransactionSuccessPop from "@/components/Modals/TransactionSuccessPop";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
+import axios from "axios";
 
 const WithdrawalSwap = () => {
   const userAuth = useSelector((state) => state.Auth);
@@ -43,7 +45,7 @@ const WithdrawalSwap = () => {
   // SideShift states
   const [goldToUsdcShift, setGoldToUsdcShift] = useState(null);
   const [ethGasShift, setEthGasShift] = useState(null);
-  const [usdcToEthShift, setUsdcToEthShift] = useState(null);
+  const [usdcToEthShiftt, setUsdcToEthShift] = useState(null);
 
   const [gasRequiredWei, setGasRequiredWei] = useState("0");
   const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +160,6 @@ const WithdrawalSwap = () => {
         totalGasCost: totalGasCost,
       };
     } catch (error) {
-      console.error("Gas estimation error:", error);
       // Fallback gas values
       const gasPrice = await wallet.provider.getGasPrice();
       const fallbackGasLimit = ethers.BigNumber.from("100000");
@@ -190,7 +191,6 @@ const WithdrawalSwap = () => {
         setToAmount(goldShift?.settleAmount);
       }
     } catch (error) {
-      console.error("Bridge quote error:", error);
       setError(error?.message || "Failed to get the quotes");
       setToAmount("");
       setGoldToUsdcShift(null);
@@ -206,19 +206,19 @@ const WithdrawalSwap = () => {
     try {
       // Step 1: Get USDC Base to ETH Mainnet shift
       const ethAmountFormatted = ethers.utils.formatEther(requiredGasWei);
-      const ethToUsdcShift = await createEthMainnetToUsdcbaseShift(
+      const ethGasShift = await createEthMainnetToUsdcbaseShift(
         ethAmountFormatted, // ETH amount to deposit
         userAuth?.walletAddress, // USDC settle address on Base
         SIDESHIFT_SECRET_KEY,
         SIDESHIFT_AFFILIATE_ID
       );
-
-      setUsdcToEthShift(ethToUsdcShift);
+      setUsdcToEthShift(ethGasShift);
 
       // Step 2: Get ETH Mainnet to USDC Base shift for the deposit amount
-      if (ethToUsdcShift?.depositAmount) {
-        const usdcToEthShift = await createUsdcBaseToEthMainnetShift(
-          ethToUsdcShift?.settleAmount, // ETH amount needed
+      let usdcToEthShift;
+      if (ethGasShift?.depositAmount) {
+        usdcToEthShift = await createUsdcBaseToEthMainnetShift(
+          ethGasShift?.settleAmount, // ETH amount needed
           userAuth?.walletAddress, // settle address (will receive ETH on mainnet)
           SIDESHIFT_SECRET_KEY,
           SIDESHIFT_AFFILIATE_ID
@@ -226,6 +226,11 @@ const WithdrawalSwap = () => {
 
         setEthGasShift(usdcToEthShift);
       }
+
+      return {
+        ethGasShift,
+        usdcToEthShift,
+      };
     } catch (error) {
       setError(error?.message || "Failed to prepare gas shift");
     }
@@ -345,91 +350,114 @@ const WithdrawalSwap = () => {
           ? minimumAmount
           : shortfall;
 
-        await prepareGasShift(amountToShift.toString());
-      }
+        const { ethGasShift, usdcToEthShift } = await prepareGasShift(
+          amountToShift.toString()
+        );
 
-      // Step 3: Execute gas shift (if necessary)
-      const getAccountCli = await getAccount(
-        secretData?.privateKey,
-        secretData?.safePrivateKey
-      );
-      if (!getAccountCli.status) {
-        return;
-      }
+        // Step 3: Execute gas shift (if necessary)
+        const getAccountCli = await getAccount(
+          secretData?.privateKey,
+          secretData?.safePrivateKey
+        );
+        if (!getAccountCli.status) {
+          return;
+        }
 
-      if (currentEthBalance.lt(requiredGas) && usdcToEthShift && ethGasShift) {
-        if (usdcToEthShift.settleAmount) {
-          const gasPriceResult = await calculateGasPriceInUSDC(
-            getAccountCli?.kernelClient,
-            [
-              {
-                to: USDC_ADDRESS,
-                abi: USDC_ABI,
-                functionName: "transfer",
-                args: [
-                  usdcToEthShift.depositAddress,
-                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
-                ],
-              },
-            ]
-          );
-          // Round gas price to 2 decimals
-          const value = Number.parseFloat(gasPriceResult.formatted);
-          const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
-          setGasPrice(roundedGasPrice);
-          // Check if amount + gas price exceeds balance
-          const totalRequired =
-            Number.parseFloat(usdcToEthShift.settleAmount) +
-            Number.parseFloat(roundedGasPrice);
-          if (totalRequired > Number.parseFloat(usdcBalance)) {
-            setGasPriceError(
-              `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.settleAmount} + Max Gas Fee: ${roundedGasPrice})`
-            );
-            setIsLoading(false);
-            return;
-          }
-          const usdcSendTx = await sendTransaction(
-            getAccountCli?.kernelClient,
-            [
-              {
-                to: USDC_ADDRESS,
-                abi: USDC_ABI,
-                functionName: "transfer",
-                args: [
-                  usdcToEthShift.depositAddress,
-                  parseUnits(usdcToEthShift.settleAmount.toString(), 6),
-                ],
-              },
-            ]
-          );
-
-          if (usdcSendTx) {
-            // const delaySeconds =
-            //   Number(usdcToEthShift?.averageShiftSeconds) + 10 || 40;
-
-            // await new Promise((resolve) =>
-            //   setTimeout(resolve, delaySeconds * 1000)
-            // );
-            let data = await updtUser(
-              { email: userAuth?.email },
-              {
-                $push: {
-                  sideshiftIds: {
-                    id: usdcToEthShift.id,
-                    date: new Date(), // stores the current date/time
-                    type: "gasShift", // or whatever type value you want to store
+        if (
+          currentEthBalance.lt(requiredGas) &&
+          usdcToEthShift &&
+          ethGasShift
+        ) {
+          try {
+            if (usdcToEthShift.depositAmount) {
+              const gasPriceResult = await calculateGasPriceInUSDC(
+                getAccountCli?.kernelClient,
+                [
+                  {
+                    to: USDC_ADDRESS,
+                    abi: USDC_ABI,
+                    functionName: "transfer",
+                    args: [
+                      usdcToEthShift.depositAddress,
+                      parseUnits(usdcToEthShift.depositAmount.toString(), 6),
+                    ],
                   },
-                },
+                ]
+              );
+              const value = Number.parseFloat(gasPriceResult.formatted);
+              const roundedGasPrice = (Math.ceil(value * 100) / 100).toFixed(2);
+              setGasPrice(roundedGasPrice);
+              const totalRequired =
+                Number.parseFloat(usdcToEthShift.depositAmount) +
+                Number.parseFloat(roundedGasPrice);
+              if (totalRequired > Number.parseFloat(usdcBalance)) {
+                setGasPriceError(
+                  `Insufficient balance. Required: ${totalRequired.toFixed(2)} USDC (Amount: ${usdcToEthShift.depositAmount} + Max Gas Fee: ${roundedGasPrice})`
+                );
+                setIsLoading(false);
+                return;
               }
-            );
-            await new Promise((resolve) => setTimeout(resolve, 15000));
+
+              const usdcSendTx = await sendTransaction(
+                getAccountCli?.kernelClient,
+                [
+                  {
+                    to: USDC_ADDRESS,
+                    abi: USDC_ABI,
+                    functionName: "transfer",
+                    args: [
+                      usdcToEthShift.depositAddress,
+                      parseUnits(usdcToEthShift.depositAmount.toString(), 6),
+                    ],
+                  },
+                ]
+              );
+
+              if (usdcSendTx) {
+                await lambdaInvokeFunction(
+                  {
+                    email: userAuth?.email,
+                    wallet: userAuth?.walletAddress,
+                    type: "gasShift",
+                    data: usdcToEthShift,
+                  },
+                  "madhouse-backend-production-addSideShiftTrxn"
+                );
+                // await new Promise((resolve) => setTimeout(resolve, 15000));
+
+                const checkShiftStatus = async () => {
+                  try {
+                    const response = await axios.get(
+                      `https://sideshift.ai/api/v2/shifts/${usdcToEthShift.id}`
+                    );
+
+                    if (response.data.status === "settled") {
+                      return true; // Status is settled, exit polling
+                    } else {
+                      return false; // Not settled yet, continue polling
+                    }
+                  } catch (error) {
+                    console.log("Error checking shift status:", error);
+                    return false; // Continue polling on error
+                  }
+                };
+
+                // Poll every 3 seconds until settled
+                let isSettled = false;
+                while (!isSettled) {
+                  isSettled = await checkShiftStatus();
+                  if (!isSettled) {
+                    await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3 seconds
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            setFailed(true);
+            setTxError(error || "Transaction failed please try again.");
           }
         }
-      } else {
-        setFailed(true);
-        setTxError(tx.error.message || tx);
       }
-
       // Send Tether Gold to SideShift deposit address
       const goldTx = await goldContract.transfer(
         goldToUsdcShift.depositAddress,
@@ -443,26 +471,22 @@ const WithdrawalSwap = () => {
         setHash(goldTx.hash);
       } else {
         setFailed(true);
-        setTxError(tx.error.message || tx);
+        setTxError(goldTx.error.message || goldTx);
       }
 
-      let dataa = await updtUser(
-        { email: userAuth?.email },
+      await lambdaInvokeFunction(
         {
-          $push: {
-            sideshiftIds: {
-              id: goldToUsdcShift.id,
-              date: new Date(), // stores the current date/time
-              type: "goldWithdraw", // or whatever type value you want to store
-            },
-          },
-        }
+          email: userAuth?.email,
+          wallet: userAuth?.walletAddress,
+          type: "goldWithdraw",
+          data: goldToUsdcShift,
+        },
+        "madhouse-backend-production-addSideShiftTrxn"
       );
 
-      // Refresh balances
       setTimeout(() => {
         fetchBalances();
-      }, 30000); // Wait 30 seconds for balances to update
+      }, 3000);
 
       // Reset form
       setFromAmount("");
@@ -498,7 +522,7 @@ const WithdrawalSwap = () => {
     if (Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance))
       return "Insufficient Tether Gold Balance";
     if (!goldToUsdcShift) return "Get Bridge Quote";
-    if (gasRequiredWei !== "0" && !usdcToEthShift)
+    if (gasRequiredWei !== "0" && !usdcToEthShiftt)
       return "Preparing gas swap...";
     return "Bridge Tokens";
   };
@@ -512,7 +536,7 @@ const WithdrawalSwap = () => {
       !toAmount ||
       !goldToUsdcShift ||
       Number.parseFloat(fromAmount) > Number.parseFloat(goldBalance) ||
-      (gasRequiredWei !== "0" && !usdcToEthShift)
+      (gasRequiredWei !== "0" && !usdcToEthShiftt)
     );
   };
 
@@ -654,7 +678,7 @@ const WithdrawalSwap = () => {
                   <p className="m-0 text-amber-500">
                     Gas required: {ethers.utils.formatEther(gasRequiredWei)} ETH
                   </p>
-                  {usdcToEthShift && (
+                  {usdcToEthShiftt && (
                     <p className="m-0 text-green-500">
                       Gas swap prepared: USDC → ETH
                     </p>

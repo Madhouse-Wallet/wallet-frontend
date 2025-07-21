@@ -14,7 +14,7 @@ import Image from "next/image";
 import { retrieveSecret } from "../../utils/webauthPrf";
 import { parseAbi, parseUnits } from "viem";
 import { createUsdcBaseToGoldShift } from "../api/sideShiftAI";
-import { updtUser } from "@/lib/apiCall";
+import { lambdaInvokeFunction, updtUser } from "@/lib/apiCall";
 import TransactionConfirmationPop from "@/components/Modals/TransactionConfirmationPop";
 import { createPortal } from "react-dom";
 import { filterAmountInput } from "@/utils/helper";
@@ -257,17 +257,15 @@ const DepositSwap = () => {
         setFromAmount("");
         setToAmount("");
         setDepositAddress("");
-        let data = await updtUser(
-          { email: userAuth?.email },
+
+        await lambdaInvokeFunction(
           {
-            $push: {
-              sideshiftIds: {
-                id: shiftData.id,
-                date: new Date(), // stores the current date/time
-                type: "goldDeposit", // or whatever type value you want to store
-              },
-            },
-          }
+            email: userAuth?.email,
+            wallet: userAuth?.walletAddress,
+            type: "goldDeposit",
+            data: shiftData,
+          },
+          "madhouse-backend-production-addSideShiftTrxn"
         );
         setShiftData(null);
       } else {

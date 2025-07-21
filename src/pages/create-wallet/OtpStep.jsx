@@ -116,7 +116,6 @@ const OtpStep = ({
 
       // If more than 3 attempts, redirect to login
       if (resendCount >= 3) {
-        console.log("Too many OTP attempts. Redirecting...");
         localStorage.setItem("resendOtpCount", "0");
         setStep(1);
         return;
@@ -136,8 +135,6 @@ const OtpStep = ({
       }
     } catch (error) {
       setLoading(false);
-
-      console.log("resendOtp error -->", error);
       setRegisterOtpLoading(false);
     }
   };

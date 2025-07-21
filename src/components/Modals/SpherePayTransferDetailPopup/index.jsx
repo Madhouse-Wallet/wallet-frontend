@@ -49,6 +49,7 @@ const SpherePayTransferDetailPop = ({
     };
   };
 
+
   return (
     <>
       <Modal
@@ -226,6 +227,27 @@ const SpherePayTransferDetailPop = ({
                                 onClick={() =>
                                   copyToClipboard(
                                     transferData.instructions.memo
+                                  )
+                                }
+                                className="cursor-pointer hover:text-white transition-colors"
+                              >
+                                {copyIcn}
+                              </span>
+                            </p>
+                          </div>
+
+                          <div className="sm:col-span-6 col-span-12">
+                            <h6 className="m-0">Routing Number :</h6>
+                            <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {
+                                transferData.instructions?.resource
+                                  ?.routingNumber
+                              }{" "}
+                              <span
+                                onClick={() =>
+                                  copyToClipboard(
+                                    transferData.instructions?.resource
+                                      ?.routingNumber
                                   )
                                 }
                                 className="cursor-pointer hover:text-white transition-colors"

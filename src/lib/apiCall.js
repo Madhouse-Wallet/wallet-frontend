@@ -6,8 +6,8 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
     region: REGION,
     credentials: {
-      accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-      secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_LAMBDA_ACCESS_KEY,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_LAMBDA_SECRET_KEY,
     },
   });
 
@@ -22,10 +22,10 @@ export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
     const result = new TextDecoder().decode(response.Payload);
 
     if (response.LogResult) {
-      console.log(
-        "Lambda logs:",
-        Buffer.from(response.LogResult, "base64").toString("ascii")
-      );
+      // console.log(
+      //   "Lambda logs:",
+      //   Buffer.from(response.LogResult, "base64").toString("ascii")
+      // );
     }
 
     // return JSON.parse(result);
@@ -631,7 +631,6 @@ export const getUserWallet = async (wallet) => {
 export const updtUser = async (findData, updtData) => {
   try {
     try {
-      console.log("line-541");
       return await fetch(`/api/updt-user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -657,7 +656,6 @@ export const updtUser = async (findData, updtData) => {
 export const deleteBankAccountt = async (email, partyId) => {
   try {
     try {
-      console.log("line-541");
       return await fetch(`/api/delete-account`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

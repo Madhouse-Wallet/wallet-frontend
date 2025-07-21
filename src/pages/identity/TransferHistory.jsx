@@ -25,6 +25,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [gasPrice, setGasPrice] = useState(null);
   const [gasPriceError, setGasPriceError] = useState("");
   const [balance, setBalance] = useState("0");
+  const [feeAmount, setFeeAmount] = useState(null);
 
   const [hash, setHash] = useState("");
   const [error, setError] = useState("");
@@ -75,7 +76,11 @@ const TransferHistory = ({ step, setStep, customerId }) => {
     }
 
     if (id === "amount") {
+      setFeeAmount(null);
       const filteredValue = filterAmountInput(value, 2, 20);
+      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      const FeeAmount = filteredValue * FEE_PERCENTAGE;
+      setFeeAmount(FeeAmount);
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
       if (parseFloat(value) > parseFloat(balance)) {
         setError("Insufficient USDC Balance");
@@ -199,7 +204,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           txHash: resultt,
         };
 
-        console.log("line-180", transferData);
         const obj = {
           // email: userAuth.email,
           email: process.env.NEXT_PUBLIC_REAP_EMAIL_URL,
@@ -353,7 +357,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       if (selectedPartyData) {
         const account = selectedPartyData.data.accounts[0]; // Taking first account
         const address = account.addresses[0]; // Taking first address
-        console.log(account);
         setOffRampForm((prev) => ({
           ...prev,
           receivingPartyName: selectedPartyData.data.name.name,
@@ -373,7 +376,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const usdcBridge = async () => {
     let user = await getUser(userAuth?.email);
-    console.log("line-104", user);
 
     if (!user) {
       return;
@@ -389,8 +391,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       process.env.NEXT_PUBLIC_MAINNET_CHAIN,
       userAuth?.walletAddress
     );
-
-    console.log("line-242", quoteResult);
 
     if (!quoteResult) {
       return;
@@ -414,8 +414,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       userAuth?.walletAddress
     );
 
-    console.log("line-262", gasQuoteResult);
-
     if (!gasQuoteResult) {
       return;
     }
@@ -427,8 +425,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       process.env.NEXT_PUBLIC_MAINNET_CHAIN,
       userAuth?.walletAddress
     );
-
-    console.log("line-276", gasQuoteFinalResult);
 
     if (!gasQuoteFinalResult) {
       return;
@@ -451,7 +447,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         secretData?.safePrivateKey
       );
 
-      console.log("line-434", gasQuoteFinalResult);
       const gasGasPriceResult = await calculateGasPriceInUSDC(
         getAccountCli?.kernelClient,
         [
@@ -473,15 +468,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const gasValue = Number.parseFloat(gasGasPriceResult.formatted);
       const roundedGasGasPrice = (Math.ceil(gasValue * 100) / 100).toFixed(2);
 
-      console.log("Gas transaction estimated gas price:", roundedGasGasPrice);
-
-      const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
-      const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
-      console.log("line-133", FeeAmount);
+      // const FEE_PERCENTAGE = parseFloat(process.env.NEXT_PUBLIC_FEE_PERCENTAGE);
+      // const FeeAmount = offRampForm.amount * FEE_PERCENTAGE;
+      // console.log("line-133", FeeAmount);
 
       let COMMISSION_FEES;
       if (!user?.userId?.commission_fees) {
-        console.log("line-138");
         let data = await updtUser(
           { email: userAuth.email },
           {
@@ -490,7 +482,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         );
         COMMISSION_FEES = process.env.NEXT_PUBLIC_MADHOUSE_FEE;
       } else {
-        console.log("line-147");
         COMMISSION_FEES = user?.userId?.commission_fees;
       }
 
@@ -513,7 +504,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
           },
         ]
       );
@@ -522,14 +513,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       const mainValue = Number.parseFloat(mainGasPriceResult.formatted);
       const roundedMainGasPrice = (Math.ceil(mainValue * 100) / 100).toFixed(2);
 
-      console.log("Main transaction estimated gas price:", roundedMainGasPrice);
-
       // Calculate total gas required
       const totalGasRequired =
         Number.parseFloat(roundedGasGasPrice) +
         Number.parseFloat(roundedMainGasPrice);
-
-      console.log("Total gas required:", totalGasRequired.toFixed(2));
 
       // Check if user has sufficient balance (you may want to add balance check here)
       const totalRequired =
@@ -540,8 +527,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         );
         return;
       }
-
-      console.log("line-499", gasQuoteFinalResult);
 
       const gasTx = await sendTransaction(getAccountCli?.kernelClient, [
         {
@@ -556,9 +541,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           value: gasQuoteFinalResult?.routeData?.tx?.value,
         },
       ]);
-      console.log("gasTx", gasTx);
       if (gasTx?.success !== false) {
-        console.log("gasTx", gasTx);
         const tx = await sendTransaction(getAccountCli?.kernelClient, [
           {
             from: quoteResult?.approvalData?.tx?.from,
@@ -575,15 +558,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: "transfer",
-            args: [COMMISSION_FEES, parseUnits(FeeAmount.toString(), 6)],
+            args: [COMMISSION_FEES, parseUnits(feeAmount.toString(), 6)],
           },
         ]);
 
-        console.log("line-283", tx);
         setHash(tx);
         return tx;
       } else {
         console.log("line-422 error");
+        setError("Gas Estimation Failed");
         return;
       }
     } catch (error) {
@@ -937,6 +920,14 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                       <div className="text-red-500 text-xs">
                         {gasPriceError}
                       </div>
+                    )}
+
+                    {feeAmount > 0 && (
+                      <label className="form-label m-0 font-semibold text-xs block">
+                        Commission Fee:{" "}
+                        {(Math.ceil(feeAmount * 100) / 100).toFixed(2)} USDC
+                        USDC
+                      </label>
                     )}
                   </div>
                 </div>

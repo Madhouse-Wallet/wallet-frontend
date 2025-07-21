@@ -32,23 +32,17 @@ const BitcoinTransactionsTab = ({
       setLoading(true);
       try {
         const data = await fetchBitcoinTransactions(
-          btcWalletAddress,
-          selectedItem
+          btcWalletAddress
+          // selectedItem
         );
         const userTimezone = getCurrentUserTimezone();
-        console.log(userTimezone);
         const formattedTransactions = formatBitcoinTransactions(
           data,
           btcWalletAddress,
           userTimezone
-          // "America/New_York"
         );
-        // setBtcTransactions(formattedTransactions);
-        // setTransactions(formattedTransactions);
 
-        // Sort transactions: pending/unconfirmed first, then by date (newest first)
         const sortedTransactions = formattedTransactions.sort((a, b) => {
-          // Define priority order: unconfirmed = 0, pending = 1, confirmed = 2
           const getPriority = (status) => {
             if (status === "unconfirmed") return 0;
             if (status === "pending") return 1;
@@ -58,19 +52,19 @@ const BitcoinTransactionsTab = ({
           const priorityA = getPriority(a.status);
           const priorityB = getPriority(b.status);
 
-          // First sort by priority (lower number = higher priority)
           if (priorityA !== priorityB) {
             return priorityA - priorityB;
           }
 
-          // If same priority, sort by date (newest first)
           const dateA = new Date(a.rawData.confirmed || a.rawData.received);
           const dateB = new Date(b.rawData.confirmed || b.rawData.received);
           return dateB - dateA;
         });
-
-        setBtcTransactions(sortedTransactions);
-        setTransactions(sortedTransactions);
+        // setBtcTransactions(sortedTransactions);
+        // setTransactions(sortedTransactions);
+        const slicedTransactions = sortedTransactions.slice(0, selectedItem);
+        setBtcTransactions(slicedTransactions);
+        setTransactions(slicedTransactions);
       } catch (err) {
         console.error("Failed to fetch BTC transactions:", err);
         setError("Failed to load transactions");

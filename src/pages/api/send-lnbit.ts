@@ -37,7 +37,7 @@ export default async function handler(
       token,
       2
     )) as any;
-    console.log("data", data);
+    // console.log("data", data);
     if (data?.status) {
       const payInv = (await payInvoice(
         {
@@ -48,7 +48,7 @@ export default async function handler(
         2,
         lnbitAdminKey_3
       )) as any;
-      console.log("payInv-->",payInv)
+      // console.log("payInv-->",payInv)
          return res.status(200).json({
           status: "success",
           message: "Withdraw Done!",

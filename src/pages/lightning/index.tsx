@@ -104,7 +104,6 @@ const BTCDebitCard: React.FC = () => {
         return;
       }
       setCommonError("");
-      // console.log("userAuth.email ->",userAuth.email, value )
       setInitValueAutoTransfer(!initValueAutoTransfer);
       let data = await updtUser(
         { email: userAuth.email },
