@@ -161,7 +161,7 @@ const CreateWalletStep = ({
             </div>
             <div className="col-span-12 flex flex-col items-center">
               <ReCAPTCHA
-                sitekey="6LdT0YkrAAAAAKNrCVrpZ5lWndeBk_CLot4GPLTj"
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
                 onChange={handleRecaptchaChange}
                 theme="light"
                 className="mb-2"
