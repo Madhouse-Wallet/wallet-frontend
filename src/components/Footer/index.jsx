@@ -50,7 +50,7 @@ const Footer = () => {
           <li className="relative aspect-square">
             <button
               // disabled
-              onClick={() => window.open("http://app.offramp.xyz/login?referralCode=t89ein", "_blank")
+              onClick={() => window.open("https://app.offramp.xyz/login?referralCode=t89ein", "_blank")
               }
               className="relative filter origin-top-center bg-cover transition-[filter] has-[:focus-visible]:brightness-125"
             >
