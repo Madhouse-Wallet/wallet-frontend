@@ -16,8 +16,8 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
   };
 
   const delUserFunc = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       let data = await delUser(userAuth.email);
       if (data) {
         logoutStorage();
@@ -34,12 +34,12 @@ const ConfirmationPop = ({ confirm, setConfirm }) => {
           })
         );
         setConfirm(!confirm);
+      } else {
       }
-    } catch (error) {
-      // Optionally show a toast or error message to the user
-      console.log("error-->", error);
-    } finally {
       setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("error-->", error);
     }
   };
   return (

@@ -13,7 +13,6 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
         isScanning.current = false;
       }
     } catch (err) {
-      // Optionally show a toast or error message to the user
       console.error("Error stopping scanner:", err);
     }
   };
@@ -23,52 +22,43 @@ const QRScannerModal = ({ onScan, openCam, setOpenCam }) => {
       if (scannerRef.current || isScanning.current) {
         return;
       }
+
       // Initialize SDK if not already done
       if (!sdkRef.current) {
-        try {
-          const reference = (await import("scanbot-web-sdk")).default;
-          sdkRef.current = await reference.initialize({
-            licenseKey: "", // Leave empty for trial mode
-            enginePath: "/wasm/", // Make sure WASM files are in public/wasm folder
-          });
-        } catch (sdkErr) {
-          console.error("Failed to initialize Scanbot SDK:", sdkErr);
-          setOpenCam(false);
-          return;
-        }
-      }
-      // Create barcode scanner
-      try {
-        const barcodeScanner = await sdkRef.current.createBarcodeScanner({
-          containerId: "qr-reader",
-          onBarcodesDetected: async (result) => {
-            if (result.barcodes && result.barcodes.length > 0) {
-              const decodedText = result.barcodes[0].text;
-              await stopScanner();
-              onScan(decodedText);
-              setOpenCam(false);
-            }
-          },
-          onError: (error) => {
-            if (!error?.message?.includes("No barcode found")) {
-              console.warn("QR Scan Error:", error);
-            }
-          },
-          preferredCamera: "camera2 0",
-          style: {
-            window: {
-              width: "100%",
-              height: "100%",
-            },
-          },
+        const reference = (await import("scanbot-web-sdk")).default;
+        sdkRef.current = await reference.initialize({
+          licenseKey: "", // Leave empty for trial mode
+          enginePath: "/wasm/", // Make sure WASM files are in public/wasm folder
         });
-        scannerRef.current = barcodeScanner;
-        isScanning.current = true;
-      } catch (scannerErr) {
-        console.error("Failed to create barcode scanner:", scannerErr);
-        await stopScanner();
-        setOpenCam(false);
       }
+
+      // Create barcode scanner
+      const barcodeScanner = await sdkRef.current.createBarcodeScanner({
+        containerId: "qr-reader",
+        onBarcodesDetected: async (result) => {
+          if (result.barcodes && result.barcodes.length > 0) {
+            const decodedText = result.barcodes[0].text;
+            await stopScanner();
+            onScan(decodedText);
+            setOpenCam(false);
+          }
+        },
+        onError: (error) => {
+          if (!error?.message?.includes("No barcode found")) {
+            console.warn("QR Scan Error:", error);
+          }
+        },
+        preferredCamera: "camera2 0",
+        style: {
+          window: {
+            width: "100%",
+            height: "100%",
+          },
+        },
+      });
+
+      scannerRef.current = barcodeScanner;
+      isScanning.current = true;
     } catch (err) {
       console.error("Failed to start scanner:", err);
       await stopScanner();

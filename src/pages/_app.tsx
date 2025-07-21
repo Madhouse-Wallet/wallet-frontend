@@ -21,20 +21,18 @@ export default function App({ Component, pageProps, ...props }: AppProps) {
     setToastVisible(true);
   };
   useEffect(() => {
-    if (typeof window === "undefined" || typeof document === "undefined") return;
     const header = document.getElementById("header");
+
     const preventRubberBand = (e: TouchEvent) => {
-      try {
-        if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
-          e.preventDefault(); // stop downward bounce
-        }
-      } catch (err) {
-        // fail silently
+      if (window.scrollY <= 0 && e.touches[0].clientY > 0) {
+        e.preventDefault(); // stop downward bounce
       }
     };
+
     header?.addEventListener("touchstart", preventRubberBand, {
       passive: false,
     });
+
     return () => {
       header?.removeEventListener("touchstart", preventRubberBand);
     };

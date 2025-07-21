@@ -243,6 +243,7 @@ export const registerStoreCredential = async (username, displayName, data) => {
 export const storeSecret = async (credentialIdBase, data) => {
   const context = "secret data";
   const secretValue = data;
+  const outputElement = document.getElementById("storeOutput");
   try {
     // Get stored credential ID or use empty to try discoverable credentials
     let credentialId;
@@ -379,6 +380,7 @@ export const verifyUser = async (credentialIdBase) => {
 // Retrieve and decrypt a stored secret using WebAuthn PRF
 export const retrieveSecret = async (storageKey, credentialIdBase) => {
   const context = "secret data";
+  const outputElement = document.getElementById("retrieveOutput");
 
   try {
     // Check if we have the encrypted data
