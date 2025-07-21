@@ -3,7 +3,6 @@ import React from "react";
 import Image from "next/image";
 import { BackBtn } from "@/components/common";
 import Link from "next/link";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 const Welcome = () => {
   const router = useRouter();
@@ -43,20 +42,34 @@ const Welcome = () => {
           </div>
         </div>
         <div className="btnWrpper pt-4 mt-4 text-center flex gap-3 justify-center">
-          <PrimaryButton onClick={() => router.push("/create-wallet")} type="submit">
+          <button
+            onClick={() => router.push("/create-wallet")}
+            type="submit"
+            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+          >
             Create Wallet
-          </PrimaryButton>
-          <PrimaryButton onClick={() => router.push("/login")} type="submit">
+          </button>
+          <button
+            onClick={() => router.push("/login")}
+            type="submit"
+            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+          >
             Log in
-          </PrimaryButton>
+          </button>
         </div>
         <div className="mt-2 text-center flex gap-3 justify-center">
-          <PrimaryButton asChild>
-            <Link href="/recover-wallet">Add Passkey</Link>
-          </PrimaryButton>
-          <PrimaryButton asChild>
-            <Link href="/modify-keys">Modify Passkeys</Link>
-          </PrimaryButton>
+          <Link
+            href={"/recover-wallet"}
+            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+          >
+            Add Passkey
+          </Link>
+          <Link
+            href={"/modify-keys"}
+            className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+          >
+            Modify Passkeys
+          </Link>
         </div>
       </div>
     </>

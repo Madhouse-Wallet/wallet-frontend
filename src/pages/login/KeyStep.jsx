@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useToast } from "../../ContextApi/ToastContext";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
   const { showToast } = useToast();
@@ -102,9 +101,10 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
           </div>
           <div className="btnWrpper">
             <div className="btnWrpper text-center mt-3 mx-auto  max-w-[300px]">
-              <PrimaryButton
+              <button
                 onClick={loginTry}
                 disabled={loginLoading}
+                className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
               >
                 {loginLoading ? (
                   <Image
@@ -117,7 +117,7 @@ const KeyStep = ({ step, setStep, passkeyData, email, loginFn2nd, error }) => {
                 ) : (
                   "Verify"
                 )}
-              </PrimaryButton>
+              </button>
             </div>
           </div>
         </div>

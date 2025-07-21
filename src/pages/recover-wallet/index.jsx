@@ -14,7 +14,6 @@ import {
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
 import { useToast } from "../../ContextApi/ToastContext";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 const RecoverWallet = () => {
   const { showToast } = useToast();
@@ -363,10 +362,11 @@ const RecoverWallet = () => {
                   )}
                 </div>
                 <div className="btnWrpper mt-3 text-center">
-                  <PrimaryButton
+                  <button
                     type="button"
                     onClick={checkAddress}
                     disabled={loadingNewSigner || error || !email}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loadingNewSigner ? (
                       <Image
@@ -379,7 +379,7 @@ const RecoverWallet = () => {
                     ) : (
                       "Next"
                     )}
-                  </PrimaryButton>
+                  </button>
                 </div>
               </form>
             </>
@@ -451,7 +451,7 @@ const RecoverWallet = () => {
                 </div>
               )}
               <div className="btnWrpper mt-3 text-center">
-                <PrimaryButton
+                <button
                   type="button"
                   disabled={
                     loadingNewSigner ||
@@ -464,7 +464,9 @@ const RecoverWallet = () => {
                     privateKeyError ||
                     safePrivateKeyError
                   }
+                  // onClick={checkPhrase}
                   onClick={checkPhrase}
+                  className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                 >
                   {loadingNewSigner ? (
                     <Image
@@ -477,7 +479,7 @@ const RecoverWallet = () => {
                   ) : (
                     "Next"
                   )}
-                </PrimaryButton>
+                </button>
               </div>
             </>
           ) : step == 3 ? (
@@ -501,13 +503,13 @@ const RecoverWallet = () => {
                 {/* ))} */}
 
                 <div className="col-span-12 text-center my-2">
-                  <PrimaryButton
-                    type="button"
+                  <button
                     disabled={loadingNewSigner}
                     onClick={createNewSigner}
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loadingNewSigner ? "Creating..." : "Create a new Signer"}
-                  </PrimaryButton>
+                  </button>
                 </div>
               </div>
             </>

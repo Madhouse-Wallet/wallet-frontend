@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Swap from "../swap";
 import { BackBtn } from "@/components/common";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 const SellPage = () => {
   const tabData = [
@@ -31,12 +30,18 @@ const SellPage = () => {
                   <ul className="list-none pl-0 mb-0 flex items-center gap-3 ">
                     {tabData.map((item, index) => (
                       <li key={index} className="py-1">
-                        <PrimaryButton
-                          asChild
-                          className={`${activeTab === index ? "bg-[#ffad84] border-[#ffad84]" : "bg-white border-white"} flex w-full h-[42px] border-2 text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        <button
+                          className={` ${
+                            activeTab === index
+                              ? "bg-[#ffad84] border-[#ffad84]"
+                              : "bg-white border-white"
+                          }  flex w-full h-[42px]  border-2 text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50
+             // Highlight active tab
+              `}
+                          onClick={() => setActiveTab(index)}
                         >
-                          <button type="button" onClick={() => setActiveTab(index)}>{item.title}</button>
-                        </PrimaryButton>
+                          {item.title}
+                        </button>
                       </li>
                     ))}
                   </ul>

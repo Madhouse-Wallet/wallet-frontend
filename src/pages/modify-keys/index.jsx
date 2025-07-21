@@ -7,7 +7,6 @@ import { getUser, updtUser, decodeBitcoinAddress } from "../../lib/apiCall";
 import styled from "styled-components";
 import { filterHexxInput, filterAlphaWithSpaces } from "../../utils/helper";
 import { useToast } from "../../ContextApi/ToastContext";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 const ModifyKeys = () => {
   const { showToast } = useToast();
@@ -438,7 +437,7 @@ const ModifyKeys = () => {
                   </div>
                 )}
                 <div className="btnWrpper mt-3 text-center">
-                  <PrimaryButton
+                  <button
                     type="button"
                     onClick={checkAddress}
                     disabled={
@@ -454,6 +453,7 @@ const ModifyKeys = () => {
                       !wif ||
                       !seedPhrase
                     }
+                    className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
                     {loadingNewSigner ? (
                       <Image
@@ -466,7 +466,7 @@ const ModifyKeys = () => {
                     ) : (
                       "Next"
                     )}
-                  </PrimaryButton>
+                  </button>
                 </div>
               </div>
             </>
@@ -560,20 +560,24 @@ const ModifyKeys = () => {
                   <>
                     {" "}
                     <div className="btnWrpper mt-3 text-center mx-auto gap-3 flex items-center justify-center">
-                      <PrimaryButton
+                      <button
                         type="button"
                         disabled={loadingNewSigner}
+                        // onClick={checkPhrase}
                         onClick={saveEdit}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Save
-                      </PrimaryButton>
-                      <PrimaryButton
+                      </button>
+                      <button
                         type="button"
                         disabled={loadingNewSigner}
+                        // onClick={checkPhrase}
                         onClick={cancelEdit}
+                        className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
                         Cancel
-                      </PrimaryButton>
+                      </button>
                     </div>
                   </>
                 )}

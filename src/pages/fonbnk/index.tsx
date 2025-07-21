@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import PrimaryButton from "@/components/common/PrimaryButton";
 
 export default function Fonbnk() {
   const router = useRouter();
@@ -219,12 +218,16 @@ export default function Fonbnk() {
                 <ul className="list-none pl-0 mb-0 flex items-center gap-3 ">
                   {tabData.map((item, index) => (
                     <li key={index} className="w-full">
-                      <PrimaryButton
-                        asChild
-                        className={`${activeTab === index ? "bg-[#ffad84] border-[#ffad84]" : "bg-white border-white"} flex w-full h-[30px] border-2 text-[10px] sm:h-[40px] sm:text-[12px] items-center rounded-full px-3 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                      <button
+                        className={` ${
+                          activeTab === index
+                            ? "bg-[#ffad84] border-[#ffad84]"
+                            : "bg-white border-white"
+                        } flex w-full h-[30px]  border-2 text-[10px] sm:h-[40px] sm:text-[12px] items-center rounded-full  px-3 font-medium -tracking-1 text-black ring-white/40 transition-all duration-300 hover:bg-white/80 focus:outline-none focus-visible:ring-3 active:scale-100 active:bg-white/90 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
+                        onClick={() => setActiveTab(index)}
                       >
-                        <button type="button" onClick={() => setActiveTab(index)}>{item.title}</button>
-                      </PrimaryButton>
+                        {item.title}
+                      </button>
                     </li>
                   ))}
                 </ul>
