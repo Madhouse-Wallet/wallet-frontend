@@ -4,6 +4,7 @@ import { isValidEmail } from "../../utils/globals";
 import { BackBtn } from "@/components/common/index";
 import ReCAPTCHA from 'react-google-recaptcha';
 
+const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 const CreateWalletStep = ({
   step,
   setStep,
@@ -17,7 +18,7 @@ const CreateWalletStep = ({
   const [error, setError] = useState("");
   const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [recaptchaError, setRecaptchaError] = useState("");
-
+ 
   const handleRecaptchaChange = (token) => {
     setRecaptchaToken(token);
     setRecaptchaError("");
@@ -161,7 +162,7 @@ const CreateWalletStep = ({
             </div>
             <div className="col-span-12 flex flex-col items-center">
               <ReCAPTCHA
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                sitekey={SITE_KEY}
                 onChange={handleRecaptchaChange}
                 theme="light"
                 className="mb-2"
