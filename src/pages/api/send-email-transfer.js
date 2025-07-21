@@ -177,8 +177,8 @@ export default async function handler(req, res) {
       const ses = new AWS.SES({
         region: process.env.NEXT_PUBLIC_AWS_S3_REGION,
         credentials: {
-          accessKeyId: process.env.NEXT_PUBLIC_AWS_S3_ACCESS_KEY,
-          secretAccessKey: process.env.NEXT_PUBLIC_AWS_S3_SECRET_KEY,
+          accessKeyId: process.env.NEXT_PUBLIC_AWS_SES_ACCESS_KEY,
+          secretAccessKey: process.env.NEXT_PUBLIC_AWS_SES_SECRET_KEY,
         },
       });
 
