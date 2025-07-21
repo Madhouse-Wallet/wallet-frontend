@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = () => {
                   <>
                     <button
                       onClick={() => handleCopy(userAuth?.walletAddress, "one")}
-                      className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20"
+                      className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20 bg-white hover:bg-white/80 active:bg-white/60 focus:bg-white/70 text-black transition-colors duration-200"
                     >
                       {userAuth?.walletAddress ? (
                         <>
