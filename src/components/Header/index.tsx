@@ -132,7 +132,10 @@ const Header: React.FC<HeaderProps> = () => {
                   <>
                     <button
                       onClick={() => handleCopy(userAuth?.walletAddress, "one")}
-                      className="btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20 transition-colors duration-200 bg-white/10 hover:bg-white/20 active:bg-white/30 focus:bg-white/20"
+                      onTouchStart={() => setIsTouchActive(true)}
+                      onTouchEnd={e => { setIsTouchActive(false); e.currentTarget.blur(); }}
+                      onTouchCancel={() => setIsTouchActive(false)}
+                      className={`btn flex items-center justify-center commonBtn text-xs font-medium px-3 min-w-[80px] rounded-20 transition-colors duration-200 bg-white/10 hover:bg-white/20 focus:bg-white/20 ${isTouchActive ? 'bg-white/30' : ''}`}
                     >
                       {userAuth?.walletAddress ? (
                         <>
