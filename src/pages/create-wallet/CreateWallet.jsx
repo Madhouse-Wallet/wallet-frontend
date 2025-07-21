@@ -20,7 +20,8 @@ const CreateWalletStep = ({
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      loadCaptchaEnginge(6, "#18181b", "#fff");
+      // Harder challenge: 8 chars, uppercase letters and numbers only
+      loadCaptchaEnginge(8, "#18181b", "#fff");
     }
   }, []);
 
