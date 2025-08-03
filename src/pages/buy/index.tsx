@@ -30,7 +30,7 @@ const BuyCoin: React.FC = () => {
       ),
     },
     {
-      title: "Loan",
+      title: "Buy with M-Pesa",
       component: <>{/* <SellBitcoin />{" "} */}</>,
     },
   ];
