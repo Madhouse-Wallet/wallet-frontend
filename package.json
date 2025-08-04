@@ -18,7 +18,7 @@
     "@ensofinance/sdk": "^1.0.13",
     "@ensofinance/shortcuts-widget": "^0.2.52",
     "@ethersproject/hash": "^5.8.0",
-    "@keep-network/tbtc-v2.ts": "~2.4.1",
+    "@keep-network/tbtc-v2.ts": "~2.8.0",
     "@noble/secp256k1": "^2.2.3",
     "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-separator": "^1.1.1",
@@ -40,7 +40,7 @@
     "@zerodev/weighted-ecdsa-validator": "^5.4.1",
     "@zerodev/weighted-validator": "^5.4.4",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.8.3",
+    "axios": "^1.11.0",
     "bigi": "^1.4.2",
     "bitcoinjs-lib": "^6.1.7",
     "bolt11": "^1.4.1",
@@ -91,7 +91,7 @@
     "tiny-secp256k1": "^2.2.3",
     "viem": "^2.22.14",
     "webpack": "^5.97.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/cors": "2.8.17",
