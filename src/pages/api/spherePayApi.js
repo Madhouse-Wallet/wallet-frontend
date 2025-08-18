@@ -214,6 +214,17 @@ const SpherePayAPI = {
     }
   },
 
+  getBankAccountDetails: async (customerId, bankAccountId) => {
+    try {
+      const response = await sphereAPIClient.get(
+        `/v2/customers/${customerId}/bank-account/${bankAccountId}`
+      );
+      return response.data;
+    } catch (error) {
+      return handleError(error);
+    }
+  },
+
   transferFee: async (feeData) => {
     try {
       const response = await sphereAPIClient.post(`/v1/transfer/fee`, feeData);

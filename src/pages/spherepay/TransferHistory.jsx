@@ -512,7 +512,6 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         })
         .filter((transfer) => transfer !== null)
         .reverse();
-
       setTransfers(transfersData);
 
       if (transfersData.length === 0) {
@@ -880,17 +879,48 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                   <div
                     key={index}
                     className={`p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all ${
-                      transfer.status === "pending" &&
-                      transfer.type === "onRamp" &&
                       "cursor-pointer"
                     }`}
-                    onClick={() => {
-                      if (
-                        transfer.status === "pending" &&
-                        transfer.type === "onRamp"
-                      ) {
+                    onClick={async () => {
+                      const isOffRamp = transfer.type === "offRamp";
+                      const isPending = true;
+
+                      if (isPending && transfer.type === "onRamp") {
+                        // Directly show popup with onRamp
                         setTransferData(transfer);
                         setSpherePayTransfer(true);
+                      }
+
+                      if (isPending && isOffRamp) {
+                        try {
+                          // Fetch bank details for offRamp destination
+                          const customerId = transfer.customer;
+                          const bankAccountId = transfer.destination?.id;
+
+                          if (customerId && bankAccountId) {
+                            const bankDetails =
+                              await SpherePayAPI.getBankAccountDetails(
+                                customerId,
+                                bankAccountId
+                              );
+                            // Merge the fetched bankDetails into the transfer object (add a new key)
+                            const enrichedTransfer = {
+                              ...transfer,
+                              bankDetails, // You can access this in the popup
+                            };
+                            setTransferData(enrichedTransfer);
+                            setSpherePayTransfer(true);
+                          } else {
+                            console.warn(
+                              "Missing customer or bankAccount ID for offRamp"
+                            );
+                          }
+                        } catch (err) {
+                          console.error(
+                            "Error fetching bank account details for offRamp",
+                            err
+                          );
+                        }
                       }
                     }}
                   >

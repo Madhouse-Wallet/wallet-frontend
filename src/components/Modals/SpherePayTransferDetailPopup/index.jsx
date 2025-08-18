@@ -49,185 +49,85 @@ const SpherePayTransferDetailPop = ({
     };
   };
 
+  // Select correct resource depending on transaction type
+  const isOffRamp = transferData?.type === "offRamp";
+  const resource = isOffRamp
+    ? transferData.bankDetails || {}
+    : transferData.instructions?.resource || {};
+
+  const accountNumber = isOffRamp
+    ? resource.accountDetails?.accountNumber
+    : resource.accountNumber;
+
+  const routingNumber = isOffRamp
+    ? resource.accountDetails?.routingNumber
+    : resource.routingNumber;
 
   return (
-    <>
-      <Modal
-        className={` fixed inset-0 flex items-center justify-center cstmModal z-[99999]`}
+    <Modal className="fixed inset-0 flex items-center justify-center cstmModal z-[99999]">
+      <button
+        onClick={handleSpherePayDetail}
+        className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
+        style={{ border: "1px solid #5f5f5f59" }}
       >
-        <button
-          onClick={handleSpherePayDetail}
-          className="bg-black/50 h-10 w-10 items-center rounded-20 p-0 absolute mx-auto left-0 right-0 bottom-10 z-[99999] inline-flex justify-center"
-          style={{ border: "1px solid #5f5f5f59" }}
-        >
-          {closeIcn}
-        </button>
-        <div className="absolute inset-0 backdrop-blur-xl"></div>
-        <div
-          className={`modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20   z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl contrast-more:backdrop-blur-none duration-200 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%] w-full`}
-        >
-          {" "}
-          <div className={`relative rounded px-3`}>
-            <div className="top pb-3 border-b border-white/20 mb-10">
-              <h4 className="m-0 font-bold text-white text-2xl">
-                Transfer Instruction
-              </h4>
-            </div>
-            <div className="modalBody">
-              {/* {isLoading && createPortal(<LoadingScreen />, document.body)} */}
-              <div className="grid gap-3 grid-cols-12">
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Bank Name :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.bankName}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.bankName
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Account Holder Name :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.accountHolderName}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.accountHolderName
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Bank Address :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.bankAddressString}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.bankAddressString
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Account Name :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.accountName}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.accountName
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Account Number :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.accountNumber}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.accountNumber
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
-                <div className="sm:col-span-6 col-span-12">
-                  <h6 className="m-0">Account Type :</h6>
-                  <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                    {transferData.instructions.resource.accountType}{" "}
-                    <span
-                      onClick={() =>
-                        copyToClipboard(
-                          transferData.instructions.resource.accountType
-                        )
-                      }
-                      className="cursor-pointer hover:text-white transition-colors"
-                    >
-                      {copyIcn}
-                    </span>
-                  </p>
-                </div>
+        {closeIcn}
+      </button>
+      <div className="absolute inset-0 backdrop-blur-xl"></div>
+      <div className="modalDialog relative p-3 lg:p-6 mx-auto w-full rounded-20 z-10 contrast-more:bg-dialog-content shadow-dialog backdrop-blur-3xl w-full">
+        <div className="relative rounded px-3">
+          <div className="top pb-3 border-b border-white/20 mb-10">
+            <h4 className="m-0 font-bold text-white text-2xl">
+              Transfer Instruction
+            </h4>
+          </div>
 
-                <div className="col-span-12">
-                  <h6 className="m-0">Instruction :</h6>
-                  {/* <p className="m-0 text-white/50 text-xs px-2 py-2">
-                    {transferData.instructions.human}
-                  </p> */}
+          <div className="modalBody">
+            <div className="grid gap-3 grid-cols-12">
+              {[
+                { label: "Bank Name", value: resource.bankName },
+                {
+                  label: "Account Holder Name",
+                  value: resource.accountHolderName,
+                },
+                { label: "Bank Address", value: resource.bankAddressString },
+                { label: "Account Name", value: resource.accountName },
+                { label: "Account Number", value: accountNumber },
+                { label: "Account Type", value: resource.accountType },
+              ].map(
+                (field, i) =>
+                  field.value && (
+                    <div key={i} className={`sm:col-span-6 col-span-12`}>
+                      <h6 className="m-0">{field.label} :</h6>
+                      <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                        {field.value}{" "}
+                        <span
+                          onClick={() => copyToClipboard(field.value)}
+                          className="cursor-pointer hover:text-white transition-colors"
+                        >
+                          {copyIcn}
+                        </span>
+                      </p>
+                    </div>
+                  )
+              )}
 
-                  {/* Parsed instruction data */}
-                  <div className="mt-4 grid gap-3 grid-cols-12">
-                    {(() => {
-                      const parsedData = parseInstructionData(
-                        transferData.instructions.human
-                      );
-                      return (
-                        <>
-                          {parsedData.amount && (
-                            <div className="sm:col-span-6 col-span-12">
-                              <h6 className="m-0">Amount to Send :</h6>
-                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                                `{parsedData.amount}`{" "}
-                                <span
-                                  onClick={() =>
-                                    copyToClipboard(parsedData.amount)
-                                  }
-                                  className="cursor-pointer hover:text-white transition-colors"
-                                >
-                                  {copyIcn}
-                                </span>
-                              </p>
-                            </div>
-                          )}
-                          {parsedData.network && (
-                            <div className="sm:col-span-6 col-span-12">
-                              <h6 className="m-0">Network to use :</h6>
-                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                                `{parsedData.network}`{" "}
-                                <span
-                                  onClick={() =>
-                                    copyToClipboard(parsedData.network)
-                                  }
-                                  className="cursor-pointer hover:text-white transition-colors"
-                                >
-                                  {copyIcn}
-                                </span>
-                              </p>
-                            </div>
-                          )}
+              <div className="col-span-12">
+                <h6 className="m-0">Instruction :</h6>
+                <div className="mt-4 grid gap-3 grid-cols-12">
+                  {(() => {
+                    const parsedData = parseInstructionData(
+                      transferData.instructions?.human || ""
+                    );
+                    return (
+                      <>
+                        {parsedData.amount && (
                           <div className="sm:col-span-6 col-span-12">
-                            <h6 className="m-0">Memo :</h6>
-                            <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                              {transferData.instructions.memo}{" "}
+                            <h6 className="m-0">Amount to Send :</h6>
+                            <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {parsedData.amount}
                               <span
                                 onClick={() =>
-                                  copyToClipboard(
-                                    transferData.instructions.memo
-                                  )
+                                  copyToClipboard(parsedData.amount)
                                 }
                                 className="cursor-pointer hover:text-white transition-colors"
                               >
@@ -235,57 +135,81 @@ const SpherePayTransferDetailPop = ({
                               </span>
                             </p>
                           </div>
-
+                        )}
+                        {parsedData.network && (
+                          <div className="sm:col-span-6 col-span-12">
+                            <h6 className="m-0">Network to Use :</h6>
+                            <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {parsedData.network}
+                              <span
+                                onClick={() =>
+                                  copyToClipboard(parsedData.network)
+                                }
+                                className="cursor-pointer hover:text-white transition-colors"
+                              >
+                                {copyIcn}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                        {parsedData.accountEnding && (
+                          <div className="col-span-12">
+                            <h6 className="m-0">
+                              Please send funds from bank account ending in:
+                            </h6>
+                            <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {parsedData.accountEnding}
+                              <span
+                                onClick={() =>
+                                  copyToClipboard(parsedData.accountEnding)
+                                }
+                                className="cursor-pointer hover:text-white transition-colors"
+                              >
+                                {copyIcn}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                        <div className="sm:col-span-6 col-span-12">
+                          <h6 className="m-0">Memo :</h6>
+                          <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                            {transferData.instructions?.memo || "N/A"}
+                            <span
+                              onClick={() =>
+                                copyToClipboard(
+                                  transferData.instructions?.memo || ""
+                                )
+                              }
+                              className="cursor-pointer hover:text-white transition-colors"
+                            >
+                              {copyIcn}
+                            </span>
+                          </p>
+                        </div>
+                        {routingNumber && (
                           <div className="sm:col-span-6 col-span-12">
                             <h6 className="m-0">Routing Number :</h6>
-                            <p className="m-0  text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                              {
-                                transferData.instructions?.resource
-                                  ?.routingNumber
-                              }{" "}
+                            <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
+                              {routingNumber}
                               <span
-                                onClick={() =>
-                                  copyToClipboard(
-                                    transferData.instructions?.resource
-                                      ?.routingNumber
-                                  )
-                                }
+                                onClick={() => copyToClipboard(routingNumber)}
                                 className="cursor-pointer hover:text-white transition-colors"
                               >
                                 {copyIcn}
                               </span>
                             </p>
                           </div>
-                          {parsedData.accountEnding && (
-                            <div className="col-span-12">
-                              <h6 className="m-0">
-                                Please send funds to the bank account referenced
-                                above from the bank account number ending in :
-                              </h6>
-                              <p className="m-0 text-white/50 text-xs px-2 py-2 flex items-center gap-1">
-                                `{parsedData.accountEnding}`{" "}
-                                <span
-                                  onClick={() =>
-                                    copyToClipboard(parsedData.accountEnding)
-                                  }
-                                  className="cursor-pointer hover:text-white transition-colors"
-                                >
-                                  {copyIcn}
-                                </span>
-                              </p>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Modal>
-    </>
+      </div>
+    </Modal>
   );
 };
 
