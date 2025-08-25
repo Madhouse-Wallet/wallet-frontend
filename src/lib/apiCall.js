@@ -1,6 +1,7 @@
 import axios from "axios";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 const REGION = process.env.NEXT_PUBLIC_AWS_S3_REGION;
+import { encryptOTP } from "../utils/globals";
 
 export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
@@ -712,7 +713,7 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
         subject,
         emailData: {
           name: name,
-          verificationCode: otp,
+          verificationCode:  await encryptOTP(otp),
         },
         email,
       }),

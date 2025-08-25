@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { getBitcoinAddress } from "../../lib/apiCall";
+import { encryptOTP } from "../../utils/globals";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import {
@@ -123,7 +124,7 @@ const CreateWallet = () => {
           subject,
           emailData: {
             name: name,
-            verificationCode: otp,
+            verificationCode:  await encryptOTP(otp),
           },
           email,
         }),

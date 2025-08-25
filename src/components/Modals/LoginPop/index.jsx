@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
-import { generateOTP } from "../../../utils/globals";
+import { generateOTP, encryptOTP } from "../../../utils/globals";
 import Image from "next/image";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
@@ -92,7 +92,7 @@ const LoginPop = ({ login, setLogin }) => {
           subject,
           emailData: {
             name: name,
-            verificationCode: otp,
+            verificationCode: await encryptOTP(otp),
           },
           email,
         }),
