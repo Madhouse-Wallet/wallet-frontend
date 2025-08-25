@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 const REGION = process.env.NEXT_PUBLIC_AWS_S3_REGION;
-import { encryptOTP } from "../utils/globals";
+import { encryptData } from "../utils/globals";
 
 export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
@@ -371,8 +371,6 @@ export const btcSat = async (
   }
 };
 
-
-
 export const lbtcSat = async (
   amount,
   refund_address = "",
@@ -709,13 +707,17 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type,
-        subject,
-        emailData: {
-          name: name,
-          verificationCode:  await encryptOTP(otp),
-        },
-        email,
+        data: await encryptData(
+          JSON.stringify({
+            email,
+            emailData: {
+              name: name,
+              verificationCode: otp,
+            },
+            subject,
+            type,
+          })
+        ),
       }),
     })
       .then((res) => res.json())

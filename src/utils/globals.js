@@ -171,7 +171,7 @@ export const calcFeeOnchainToLnWithReceiveAmount = async (
   };
 };
 
-export const encryptOTP = async(otp) => {
+export const encryptData = async(data) => {
   const SECRET_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY; // Store in env
-  return CryptoJS.AES.encrypt(otp.toString(), SECRET_KEY).toString();
+  return CryptoJS.AES.encrypt(data.toString(), SECRET_KEY).toString();
 };

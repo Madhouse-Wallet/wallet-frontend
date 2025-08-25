@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../../lib/redux/slices/auth/authSlice";
-import { generateOTP, encryptOTP } from "../../../utils/globals";
+import { generateOTP, encryptData } from "../../../utils/globals";
 import Image from "next/image";
 const LoginPop = ({ login, setLogin }) => {
   const dispatch = useDispatch();
@@ -88,13 +88,17 @@ const LoginPop = ({ login, setLogin }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type,
-          subject,
-          emailData: {
-            name: name,
-            verificationCode: await encryptOTP(otp),
-          },
-          email,
+          data: await encryptData(
+            JSON.stringify({
+              email,
+              emailData: {
+                name: name,
+                verificationCode: otp,
+              },
+              subject,
+              type,
+            })
+          ),
         }),
       })
         .then((res) => res.json())
