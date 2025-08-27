@@ -24,6 +24,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
   const [customerData, setCustomerData] = useState(null);
   const [userData, setUserData] = useState(null);
   const [bankAccounts, setBankAccounts] = useState([]);
+  const [onRampBankAccounts, setOnRampBankAccounts] = useState([]);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [transfers, setTransfers] = useState([]);
@@ -115,6 +116,12 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           response.data.customer.bankAccounts &&
           response.data.customer.bankAccounts.length > 0
         ) {
+          console.log(
+            "response.data.customer:",
+            response.data.customer.firstName +
+              " " +
+              response.data.customer.lastName
+          );
           const accountDetailsPromises =
             response.data.customer.bankAccounts.map((bankAccountId) =>
               SpherePayAPI.getBankAccountDetail(bankAccountId)
@@ -134,6 +141,17 @@ const TransferHistory = ({ step, setStep, customerId }) => {
             .filter((account) => account !== null);
 
           setBankAccounts(bankAccountDetails);
+          // New logic to set on-ramp bank accounts
+          const fullName =
+            response.data.customer.firstName +
+            " " +
+            response.data.customer.lastName;
+
+          const onRampAccounts = bankAccountDetails.filter(
+            (account) => account.accountHolderName === fullName
+          );
+
+          setOnRampBankAccounts(onRampAccounts);
         }
       } else {
         setError("Failed to retrieve customer data");
@@ -619,10 +637,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     </option>
                     {isLoading ? (
                       <option disabled>Loading bank accounts...</option>
-                    ) : bankAccounts.length === 0 ? (
+                    ) : onRampBankAccounts.length === 0 ? (
                       <option disabled>No bank accounts found</option>
                     ) : (
-                      bankAccounts.map((account) => (
+                      onRampBankAccounts.map((account) => (
                         <option
                           className="text-black"
                           key={account.id}
@@ -878,9 +896,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                 {transfers.map((transfer, index) => (
                   <div
                     key={index}
-                    className={`p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all ${
-                      "cursor-pointer"
-                    }`}
+                    className={`p-4 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all ${"cursor-pointer"}`}
                     onClick={async () => {
                       const isOffRamp = transfer.type === "offRamp";
                       const isPending = true;
