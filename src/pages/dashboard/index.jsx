@@ -56,7 +56,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Payments",
+      head: "Buy Crypto",
       icn: icn7,
       onClick: () => {
         setPointSale(!pointSale);
