@@ -56,7 +56,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Point of Sale",
+      head: "Payments",
       icn: icn7,
       onClick: () => {
         setPointSale(!pointSale);
