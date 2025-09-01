@@ -210,7 +210,9 @@ const Swap = () => {
             const isAmountTooHighError =
               shiftError?.message?.includes("Amount too high") ||
               shiftError?.toString()?.includes("Amount too high");
-
+             setError(
+                shiftError?.message || "Failed to get quotes from Sideshift"
+              );
             if (isAmountTooHighError) {
               // Only try Swapkit for "Amount too high" error
               shouldTrySwapkit = false;
