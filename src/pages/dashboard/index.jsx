@@ -78,14 +78,14 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Gold",
+      head: "Earn",
       icn: icn5,
       onClick: () => {
         router.push("/curve-deposit");
       },
     },
     {
-      head: "Lightning",
+      head: "Mobile Money",
       icn: icn6,
       onClick: () => {
         router.push("/lightning");
