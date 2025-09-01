@@ -60,7 +60,7 @@ export default function Fonbnk() {
 
   const tabData = [
     {
-      title: "Onramp Fonbnk",
+      title: "Kenya",
       component: (
         <>
           <div className="px-3">
@@ -131,7 +131,7 @@ export default function Fonbnk() {
       ),
     },
     {
-      title: "Offramp Fonbnk",
+      title: "Ghana",
       component: (
         <>
           <div className="px-3">
@@ -211,7 +211,7 @@ export default function Fonbnk() {
             <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap gap-2">
               <div className="left w-full text-center">
                 <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                  Fonbnk
+                 Mobile Money 
                 </h4>
               </div>
               <div className="right w-full">

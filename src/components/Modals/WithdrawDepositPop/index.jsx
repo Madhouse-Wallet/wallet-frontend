@@ -119,7 +119,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "M-Pesa"
+                      "Mobile Money"
                     )}
                   </button>
                 </div>
