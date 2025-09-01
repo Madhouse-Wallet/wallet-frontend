@@ -138,7 +138,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "USA Bank Accounts"
+                      "United States"
                     )}
                   </button>
                 </div>
@@ -166,7 +166,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "International Payments"
+                      "Africa"
                     )}
                   </button>
                 </div>
