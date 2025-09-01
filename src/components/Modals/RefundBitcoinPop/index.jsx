@@ -124,7 +124,7 @@ const RefundBitcoin = ({
 
             if (isAmountTooHighError) {
               // Only try Swapkit for "Amount too high" error
-              shouldTrySwapkit = true;
+              shouldTrySwapkit = false;
             } else {
               // For other errors, show error and don't try Swapkit
               setError(
