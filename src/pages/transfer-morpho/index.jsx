@@ -57,7 +57,7 @@ const TransferMorpho = () => {
               <Nav className=" px-3 py-3 rounded-[20px] shadow relative flex items-center justify-between flex-wrap gap-2">
                 <div className="left w-full text-center">
                   <h4 className="m-0 text-[22px] font-bold -tracking-3 flex-1 whitespace-nowrap capitalize leading-none">
-                    Earn
+                    Savings
                   </h4>
                 </div>
                 <div className="right w-full">
