@@ -21,6 +21,7 @@ const nextConfig = {
   },
   webpack(config, { isServer }) {
     // Existing webpack configuration
+    //
 
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
