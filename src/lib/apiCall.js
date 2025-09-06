@@ -64,6 +64,38 @@ export const getUser = async (email) => {
   }
 };
 
+export const katonipayApi = async ({
+  phoneNumber,
+  accountName,
+  networkProvider,
+  currency,
+  cryptoAmount,
+  senderAddress,
+}) => {
+  try {
+    return await fetch(`/api/katonipay`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phoneNumber,
+        accountName,
+        networkProvider,
+        currency,
+        cryptoAmount,
+        senderAddress,
+        referenceId: Math.floor(100000 + Math.random() * 900000).toString(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
 //update-lnaddress
 export const updateLNAddressCall = async (email, username) => {
   try {
