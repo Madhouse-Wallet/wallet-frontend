@@ -18,6 +18,7 @@ import { retrieveSecret } from "@/utils/webauthPrf";
 import TransactionFailedPop from "@/components/Modals/TransactionFailedPop";
 import { createPortal } from "react-dom";
 import SuccessPop from "@/components/Modals/SuccessPop";
+import { networks } from "ecpair";
 export default function Fonbnk() {
   const router = useRouter();
   const userAuth = useSelector((state: any) => state.Auth);
@@ -70,12 +71,17 @@ export default function Fonbnk() {
     amount: "",
     phoneNumber: "",
     finalPhone: "",
+    network: "TIGO",
     currency: "USDC", // Default to USDC
   });
 
   const currencyOptions = [
     { value: "usdc", label: "USD" },
     // { value: "airtime", label: "KES" },
+  ];
+  const networkyOptions = [
+    { value: "TIGO", label: "TIGO" },
+    { value: "AIRTEL", label: "AIRTEL" },
   ];
   const handleOnRampChange = (e: any) => {
     const { id, value } = e.target;
@@ -116,7 +122,7 @@ export default function Fonbnk() {
 
   const handleOffRampChange = (e: any) => {
     const { id, value } = e.target;
-
+    setError("");
     if (id === "amount") {
       const filteredValue = filterAmountInput(value, 2, 20);
       const FEE_PERCENTAGE = parseFloat(
@@ -148,6 +154,8 @@ export default function Fonbnk() {
         [id]: digits,
         finalPhone: formatted,
       }));
+    } else {
+      setOffRampForm((prev) => ({ ...prev, [id]: value }));
     }
   };
 
@@ -325,7 +333,7 @@ export default function Fonbnk() {
     const data = await katonipayApi({
       phoneNumber: offRampForm.finalPhone,
       accountName: offRampForm.finalPhone,
-      networkProvider: "AIRTEL",
+      networkProvider: offRampForm.network,
       currency: "GHS",
       cryptoAmount: parseFloat(offRampForm.amount),
       senderAddress: userAuth?.walletAddress,
@@ -365,6 +373,28 @@ export default function Fonbnk() {
               </div>
               <form onSubmit={handleOnRampSubmit}>
                 <div className="grid gap-3 grid-cols-12">
+                    <div className="col-span-12">
+                    <label
+                      htmlFor="currency"
+                      className="from-label pl-3 text-xs m-0 font-medium"
+                    >
+                      Currency
+                    </label>
+                    <input
+                      id="currency"
+                      type="text"
+                      value="USDC"
+                      disabled
+                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
+                    />
+                    <label className="from-label pl-3 text-xs m-0 font-medium">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
+                  </div>
                   <div className="col-span-12">
                     <label
                       htmlFor="amount"
@@ -402,37 +432,7 @@ export default function Fonbnk() {
                       />
                     </div>
                   </div>
-                  <div className="col-span-12">
-                    <label
-                      htmlFor="currency"
-                      className="from-label pl-3 text-xs m-0 font-medium"
-                    >
-                      Select Currency
-                    </label>
-                    <select
-                      id="currency"
-                      value={onRampForm.currency}
-                      onChange={handleOnRampChange}
-                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                    >
-                      {currencyOptions.map((option) => (
-                        <option
-                          className="text-black"
-                          key={option.value}
-                          value={option.value}
-                        >
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="from-label pl-3 text-xs m-0 font-medium">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
-                  </div>
+
                   <div className="col-span-12 mt-3">
                     <button
                       type="submit"
@@ -471,6 +471,28 @@ export default function Fonbnk() {
                 <div className="grid gap-3 grid-cols-12">
                   <div className="col-span-12">
                     <label
+                      htmlFor="currency"
+                      className="from-label pl-3 text-xs m-0 font-medium"
+                    >
+                      Currency
+                    </label>
+                    <input
+                      id="currency"
+                      type="text"
+                      value="USDC"
+                      disabled
+                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
+                    />
+                    <label className="from-label pl-3 text-xs m-0 font-medium">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
+                  </div>
+                  <div className="col-span-12">
+                    <label
                       htmlFor="amount"
                       className="from-label pl-3 text-xs m-0 font-medium"
                     >
@@ -506,27 +528,30 @@ export default function Fonbnk() {
                       />
                     </div>
                   </div>
+
                   <div className="col-span-12">
                     <label
                       htmlFor="currency"
                       className="from-label pl-3 text-xs m-0 font-medium"
                     >
-                      Currency
+                      Select Network
                     </label>
-                    <input
-                      id="currency"
-                      type="text"
-                      value="USDC"
-                      disabled
-                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
-                    />
-                    <label className="from-label pl-3 text-xs m-0 font-medium">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
+                    <select
+                      id="network"
+                      value={offRampForm.network}
+                      onChange={handleOffRampChange}
+                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                    >
+                      {networkyOptions.map((option) => (
+                        <option
+                          className="text-black"
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="col-span-12 mt-3">
                     <button
