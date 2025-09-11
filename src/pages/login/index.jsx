@@ -146,7 +146,7 @@ const Login = () => {
               },
               "authUser"
             );
-            addProvisionData(userExist?.userId?.email);
+            // addProvisionData(userExist?.userId?.email);
 
             return true;
           } else {
@@ -234,7 +234,7 @@ const Login = () => {
             },
             "authUser"
           );
-          addProvisionData(userExist?.userId?.email);
+          // addProvisionData(userExist?.userId?.email);
           return true;
         } else {
           setError(

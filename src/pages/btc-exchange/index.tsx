@@ -46,7 +46,7 @@ const BTCEchange = () => {
   const [depositFound, setDepositFound] = useState<any>("");
   const [sendSdk, setSendSdk] = useState<any>("");
   const [totalUsdBalance, setTotalUsdBalance] = useState("0.0");
-  const [filterType, setSetFilterType] = useState(5);
+  const [filterType, setSetFilterType] = useState(1);
 
   const MORPHO_ADDRESS = process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS;
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
@@ -170,98 +170,7 @@ const BTCEchange = () => {
         } catch (error) {
           console.error("Failed to fetch BTC balance in USD:", error);
         }
-      } else if (filterType === 2) {
-        const providerETH = await getETHEREUMRpcProvider();
-        const provider = await getRpcProvider();
-        const web3 = new Web3Interaction("sepolia", provider);
-
-        // Fetch PAXG balance on Ethereum
-        const paxgResult = await web3.getGOLDBalance(
-          process.env.NEXT_PUBLIC_ENV_ETHERCHAIN_TETHER_GOLD_ADDRESS!,
-          userAuth?.walletAddress,
-          providerETH as ethers.providers.Web3Provider
-        );
-
-        if (paxgResult.success && paxgResult.balance) {
-          setTotalUsdBalance(
-            `Savings: ${
-              paxgResult.balance !== "0.0"
-                ? Number.parseFloat(paxgResult.balance).toFixed(6).toString()
-                : "0"
-            }`
-          );
-        }
-      } else if (filterType === 3) {
-        try {
-          const userExist = await getUser(userAuth.email);
-
-          const response = await fetch("/api/lnbit-balance", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              walletId: userExist?.userId?.lnbitWalletId,
-              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
-            }),
-          });
-
-          const { status, data } = await response.json();
-
-          if (status === "success") {
-            if (data?.[0]?.balance != null) {
-              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
-              const balanceSatss = Math.floor(balanceSats / 1000);
-              setTotalUsdBalance(
-                `Lightning TPOS USDC: ${balanceSatss.toString()}`
-              );
-            } else {
-              setTotalUsdBalance(`Lightning TPOS USDC: 0`);
-            }
-          } else {
-            console.error(
-              "Failed to fetch lightning balance or empty balance."
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching lightning balance:", error);
-        }
-      } else if (filterType === 4) {
-        try {
-          const userExist = await getUser(userAuth.email);
-
-          const response = await fetch("/api/lnbit-balance", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              walletId: userExist?.userId?.lnbitWalletId_2,
-              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
-            }),
-          });
-
-          const { status, data } = await response.json();
-
-          if (status === "success") {
-            if (data?.[0]?.balance != null) {
-              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
-              const balanceSatss = Math.floor(balanceSats / 1000);
-              setTotalUsdBalance(
-                `Lightning TPOS Bitcoin: ${balanceSatss.toString()}`
-              );
-            } else {
-              setTotalUsdBalance(`Lightning TPOS Bitcoin: 0`);
-            }
-          } else {
-            console.error(
-              "Failed to fetch lightning balance or empty balance."
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching lightning balance:", error);
-        }
-      } else if (filterType === 5 || filterType === 7) {
+      } else if (filterType === 5 || filterType === 3) {
         try {
           const userExist = await getUser(userAuth.email);
 
@@ -294,7 +203,7 @@ const BTCEchange = () => {
         } catch (error) {
           console.error("Error fetching lightning balance:", error);
         }
-      } else if (filterType === 6) {
+      } else if (filterType === 2) {
         try {
           const senderMPRPHOBalance = await publicClient.readContract({
             abi: parseAbi([

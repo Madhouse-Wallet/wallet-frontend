@@ -11,18 +11,18 @@ const RecoverPopup = ({
   step,
   setloading,
 }) => {
-  const [lndHubUrl, setLndHubUrl] = useState(
-    `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
-  );
+  // const [lndHubUrl, setLndHubUrl] = useState(
+  //   `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
+  // );
   const handleAdjustPop = () => {
     setRecover(!recover);
     setLoader(false);
     setloading(false);
   };
   useEffect(() => {
-    setLndHubUrl(
-      `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
-    );
+    // setLndHubUrl(
+    //   `lndhub://admin:${adminId || ""}@https://spend.madhousewallet.com/lndhub/ext/`
+    // );
   }, []);
   const handleCopy = async (text) => {
     try {
@@ -364,7 +364,7 @@ const RecoverPopup = ({
                   <div className="grid gap-3 grid-cols-12 ">
                     {/* {addressPhrase &&
               addressPhrase.split(" ").map((item, key) => ( */}
-                    {adminId && (
+                    {/* {adminId && (
                       <div className="col-span-12">
                         <input
                           readOnly={true}
@@ -373,8 +373,8 @@ const RecoverPopup = ({
                           className={` border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx  px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300   focus-visible:outline-none  disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                         />
                       </div>
-                    )}
-                    <div className="col-span-12">
+                    )} */}
+                    {/* <div className="col-span-12">
                       <div className="text-center my-3">
                         <button
                           onClick={() => handleCopyURL(lndHubUrl || "")}
@@ -385,7 +385,7 @@ const RecoverPopup = ({
                           clipboard
                         </button>
                       </div>
-                    </div>
+                    </div> */}
                     {/* {!phraseStatus && (
                       <>
                         <div className="col-span-12">

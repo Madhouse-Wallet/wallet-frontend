@@ -13,14 +13,14 @@ const BuyCoin: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState("");
   const tabData = [
     { title: "Buy", component: <Swap /> },
-    {
-      title: "Buy with Stripe",
-      component: (
-        <>
-          <StripePaymentPage walletAddress={walletAddress} />
-        </>
-      ),
-    },
+    // {
+    //   title: "Buy with Stripe",
+    //   component: (
+    //     <>
+    //       <StripePaymentPage walletAddress={walletAddress} />
+    //     </>
+    //   ),
+    // },
     {
       title: "Sell",
       component: (
@@ -29,10 +29,10 @@ const BuyCoin: React.FC = () => {
         </>
       ),
     },
-    {
-      title: "Buy with M-Pesa",
-      component: <>{/* <SellBitcoin />{" "} */}</>,
-    },
+    // {
+    //   title: "Buy with M-Pesa",
+    //   component: <>{/* <SellBitcoin />{" "} */}</>,
+    // },
   ];
 
   const [showFirstComponent, setShowFirstComponent] = useState(true);
