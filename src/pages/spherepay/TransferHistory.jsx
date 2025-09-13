@@ -44,6 +44,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const [offRampForm, setOffRampForm] = useState({
     currency: "usd",
+    wireMessage: "",
+    achMessage: "",
     transferMethod: "",
     bankAccountId: "",
     amount: "",
@@ -191,6 +193,10 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         setError("Insufficient USDC Balance");
         return;
       }
+    } else if (id === "achMessage" || id === "wireMessage") {
+      // allow only letters + numbers (no special characters)
+      const filteredValue = value.replace(/[^a-zA-Z0-9]/g, "");
+      setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
     } else {
       setOffRampForm((prev) => ({ ...prev, [id]: value }));
     }
@@ -443,6 +449,8 @@ const TransferHistory = ({ step, setStep, customerId }) => {
           id: offRampForm.bankAccountId,
           network: offRampForm.transferMethod,
           currency: offRampForm.currency,
+          wireMessage: offRampForm.wireMessage,
+          achReference: offRampForm.achMessage,
         },
       };
 
@@ -812,6 +820,36 @@ const TransferHistory = ({ step, setStep, customerId }) => {
                     placeholder="Enter Amount"
                     min="1"
                     step="0.01"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                    Wire Message
+                  </label>
+                  <input
+                    id="wireMessage"
+                    type="text"
+                    value={offRampForm.wireMessage}
+                    onChange={handleOffRampChange}
+                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                    placeholder="Enter Wire Message"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
+                    Ach Message
+                  </label>
+                  <input
+                    id="achMessage"
+                    type="text"
+                    value={offRampForm.achMessage}
+                    onChange={handleOffRampChange}
+                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
+                    placeholder="Enter Ach Message"
                     required
                   />
                 </div>

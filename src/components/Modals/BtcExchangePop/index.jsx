@@ -143,10 +143,10 @@ const BtcExchangePop = ({
         </>
       ),
     },
-    {
-      title: "Lightning Network",
-      component: <LightningTab walletAddress={walletAddress} />,
-    },
+    // {
+    //   title: "Lightning Network",
+    //   component: <LightningTab walletAddress={walletAddress} />,
+    // },
   ];
 
   return (

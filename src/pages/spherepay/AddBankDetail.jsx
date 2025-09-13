@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { isValidName, isValidNumber } from "@/utils/helper";
+import { State } from "country-state-city";
+// Get all states of USA (ISO code for USA is "US")
+const states = State.getStatesOfCountry("US");
 
+// console.log(states);
 const AddBankDetail = ({ step, setStep, customerId }) => {
   const [formData, setFormData] = useState({
     accountHolderName: "",
@@ -10,6 +14,10 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
     accountType: "",
     accountNumber: "",
     routingNumber: "",
+    line1: "",
+    city: "",
+    postalCode: "",
+    state: "",
   });
 
   const [bankAccounts, setBankAccounts] = useState([]);
@@ -161,6 +169,19 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
       newErrors.routingNumber = "Routing number should only contain digits";
     }
 
+    if (!formData.line1.trim()) {
+      newErrors.line1 = "line1 is required";
+    }
+    if (!formData.city.trim()) {
+      newErrors.city = "city is required";
+    }
+    if (!formData.postalCode.trim()) {
+      newErrors.postalCode = "postalCode is required";
+    }
+    if (!formData.state.trim()) {
+      newErrors.state = "state is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -185,6 +206,14 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
         accountType: formData.accountType,
         accountNumber: formData.accountNumber,
         routingNumber: formData.routingNumber,
+        beneficiaryAddress: {
+          line1: formData.line1,
+          line2: "",
+          city: formData.city,
+          postalCode: formData.postalCode,
+          state: formData.state,
+          country: "USA",
+        },
       };
 
       const response = await SpherePayAPI.addBankAccount(
@@ -428,6 +457,122 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                   {errors.routingNumber && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
                       {errors.routingNumber}
+                    </p>
+                  )}
+                </div>
+
+                {/* benfeciary details */}
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="line1"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    line1
+                  </label>
+                  <input
+                    id="line1"
+                    type="text"
+                    value={formData.line1}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.line1 ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter line1."
+                  />
+                  {errors.line1 && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.line1}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="city"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    city
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.city ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter city"
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.city}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="postalCode"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    postalCode
+                  </label>
+                  <input
+                    id="postalCode"
+                    type="text"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.postalCode ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter postalCode."
+                  />
+                  {errors.postalCode && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.postalCode}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-6 col-span-12">
+                  <label
+                    htmlFor="state"
+                    className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
+                  >
+                    state
+                  </label>
+                  {/* <input
+                    id="state"
+                    type="text"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
+                      errors.state ? "border-red-500" : ""
+                    }`}
+                    placeholder="Enter state"
+                  /> */}
+                  <select
+                    id="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="border-white/10 bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+                  >
+                    <option value="" disabled>
+                      Select state
+                    </option>
+                    {states.map((option) => (
+                      <option
+                        className="text-black"
+                        key={option.name}
+                        value={option.isoCode}
+                      >
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <p className="text-red-500 text-xs mt-1 pl-3">
+                      {errors.state}
                     </p>
                   )}
                 </div>

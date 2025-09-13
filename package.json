@@ -31,7 +31,7 @@
     "buffer": "6.0.3",
     "clsx": "2.1.1",
     "cors": "2.8.5",
-    "country-state-city": "3.2.1",
+    "country-state-city": "^3.2.1",
     "date-fns": "4.1.0",
     "dayjs": "1.11.13",
     "defender-relay-client": "1.38.3-rc.0",

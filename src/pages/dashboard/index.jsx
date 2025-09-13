@@ -172,7 +172,12 @@ const Dashboard = () => {
           );
 
           if (morphoResult) {
-            setMorphoBalance(morphoResult);
+            // setMorphoBalance(morphoResult);
+            setMorphoBalance(
+              parseFloat(morphoResult) < 0.01
+                ? "0"
+                : parseFloat(morphoResult).toFixed(2)
+            );
           }
 
           // let combinedUsdValue = usdcBalance + morphoBalance;
