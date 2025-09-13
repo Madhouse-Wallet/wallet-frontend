@@ -47,8 +47,8 @@ const Dashboard = () => {
   const cardMetrics = [
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
-    { head: "Savings", value: `${morphoBalance}`, icn: icn33 },
-    { head: "Card", value: `${goldBalance}`, icn: icn11 },
+    { head: "Savings", value: `$ ${morphoBalance}`, icn: icn33 },
+    { head: "Card", value: `$ ${goldBalance}`, icn: icn11 },
   ];
 
   const cardData = [
@@ -172,7 +172,14 @@ const Dashboard = () => {
           );
 
           if (morphoResult) {
-            setMorphoBalance(morphoResult);
+            setMorphoBalance(
+            parseFloat(morphoResult) < 0.01
+              ? "0"
+              : parseFloat(morphoResult).toFixed(2)
+          );
+          
+            
+          
           }
 
           // let combinedUsdValue = usdcBalance + morphoBalance;
@@ -197,10 +204,10 @@ const Dashboard = () => {
 
           if (paxgResult.success && paxgResult.balance) {
             setGoldBalance(
-              paxgResult.balance !== "0.0"
-                ? Number.parseFloat(paxgResult.balance).toFixed(6)
-                : 0
-            );
+            parseFloat(morphoResult) < 0.01 //paxgResult.balance
+              ? "0"
+              : parseFloat(morphoResult).toFixed(2)
+          );
           }
         } catch (error) {
           console.error("Error fetching token balances:", error);
