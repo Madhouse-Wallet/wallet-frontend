@@ -1,5 +1,12 @@
 import AWS from "aws-sdk";
+import CryptoJS from "crypto-js";
 
+const SECRET_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY; // Same key, stored securely
+
+const decryptData = async (encryptedData) => {
+  const bytes = await CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
 // Initialize the SES service
 const replacePlaceholders = (template, placeholders) => {
   try {
@@ -19,10 +26,10 @@ export default async function handler(req, res) {
           secretAccessKey: process.env.NEXT_PUBLIC_AWS_SES_SECRET_KEY,
         },
       });
-
-      const { type, subject, emailData, email } = req.body;
+      const { data } = req.body;
       // Path to the HTML template
-
+      let bodyData = await decryptData(data);
+      const { type, subject, emailData, email } = JSON.parse(bodyData);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_DOMAIN}registerotp.html`
       );

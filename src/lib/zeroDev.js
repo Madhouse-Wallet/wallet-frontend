@@ -121,7 +121,7 @@ export const setupNewAccount = async (chain = base) => {
     const eoaPrivateKey = generatePrivateKey.privateKey; //this is an issue //generatePrivateKey() // PRIVATE_KEY
     if (!eoaPrivateKey) throw new Error("EOA_PRIVATE_KEY is required");
 
-    const relayPrivateKey = RELAY_PRIVATE_KEY;
+    const relayPrivateKey = `0x${RELAY_PRIVATE_KEY}`;
     if (!relayPrivateKey) throw new Error("RELAY_PRIVATE_KEY is required");
 
     const safePrivateKey = getSafeKey;

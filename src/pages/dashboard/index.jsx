@@ -43,8 +43,8 @@ const Dashboard = () => {
   const cardMetrics = [
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
-    { head: "Gold", value: `${goldBalance}`, icn: icn33 },
-    { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
+    { head: "Savings", value: `${goldBalance}`, icn: icn33 },
+  //  { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
   ];
 
   const cardData = [
@@ -56,7 +56,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Point of Sale",
+      head: "Buy Crypto",
       icn: icn7,
       onClick: () => {
         setPointSale(!pointSale);
@@ -71,21 +71,21 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Cash",
+      head: "Banks",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
       },
     },
     {
-      head: "Gold",
+      head: "Savings",
       icn: icn5,
       onClick: () => {
         router.push("/curve-deposit");
       },
     },
     {
-      head: "Lightning",
+      head: "Mobile Money",
       icn: icn6,
       onClick: () => {
         router.push("/lightning");

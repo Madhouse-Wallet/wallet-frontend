@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import { loginSet } from "../../lib/redux/slices/auth/authSlice";
 import { getBitcoinAddress } from "../../lib/apiCall";
+import { encryptData } from "../../utils/globals";
 
 import { registerCredential, storeSecret } from "../../utils/webauthPrf";
 import {
@@ -119,13 +120,17 @@ const CreateWallet = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type,
-          subject,
-          emailData: {
-            name: name,
-            verificationCode: otp,
-          },
-          email,
+          data: await encryptData(
+            JSON.stringify({
+              email,
+              emailData: {
+                name: name,
+                verificationCode: otp,
+              },
+              subject,
+              type,
+            })
+          ),
         }),
       })
         .then((res) => res.json())

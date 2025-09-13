@@ -119,7 +119,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "M-Pesa"
+                      "Mobile Money"
                     )}
                   </button>
                 </div>
@@ -138,7 +138,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "USA Bank Accounts"
+                      "United States"
                     )}
                   </button>
                 </div>
@@ -147,7 +147,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                     href="/transfer-morpho"
                     className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                   >
-                    Spark Lend
+                    Savings
                   </Link>
                 </div>
 
@@ -166,7 +166,7 @@ const WithdrawDepositPopup = ({ withdrawDep, setWithdrawDep }) => {
                         className={"max-w-full h-[40px] object-contain w-auto"}
                       />
                     ) : (
-                      "International Payments"
+                      "Africa"
                     )}
                   </button>
                 </div>

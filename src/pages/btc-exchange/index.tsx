@@ -184,7 +184,7 @@ const BTCEchange = () => {
 
         if (paxgResult.success && paxgResult.balance) {
           setTotalUsdBalance(
-            `Gold: ${
+            `Savings: ${
               paxgResult.balance !== "0.0"
                 ? Number.parseFloat(paxgResult.balance).toFixed(6).toString()
                 : "0"

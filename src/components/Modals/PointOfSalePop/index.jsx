@@ -85,7 +85,7 @@ const PointOfSalePop = ({
                         }}
                         className={` bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full  px-4 text-14 font-medium -tracking-1  transition-all duration-300  focus:outline-none focus-visible:ring-3 active:scale-100  min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                       >
-                        Refund
+                        Send Bitcoin
                       </button>
                     </div>
                   </>
@@ -103,11 +103,11 @@ const PointOfSalePop = ({
                               rel="noopener noreferrer"
                               className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                             >
-                              Accept in Dollars
+                              Dollars
                             </Link>
                           ) : (
                             <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                              Accept in Dollars
+                              Dollars
                             </div>
                           )}
                         </div>
@@ -120,11 +120,11 @@ const PointOfSalePop = ({
                               rel="noopener noreferrer"
                               className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                             >
-                              Accept in Bitcoin
+                              Bitcoin
                             </Link>
                           ) : (
                             <div className="bg-white text-black opacity-50 pointer-events-none flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 min-w-[112px] justify-center">
-                              Accept in Bitcoin
+                              Bitcoin
                             </div>
                           )}
                         </div>
@@ -138,7 +138,7 @@ const PointOfSalePop = ({
                             rel="noopener noreferrer"
                             className="bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center"
                           >
-                            Accept in Dollars
+                            Dollars
                           </Link>
                         </div>
 
@@ -149,7 +149,7 @@ const PointOfSalePop = ({
                             rel="noopener noreferrer"
                             className={`bg-white hover:bg-white/80 text-black ring-white/40 active:bg-white/90 flex w-full h-[42px] text-xs items-center rounded-full px-4 text-14 font-medium -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-3 active:scale-100 min-w-[112px] justify-center disabled:pointer-events-none disabled:opacity-50`}
                           >
-                            Accept in Bitcoin
+                            Bitcoin
                           </Link>
                         </div>
                       </>

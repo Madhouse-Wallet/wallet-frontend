@@ -8,6 +8,7 @@ const nextConfig = {
     buildActivity: false,
   },
   async headers() {
+
     return [
       {
         source: '/:path*',

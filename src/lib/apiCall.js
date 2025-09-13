@@ -1,6 +1,7 @@
 import axios from "axios";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 const REGION = process.env.NEXT_PUBLIC_AWS_S3_REGION;
+import { encryptData } from "../utils/globals";
 
 export const lambdaInvokeFunction = async (payload, FUNCTION_NAME) => {
   const lambdaClient = new LambdaClient({
@@ -59,6 +60,38 @@ export const getUser = async (email) => {
     }
   } catch (error) {
     console.log("error-->", error);
+    return false;
+  }
+};
+
+export const katonipayApi = async ({
+  phoneNumber,
+  accountName,
+  networkProvider,
+  currency,
+  cryptoAmount,
+  senderAddress,
+}) => {
+  try {
+    return await fetch(`/api/katonipay`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phoneNumber,
+        accountName,
+        networkProvider,
+        currency,
+        cryptoAmount,
+        senderAddress,
+        referenceId: Math.floor(100000 + Math.random() * 900000).toString(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        return data;
+      });
+  } catch (error) {
+    console.log(error);
     return false;
   }
 };
@@ -369,8 +402,6 @@ export const btcSat = async (
     return false;
   }
 };
-
-
 
 export const lbtcSat = async (
   amount,
@@ -708,13 +739,17 @@ export const sendOTP = async ({ email, name, otp, subject, type }) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type,
-        subject,
-        emailData: {
-          name: name,
-          verificationCode: otp,
-        },
-        email,
+        data: await encryptData(
+          JSON.stringify({
+            email,
+            emailData: {
+              name: name,
+              verificationCode: otp,
+            },
+            subject,
+            type,
+          })
+        ),
       }),
     })
       .then((res) => res.json())
