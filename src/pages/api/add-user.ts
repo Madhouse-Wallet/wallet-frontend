@@ -34,10 +34,10 @@ export default async function handler(
       //     "provisionlnbitType": 1,
       //     "refund_address1": ""
       // })
-      checkLnbitCreds({
-        madhouseWallet: wallet,
-        email: email,
-      });
+      // checkLnbitCreds({
+      //   madhouseWallet: wallet,
+      //   email: email,
+      // });
       return res
         .status(200)
         .json({

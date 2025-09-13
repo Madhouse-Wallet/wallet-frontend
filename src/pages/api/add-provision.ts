@@ -21,10 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (apiResponse?.status == "success") {
             let existingUser = apiResponse?.data;
             if (existingUser) {
-                checkLnbitCreds({
-                    "madhouseWallet": existingUser?.wallet,
-                    "email": email
-                })
+                // checkLnbitCreds({
+                //     "madhouseWallet": existingUser?.wallet,
+                //     "email": email
+                // })
             }
         }
         return res.status(201).json({ status: "success", message: 'User added successfully', userData: {} });

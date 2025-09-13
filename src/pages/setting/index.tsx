@@ -65,9 +65,9 @@ const Setting: React.FC = () => {
   useEffect(() => {
     const getUserData = async () => {
       let userExist = await getUser(userAuth.email);
-      setTposId1(userExist?.userId?.lnbitLinkId || "");
-      setTposId2(userExist?.userId?.lnbitLinkId_2 || "");
-      setAdminId(userExist?.userId?.lnbitAdminKey_3 || "");
+      // setTposId1(userExist?.userId?.lnbitLinkId || "");
+      // setTposId2(userExist?.userId?.lnbitLinkId_2 || "");
+      // setAdminId(userExist?.userId?.lnbitAdminKey_3 || "");
     };
     if (userAuth.email) {
       getUserData();
@@ -186,7 +186,7 @@ const Setting: React.FC = () => {
   };
   const LogoutFuc = async () => {
     try {
-      addProvisionData(userAuth.email);
+      // addProvisionData(userAuth.email);
       logoutStorage();
       showToast("Logout Successfully");
       dispatch(
@@ -363,32 +363,28 @@ const Setting: React.FC = () => {
                       {
                         // tposId1 tposId2
                         <>
-                          <li className="flex gap-2 py-1">
+                          {/* <li className="flex gap-2 py-1">
                             <div
                               className="block text-gray-500"
                               style={{ width: 160 }}
                             >
                               USD Tpos ID:
                             </div>
-                            {/* {userAuth?.email && ( */}
                             <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.email && tposId1 ? tposId1 : "--"}
                             </span>
-                            {/* )} */}
-                          </li>
-                          <li className="flex gap-2 py-1">
+                          </li> */}
+                          {/* <li className="flex gap-2 py-1">
                             <div
                               className="block text-gray-500"
                               style={{ width: 160 }}
                             >
                               Bitcoin Tpos ID:
                             </div>
-                            {/* {userAuth?.email && ( */}
                             <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.email && tposId2 ? tposId2 : "--"}
                             </span>
-                            {/* )} */}
-                          </li>
+                          </li> */}
                         </>
                       }
                     </ul>
@@ -589,7 +585,7 @@ const Setting: React.FC = () => {
                         tabIndex={-1}
                         className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 py-3 outline-none bg-gradient-to-r from-transparent to-transparent hover:via-white/4"
                       >
-                        {userAuth?.login && (
+                        {/* {userAuth?.login && (
                           <>
                             <div className="flex flex-col gap-1">
                               <h3 className="text-xs font-medium leading-none -tracking-2">
@@ -618,7 +614,7 @@ const Setting: React.FC = () => {
                               </button>
                             </div>
                           </>
-                        )}
+                        )} */}
                       </div>
                     </>
                   )}

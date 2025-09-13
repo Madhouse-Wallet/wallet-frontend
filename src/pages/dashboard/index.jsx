@@ -35,16 +35,20 @@ const Dashboard = () => {
   const [buySell, setBuySell] = useState(false);
   const [bitcoinBalance, setBitcoinBalance] = useState(0.0);
   const [goldBalance, setGoldBalance] = useState(0.0);
+  const [morphoBalance, setMorphoBalance] = useState("0");
+
   const [lightningBalance, setLightningBalance] = useState(0);
   const [totalUsdBalance, setTotalUsdBalance] = useState(0.0);
 
   const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS;
+  const MORPHO_ADDRESS =
+    process.env.NEXT_PUBLIC_MORPHO_CONTRACT_ADDRESS || TOKENS.MORPHO.address;
 
   const cardMetrics = [
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
-    { head: "Savings", value: `${goldBalance}`, icn: icn33 },
-  //  { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
+    { head: "Savings", value: `${morphoBalance}`, icn: icn33 },
+    //  { head: "Lightning (sats)", value: `${lightningBalance}`, icn: icn11 },
   ];
 
   const cardData = [
@@ -59,7 +63,9 @@ const Dashboard = () => {
       head: "Buy Crypto",
       icn: icn7,
       onClick: () => {
-        setPointSale(!pointSale);
+        // setPointSale(!pointSale);
+        const url = `${process.env.NEXT_PUBLIC_TPOS_URL}?id=${userAuth?.walletAddress}`;
+        window.open(url, "_blank");
       },
     },
     {
@@ -81,14 +87,16 @@ const Dashboard = () => {
       head: "Savings",
       icn: icn5,
       onClick: () => {
-        router.push("/curve-deposit");
+        // router.push("/curve-deposit");
+        router.push("/transfer-morpho");
       },
     },
     {
       head: "Mobile Money",
       icn: icn6,
       onClick: () => {
-        router.push("/lightning");
+        // router.push("/lightning");
+        router.push("/fonbnk");
       },
     },
   ];
@@ -151,17 +159,21 @@ const Dashboard = () => {
             Number(BigInt(senderUsdcBalance)) / Number(BigInt(1e6))
           );
 
-          // const senderMPRPHOBalance = await publicClient.readContract({
-          //   abi: parseAbi([
-          //     "function balanceOf(address account) returns (uint256)",
-          //   ]),
-          //   address: MORPHO_ADDRESS,
-          //   functionName: "balanceOf",
-          //   args: [userAuth?.walletAddress],
-          // });
-          // const morphoBalance = String(
-          //   Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
-          // );
+          const senderMPRPHOBalance = await publicClient.readContract({
+            abi: parseAbi([
+              "function balanceOf(address account) returns (uint256)",
+            ]),
+            address: MORPHO_ADDRESS,
+            functionName: "balanceOf",
+            args: [userAuth?.walletAddress],
+          });
+          const morphoResult = String(
+            Number(BigInt(senderMPRPHOBalance)) / Number(BigInt(1e18))
+          );
+
+          if (morphoResult) {
+            setMorphoBalance(morphoResult);
+          }
 
           // let combinedUsdValue = usdcBalance + morphoBalance;
 
