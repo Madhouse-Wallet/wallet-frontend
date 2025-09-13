@@ -7,7 +7,8 @@ const nextConfig = {
   devIndicators: {
     buildActivity: false,
   },
-    async headers() {
+  async headers() {
+
     return [
       {
         source: '/:path*',
