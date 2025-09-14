@@ -44,8 +44,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
   const [offRampForm, setOffRampForm] = useState({
     currency: "usd",
-    wireMessage: "",
-    achMessage: "",
+    message: "",
     transferMethod: "",
     bankAccountId: "",
     amount: "",
@@ -193,7 +192,7 @@ const TransferHistory = ({ step, setStep, customerId }) => {
         setError("Insufficient USDC Balance");
         return;
       }
-    } else if (id === "achMessage" || id === "wireMessage") {
+    } else if (id === "message") {
       // allow only letters + numbers (no special characters)
       const filteredValue = value.replace(/[^a-zA-Z0-9]/g, "");
       setOffRampForm((prev) => ({ ...prev, [id]: filteredValue }));
@@ -435,24 +434,44 @@ const TransferHistory = ({ step, setStep, customerId }) => {
       }
 
       const walletId = customerData.wallets[0]; // Using the first wallet found
+      let destination = {
+        id: offRampForm.bankAccountId,
+        network: offRampForm.transferMethod,
+        currency: offRampForm.currency,
+      };
 
+      if (offRampForm.transferMethod === "wire") {
+        destination.wireMessage = offRampForm.message;
+      } else if (offRampForm.transferMethod === "achSameDay") {
+        destination.achReference = offRampForm.message;
+      }
       const transferData = {
-        // customer: "customer_80e5b83cddc547ae8e5a167a71ee550b",
         customer: customerId,
         amount: offRampForm.amount,
         source: {
           id: walletId,
-          network: process.env.NEXT_PUBLIC_SPHEREPAY_NETWORK, // You might want to make this dynamic as well
-          currency: process.env.NEXT_PUBLIC_SPHEREPAY_CURRENCY, // You might want to make this dynamic as well
+          network: process.env.NEXT_PUBLIC_SPHEREPAY_NETWORK,
+          currency: process.env.NEXT_PUBLIC_SPHEREPAY_CURRENCY,
         },
-        destination: {
-          id: offRampForm.bankAccountId,
-          network: offRampForm.transferMethod,
-          currency: offRampForm.currency,
-          wireMessage: offRampForm.wireMessage,
-          achReference: offRampForm.achMessage,
-        },
+        destination,
       };
+      // const transferData = {
+      //   // customer: "customer_80e5b83cddc547ae8e5a167a71ee550b",
+      //   customer: customerId,
+      //   amount: offRampForm.amount,
+      //   source: {
+      //     id: walletId,
+      //     network: process.env.NEXT_PUBLIC_SPHEREPAY_NETWORK, // You might want to make this dynamic as well
+      //     currency: process.env.NEXT_PUBLIC_SPHEREPAY_CURRENCY, // You might want to make this dynamic as well
+      //   },
+      //   destination: {
+      //     id: offRampForm.bankAccountId,
+      //     network: offRampForm.transferMethod,
+      //     currency: offRampForm.currency,
+      //     wireMessage: offRampForm.wireMessage,
+      //     achReference: offRampForm.achMessage,
+      //   },
+      // };
 
       const response =
         await SpherePayAPI.createWalletToBankTransfer(transferData);
@@ -826,30 +845,15 @@ const TransferHistory = ({ step, setStep, customerId }) => {
 
                 <div className="md:col-span-6 col-span-12">
                   <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Wire Message
+                    Message
                   </label>
                   <input
-                    id="wireMessage"
+                    id="message"
                     type="text"
-                    value={offRampForm.wireMessage}
+                    value={offRampForm.message}
                     onChange={handleOffRampChange}
                     className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter Wire Message"
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-6 col-span-12">
-                  <label className="form-label m-0 font-medium text-[12px] pl-3 pb-1">
-                    Ach Message
-                  </label>
-                  <input
-                    id="achMessage"
-                    type="text"
-                    value={offRampForm.achMessage}
-                    onChange={handleOffRampChange}
-                    className="border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11"
-                    placeholder="Enter Ach Message"
+                    placeholder="Enter Message"
                     required
                   />
                 </div>

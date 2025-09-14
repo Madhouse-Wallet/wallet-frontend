@@ -69,6 +69,7 @@ export default function Identity() {
   const handleVerification = async () => {
     setIsLoading(true);
     try {
+      console.log("userAuth",userAuth)
       // Create the VerificationSession on the server
       const response = await fetch("/api/create-verification-session", {
         headers: {
