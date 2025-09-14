@@ -77,7 +77,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Cash",
+      head: "USA Cash",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
@@ -92,7 +92,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Mobile Money",
+      head: "Africa Cash",
       icn: icn6,
       onClick: () => {
         // router.push("/lightning");
