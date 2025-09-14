@@ -313,7 +313,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
                       errors.accountHolderName ? "border-red-500" : ""
                     }`}
-                    placeholder="Enter Name"
+                    placeholder="Enter account name as per bank record"
                   />
                   {errors.accountHolderName && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
@@ -327,7 +327,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     htmlFor="accountName"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    Account Name
+                    Account Nickname
                   </label>
                   <input
                     id="accountName"
@@ -337,7 +337,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
                       errors.accountName ? "border-red-500" : ""
                     }`}
-                    placeholder="Enter Name"
+                    placeholder="Enter a nickname for the account"
                   />
                   {errors.accountName && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
@@ -428,7 +428,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
                       errors.accountNumber ? "border-red-500" : ""
                     }`}
-                    placeholder="Enter Account no."
+                    placeholder="Enter account number"
                   />
                   {errors.accountNumber && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
@@ -467,7 +467,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     htmlFor="line1"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    line1
+                    Street Address
                   </label>
                   <input
                     id="line1"
@@ -477,7 +477,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
                       errors.line1 ? "border-red-500" : ""
                     }`}
-                    placeholder="Enter line1."
+                    placeholder="Enter street address"
                   />
                   {errors.line1 && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
@@ -491,7 +491,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     htmlFor="city"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    city
+                    City
                   </label>
                   <input
                     id="city"
@@ -515,7 +515,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     htmlFor="postalCode"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    postalCode
+                    Postal Code
                   </label>
                   <input
                     id="postalCode"
@@ -525,7 +525,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11 ${
                       errors.postalCode ? "border-red-500" : ""
                     }`}
-                    placeholder="Enter postalCode."
+                    placeholder="Enter postal code"
                   />
                   {errors.postalCode && (
                     <p className="text-red-500 text-xs mt-1 pl-3">
@@ -539,7 +539,7 @@ const AddBankDetail = ({ step, setStep, customerId }) => {
                     htmlFor="state"
                     className="form-label m-0 font-medium text-[12px] pl-3 pb-1"
                   >
-                    state
+                    State
                   </label>
                   {/* <input
                     id="state"
