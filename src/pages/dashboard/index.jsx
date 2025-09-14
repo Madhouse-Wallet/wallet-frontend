@@ -48,7 +48,7 @@ const Dashboard = () => {
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
     { head: "Savings", value: `$ ${morphoBalance}`, icn: icn33 },
-    { head: "Card", value: `$ ${goldBalance}`, icn: icn11 },
+    //{ head: "Card", value: `$ ${goldBalance}`, icn: icn11 },
   ];
 
   const cardData = [
@@ -77,7 +77,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Cash",
+      head: "USA Cash",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
@@ -92,7 +92,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Mobile Money",
+      head: "Africa Cash",
       icn: icn6,
       onClick: () => {
         // router.push("/lightning");
