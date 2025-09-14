@@ -101,7 +101,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       fetchFeeTransactions(resetDate);
     } else if (activeTab === 2) {
       fetchRecentMorphoTransactions(resetDate);
-    } 
+    }
   };
 
   const formatWalletHistoryData = (txs) => {
@@ -333,6 +333,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         const formattedTransactions = formatFeeTransactions(
           data.result.slice(0, 100)
         );
+        console.log("formattedTransactions", formattedTransactions);
         setFeeTransactions(formattedTransactions);
       }
     } catch (error) {
@@ -801,6 +802,14 @@ const RecentTransaction = ({ setSetFilterType }) => {
           {feeTransaction.length > 0 ? (
             <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
               {Object.entries(transactionsByDateFee).map(([date, txs]) => {
+                // Filtered txs first
+                const filteredTxs = txs.filter((tx) => {
+                  const amount = parseFloat(tx.amount?.split(" ")[0] || 0);
+                  return amount >= 0.01;
+                });
+
+                if (filteredTxs.length === 0) return null; // ⬅️ skip empty groups
+
                 return (
                   <div key={date} className="py-3">
                     <p className="m-0 text-white text-xs font-semibold pb-2">
@@ -1093,7 +1102,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
                             fetchRecentMorphoTransactions();
                           } else if (key === 4) {
                             fetchFeeTransactions();
-                          } 
+                          }
                         }}
                         className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${
                           activeTab === key

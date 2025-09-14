@@ -373,7 +373,7 @@ export default function Fonbnk() {
               </div>
               <form onSubmit={handleOnRampSubmit}>
                 <div className="grid gap-3 grid-cols-12">
-                    <div className="col-span-12">
+                  {/* <div className="col-span-12">
                     <label
                       htmlFor="currency"
                       className="from-label pl-3 text-xs m-0 font-medium"
@@ -387,14 +387,7 @@ export default function Fonbnk() {
                       disabled
                       className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
                     />
-                    <label className="from-label pl-3 text-xs m-0 font-medium">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
-                  </div>
+                  </div> */}
                   <div className="col-span-12">
                     <label
                       htmlFor="amount"
@@ -410,6 +403,13 @@ export default function Fonbnk() {
                       onChange={handleOnRampChange}
                       className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                     />
+                    <label className="from-label pl-3 text-xs m-0 font-medium">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
                   </div>
                   <div className="col-span-12">
                     <label
@@ -469,7 +469,7 @@ export default function Fonbnk() {
               </div>
               <form onSubmit={handleOffRampSubmit}>
                 <div className="grid gap-3 grid-cols-12">
-                  <div className="col-span-12">
+                  {/* <div className="col-span-12">
                     <label
                       htmlFor="currency"
                       className="from-label pl-3 text-xs m-0 font-medium"
@@ -483,14 +483,7 @@ export default function Fonbnk() {
                       disabled
                       className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
                     />
-                    <label className="from-label pl-3 text-xs m-0 font-medium">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
-                  </div>
+                  </div> */}
                   <div className="col-span-12">
                     <label
                       htmlFor="amount"
@@ -506,6 +499,13 @@ export default function Fonbnk() {
                       onChange={handleOffRampChange}
                       className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
                     />
+                    <label className="from-label pl-3 text-xs m-0 font-medium">
+                      Balance:{" "}
+                      {Number(balance) < 0.01
+                        ? "0"
+                        : Number.parseFloat(balance).toFixed(2)}{" "}
+                      USDC
+                    </label>
                   </div>
                   <div className="col-span-12">
                     <label
