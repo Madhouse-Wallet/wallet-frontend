@@ -458,126 +458,126 @@ export default function Fonbnk() {
         </>
       ),
     },
-    {
-      title: "Ghana",
-      component: (
-        <>
-          <div className="px-3">
-            <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-5 lg:p-8">
-              <div className="top pb-3">
-                <h4 className="m-0 font-bold text-2xl">Send</h4>
-              </div>
-              <form onSubmit={handleOffRampSubmit}>
-                <div className="grid gap-3 grid-cols-12">
-                  {/* <div className="col-span-12">
-                    <label
-                      htmlFor="currency"
-                      className="from-label pl-3 text-xs m-0 font-medium"
-                    >
-                      Currency
-                    </label>
-                    <input
-                      id="currency"
-                      type="text"
-                      value="USDC"
-                      disabled
-                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
-                    />
-                  </div> */}
-                  <div className="col-span-12">
-                    <label
-                      htmlFor="amount"
-                      className="from-label pl-3 text-xs m-0 font-medium"
-                    >
-                      Enter Amount
-                    </label>
-                    <input
-                      id="amount"
-                      placeholder="0.00"
-                      type="text"
-                      value={offRampForm.amount}
-                      onChange={handleOffRampChange}
-                      className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
-                    />
-                    <label className="from-label pl-3 text-xs m-0 font-medium">
-                      Balance:{" "}
-                      {Number(balance) < 0.01
-                        ? "0"
-                        : Number.parseFloat(balance).toFixed(2)}{" "}
-                      USDC
-                    </label>
-                  </div>
-                  <div className="col-span-12">
-                    <label
-                      htmlFor="phoneNumber"
-                      className="from-label pl-3 text-xs m-0 font-medium"
-                    >
-                      Enter Phone Number
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/60 text-xs pointer-events-none">
-                        +233
-                      </span>
-                      <input
-                        id="phoneNumber"
-                        placeholder="712345678"
-                        type="text"
-                        value={offRampForm.phoneNumber}
-                        onChange={handleOffRampChange}
-                        className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx pl-14 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
-                      />
-                    </div>
-                  </div>
+    // {
+    //   title: "Ghana",
+    //   component: (
+    //     <>
+    //       <div className="px-3">
+    //         <div className="bg-black/50 mx-auto max-w-[500px] rounded-xl p-5 lg:p-8">
+    //           <div className="top pb-3">
+    //             <h4 className="m-0 font-bold text-2xl">Send</h4>
+    //           </div>
+    //           <form onSubmit={handleOffRampSubmit}>
+    //             <div className="grid gap-3 grid-cols-12">
+    //               {/* <div className="col-span-12">
+    //                 <label
+    //                   htmlFor="currency"
+    //                   className="from-label pl-3 text-xs m-0 font-medium"
+    //                 >
+    //                   Currency
+    //                 </label>
+    //                 <input
+    //                   id="currency"
+    //                   type="text"
+    //                   value="USDC"
+    //                   disabled
+    //                   className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full"
+    //                 />
+    //               </div> */}
+    //               <div className="col-span-12">
+    //                 <label
+    //                   htmlFor="amount"
+    //                   className="from-label pl-3 text-xs m-0 font-medium"
+    //                 >
+    //                   Enter Amount
+    //                 </label>
+    //                 <input
+    //                   id="amount"
+    //                   placeholder="0.00"
+    //                   type="text"
+    //                   value={offRampForm.amount}
+    //                   onChange={handleOffRampChange}
+    //                   className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx px-5 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+    //                 />
+    //                 <label className="from-label pl-3 text-xs m-0 font-medium">
+    //                   Balance:{" "}
+    //                   {Number(balance) < 0.01
+    //                     ? "0"
+    //                     : Number.parseFloat(balance).toFixed(2)}{" "}
+    //                   USDC
+    //                 </label>
+    //               </div>
+    //               <div className="col-span-12">
+    //                 <label
+    //                   htmlFor="phoneNumber"
+    //                   className="from-label pl-3 text-xs m-0 font-medium"
+    //                 >
+    //                   Enter Phone Number
+    //                 </label>
+    //                 <div className="relative">
+    //                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/60 text-xs pointer-events-none">
+    //                     +233
+    //                   </span>
+    //                   <input
+    //                     id="phoneNumber"
+    //                     placeholder="712345678"
+    //                     type="text"
+    //                     value={offRampForm.phoneNumber}
+    //                     onChange={handleOffRampChange}
+    //                     className={`border-white/10 bg-white/4 hover:bg-white/6 focus-visible:placeholder:text-white/40 text-white/40 focus-visible:text-white focus-visible:border-white/50 focus-visible:bg-white/10 placeholder:text-white/30 flex text-xs w-full border-px md:border-hpx pl-14 py-2 text-15 font-medium -tracking-1 transition-colors duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 h-12 rounded-full pr-11`}
+    //                   />
+    //                 </div>
+    //               </div>
 
-                  <div className="col-span-12">
-                    <label
-                      htmlFor="currency"
-                      className="from-label pl-3 text-xs m-0 font-medium"
-                    >
-                      Select Network
-                    </label>
-                    <select
-                      id="network"
-                      value={offRampForm.network}
-                      onChange={handleOffRampChange}
-                      className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
-                    >
-                      {networkyOptions.map((option) => (
-                        <option
-                          className="text-black"
-                          key={option.value}
-                          value={option.value}
-                        >
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-span-12 mt-3">
-                    <button
-                      type="submit"
-                      disabled={!offRampForm.amount || ghanaLoading || error}
-                      className={`flex btn font-medium rounded-full items-center justify-center commonBtn w-full ${
-                        !offRampForm.amount
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {ghanaLoading ? ghanaBtnText : "Submit"}
-                    </button>
-                    {error && (
-                      <label className="from-label text-red-500 pl-3 text-xs m-0 font-medium">
-                        {error}
-                      </label>
-                    )}
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </>
-      ),
-    },
+    //               <div className="col-span-12">
+    //                 <label
+    //                   htmlFor="currency"
+    //                   className="from-label pl-3 text-xs m-0 font-medium"
+    //                 >
+    //                   Select Network
+    //                 </label>
+    //                 <select
+    //                   id="network"
+    //                   value={offRampForm.network}
+    //                   onChange={handleOffRampChange}
+    //                   className="border-white/10 border bg-white/5 text-white/70 w-full px-5 py-2 text-xs font-medium h-12 rounded-full appearance-none"
+    //                 >
+    //                   {networkyOptions.map((option) => (
+    //                     <option
+    //                       className="text-black"
+    //                       key={option.value}
+    //                       value={option.value}
+    //                     >
+    //                       {option.label}
+    //                     </option>
+    //                   ))}
+    //                 </select>
+    //               </div>
+    //               <div className="col-span-12 mt-3">
+    //                 <button
+    //                   type="submit"
+    //                   disabled={!offRampForm.amount || ghanaLoading || error}
+    //                   className={`flex btn font-medium rounded-full items-center justify-center commonBtn w-full ${
+    //                     !offRampForm.amount
+    //                       ? "opacity-50 cursor-not-allowed"
+    //                       : ""
+    //                   }`}
+    //                 >
+    //                   {ghanaLoading ? ghanaBtnText : "Submit"}
+    //                 </button>
+    //                 {error && (
+    //                   <label className="from-label text-red-500 pl-3 text-xs m-0 font-medium">
+    //                     {error}
+    //                   </label>
+    //                 )}
+    //               </div>
+    //             </div>
+    //           </form>
+    //         </div>
+    //       </div>
+    //     </>
+    //   ),
+    // },
   ];
 
   return (
