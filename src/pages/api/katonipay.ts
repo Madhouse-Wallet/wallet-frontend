@@ -42,7 +42,7 @@ export default async function handler(
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer eyJ1c2VyX2lkIjoiNjg3OTE5YWNhODY3NDRlNTVkMDM5OWI4IiwiY3JlYXRlZF9hdCI6IjIwMjUtMDctMTdUMTc6MjI6MzIuNzQ2WiJ9.6da2c9ca8ad4b1665b5cacb989ce1e3f1b988d4deee7308e95ab7ecc6482def4",
+          `Bearer ${process.env.NEXT_PUBLIC_KOTANIPAY_API_KEY}`,
       },
       data,
     };
