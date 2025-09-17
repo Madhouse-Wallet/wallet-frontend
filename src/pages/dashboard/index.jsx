@@ -48,7 +48,7 @@ const Dashboard = () => {
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
     { head: "Savings", value: `$ ${morphoBalance}`, icn: icn33 },
-    //{ head: "Card", value: `$ ${goldBalance}`, icn: icn11 },
+    { head: "Card", value: `$ ${morphoBalance}`, icn: icn11 },
   ];
 
   const cardData = [
