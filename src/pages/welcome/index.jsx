@@ -27,9 +27,6 @@ const Welcome = () => {
               <h1 className="text-center text-base font-medium  m-0">
                Get Started
               </h1>
-              <p className="text-center text-sm font-medium opacity-50 md:text-xs">
-                Please review our privacy policy before proceeding: 
-              </p> 
               <a
                 href="https://madhouse-wallet.gitbook.io/docs/legal-policies/privacy"
                 target="_blank"
@@ -37,6 +34,14 @@ const Welcome = () => {
                 className="mt-2 mb-2 bg-white/10 hover:bg-white/20 text-white font-normal flex items-center justify-center rounded-full px-4 py-2 text-14 -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 min-w-[112px] w-full max-w-xs mx-auto"
               >
                 Privacy Policy
+              </a>
+              <a
+                href="https://madhouse-wallet.gitbook.io/docs/legal-policies/terms-and-conditions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 mb-2 bg-white/10 hover:bg-white/20 text-white font-normal flex items-center justify-center rounded-full px-4 py-2 text-14 -tracking-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 min-w-[112px] w-full max-w-xs mx-auto"
+              >
+                Terms and Conditions
               </a>
             </div>
           </div>
