@@ -47,7 +47,7 @@ const Footer = () => {
             </Link>
           </li> */}
 
-          {/* <li className="relative aspect-square">
+          <li className="relative aspect-square">
             <button
               // disabled
               onClick={() => window.open("https://app.offramp.xyz/login?referralCode=t89ein", "_blank")
@@ -67,7 +67,7 @@ const Footer = () => {
                 Card
               </span>
             </button>
-          </li> */}
+          </li>
           <li className="relative aspect-square">
             <Link
               href={"/setting"}
