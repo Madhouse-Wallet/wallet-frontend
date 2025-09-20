@@ -170,40 +170,43 @@ const BTCEchange = () => {
         } catch (error) {
           console.error("Failed to fetch BTC balance in USD:", error);
         }
-      } else if (filterType === 5 || filterType === 3) {
-        try {
-          const userExist = await getUser(userAuth.email);
+      } 
+      // else if (filterType === 5 || filterType === 3) {
+      //   try {
+      //     const userExist = await getUser(userAuth.email);
 
-          const response = await fetch("/api/spend-balance", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              walletId: userExist?.userId?.lnbitWalletId_3,
-              // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
-            }),
-          });
+      //     const response = await fetch("/api/spend-balance", {
+      //       method: "POST",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         walletId: userExist?.userId?.lnbitWalletId_3,
+      //         // walletId: "ccd505c23ebf4a988b190e6aaefff7a5", i
+      //       }),
+      //     });
 
-          const { status, data } = await response.json();
+      //     const { status, data } = await response.json();
 
-          if (status === "success") {
-            if (data?.[0]?.balance != null) {
-              const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
-              const balanceSatss = Math.floor(balanceSats / 1000);
-              setTotalUsdBalance(`Lightning Spend: ${balanceSatss.toString()}`);
-            } else {
-              setTotalUsdBalance(`Lightning Spend: 0`);
-            }
-          } else {
-            console.error(
-              "Failed to fetch lightning balance or empty balance."
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching lightning balance:", error);
-        }
-      } else if (filterType === 2) {
+      //     if (status === "success") {
+      //       if (data?.[0]?.balance != null) {
+      //         const balanceSats = Number(data[0].balance); // e.g., 1997000 sats
+      //         const balanceSatss = Math.floor(balanceSats / 1000);
+      //         setTotalUsdBalance(`Lightning Spend: ${balanceSatss.toString()}`);
+      //       } else {
+      //         setTotalUsdBalance(`Lightning Spend: 0`);
+      //       }
+      //     } else {
+      //       console.error(
+      //         "Failed to fetch lightning balance or empty balance."
+      //       );
+      //     }
+      //   } catch (error) {
+      //     console.error("Error fetching lightning balance:", error);
+      //   }
+      // } 
+      
+      else if (filterType === 2) {
         try {
           const senderMPRPHOBalance = await publicClient.readContract({
             abi: parseAbi([

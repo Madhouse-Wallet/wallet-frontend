@@ -118,7 +118,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
             setCommonError(getBtcSat.message);
             setLoading(false);
           } else {
-            fetchLighteningBalance();
+           // fetchLighteningBalance();
             setLoading(false);
             setSuccess(true)
           }
@@ -164,7 +164,7 @@ const WithdrawPopup = ({ withdrawPop, setWithdrawPop }) => {
   };
 
   useEffect(() => {
-    fetchLighteningBalance();
+   // fetchLighteningBalance();
   }, []);
 
   useEffect(() => {

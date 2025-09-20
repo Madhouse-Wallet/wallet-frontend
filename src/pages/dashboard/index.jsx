@@ -238,7 +238,7 @@ const Dashboard = () => {
       }
 
       fetchData();
-      fetchLighteningBalance();
+    //  fetchLighteningBalance();
     }
   }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
 

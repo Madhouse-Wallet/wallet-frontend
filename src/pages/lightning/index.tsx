@@ -215,7 +215,7 @@ const BTCDebitCard: React.FC = () => {
   useEffect(() => {
     if (userAuth.email) {
       getUSerData(userAuth.email);
-      fetchLighteningBalance();
+    //  fetchLighteningBalance();
     }
   }, []);
 
