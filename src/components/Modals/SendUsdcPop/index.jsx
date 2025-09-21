@@ -372,7 +372,7 @@ const SendUSDCPop = ({ setSendUsdc, setSuccess, sendUsdc, success }) => {
                 <div className="modalBody">
                   <div className="py-2">
                     <label className="form-label m-0 font-semibold text-xs ps-3">
-                      To
+                      To (Base Network Address)
                     </label>
                     <div className="relative">
                       <input
