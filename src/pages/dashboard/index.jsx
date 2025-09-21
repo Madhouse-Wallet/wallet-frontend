@@ -203,7 +203,10 @@ const Dashboard = () => {
           );
 
           if (paxgResult.success && paxgResult.balance) {
-            setGoldBalance(paxgResult.balance
+            setGoldBalance(
+              paxgResult.balance !== "0.0"
+                ? Number.parseFloat(paxgResult.balance).toFixed(6)
+                : 0
             // parseFloat(morphoResult) < 0.01 
             //   ? "0"
             //   : parseFloat(morphoResult).toFixed(2)
