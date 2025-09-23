@@ -24,6 +24,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
   const [transactionsPaxg, setTransactionsPaxg] = useState([]);
   const [feeTransaction, setFeeTransactions] = useState([]);
+  const [mobileMoneyTransaction, setMobileMoneyTransaction] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(1);
   const [detail, setDetail] = useState(false);
@@ -101,6 +102,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
       fetchFeeTransactions(resetDate);
     } else if (activeTab === 2) {
       fetchRecentMorphoTransactions(resetDate);
+    } else if (activeTab === 5) {
+      fetchMobileMoneyTransactions(resetDate);
     }
   };
 
@@ -341,6 +344,34 @@ const RecentTransaction = ({ setSetFilterType }) => {
     }
   };
 
+  const fetchMobileMoneyTransactions = async (customDateRange = null) => {
+    try {
+      setTransactionType("all");
+      const activeDateRange = customDateRange || dateRange;
+      const startDate = isDateFilterActive()
+        ? formatDateForApi(activeDateRange[0].startDate)
+        : null;
+      const endDate = isDateFilterActive()
+        ? formatDateForApi(activeDateRange[0].endDate)
+        : null;
+      console.log("startDate", startDate, "endDate", endDate);
+      let mobileMoneyData = await lambdaInvokeFunction(
+        {
+          userEmail: userAuth?.email,
+          startDate,
+          endDate,
+        },
+        "madhouse-backend-production-fetchMobileMoneyData"
+      );
+      console.log("mobileMoneyData", mobileMoneyData);
+      // if (mobileMoneyData?.data?.length) {
+        setMobileMoneyTransaction(mobileMoneyData?.data);
+      // }
+    } catch (error) {
+      console.error("Error fetching mobile money transactions:", error);
+    }
+  };
+
   const formatLightningSwapData = (data) => {
     if (!data?.data?.data?.length > 0) return [];
     return data.data.data.map((transaction) => {
@@ -529,6 +560,52 @@ const RecentTransaction = ({ setSetFilterType }) => {
     return sortedGroups;
   };
 
+  const groupTransactionsByDateMobileMoney = (txs) => {
+    const groups = {};
+
+    txs.forEach((tx) => {
+      // Prefer createdAt for mobileMoneyTransaction
+      const rawDate = tx.createdAt || tx.date;
+
+      if (rawDate && typeof rawDate === "string") {
+        const txDate = moment(rawDate); // ISO string works directly with moment
+
+        if (txDate.isValid()) {
+          const dateKey = txDate.format("YYYY-MM-DD");
+
+          if (!groups[dateKey]) {
+            groups[dateKey] = [];
+          }
+
+          groups[dateKey].push(tx);
+        } else {
+          console.error("Invalid date format:", rawDate);
+        }
+      } else if (rawDate && moment.isMoment(rawDate)) {
+        const dateKey = rawDate.format("YYYY-MM-DD");
+
+        if (!groups[dateKey]) {
+          groups[dateKey] = [];
+        }
+        groups[dateKey].push(tx);
+      } else {
+        console.error("Missing or invalid date:", rawDate);
+      }
+    });
+
+    const sortedGroups = {};
+    Object.keys(groups)
+      .sort(
+        (a, b) =>
+          moment(b, "YYYY-MM-DD").valueOf() - moment(a, "YYYY-MM-DD").valueOf()
+      )
+      .forEach((key) => {
+        sortedGroups[key] = groups[key];
+      });
+
+    return sortedGroups;
+  };
+
   const handleTransactionClick = (tx) => {
     setDetail(!detail);
     setTransactionData(tx);
@@ -542,6 +619,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
   const transactionsByDate = groupTransactionsByDate(transactions);
   const transactionsByDatePaxg = groupTransactionsByDate(transactionsPaxg);
   const transactionsByDateFee = groupTransactionsByDate(feeTransaction);
+  const mobileMoneyTransactionsByDateFee = groupTransactionsByDateMobileMoney(
+    mobileMoneyTransaction
+  );
   const transactionsByDateMorpho = groupTransactionsByDate(morphotransactions);
   const transactionsByDateTPOSWithdraw = groupTransactionsByDate(withdrawBoltz);
 
@@ -564,6 +644,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
       }
       if (activeTab === 4) {
         fetchFeeTransactions();
+      }
+      if (activeTab === 5) {
+        fetchMobileMoneyTransactions();
       }
       setIsDatePickerOpen(false);
     } else {
@@ -894,6 +977,94 @@ const RecentTransaction = ({ setSetFilterType }) => {
         </>
       ),
     },
+    {
+      title: "Mobile Money",
+      component: (
+        <>
+          {mobileMoneyTransaction.length > 0 ? (
+            <div className="bg-black/5 lg:p-4 rounded-lg p-3 ">
+              {Object.entries(mobileMoneyTransactionsByDateFee).map(
+                ([date, txs]) => {
+                  if (!txs || txs.length === 0) return null;
+
+                  return (
+                    <div key={date} className="py-3">
+                      <p className="m-0 text-white text-xs font-semibold pb-2">
+                        {moment(date).format("MMM DD, YYYY")}
+                      </p>
+                      <div className="grid gap-3 grid-cols-12">
+                        {txs.map((tx, key) => {
+                          const rate = tx.kotanipayRate || {};
+                          const onramp = tx.kotanipayOnramp || {};
+
+                          return (
+                            <div
+                              key={key}
+                              className="md:col-span-6 col-span-12"
+                            >
+                              <div
+                                // onClick={() => handleTransactionClick(tx)}
+                                className="bg-white/5 p-3 rounded-lg flex items-start gap-2 justify-between cursor-pointer hover:bg-black/60"
+                              >
+                                <div className="left flex items-start gap-2">
+                                  <div className="flex-shrink-0 h-[40px] w-[40px] rounded-full flex items-center justify-center bg-white/50">
+                                    {/* Icon can be static or depend on status */}
+                                    {receiveSvg}
+                                  </div>
+                                  <div className="content">
+                                    <h4 className="m-0 font-bold md:text-base">
+                                      {rate.from} → {rate.to}
+                                    </h4>
+                                    <p className="m-0 text-xs font-medium">
+                                      Reference: {onramp.referenceId || "—"}
+                                    </p>
+                                    <p className="m-0 text-xs font-medium">
+                                      Phone: {onramp.phoneNumber || "—"}
+                                    </p>
+                                    <p className="m-0 text-xs font-medium py-1">
+                                      Rate: {rate.value}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="right text-right">
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    Fiat: {rate.fiatAmount} {rate.from}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    Crypto: {rate.cryptoAmount} {rate.to}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    Fee: {rate.fee}
+                                  </p>
+                                  <p className="m-0 text-xs font-medium py-1">
+                                    {moment(tx.createdAt).format("hh:mm A")}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <>
+              <Image
+                src={process.env.NEXT_PUBLIC_IMAGE_URL + "noData.png"}
+                alt=""
+                height={10000}
+                width={10000}
+                style={{ maxHeight: 400 }}
+                className="max-w-full h-auto w-auto mx-auto"
+              />
+            </>
+          )}
+        </>
+      ),
+    },
   ];
 
   return (
@@ -1102,6 +1273,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                             fetchRecentMorphoTransactions();
                           } else if (key === 4) {
                             fetchFeeTransactions();
+                          } else if (key === 5) {
+                            fetchMobileMoneyTransactions();
                           }
                         }}
                         className={`block px-4 text-xs py-2 w-full text-left flex items-center justify-between ${
