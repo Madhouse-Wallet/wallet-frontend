@@ -48,7 +48,7 @@ const Dashboard = () => {
     { head: "Dollars", value: `$ ${totalUsdBalance}`, icn: icn11 },
     { head: "Bitcoin", value: `${bitcoinBalance}`, icn: icn22 },
     { head: "Savings", value: `$ ${morphoBalance}`, icn: icn33 },
-    //{ head: "Card", value: `$ ${goldBalance}`, icn: icn11 },
+    { head: "Gold", value: `${goldBalance}`, icn: icn11 },
   ];
 
   const cardData = [
@@ -77,7 +77,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "USA Cash",
+      head: "Withdraw",
       icn: icn4,
       onClick: () => {
         setWithdrawDep(!withdrawDep);
@@ -92,7 +92,7 @@ const Dashboard = () => {
       },
     },
     {
-      head: "Africa Cash",
+      head: "Gold",
       icn: icn6,
       onClick: () => {
         // router.push("/lightning");
@@ -204,9 +204,12 @@ const Dashboard = () => {
 
           if (paxgResult.success && paxgResult.balance) {
             setGoldBalance(
-            parseFloat(morphoResult) < 0.01 //paxgResult.balance
-              ? "0"
-              : parseFloat(morphoResult).toFixed(2)
+              paxgResult.balance !== "0.0"
+                ? Number.parseFloat(paxgResult.balance).toFixed(6)
+                : 0
+            // parseFloat(morphoResult) < 0.01 
+            //   ? "0"
+            //   : parseFloat(morphoResult).toFixed(2)
           );
           }
         } catch (error) {
@@ -238,7 +241,7 @@ const Dashboard = () => {
       }
 
       fetchData();
-      fetchLighteningBalance();
+    //  fetchLighteningBalance();
     }
   }, [userAuth?.walletAddress, userAuth?.passkeyCred]);
 

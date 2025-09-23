@@ -211,7 +211,7 @@ const LightningSendTab = () => {
 
   useEffect(() => {
     if (userAuth?.email) {
-      fetchBalance();
+     // fetchBalance();
     }
   }, []);
 
