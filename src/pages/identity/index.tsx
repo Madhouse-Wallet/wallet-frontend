@@ -15,7 +15,7 @@ export default function Identity() {
   // const [step, setStep] = useState("PaymentTab");
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [userId, setUserId] = useState<any>("");
+  const [userId, setUserId] = useState<any>("");
 
   const router = useRouter();
 
@@ -37,14 +37,15 @@ export default function Identity() {
 
           const result = await response.json();
 
-          if (result.business.id) {
+          if (result?.business?.id) {
             setStep("PaymentTab");
           } else {
-            console.error("API Error:", result.error);
+            // console.error("API Error:", result.error);
             setStep("user");
           }
         } catch (error) {
-          console.log(error);
+          // console.log(error);
+          setStep("user");
         }
       } else if (userExist?.userId?.kyc?.status === "processing") {
         setStep("processing");
