@@ -64,6 +64,15 @@ const nextConfig = {
     // Add fallback for browser polyfills
     config.resolve.fallback = {
       ...config.resolve.fallback,
+      crypto: "crypto-browserify",
+      stream: "stream-browserify",
+      buffer: "buffer",
+      process: "process/browser",
+      path: "path-browserify",
+      zlib: "browserify-zlib",
+      util: "util",
+      assert: "assert",
+      http: "stream-http",
       net: false, // Node.js-only module
       tls: false, // Node.js-only module
       fs: false, // Node.js-only module
