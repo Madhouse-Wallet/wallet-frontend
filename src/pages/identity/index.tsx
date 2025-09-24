@@ -15,6 +15,8 @@ export default function Identity() {
   // const [step, setStep] = useState("PaymentTab");
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [userId, setUserId] = useState<any>("");
+
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +25,7 @@ export default function Identity() {
       if (!userExist) {
         return;
       }
+      setUserId(userExist?.userId?._id);
       if (userExist?.userId?.kyc?.status === "success") {
         try {
           const response = await fetch(
@@ -69,20 +72,21 @@ export default function Identity() {
   const handleVerification = async () => {
     setIsLoading(true);
     try {
-      console.log("userAuth",userAuth)
+      // console.log("userAuth",userAuth)
       // Create the VerificationSession on the server
       const response = await fetch("/api/create-verification-session", {
         headers: {
           "Content-Type": "application/json",
         },
         method: "POST",
-        body: JSON.stringify({ userId: userAuth?.id }),
+        body: JSON.stringify({ userId: userId }),
       });
       const { client_secret } = await response.json();
 
       // Open the modal on the client
       if (stripe) {
         const { error } = await stripe.verifyIdentity(client_secret);
+        console.log("Verification result:", { error });
         if (!error) {
           const userExist = await getUser(userAuth.email);
           if (userExist?.userId?.kyc?.status === "success") {
