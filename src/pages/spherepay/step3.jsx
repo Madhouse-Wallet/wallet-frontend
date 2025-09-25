@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SpherePayAPI from "../api/spherePayApi";
 import { useSelector } from "react-redux";
-import { BackBtn } from "@/components/common";
 
 const Step3 = ({
   step,
