@@ -61,10 +61,10 @@ const Step3 = ({
             );
           }
         } else {
-          const setFee = await SpherePayAPI.transferFee({
-            bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
-            targetCustomerId: response?.data?.customer?.id,
-          });
+          // const setFee = await SpherePayAPI.transferFee({
+          //   bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
+          //   targetCustomerId: response?.data?.customer?.id,
+          // });
           const result = await SpherePayAPI.createTosLink(
             response?.data?.customer?.id
           );
@@ -100,10 +100,10 @@ const Step3 = ({
             );
           }
         } else {
-          const setFee = await SpherePayAPI.transferFee({
-            bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
-            targetCustomerId: response?.data?.customer?.id,
-          });
+          // const setFee = await SpherePayAPI.transferFee({
+          //   bpsFee: process.env.NEXT_PUBLIC_SPHEREPAY_FEE,
+          //   targetCustomerId: response?.data?.customer?.id,
+          // });
           const result = await SpherePayAPI.createKycLink(
             response?.data?.customer?.id
           );
