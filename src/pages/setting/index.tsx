@@ -363,17 +363,25 @@ const Setting: React.FC = () => {
                       {
                         // tposId1 tposId2
                         <>
-                          {/* <li className="flex gap-2 py-1">
+                          <li className="flex gap-2 py-1">
                             <div
-                              className="block text-gray-500"
+                              className="block"
                               style={{ width: 160 }}
                             >
-                              USD Tpos ID:
+                              <a
+                                href="https://madhouse-wallet.gitbook.io/docs"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 underline hover:text-blue-700 transition-colors duration-200"
+                                style={{ cursor: "pointer" }}
+                              >
+                                Documentation
+                              </a>
                             </div>
-                            <span className="text-white block items-center truncate w-[calc(100%-170px)]">
+                            {/* <span className="text-white block items-center truncate w-[calc(100%-170px)]">
                               {userAuth?.email && tposId1 ? tposId1 : "--"}
-                            </span>
-                          </li> */}
+                            </span> */}
+                          </li>
                           {/* <li className="flex gap-2 py-1">
                             <div
                               className="block text-gray-500"

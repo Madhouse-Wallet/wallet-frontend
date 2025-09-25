@@ -113,7 +113,7 @@ const Sidebar = ({ sidebar, setSidebar }) => {
                 } flex p-2 items-start justify-start gap-2 rounded`}
               >
                 <span className="icn">{setting}</span>
-                Setting & Support
+                Settings
               </Link>
             </li>
             <li className="py-1">

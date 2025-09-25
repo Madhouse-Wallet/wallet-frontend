@@ -86,7 +86,7 @@ const Footer = () => {
               </span>
             </Link>
           </li>
-          <li className="relative aspect-square">
+          {/* <li className="relative aspect-square">
             <Link
               href={"https://madhouse-wallet.gitbook.io/docs"}
               target="_blank"
@@ -106,7 +106,7 @@ const Footer = () => {
                 Docs
               </span>
             </Link>
-          </li>
+          </li> */}
           {/* <li className="relative aspect-square">
             <Link
               href={"https://chat.madhousewallet.com/home/"}
