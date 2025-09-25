@@ -14,18 +14,12 @@ import {
   getProvider,
   getAccount,
   publicClient,
-  getETHEREUMRpcProvider,
-  getRpcProvider,
 } from "../../lib/zeroDev";
 import LoadingScreen from "@/components/LoadingScreen";
 
 import styled from "styled-components";
-import { BackBtn } from "@/components/common";
 import { parseAbi } from "viem";
-import { getUser } from "@/lib/apiCall";
 import { fetchBitcoinBalance } from "../api/bitcoinBalance";
-import Web3Interaction from "@/utils/web3Interaction";
-import { ethers } from "ethers";
 import { useRouter } from "next/router";
 const BTCEchange = () => {
   const router = useRouter();
