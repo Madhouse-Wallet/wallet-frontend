@@ -112,7 +112,6 @@ const RecentTransaction = ({ setSetFilterType }) => {
 
     return txs
       .map((tx) => {
-        // const amount = `${tx.value_decimal} ${tx.token_symbol}` || "";
         const decimals =
           tx.token_symbol === "USDC" ? 2 : tx.token_symbol === "XAUt" ? 6 : 2;
 
@@ -133,6 +132,12 @@ const RecentTransaction = ({ setSetFilterType }) => {
           useData?.userId?.commission_fees?.toLowerCase()
         ) {
           feeType = "Commission Fee";
+        } else if (
+          tx.to_address?.toLowerCase() ===
+          "0xd8baa107006c93a030d1455a2ef43261b384f21c".toLowerCase()
+        ) {
+          // 👇 Skip this transaction
+          return null;
         }
 
         return {
@@ -145,20 +150,21 @@ const RecentTransaction = ({ setSetFilterType }) => {
           from: tx.from_address || "",
           id: tx.transaction_hash || "",
           rawData: tx,
-          status: "confirmed", // You can modify this if you plan to add status checks later
+          status: "confirmed",
           summary: `${amount || "0"} ${isSend ? "Transfer" : "Receive"}`,
           to: tx.to_address || "",
           transactionHash: tx.transaction_hash || "",
-          type: isSend === true ? "send" : "receive",
+          type: isSend ? "send" : "receive",
           day:
             moment(tx.block_timestamp)
               .tz(userTimezone)
               .format("MMMM D, YYYY h:mm A z") || "",
-          feeType, // Keep this temporarily for filtering
+          feeType,
         };
       })
-      .filter((tx) => tx.feeType === null) // Filter out transactions with fee types
-      .map(({ feeType, ...tx }) => tx); // Remove feeType from final objects
+      .filter((tx) => tx !== null) // ✅ remove skipped/null txs first
+      .filter((tx) => tx.feeType === null) // ✅ only keep normal transfers
+      .map(({ feeType, ...tx }) => tx); // ✅ drop feeType from final objects
   };
 
   const fetchRecentTransactions = async (customDateRange = null) => {
@@ -284,7 +290,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         }
 
         // Only return transactions that have a fee type
-        if (feeType === null) return null;
+        // if (feeType === null) return null;
 
         return {
           amount,
@@ -336,7 +342,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
         const formattedTransactions = formatFeeTransactions(
           data.result.slice(0, 100)
         );
-        console.log("formattedTransactions", formattedTransactions);
+        // console.log("formattedTransactions", formattedTransactions);
         setFeeTransactions(formattedTransactions);
       }
     } catch (error) {
@@ -354,7 +360,7 @@ const RecentTransaction = ({ setSetFilterType }) => {
       const endDate = isDateFilterActive()
         ? formatDateForApi(activeDateRange[0].endDate)
         : null;
-      console.log("startDate", startDate, "endDate", endDate);
+      // console.log("startDate", startDate, "endDate", endDate);
       let mobileMoneyData = await lambdaInvokeFunction(
         {
           userEmail: userAuth?.email,
@@ -363,9 +369,9 @@ const RecentTransaction = ({ setSetFilterType }) => {
         },
         "madhouse-backend-production-fetchMobileMoneyData"
       );
-      console.log("mobileMoneyData", mobileMoneyData);
+      // console.log("mobileMoneyData", mobileMoneyData);
       // if (mobileMoneyData?.data?.length) {
-        setMobileMoneyTransaction(mobileMoneyData?.data);
+      setMobileMoneyTransaction(mobileMoneyData?.data);
       // }
     } catch (error) {
       console.error("Error fetching mobile money transactions:", error);
@@ -1220,6 +1226,8 @@ const RecentTransaction = ({ setSetFilterType }) => {
                   else if (activeTab === 2) dataToExport = morphotransactions;
                   else if (activeTab === 3) dataToExport = sideshiftTxs;
                   else if (activeTab === 4) dataToExport = feeTransaction;
+                  else if (activeTab === 5)
+                    dataToExport = mobileMoneyTransaction;
                   if (dataToExport.length) {
                     exportTransactionsToCSV(
                       dataToExport,
